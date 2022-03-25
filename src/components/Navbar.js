@@ -11,7 +11,7 @@ const Navbar = (props) => {
         <React.Fragment>
             <div className="topnav shadow-sm">
                 <div className="container-fluid">
-                    <nav className="navbar navbar-light navbar-expand-lg topbar-nav">
+                    <nav className="navbar navbar-expand-lg topbar-nav">
                         <Link to="/" className="navbar-brand mr-0 mr-md-2 logo">
                             <span className="logo-lg">
                                 {/* <img src={logo} alt="" height="24" /> */}
@@ -25,15 +25,12 @@ const Navbar = (props) => {
                             <AppMenu mode={'horizontal'} />
                         </Collapse>
                         <ul className="navbar-nav flex-row ml-auto d-flex list-unstyled topnav-menu float-right mb-0">
-            
-
-              {/*
+                            {/*
             <LanguageDropdown tag="li" />
               <NotificationDropdown notifications={Notifications} />
             */}
-              
 
-              {/*
+                            {/*
             <li className="notification-list">
                 <button className="btn btn-sm btn-link nav-link right-bar-toggle" onClick={e=> {
                  
@@ -43,14 +40,11 @@ const Navbar = (props) => {
                 </button>
               </li>
             */}
-              
 
-              {/*
+                            {/*
             <ProfileDropdown profilePic={profilePic} menuItems={ProfileMenus} username={'Sapient N'} description="Administrator" />
           */}
-              
-            </ul>
-
+                        </ul>
                     </nav>
                 </div>
             </div>

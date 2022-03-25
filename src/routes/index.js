@@ -39,7 +39,13 @@ const UniconsIcons = React.lazy(() => import('../pages/uikit/Icons/Unicons'));
 const Widgets = React.lazy(() => import('../pages/uikit/Widgets/'));
 
 // charts
-const Charts = React.lazy(() => import('../pages/charts/'));
+const Charts = React.lazy(() => import('../pages/charts'));
+
+// energy
+const Portfolio = React.lazy(() => import('../pages/portfolio'));
+
+// building
+const Building = React.lazy(() => import('../pages/buildings'));
 
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
@@ -53,12 +59,11 @@ const Editor = React.lazy(() => import('../pages/forms/Editor'));
 const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
-
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
     <Route
         {...rest}
-        render={props => {
+        render={(props) => {
             if (!isUserAuthenticated()) {
                 // not logged in so redirect to login page with the return url
                 return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
@@ -97,7 +102,7 @@ const dashboardRoutes = {
     },
     component: Dashboard,
     roles: ['Admin'],
-    route: PrivateRoute
+    route: PrivateRoute,
 };
 
 // apps
@@ -138,7 +143,7 @@ const emailAppRoutes = {
             route: PrivateRoute,
             roles: ['Admin'],
         },
-    ]
+    ],
 };
 
 const projectAppRoutes = {
@@ -160,7 +165,7 @@ const projectAppRoutes = {
             route: PrivateRoute,
             roles: ['Admin'],
         },
-    ]
+    ],
 };
 
 const taskAppRoutes = {
@@ -186,8 +191,6 @@ const taskAppRoutes = {
 };
 
 const appRoutes = [calendarAppRoutes, emailAppRoutes, projectAppRoutes, taskAppRoutes];
-
-
 
 // pages
 const pagesRoutes = {
@@ -235,17 +238,16 @@ const pagesRoutes = {
             path: '/pages/error-404',
             name: 'Error 404',
             component: Error404,
-            route: Route
+            route: Route,
         },
         {
             path: '/pages/error-500',
             name: 'Error 500',
             component: Error500,
-            route: Route
+            route: Route,
         },
-    ]
+    ],
 };
-
 
 // components
 const componentsRoutes = {
@@ -279,7 +281,7 @@ const componentsRoutes = {
                     route: PrivateRoute,
                     roles: ['Admin'],
                 },
-            ]
+            ],
         },
         {
             path: '/ui/widgets',
@@ -288,8 +290,7 @@ const componentsRoutes = {
             route: PrivateRoute,
             roles: ['Admin'],
         },
-
-    ]
+    ],
 };
 
 // charts
@@ -299,9 +300,28 @@ const chartRoutes = {
     component: Charts,
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
-    route: PrivateRoute
-}
+    route: PrivateRoute,
+};
 
+// portfolio
+const portfolioRoutes = {
+    path: '/portfolio',
+    name: 'Energy',
+    component: Portfolio,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
+
+// building
+const buildingRoutes = {
+    path: '/building',
+    name: 'Building',
+    component: Building,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
 
 // forms
 const formsRoutes = {
@@ -344,10 +364,9 @@ const formsRoutes = {
             name: 'File Upload',
             component: FileUpload,
             route: PrivateRoute,
-        }
-    ]
+        },
+    ],
 };
-
 
 const tableRoutes = {
     path: '/tables',
@@ -365,9 +384,9 @@ const tableRoutes = {
             name: 'Advanced',
             component: AdvancedTables,
             route: PrivateRoute,
-        }]
+        },
+    ],
 };
-
 
 // auth
 const authRoutes = {
@@ -408,11 +427,11 @@ const authRoutes = {
 };
 
 // flatten the list of all nested routes
-const flattenRoutes = routes => {
+const flattenRoutes = (routes) => {
     let flatRoutes = [];
 
     routes = routes || [];
-    routes.forEach(item => {
+    routes.forEach((item) => {
         flatRoutes.push(item);
 
         if (typeof item.children !== 'undefined') {
@@ -426,16 +445,22 @@ const flattenRoutes = routes => {
 const allRoutes = [
     rootRoute,
     dashboardRoutes,
+    chartRoutes,
+    portfolioRoutes,
+    buildingRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
-    chartRoutes,
     // formsRoutes,
     // tableRoutes,
     authRoutes,
 ];
 
-const authProtectedRoutes = [dashboardRoutes, chartRoutes,
+const authProtectedRoutes = [
+    dashboardRoutes,
+    portfolioRoutes,
+    buildingRoutes,
+    chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
 const allFlattenRoutes = flattenRoutes(allRoutes);
