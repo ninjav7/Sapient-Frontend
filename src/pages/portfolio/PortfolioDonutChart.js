@@ -46,12 +46,11 @@ const DonutChart = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-3">Donut Chart</h4>
                 <Chart
                     options={apexDonutOpts}
                     series={apexDonutData}
                     type="donut"
-                    height={320}
+                    height={300}
                     className="apex-charts"
                 />
             </CardBody>
