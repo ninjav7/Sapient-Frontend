@@ -131,7 +131,7 @@ class AppMenu extends Component {
                             classNamePrefix="react-select"
                             placeholder="Please select your building"
                             options={[
-                                { value: 'Building Overview', label: 'Building Overview' },
+                                { value: 'Portfolio Overview', label: 'Portfolio Overview' },
                                 { value: 'Peek Demand', label: 'Peek Demand' },
                                 { value: 'End Uses', label: 'End Uses' },
                                 { value: 'Time of Day', label: 'Time of Day' },

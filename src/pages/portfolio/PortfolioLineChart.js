@@ -1,111 +1,51 @@
-// @flow
-import React from 'react';
-import Chart from 'react-apexcharts';
-import { Card, CardBody } from 'reactstrap';
+import React, { useState } from 'react';
+import ReactApexChart from 'react-apexcharts';
+import './style.css';
 
-// simple line chart
-const LineChart = () => {
-    const apexLineChartWithLables = {
+const EnergyLineChart = () => {
+    const [series, setSeries] = useState([
+        {
+            name: 'Desktops',
+            data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+        },
+    ]);
+
+    const [options, setOptions] = useState({
         chart: {
-            height: 380,
+            height: 350,
             type: 'line',
             zoom: {
                 enabled: false,
             },
-            toolbar: {
-                show: false,
-            },
-        },
-        colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
         },
         dataLabels: {
-            enabled: true,
+            enabled: false,
         },
         stroke: {
-            width: [3, 3],
-            curve: 'smooth',
+            curve: 'straight',
         },
         title: {
-            text: 'Average High & Low Temperature',
+            text: 'Product Trends by Month',
             align: 'left',
-            style: {
-                fontSize: '14px',
-            },
         },
         grid: {
             row: {
-                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.2,
+                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.5,
             },
-            borderColor: '#f1f3fa',
-        },
-        markers: {
-            style: 'inverted',
-            size: 6,
         },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            title: {
-                text: 'Month',
-            },
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
         },
-        yaxis: {
-            title: {
-                text: 'Temperature',
-            },
-            min: 5,
-            max: 40,
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'right',
-            floating: true,
-            offsetY: -25,
-            offsetX: -5,
-        },
-        responsive: [
-            {
-                breakpoint: 600,
-                options: {
-                    chart: {
-                        toolbar: {
-                            show: false,
-                        },
-                    },
-                    legend: {
-                        show: false,
-                    },
-                },
-            },
-        ],
-    };
-
-    const apexLineChartWithLablesData = [
-        {
-            name: 'High - 2018',
-            data: [28, 29, 33, 36, 32, 32, 33],
-        },
-        {
-            name: 'Low - 2018',
-            data: [12, 11, 14, 18, 17, 13, 13],
-        },
-    ];
+    });
 
     return (
-        <Card>
-            <CardBody>
-                <Chart
-                    options={apexLineChartWithLables}
-                    series={apexLineChartWithLablesData}
-                    type="line"
-                    className="apex-charts"
-                />
-            </CardBody>
-        </Card>
+        <>
+            <div id="chart">
+                <ReactApexChart options={options} series={series} type="line" height={350} className="mt-2" />
+            </div>
+        </>
     );
 };
 
-export default LineChart;
+export default EnergyLineChart;
