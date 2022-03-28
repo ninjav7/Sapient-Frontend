@@ -104,25 +104,24 @@
 
 .custom-subtitle {
     font-style: normal;
-    font-weight: 500;
+    font-weight: 700;
     font-size: 12px;
     line-height: 20px;
     display: flex;
     align-items: center;
     letter-spacing: 0.25px;
-    color: #9ca3af;
+    color: #798190;
 }
 
 .map-widget {
     position: absolute;
+    width: 90%;
+    height: 75%;
     left: 30px;
     right: 20px;
     top: 100px;
     bottom: 20px;
     border: 0.5px solid grey;
-
-    /* gray/50 */
-
     background: #f9fafb;
 }
 

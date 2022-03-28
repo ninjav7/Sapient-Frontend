@@ -15,7 +15,7 @@ const ProgressBar = (props) => {
                         color={progressColor}
                         value={props.progressValue}
                     />
-                    <span className="text-muted font-weight-semibold float-left">{props.progressTitle}</span>
+                    <span className="text-muted font-weight-bolder float-left">{props.progressTitle}</span>
                     <span className="text-muted font-weight-semibold float-right">{props.progressUnit}</span>
                 </div>
             </CardBody>

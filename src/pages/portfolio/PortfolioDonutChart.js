@@ -7,7 +7,7 @@ import { Card, CardBody } from 'reactstrap';
 const DonutChart = () => {
     const apexDonutOpts = {
         chart: {
-            height: 320,
+            height: 300,
             type: 'pie',
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],

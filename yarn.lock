@@ -2735,6 +2735,13 @@
   "resolved" "https://registry.npmjs.org/aws4/-/aws4-1.11.0.tgz"
   "version" "1.11.0"
 
+"axios@^0.26.1":
+  "integrity" "sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.26.1.tgz"
+  "version" "0.26.1"
+  dependencies:
+    "follow-redirects" "^1.14.8"
+
 "axobject-query@^2.0.2":
   "integrity" "sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA=="
   "resolved" "https://registry.npmjs.org/axobject-query/-/axobject-query-2.2.0.tgz"
@@ -5805,6 +5812,11 @@
   "resolved" "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
   "version" "3.1.3"
 
+"fast-deep-equal@^3.1.3":
+  "integrity" "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="
+  "resolved" "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
+  "version" "3.1.3"
+
 "fast-glob@^2.0.2":
   "integrity" "sha512-g1KuQwHOZAmOZMuBtHdxDtju+T2RT8jgCC9aANsbpdiDDTSnjgfuVsIBNKbUeJI3oKMRExcfNDtJl4OhbffMsw=="
   "resolved" "https://registry.npmjs.org/fast-glob/-/fast-glob-2.2.7.tgz"
@@ -6063,7 +6075,7 @@
     "inherits" "^2.0.3"
     "readable-stream" "^2.3.6"
 
-"follow-redirects@^1.0.0":
+"follow-redirects@^1.0.0", "follow-redirects@^1.14.8":
   "integrity" "sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w=="
   "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.9.tgz"
   "version" "1.14.9"
@@ -8308,6 +8320,11 @@
   "integrity" "sha1-odePw6UEdMuAhF07O24dpJpEbo4="
   "resolved" "https://registry.npmjs.org/lazy-cache/-/lazy-cache-1.0.4.tgz"
   "version" "1.0.4"
+
+"leaflet@^1.6.0":
+  "integrity" "sha512-/xwPEBidtg69Q3HlqPdU3DnrXQOvQU/CCHA1tcDQVzOwm91YMYaILjNp7L4Eaw5Z4sOYdbBz6koWyibppd8Zqw=="
+  "resolved" "https://registry.npmjs.org/leaflet/-/leaflet-1.7.1.tgz"
+  "version" "1.7.1"
 
 "left-pad@^1.3.0":
   "integrity" "sha512-XI5MPzVNApjAyhQzphX8BkmKsKUxD4LdyK24iZeQGinBN9yTQT3bFlCBy/aVx2HrNcqQGsdot8ghrjyrvMCoEA=="
@@ -10932,7 +10949,7 @@
   dependencies:
     "ua-parser-js" "^0.7.24"
 
-"react-dom@^0.14.0 || ^15.0.0-rc || ^16.0.0-rc || ^16.0.0", "react-dom@^0.14.9 || ^15.3.0 || ^16.0.0", "react-dom@^15.0.0 || ^16.0.0", "react-dom@^16.3.0", "react-dom@^16.7.0", "react-dom@^16.8.0 || ^17.0.0", "react-dom@^16.9.0", "react-dom@>= 0.14.0 < 18.0.0", "react-dom@>=15.0.0", "react-dom@>=16.3.0", "react-dom@>=16.3.3", "react-dom@>=16.6.0", "react-dom@0.13.x || 0.14.x || ^15.0.0-0 || 15.x.x || ^16.0.0-0 || ^16.x.x || ^17.x.x":
+"react-dom@^0.14.0 || ^15.0.0-rc || ^16.0.0-rc || ^16.0.0", "react-dom@^0.14.9 || ^15.3.0 || ^16.0.0", "react-dom@^15.0.0 || ^16.0.0", "react-dom@^16.3.0", "react-dom@^16.7.0", "react-dom@^16.8.0  || ^17.0.0", "react-dom@^16.8.0 || ^17.0.0", "react-dom@^16.9.0", "react-dom@>= 0.14.0 < 18.0.0", "react-dom@>=15.0.0", "react-dom@>=16.3.0", "react-dom@>=16.3.3", "react-dom@>=16.6.0", "react-dom@0.13.x || 0.14.x || ^15.0.0-0 || 15.x.x || ^16.0.0-0 || ^16.x.x || ^17.x.x":
   "integrity" "sha512-1gCeQXDLoIqMgqD3IO2Ah9bnf0w9kzhwN5q4FGnHZ67hBm9yePzB5JJAIQCc8x3pFnNlwFq4RidZggNAAkzWWw=="
   "resolved" "https://registry.npmjs.org/react-dom/-/react-dom-16.14.0.tgz"
   "version" "16.14.0"
@@ -10998,6 +11015,21 @@
   "integrity" "sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w=="
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-17.0.2.tgz"
   "version" "17.0.2"
+
+"react-leaflet-search@^2.0.1":
+  "integrity" "sha512-doOcPPUgQVO2CJrO5kg0o14qCC/iD4gQwIclZt4xfvO353yUVRGkBAt5LOhjFLgLzxWjI54VkBKK3EK1ps6clA=="
+  "resolved" "https://registry.npmjs.org/react-leaflet-search/-/react-leaflet-search-2.0.1.tgz"
+  "version" "2.0.1"
+
+"react-leaflet@^2.6.0", "react-leaflet@^2.8.0":
+  "integrity" "sha512-Y7oHtNrrlRH8muDttXf+jZ2Ga/X7jneSGi1GN8uEdeCfLProTqgG2Zoa5TfloS3ZnY20v7w+DIenMG59beFsQw=="
+  "resolved" "https://registry.npmjs.org/react-leaflet/-/react-leaflet-2.8.0.tgz"
+  "version" "2.8.0"
+  dependencies:
+    "@babel/runtime" "^7.12.1"
+    "fast-deep-equal" "^3.1.3"
+    "hoist-non-react-statics" "^3.3.2"
+    "warning" "^4.0.3"
 
 "react-lifecycles-compat@^3.0.4":
   "integrity" "sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA=="
@@ -11196,7 +11228,7 @@
     "prop-types" "^15.6.2"
     "react-lifecycles-compat" "^3.0.4"
 
-"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^0.14.0 || ^15.0.0-rc || ^16.0.0-rc || ^16.0.0", "react@^0.14.9 || ^15.3.0 || ^16.0.0", "react@^15.0.0 || ^16.0.0", "react@^16.14.0", "react@^16.3.0", "react@^16.3.0 || ^17.0.0", "react@^16.7.0", "react@^16.8.0 || ^17.0.0", "react@^16.8.3 || ^17", "react@^16.8.6 || ^17", "react@^16.9.0", "react@^17.0.1", "react@>= 0.14.0 < 18.0.0", "react@>= 16.3.0", "react@>= 16.8", "react@>=0.13", "react@>=0.14.0", "react@>=15", "react@>=15.0.0", "react@>=16.3.0", "react@>=16.3.3", "react@>=16.6.0", "react@0.13.x || 0.14.x || ^15.0.0-0 || 15.x.x || ^16.0.0-0 || ^16.x.x || ^17.x.x", "react@0.14.x || ^15.0.0 || ^16.0.0 || ^17.0.0":
+"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^0.14.0 || ^15.0.0-rc || ^16.0.0-rc || ^16.0.0", "react@^0.14.9 || ^15.3.0 || ^16.0.0", "react@^15.0.0 || ^16.0.0", "react@^16.12.0", "react@^16.14.0", "react@^16.3.0", "react@^16.3.0 || ^17.0.0", "react@^16.7.0", "react@^16.8.0 || ^17.0.0", "react@^16.8.3 || ^17", "react@^16.8.6 || ^17", "react@^16.9.0", "react@^17.0.1", "react@>= 0.14.0 < 18.0.0", "react@>= 16.3.0", "react@>= 16.8", "react@>=0.13", "react@>=0.14.0", "react@>=15", "react@>=15.0.0", "react@>=16.3.0", "react@>=16.3.3", "react@>=16.6.0", "react@0.13.x || 0.14.x || ^15.0.0-0 || 15.x.x || ^16.0.0-0 || ^16.x.x || ^17.x.x", "react@0.14.x || ^15.0.0 || ^16.0.0 || ^17.0.0":
   "integrity" "sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.14.0.tgz"
   "version" "16.14.0"

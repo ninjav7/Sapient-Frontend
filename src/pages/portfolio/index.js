@@ -77,7 +77,7 @@ const PortfolioOverview = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col>
-                    <h4 className="heading-style">Portfolio Overview</h4>
+                    <h4 className="heading-style" style={{marginLeft: '20px'}}>Portfolio Overview</h4>
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div>
                             {Object.keys(TABS).map((key) => (
@@ -105,7 +105,7 @@ const PortfolioOverview = () => {
 
             <Row>
                 {/* <Col> */}
-                <div className="card-group button-style">
+                <div className="card-group button-style" style={{marginLeft: '29px'}}>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title card-title-style">Total Buildings</h5>
@@ -152,9 +152,9 @@ const PortfolioOverview = () => {
                 {/* </Col> */}
             </Row>
 
-            <Row className="mt-2 mr-4">
+            <Row className="mt-2">
                 <Col xl={5}>
-                    <div className="card-body mt-4">
+                    <div className="card-body mt-2">
                         <h6 className="card-title custom-title">Energy Density Top Buildings</h6>
                         <h6 className="card-subtitle custom-subtitle">Energy Consumption / Sq. Ft. Average</h6>
                         <div className="map-widget">
@@ -187,11 +187,11 @@ const PortfolioOverview = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-4">
+            <Row className="mt-2">
                 <Col xl={6}>
                     <Row>
                         <Col xl={6}>
-                            <div className="card-body donut-style">
+                            <div className="card-body">
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
                                 <div className="mt-2">

@@ -99,7 +99,9 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col>
-                    <h4 className="heading-style">Building Overview</h4>
+                    <h4 className="heading-style" style={{ marginLeft: '20px' }}>
+                        Building Overview
+                    </h4>
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div>
                             {Object.keys(TABS).map((key) => (
@@ -127,7 +129,7 @@ const BuildingOverview = () => {
 
             <Row>
                 {/* <Col> */}
-                <div className="card-group button-style">
+                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
@@ -196,36 +198,38 @@ const BuildingOverview = () => {
             </Row>
 
             <Row>
-                <Col xl={8}>
+                <Col xl={8} style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     <Row>
-                        <Col xl={6}>
-                            <div className="card-body donut-style">
-                                <h6
-                                    className="card-title custom-title"
-                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                    Energy Consumption by End Use
-                                </h6>
-                                <a
-                                    href="#"
-                                    // target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="link-primary"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
-                                    }}>
-                                    More Details
-                                </a>
-                                <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
-                                <div className="mt-2">
+                        <Col xl={12}>
+                            <h6
+                                className="card-title custom-title"
+                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                                Energy Consumption by End Use
+                            </h6>
+                            <a
+                                href="#"
+                                // target="_blank"
+                                rel="noopener noreferrer"
+                                className="link-primary mr-4"
+                                style={{
+                                    display: 'inline-block',
+                                    float: 'right',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                }}>
+                                More Details
+                            </a>
+                            <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
+                        </Col>
+                        <Col>
+                            <div className="card-body">
+                                <div>
                                     <DonutChart />
                                 </div>
                             </div>
                         </Col>
                         <Col xl={6}>
-                            <Card style={{ marginTop: '90px' }}>
+                            <Card style={{ marginTop: '50px' }}>
                                 <CardBody>
                                     <Table className="mb-0" borderless hover>
                                         <tbody>
@@ -254,7 +258,7 @@ const BuildingOverview = () => {
                     </Row>
                 </Col>
 
-                <Col xl={4}>
+                <Col style={{ marginTop: '2rem' }}>
                     <div className="card text-dark bg-light">
                         <div
                             className="card-header font-weight-bold"
