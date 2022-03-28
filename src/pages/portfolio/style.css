@@ -1,16 +1,14 @@
 .card-title-style {
-    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: 700;
+    font-size: 14px;
     line-height: 15px;
     display: flex;
     align-items: center;
-    color: #4b5563;
+    color: #5a6472;
 }
 
 .card-content-style {
-    font-family: 'Space Grotesk';
     font-style: normal;
     font-weight: 700;
     font-size: 20px;
@@ -23,7 +21,6 @@
 }
 
 .card-unit-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 12px;
@@ -41,12 +38,8 @@
 .card-box-style {
     height: 90px;
     background: #f9fafb;
-    /* gray/100 */
-
     border: 1px solid #f3f4f6;
     box-sizing: border-box;
-    /* shadow/base */
-
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
 }
@@ -54,12 +47,8 @@
 .card-box-style:hover {
     height: 90px;
     background: rgb(224, 222, 222);
-    /* gray/100 */
-
     border: 1px solid #f3f4f6;
     box-sizing: border-box;
-    /* shadow/base */
-
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
 }
@@ -70,64 +59,26 @@
     height: 272px;
     left: calc(50% - 632px / 2);
     top: calc(50% - 272px / 2 + 27.5px);
-
-    /* gray/white */
-
     background: #ffffff;
-    /* gray/200 */
-
     border: 1px solid #e4e7ec;
     box-sizing: border-box;
-    /* shadow/base */
-
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
 }
 
 .heading-style {
-    font-family: 'Space Grotesk';
     font-style: normal;
     font-weight: 700;
     font-size: 24px;
     line-height: 125%;
     display: inline;
-    /* identical to box height, or 30px */
-
-    /* text/dark */
-
     color: #1f2937;
 }
 
 .custom-buttons {
-    /* Text */
-
-    position: static;
-    width: 90px;
-    height: 35px;
-    /* left: calc(50% - 62px / 2); */
-    /* top: calc(50% - 20px / 2); */
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 20px;
-    /* identical to box height, or 143% */
-
-    display: flex;
-    align-items: center;
-    text-align: center;
-
-    /* text/light */
-
-    color: #5c6780;
-
-    /* Inside auto layout */
-
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-    margin: 0px 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
 }
 
 .custom-button-group {
@@ -137,9 +88,8 @@
 }
 
 .custom-title {
-    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     line-height: 17px;
     /* identical to box height */
@@ -153,19 +103,13 @@
 }
 
 .custom-subtitle {
-    font-family: 'Inter';
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 12px;
     line-height: 20px;
-    /* identical to box height, or 167% */
-
     display: flex;
     align-items: center;
     letter-spacing: 0.25px;
-
-    /* text/light */
-
     color: #9ca3af;
 }
 
@@ -184,42 +128,28 @@
 
 .progress-bar-container {
     position: static;
-    width: 856px;
+    width: 100%;
     height: 40px;
-    left: 0px;
-    top: 0px;
+    /* left: 0px;
+    top: 0px; */
     border: 0.5px solid red;
-
-    /* gray/white */
-
     background: #ffffff;
-    /* gray/200 */
-
     border: 0.5px solid #edeff3;
     box-sizing: border-box;
-    /* shadow/sm */
-
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 3px;
 }
 
 .progress-bar-container:hover {
     position: static;
-    width: 856px;
+    width: 100%;
     height: 40px;
-    left: 0px;
-    top: 0px;
+    /* left: 0px;
+    top: 0px;  */
     border: 2px solid #e6d7d7 !important;
-
-    /* gray/white */
-
     background: rgb(224, 222, 222);
-    /* gray/200 */
-
     border: 1px solid #f3f4f6;
     box-sizing: border-box;
-    /* shadow/sm */
-
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 6px;
 }
@@ -230,7 +160,6 @@
 }
 
 .store-name {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 12px;
@@ -274,7 +203,6 @@
 }
 
 .store-name-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 14px;
@@ -291,11 +219,10 @@
 }
 
 .store-value-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
-    line-height: 17px;
+    line-height: 15px;
     /* identical to box height */
 
     display: flex;
@@ -317,7 +244,6 @@
 }
 
 .custom-navbar-fonts {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 12px;
@@ -330,7 +256,6 @@
 }
 
 .custom-equip-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 14px;
@@ -345,7 +270,6 @@
 }
 
 .custom-usage-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 500;
     font-size: 14px;
@@ -370,4 +294,18 @@
 
     background: #fef2f2;
     border-radius: 6px;
+}
+
+.button-style {
+    display: inline-block;
+}
+
+.custom-cards {
+    width: fit-content;
+    height: fit-content;
+}
+
+#chartdiv {
+    width: 95%;
+    height: 375px;
 }

@@ -1,16 +1,14 @@
 .card-title-style {
-    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: 700;
+    font-size: 14px;
     line-height: 15px;
     display: flex;
     align-items: center;
-    color: #4b5563;
+    color: #5a6472;
 }
 
-.card-content-style {
-    font-family: 'Space Grotesk';
+/* .card-content-style {
     font-style: normal;
     font-weight: 700;
     font-size: 20px;
@@ -18,25 +16,19 @@
     display: flex;
     align-items: center;
     text-align: right;
-
     color: #1f2937;
 }
 
 .card-unit-style {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
     font-size: 12px;
     line-height: 20px;
-
     display: flex;
     align-items: center;
     text-align: right;
-
-    /* text/medium */
-
     color: #4b5563;
-}
+} */
 
 .card-box-style {
     height: 90px;
@@ -67,27 +59,26 @@
 .card-box-style1:active {
     height: 90px;
     background: rgb(0, 255, 76);
-    /* gray/100 */
-
     border: 1px solid #f3f4f6;
     box-sizing: border-box;
-    /* shadow/base */
-
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
 }
 
 .heading-style {
-    /* h1 */
-
-    font-family: 'Space Grotesk';
     font-style: normal;
     font-weight: 700;
     font-size: 24px;
     line-height: 125%;
-    /* identical to box height, or 30px */
-
-    /* text/dark */
-
     color: #1f2937;
+}
+
+.button-style {
+    display: inline-block;
+}
+
+#inner-button {
+    border: 1px solid #e4e7ec;
+    box-sizing: border-box;
+    border-radius: 4px;
 }

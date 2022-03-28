@@ -2,13 +2,9 @@ import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import DonutChart from './PortfolioDonutChart';
 import LineChart from './PortfolioLineChart';
-import GeoLocation from './GeoLocation';
+import MapChart from './MapChart';
 import ProgressBar from './ProgressBar';
-import StatisticsWidget from '../../components/StatisticsWidget';
-import StatisticsProgressWidget from '../../components/StatisticsProgressWidget';
-import StatisticsChartWidget from '../../components/StatisticsChartWidget';
-import StatisticsChartWidget2 from '../../components/StatisticsChartWidget2';
-import classNames from 'classnames';
+import DetailedButton from '../buildings/DetailedButton';
 import './style.css';
 
 const PortfolioOverview = () => {
@@ -53,107 +49,116 @@ const PortfolioOverview = () => {
         },
         {
             equipName: 'Lightning',
-            usage: '12,553 kWh',
+            usage: '11,553 kWh',
             percentage: 22,
         },
         {
             equipName: 'Plug',
-            usage: '12,553 kWh',
+            usage: '11,553 kWh',
             percentage: 22,
         },
         {
             equipName: 'Process',
-            usage: '12,553 kWh',
+            usage: '2,333 kWh',
             percentage: 22,
         },
     ];
 
+    const TABS = {
+        Tab1: '24 Hours',
+        Tab2: '7 Days',
+        Tab3: '30 Days',
+        Tab4: 'Custom',
+    };
+
+    const [activeTab, setActiveTab] = useState(TABS.Tab3);
+
     return (
-        <>
+        <React.Fragment>
             <Row className="page-title">
                 <Col>
                     <h4 className="heading-style">Portfolio Overview</h4>
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <button type="button" className="btn btn-outline-secondary custom-buttons">
-                            24 Hours
-                        </button>
-                        <button type="button" className="btn btn-outline-secondary custom-buttons">
-                            7 Days
-                        </button>
-                        <button type="button" className="btn btn-outline-secondary custom-buttons active">
-                            30 Days
-                        </button>
-                        <button type="button" className="btn btn-outline-secondary custom-buttons">
-                            Custom
-                        </button>
+                        <div>
+                            {Object.keys(TABS).map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    className={
+                                        activeTab === TABS[key]
+                                            ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
+                                            : 'btn btn-sm btn-light font-weight-bold custom-buttons'
+                                    }
+                                    onClick={() => setActiveTab(TABS[key])}>
+                                    {TABS[key]}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="float-right ml-2">
+                            <button type="button" className="btn btn-sm btn-primary font-weight-bold">
+                                <i className="uil uil-pen mr-1"></i>Explore
+                            </button>
+                        </div>
                     </div>
                 </Col>
             </Row>
 
             <Row>
-                <Col md={6}>
-                    <div className="card-group">
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Total Buildings</h5>
-                                <p className="card-text card-content-style">
-                                    16 <span className="card-unit-style">&nbsp;&nbsp;</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Total Consumption</h5>
-                                <p className="card-text card-content-style">
-                                    325,441{' '}
-                                    <span className="card-unit-style">
-                                        &nbsp;&nbsp;kWh&nbsp;
-                                        <button className="button-success text-success font-weight-bold font-size-5">
-                                            <i className="bi-graph-up">5 %</i>
-                                        </button>
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Average Energy Density</h5>
-                                <p className="card-text card-content-style">
-                                    1.25{' '}
-                                    <span className="card-unit-style">
-                                        &nbsp;&nbsp;kWh/sq.ft.&nbsp;
-                                        <button className="button-success text-success font-weight-bold font-size-5">
-                                            <i className="bi-graph-up">5 %</i>
-                                        </button>
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">12 Mo. Electric EUI</h5>
-                                <p className="card-text card-content-style">
-                                    67{' '}
-                                    <span className="card-unit-style">
-                                        &nbsp;&nbsp;kBtu/ft/yr&nbsp;
-                                        <button className="button-danger text-danger font-weight-bold font-size-5">
-                                            <i className="bi-graph-up">6.2 %</i>
-                                        </button>
-                                    </span>
-                                </p>
-                            </div>
+                {/* <Col> */}
+                <div className="card-group button-style">
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <h5 className="card-title card-title-style">Total Buildings</h5>
+                            <p className="card-text card-content-style">16</p>
                         </div>
                     </div>
-                </Col>
+
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="Total Consumption"
+                                description="325,441"
+                                unit="kWh"
+                                value="5"
+                                consumptionNormal={true}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="Average Energy Density"
+                                description="1.25"
+                                unit="kWh/sq.ft."
+                                value="5"
+                                consumptionNormal={true}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="12 Mo. Electric EUI"
+                                description="67"
+                                unit="kBtu/ft/yr"
+                                value="6.2"
+                                consumptionNormal={false}
+                            />
+                        </div>
+                    </div>
+                </div>
+                {/* </Col> */}
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-2 mr-4">
                 <Col xl={5}>
                     <div className="card-body mt-4">
                         <h6 className="card-title custom-title">Energy Density Top Buildings</h6>
                         <h6 className="card-subtitle custom-subtitle">Energy Consumption / Sq. Ft. Average</h6>
                         <div className="map-widget">
-                            <GeoLocation />
+                            <MapChart />
                         </div>
                     </div>
                 </Col>
@@ -184,10 +189,6 @@ const PortfolioOverview = () => {
 
             <Row className="mt-4">
                 <Col xl={6}>
-                    {/* <Row xl={12}>
-                        <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                        <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
-                    </Row> */}
                     <Row>
                         <Col xl={6}>
                             <div className="card-body donut-style">
@@ -201,25 +202,21 @@ const PortfolioOverview = () => {
                         <Col xl={6}>
                             <Card style={{ marginTop: '90px' }}>
                                 <CardBody>
-                                    <Table className="mb-0" bordered hover>
+                                    <Table className="mb-0" borderless hover>
                                         <tbody>
                                             {energyConsumption.map((record, index) => {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="custom-equip-style">{record.equipName}</td>
-                                                        <td className="custom-usage-style muted">
-                                                            {/* {`${record.usage} kWh`} */}
-                                                            {record.usage}
-                                                        </td>
+                                                        <td className="custom-usage-style muted">{record.usage}</td>
                                                         <td>
                                                             <button
                                                                 className="button-danger text-danger font-weight-bold font-size-5"
-                                                                style={{ width: '50px' }}>
-                                                                <i className="bi-graph-up">{`${record.percentage} %`}</i>
+                                                                style={{ width: '100%' }}>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>{record.percentage} %</strong>
+                                                                </i>
                                                             </button>
-                                                            {/* <button className="custom-percent-style">
-                                                                {`${record.percentage} %`}
-                                                            </button> */}
                                                         </td>
                                                     </tr>
                                                 );
@@ -240,7 +237,7 @@ const PortfolioOverview = () => {
                     </div>
                 </Col>
             </Row>
-        </>
+        </React.Fragment>
     );
 };
 
