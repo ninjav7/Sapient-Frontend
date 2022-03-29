@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // stacked bar chart
-const StackedBarChart = () => {
+const StackedBarChart = ({ title = 'Stacked Bar Chart' }) => {
     const apexBarChartStackedOpts = {
         chart: {
             height: 380,
@@ -16,7 +16,7 @@ const StackedBarChart = () => {
         },
         plotOptions: {
             bar: {
-                horizontal: true,
+                horizontal: false,
             },
         },
         stroke: {
@@ -25,7 +25,7 @@ const StackedBarChart = () => {
         xaxis: {
             categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
             labels: {
-                formatter: function(val) {
+                formatter: function (val) {
                     return val + 'K';
                 },
             },
@@ -38,12 +38,12 @@ const StackedBarChart = () => {
         colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
         tooltip: {
             y: {
-                formatter: function(val) {
+                formatter: function (val) {
                     return val + 'K';
                 },
             },
             theme: 'dark',
-            x: { show: false }
+            x: { show: false },
         },
         fill: {
             opacity: 1,
@@ -88,7 +88,7 @@ const StackedBarChart = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-3">Stacked Bar Chart</h4>
+                <h4 className="header-title mt-0 mb-3">{title}</h4>
                 <Chart
                     options={apexBarChartStackedOpts}
                     series={apexBarChartStackedData}

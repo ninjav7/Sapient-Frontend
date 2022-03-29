@@ -128,7 +128,6 @@ const BuildingOverview = () => {
             </Row>
 
             <Row>
-                {/* <Col> */}
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
@@ -194,7 +193,6 @@ const BuildingOverview = () => {
                         </div>
                     </div>
                 </div>
-                {/* </Col> */}
             </Row>
 
             <Row>
