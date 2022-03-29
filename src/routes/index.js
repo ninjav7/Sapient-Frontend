@@ -314,53 +314,56 @@ const chartRoutes = {
 
 // portfolio
 const portfolioRoutes = {
-    path: '/portfolio',
+    path: '/energy',
     name: 'Energy',
-    component: Portfolio,
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
+    children: [
+        {
+            path: '/energy/portfolio/overview',
+            name: 'Portfolio Overview',
+            component: Portfolio,
+            route: PrivateRoute 
+        },
+        {
+            path: '/energy/building',
+            name: 'Building Overview',
+            component: Building,
+            route: PrivateRoute 
+        },
+        {
+            path: '/energy/peak-demand',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute 
+        },
+        {
+            path: '/energy/end-users',
+            name: 'End Users',
+            component: EndUses,
+            route: PrivateRoute 
+        },
+        {
+            path: '/energy/time-of-day',
+            name: 'Time Of Day',
+            component: TimeOfDay,
+            route: PrivateRoute 
+        }
+    ],
 
-// building
-const buildingRoutes = {
-    path: '/building',
-    name: 'Building',
-    component: Building,
     icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
-
-// peakDemand
-const peakDemandRoutes = {
-    path: '/peakDemand',
-    name: 'Peak Demand',
-    component: PeakDemand,
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
+    roles: ['Admin']
 };
 
 // endUses
 const endUsesRoutes = {
     path: '/endUses',
     name: 'End Uses',
-    component: EndUses,
+
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
     route: PrivateRoute,
 };
 
-// timeOfDay
-const timeOfDayRoutes = {
-    path: '/timeOfDay',
-    name: 'Time of Day',
-    component: TimeOfDay,
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
+
 
 // forms
 const formsRoutes = {
@@ -486,10 +489,6 @@ const allRoutes = [
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
-    buildingRoutes,
-    peakDemandRoutes,
-    endUsesRoutes,
-    timeOfDayRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -501,10 +500,6 @@ const allRoutes = [
 const authProtectedRoutes = [
     dashboardRoutes,
     portfolioRoutes,
-    buildingRoutes,
-    peakDemandRoutes,
-    endUsesRoutes,
-    timeOfDayRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

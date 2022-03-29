@@ -125,16 +125,16 @@ class AppMenu extends Component {
         return (
             <React.Fragment>
                 {this.props.showBuilding && (
-                    <div className="pl-2 pr-2 pt-2">
+                    <div className="pl-2 pr-2 pt-2 mb-4">
                         <Select
                             className="react-select"
                             classNamePrefix="react-select"
                             placeholder="Please select your building"
                             options={[
-                                { value: 'Portfolio Overview', label: 'Portfolio Overview' },
-                                { value: 'Peek Demand', label: 'Peek Demand' },
-                                { value: 'End Uses', label: 'End Uses' },
-                                { value: 'Time of Day', label: 'Time of Day' },
+                                { value: 'Building 1', label: 'Building 1' },
+                                { value: 'Building 2', label: 'Building 2' },
+                                { value: 'Building 3', label: 'Building 3' },
+                                { value: 'Building 4', label: 'Building 4' },
                             ]}></Select>
                     </div>
                 )}
