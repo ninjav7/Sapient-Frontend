@@ -7,11 +7,11 @@ import { Card, CardBody } from 'reactstrap';
 const DonutChart = () => {
     const apexDonutOpts = {
         chart: {
-            height: 320,
+            height: 300,
             type: 'pie',
         },
-        labels: ['Series 1', 'Series 2', 'Series 3', 'Series 4', 'Series 5'],
-        colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
         tooltip: {
             theme: 'dark',
             x: { show: false },
@@ -22,7 +22,7 @@ const DonutChart = () => {
             horizontalAlign: 'center',
             verticalAlign: 'middle',
             floating: false,
-            fontSize: '14px',
+            fontSize: '12px',
             offsetX: 0,
             offsetY: -10,
         },
@@ -41,7 +41,7 @@ const DonutChart = () => {
         ],
     };
 
-    const apexDonutData = [44, 55, 41, 17, 15];
+    const apexDonutData = [12553, 11553, 6503, 2333];
 
     return (
         <Card>

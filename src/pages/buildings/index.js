@@ -1,13 +1,36 @@
 import React, { useState } from 'react';
-import { Row, Col } from 'reactstrap';
-import PageTitle from '../../components/PageTitle';
+import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
+import DonutChart from '../portfolio/PortfolioDonutChart';
 import './style.css';
+import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
 import EnergyBarChart from './EnergyBarChart';
-import EnergyDonutChart from './EnergyDonutChart';
 
 const BuildingOverview = () => {
     const [energyConsumption, setEnergyConsumption] = useState([
+        {
+            equipName: 'HVAC',
+            usage: '12,553 kWh',
+            percentage: 22,
+        },
+        {
+            equipName: 'Lightning',
+            usage: '11,553 kWh',
+            percentage: 22,
+        },
+        {
+            equipName: 'Plug',
+            usage: '11,553 kWh',
+            percentage: 22,
+        },
+        {
+            equipName: 'Process',
+            usage: '2,333 kWh',
+            percentage: 22,
+        },
+    ]);
+
+    const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
             equipment: 'AHU 1',
             power: 25.3,
@@ -63,84 +86,177 @@ const BuildingOverview = () => {
         },
     ]);
 
+    const TABS = {
+        Tab1: '24 Hours',
+        Tab2: '7 Days',
+        Tab3: '30 Days',
+        Tab4: 'Custom',
+    };
+
+    const [activeTab, setActiveTab] = useState(TABS.Tab3);
+
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col>
-                    <PageTitle
-                        breadCrumbItems={[
-                            { label: 'Charts', path: '/charts' },
-                            { label: 'Energy', path: '/building', active: true },
-                        ]}
-                        title={'Building Overview'}
-                    />
-                </Col>
-            </Row>
-
-            <Row>
-                <Col md={6}>
-                    <div className="card-group">
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Total Consumption</h5>
-                                <p className="card-text card-content-style">
-                                    25441 <span className="card-unit-style">&nbsp;&nbsp;kWh</span>
-                                </p>
-                            </div>
+                    <h4 className="heading-style" style={{ marginLeft: '20px' }}>
+                        Building Overview
+                    </h4>
+                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
+                        <div>
+                            {Object.keys(TABS).map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    className={
+                                        activeTab === TABS[key]
+                                            ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
+                                            : 'btn btn-sm btn-light font-weight-bold custom-buttons'
+                                    }
+                                    onClick={() => setActiveTab(TABS[key])}>
+                                    {TABS[key]}
+                                </button>
+                            ))}
                         </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Portfolio Rank</h5>
-                                <p className="card-text card-content-style">
-                                    1 <span className="card-unit-style">&nbsp;&nbsp;of 40</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">Energy Density</h5>
-                                <p className="card-text card-content-style">
-                                    1.3 <span className="card-unit-style">&nbsp;&nbsp;kWh/sq.ft.</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div className="card card-box-style">
-                            <div className="card-body">
-                                <h5 className="card-title card-title-style">12 Mo. Electric EUI</h5>
-                                <p className="card-text card-content-style">
-                                    67 <span className="card-unit-style">&nbsp;&nbsp;kBtu/ft/yr</span>
-                                </p>
-                            </div>
+                        <div className="float-right ml-2">
+                            <button type="button" className="btn btn-sm btn-primary font-weight-bold">
+                                <i className="uil uil-pen mr-1"></i>Explore
+                            </button>
                         </div>
                     </div>
                 </Col>
             </Row>
 
             <Row>
-                <Col xl={8}>
-                    <div className="card-body">
-                        <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                            Energy Consumption by End Use
-                        </h6>
-                        <a
-                            href="#"
-                            // target="_blank"
-                            rel="noopener noreferrer"
-                            className="link-primary"
-                            style={{
-                                display: 'inline-block',
-                                float: 'right',
-                                textDecoration: 'none',
-                                fontWeight: 'bold',
-                            }}>
-                            More Details
-                        </a>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
-                        <EnergyDonutChart />
+                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="Total Consumption"
+                                description="25,441"
+                                unit="kWh"
+                                value="5"
+                                consumptionNormal={true}
+                            />
+                        </div>
                     </div>
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <h5 className="card-title card-title-style">
+                                Portfolio Rank&nbsp;&nbsp;
+                                <div>
+                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
+                                    <UncontrolledTooltip placement="bottom" target="#title">
+                                        Information ToolTips
+                                    </UncontrolledTooltip>
+                                </div>
+                            </h5>
+                            <p className="card-text card-content-style">
+                                1 <span className="card-unit-style">&nbsp;&nbsp;of 40</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="Energy Density"
+                                description="1.3"
+                                unit="kWh/sq.ft."
+                                value="5"
+                                consumptionNormal={true}
+                            />
+                        </div>
+                    </div>
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <DetailedButton
+                                title="12 Mo. Electric EUI"
+                                description="67"
+                                unit="kBtu/ft/yr"
+                                value="6.2"
+                                consumptionNormal={false}
+                            />
+                        </div>
+                    </div>
+                    <div className="card card-box-style button-style">
+                        <div className="card-body">
+                            <h5 className="card-title card-title-style">
+                                Monitored Load&nbsp;&nbsp;
+                                <div>
+                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
+                                    <UncontrolledTooltip placement="bottom" target="#title">
+                                        Information ToolTips
+                                    </UncontrolledTooltip>
+                                </div>
+                            </h5>
+                            <button id="inner-button">Add Utility Bill</button>
+                        </div>
+                    </div>
+                </div>
+            </Row>
+
+            <Row>
+                <Col xl={8} style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    <Row>
+                        <Col xl={12}>
+                            <h6
+                                className="card-title custom-title"
+                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                                Energy Consumption by End Use
+                            </h6>
+                            <a
+                                href="#"
+                                // target="_blank"
+                                rel="noopener noreferrer"
+                                className="link-primary mr-4"
+                                style={{
+                                    display: 'inline-block',
+                                    float: 'right',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                }}>
+                                More Details
+                            </a>
+                            <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
+                        </Col>
+                        <Col>
+                            <div className="card-body">
+                                <div>
+                                    <DonutChart />
+                                </div>
+                            </div>
+                        </Col>
+                        <Col xl={6}>
+                            <Card style={{ marginTop: '50px' }}>
+                                <CardBody>
+                                    <Table className="mb-0" borderless hover>
+                                        <tbody>
+                                            {energyConsumption.map((record, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        <td className="custom-equip-style">{record.equipName}</td>
+                                                        <td className="custom-usage-style muted">{record.usage}</td>
+                                                        <td>
+                                                            <button
+                                                                className="button-danger text-danger font-weight-bold font-size-5"
+                                                                style={{ width: '100%' }}>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>{record.percentage} %</strong>
+                                                                </i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </Table>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
                 </Col>
 
-                <Col xl={4}>
+                <Col style={{ marginTop: '2rem' }}>
                     <div className="card text-dark bg-light">
                         <div
                             className="card-header font-weight-bold"
@@ -317,7 +433,7 @@ const BuildingOverview = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {energyConsumption.map((item, index) => (
+                                            {topEnergyConsumption.map((item, index) => (
                                                 <tr key={index}>
                                                     <td>
                                                         <div>

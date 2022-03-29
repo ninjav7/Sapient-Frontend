@@ -47,6 +47,15 @@ const Portfolio = React.lazy(() => import('../pages/portfolio'));
 // building
 const Building = React.lazy(() => import('../pages/buildings'));
 
+// peakDemand
+const PeakDemand = React.lazy(() => import('../pages/peakDemand'));
+
+// endUses
+const EndUses = React.lazy(() => import('../pages/endUses'));
+
+// timeOfDay
+const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
+
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
 const FormAdvanced = React.lazy(() => import('../pages/forms/Advanced'));
@@ -323,6 +332,36 @@ const buildingRoutes = {
     route: PrivateRoute,
 };
 
+// peakDemand
+const peakDemandRoutes = {
+    path: '/peakDemand',
+    name: 'Peak Demand',
+    component: PeakDemand,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
+
+// endUses
+const endUsesRoutes = {
+    path: '/endUses',
+    name: 'End Uses',
+    component: EndUses,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
+
+// timeOfDay
+const timeOfDayRoutes = {
+    path: '/timeOfDay',
+    name: 'Time of Day',
+    component: TimeOfDay,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
+
 // forms
 const formsRoutes = {
     path: '/forms',
@@ -448,6 +487,9 @@ const allRoutes = [
     chartRoutes,
     portfolioRoutes,
     buildingRoutes,
+    peakDemandRoutes,
+    endUsesRoutes,
+    timeOfDayRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -460,6 +502,9 @@ const authProtectedRoutes = [
     dashboardRoutes,
     portfolioRoutes,
     buildingRoutes,
+    peakDemandRoutes,
+    endUsesRoutes,
+    timeOfDayRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

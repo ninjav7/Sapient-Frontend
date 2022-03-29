@@ -25,7 +25,7 @@ const EnergyLineChart = () => {
             curve: 'straight',
         },
         title: {
-            text: 'Product Trends by Month',
+            text: '',
             align: 'left',
         },
         grid: {

@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // simple line chart
-const LineChart = () => {
+const LineChart = ({ title = 'Line with Data Labels' }) => {
     const apexLineChartWithLables = {
         chart: {
             height: 380,
@@ -19,7 +19,7 @@ const LineChart = () => {
         colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
         tooltip: {
             theme: 'dark',
-            x: { show: false }
+            x: { show: false },
         },
         dataLabels: {
             enabled: true,
@@ -97,7 +97,7 @@ const LineChart = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-3">Line with Data Labels</h4>
+                <h4 className="header-title mt-0 mb-3">{title}</h4>
                 <Chart
                     options={apexLineChartWithLables}
                     series={apexLineChartWithLablesData}

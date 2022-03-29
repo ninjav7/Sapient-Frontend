@@ -308,3 +308,12 @@
     width: 95%;
     height: 375px;
 }
+
+.content-heading-style {
+    font-style: normal;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 125%;
+    display: inline;
+    color: #371f31 !important;
+}
