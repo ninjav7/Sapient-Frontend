@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
+import Header from '../../components/Header';
 import StackedBarChart from '../charts/StackedBarChart';
 import './style.css';
 
@@ -22,8 +23,10 @@ const EnergyUsageCard = ({ usage }) => {
                     <p className="card-text card-content-style">
                         {usage.totalConsumption} <span className="card-unit-style">&nbsp;kWh</span>
                     </p>
-                    <button className="button-danger text-danger font-weight-bold font-size-5" style={{ width: '4vw' }}>
-                        <i className="uil uil-chart-down">
+                    <button
+                        className="button-danger text-danger font-weight-bold font-size-5"
+                        style={{ width: 'auto' }}>
+                        <i className="uil uil-arrow-growth">
                             <strong>{usage.val1.value} %</strong>
                         </i>
                     </button>
@@ -33,7 +36,7 @@ const EnergyUsageCard = ({ usage }) => {
                     <button
                         className="button-danger text-danger font-weight-bold font-size-5 content-stying"
                         style={{ width: '4vw' }}>
-                        <i className="uil uil-chart-down">
+                        <i className="uil uil-arrow-growth">
                             <strong>{usage.val2.value} %</strong>
                         </i>
                     </button>
@@ -50,15 +53,17 @@ const EnergyUsageCard = ({ usage }) => {
                     <button
                         className="button-danger text-danger font-weight-bold font-size-5 content-stying"
                         style={{ width: '4vw' }}>
-                        <i className="uil uil-chart-down">
+                        <i className="uil uil-arrow-growth">
                             <strong>{usage.val3.value} %</strong>
                         </i>
                     </button>
                     &nbsp;&nbsp;
                     <span>since last period</span>
                     <br />
-                    <button className="button-danger text-danger font-weight-bold font-size-5" style={{ width: '4vw' }}>
-                        <i className="uil uil-chart-down">
+                    <button
+                        className="button-danger text-danger font-weight-bold font-size-5"
+                        style={{ width: 'auto' }}>
+                        <i className="uil uil-arrow-growth">
                             <strong>{usage.val4.value} %</strong>
                         </i>
                     </button>
@@ -71,31 +76,24 @@ const EnergyUsageCard = ({ usage }) => {
 };
 
 const EndUses = () => {
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-
     const [endUsage, seteEndUsage] = useState([
         {
             title: 'HVAC',
             totalConsumption: '11,441',
             afterHourConsumption: '2,321',
-            val1: { value: 6, type: 'decreased' },
-            val2: { value: 6, type: 'decreased' },
-            val3: { value: 3, type: 'increased' },
-            val4: { value: 2, type: 'increased' },
+            val1: { value: 61, type: 'up' },
+            val2: { value: 6, type: 'down' },
+            val3: { value: 31, type: 'normal' },
+            val4: { value: 2, type: 'up' },
         },
         {
             title: 'Lighting',
             totalConsumption: '7,247',
             afterHourConsumption: '2,321',
-            val1: { value: 3, type: 'increased' },
+            val1: { value: 32, type: 'increased' },
             val2: { value: 4, type: 'decreased' },
-            val3: { value: 4, type: 'decreased' },
-            val4: { value: 1, type: 'increased' },
+            val3: { value: 41, type: 'decreased' },
+            val4: { value: 12, type: 'increased' },
         },
         {
             title: 'Plug',
@@ -108,40 +106,9 @@ const EndUses = () => {
         },
     ]);
 
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col>
-                    <h4 className="heading-style" style={{ marginLeft: '20px' }}>
-                        End Uses
-                    </h4>
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div>
-                            {Object.keys(TABS).map((key) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={
-                                        activeTab === TABS[key]
-                                            ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
-                                            : 'btn btn-sm btn-light font-weight-bold custom-buttons'
-                                    }
-                                    onClick={() => setActiveTab(TABS[key])}>
-                                    {TABS[key]}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-sm btn-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </div>
-                    </div>
-                </Col>
-            </Row>
-
+            <Header title="End Uses" />
             <Row>
                 <Col xl={8}>
                     <StackedBarChart />
@@ -158,7 +125,7 @@ const EndUses = () => {
                     <Row className="mt-4 energy-container">
                         {endUsage.map((usage, index) => {
                             return (
-                                <div className="energy-usage">
+                                <div className="usage-card">
                                     <EnergyUsageCard usage={usage} />
                                 </div>
                             );

@@ -56,6 +56,9 @@ const EndUses = React.lazy(() => import('../pages/endUses'));
 // timeOfDay
 const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 
+// compareBuildings
+const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
+
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
 const FormAdvanced = React.lazy(() => import('../pages/forms/Advanced'));
@@ -336,8 +339,8 @@ const portfolioRoutes = {
             route: PrivateRoute 
         },
         {
-            path: '/energy/end-users',
-            name: 'End Users',
+            path: '/energy/end-uses',
+            name: 'End Uses',
             component: EndUses,
             route: PrivateRoute 
         },
@@ -345,6 +348,12 @@ const portfolioRoutes = {
             path: '/energy/time-of-day',
             name: 'Time Of Day',
             component: TimeOfDay,
+            route: PrivateRoute 
+        },
+        {
+            path: '/energy/compare-buildings',
+            name: 'Compare Buildings',
+            component: CompareBuildings,
             route: PrivateRoute 
         }
     ],

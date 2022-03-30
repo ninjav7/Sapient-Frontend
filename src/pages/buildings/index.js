@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import DonutChart from '../portfolio/PortfolioDonutChart';
+import Header from '../../components/Header';
 import './style.css';
 import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
@@ -35,21 +36,25 @@ const BuildingOverview = () => {
             equipment: 'AHU 1',
             power: 25.3,
             change: 22,
+            status: 'up',
         },
         {
             equipment: 'AHU 2',
             power: 21.3,
             change: 3,
+            status: 'down',
         },
         {
             equipment: 'RTU 1',
             power: 2.3,
             change: 6,
+            status: 'normal',
         },
         {
             equipment: 'Front RTU',
             power: 25.3,
             change: 2,
+            status: 'down',
         },
     ]);
 
@@ -86,46 +91,9 @@ const BuildingOverview = () => {
         },
     ]);
 
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col>
-                    <h4 className="heading-style" style={{ marginLeft: '20px' }}>
-                        Building Overview
-                    </h4>
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div>
-                            {Object.keys(TABS).map((key) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={
-                                        activeTab === TABS[key]
-                                            ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
-                                            : 'btn btn-sm btn-light font-weight-bold custom-buttons'
-                                    }
-                                    onClick={() => setActiveTab(TABS[key])}>
-                                    {TABS[key]}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-sm btn-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </div>
-                    </div>
-                </Col>
-            </Row>
+            <Header title="Building Overview" />
 
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
@@ -219,7 +187,7 @@ const BuildingOverview = () => {
                             </a>
                             <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
                         </Col>
-                        <Col>
+                        <Col xl={6}>
                             <div className="card-body">
                                 <div>
                                     <DonutChart />
@@ -367,13 +335,17 @@ const BuildingOverview = () => {
                         <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minutes period)</h6>
                         <div className="card-group mt-2">
                             {topContributors.map((item, index) => (
-                                <div className="card" style={{ margin: '1rem', border: '0.5px solid #a9aaaf' }}>
+                                <div className="card peak-demand-container">
                                     <div className="card-body">
                                         <h6 className="card-title text-muted">
                                             {item.date} & {item.time}
                                         </h6>
-                                        <h5 className="card-title">{item.power} kW</h5>
-                                        <p className="card-text" style={{ fontWeight: 'bold', paddingTop: '10px' }}>
+                                        <h5 className="card-title">
+                                            <span style={{ color: 'black' }}>{item.power}</span>&nbsp; kW
+                                        </h5>
+                                        <p
+                                            className="card-text"
+                                            style={{ fontWeight: 'bold', paddingTop: '10px', color: 'black' }}>
                                             Top Contributor
                                         </p>
                                         <table className="table table-borderless w-auto small">
@@ -382,24 +354,32 @@ const BuildingOverview = () => {
                                                 <tr>
                                                     <td>
                                                         <tr>
-                                                            <div>AHU 1</div>
+                                                            <div className="font-weight-bold text-dark">AHU 1</div>
                                                         </tr>
                                                         <tr>
-                                                            <div>AHU 2</div>
+                                                            <div className="font-weight-bold text-dark">AHU 2</div>
                                                         </tr>
                                                         <tr>
-                                                            <div>Compressor 1</div>
+                                                            <div className="font-weight-bold text-dark">
+                                                                Compressor 1
+                                                            </div>
                                                         </tr>
                                                     </td>
                                                     <td>
                                                         <tr>
-                                                            <div>{item.contributor.ahu1} kW</div>
+                                                            <div className="font-weight-bold">
+                                                                {item.contributor.ahu1} kW
+                                                            </div>
                                                         </tr>
                                                         <tr>
-                                                            <div>{item.contributor.ahu2} kW</div>
+                                                            <div className="font-weight-bold">
+                                                                {item.contributor.ahu2} kW
+                                                            </div>
                                                         </tr>
                                                         <tr>
-                                                            <div>{item.contributor.compressor} kW</div>
+                                                            <div className="font-weight-bold">
+                                                                {item.contributor.compressor} kW
+                                                            </div>
                                                         </tr>
                                                     </td>
                                                 </tr>
@@ -413,7 +393,7 @@ const BuildingOverview = () => {
                 </Col>
 
                 <Col xl={4}>
-                    <div className="card text-dark bg-light">
+                    <div className="card text-dark bg-light" style={{ marginLeft: '20px' }}>
                         <div className="card-header">Top Equipment Consumption</div>
                         <div className="card-body">
                             <div className="card">
@@ -437,17 +417,53 @@ const BuildingOverview = () => {
                                                 <tr key={index}>
                                                     <td>
                                                         <div>
-                                                            <div>{item.equipment}</div>
+                                                            <div
+                                                                className="font-weight-bold"
+                                                                style={{ color: 'black' }}>
+                                                                {item.equipment}
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div>
-                                                            <div>{item.power} kW</div>
+                                                            <div className="font-weight-bold">
+                                                                <span style={{ color: 'black' }}>{item.power}</span>
+                                                                <span>&nbsp;kW</span>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div>
-                                                            <div>{item.change} %</div>
+                                                            {/* <div>{item.change} %</div> */}
+                                                            <div>
+                                                                {item.status === 'up' && (
+                                                                    <button
+                                                                        className="button-danger text-danger font-weight-bold font-size-5"
+                                                                        style={{ width: '100%' }}>
+                                                                        <i className="uil uil-arrow-growth">
+                                                                            <strong>{item.change} %</strong>
+                                                                        </i>
+                                                                    </button>
+                                                                )}
+                                                                {item.status === 'down' && (
+                                                                    <button
+                                                                        className="button-success text-success font-weight-bold font-size-5"
+                                                                        style={{ width: '100%' }}>
+                                                                        <i className="uil uil-chart-down">
+                                                                            <strong>{item.change} %</strong>
+                                                                        </i>
+                                                                    </button>
+                                                                )}
+                                                                {item.status === 'normal' && (
+                                                                    <button
+                                                                        className="button text-muted font-weight-bold font-size-5"
+                                                                        style={{ width: '100%', border: 'none' }}>
+                                                                        <i className="uil uil-arrow-growth">
+                                                                            <strong>{item.change} %</strong>
+                                                                        </i>
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>

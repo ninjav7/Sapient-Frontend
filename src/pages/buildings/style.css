@@ -93,3 +93,12 @@
     letter-spacing: 0.25px;
     color: #798190;
 }
+
+.peak-demand-container {
+    margin: 1rem;
+    box-shadow: 0px 0px 5px rgb(170, 170, 170);
+}
+
+.peak-demand-container:hover {
+    background: rgb(224, 222, 222);
+}

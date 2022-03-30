@@ -22,14 +22,14 @@ const LineChart = ({ title = 'Line with Data Labels' }) => {
             x: { show: false },
         },
         dataLabels: {
-            enabled: true,
+            enabled: false,
         },
         stroke: {
             width: [3, 3],
             curve: 'smooth',
         },
         title: {
-            text: 'Average High & Low Temperature',
+            // text: 'Average High & Low Temperature',
             align: 'left',
             style: {
                 fontSize: '14px',

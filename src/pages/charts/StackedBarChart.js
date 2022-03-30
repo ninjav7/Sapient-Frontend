@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // stacked bar chart
-const StackedBarChart = ({ title = 'Stacked Bar Chart' }) => {
+const StackedBarChart = ({ title }) => {
     const apexBarChartStackedOpts = {
         chart: {
             height: 380,

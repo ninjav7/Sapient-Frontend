@@ -35,7 +35,7 @@ const ApexChart = () => {
                 </Col>
 
                 <Col xl={6}>
-                    <LineAnnotationChart />
+                    <LineAnnotationChart title="Line Chart with Annotations" />
                 </Col>
             </Row>
 
