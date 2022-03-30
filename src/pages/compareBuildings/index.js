@@ -12,6 +12,7 @@ import {
     DropdownItem,
 } from 'reactstrap';
 import { Search, ChevronDown, ChevronLeft, ChevronUp, ChevronRight } from 'react-feather';
+
 import './style.css';
 
 const BuildingTable = () => {
@@ -25,20 +26,33 @@ const BuildingTable = () => {
             hvacPerChg: '40',
             hvacPerChgStatus: 'down',
             totalConsumption: 25003,
-            totalPerChg: '40',
+            totalPerChg: '4',
             totalPerChgStatus: 'normal',
             sqFt: 46332,
         },
         {
             name: '123 Main St. Portland OR',
             energyDensity: 1.5,
-            energyPerChg: '22',
-            energyPerChgStatus: 'up',
+            energyPerChg: '2',
+            energyPerChgStatus: 'normal',
             hvacConsumption: 0.8,
             hvacPerChg: '40',
             hvacPerChgStatus: 'down',
             totalConsumption: 25003,
             totalPerChg: '40',
+            totalPerChgStatus: 'up',
+            sqFt: 46332,
+        },
+        {
+            name: '123 Main St. Portland OR',
+            energyDensity: 1.5,
+            energyPerChg: '22',
+            energyPerChgStatus: 'down',
+            hvacConsumption: 0.8,
+            hvacPerChg: '40',
+            hvacPerChgStatus: 'up',
+            totalConsumption: 25003,
+            totalPerChg: '4',
             totalPerChgStatus: 'normal',
             sqFt: 46332,
         },
@@ -70,7 +84,15 @@ const BuildingTable = () => {
                                         </a>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
-                                    <td>{record.energyDensity} kWh / sq. ft.sq. ft.</td>
+                                    <td>
+                                        {record.energyDensity} kWh / sq. ft.sq. ft.
+                                        <br />
+                                        {/* <ProgressBar
+                                            color="danger"
+                                            progressUnit={item.energyDensity}
+                                            className="progress-bar-container"
+                                        /> */}
+                                    </td>
                                     {/* <td>{record.energyPerChg} %</td> */}
                                     {/* <td>
                                         <button

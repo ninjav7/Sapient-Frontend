@@ -315,6 +315,40 @@ const chartRoutes = {
     route: PrivateRoute,
 };
 
+const buildingRoutes = {
+    path: '/energy/building',
+    name: 'Building Overview',
+    component: Building,
+    children: [
+        {
+            path: '/energy/building',
+            name: 'Building Overview',
+            component: Building,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/peak-demand',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/end-uses',
+            name: 'End Uses',
+            component: EndUses,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/time-of-day',
+            name: 'Time Of Day',
+            component: TimeOfDay,
+            route: PrivateRoute,
+        },
+    ],
+    roles: ['Admin'],
+    route: PrivateRoute,
+};
+
 // portfolio
 const portfolioRoutes = {
     path: '/energy',
@@ -324,42 +358,41 @@ const portfolioRoutes = {
             path: '/energy/portfolio/overview',
             name: 'Portfolio Overview',
             component: Portfolio,
-            route: PrivateRoute 
+            route: PrivateRoute,
         },
         {
             path: '/energy/building',
             name: 'Building Overview',
             component: Building,
-            route: PrivateRoute 
+            route: PrivateRoute,
         },
         {
             path: '/energy/peak-demand',
             name: 'Peak Demand',
             component: PeakDemand,
-            route: PrivateRoute 
+            route: PrivateRoute,
         },
         {
             path: '/energy/end-uses',
             name: 'End Uses',
             component: EndUses,
-            route: PrivateRoute 
+            route: PrivateRoute,
         },
         {
             path: '/energy/time-of-day',
             name: 'Time Of Day',
             component: TimeOfDay,
-            route: PrivateRoute 
+            route: PrivateRoute,
         },
         {
             path: '/energy/compare-buildings',
             name: 'Compare Buildings',
             component: CompareBuildings,
-            route: PrivateRoute 
-        }
+            route: PrivateRoute,
+        },
     ],
-
     icon: FeatherIcon.PieChart,
-    roles: ['Admin']
+    roles: ['Admin'],
 };
 
 // endUses
@@ -371,8 +404,6 @@ const endUsesRoutes = {
     roles: ['Admin'],
     route: PrivateRoute,
 };
-
-
 
 // forms
 const formsRoutes = {
@@ -498,6 +529,7 @@ const allRoutes = [
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
+    buildingRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,

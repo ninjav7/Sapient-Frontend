@@ -439,7 +439,7 @@ const BuildingOverview = () => {
                                                                 {item.status === 'up' && (
                                                                     <button
                                                                         className="button-danger text-danger font-weight-bold font-size-5"
-                                                                        style={{ width: '100%' }}>
+                                                                        style={{ width: '75px' }}>
                                                                         <i className="uil uil-arrow-growth">
                                                                             <strong>{item.change} %</strong>
                                                                         </i>
@@ -448,7 +448,7 @@ const BuildingOverview = () => {
                                                                 {item.status === 'down' && (
                                                                     <button
                                                                         className="button-success text-success font-weight-bold font-size-5"
-                                                                        style={{ width: '100%' }}>
+                                                                        style={{ width: '75px' }}>
                                                                         <i className="uil uil-chart-down">
                                                                             <strong>{item.change} %</strong>
                                                                         </i>
@@ -457,7 +457,7 @@ const BuildingOverview = () => {
                                                                 {item.status === 'normal' && (
                                                                     <button
                                                                         className="button text-muted font-weight-bold font-size-5"
-                                                                        style={{ width: '100%', border: 'none' }}>
+                                                                        style={{ width: '75px', border: 'none' }}>
                                                                         <i className="uil uil-arrow-growth">
                                                                             <strong>{item.change} %</strong>
                                                                         </i>

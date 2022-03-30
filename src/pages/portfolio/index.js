@@ -136,7 +136,11 @@ const PortfolioOverview = () => {
 
                         {buildingsEnergyConsume.map((item, index) => (
                             <Col md={6} xl={12}>
-                                <div className="progress-bar-container mt-4">
+                                <div
+                                    className="progress-bar-container mt-4"
+                                    onClick={(e) => {
+                                        window.open('/energy/building', '_parent');
+                                    }}>
                                     <ProgressBar
                                         color="danger"
                                         progressValue={item.value}

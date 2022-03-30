@@ -118,7 +118,7 @@
 .map-widget {
     position: absolute;
     width: 90%;
-    height: 75%;
+    height: 80%;
     left: 30px;
     right: 20px;
     top: 100px;
@@ -141,18 +141,20 @@
     border-radius: 3px;
 }
 
+.progress-bar-container {
+    height: 44px;
+}
+
+.progress-title:hover,
 .progress-bar-container:hover {
-    position: static;
-    width: 100%;
-    height: 40px;
-    /* left: 0px;
-    top: 0px;  */
-    border: 2px solid #e6d7d7 !important;
-    background: rgb(224, 222, 222);
-    border: 1px solid #f3f4f6;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+    /* box-shadow: 0px 0px 5px rgb(172, 171, 171); */
+    /* background: rgb(224, 222, 222); */
     border-radius: 6px;
+    text-decoration: underline;
+}
+
+.progress-bar-container:hover {
+    box-shadow: 0px 0px 5px rgb(172, 171, 171);
 }
 
 .progress-bar-line {
@@ -321,6 +323,11 @@
     grid-template-columns: 1fr 1fr;
 }
 
+.progress-title {
+    font-size: small;
+    /* text-decoration: underline; */
+}
+
 .progress-title :hover {
-    text-decoration: underline;
+    /* text-decoration: underline; */
 }
