@@ -71,7 +71,7 @@ const ApexChart = () => {
 
             <Row>
                 <Col>
-                    <MixedChart />
+                    <MixedChart title="Line, Bar and Area (Mixed)" />
                 </Col>
             </Row>
         </React.Fragment>

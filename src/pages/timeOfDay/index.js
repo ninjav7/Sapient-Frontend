@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
 import Header from '../../components/Header';
-import EnergyBarChart from '../buildings/EnergyBarChart';
+import HeatMapChart from '../charts/HeatMapChart';
 import DonutChart from '../portfolio/PortfolioDonutChart';
 import LineChart from '../charts/LineChart';
 import './style.css';
@@ -10,7 +10,7 @@ const TimeOfDay = () => {
     return (
         <React.Fragment>
             <Header title="Time of Day" />
-            <Row className="mt-2">
+            <Row className="">
                 <Col xl={3}>
                     <div className="card-body container-style">
                         <h6 className="card-title custom-title">Off Hours Energy</h6>
@@ -26,7 +26,8 @@ const TimeOfDay = () => {
                             Average Daily Usage by Hour
                         </h6>
                         <h6 className="card-subtitle mb-2 text-muted">Energy Usage By Hour</h6>
-                        <EnergyBarChart />
+                        {/* <EnergyBarChart /> */}
+                        <HeatMapChart />
                     </div>
                 </Col>
             </Row>

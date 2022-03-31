@@ -59,6 +59,11 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 // compareBuildings
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 
+// endUses - Sub-pages
+const HVACUsage = React.lazy(() => import('../pages/endUses/UsagePageOne'));
+const LightningUsage = React.lazy(() => import('../pages/endUses/UsagePageTwo'));
+const PlugUsage = React.lazy(() => import('../pages/endUses/UsagePageThree'));
+
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
 const FormAdvanced = React.lazy(() => import('../pages/forms/Advanced'));
@@ -388,6 +393,24 @@ const portfolioRoutes = {
             path: '/energy/compare-buildings',
             name: 'Compare Buildings',
             component: CompareBuildings,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/hvac',
+            name: 'HVAC Usage',
+            component: HVACUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/lightning',
+            name: 'Lightning Usage',
+            component: LightningUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/plug',
+            name: 'Plug Usage',
+            component: PlugUsage,
             route: PrivateRoute,
         },
     ],

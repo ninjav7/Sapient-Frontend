@@ -14,7 +14,7 @@ const DetailedButton = (props) => {
                 </div>
             </h5>
             <p className="card-text card-content-style">
-                {props.description.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                {props.description}
                 <span className="card-unit-style">
                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
                     {props.consumptionNormal && (

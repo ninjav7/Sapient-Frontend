@@ -79,7 +79,12 @@ const BuildingTable = () => {
                             return (
                                 <tr key={index}>
                                     <th scope="row">
-                                        <a href="#" className="building-name">
+                                        <a
+                                            href="#"
+                                            className="building-name"
+                                            onClick={(e) => {
+                                                window.open('/energy/building', '_parent');
+                                            }}>
                                             {record.name}
                                         </a>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
@@ -163,7 +168,12 @@ const BuildingTable = () => {
                                             </button>
                                         )}
                                     </td>
-                                    <td className="text-muted font-weight-bold">{record.totalConsumption} kWh</td>
+                                    <td className="text-muted font-weight-bold">
+                                        {record.totalConsumption.toLocaleString(undefined, {
+                                            maximumFractionDigits: 2,
+                                        })}
+                                        kWh
+                                    </td>
                                     {/* <td>{record.totalPerChg} %</td> */}
                                     <td>
                                         {record.totalPerChgStatus === 'up' && (

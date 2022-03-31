@@ -45,22 +45,22 @@ const PortfolioOverview = () => {
     const energyConsumption = [
         {
             equipName: 'HVAC',
-            usage: '12,553 kWh',
+            usage: 12553,
             percentage: 22,
         },
         {
             equipName: 'Lightning',
-            usage: '11,553 kWh',
+            usage: 11553,
             percentage: 22,
         },
         {
             equipName: 'Plug',
-            usage: '11,553 kWh',
+            usage: 11553,
             percentage: 22,
         },
         {
             equipName: 'Process',
-            usage: '2,333 kWh',
+            usage: 2333,
             percentage: 22,
         },
     ];
@@ -72,7 +72,7 @@ const PortfolioOverview = () => {
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body">
+                        <div className="card-body" style={{ marginTop: '2px' }}>
                             <h5 className="card-title card-title-style">Total Buildings</h5>
                             <p className="card-text card-content-style">16</p>
                         </div>
@@ -82,7 +82,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Total Consumption"
-                                description="325,441"
+                                description={325441}
                                 unit="kWh"
                                 value="5"
                                 consumptionNormal={true}
@@ -94,7 +94,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Average Energy Density"
-                                description="1.25"
+                                description={1.25}
                                 unit="kWh/sq.ft."
                                 value="5"
                                 consumptionNormal={true}
@@ -106,7 +106,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description="67"
+                                description={67}
                                 unit="kBtu/ft/yr"
                                 value="6.2"
                                 consumptionNormal={false}
@@ -176,7 +176,11 @@ const PortfolioOverview = () => {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="custom-equip-style">{record.equipName}</td>
-                                                        <td className="custom-usage-style muted">{record.usage}</td>
+                                                        <td className="custom-usage-style muted">
+                                                            {record.usage.toLocaleString(undefined, {
+                                                                maximumFractionDigits: 2,
+                                                            })} kWh
+                                                        </td>
                                                         <td>
                                                             <button
                                                                 className="button-danger text-danger font-weight-bold font-size-5"

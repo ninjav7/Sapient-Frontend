@@ -6,6 +6,7 @@ import './style.css';
 import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
 import EnergyBarChart from './EnergyBarChart';
+import HeatMapChart from '../charts/HeatMapChart';
 
 const BuildingOverview = () => {
     const [energyConsumption, setEnergyConsumption] = useState([
@@ -101,7 +102,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Total Consumption"
-                                description="25,441"
+                                description={25441}
                                 unit="kWh"
                                 value="5"
                                 consumptionNormal={true}
@@ -497,7 +498,8 @@ const BuildingOverview = () => {
                             More Details
                         </a>
                         <h6 className="card-subtitle mb-2 text-muted">Average by Hour</h6>
-                        <EnergyBarChart />
+                        {/* <EnergyBarChart /> */}
+                        <HeatMapChart />
                     </div>
                 </Col>
             </Row>

@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // Mixed chart
-const MixedChart = () => {
+const MixedChart = ({title}) => {
     var apexMixedOpts = {
         chart: {
             height: 380,
@@ -66,7 +66,7 @@ const MixedChart = () => {
             shared: true,
             intersect: false,
             y: {
-                formatter: function(y) {
+                formatter: function (y) {
                     if (typeof y !== 'undefined') {
                         return y.toFixed(0) + ' points';
                     }
@@ -74,7 +74,7 @@ const MixedChart = () => {
                 },
             },
             theme: 'dark',
-            x: { show: false }
+            x: { show: false },
         },
         grid: {
             borderColor: '#f1f3fa',
@@ -102,7 +102,7 @@ const MixedChart = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-3">Line, Bar and Area (Mixed)</h4>
+                <h4 className="header-title mt-0 mb-3">{title}</h4>
                 <Chart
                     options={apexMixedOpts}
                     series={apexMixedData}
