@@ -1,7 +1,7 @@
 .energy-container {
-    /* border: 2px solid red; */
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    /* border: 2px soild black; */
 }
 
 @media screen and (max-width: 1194px) {
@@ -10,14 +10,14 @@
     }
 }
 /* 1834 */
-@media (min-width: 1194px) and (max-width: 1834px) {
+@media (min-width: 1194px) and (max-width: 1234px) {
     .energy-container {
         grid-template-columns: 1fr 1fr;
     }
 }
-​ .energy-usage {
-    margin: 2rem;
+​ .usage-card {
     display: grid;
+    margin: 350px;
 }
 
 .title-style {
@@ -38,7 +38,9 @@
     align-items: center;
 }
 
-.card-content-style {
+.usage-card-content-style {
+    margin-top: 5px;
+    margin-bottom: 7px;
     font-style: normal;
     font-weight: 700;
     font-size: 20px;
@@ -67,9 +69,7 @@
 
 .button-style {
     background: #ffffff;
-
-    /* border: 1px solid #e5e7eb; */
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
 
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 4px;
@@ -93,7 +93,30 @@
 .energy-chart-style {
     height: 50%;
     width: 100%;
-    border: 2px solid red;
     background: #ffffff;
     border-radius: 8px;
+}
+
+.card-group-style {
+    background-color: #f9fafb;
+    box-shadow: 0px 0px 2px rgb(179, 179, 179);
+}
+
+.usage-card-box-style {
+    height: auto;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    box-sizing: border-box;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+    /* box-shadow: 0px 0px 5px black; */
+    border-radius: 10px;
+}
+
+.usage-card-box-style:hover {
+    height: auto;
+    background: rgb(224, 222, 222);
+    border: 1px solid #f3f4f6;
+    box-sizing: border-box;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
 }

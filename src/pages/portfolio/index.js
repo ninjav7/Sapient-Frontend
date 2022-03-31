@@ -5,6 +5,7 @@ import LineChart from './PortfolioLineChart';
 import MapChart from './MapChart';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
+import Header from '../../components/Header';
 import './style.css';
 
 const PortfolioOverview = () => {
@@ -44,71 +45,34 @@ const PortfolioOverview = () => {
     const energyConsumption = [
         {
             equipName: 'HVAC',
-            usage: '12,553 kWh',
+            usage: 12553,
             percentage: 22,
         },
         {
             equipName: 'Lightning',
-            usage: '11,553 kWh',
+            usage: 11553,
             percentage: 22,
         },
         {
             equipName: 'Plug',
-            usage: '11,553 kWh',
+            usage: 11553,
             percentage: 22,
         },
         {
             equipName: 'Process',
-            usage: '2,333 kWh',
+            usage: 2333,
             percentage: 22,
         },
     ];
 
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col>
-                    <h4 className="heading-style" style={{ marginLeft: '20px' }}>
-                        Portfolio Overview
-                    </h4>
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div>
-                            {Object.keys(TABS).map((key) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={
-                                        activeTab === TABS[key]
-                                            ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
-                                            : 'btn btn-sm btn-light font-weight-bold custom-buttons'
-                                    }
-                                    onClick={() => setActiveTab(TABS[key])}>
-                                    {TABS[key]}
-                                </button>
-                            ))}
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-sm btn-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </div>
-                    </div>
-                </Col>
-            </Row>
+            <Header title="Portfolio Overview" />
 
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body">
+                        <div className="card-body" style={{ marginTop: '2px' }}>
                             <h5 className="card-title card-title-style">Total Buildings</h5>
                             <p className="card-text card-content-style">16</p>
                         </div>
@@ -118,7 +82,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Total Consumption"
-                                description="325,441"
+                                description={325441}
                                 unit="kWh"
                                 value="5"
                                 consumptionNormal={true}
@@ -130,7 +94,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Average Energy Density"
-                                description="1.25"
+                                description={1.25}
                                 unit="kWh/sq.ft."
                                 value="5"
                                 consumptionNormal={true}
@@ -142,7 +106,7 @@ const PortfolioOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description="67"
+                                description={67}
                                 unit="kBtu/ft/yr"
                                 value="6.2"
                                 consumptionNormal={false}
@@ -172,7 +136,11 @@ const PortfolioOverview = () => {
 
                         {buildingsEnergyConsume.map((item, index) => (
                             <Col md={6} xl={12}>
-                                <div className="progress-bar-container mt-4">
+                                <div
+                                    className="progress-bar-container mt-4"
+                                    onClick={(e) => {
+                                        window.open('/energy/building', '_parent');
+                                    }}>
                                     <ProgressBar
                                         color="danger"
                                         progressValue={item.value}
@@ -200,7 +168,7 @@ const PortfolioOverview = () => {
                             </div>
                         </Col>
                         <Col xl={6}>
-                            <Card style={{ marginTop: '90px' }}>
+                            <Card style={{ marginTop: '80px' }}>
                                 <CardBody>
                                     <Table className="mb-0" borderless hover>
                                         <tbody>
@@ -208,11 +176,15 @@ const PortfolioOverview = () => {
                                                 return (
                                                     <tr key={index}>
                                                         <td className="custom-equip-style">{record.equipName}</td>
-                                                        <td className="custom-usage-style muted">{record.usage}</td>
+                                                        <td className="custom-usage-style muted">
+                                                            {record.usage.toLocaleString(undefined, {
+                                                                maximumFractionDigits: 2,
+                                                            })} kWh
+                                                        </td>
                                                         <td>
                                                             <button
                                                                 className="button-danger text-danger font-weight-bold font-size-5"
-                                                                style={{ width: '100%' }}>
+                                                                style={{ width: '75px' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>{record.percentage} %</strong>
                                                                 </i>

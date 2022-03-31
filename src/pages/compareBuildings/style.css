@@ -1,0 +1,26 @@
+.search-fields {
+    display: inline-block;
+    width: 25%;
+}
+
+.building-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    color: #2955e7;
+}
+
+.building-name :hover {
+    text-decoration: underline !important;
+}
+
+.building-groups {
+    display: inline-block;
+}
+
+.search-style {
+    width: 240px;
+    height: 34px;
+}

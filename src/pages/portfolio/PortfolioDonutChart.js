@@ -5,15 +5,18 @@ import { Card, CardBody } from 'reactstrap';
 
 // simple donut chart
 const DonutChart = () => {
-    const apexDonutOpts = {
+    const options = {
         chart: {
+            type: 'donut',
             height: 300,
-            type: 'pie',
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        dataLabels: {
+            enabled: false,
+        },
         tooltip: {
-            theme: 'dark',
+            theme: 'light',
             x: { show: false },
         },
         legend: {
@@ -25,6 +28,23 @@ const DonutChart = () => {
             fontSize: '12px',
             offsetX: 0,
             offsetY: -10,
+        },
+        plotOptions: {
+            pie: {
+                expandOnClick: false,
+                donut: {
+                    size: '78px',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            fontSize: '24px',
+                            // color: '#2787AB',
+                        },
+                    },
+                },
+            },
         },
         responsive: [
             {
@@ -41,18 +61,12 @@ const DonutChart = () => {
         ],
     };
 
-    const apexDonutData = [12553, 11553, 6503, 2333];
+    const series = [12553, 11553, 6503, 2333];
 
     return (
         <Card>
             <CardBody>
-                <Chart
-                    options={apexDonutOpts}
-                    series={apexDonutData}
-                    type="donut"
-                    height={300}
-                    className="apex-charts"
-                />
+                <Chart options={options} series={series} type="donut" height={300} className="apex-charts" />
             </CardBody>
         </Card>
     );

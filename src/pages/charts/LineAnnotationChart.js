@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // line chart with annotations
-const LineAnnotationChart = () => {
+const LineAnnotationChart = (props) => {
     const apexLineChartWithAnnotationOpts = {
         tooltip: {
             theme: 'dark',
@@ -21,7 +21,7 @@ const LineAnnotationChart = () => {
                             color: '#fff',
                             background: '#0acf97',
                         },
-                        text: 'Support',
+                        // text: 'Support',
                     },
                 },
             ],
@@ -35,7 +35,7 @@ const LineAnnotationChart = () => {
                             color: '#fff',
                             background: '#775DD0',
                         },
-                        text: 'Anno Test',
+                        // text: 'Anno Test',
                     },
                 },
                 {
@@ -48,7 +48,7 @@ const LineAnnotationChart = () => {
                             background: '#ffbc00',
                         },
                         orientation: 'horizontal',
-                        text: 'New Beginning',
+                        // text: 'New Beginning',
                     },
                 },
             ],
@@ -70,7 +70,7 @@ const LineAnnotationChart = () => {
                             background: '#fa5c7c',
                         },
 
-                        text: 'Point Annotation',
+                        // text: 'Point Annotation',
                     },
                 },
             ],
@@ -110,10 +110,10 @@ const LineAnnotationChart = () => {
             width: [3],
             curve: 'straight',
         },
-        title: {
-            text: 'Line with Annotations',
-            align: 'left',
-        },
+        // title: {
+        //     text: 'Line with Annotations',
+        //     align: 'left',
+        // },
         xaxis: {
             type: 'datetime',
         },
@@ -172,7 +172,7 @@ const LineAnnotationChart = () => {
     return (
         <Card>
             <CardBody>
-                <h4 className="header-title mt-0 mb-3">Line Chart with Annotations</h4>
+                <h4 className="header-title mt-0 mb-3">{props.title}</h4>
                 <Chart
                     options={apexLineChartWithAnnotationOpts}
                     series={apexLineChartWithAnnotationData}

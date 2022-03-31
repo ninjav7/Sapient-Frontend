@@ -35,7 +35,7 @@ const ApexChart = () => {
                 </Col>
 
                 <Col xl={6}>
-                    <LineAnnotationChart />
+                    <LineAnnotationChart title="Line Chart with Annotations" />
                 </Col>
             </Row>
 
@@ -71,7 +71,7 @@ const ApexChart = () => {
 
             <Row>
                 <Col>
-                    <MixedChart />
+                    <MixedChart title="Line, Bar and Area (Mixed)" />
                 </Col>
             </Row>
         </React.Fragment>
