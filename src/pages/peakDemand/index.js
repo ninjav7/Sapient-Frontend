@@ -61,7 +61,9 @@ const Peaks = ({ energyConsumption }) => {
                         {energyConsumption.map((record, index) => {
                             return (
                                 <tr key={index}>
-                                    <td className="custom-equip-style">{record.equipName}</td>
+                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
+                                        {record.equipName}
+                                    </td>
                                     <td className="custom-usage-style muted">{record.usage}</td>
                                     <td>
                                         <button
@@ -198,7 +200,7 @@ const PeakDemand = () => {
                     </div>
 
                     <div className="card card-box-style button-style">
-                        <div className="card-body">
+                        <div className="card-body" style={{ marginTop: '4px' }}>
                             <h5 className="card-title card-title-style">July 9, 4:30 PM&nbsp;&nbsp;</h5>
                             <p className="card-text bold">4:30 PM</p>
                         </div>
@@ -288,7 +290,7 @@ const PeakDemand = () => {
                     <Card>
                         <CardBody className="pt-2 pb-3">
                             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Total Energy Consumption
+                                Building 15-Minute Demand Peaks Trend
                             </h6>
                             <Button
                                 className="button-success text-success font-weight-bold font-size-5 float-right"
@@ -299,9 +301,8 @@ const PeakDemand = () => {
                                     <strong>5 %</strong>
                                 </i>
                             </Button>
-                            <h6 className="card-subtitle custom-subtitle">Totaled by Hour</h6>
-                            {/* <LineChart /> */}
-                            <LineAnnotationChart title="" />
+                            <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minute period)</h6>
+                            <LineAnnotationChart title="" height={350}/>
                         </CardBody>
                     </Card>
                 </Col>

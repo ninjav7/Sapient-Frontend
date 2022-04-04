@@ -8,57 +8,90 @@ const DonutChart = () => {
     const options = {
         chart: {
             type: 'donut',
-            height: 300,
         },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 300,
+                    },
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+            },
+        ],
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        series: [12553, 11553, 6503, 2333],
         dataLabels: {
             enabled: false,
         },
         tooltip: {
-            theme: 'light',
+            theme: 'dark',
             x: { show: false },
         },
         legend: {
-            show: true,
-            position: 'bottom',
-            horizontalAlign: 'center',
-            verticalAlign: 'middle',
-            floating: false,
-            fontSize: '12px',
-            offsetX: 0,
-            offsetY: -10,
+            show: false,
+        },
+        stroke: {
+            width: 0,
         },
         plotOptions: {
             pie: {
                 expandOnClick: false,
+                size: 200,
                 donut: {
-                    size: '78px',
+                    size: '77%',
                     labels: {
                         show: true,
+                        name: {
+                            show: true,
+                            fontSize: '22px',
+                            fontFamily: undefined,
+                            color: '#dfsda',
+                            offsetY: -10,
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            fontFamily: undefined,
+                            color: '#d14065',
+                            offsetY: 16,
+                            formatter: function (val) {
+                                return val;
+                            },
+                        },
                         total: {
                             show: true,
-                            showAlways: true,
-                            fontSize: '24px',
-                            // color: '#2787AB',
+                            label: 'Total',
+                            color: '#373d3f',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b;
+                                }, 0);
+                            },
                         },
                     },
                 },
             },
         },
-        responsive: [
-            {
-                breakpoint: 600,
-                options: {
-                    chart: {
-                        height: 240,
-                    },
-                    legend: {
-                        show: false,
-                    },
-                },
-            },
-        ],
+        // legend: {
+        //     offsetY: 25,
+        //     offsetX: 0,
+        // },
+        // markers: {
+        //     width: 10,
+        //     height: 10,
+        //     colors: ['#063760', '#E91E63', '#9C27B0'],
+        // },
+        itemMargin: {
+            horizontal: 10,
+        },
+        dataLabels: {
+            enabled: false,
+        },
     };
 
     const series = [12553, 11553, 6503, 2333];
@@ -66,7 +99,7 @@ const DonutChart = () => {
     return (
         <Card>
             <CardBody>
-                <Chart options={options} series={series} type="donut" height={300} className="apex-charts" />
+                <Chart options={options} series={series} type="donut" height={200} className="apex-charts" />
             </CardBody>
         </Card>
     );
