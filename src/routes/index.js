@@ -5,6 +5,11 @@ import * as FeatherIcon from 'react-feather';
 
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
+// settings
+import General from '../pages/settings/General';
+import UtilityBills from '../pages/settings/UtilityBills';
+import Equipment from '../pages/settings/Equipment';
+
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
 const Logout = React.lazy(() => import('../pages/auth/Logout'));
@@ -320,6 +325,7 @@ const chartRoutes = {
     route: PrivateRoute,
 };
 
+// builindgs
 const buildingRoutes = {
     path: '/energy/building/overview',
     name: 'Building Overview',
@@ -411,6 +417,34 @@ const portfolioRoutes = {
             path: '/energy/plug',
             name: 'Plug Usage',
             component: PlugUsage,
+            route: PrivateRoute,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+// settings
+const settingsRoutes = {
+    path: '/settings',
+    name: 'Settings',
+    children: [
+        {
+            path: '/settings/general',
+            name: 'General',
+            component: General,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/utility-bills',
+            name: 'Utility Bills',
+            component: UtilityBills,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/equipment',
+            name: 'Equipment',
+            component: Equipment,
             route: PrivateRoute,
         },
     ],
@@ -553,6 +587,7 @@ const allRoutes = [
     chartRoutes,
     portfolioRoutes,
     buildingRoutes,
+    settingsRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -564,6 +599,7 @@ const allRoutes = [
 const authProtectedRoutes = [
     dashboardRoutes,
     portfolioRoutes,
+    settingsRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

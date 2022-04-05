@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Label, FormGroup, Input } from 'reactstrap';
+import { Row, Col, Input } from 'reactstrap';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
