@@ -251,10 +251,6 @@
     font-weight: 600;
     font-size: 12px;
     line-height: 22px;
-    /* identical to box height, or 183% */
-
-    /* gray/white */
-
     color: #ffffff !important;
 }
 
@@ -327,4 +323,6 @@
     font-size: small;
 }
 
-
+.card-title {
+    font-weight: bold;
+}

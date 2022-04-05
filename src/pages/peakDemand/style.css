@@ -259,13 +259,9 @@
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
-    /* identical to box height, or 143% */
-
+    color: #2955e7 !important;
     letter-spacing: 0.44px;
-
-    /* text/dark */
-
-    color: #1f2937;
+    /* color: #1f2937; */
 }
 
 .custom-usage-style {

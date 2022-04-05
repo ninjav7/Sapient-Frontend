@@ -147,7 +147,7 @@ const UsagePageThree = () => {
                         </div>
                     </div>
 
-                    <div className="card button-style float-right">
+                    <div className="card button-style float-right single-button-style">
                         <div className="card-body">
                             <p className="subtitle-style" style={{ margin: '2px', fontWeight: 'bold' }}>
                                 Installed Lighting Density

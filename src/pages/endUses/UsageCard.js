@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardBody, Button } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import './style.css';
 
 const UsageCard = ({ usage, button }) => {
@@ -13,34 +14,31 @@ const UsageCard = ({ usage, button }) => {
                 {button === 'View' && (
                     <div className="float-right ml-2">
                         {usage.title === 'HVAC' && (
-                            <Button
-                                color="light"
-                                className="btn btn-sm btn-outline-dark font-weight-bold button-style"
-                                onClick={(e) => {
-                                    window.open('/energy/hvac', '_parent');
-                                }}>
-                                View
-                            </Button>
+                            <Link to="/energy/hvac" className="list-group-item border-0">
+                                <Button
+                                    color="light"
+                                    className="btn btn-sm btn-outline-dark font-weight-bold button-style">
+                                    View
+                                </Button>
+                            </Link>
                         )}
                         {usage.title === 'Lighting' && (
-                            <Button
-                                color="light"
-                                className="btn btn-sm btn-outline-dark font-weight-bold button-style"
-                                onClick={(e) => {
-                                    window.open('/energy/lightning', '_parent');
-                                }}>
-                                View
-                            </Button>
+                            <Link to="/energy/lightning" className="list-group-item border-0">
+                                <Button
+                                    color="light"
+                                    className="btn btn-sm btn-outline-dark font-weight-bold button-style">
+                                    View
+                                </Button>
+                            </Link>
                         )}
                         {usage.title === 'Plug' && (
-                            <Button
-                                color="light"
-                                className="btn btn-sm btn-outline-dark font-weight-bold button-style"
-                                onClick={(e) => {
-                                    window.open('/energy/plug', '_parent');
-                                }}>
-                                View
-                            </Button>
+                            <Link to="/energy/plug" className="list-group-item border-0">
+                                <Button
+                                    color="light"
+                                    className="btn btn-sm btn-outline-dark font-weight-bold button-style">
+                                    View
+                                </Button>
+                            </Link>
                         )}
                     </div>
                 )}

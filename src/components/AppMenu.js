@@ -131,10 +131,10 @@ class AppMenu extends Component {
                             classNamePrefix="react-select"
                             placeholder="Please select your building"
                             options={[
-                                { value: 'Building 1', label: 'Building 1' },
-                                { value: 'Building 2', label: 'Building 2' },
-                                { value: 'Building 3', label: 'Building 3' },
-                                { value: 'Building 4', label: 'Building 4' },
+                                { value: 'Building 1', label: '123 Main St. Portland, OR' },
+                                { value: 'Building 2', label: '15 University Bivd. Hartford, CT' },
+                                { value: 'Building 3', label: '6223 Syncamore Ave. Pittsburgh, PA' },
+                                { value: 'Building 4', label: '246 Blackburn Rd. Philadelphia, PA' },
                             ]}></Select>
                     </div>
                 )}

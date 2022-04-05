@@ -69,8 +69,9 @@
 
 .button-style {
     background: #ffffff;
-    /* box-sizing: border-box; */
-
+    /* width: 100%;
+    display: flex;
+    flex-direction: row; */
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
     border-radius: 4px;
 }
@@ -120,3 +121,8 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
 }
+
+/* .single-button-style {
+    position: relative;
+    left: 7%;
+} */

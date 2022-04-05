@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../../components/Header';
+import { Link } from 'react-router-dom';
 import {
     Row,
     Col,
@@ -11,6 +12,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+// import ProgressBar from './ProgressBar';
 import { Search, ChevronDown, ChevronLeft, ChevronUp, ChevronRight } from 'react-feather';
 
 import './style.css';
@@ -79,35 +81,18 @@ const BuildingTable = () => {
                             return (
                                 <tr key={index}>
                                     <th scope="row">
-                                        <a
-                                            href="#"
-                                            className="building-name"
-                                            onClick={(e) => {
-                                                window.open('/energy/building', '_parent');
-                                            }}>
-                                            {record.name}
-                                        </a>
+                                        <Link to="/energy/building/overview">
+                                            <a className="building-name">{record.name}</a>
+                                        </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td>
                                         {record.energyDensity} kWh / sq. ft.sq. ft.
                                         <br />
-                                        {/* <ProgressBar
-                                            color="danger"
-                                            progressUnit={item.energyDensity}
-                                            className="progress-bar-container"
-                                        /> */}
+                                        <progress id="file" value={72} min={50} max={100}>
+                                            32%
+                                        </progress>
                                     </td>
-                                    {/* <td>{record.energyPerChg} %</td> */}
-                                    {/* <td>
-                                        <button
-                                            className="button-success text-success font-weight-bold font-size-5"
-                                            style={{ width: '100%' }}>
-                                            <i className="uil uil-arrow-growth">
-                                                <strong>{record.energyPerChg} %</strong>
-                                            </i>
-                                        </button>
-                                    </td> */}
                                     <td>
                                         {record.energyPerChgStatus === 'up' && (
                                             <button
@@ -225,27 +210,12 @@ const CompareBuildings = () => {
                 <Col xl={12}>
                     <div style={{ marginLeft: '25px' }}>
                         <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." />
+                            <input type="text" className="search-style" placeholder="Search..." autoFocus />
                         </div>
                         <button type="button" className="btn btn-white d-inline">
-                            + Add Filter
+                            <i className="uil uil-plus mr-1"></i>Add Filter
                         </button>
-                        {/* <button type="button" className="btn btn-white btn-sm">
-                            Message
-                        </button> */}
-                        {/* <UncontrolledDropdown className="d-inline">
-                            <DropdownToggle color="primary">
-                                All Building Types
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                em divider
-                                <DropdownItem>Dropdown 1</DropdownItem>
-                                <DropdownItem>Dropdown 2</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown> */}
+
                         {/* ---------------------------------------------------------------------- */}
                         <UncontrolledDropdown className="d-inline float-right">
                             <DropdownToggle color="white">

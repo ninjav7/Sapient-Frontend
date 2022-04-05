@@ -1,14 +1,198 @@
 import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import DonutChart from '../portfolio/PortfolioDonutChart';
 import Header from '../../components/Header';
 import './style.css';
+import LineChart from '../charts/LineChart';
 import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
-import EnergyBarChart from './EnergyBarChart';
 import HeatMapChart from '../charts/HeatMapChart';
 
 const BuildingOverview = () => {
+    const [lineChartSeries, setLineChartSeries] = useState([
+        {
+            data: [
+                {
+                    x: new Date('2022-10-1').getTime(),
+                    y: 22000,
+                },
+                {
+                    x: new Date('2022-10-2').getTime(),
+                    y: 25000,
+                },
+                {
+                    x: new Date('2022-10-3').getTime(),
+                    y: 21500,
+                },
+                {
+                    x: new Date('2022-10-4').getTime(),
+                    y: 23000,
+                },
+                {
+                    x: new Date('2022-10-5').getTime(),
+                    y: 20000,
+                },
+                {
+                    x: new Date('2022-10-6').getTime(),
+                    y: 15000,
+                },
+                {
+                    x: new Date('2022-10-7').getTime(),
+                    y: 18000,
+                },
+                {
+                    x: new Date('2022-10-8').getTime(),
+                    y: 25000,
+                },
+                {
+                    x: new Date('2022-10-9').getTime(),
+                    y: 15000,
+                },
+                {
+                    x: new Date('2022-10-10').getTime(),
+                    y: 20000,
+                },
+                {
+                    x: new Date('2022-10-11').getTime(),
+                    y: 23000,
+                },
+                {
+                    x: new Date('2022-10-12').getTime(),
+                    y: 20000,
+                },
+                {
+                    x: new Date('2022-10-13').getTime(),
+                    y: 23000,
+                },
+                {
+                    x: new Date('2022-10-14').getTime(),
+                    y: 19000,
+                },
+                {
+                    x: new Date('2022-10-15').getTime(),
+                    y: 24000,
+                },
+                {
+                    x: new Date('2022-10-16').getTime(),
+                    y: 20000,
+                },
+                {
+                    x: new Date('2022-10-17').getTime(),
+                    y: 25000,
+                },
+                {
+                    x: new Date('2022-10-18').getTime(),
+                    y: 23000,
+                },
+                {
+                    x: new Date('2022-10-19').getTime(),
+                    y: 27000,
+                },
+                {
+                    x: new Date('2022-10-20').getTime(),
+                    y: 22000,
+                },
+                {
+                    x: new Date('2022-10-21').getTime(),
+                    y: 20000,
+                },
+                {
+                    x: new Date('2022-10-22').getTime(),
+                    y: 21000,
+                },
+                {
+                    x: new Date('2022-10-23').getTime(),
+                    y: 24000,
+                },
+                {
+                    x: new Date('2022-10-24').getTime(),
+                    y: 18000,
+                },
+                {
+                    x: new Date('2022-10-25').getTime(),
+                    y: 19000,
+                },
+                {
+                    x: new Date('2022-10-26').getTime(),
+                    y: 24000,
+                },
+                {
+                    x: new Date('2022-10-27').getTime(),
+                    y: 21000,
+                },
+                {
+                    x: new Date('2022-10-28').getTime(),
+                    y: 27000,
+                },
+                {
+                    x: new Date('2022-10-29').getTime(),
+                    y: 24000,
+                },
+                {
+                    x: new Date('2022-10-30').getTime(),
+                    y: 20000,
+                },
+            ],
+        },
+    ]);
+
+    const [lineChartOptions, setLineChartOptions] = useState({
+        chart: {
+            type: 'line',
+            zoom: {
+                enabled: false,
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        colors: ['#87AADE'],
+        stroke: {
+            curve: 'straight',
+        },
+        grid: {
+            row: {
+                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.5,
+            },
+        },
+        stroke: {
+            width: [2, 2],
+        },
+        plotOptions: {
+            bar: {
+                columnWidth: '20%',
+            },
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+            x: {
+                show: true,
+            },
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                formatter: function (value, timestamp, opts) {
+                    return opts.dateFormatter(new Date(timestamp), 'MMM-dd');
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                formatter: function (value) {
+                    var val = Math.abs(value);
+                    if (val >= 1000) {
+                        val = (val / 1000).toFixed(0) + ' K';
+                    }
+                    return val;
+                },
+            },
+        },
+    });
+
     const [energyConsumption, setEnergyConsumption] = useState([
         {
             equipName: 'HVAC',
@@ -92,6 +276,353 @@ const BuildingOverview = () => {
         },
     ]);
 
+    const weekdaysOptions = {
+        chart: {
+            type: 'heatmap',
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        title: {
+            text: 'Weekdays',
+            style: {
+                fontSize: '15px',
+                fontWeight: 'bold',
+                fontFamily: undefined,
+                color: '#98A2B3',
+            },
+        },
+        stroke: {
+            width: 0.7,
+        },
+        plotOptions: {
+            heatmap: {
+                // shadeIntensity: 0.5,
+                radius: 1,
+                useFillColorAsStroke: false,
+                colorScale: {
+                    ranges: [
+                        {
+                            from: 1000,
+                            to: 1999,
+                            color: '#9bb4da',
+                        },
+                        {
+                            from: 2000,
+                            to: 2999,
+                            color: '#819dc9',
+                        },
+                        {
+                            from: 3000,
+                            to: 3999,
+                            color: '#128FD9',
+                        },
+                        {
+                            from: 4000,
+                            to: 4999,
+                            color: '#F87171',
+                        },
+                        {
+                            from: 5000,
+                            to: 5999,
+                            color: '#FF0000',
+                        },
+                    ],
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                show: false,
+            },
+        },
+        xaxis: {
+            labels: {
+                show: true,
+            },
+            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
+        },
+    };
+
+    const weekdaysSeries = [
+        {
+            name: 'Weekends',
+            data: [
+                {
+                    x: '1AM',
+                    y: 1000,
+                },
+                {
+                    x: '2AM',
+                    y: 1000,
+                },
+                {
+                    x: '3AM',
+                    y: 2000,
+                },
+                {
+                    x: '4AM',
+                    y: 2000,
+                },
+                {
+                    x: '5AM',
+                    y: 4000,
+                },
+                {
+                    x: '6AM',
+                    y: 3000,
+                },
+                {
+                    x: '7AM',
+                    y: 3000,
+                },
+                {
+                    x: '8AM',
+                    y: 1000,
+                },
+                {
+                    x: '9AM',
+                    y: 2000,
+                },
+                {
+                    x: '10AM',
+                    y: 2000,
+                },
+                {
+                    x: '11AM',
+                    y: 1000,
+                },
+                {
+                    x: '12PM',
+                    y: 1000,
+                },
+                {
+                    x: '1PM',
+                    y: 2000,
+                },
+                {
+                    x: '2PM',
+                    y: 2000,
+                },
+                {
+                    x: '3PM',
+                    y: 3000,
+                },
+                {
+                    x: '4PM',
+                    y: 4000,
+                },
+                {
+                    x: '5PM',
+                    y: 4000,
+                },
+                {
+                    x: '6PM',
+                    y: 5000,
+                },
+                {
+                    x: '7PM',
+                    y: 5000,
+                },
+                {
+                    x: '8PM',
+                    y: 4000,
+                },
+                {
+                    x: '9PM',
+                    y: 4000,
+                },
+                {
+                    x: '10PM',
+                    y: 3000,
+                },
+                {
+                    x: '11PM',
+                    y: 2500,
+                },
+                {
+                    x: '12AM',
+                    y: 2000,
+                },
+            ],
+        },
+    ];
+
+    const weekdaysChartHeight = 135;
+    const weekendsChartHeight = 135;
+
+    const weekendsOptions = {
+        chart: {
+            type: 'heatmap',
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        title: {
+            text: 'Weekends',
+            style: {
+                fontSize: '15px',
+                fontWeight: 'bold',
+                fontFamily: undefined,
+                color: '#98A2B3',
+            },
+        },
+        stroke: {
+            width: 0.7,
+        },
+        plotOptions: {
+            heatmap: {
+                // shadeIntensity: 0.5,
+                radius: 1,
+                useFillColorAsStroke: false,
+                colorScale: {
+                    ranges: [
+                        {
+                            from: 1000,
+                            to: 1999,
+                            color: '#9bb4da',
+                        },
+                        {
+                            from: 2000,
+                            to: 2999,
+                            color: '#819dc9',
+                        },
+                        {
+                            from: 3000,
+                            to: 3999,
+                            color: '#128FD9',
+                        },
+                        {
+                            from: 4000,
+                            to: 4999,
+                            color: '#F87171',
+                        },
+                        {
+                            from: 5000,
+                            to: 5999,
+                            color: '#FF0000',
+                        },
+                    ],
+                },
+            },
+        },
+        yaxis: {
+            labels: {
+                show: false,
+            },
+        },
+        xaxis: {
+            labels: {
+                show: true,
+            },
+            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
+        },
+    };
+
+    const weekendsSeries = [
+        {
+            name: 'Weekends',
+            data: [
+                {
+                    x: '1AM',
+                    y: 1000,
+                },
+                {
+                    x: '2AM',
+                    y: 1000,
+                },
+                {
+                    x: '3AM',
+                    y: 2000,
+                },
+                {
+                    x: '4AM',
+                    y: 2000,
+                },
+                {
+                    x: '5AM',
+                    y: 4000,
+                },
+                {
+                    x: '6AM',
+                    y: 3000,
+                },
+                {
+                    x: '7AM',
+                    y: 3000,
+                },
+                {
+                    x: '8AM',
+                    y: 1000,
+                },
+                {
+                    x: '9AM',
+                    y: 2000,
+                },
+                {
+                    x: '10AM',
+                    y: 2000,
+                },
+                {
+                    x: '11AM',
+                    y: 1000,
+                },
+                {
+                    x: '12PM',
+                    y: 1000,
+                },
+                {
+                    x: '1PM',
+                    y: 2000,
+                },
+                {
+                    x: '2PM',
+                    y: 2000,
+                },
+                {
+                    x: '3PM',
+                    y: 3000,
+                },
+                {
+                    x: '4PM',
+                    y: 4000,
+                },
+                {
+                    x: '5PM',
+                    y: 4000,
+                },
+                {
+                    x: '6PM',
+                    y: 5000,
+                },
+                {
+                    x: '7PM',
+                    y: 5000,
+                },
+                {
+                    x: '8PM',
+                    y: 4000,
+                },
+                {
+                    x: '9PM',
+                    y: 4000,
+                },
+                {
+                    x: '10PM',
+                    y: 3000,
+                },
+                {
+                    x: '11PM',
+                    y: 2500,
+                },
+                {
+                    x: '12AM',
+                    y: 2000,
+                },
+            ],
+        },
+    ];
+
     return (
         <React.Fragment>
             <Header title="Building Overview" />
@@ -149,7 +680,7 @@ const BuildingOverview = () => {
                     </div>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
-                            <h5 className="card-title card-title-style">
+                            <h5 className="card-title card-title-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
                                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -173,20 +704,22 @@ const BuildingOverview = () => {
                                 style={{ display: 'inline-block', fontWeight: 'bold' }}>
                                 Energy Consumption by End Use
                             </h6>
-                            <a
-                                href="#"
-                                // target="_blank"
-                                rel="noopener noreferrer"
-                                className="link-primary mr-4"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}>
-                                More Details
-                            </a>
-                            <h6 className="card-subtitle custom-subtitle">Energy Totals</h6>
+                            <Link to="/energy/end-uses">
+                                <a
+                                    rel="noopener noreferrer"
+                                    className="link-primary mr-4"
+                                    style={{
+                                        display: 'inline-block',
+                                        float: 'right',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                    }}>
+                                    More Details
+                                </a>
+                            </Link>
+                            
+                            <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                            {/* <h6 className="card-subtitle custom-subtitle">Energy Totals</h6> */}
                         </Col>
                         <Col xl={6}>
                             <div className="card-body">
@@ -203,6 +736,28 @@ const BuildingOverview = () => {
                                             {energyConsumption.map((record, index) => {
                                                 return (
                                                     <tr key={index}>
+                                                        <td>
+                                                            {record.equipName === 'HVAC' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#3094B9' }}></div>
+                                                            )}
+                                                            {record.equipName === 'Lightning' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#2C4A5E' }}></div>
+                                                            )}
+                                                            {record.equipName === 'Plug' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#66D6BC' }}></div>
+                                                            )}
+                                                            {record.equipName === 'Process' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#3B8554' }}></div>
+                                                            )}
+                                                        </td>
                                                         <td className="custom-equip-style">{record.equipName}</td>
                                                         <td className="custom-usage-style muted">{record.usage}</td>
                                                         <td>
@@ -320,23 +875,23 @@ const BuildingOverview = () => {
                         <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
                             Top 3 Peak Demand Periods
                         </h6>
-                        <a
-                            href="#"
-                            // target="_blank"
-                            rel="noopener noreferrer"
-                            className="link-primary"
-                            style={{
-                                display: 'inline-block',
-                                float: 'right',
-                                textDecoration: 'none',
-                                fontWeight: 'bold',
-                            }}>
-                            More Details
-                        </a>
+                        <Link to="/energy/peak-demand">
+                            <a
+                                rel="noopener noreferrer"
+                                className="link-primary"
+                                style={{
+                                    display: 'inline-block',
+                                    float: 'right',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                }}>
+                                More Details
+                            </a>
+                        </Link>
                         <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minutes period)</h6>
                         <div className="card-group mt-2">
                             {topContributors.map((item, index) => (
-                                <div className="card peak-demand-container">
+                                <div className="card peak-demand-container mt-3">
                                     <div className="card-body">
                                         <h6 className="card-title text-muted">
                                             {item.date} & {item.time}
@@ -349,8 +904,9 @@ const BuildingOverview = () => {
                                             style={{ fontWeight: 'bold', paddingTop: '10px', color: 'black' }}>
                                             Top Contributor
                                         </p>
-                                        <table className="table table-borderless w-auto small">
-                                            {/* <thead></thead> */}
+                                        <table
+                                            className="table table-borderless w-auto small"
+                                            style={{ fontSize: '12px' }}>
                                             <tbody>
                                                 <tr>
                                                     <td>
@@ -484,22 +1040,22 @@ const BuildingOverview = () => {
                         <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
                             Hourly Average Consumption
                         </h6>
-                        <a
-                            href="#"
-                            // target="_blank"
-                            rel="noopener noreferrer"
-                            className="link-primary"
-                            style={{
-                                display: 'inline-block',
-                                float: 'right',
-                                textDecoration: 'none',
-                                fontWeight: 'bold',
-                            }}>
-                            More Details
-                        </a>
+                        <Link to="/energy/time-of-day">
+                            <a
+                                rel="noopener noreferrer"
+                                className="link-primary"
+                                style={{
+                                    display: 'inline-block',
+                                    float: 'right',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                }}>
+                                More Details
+                            </a>
+                        </Link>
                         <h6 className="card-subtitle mb-2 text-muted">Average by Hour</h6>
-                        {/* <EnergyBarChart /> */}
-                        <HeatMapChart />
+                        <HeatMapChart options={weekdaysOptions} series={weekdaysSeries} height={weekdaysChartHeight} />
+                        <HeatMapChart options={weekendsOptions} series={weekendsSeries} height={weekendsChartHeight} />
                     </div>
                 </Col>
             </Row>
@@ -509,7 +1065,8 @@ const BuildingOverview = () => {
                     <div className="card-body">
                         <h6 className="card-title">Total Energy Consumption</h6>
                         <h6 className="card-subtitle mb-2 text-muted">Totaled by Hour</h6>
-                        <EnergyLineChart />
+                        {/* <EnergyLineChart /> */}
+                        <LineChart options={lineChartOptions} series={lineChartSeries} />
                     </div>
                 </Col>
             </Row>

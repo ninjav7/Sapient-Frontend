@@ -102,3 +102,10 @@
 .peak-demand-container:hover {
     background: rgb(224, 222, 222);
 }
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+}
