@@ -106,3 +106,64 @@
 .grey-out {
     color: rgb(179, 176, 176);
 }
+
+.icon-bg-styling {
+    background: #12b76a;
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+}
+
+.icon-styling {
+    color: white;
+    margin-left: 4px;
+}
+
+.panel-name {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    color: #2955e7;
+}
+
+.gateway-content-style {
+    margin-left: 40px;
+    font-weight: 700;
+}
+
+.layout-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 10px;
+    border: solid rgb(159, 159, 159);
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+.container-heading {
+    height: 40px;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    background: #f3f4f7;
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.container-content-group {
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.container-single-content:hover {
+    background: #f3f4f7;
+}
+
+.container-single-content {
+    padding-top: 5px;
+    height: 40px;
+    align-content: center;
+}

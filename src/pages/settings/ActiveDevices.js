@@ -13,37 +13,25 @@ import {
 import { ChevronDown } from 'react-feather';
 import './style.css';
 
-const BuildingTable = () => {
+const ActiveDevicesTable = () => {
     const records = [
         {
             status: 'available',
-            name: '-',
-            equipType: 'Desktop PC',
+            identifierMAC: 'D8:07:B6:88:D8:3B',
+            model: 'KP115',
             location: 'Floor 1 > 252',
-            tags: 'FINANCE',
-            sensorNo: 2,
-            lastData: '5 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
+            sensors: '1/1',
+            firmwareVersion: 'v1.1',
+            hardwareVersion: 'v1',
         },
         {
             status: 'available',
-            name: '-',
-            equipType: 'Refrigerator',
-            location: 'Floor 1 > W Kitchen',
-            tags: 'None',
-            sensorNo: '2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-        {
-            status: 'available',
-            name: 'AHU 1',
-            equipType: 'AHU',
-            location: 'Floor 1 > Mech.',
-            tags: 'None',
-            sensorNo: '1,2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
+            identifierMAC: 'D8:07:B6:88:D9:4A',
+            model: 'HS300',
+            location: 'Floor 1 > 253',
+            sensors: '2/6',
+            firmwareVersion: 'v1.2',
+            hardwareVersion: 'v2',
         },
     ];
 
@@ -54,13 +42,12 @@ const BuildingTable = () => {
                     <thead>
                         <tr>
                             <th>Status</th>
-                            <th>Name</th>
-                            <th>Equipment Type</th>
+                            <th>Identifier (MAC)</th>
+                            <th>Model</th>
                             <th>Location</th>
-                            <th>Tags</th>
-                            <th>Sensor Number</th>
-                            <th>Last Data</th>
-                            <th>Device ID</th>
+                            <th>Sensors</th>
+                            <th>Firmware Version</th>
+                            <th>Hardware Version</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -74,19 +61,12 @@ const BuildingTable = () => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold">{record.name}</td>
-                                    <td className="font-weight-bold">{record.equipType}</td>
+                                    <td className="font-weight-bold panel-name">{record.identifierMAC}</td>
+                                    <td>{record.model}</td>
                                     <td>{record.location}</td>
-                                    <td>
-                                        {
-                                            <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                {record.tags}
-                                            </div>
-                                        }
-                                    </td>
-                                    <td>{record.sensorNo}</td>
-                                    <td>{record.lastData}</td>
-                                    <td className="font-weight-bold">{record.deviceId}</td>
+                                    <td>{record.sensors}</td>
+                                    <td>{record.firmwareVersion}</td>
+                                    <td>{record.hardwareVersion}</td>
                                 </tr>
                             );
                         })}
@@ -97,19 +77,24 @@ const BuildingTable = () => {
     );
 };
 
-const Equipment = () => {
+const ActiveDevices = () => {
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Equipment
+                        Active Devices
                     </span>
 
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div className="float-right ml-2">
+                            <button type="button" className="btn btn-md btn-light font-weight-bold">
+                                Attach Kasa Account
+                            </button>
+                        </div>
+                        <div className="float-right ml-2">
                             <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                <i className="uil uil-plus mr-1"></i>Add Equipment
+                                <i className="uil uil-plus mr-1"></i>Add Device
                             </button>
                         </div>
                     </div>
@@ -122,28 +107,6 @@ const Equipment = () => {
                         <div style={{ display: 'inline-block', marginRight: '10px' }}>
                             <input type="text" className="search-style" placeholder="Search..." autoFocus />
                         </div>
-
-                        {/* <div class="input-group">
-                            <input
-                                class="form-control border-end-0 border rounded-pill"
-                                type="text"
-                                value="search"
-                                id="example-search-input"
-                            />
-                            <span class="input-group-append">
-                                <button
-                                    class="btn btn-outline-secondary bg-white border-start-0 border rounded-pill ms-n3"
-                                    type="button">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </span>
-                        </div> */}
-
-                        {/* <div className="input-group" style={{ display: 'inline-block' }}>
-                            <input type="text" className="form-control search-input" placeholder="Search..." />
-                            <span className="uil uil-search icon-search"></span>
-                            <div className="input-group-append"></div>
-                        </div> */}
 
                         <div className="btn-group" role="group" aria-label="Basic example">
                             <div>
@@ -185,11 +148,11 @@ const Equipment = () => {
 
             <Row>
                 <Col lg={12}>
-                    <BuildingTable />
+                    <ActiveDevicesTable />
                 </Col>
             </Row>
         </React.Fragment>
     );
 };
 
-export default Equipment;
+export default ActiveDevices;

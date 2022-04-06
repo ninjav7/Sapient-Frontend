@@ -8,7 +8,12 @@ import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 // settings
 import General from '../pages/settings/General';
 import UtilityBills from '../pages/settings/UtilityBills';
+import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
+import Panels from '../pages/settings/Panels';
+import ActiveDevices from '../pages/settings/ActiveDevices';
+import PassiveDevices from '../pages/settings/PassiveDevices';
+import Gateways from '../pages/settings/Gateways';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -442,9 +447,39 @@ const settingsRoutes = {
             route: PrivateRoute,
         },
         {
+            path: '/settings/layout',
+            name: 'Layout',
+            component: Layout,
+            route: PrivateRoute,
+        },
+        {
             path: '/settings/equipment',
             name: 'Equipment',
             component: Equipment,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/panels',
+            name: 'Panels',
+            component: Panels,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/active-devices',
+            name: 'Active Devices',
+            component: ActiveDevices,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/passive-devices',
+            name: 'Passive Devices',
+            component: PassiveDevices,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/gateways',
+            name: 'Gateways',
+            component: Gateways,
             route: PrivateRoute,
         },
     ],
