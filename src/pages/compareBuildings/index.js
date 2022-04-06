@@ -12,8 +12,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-// import ProgressBar from './ProgressBar';
-import { Search, ChevronDown, ChevronLeft, ChevronUp, ChevronRight } from 'react-feather';
+import { ChevronDown } from 'react-feather';
 
 import './style.css';
 
@@ -225,9 +224,6 @@ const CompareBuildings = () => {
                                 </i>
                             </DropdownToggle>
                             <DropdownMenu>
-                                {/* <DropdownItem header>Dropdown 1</DropdownItem>
-                                    <DropdownItem header>Dropdown 2</DropdownItem> */}
-                                {/* <DropdownItem divider /> */}
                                 <DropdownItem>Dropdown 1</DropdownItem>
                                 <DropdownItem>Dropdown 2</DropdownItem>
                             </DropdownMenu>
