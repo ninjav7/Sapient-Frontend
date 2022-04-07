@@ -51,7 +51,11 @@ const GatewaysTable = () => {
                         {records.map((record, index) => {
                             return (
                                 <tr key={index}>
-                                    <td className="font-weight-bold">{record.status}</td>
+                                    <td>
+                                        <span className="badge badge-success" style={{ backgroundColor: '#12b76a' }}>
+                                            {record.status}
+                                        </span>
+                                    </td>
                                     <td className="font-weight-bold panel-name">{record.macAddress}</td>
                                     <td className="font-weight-bold">{record.model}</td>
                                     <td className="font-weight-bold">{record.location}</td>

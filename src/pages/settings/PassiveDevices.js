@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Row,
     Col,
@@ -9,7 +9,12 @@ import {
     DropdownMenu,
     DropdownToggle,
     DropdownItem,
+    Button,
+    Input,
 } from 'reactstrap';
+
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
 import { ChevronDown } from 'react-feather';
 import './style.css';
 
@@ -75,6 +80,11 @@ const PassiveDevicesTable = () => {
 };
 
 const PassiveDevices = () => {
+    // Modal states
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -85,7 +95,12 @@ const PassiveDevices = () => {
 
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={() => {
+                                    handleShow();
+                                }}>
                                 <i className="uil uil-plus mr-1"></i>Add Passive Device
                             </button>
                         </div>
@@ -143,6 +158,51 @@ const PassiveDevices = () => {
                     <PassiveDevicesTable />
                 </Col>
             </Row>
+
+            <Modal show={show} onHide={handleClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Edit Utility Bill</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Identifier</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Identifier"
+                                className="font-weight-bold"
+                                autoFocus
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Model</Form.Label>
+                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
+                                <option selected>Open this select menu</option>
+                                <option>Office Building</option>
+                                <option>Residential Building</option>
+                            </Input>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Location</Form.Label>
+                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
+                                <option selected>Select Location</option>
+                                <option>Office Building</option>
+                                <option>Residential Building</option>
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleClose}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };

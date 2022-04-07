@@ -238,20 +238,18 @@
 }
 
 .custom-navbar {
-    position: relative;
-    /* height: 45px; */
-    left: 0px;
-    right: 0px;
-    top: 0px;
+    margin: 0px !important;
+    padding: 0px !important;
     background: #141924 !important;
 }
 
 .custom-navbar-fonts {
     font-style: normal;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 12px;
     line-height: 22px;
     color: #ffffff !important;
+    background: green !important;
 }
 
 .custom-equip-style {
@@ -259,12 +257,7 @@
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
-    /* identical to box height, or 143% */
-
     letter-spacing: 0.44px;
-
-    /* text/dark */
-
     color: #1f2937;
 }
 
@@ -273,12 +266,7 @@
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
-    /* identical to box height, or 143% */
-
     letter-spacing: 0.44px;
-
-    /* text/medium */
-
     color: #4b5563;
 }
 

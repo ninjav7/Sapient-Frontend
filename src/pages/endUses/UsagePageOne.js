@@ -6,7 +6,7 @@ import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import './style.css';
 
-const UsagePageOne = (props) => {
+const UsagePageOne = ({ title = 'HVAC' }) => {
     const [endUsage, seteEndUsage] = useState([
         {
             title: 'AHUs',
@@ -142,7 +142,7 @@ const UsagePageOne = (props) => {
 
     return (
         <React.Fragment>
-            <Header title="HVAC" />
+            <Header title={title} />
 
             <Row>
                 <div className="card-group button-style mt-2" style={{ marginLeft: '29px' }}>
