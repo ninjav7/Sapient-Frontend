@@ -10,8 +10,9 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import { ChevronDown } from 'react-feather';
-import './style.css';
+import '../style.css';
 
 const PanelsTable = () => {
     const records = [
@@ -54,8 +55,11 @@ const PanelsTable = () => {
                             return (
                                 <tr key={index}>
                                     <td className="font-weight-bold panel-name">
-                                        <a href="#">{record.name}</a>
+                                        <Link to="/settings/editPanel">
+                                            <a href="#">{record.name}</a>
+                                        </Link>
                                     </td>
+
                                     <td className="font-weight-bold">{record.location}</td>
                                     <td className="font-weight-bold">{record.breakers}</td>
                                     {record.parent === '' ? (
@@ -84,9 +88,11 @@ const Panels = () => {
 
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                <i className="uil uil-plus mr-1"></i>Add Panel
-                            </button>
+                            <Link to="/settings/createPanel">
+                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                                    <i className="uil uil-plus mr-1"></i>Add Panel
+                                </button>
+                            </Link>
                         </div>
                     </div>
                 </Col>

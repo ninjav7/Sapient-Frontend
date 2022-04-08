@@ -18,152 +18,180 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown } from 'react-feather';
 import './style.css';
+import { TagsInput } from 'react-tag-input-component';
 
-// const EquipmentModal = ({ show, handleClose }) => {
-//     return (
-//         <Modal show={show} onHide={handleClose} dialogClassName="modal-container-style" centered>
-//             <Modal.Header closeButton>
-//                 <Row>
-//                     <Col lg={12}>
-//                         <h6>{`Floor 1 > 252 > Desktop PC`}</h6>
-//                         <span className="heading-style">Desktop PC</span>
-//                         <div className="mt-2 modal-tabs-style">
-//                             <span className="mr-3">Metrics</span>
-//                             <span className="mr-3 tab-styling">Configure</span>
-//                             <span className="mr-3">History</span>
-//                         </div>
-//                     </Col>
-//                 </Row>
-//             </Modal.Header>
-//             <Modal.Body>
-//                 <Row>
-//                     <Col lg={8}>
-//                         <Row>
-//                             <Col lg={12}>
-//                                 <h4>Equipment Details</h4>
-//                             </Col>
-//                         </Row>
-//                         <Row>
-//                             <Col lg={6}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Equipment Name</Form.Label>
-//                                     <Form.Control
-//                                         type="text"
-//                                         placeholder="Enter Equipment Name"
-//                                         className="font-weight-bold"
-//                                         defaultValue="Name"
-//                                     />
-//                                 </Form.Group>
-//                             </Col>
-//                             <Col lg={6}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Equipment Type</Form.Label>
-//                                     <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-//                                         <option selected>Desktop PC</option>
-//                                         <option>Refigerator</option>
-//                                     </Input>
-//                                 </Form.Group>
-//                             </Col>
-//                         </Row>
-//                         <Row>
-//                             <Col lg={12}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Equipment Location</Form.Label>
-//                                     <Form.Control
-//                                         type="text"
-//                                         placeholder="Enter Identifier"
-//                                         className="font-weight-bold"
-//                                         value="Floor 1, 252"
-//                                     />
-//                                     <Form.Label>Location this equipment is installed in.</Form.Label>
-//                                 </Form.Group>
-//                             </Col>
-//                         </Row>
-//                         <Row>
-//                             <Col lg={12}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Applied Rule</Form.Label>
-//                                     <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-//                                         <option selected>Desktop PC</option>
-//                                         <option>Refigerator</option>
-//                                     </Input>
-//                                     <Form.Label>
-//                                         The rule applied to this equipment to control when it is on.
-//                                     </Form.Label>
-//                                 </Form.Group>
-//                             </Col>
-//                         </Row>
-//                         <Row>
-//                             <Col lg={12}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Tags</Form.Label>
-//                                     <Input type="text" placeholder="Add Tags"></Input>
-//                                     {/* <input
-//                                     type="text"
-//                                     value="Amsterdam,Washington,Sydney,Beijing,Cairo"
-//                                     data-role="tagsinput"
-//                                     placeholder="Add tags"
-//                                 /> */}
-//                                 </Form.Group>
-//                             </Col>
-//                         </Row>
-//                         <Row>
-//                             <Col lg={12}>
-//                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-//                                     <Form.Label>Notes</Form.Label>
-//                                     <Input
-//                                         type="textarea"
-//                                         name="text"
-//                                         id="exampleText"
-//                                         rows="3"
-//                                         placeholder="Enter a Note..."
-//                                     />
-//                                 </Form.Group>
-//                             </Col>
-//                         </Row>
-//                     </Col>
-//                     <Col lg={4}>
-//                         <div className="modal-right-container">
-//                             <div className="modal-right-pic"></div>
-//                             <div className="modal-right-card mt-2">
-//                                 <span className="modal-right-card-title">Power Strip Socket 2</span>
-//                                 <button type="button" class="btn btn-light btn-md font-weight-bold float-right mr-2">
-//                                     View Devices
-//                                 </button>
-//                             </div>
-//                             <div className="mt-4 modal-right-group">
-//                                 <FormGroup>
-//                                     <div className="single-line-style">
-//                                         <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-//                                             MAC Address
-//                                         </h6>
-//                                         <h6 className="card-title">AA:AA:AA:AA:AA:AA:AA</h6>
-//                                     </div>
-//                                 </FormGroup>
-//                                 <FormGroup>
-//                                     <div className="single-line-style">
-//                                         <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-//                                             Device type
-//                                         </h6>
-//                                         <h6 className="card-title">HS300</h6>
-//                                     </div>
-//                                 </FormGroup>
-//                             </div>
-//                             <FormGroup>
-//                                 <div className="single-line-style">
-//                                     <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-//                                         Installed at
-//                                     </h6>
-//                                     <h6 className="card-title">{`Floor 1 -> Room 253`}</h6>
-//                                 </div>
-//                             </FormGroup>
-//                         </div>
-//                     </Col>
-//                 </Row>
-//             </Modal.Body>
-//         </Modal>
-//     );
-// };
+const ModalEquipment = ({ show, equipData, close }) => {
+    return (
+        <>
+            {show ? (
+                <Modal show={show} onHide={close} dialogClassName="modal-container-style" centered>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={12}>
+                                <h6 className="text-muted">{`Floor 1 > 252 > Desktop PC`}</h6>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={10}>
+                                <div>
+                                    <span className="heading-style">{equipData.equipType}</span>
+                                </div>
+                            </Col>
+                            <Col lg={2}>
+                                <div className="float-right">
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
+                                        Turn Off
+                                    </button>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={12}>
+                                <div className="mt-2 modal-tabs-style">
+                                    <span className="mr-3">Metrics</span>
+                                    <span className="mr-3 tab-styling">Configure</span>
+                                    <span className="mr-3">History</span>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={8}>
+                                <Row>
+                                    <Col lg={12}>
+                                        <h4>Equipment Details</h4>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={6}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Name</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Enter Equipment Name"
+                                                className="font-weight-bold"
+                                                defaultValue="Name"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={6}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Type</Form.Label>
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold">
+                                                <option selected>Desktop PC</option>
+                                                <option>Refigerator</option>
+                                            </Input>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Location</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Enter Identifier"
+                                                className="font-weight-bold"
+                                                value="Floor 1, 252"
+                                            />
+                                            <Form.Label>Location this equipment is installed in.</Form.Label>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Applied Rule</Form.Label>
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold">
+                                                <option selected>Desktop PC</option>
+                                                <option>Refigerator</option>
+                                            </Input>
+                                            <Form.Label>
+                                                The rule applied to this equipment to control when it is on.
+                                            </Form.Label>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        {/* <TagsInput
+                                            value={selected}
+                                            onChange={setSelected}
+                                            name="fruits"
+                                            placeHolder="enter fruits"
+                                        /> */}
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Notes</Form.Label>
+                                            <Input
+                                                type="textarea"
+                                                name="text"
+                                                id="exampleText"
+                                                rows="3"
+                                                placeholder="Enter a Note..."
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col lg={4}>
+                                <div className="modal-right-container">
+                                    <div className="modal-right-pic"></div>
+                                    <div className="modal-right-card mt-2">
+                                        <span className="modal-right-card-title">Power Strip Socket 2</span>
+                                        <button
+                                            type="button"
+                                            class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                            View Devices
+                                        </button>
+                                    </div>
+                                    <div className="mt-4 modal-right-group">
+                                        <FormGroup>
+                                            <div className="single-line-style">
+                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    MAC Address
+                                                </h6>
+                                                <h6 className="card-title">AA:AA:AA:AA:AA:AA:AA</h6>
+                                            </div>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <div className="single-line-style">
+                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    Device type
+                                                </h6>
+                                                <h6 className="card-title">HS300</h6>
+                                            </div>
+                                        </FormGroup>
+                                    </div>
+                                    <FormGroup>
+                                        <div className="single-line-style">
+                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                Installed at
+                                            </h6>
+                                            <h6 className="card-title">{`Floor 1 -> Room 253`}</h6>
+                                        </div>
+                                    </FormGroup>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                </Modal>
+            ) : null}
+        </>
+    );
+};
 
 const BuildingTable = () => {
     const records = [
@@ -199,9 +227,11 @@ const BuildingTable = () => {
         },
     ];
 
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const [modal, setModal] = useState(false);
+    const Toggle = () => setModal(!modal);
+    const [equipData, setEquipData] = useState(null);
+
+    const [selected, setSelected] = useState(['papaya']);
 
     return (
         <>
@@ -220,13 +250,15 @@ const BuildingTable = () => {
                                 <th>Device ID</th>
                             </tr>
                         </thead>
-                        <tbody
-                            onClick={() => {
-                                handleShow();
-                            }}>
+                        <tbody>
                             {records.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr
+                                        key={index}
+                                        onClick={() => {
+                                            setEquipData(record);
+                                            Toggle();
+                                        }}>
                                         <td className="text-center">
                                             <div>
                                                 {record.status === 'available' && (
@@ -256,154 +288,9 @@ const BuildingTable = () => {
                     </Table>
                 </CardBody>
             </Card>
-
-            <Modal show={show} onHide={handleClose} dialogClassName="modal-container-style" centered>
-                <Modal.Header>
-                    <Row>
-                        <Col lg={12}>
-                            <h6>{`Floor 1 > 252 > Desktop PC`}</h6>
-                            <span className="heading-style">Desktop PC</span>
-                            <div className="mt-2 modal-tabs-style">
-                                <span className="mr-3">Metrics</span>
-                                <span className="mr-3 tab-styling">Configure</span>
-                                <span className="mr-3">History</span>
-                            </div>
-                        </Col>
-                    </Row>
-                </Modal.Header>
-                <Modal.Body>
-                    <Row>
-                        <Col lg={8}>
-                            <Row>
-                                <Col lg={12}>
-                                    <h4>Equipment Details</h4>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={6}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Equipment Name</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Enter Equipment Name"
-                                            className="font-weight-bold"
-                                            defaultValue="Name"
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col lg={6}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Equipment Type</Form.Label>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            className="font-weight-bold">
-                                            <option selected>Desktop PC</option>
-                                            <option>Refigerator</option>
-                                        </Input>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Equipment Location</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Enter Identifier"
-                                            className="font-weight-bold"
-                                            value="Floor 1, 252"
-                                        />
-                                        <Form.Label>Location this equipment is installed in.</Form.Label>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Applied Rule</Form.Label>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            className="font-weight-bold">
-                                            <option selected>Desktop PC</option>
-                                            <option>Refigerator</option>
-                                        </Input>
-                                        <Form.Label>
-                                            The rule applied to this equipment to control when it is on.
-                                        </Form.Label>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Tags</Form.Label>
-                                        <Input type="text" placeholder="Add Tags"></Input>
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Notes</Form.Label>
-                                        <Input
-                                            type="textarea"
-                                            name="text"
-                                            id="exampleText"
-                                            rows="3"
-                                            placeholder="Enter a Note..."
-                                        />
-                                    </Form.Group>
-                                </Col>
-                            </Row>
-                        </Col>
-                        <Col lg={4}>
-                            <div className="modal-right-container">
-                                <div className="modal-right-pic"></div>
-                                <div className="modal-right-card mt-2">
-                                    <span className="modal-right-card-title">Power Strip Socket 2</span>
-                                    <button
-                                        type="button"
-                                        class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                        View Devices
-                                    </button>
-                                </div>
-                                <div className="mt-4 modal-right-group">
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                MAC Address
-                                            </h6>
-                                            <h6 className="card-title">AA:AA:AA:AA:AA:AA:AA</h6>
-                                        </div>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                Device type
-                                            </h6>
-                                            <h6 className="card-title">HS300</h6>
-                                        </div>
-                                    </FormGroup>
-                                </div>
-                                <FormGroup>
-                                    <div className="single-line-style">
-                                        <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                            Installed at
-                                        </h6>
-                                        <h6 className="card-title">{`Floor 1 -> Room 253`}</h6>
-                                    </div>
-                                </FormGroup>
-                            </div>
-                        </Col>
-                    </Row>
-                </Modal.Body>
-            </Modal>
-
-            {/* <EquipmentModal show={show} onHide={handleClose} /> */}
+            <div>
+                <ModalEquipment show={modal} equipData={equipData} close={Toggle} />
+            </div>
         </>
     );
 };

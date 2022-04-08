@@ -10,7 +10,9 @@ import General from '../pages/settings/General';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
-import Panels from '../pages/settings/Panels';
+import Panels from '../pages/settings/panels/Panels';
+import CreatePanel from '../pages/settings/panels/CreatePanel';
+import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/ActiveDevices';
 import PassiveDevices from '../pages/settings/PassiveDevices';
 import Gateways from '../pages/settings/Gateways';
@@ -462,6 +464,18 @@ const settingsRoutes = {
             path: '/settings/panels',
             name: 'Panels',
             component: Panels,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/createPanel',
+            name: 'Create Panel',
+            component: CreatePanel,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/editPanel',
+            name: 'Edit Panel',
+            component: EditPanel,
             route: PrivateRoute,
         },
         {

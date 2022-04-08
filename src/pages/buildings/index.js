@@ -717,9 +717,8 @@ const BuildingOverview = () => {
                                     More Details
                                 </a>
                             </Link>
-                            
+
                             <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
-                            {/* <h6 className="card-subtitle custom-subtitle">Energy Totals</h6> */}
                         </Col>
                         <Col xl={6}>
                             <div className="card-body">

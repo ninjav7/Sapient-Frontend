@@ -159,7 +159,7 @@ const Layout = () => {
                                 {floors.map((floor) => (
                                     <div className="container-single-content mr-4">
                                         <span>Floor {floor.number}</span>
-                                        <span class="badge badge-light font-weight-bold float-right">
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
                                             {floor.label}
                                         </span>
                                     </div>
@@ -179,7 +179,7 @@ const Layout = () => {
                                 {floor1.map((floor) => (
                                     <div className="container-single-content mr-4">
                                         <span>{floor.area}</span>
-                                        <span class="badge badge-light font-weight-bold float-right">
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
                                             {floor.label}
                                         </span>
                                     </div>
@@ -199,7 +199,7 @@ const Layout = () => {
                                 {mainArea.map((record) => (
                                     <div className="container-single-content mr-4">
                                         <span>{record.name}</span>
-                                        <span class="badge badge-light font-weight-bold float-right">
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
                                             {record.label}
                                         </span>
                                     </div>
