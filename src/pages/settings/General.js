@@ -1,6 +1,7 @@
 import React from 'react';
 import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
 import Flatpickr from 'react-flatpickr';
+import { servicePost } from '../../helpers/api';
 import './style.css';
 
 const General = () => {

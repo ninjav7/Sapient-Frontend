@@ -89,6 +89,11 @@
     margin-bottom: 0px;
 }
 
+.header-widget-styling {
+    color: black !important;
+    font-weight: bold !important;
+}
+
 .custom-title {
     font-style: normal;
     font-weight: 700;

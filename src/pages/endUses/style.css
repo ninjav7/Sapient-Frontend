@@ -122,7 +122,9 @@
     border-radius: 10px;
 }
 
-/* .single-button-style {
-    position: relative;
-    left: 7%;
-} */
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+}

@@ -32,6 +32,7 @@
     "react-bootstrap-table2-toolkit": "^2.1.0",
     "react-chartjs-2": "^4.0.1",
     "react-cookie": "^4.0.1",
+    "react-datepicker": "^4.7.0",
     "react-device-detect": "^1.9.9",
     "react-dom": "^16.9.0",
     "react-draft-wysiwyg": "^1.13.2",

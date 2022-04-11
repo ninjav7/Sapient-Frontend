@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
@@ -11,6 +13,8 @@ const Header = (props) => {
     };
 
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
 
     return (
         <React.Fragment>
@@ -46,7 +50,10 @@ const Header = (props) => {
                     )}
 
                     {props.title !== 'Compare Buildings' && (
-                        <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
+                        <div
+                            className="btn-group custom-button-group header-widget-styling"
+                            role="group"
+                            aria-label="Basic example">
                             <div>
                                 <Input
                                     type="select"
@@ -61,6 +68,19 @@ const Header = (props) => {
                                 </Input>
                             </div>
                             <div>
+                                <DatePicker
+                                    selectsRange={true}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    onChange={(update) => {
+                                        setDateRange(update);
+                                    }}
+                                    dateFormat="MMMM d"
+                                    className="select-button form-control form-control-md font-weight-bold"
+                                    placeholderText="Select Date Range"
+                                />
+                            </div>
+                            {/* <div>
                                 <Input
                                     type="week"
                                     name="week"
@@ -69,7 +89,7 @@ const Header = (props) => {
                                     style={{ color: 'black', fontWeight: 'bold' }}
                                     className="select-button form-control form-control-md"
                                 />
-                            </div>
+                            </div> */}
                             {props.title !== 'Portfolio Overview' && (
                                 <div className="float-right ml-2">
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
