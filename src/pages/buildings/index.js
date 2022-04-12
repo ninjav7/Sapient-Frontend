@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../portfolio/PortfolioDonutChart';
@@ -8,8 +8,227 @@ import LineChart from '../charts/LineChart';
 import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
 import HeatMapChart from '../charts/HeatMapChart';
-
+import axios from 'axios';
+import {
+    BaseUrl,
+    builidingAlerts,
+    builidingEquipments,
+    builidingHourly,
+    builidingOverview,
+    builidingPeak,
+    portfolioEndUser,
+} from '../../services/Network';
+import { percentageHandler } from '../../utils/helper';
 const BuildingOverview = () => {
+    const [overview, setOverview] = useState({
+        total_building: 0,
+        portfolio_rank: '10 of 50',
+        total_consumption: {
+            now: 0,
+            old: 0,
+        },
+        average_energy_density: {
+            now: 0,
+            old: 0,
+        },
+        yearly_electric_eui: {
+            now: 0,
+            old: 0,
+        },
+    });
+    // const [buildingAlert, setBuildingAlerts] = useState([
+    //     {
+    //         type: 'string',
+    //         building_name: 'New Building Peak',
+    //         building_address: 'address',
+    //         trend: 'string',
+    //         last_known_value: '100',
+    //         current_value: '10',
+    //         message: 'test',
+    //         due_message: '10',
+    //         created_at: 'Today',
+    //     },
+    //     {
+    //         type: 'type2',
+    //         building_name: 'Energy trend Upward',
+    //         building_address: 'address',
+    //         trend: 'string',
+    //         last_known_value: '100',
+    //         current_value: '10',
+    //         message: 'test',
+    //         due_message: '10',
+    //         created_at: 'Today',
+    //     },
+    // ]);
+
+    const [buildingAlert, setBuildingAlerts] = useState([]);
+
+    const [buildingPeak, setBuildingPeak] = useState([
+        {
+            type: 'string',
+            building_name: 'New Building Peak',
+            building_address: 'address',
+            trend: 'string',
+            last_known_value: '100',
+            current_value: '10',
+            message: 'test',
+            due_message: '10',
+            created_at: 'Today',
+        },
+        {
+            type: 'type2',
+            building_name: 'Energy trend Upward',
+            building_address: 'address',
+            trend: 'string',
+            last_known_value: '100',
+            current_value: '10',
+            message: 'test',
+            due_message: '10',
+            created_at: 'Today',
+        },
+    ]);
+
+    const [buildingsEnergyConsume, setbuildingsEnergyConsume] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingOverview}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setOverview(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(
+                `${BaseUrl}${portfolioEndUser}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEnergyConsumption(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingAlerts}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setBuildingAlerts(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
+    // peaks api call
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}&limit=${2}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingPeak}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopContributors(res.data);
+                console.log(res.data);
+            });
+    }, []);
+    // builidingEquipments
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingEquipments}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopEnergyConsumption(res.data[0].top_contributors);
+                console.log(res.data);
+            });
+    }, []);
+    // builidingHourly
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}&aggregate=${'hi'}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingHourly}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                const data = res.data.map((el) => {
+                    return {
+                        x: el.energy_consumption,
+                        y: el.timestamp,
+                    };
+                });
+                const arr = [
+                    {
+                        data: data,
+                    },
+                ];
+                console.log(res.data);
+                console.log(arr);
+                // setLineChartSeries(arr);
+            });
+    }, []);
+
     const [lineChartSeries, setLineChartSeries] = useState([
         {
             data: [
@@ -195,84 +414,87 @@ const BuildingOverview = () => {
 
     const [energyConsumption, setEnergyConsumption] = useState([
         {
-            equipName: 'HVAC',
-            usage: '12,553 kWh',
-            percentage: 22,
+            device: 'HVAC',
+            energy_consumption: {
+                now: 8000,
+                old: 100,
+            },
         },
         {
-            equipName: 'Lightning',
-            usage: '11,553 kWh',
-            percentage: 22,
+            device: 'HVAC',
+            energy_consumption: {
+                now: 1000,
+                old: 100,
+            },
         },
         {
-            equipName: 'Plug',
-            usage: '11,553 kWh',
-            percentage: 22,
+            device: 'HVAC',
+            energy_consumption: {
+                now: 1000,
+                old: 100,
+            },
         },
         {
-            equipName: 'Process',
-            usage: '2,333 kWh',
-            percentage: 22,
+            device: 'HVAC',
+            energy_consumption: {
+                now: 1000,
+                old: 100,
+            },
         },
     ]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
-            equipment: 'AHU 1',
-            power: 25.3,
-            change: 22,
-            status: 'up',
+            equipment_id: 0,
+            equipment_name: 'AHU 1',
+            energy_consumption: {
+                now: 25.3,
+                old: 20,
+            },
         },
         {
-            equipment: 'AHU 2',
-            power: 21.3,
-            change: 3,
-            status: 'down',
+            equipment_id: 1,
+            equipment_name: 'AHU 2',
+            energy_consumption: {
+                now: 75.3,
+                old: 20,
+            },
         },
         {
-            equipment: 'RTU 1',
-            power: 2.3,
-            change: 6,
-            status: 'normal',
+            equipment_id: 2,
+            equipment_name: 'AHU 3',
+            energy_consumption: {
+                now: 89.3,
+                old: 20,
+            },
         },
         {
-            equipment: 'Front RTU',
-            power: 25.3,
-            change: 2,
-            status: 'down',
+            equipment_id: 3,
+            equipment_name: 'AHU 4',
+            energy_consumption: {
+                now: 100.3,
+                old: 20,
+            },
         },
     ]);
 
     const [topContributors, setTopContributors] = useState([
         {
-            date: 'March 3rd',
-            time: '3:20 PM',
-            power: 225.3,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 15.3,
-                compressor: 0.2,
+            timeRange: {
+                frm: 'yyy-mm-dd',
+                to: 'yyy-mm-dd',
             },
-        },
-        {
-            date: 'April 3rd',
-            time: '4:20 PM',
-            power: 219.2,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 0.4,
-                compressor: 0.2,
-            },
-        },
-        {
-            date: 'March 3rd',
-            time: '3:20 PM',
-            power: 202.2,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 0.4,
-                compressor: 0.2,
-            },
+            overall_energy_consumption: 0,
+            top_contributors: [
+                {
+                    equipment_id: 0,
+                    equipment_name: 'string',
+                    energy_consumption: {
+                        now: 0,
+                        ol: 0,
+                    },
+                },
+            ],
         },
     ]);
 
@@ -633,10 +855,13 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={25441}
+                                description={overview.total_consumption.now}
                                 unit="kWh"
-                                value="5"
-                                consumptionNormal={true}
+                                value={percentageHandler(
+                                    overview.total_consumption.now,
+                                    overview.total_consumption.old
+                                )}
+                                consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
                             />
                         </div>
                     </div>
@@ -652,7 +877,10 @@ const BuildingOverview = () => {
                                 </div>
                             </h5>
                             <p className="card-text card-content-style">
-                                1 <span className="card-unit-style">&nbsp;&nbsp;of 40</span>
+                                {overview.portfolio_rank.split('of')[0]}{' '}
+                                <span className="card-unit-style">
+                                    &nbsp;&nbsp;of {overview.portfolio_rank.split('of')[1]}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -660,10 +888,15 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description="1.3"
+                                description={overview.average_energy_density.now}
                                 unit="kWh/sq.ft."
-                                value="5"
-                                consumptionNormal={true}
+                                value={percentageHandler(
+                                    overview.average_energy_density.now,
+                                    overview.average_energy_density.old
+                                )}
+                                consumptionNormal={
+                                    overview.average_energy_density.now >= overview.average_energy_density.old
+                                }
                             />
                         </div>
                     </div>
@@ -671,10 +904,13 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description="67"
+                                description={overview.yearly_electric_eui.now}
                                 unit="kBtu/ft/yr"
-                                value="6.2"
-                                consumptionNormal={false}
+                                value={percentageHandler(
+                                    overview.yearly_electric_eui.now,
+                                    overview.yearly_electric_eui.old
+                                )}
+                                consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
                             />
                         </div>
                     </div>
@@ -719,6 +955,7 @@ const BuildingOverview = () => {
                             </Link>
 
                             <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                            {/* <h6 className="card-subtitle custom-subtitle">Energy Totals</h6> */}
                         </Col>
                         <Col xl={6}>
                             <div className="card-body">
@@ -736,37 +973,62 @@ const BuildingOverview = () => {
                                                 return (
                                                     <tr key={index}>
                                                         <td>
-                                                            {record.equipName === 'HVAC' && (
+                                                            {record.device === 'HVAC' && (
                                                                 <div
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#3094B9' }}></div>
                                                             )}
-                                                            {record.equipName === 'Lightning' && (
+                                                            {record.device === 'Lightning' && (
                                                                 <div
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#2C4A5E' }}></div>
                                                             )}
-                                                            {record.equipName === 'Plug' && (
+                                                            {record.device === 'Plug' && (
                                                                 <div
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#66D6BC' }}></div>
                                                             )}
-                                                            {record.equipName === 'Process' && (
+                                                            {record.device === 'Process' && (
                                                                 <div
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#3B8554' }}></div>
                                                             )}
                                                         </td>
-                                                        <td className="custom-equip-style">{record.equipName}</td>
-                                                        <td className="custom-usage-style muted">{record.usage}</td>
+                                                        <td className="custom-equip-style">{record.device}</td>
+                                                        <td className="custom-usage-style muted">{record.device}</td>
                                                         <td>
-                                                            <button
-                                                                className="button-danger text-danger font-weight-bold font-size-5"
-                                                                style={{ width: '100%' }}>
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>{record.percentage} %</strong>
-                                                                </i>
-                                                            </button>
+                                                            {record.energy_consumption.now <
+                                                                record.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-danger text-danger font-weight-bold font-size-5"
+                                                                    style={{ width: '100%' }}>
+                                                                    <i className="uil uil-chart-down">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record.energy_consumption.now,
+                                                                                record.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                            {record.energy_consumption.now >=
+                                                                record.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-success text-success font-weight-bold font-size-5"
+                                                                    style={{ width: '100%' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record.energy_consumption.now,
+                                                                                record.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 );
@@ -800,69 +1062,31 @@ const BuildingOverview = () => {
                             </a>
                         </div>
                         <div className="card-body">
-                            <div className="card">
-                                <div className="card-body">
-                                    <h5 className="card-title" style={{ display: 'inline-block' }}>
-                                        New Building Peak
-                                    </h5>
-                                    <a
-                                        href="#"
-                                        // target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="link-primary text-muted"
-                                        style={{
-                                            display: 'inline-block',
-                                            float: 'right',
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        Today
-                                    </a>
-                                    <p className="card-text">225.3 kW 3/3/22 @ 3:20 PM</p>
-                                </div>
-                            </div>
-                            <div className="card mt-2">
-                                <div className="card-body">
-                                    <h5 className="card-title" style={{ display: 'inline-block' }}>
-                                        Energy trend Upward
-                                    </h5>
-                                    <a
-                                        href="#"
-                                        // target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="link-primary text-muted"
-                                        style={{
-                                            display: 'inline-block',
-                                            float: 'right',
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        Yesterday
-                                    </a>
-                                    <p className="card-text">+25% form last 30 days</p>
-                                </div>
-                            </div>
-                            <div className="card mt-2">
-                                <div className="card-body">
-                                    <h5 className="card-title" style={{ display: 'inline-block' }}>
-                                        Service Due Soon (AHU 1)
-                                    </h5>
-                                    <a
-                                        href="#"
-                                        // target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="link-primary text-muted"
-                                        style={{
-                                            display: 'inline-block',
-                                            float: 'right',
-                                            textDecoration: 'none',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        Tuesday
-                                    </a>
-                                    <p className="card-text">40 Run Hours in 25 Days</p>
-                                </div>
-                            </div>
+                            {buildingAlert.map((record) => {
+                                return (
+                                    <div className="card">
+                                        <div className="card-body">
+                                            <h5 className="card-title" style={{ display: 'inline-block' }}>
+                                                {record.building_name || 'NA'}
+                                            </h5>
+                                            <a
+                                                href="#"
+                                                // target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="link-primary text-muted"
+                                                style={{
+                                                    display: 'inline-block',
+                                                    float: 'right',
+                                                    textDecoration: 'none',
+                                                    fontWeight: 'bold',
+                                                }}>
+                                                {record.created_at || 'NA'}
+                                            </a>
+                                            <p className="card-text">{record.current_value || 'NA'} kW </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </Col>
@@ -893,10 +1117,16 @@ const BuildingOverview = () => {
                                 <div className="card peak-demand-container mt-3">
                                     <div className="card-body">
                                         <h6 className="card-title text-muted">
-                                            {item.date} & {item.time}
+                                            {item.timeRange.frm.slice(0, 10)} &{' '}
+                                            {new Date(item.timeRange.frm).toLocaleTimeString('en', {
+                                                timeStyle: 'short',
+                                                hour12: false,
+                                                timeZone: 'UTC',
+                                            })}
                                         </h6>
                                         <h5 className="card-title">
-                                            <span style={{ color: 'black' }}>{item.power}</span>&nbsp; kW
+                                            <span style={{ color: 'black' }}>{item.overall_energy_consumption}</span>
+                                            &nbsp; kW
                                         </h5>
                                         <p
                                             className="card-text"
@@ -909,34 +1139,22 @@ const BuildingOverview = () => {
                                             <tbody>
                                                 <tr>
                                                     <td>
-                                                        <tr>
-                                                            <div className="font-weight-bold text-dark">AHU 1</div>
-                                                        </tr>
-                                                        <tr>
-                                                            <div className="font-weight-bold text-dark">AHU 2</div>
-                                                        </tr>
-                                                        <tr>
-                                                            <div className="font-weight-bold text-dark">
-                                                                Compressor 1
-                                                            </div>
-                                                        </tr>
+                                                        {item.top_contributors.map((el) => (
+                                                            <tr>
+                                                                <div className="font-weight-bold text-dark">
+                                                                    {el.equipment_name}
+                                                                </div>
+                                                            </tr>
+                                                        ))}
                                                     </td>
                                                     <td>
-                                                        <tr>
-                                                            <div className="font-weight-bold">
-                                                                {item.contributor.ahu1} kW
-                                                            </div>
-                                                        </tr>
-                                                        <tr>
-                                                            <div className="font-weight-bold">
-                                                                {item.contributor.ahu2} kW
-                                                            </div>
-                                                        </tr>
-                                                        <tr>
-                                                            <div className="font-weight-bold">
-                                                                {item.contributor.compressor} kW
-                                                            </div>
-                                                        </tr>
+                                                        {item.top_contributors.map((el2) => (
+                                                            <tr>
+                                                                <div className="font-weight-bold">
+                                                                    {el2.energy_consumption.now} kW
+                                                                </div>
+                                                            </tr>
+                                                        ))}
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -963,12 +1181,12 @@ const BuildingOverview = () => {
                                                 <th scope="col" className="text-muted">
                                                     Power
                                                 </th>
-                                                <th scope="col" className="text-muted">
+                                                <th scope="col" className="text-muted" style={{ width: '100%' }}>
                                                     Change
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody style={{ fontSize: '12px' }}>
                                             {topEnergyConsumption.map((item, index) => (
                                                 <tr key={index}>
                                                     <td>
@@ -976,14 +1194,16 @@ const BuildingOverview = () => {
                                                             <div
                                                                 className="font-weight-bold"
                                                                 style={{ color: 'black' }}>
-                                                                {item.equipment}
+                                                                {item.equipment_name}
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div>
                                                             <div className="font-weight-bold">
-                                                                <span style={{ color: 'black' }}>{item.power}</span>
+                                                                <span style={{ color: 'black' }}>
+                                                                    {item.energy_consumption.now}
+                                                                </span>
                                                                 <span>&nbsp;kW</span>
                                                             </div>
                                                         </div>
@@ -992,30 +1212,51 @@ const BuildingOverview = () => {
                                                         <div>
                                                             {/* <div>{item.change} %</div> */}
                                                             <div>
-                                                                {item.status === 'up' && (
+                                                                {item.energy_consumption.now <
+                                                                    item.energy_consumption.old && (
                                                                     <button
                                                                         className="button-danger text-danger font-weight-bold font-size-5"
-                                                                        style={{ width: '75px' }}>
-                                                                        <i className="uil uil-arrow-growth">
-                                                                            <strong>{item.change} %</strong>
+                                                                        style={{ width: 'auto' }}>
+                                                                        <i className="uil uil-chart-down">
+                                                                            <strong>
+                                                                                {percentageHandler(
+                                                                                    item.energy_consumption.now,
+                                                                                    item.energy_consumption.old
+                                                                                )}{' '}
+                                                                                %
+                                                                            </strong>
                                                                         </i>
                                                                     </button>
                                                                 )}
-                                                                {item.status === 'down' && (
+                                                                {item.energy_consumption.now >
+                                                                    item.energy_consumption.old && (
                                                                     <button
                                                                         className="button-success text-success font-weight-bold font-size-5"
-                                                                        style={{ width: '75px' }}>
-                                                                        <i className="uil uil-chart-down">
-                                                                            <strong>{item.change} %</strong>
+                                                                        style={{ width: '100%' }}>
+                                                                        <i className="uil uil-arrow-growth">
+                                                                            <strong>
+                                                                                {percentageHandler(
+                                                                                    item.energy_consumption.now,
+                                                                                    item.energy_consumption.old
+                                                                                )}{' '}
+                                                                                %
+                                                                            </strong>
                                                                         </i>
                                                                     </button>
                                                                 )}
-                                                                {item.status === 'normal' && (
+                                                                {item.energy_consumption.now ===
+                                                                    item.energy_consumption.old && (
                                                                     <button
                                                                         className="button text-muted font-weight-bold font-size-5"
-                                                                        style={{ width: '75px', border: 'none' }}>
+                                                                        style={{ width: '100%', border: 'none' }}>
                                                                         <i className="uil uil-arrow-growth">
-                                                                            <strong>{item.change} %</strong>
+                                                                            <strong>
+                                                                                {percentageHandler(
+                                                                                    item.energy_consumption.now,
+                                                                                    item.energy_consumption.old
+                                                                                )}{' '}
+                                                                                %
+                                                                            </strong>
                                                                         </i>
                                                                     </button>
                                                                 )}

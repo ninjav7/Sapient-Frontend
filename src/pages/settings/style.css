@@ -65,7 +65,7 @@
     align-items: center;
     text-align: center;
     justify-content: center;
-    margin: 8px;
+    margin: 12px;
 }
 
 .time-style {
@@ -346,4 +346,41 @@
     font-weight: 600;
     font-size: 14px;
     color: #1d2939;
+}
+
+.time-picker-style {
+    width: 95px;
+    height: 34px;
+    padding: 7px 10px;
+    background: #ffffff;
+    border: 1px solid #d9dde2;
+    box-sizing: border-box;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+    border-radius: 6px;
+}
+
+.time-picker-style-disabled {
+    background: #f9fafb;
+    width: 95px;
+    height: 34px;
+    border: 1px solid #d9dde2;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+    border-radius: 6px;
+}
+
+.time-picker-text-style-disabled {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #667085;
+}
+
+.weekday-style {
+    width: 50px;
+    height: 22px;
+    padding: 3px 8px 4px;
+    background: #f2f4f7;
+    border-radius: 4px;
 }

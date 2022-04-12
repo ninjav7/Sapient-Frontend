@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -12,14 +12,16 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import { Search } from 'react-feather';
 
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-
+import axios from 'axios';
+import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import './style.css';
 
-const ActiveDevicesTable = () => {
+const ActiveDevicesTable = ({ activeDeviceData }) => {
     const records = [
         {
             status: 'available',
@@ -57,22 +59,27 @@ const ActiveDevicesTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {records.map((record, index) => {
+                        {activeDeviceData.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <td scope="row" className="text-center">
-                                        {record.status === 'available' && (
+                                        {record.status === 'Online' && (
+                                            <div className="icon-bg-styling">
+                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                            </div>
+                                        )}
+                                        {record.status === 'Offline' && (
                                             <div className="icon-bg-styling">
                                                 <i className="uil uil-wifi mr-1 icon-styling"></i>
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifierMAC}</td>
+                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     <td>{record.model}</td>
                                     <td>{record.location}</td>
-                                    <td>{record.sensors}</td>
-                                    <td>{record.firmwareVersion}</td>
-                                    <td>{record.hardwareVersion}</td>
+                                    <td>{record.sensor_number}</td>
+                                    <td>{record.firmware_version}</td>
+                                    <td>{record.hardware_version}</td>
                                 </tr>
                             );
                         })}
@@ -88,6 +95,23 @@ const ActiveDevices = () => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const [buildingId, setBuildingId] = useState(1);
+    const [activeDeviceData, setActiveDeviceData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(`${BaseUrl}${generalActiveDevices}/${buildingId}`, {}, { headers })
+            .then((res) => {
+                setActiveDeviceData(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
 
     return (
         <React.Fragment>
@@ -118,53 +142,63 @@ const ActiveDevices = () => {
             </Row>
 
             <Row className="mt-2">
-                <Col xl={12}>
-                    <div style={{ marginLeft: '25px' }}>
-                        <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." autoFocus />
-                        </div>
-
-                        <div className="btn-group" role="group" aria-label="Basic example">
-                            <div>
-                                <button type="button" className="btn btn-white d-inline">
-                                    All Statuses
-                                </button>
-
-                                <button type="button" className="btn btn-white d-inline">
-                                    <i className="uil uil-wifi mr-1"></i>Online
-                                </button>
-
-                                <button type="button" className="btn btn-white d-inline">
-                                    <i className="uil uil-wifi-slash mr-1"></i>Offline
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="button" className="btn btn-white d-inline ml-2">
-                            <i className="uil uil-plus mr-1"></i>Add Filter
-                        </button>
-
-                        {/* ---------------------------------------------------------------------- */}
-                        <UncontrolledDropdown className="d-inline float-right">
-                            <DropdownToggle color="white">
-                                Columns
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem>Phoenix Baker</DropdownItem>
-                                <DropdownItem>Olivia Rhye</DropdownItem>
-                                <DropdownItem>Lana Steiner</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
+                <Col xl={3}>
+                    <div class="input-group rounded ml-4">
+                        <input
+                            type="search"
+                            class="form-control rounded"
+                            placeholder="Search"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                        />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <Search className="icon-sm" />
+                        </span>
                     </div>
+                </Col>
+                <Col xl={9}>
+                    <div className="btn-group ml-2" role="group" aria-label="Basic example">
+                        <div>
+                            <button type="button" className="btn btn-white d-inline">
+                                All Statuses
+                            </button>
+
+                            <button type="button" className="btn btn-white d-inline">
+                                <i className="uil uil-wifi mr-1"></i>Online
+                            </button>
+
+                            <button type="button" className="btn btn-white d-inline">
+                                <i className="uil uil-wifi-slash mr-1"></i>Offline
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" className="btn btn-white d-inline ml-2">
+                        <i className="uil uil-plus mr-1"></i>Add Filter
+                    </button>
+
+                    {/* ---------------------------------------------------------------------- */}
+                    <UncontrolledDropdown className="d-inline float-right">
+                        <DropdownToggle color="white">
+                            Columns
+                            <i className="icon">
+                                <ChevronDown></ChevronDown>
+                            </i>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>Phoenix Baker</DropdownItem>
+                            <DropdownItem active={true} className="bg-primary">
+                                Olivia Rhye
+                            </DropdownItem>
+                            <DropdownItem>Lana Steiner</DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    <ActiveDevicesTable />
+                    <ActiveDevicesTable activeDeviceData={activeDeviceData} />
                 </Col>
             </Row>
 

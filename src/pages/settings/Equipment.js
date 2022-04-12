@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -13,10 +13,11 @@ import {
     Input,
     FormGroup,
 } from 'reactstrap';
-
+import axios from 'axios';
+import { BaseUrl, generalEquipments } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown } from 'react-feather';
+import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 
@@ -193,7 +194,7 @@ const ModalEquipment = ({ show, equipData, close }) => {
     );
 };
 
-const BuildingTable = () => {
+const BuildingTable = ({ generalEquipmentData }) => {
     const records = [
         {
             status: 'available',
@@ -251,7 +252,7 @@ const BuildingTable = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {records.map((record, index) => {
+                            {generalEquipmentData.map((record, index) => {
                                 return (
                                     <tr
                                         key={index}
@@ -261,26 +262,28 @@ const BuildingTable = () => {
                                         }}>
                                         <td className="text-center">
                                             <div>
-                                                {record.status === 'available' && (
+                                                {record.status === 'Online' && (
                                                     <div className="icon-bg-styling">
                                                         <i className="uil uil-wifi mr-1 icon-styling"></i>
                                                     </div>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="font-weight-bold">{record.name}</td>
-                                        <td className="font-weight-bold">{record.equipType}</td>
+                                        <td className="font-weight-bold">
+                                            {!(record.equipments_name === null) ? record.equipments_name : '-'}
+                                        </td>
+                                        <td className="font-weight-bold">{record.equipments_type}</td>
                                         <td>{record.location}</td>
                                         <td>
                                             {
                                                 <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                    {record.tags}
+                                                    {record.tags.length === 0 ? 'None' : record.tags[0]}
                                                 </div>
                                             }
                                         </td>
-                                        <td>{record.sensorNo}</td>
-                                        <td>{record.lastData}</td>
-                                        <td className="font-weight-bold">{record.deviceId}</td>
+                                        <td>{record.sensor_number}</td>
+                                        <td>{record.last_data}</td>
+                                        <td className="font-weight-bold">{record.device_id}</td>
                                     </tr>
                                 );
                             })}
@@ -296,6 +299,23 @@ const BuildingTable = () => {
 };
 
 const Equipment = () => {
+    const [buildingId, setBuildingId] = useState(1);
+    const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(`${BaseUrl}${generalEquipments}/${buildingId}`, {}, { headers })
+            .then((res) => {
+                setGeneralEquipmentData(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -315,79 +335,65 @@ const Equipment = () => {
             </Row>
 
             <Row className="mt-2">
-                <Col xl={12}>
-                    <div style={{ marginLeft: '25px' }}>
-                        <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." />
-                        </div>
-
-                        {/* <div class="input-group">
-                            <input
-                                class="form-control border-end-0 border rounded-pill"
-                                type="text"
-                                value="search"
-                                id="example-search-input"
-                            />
-                            <span class="input-group-append">
-                                <button
-                                    class="btn btn-outline-secondary bg-white border-start-0 border rounded-pill ms-n3"
-                                    type="button">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </span>
-                        </div> */}
-
-                        {/* <div className="input-group" style={{ display: 'inline-block' }}>
-                            <input type="text" className="form-control search-input" placeholder="Search..." />
-                            <span className="uil uil-search icon-search"></span>
-                            <div className="input-group-append"></div>
-                        </div> */}
-
-                        <div className="btn-group" role="group" aria-label="Basic example">
-                            <div>
-                                <button type="button" className="btn btn-white d-inline">
-                                    All Statuses
-                                </button>
-
-                                <button type="button" className="btn btn-white d-inline">
-                                    {/* <Wifi className="icon-sm" /> */}
-                                    {/* Online */}
-                                    <i className="uil uil-wifi mr-1"></i>Online
-                                </button>
-
-                                <button type="button" className="btn btn-white d-inline">
-                                    {/* <WifiOff className="icon-sm" /> */}
-                                    {/* Offline */}
-                                    <i className="uil uil-wifi-slash mr-1"></i>Offline
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="button" className="btn btn-white d-inline ml-2">
-                            <i className="uil uil-plus mr-1"></i>Add Filter
-                        </button>
-
-                        {/* ---------------------------------------------------------------------- */}
-                        <UncontrolledDropdown className="d-inline float-right">
-                            <DropdownToggle color="white">
-                                Columns
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem>Phoenix Baker</DropdownItem>
-                                <DropdownItem>Olivia Rhye</DropdownItem>
-                                <DropdownItem>Lana Steiner</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
+                <Col xl={3}>
+                    <div class="input-group rounded ml-4">
+                        <input
+                            type="search"
+                            class="form-control rounded"
+                            placeholder="Search"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                        />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <Search className="icon-sm" />
+                        </span>
                     </div>
+                </Col>
+                <Col xl={9}>
+                    <div className="btn-group" role="group" aria-label="Basic example">
+                        <div>
+                            <button type="button" className="btn btn-white d-inline">
+                                All Statuses
+                            </button>
+
+                            <button type="button" className="btn btn-white d-inline">
+                                {/* <Wifi className="icon-sm" /> */}
+                                {/* Online */}
+                                <i className="uil uil-wifi mr-1"></i>Online
+                            </button>
+
+                            <button type="button" className="btn btn-white d-inline">
+                                {/* <WifiOff className="icon-sm" /> */}
+                                {/* Offline */}
+                                <i className="uil uil-wifi-slash mr-1"></i>Offline
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" className="btn btn-white d-inline ml-2">
+                        <i className="uil uil-plus mr-1"></i>Add Filter
+                    </button>
+
+                    {/* ---------------------------------------------------------------------- */}
+                    <UncontrolledDropdown className="d-inline float-right">
+                        <DropdownToggle color="white">
+                            Columns
+                            <i className="icon">
+                                <ChevronDown></ChevronDown>
+                            </i>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>Phoenix Baker</DropdownItem>
+                            <DropdownItem>Olivia Rhye</DropdownItem>
+                            <DropdownItem>Lana Steiner</DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    <BuildingTable />
+                    <BuildingTable generalEquipmentData={generalEquipmentData} />
                 </Col>
             </Row>
         </React.Fragment>

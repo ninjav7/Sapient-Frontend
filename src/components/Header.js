@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
+    let today = new Date();
     const TABS = {
         Tab1: '24 Hours',
         Tab2: '7 Days',
@@ -15,6 +16,11 @@ const Header = (props) => {
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+
+    useEffect(() => {
+        console.log('startDate => ', startDate);
+        console.log('endDate => ', endDate);
+    });
 
     return (
         <React.Fragment>

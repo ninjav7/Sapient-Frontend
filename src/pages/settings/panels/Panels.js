@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -11,10 +11,12 @@ import {
     DropdownItem,
 } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import { ChevronDown } from 'react-feather';
+import { ChevronDown, Search } from 'react-feather';
+import axios from 'axios';
+import { BaseUrl, generalPanels } from '../../../services/Network';
 import '../style.css';
 
-const PanelsTable = () => {
+const PanelsTable = ({ generalPanelData }) => {
     const records = [
         {
             name: 'Panel 1',
@@ -51,18 +53,18 @@ const PanelsTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {records.map((record, index) => {
+                        {generalPanelData.map((record, index) => {
                             return (
-                                <tr key={index}>
+                                <tr key={record.panel_id}>
                                     <td className="font-weight-bold panel-name">
                                         <Link to="/settings/editPanel">
-                                            <a href="#">{record.name}</a>
+                                            <a href="#">{record.panel_name}</a>
                                         </Link>
                                     </td>
 
-                                    <td className="font-weight-bold">{record.location}</td>
+                                    <td className="">{record.location}</td>
                                     <td className="font-weight-bold">{record.breakers}</td>
-                                    {record.parent === '' ? (
+                                    {record.parent === null ? (
                                         <td className="font-weight-bold">-</td>
                                     ) : (
                                         <td className="font-weight-bold">{record.parent}</td>
@@ -78,6 +80,23 @@ const PanelsTable = () => {
 };
 
 const Panels = () => {
+    const [buildingId, setBuildingId] = useState(1);
+    const [generalPanelData, setGeneralPanelData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(`${BaseUrl}${generalPanels}/${buildingId}`, {}, { headers })
+            .then((res) => {
+                setGeneralPanelData(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -99,37 +118,45 @@ const Panels = () => {
             </Row>
 
             <Row className="mt-2">
-                <Col xl={12}>
-                    <div style={{ marginLeft: '25px' }}>
-                        <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." autoFocus />
-                        </div>
-
-                        <button type="button" className="btn btn-white d-inline ml-2">
-                            <i className="uil uil-plus mr-1"></i>Add Filter
-                        </button>
-
-                        {/* ---------------------------------------------------------------------- */}
-                        <UncontrolledDropdown className="d-inline float-right">
-                            <DropdownToggle color="white">
-                                Columns
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem>Phoenix Baker</DropdownItem>
-                                <DropdownItem>Olivia Rhye</DropdownItem>
-                                <DropdownItem>Lana Steiner</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
+                <Col xl={3}>
+                    <div class="input-group rounded ml-4">
+                        <input
+                            type="search"
+                            class="form-control rounded"
+                            placeholder="Search"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                        />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <Search className="icon-sm" />
+                        </span>
                     </div>
+                </Col>
+                <Col xl={9}>
+                    <button type="button" className="btn btn-white d-inline ml-2">
+                        <i className="uil uil-plus mr-1"></i>Add Filter
+                    </button>
+
+                    {/* ---------------------------------------------------------------------- */}
+                    <UncontrolledDropdown className="d-inline float-right">
+                        <DropdownToggle color="white">
+                            Columns
+                            <i className="icon">
+                                <ChevronDown></ChevronDown>
+                            </i>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>Phoenix Baker</DropdownItem>
+                            <DropdownItem>Olivia Rhye</DropdownItem>
+                            <DropdownItem>Lana Steiner</DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    <PanelsTable />
+                    <PanelsTable generalPanelData={generalPanelData} />
                 </Col>
             </Row>
         </React.Fragment>

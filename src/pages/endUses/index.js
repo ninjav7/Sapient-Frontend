@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
+import { BaseUrl, endUses } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
+import axios from 'axios';
 import './style.css';
 
 const EndUses = () => {
@@ -129,12 +131,35 @@ const EndUses = () => {
         },
     ]);
 
+    const [endUsesData, setEndUsesData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${endUses}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: '2022-04-01&2022-04-05',
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEndUsesData(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
     return (
         <React.Fragment>
             <Header title="End Uses" />
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    <div className="card card-box-style button-style">
+                    <div className="card usage-card-box-style button-style">
                         <div className="card-body">
                             <div>
                                 <p className="dot" style={{ backgroundColor: '#3094B9' }}>
@@ -149,7 +174,7 @@ const EndUses = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="card card-box-style button-style">
+                    <div className="card usage-card-box-style button-style">
                         <div className="card-body">
                             <div>
                                 <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
@@ -164,7 +189,7 @@ const EndUses = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="card card-box-style button-style">
+                    <div className="card usage-card-box-style button-style">
                         <div className="card-body">
                             <div>
                                 <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
@@ -179,7 +204,7 @@ const EndUses = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="card card-box-style button-style">
+                    <div className="card usage-card-box-style button-style">
                         <div className="card-body">
                             <div>
                                 <p className="dot" style={{ backgroundColor: '#847CB5' }}>

@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import { serviceGet } from '../../helpers/api';
+// import { generalUtilityBills } from '../../services/Network';
 import './style.css';
 
 const UtilityBills = () => {
+    const [avgRate, setAvgRate] = useState(0.6);
+
     // Table data
     const [records, setRecords] = useState([
         {
@@ -44,6 +48,9 @@ const UtilityBills = () => {
         },
     ]);
 
+    const [utilityData, setUtilityData] = useState([]);
+    const [buildingId, setBuildingId] = useState(1);
+
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -65,6 +72,23 @@ const UtilityBills = () => {
     //       this.setState({ items })
     //     }
     //   }
+
+    useEffect(() => {
+        async function getUtilityBillsData() {
+            try {
+                let req = {};
+                let response = await serviceGet(`/api/config/utility_bills/${buildingId}`, req);
+                console.log('Response fetched');
+                setUtilityData(response);
+                console.log('Response Set');
+                console.log('Response => ', response);
+            } catch (error) {
+                console.log(error);
+                alert('Failed to fetch utility bills data!');
+            }
+        }
+        getUtilityBillsData();
+    }, []);
 
     return (
         <React.Fragment>
@@ -94,24 +118,24 @@ const UtilityBills = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {records.map((record, index) => {
-                                        return record.kwh === null ? (
+                                    {utilityData.map((record, index) => {
+                                        return record.kWh === null ? (
                                             <tr key={index} className="table-warning">
                                                 <td className="text-warning font-weight-bold">{record.date}</td>
-                                                {record.kwh === null ? (
-                                                    record.kwh === null && <td>-</td>
+                                                {record.kWh === null ? (
+                                                    record.kWh === null && <td>-</td>
                                                 ) : (
-                                                    <td>{record.kwh} kWh</td>
+                                                    <td>{record.kWh} kWh</td>
                                                 )}
-                                                {record.rate === null ? (
-                                                    record.rate === null && <td>-</td>
+                                                {record.blended_rate === null ? (
+                                                    record.blended_rate === null && <td>-</td>
                                                 ) : (
-                                                    <td>{record.rate} kWh</td>
+                                                    <td>{record.blended_rate} kWh</td>
                                                 )}
-                                                {record.avg_rate === null ? (
-                                                    record.avg_rate === null && <td>-</td>
+                                                {avgRate === null ? (
+                                                    avgRate === null && <td>-</td>
                                                 ) : (
-                                                    <td>{record.avg_rate} kWh</td>
+                                                    <td>{avgRate} kWh</td>
                                                 )}
                                                 <td></td>
                                                 <td></td>
@@ -134,13 +158,11 @@ const UtilityBills = () => {
                                         ) : (
                                             <tr key={index}>
                                                 <td className="font-weight-bold">{record.date}</td>
-                                                {record.kwh === null ? (
-                                                    record.kwh === null && <td>-</td>
+                                                {record.kWh === null ? (
+                                                    record.kWh === null && <td>-</td>
                                                 ) : (
                                                     <td className="font-weight-bold">
-                                                        {record.kwh.toLocaleString(undefined, {
-                                                            maximumFractionDigits: 2,
-                                                        })}
+                                                        {record.kWh}
                                                         kWh
                                                     </td>
                                                 )}
@@ -148,18 +170,14 @@ const UtilityBills = () => {
                                                     record.rate === null && <td>-</td>
                                                 ) : (
                                                     <td className="font-weight-bold">
-                                                        {record.rate.toLocaleString(undefined, {
-                                                            maximumFractionDigits: 2,
-                                                        })}
+                                                        {record.rate}
                                                         kWh
                                                     </td>
                                                 )}
-                                                {record.avg_rate === null ? (
-                                                    record.avg_rate === null && (
-                                                        <td className="text-muted grey-out">-</td>
-                                                    )
+                                                {avgRate === null ? (
+                                                    avgRate === null && <td className="text-muted grey-out">-</td>
                                                 ) : (
-                                                    <td className="grey-out">{record.avg_rate} kWh</td>
+                                                    <td className="grey-out">{avgRate} kWh</td>
                                                 )}
                                                 <td></td>
                                                 <td></td>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { BaseUrl } from '../services/Network';
 
 /**
  * Fetch data from given url
@@ -24,7 +25,7 @@ const fetchJSON = (url, options = {}) => {
 const servicePost = async (path, payload, _headers = null) => {
     return new Promise((resolve, reject) => {
         axios
-            .post(`${process.env.REACT_APP_BACKEND_URL}/${path}`, payload, {
+            .post(`${BaseUrl}${path}`, payload, {
                 headers: _headers,
             })
             .then(function (response) {
@@ -39,7 +40,7 @@ const servicePost = async (path, payload, _headers = null) => {
 const serviceGet = async (path, payload) => {
     return new Promise((resolve, reject) => {
         axios
-            .get(`${process.env.REACT_APP_BACKEND_URL}/${path}`, payload)
+            .get(`${BaseUrl}${path}`, payload)
             .then(function (response) {
                 resolve(response.data);
             })
@@ -52,7 +53,7 @@ const serviceGet = async (path, payload) => {
 const servicePostWithVersion = async (path, payload, version = process.env.REACT_APP_BACKEND_DEFAULT_VERSION) => {
     return new Promise((resolve, reject) => {
         axios
-            .post(`${process.env.REACT_APP_BACKEND_URL}${version}/${path}`, payload)
+            .post(`${BaseUrl}${version}/${path}`, payload)
             .then(function (response) {
                 resolve(response.data);
             })

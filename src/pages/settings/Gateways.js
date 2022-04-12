@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -10,10 +10,12 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-import { ChevronDown } from 'react-feather';
+import { ChevronDown, Search } from 'react-feather';
+import axios from 'axios';
+import { BaseUrl, generalGateway } from '../../services/Network';
 import './style.css';
 
-const GatewaysTable = () => {
+const GatewaysTable = ({ generalGatewayData }) => {
     const records = [
         {
             status: 'Online',
@@ -48,7 +50,7 @@ const GatewaysTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {records.map((record, index) => {
+                        {generalGatewayData.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <td>
@@ -56,11 +58,11 @@ const GatewaysTable = () => {
                                             {record.status}
                                         </span>
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.macAddress}</td>
+                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     <td className="font-weight-bold">{record.model}</td>
-                                    <td className="font-weight-bold">{record.location}</td>
-                                    <td className="font-weight-bold">{record.deviceConnected}</td>
-                                    <td className="font-weight-bold">{record.deviceCount}</td>
+                                    <td className="">{record.location}</td>
+                                    <td className="font-weight-bold">{record.devices_connected}</td>
+                                    <td className="font-weight-bold">{record.unique_device_count}</td>
                                 </tr>
                             );
                         })}
@@ -72,6 +74,23 @@ const GatewaysTable = () => {
 };
 
 const Gateways = () => {
+    const [buildingId, setBuildingId] = useState(1);
+    const [generalGatewayData, setGeneralGatewayData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(`${BaseUrl}${generalGateway}/${buildingId}`, {}, { headers })
+            .then((res) => {
+                setGeneralGatewayData(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -91,37 +110,47 @@ const Gateways = () => {
             </Row>
 
             <Row className="mt-2">
-                <Col xl={12}>
-                    <div style={{ marginLeft: '25px' }}>
-                        <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." autoFocus />
-                        </div>
-
-                        <button type="button" className="btn btn-white d-inline ml-2">
-                            <i className="uil uil-plus mr-1"></i>Add Filter
-                        </button>
-
-                        {/* ---------------------------------------------------------------------- */}
-                        <UncontrolledDropdown className="d-inline float-right">
-                            <DropdownToggle color="white">
-                                Columns
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem>Phoenix Baker</DropdownItem>
-                                <DropdownItem>Olivia Rhye</DropdownItem>
-                                <DropdownItem>Lana Steiner</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
+                <Col md={3}>
+                    <div class="input-group rounded ml-4">
+                        <input
+                            type="search"
+                            class="form-control rounded"
+                            placeholder="Search"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                        />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <Search className="icon-sm" />
+                        </span>
                     </div>
+                </Col>
+                <Col md={9}>
+                    <button type="button" className="btn btn-white d-inline ml-2">
+                        <i className="uil uil-plus mr-1"></i>Add Filter
+                    </button>
+
+                    {/* ---------------------------------------------------------------------- */}
+                    <UncontrolledDropdown className="d-inline float-right">
+                        <DropdownToggle color="white">
+                            Columns
+                            <i className="icon">
+                                <ChevronDown></ChevronDown>
+                            </i>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>Phoenix Baker</DropdownItem>
+                            <DropdownItem active={true} className="bg-primary">
+                                Olivia Rhye
+                            </DropdownItem>
+                            <DropdownItem>Lana Steiner</DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    <GatewaysTable />
+                    <GatewaysTable generalGatewayData={generalGatewayData} />
                 </Col>
             </Row>
 
