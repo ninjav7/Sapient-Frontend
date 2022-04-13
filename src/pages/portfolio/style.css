@@ -24,14 +24,9 @@
     font-style: normal;
     font-weight: 700;
     font-size: 12px;
-    line-height: 12px;
-
     display: flex;
     align-items: center;
     text-align: right;
-
-    /* text/medium */
-
     color: #4b5563;
 }
 
@@ -120,14 +115,12 @@
 }
 
 .map-widget {
-    position: absolute;
-    width: 90%;
-    height: 80%;
-    left: 30px;
-    right: 20px;
-    top: 100px;
-    bottom: 20px;
-    border: 0.5px solid grey;
+    position: relative;
+    height: auto;
+    width: auto;
+    left: 3px;
+    top: 15px;
+    bottom: 30px;
     background: #f9fafb;
 }
 
@@ -245,6 +238,8 @@
     margin: 0px !important;
     padding: 0px !important;
     background: #141924 !important;
+    /* background: #1c52c7 !important; */
+    /* position: fixed !important; */
 }
 
 .custom-navbar-fonts {
@@ -317,4 +312,30 @@
 
 .card-title {
     font-weight: bold;
+}
+
+.table-font-style {
+    font-size: small;
+}
+
+.consumption-style {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 2px;
+    margin-bottom: 5px;
+}
+
+.consumption-style:hover {
+    border-radius: 5px;
+    border: 1px solid #e0e1e3;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    background: #f9fafb;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 20px;
+    margin-top: 6px;
 }

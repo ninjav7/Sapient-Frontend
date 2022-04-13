@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import DonutChart from '../portfolio/PortfolioDonutChart';
+import DonutChart from '../charts/DonutChart';
 import Header from '../../components/Header';
 import './style.css';
 import LineChart from '../charts/LineChart';
@@ -89,6 +89,89 @@ const BuildingOverview = () => {
     ]);
 
     const [buildingsEnergyConsume, setbuildingsEnergyConsume] = useState([]);
+
+    const [donutChartOpts, setDonutChartOpts] = useState({
+        chart: {
+            type: 'donut',
+        },
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        series: [12553, 11553, 6503, 2333],
+        plotOptions: {
+            pie: {
+                expandOnClick: false,
+                size: 200,
+                donut: {
+                    size: '77%',
+                    labels: {
+                        show: true,
+                        // name: {
+                        //     show: true,
+                        //     fontSize: '22px',
+                        //     fontFamily: undefined,
+                        //     color: '#dfsda',
+                        //     offsetY: -10,
+                        // },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            color: '#d14065',
+                            offsetY: 16,
+                            // formatter: function (val) {
+                            //     return val;
+                            // },
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Total',
+                            color: '#373d3f',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b;
+                                }, 0);
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 300,
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+        dataLabels: {
+            enabled: false,
+        },
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        legend: {
+            show: false,
+        },
+        stroke: {
+            width: 0,
+        },
+
+        itemMargin: {
+            horizontal: 10,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+    });
+
+    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
 
     useEffect(() => {
         const headers = {
@@ -412,36 +495,38 @@ const BuildingOverview = () => {
         },
     });
 
-    const [energyConsumption, setEnergyConsumption] = useState([
-        {
-            device: 'HVAC',
-            energy_consumption: {
-                now: 8000,
-                old: 100,
-            },
-        },
-        {
-            device: 'HVAC',
-            energy_consumption: {
-                now: 1000,
-                old: 100,
-            },
-        },
-        {
-            device: 'HVAC',
-            energy_consumption: {
-                now: 1000,
-                old: 100,
-            },
-        },
-        {
-            device: 'HVAC',
-            energy_consumption: {
-                now: 1000,
-                old: 100,
-            },
-        },
-    ]);
+    // const [energyConsumption, setEnergyConsumption] = useState([
+    //     {
+    //         device: 'HVAC',
+    //         energy_consumption: {
+    //             now: 8000,
+    //             old: 100,
+    //         },
+    //     },
+    //     {
+    //         device: 'HVAC',
+    //         energy_consumption: {
+    //             now: 1000,
+    //             old: 100,
+    //         },
+    //     },
+    //     {
+    //         device: 'HVAC',
+    //         energy_consumption: {
+    //             now: 1000,
+    //             old: 100,
+    //         },
+    //     },
+    //     {
+    //         device: 'HVAC',
+    //         energy_consumption: {
+    //             now: 1000,
+    //             old: 100,
+    //         },
+    //     },
+    // ]);
+
+    const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
@@ -852,7 +937,7 @@ const BuildingOverview = () => {
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body">
+                        <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
                                 description={overview.total_consumption.now}
@@ -957,21 +1042,21 @@ const BuildingOverview = () => {
                             <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
                             {/* <h6 className="card-subtitle custom-subtitle">Energy Totals</h6> */}
                         </Col>
-                        <Col xl={6}>
+                        <Col xl={5}>
                             <div className="card-body">
-                                <div>
-                                    <DonutChart />
+                                <div className="mt-4">
+                                    <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
                                 </div>
                             </div>
                         </Col>
-                        <Col xl={6}>
-                            <Card style={{ marginTop: '50px' }}>
+                        <Col xl={7}>
+                            <Card style={{ marginTop: '40px' }}>
                                 <CardBody>
-                                    <Table className="mb-0" borderless hover>
+                                    <Table className="mb-0 building-table-font-style" borderless>
                                         <tbody>
                                             {energyConsumption.map((record, index) => {
                                                 return (
-                                                    <tr key={index}>
+                                                    <tr key={index} className="building-consumption-style">
                                                         <td>
                                                             {record.device === 'HVAC' && (
                                                                 <div
@@ -994,14 +1079,21 @@ const BuildingOverview = () => {
                                                                     style={{ backgroundColor: '#3B8554' }}></div>
                                                             )}
                                                         </td>
-                                                        <td className="custom-equip-style">{record.device}</td>
-                                                        <td className="custom-usage-style muted">{record.device}</td>
+                                                        <td className="custom-equip-style table-font-style font-weight-bold">
+                                                            {record.device}
+                                                        </td>
+                                                        <td className="custom-usage-style muted table-font-style">
+                                                            {record.energy_consumption.now.toLocaleString(undefined, {
+                                                                maximumFractionDigits: 2,
+                                                            })}
+                                                            kWh
+                                                        </td>
                                                         <td>
-                                                            {record.energy_consumption.now <
+                                                            {record.energy_consumption.now <=
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-danger text-danger font-weight-bold font-size-5"
-                                                                    style={{ width: '100%' }}>
+                                                                    className="button-success text-success font-weight-bold font-size-5"
+                                                                    style={{ width: '100px' }}>
                                                                     <i className="uil uil-chart-down">
                                                                         <strong>
                                                                             {percentageHandler(
@@ -1013,11 +1105,11 @@ const BuildingOverview = () => {
                                                                     </i>
                                                                 </button>
                                                             )}
-                                                            {record.energy_consumption.now >=
+                                                            {record.energy_consumption.now >
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-success text-success font-weight-bold font-size-5"
-                                                                    style={{ width: '100%' }}>
+                                                                    className="button-danger text-danger font-weight-bold font-size-5"
+                                                                    style={{ width: '100px' }}>
                                                                     <i className="uil uil-arrow-growth">
                                                                         <strong>
                                                                             {percentageHandler(

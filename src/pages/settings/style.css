@@ -115,6 +115,14 @@
     padding-top: 3px;
 }
 
+.icon-bg-styling-slash {
+    background: rgb(240, 28, 28);
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    padding-top: 3px;
+}
+
 .icon-styling {
     color: white;
     margin-left: 4px;

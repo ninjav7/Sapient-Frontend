@@ -267,6 +267,11 @@ const BuildingTable = ({ generalEquipmentData }) => {
                                                         <i className="uil uil-wifi mr-1 icon-styling"></i>
                                                     </div>
                                                 )}
+                                                {record.status === 'Offline' && (
+                                                    <div className="icon-bg-styling-slash">
+                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="font-weight-bold">
@@ -350,21 +355,23 @@ const Equipment = () => {
                     </div>
                 </Col>
                 <Col xl={9}>
-                    <div className="btn-group" role="group" aria-label="Basic example">
+                    <div className="btn-group ml-2" role="group" aria-label="Basic example">
                         <div>
-                            <button type="button" className="btn btn-white d-inline">
+                            <button
+                                type="button"
+                                className="btn btn-white d-inline"
+                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}>
                                 All Statuses
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline">
-                                {/* <Wifi className="icon-sm" /> */}
-                                {/* Online */}
+                            <button type="button" className="btn btn-white d-inline" style={{ borderRadius: '0px' }}>
                                 <i className="uil uil-wifi mr-1"></i>Online
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline">
-                                {/* <WifiOff className="icon-sm" /> */}
-                                {/* Offline */}
+                            <button
+                                type="button"
+                                className="btn btn-white d-inline"
+                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}>
                                 <i className="uil uil-wifi-slash mr-1"></i>Offline
                             </button>
                         </div>

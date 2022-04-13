@@ -12,7 +12,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-import { ChevronDown } from 'react-feather';
+import { ChevronDown, Search } from 'react-feather';
 
 import './style.css';
 
@@ -206,29 +206,38 @@ const CompareBuildings = () => {
         <React.Fragment>
             <Header title="Compare Buildings" />
             <Row className="mt-2">
-                <Col xl={12}>
-                    <div style={{ marginLeft: '25px' }}>
-                        <div style={{ display: 'inline-block', marginRight: '10px' }}>
-                            <input type="text" className="search-style" placeholder="Search..." autoFocus />
-                        </div>
-                        <button type="button" className="btn btn-white d-inline">
-                            <i className="uil uil-plus mr-1"></i>Add Filter
-                        </button>
-
-                        {/* ---------------------------------------------------------------------- */}
-                        <UncontrolledDropdown className="d-inline float-right">
-                            <DropdownToggle color="white">
-                                Columns
-                                <i className="icon">
-                                    <ChevronDown></ChevronDown>
-                                </i>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem>Dropdown 1</DropdownItem>
-                                <DropdownItem>Dropdown 2</DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
+                <Col xl={3}>
+                    <div class="input-group rounded ml-4">
+                        <input
+                            type="search"
+                            class="form-control rounded"
+                            placeholder="Search"
+                            aria-label="Search"
+                            aria-describedby="search-addon"
+                        />
+                        <span class="input-group-text border-0" id="search-addon">
+                            <Search className="icon-sm" />
+                        </span>
                     </div>
+                </Col>
+                <Col xl={9}>
+                    <button type="button" className="btn btn-white d-inline ml-2">
+                        <i className="uil uil-plus mr-1"></i>Add Filter
+                    </button>
+
+                    {/* ---------------------------------------------------------------------- */}
+                    <UncontrolledDropdown className="d-inline float-right">
+                        <DropdownToggle color="white">
+                            Columns
+                            <i className="icon">
+                                <ChevronDown></ChevronDown>
+                            </i>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>Dropdown 1</DropdownItem>
+                            <DropdownItem>Dropdown 2</DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </Col>
             </Row>
             <Row>

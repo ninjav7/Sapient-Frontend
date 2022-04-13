@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
-import Flatpickr from 'react-flatpickr';
-import { servicePost } from '../../helpers/api';
 import Switch from 'react-switch';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
+
 import './style.css';
 import {
     BaseUrl,
@@ -19,11 +20,12 @@ const General = () => {
     const [buildingId, setBuildingId] = useState(1);
     const [buildingData, setBuildingData] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
-    const [generalDateTime, setGeneralDateTime] = useState({});
-    const [checked, setChecked] = useState(generalDateTime.time_format);
-    const [generalOperatingHours, setGeneralOperatingHours] = useState({});
+    const [generalDateTimeData, setGeneralDateTimeData] = useState({});
+    const [checked, setChecked] = useState(generalDateTimeData.time_format);
+    const [generalOperatingData, setGeneralOperatingData] = useState({});
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+    const [value, onChange] = useState('10:00');
 
     // Building Details
     useEffect(() => {
@@ -62,7 +64,7 @@ const General = () => {
         axios
             .post(`${BaseUrl}${generalDateTime}/${buildingId}`, {}, { headers })
             .then((res) => {
-                setGeneralDateTime(res.data);
+                setGeneralDateTimeData(res.data);
                 console.log(res.data);
             })
             .catch((err) => {});
@@ -77,11 +79,67 @@ const General = () => {
         axios
             .post(`${BaseUrl}${generalOperatingHours}/${buildingId}`, {}, { headers })
             .then((res) => {
-                setGeneralOperatingHours(res.data);
+                setGeneralOperatingData(res.data);
                 console.log(res.data);
             })
             .catch((err) => {});
     }, []);
+
+    const sampleOperatingHour = {
+        mon: {
+            stat: false,
+            timeRange: {
+                frm: '16:23',
+                to: '16:24',
+            },
+        },
+        tue: {
+            stat: false,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+        wed: {
+            stat: true,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+        thu: {
+            stat: false,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+        fri: {
+            stat: true,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+        sat: {
+            stat: false,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+        sun: {
+            stat: false,
+            timeRange: {
+                frm: '16:23',
+                to: '16:25',
+            },
+        },
+    };
+
+    useEffect(() => {
+        console.log('startDate', startDate);
+    });
 
     return (
         <React.Fragment>
@@ -322,7 +380,7 @@ const General = () => {
                                         <h6 className="card-title">Timezone</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="card-title">{generalDateTime.timezone}</h6>
+                                        <h6 className="card-title">{generalDateTimeData.timezone}</h6>
                                     </div>
                                     <div className="single-line-style">
                                         <h6 className="card-title">Use 24-hour Clock</h6>
@@ -339,7 +397,7 @@ const General = () => {
                                         </div> */}
                                         <Switch
                                             onChange={() => setChecked(!checked)}
-                                            checked={generalDateTime.time_format}
+                                            checked={generalDateTimeData.time_format}
                                             onColor={'#2955E7'}
                                             uncheckedIcon={false}
                                             checkedIcon={false}
@@ -387,6 +445,13 @@ const General = () => {
                                             dateFormat="h:mm aa"
                                             className="time-picker-style"
                                         />
+                                        {/* <TimePicker
+                                            onChange={onChange}
+                                            value={value}
+                                            clearIcon={false}
+                                            className="time-picker-style"
+                                            clockIcon={false}
+                                        /> */}
                                         <div className="spacing"> to </div>
                                         <DatePicker
                                             selected={endDate}

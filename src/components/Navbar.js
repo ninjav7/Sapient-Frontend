@@ -4,6 +4,7 @@ import AppMenu from './AppMenu';
 import { Link } from 'react-router-dom';
 import { Collapse } from 'reactstrap';
 import logo from '../assets/images/logo.png';
+import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings, User } from 'react-feather';
 import '../pages/portfolio/style.css';
 
@@ -15,7 +16,7 @@ const Navbar = (props) => {
                     {/* <nav className="navbar navbar-expand-lg topbar-nav custom-navbar custom-navbar-fonts"> */}
                     <Link to="/" className="navbar-brand mr-0 mr-md-2 logo">
                         <span className="logo-lg">
-                            <img src={logo} alt="" height="24" className="ml-4 mr-5" />
+                            <img src={sapientLogo} alt="" height="40" className="ml-4 mr-4" />
                             {/* <span className="d-inline h5 ml-4 mr-5 text-logo">Sapient</span> */}
                         </span>
                         {/* <span className="logo-sm">

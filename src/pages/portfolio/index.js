@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import DonutChart from './PortfolioDonutChart';
+import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
-import MapChart from './MapChart';
+import MapChart from '../charts/MapChart';
+import SimpleMaps from '../charts/SimpleMaps';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
@@ -197,6 +198,90 @@ const PortfolioOverview = () => {
         },
     });
 
+    const [donutChartOpts, setDonutChartOpts] = useState({
+        chart: {
+            type: 'donut',
+        },
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        series: [12553, 11553, 6503, 2333],
+        plotOptions: {
+            pie: {
+                expandOnClick: false,
+                size: 200,
+                donut: {
+                    size: '77%',
+                    labels: {
+                        show: true,
+                        // name: {
+                        //     show: true,
+                        //     fontSize: '22px',
+                        //     fontFamily: undefined,
+                        //     color: '#dfsda',
+                        //     offsetY: -10,
+                        // },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            color: '#d14065',
+                            offsetY: 16,
+                            // formatter: function (val) {
+                            //     return val;
+                            // },
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Total',
+                            color: '#373d3f',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b;
+                                }, 0);
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 300,
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+        dataLabels: {
+            enabled: false,
+        },
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        legend: {
+            show: false,
+        },
+        stroke: {
+            width: 0,
+        },
+
+        itemMargin: {
+            horizontal: 10,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+    });
+
+    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    // const [donutChartData, setDonutChartData] = useState([]);
+
     // const buildingsEnergyConsume = [
     //     {
     //         storeName: '123 Main St. Portland, OR',
@@ -271,15 +356,7 @@ const PortfolioOverview = () => {
 
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
 
-    const [energyConsumption, setenergyConsumption] = useState([
-        {
-            device: 'HVAC',
-            energy_consumption: {
-                now: 1000,
-                old: 100,
-            },
-        },
-    ]);
+    const [energyConsumption, setenergyConsumption] = useState([]);
 
     useEffect(() => {
         const headers = {
@@ -341,6 +418,19 @@ const PortfolioOverview = () => {
                 console.log(res.data);
             });
     }, []);
+
+    useEffect(() => {
+        let newArray = [];
+        for (let element of energyConsumption) {
+            newArray.push(element.energy_consumption.now);
+        }
+        console.log(newArray);
+        setDonutChartData(newArray);
+    }, [energyConsumption]);
+
+    useEffect(() => {
+        console.log('donutChartData => ', donutChartData);
+    });
 
     return (
         <React.Fragment>
@@ -414,7 +504,8 @@ const PortfolioOverview = () => {
                         <h6 className="card-title">Energy Density Top Buildings</h6>
                         <h6 className="card-subtitle mb-2 text-muted">Energy Consumption / Sq. Ft. Average</h6>
                         <div className="map-widget">
-                            <MapChart />
+                            {/* <MapChart /> */}
+                            <SimpleMaps />
                         </div>
                     </div>
                 </Col>
@@ -453,37 +544,61 @@ const PortfolioOverview = () => {
             </Row>
 
             <Row className="mt-2 ml-2">
-                <Col xl={6}>
+                <Col xl={7}>
                     <Row>
-                        <Col xl={6} className="mt-4">
+                        <Col xl={5} className="mt-4">
                             <h6 className="card-title">Energy Consumption by End Use</h6>
                             <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
                             <div className="card-body mt-2">
                                 <div className="mt-4">
-                                    <DonutChart />
+                                    <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
                                 </div>
                             </div>
                         </Col>
-                        <Col xl={6}>
+                        <Col xl={7} className="mt-4">
                             <Card style={{ marginTop: '80px' }}>
                                 <CardBody>
-                                    <Table className="mb-0" borderless hover>
+                                    <Table className="table-font-style" borderless>
                                         <tbody>
                                             {energyConsumption.map((record, index) => {
                                                 return (
-                                                    <tr key={index}>
-                                                        <td className="custom-equip-style">{record.device}</td>
-                                                        <td className="custom-usage-style muted">
+                                                    <tr key={index} className="consumption-style">
+                                                        <td>
+                                                            {record.device === 'HVAC' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#3094B9' }}></div>
+                                                            )}
+                                                            {record.device === 'Lightning' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#2C4A5E' }}></div>
+                                                            )}
+                                                            {record.device === 'Plug' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#66D6BC' }}></div>
+                                                            )}
+                                                            {record.device === 'Process' && (
+                                                                <div
+                                                                    className="dot"
+                                                                    style={{ backgroundColor: '#3B8554' }}></div>
+                                                            )}
+                                                        </td>
+                                                        <td className="custom-equip-style table-font-style font-weight-bold">
+                                                            {record.device}
+                                                        </td>
+                                                        <td className="custom-usage-style muted table-font-style">
                                                             {record.energy_consumption.now.toLocaleString(undefined, {
                                                                 maximumFractionDigits: 2,
-                                                            })}{' '}
+                                                            })}
                                                             kWh
                                                         </td>
                                                         <td>
-                                                            {record.energy_consumption.now <
+                                                            {record.energy_consumption.now <=
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-danger text-danger font-weight-bold font-size-5"
+                                                                    className="button-success text-success font-weight-bold font-size-5"
                                                                     style={{ width: '100px' }}>
                                                                     <i className="uil uil-chart-down">
                                                                         <strong>
@@ -496,10 +611,10 @@ const PortfolioOverview = () => {
                                                                     </i>
                                                                 </button>
                                                             )}
-                                                            {record.energy_consumption.now >=
+                                                            {record.energy_consumption.now >
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-success text-success font-weight-bold font-size-5"
+                                                                    className="button-danger text-danger font-weight-bold font-size-5"
                                                                     style={{ width: '100px' }}>
                                                                     <i className="uil uil-arrow-growth">
                                                                         <strong>
@@ -524,7 +639,7 @@ const PortfolioOverview = () => {
                     </Row>
                 </Col>
 
-                <Col xl={6}>
+                <Col xl={5}>
                     <div className="card-body">
                         <h6 className="card-title">Energy Consumption History</h6>
                         <h6 className="card-subtitle mb-2 text-muted">Energy Totals by Day</h6>

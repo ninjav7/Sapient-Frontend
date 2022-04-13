@@ -1,7 +1,7 @@
 import React from 'react';
 import { Map, TileLayer, Polygon } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { statesData } from './data';
+import { statesData } from '../portfolio/data';
 
 const center = [40.63463151377654, -97.89969605983609];
 

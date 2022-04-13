@@ -54,9 +54,20 @@ const GatewaysTable = ({ generalGatewayData }) => {
                             return (
                                 <tr key={index}>
                                     <td>
-                                        <span className="badge badge-success" style={{ backgroundColor: '#12b76a' }}>
-                                            {record.status}
-                                        </span>
+                                        {record.status === 'Online' && (
+                                            <span
+                                                className="badge badge-success"
+                                                style={{ backgroundColor: '#12b76a' }}>
+                                                {record.status}
+                                            </span>
+                                        )}
+                                        {record.status === 'Offline' && (
+                                            <span
+                                                className="badge badge-danger"
+                                                style={{ backgroundColor: 'rgb(240, 28, 28)' }}>
+                                                {record.status}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     <td className="font-weight-bold">{record.model}</td>
