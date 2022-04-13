@@ -10,28 +10,25 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
-import { BaseUrl, generalGateway } from '../../services/Network';
-import './style.css';
+import { BaseUrl, generalPanels } from '../../../services/Network';
+import '../style.css';
 
-const GatewaysTable = ({ generalGatewayData }) => {
+const PanelsTable = ({ generalPanelData }) => {
     const records = [
         {
-            status: 'Online',
-            macAddress: 'D8:07:B6:88:D8:3B',
-            model: 'AWS-1234',
+            name: 'Panel 1',
             location: 'Floor 1 > Electrical Closet',
-            deviceConnected: 4,
-            deviceCount: 1,
+            breakers: '40/48',
+            parent: '',
         },
         {
-            status: 'Online',
-            macAddress: 'D8:07:B6:88:D8:3B',
-            model: 'AWS-1234',
+            name: 'Panel 2',
             location: 'Floor 1 > Electrical Closet',
-            deviceConnected: 6,
-            deviceCount: 5,
+            breakers: '20/24',
+            parent: 'Panel 1',
         },
     ];
 
@@ -41,39 +38,37 @@ const GatewaysTable = ({ generalGatewayData }) => {
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Status</th>
-                            <th>MAC Address</th>
-                            <th>Model</th>
+                            <th>Name</th>
                             <th>Location</th>
-                            <th>Devices Connected</th>
-                            <th>Unique Device Count</th>
+                            <th>Breakers</th>
+                            <th>Parent</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {generalGatewayData.map((record, index) => {
+                        {generalPanelData.map((record, index) => {
                             return (
-                                <tr key={index}>
-                                    <td>
-                                        {record.status === 'Online' && (
-                                            <span
-                                                className="badge badge-success"
-                                                style={{ backgroundColor: '#12b76a' }}>
-                                                {record.status}
-                                            </span>
-                                        )}
-                                        {record.status === 'Offline' && (
-                                            <span
-                                                className="badge badge-danger"
-                                                style={{ backgroundColor: 'rgb(240, 28, 28)' }}>
-                                                {record.status}
-                                            </span>
-                                        )}
+                                <tr key={record.panel_id}>
+                                    <td className="font-weight-bold panel-name">
+                                        <Link to="/settings/editPanel">
+                                            <a href="#">{record.panel_name}</a>
+                                        </Link>
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                    <td className="font-weight-bold">{record.model}</td>
+
                                     <td className="">{record.location}</td>
-                                    <td className="font-weight-bold">{record.devices_connected}</td>
-                                    <td className="font-weight-bold">{record.unique_device_count}</td>
+                                    <td className="font-weight-bold">{record.breakers}</td>
+                                    {record.parent === null ? (
+                                        <td className="font-weight-bold">-</td>
+                                    ) : (
+                                        <td className="font-weight-bold">{record.parent}</td>
+                                    )}
                                 </tr>
                             );
                         })}
@@ -84,9 +79,9 @@ const GatewaysTable = ({ generalGatewayData }) => {
     );
 };
 
-const Gateways = () => {
+const Panels = () => {
     const [buildingId, setBuildingId] = useState(1);
-    const [generalGatewayData, setGeneralGatewayData] = useState([]);
+    const [generalPanelData, setGeneralPanelData] = useState([]);
 
     useEffect(() => {
         const headers = {
@@ -94,9 +89,9 @@ const Gateways = () => {
             accept: 'application/json',
         };
         axios
-            .post(`${BaseUrl}${generalGateway}/${buildingId}`, {}, { headers })
+            .post(`${BaseUrl}${generalPanels}/${buildingId}`, {}, { headers })
             .then((res) => {
-                setGeneralGatewayData(res.data);
+                setGeneralPanelData(res.data);
                 console.log(res.data);
             })
             .catch((err) => {});
@@ -107,21 +102,23 @@ const Gateways = () => {
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Gateways
+                        Panels
                     </span>
 
                     <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                         <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                <i className="uil uil-plus mr-1"></i>Add Gateway
-                            </button>
+                            <Link to="/settings/createPanel">
+                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                                    <i className="uil uil-plus mr-1"></i>Add Panel
+                                </button>
+                            </Link>
                         </div>
                     </div>
                 </Col>
             </Row>
 
             <Row className="mt-2">
-                <Col md={3}>
+                <Col xl={3}>
                     <div class="input-group rounded ml-4">
                         <input
                             type="search"
@@ -135,7 +132,7 @@ const Gateways = () => {
                         </span>
                     </div>
                 </Col>
-                <Col md={9}>
+                <Col xl={9}>
                     <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
                     </button>
@@ -150,9 +147,7 @@ const Gateways = () => {
                         </DropdownToggle>
                         <DropdownMenu>
                             <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
+                            <DropdownItem>Olivia Rhye</DropdownItem>
                             <DropdownItem>Lana Steiner</DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
@@ -161,15 +156,11 @@ const Gateways = () => {
 
             <Row>
                 <Col lg={12}>
-                    <GatewaysTable generalGatewayData={generalGatewayData} />
+                    <PanelsTable generalPanelData={generalPanelData} />
                 </Col>
-            </Row>
-
-            <Row>
-                <span className="gateway-content-style">What about a KPI about unique devices</span>
             </Row>
         </React.Fragment>
     );
 };
 
-export default Gateways;
+export default Panels;

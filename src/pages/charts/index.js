@@ -197,6 +197,44 @@ const ApexChart = () => {
         },
     ]);
 
+    const [apexDonutOpts, setApexDonutOpts] = useState({
+        chart: {
+            height: 320,
+            type: 'pie',
+        },
+        labels: ['Series 1', 'Series 2', 'Series 3', 'Series 4', 'Series 5'],
+        colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        legend: {
+            show: true,
+            position: 'bottom',
+            horizontalAlign: 'center',
+            verticalAlign: 'middle',
+            floating: false,
+            fontSize: '14px',
+            offsetX: 0,
+            offsetY: -10,
+        },
+        responsive: [
+            {
+                breakpoint: 600,
+                options: {
+                    chart: {
+                        height: 240,
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+    });
+
+    const [apexDonutData, setApexDonutData] = useState([44, 55, 41, 17, 15]);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -241,13 +279,18 @@ const ApexChart = () => {
                 </Col>
 
                 <Col xl={6}>
-                    <StackedBarChart title='Stacked Bar Chart' options={barChartOptions} series={barChartData} height={340} />
+                    <StackedBarChart
+                        title="Stacked Bar Chart"
+                        options={barChartOptions}
+                        series={barChartData}
+                        height={340}
+                    />
                 </Col>
             </Row>
 
             <Row>
                 <Col xl={6}>
-                    <DonutChart />
+                    <DonutChart options={apexDonutOpts} series={apexDonutData} height={320} title="Donut Chart" />
                 </Col>
 
                 <Col xl={6}>

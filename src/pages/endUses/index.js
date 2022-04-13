@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
+import { BaseUrl, endUses } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
+import axios from 'axios';
 import './style.css';
 
 const EndUses = () => {
@@ -129,9 +131,96 @@ const EndUses = () => {
         },
     ]);
 
+    const [endUsesData, setEndUsesData] = useState([]);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${endUses}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: '2022-04-01&2022-04-05',
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEndUsesData(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
     return (
         <React.Fragment>
             <Header title="End Uses" />
+            <Row>
+                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
+                    <div className="card usage-card-box-style button-style">
+                        <div className="card-body">
+                            <div>
+                                <p className="dot" style={{ backgroundColor: '#3094B9' }}>
+                                    <span className="card-title card-title-style">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HVAC
+                                    </span>
+                                </p>
+                            </div>
+                            <p className="card-text card-content-style">
+                                {(11441).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="card usage-card-box-style button-style">
+                        <div className="card-body">
+                            <div>
+                                <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
+                                    <span className="card-title card-title-style">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lightning
+                                    </span>
+                                </p>
+                            </div>
+                            <p className="card-text card-content-style">
+                                {(7246).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="card usage-card-box-style button-style">
+                        <div className="card-body">
+                            <div>
+                                <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
+                                    <span className="card-title card-title-style">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plug
+                                    </span>
+                                </p>
+                            </div>
+                            <p className="card-text card-content-style">
+                                {(3356).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div className="card usage-card-box-style button-style">
+                        <div className="card-body">
+                            <div>
+                                <p className="dot" style={{ backgroundColor: '#847CB5' }}>
+                                    <span className="card-title card-title-style">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Other
+                                    </span>
+                                </p>
+                            </div>
+                            <p className="card-text card-content-style">
+                                {(0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </Row>
             <Row>
                 <Col xl={12}>
                     <StackedBarChart options={barChartOptions} series={barChartData} height={440} />

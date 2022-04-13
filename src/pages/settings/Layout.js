@@ -1,9 +1,118 @@
 import React from 'react';
 import { Row, Col, Card, CardBody, CardHeader, Form } from 'reactstrap';
-import { ChevronDown } from 'react-feather';
+import { Filter } from 'react-feather';
 import './style.css';
 
 const Layout = () => {
+    const floors = [
+        {
+            number: 1,
+            label: 'Floor',
+        },
+        {
+            number: 2,
+            label: 'Floor',
+        },
+        {
+            number: 3,
+            label: 'Floor',
+        },
+        {
+            number: 4,
+            label: 'Floor',
+        },
+    ];
+
+    const floor1 = [
+        {
+            area: 'Main Area',
+            label: 'Room',
+        },
+        {
+            area: 'Front Office',
+            label: 'Room',
+        },
+        {
+            area: 'Main Conference Room',
+            label: 'Room',
+        },
+        {
+            area: 'Conference Room 2',
+            label: 'Area',
+        },
+        {
+            area: 'Primary HVAC Zone',
+            label: 'HVAC',
+        },
+        {
+            area: 'Lighting Zone 1',
+            label: 'Lighting',
+        },
+        {
+            area: 'Lighting Zone 2',
+            label: 'Lighting',
+        },
+    ];
+
+    const mainArea = [
+        {
+            name: '1WE  (Mech. Room)',
+            label: 'Room',
+        },
+        {
+            name: '123',
+            label: 'Room',
+        },
+        {
+            name: '124',
+            label: 'Room',
+        },
+        {
+            name: '125',
+            label: 'Room',
+        },
+        {
+            name: '126',
+            label: 'Room',
+        },
+        {
+            name: '127',
+            label: 'Room',
+        },
+        {
+            name: '128',
+            label: 'Room',
+        },
+        {
+            name: '129',
+            label: 'Room',
+        },
+        {
+            name: '130',
+            label: 'Room',
+        },
+        {
+            name: '131',
+            label: 'Room',
+        },
+        {
+            name: '132',
+            label: 'Room',
+        },
+        {
+            name: '133',
+            label: 'Room',
+        },
+        {
+            name: '134',
+            label: 'Room',
+        },
+        {
+            name: '135',
+            label: 'Room',
+        },
+    ];
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -37,80 +146,91 @@ const Layout = () => {
 
             <Row>
                 <Col lg={12}>
-                    {/* <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <div className="layout-grid-style-1">
-                                <div>Building Root</div>
-                                <div>Floor 1</div>
-                                <div>Main Area</div>
-                                <div>123</div>
-                            </div>
-                        </CardHeader>
-                        <CardBody>
-                            <div className="layout-grid-style-2">
-                                <div>Floor 1</div>
-                                <div>Floor 2</div>
-                                <div>Floor 3</div>
-                                <div>Floor 4</div>
-                            </div>
-                        </CardBody>
-                        <CardBody>
-                            <div className="layout-grid-style-2">
-                                <div>Floor 1</div>
-                                <div>Floor 2</div>
-                                <div>Floor 3</div>
-                                <div>Floor 4</div>
-                            </div>
-                        </CardBody>
-                    </Card> */}
-
                     <div className="layout-container mt-4">
                         <div className="container-column">
-                            <div className="container-heading">Building Root</div>
+                            <div className="container-heading">
+                                <span>Building Root</span>
+                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
+                                    <i className="uil uil-filter mr-3"></i>
+                                    <i className="uil uil-plus mr-2"></i>
+                                </div>
+                            </div>
                             <div className="container-content-group">
-                                <div className="container-single-content">Floor 1</div>
-                                <div className="container-single-content">Floor 2</div>
-                                <div className="container-single-content">Floor 3</div>
-                                <div className="container-single-content">Floor 4</div>
+                                {floors.map((floor) => (
+                                    <div className="container-single-content mr-4">
+                                        <span>Floor {floor.number}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
+                                            {floor.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                         <div className="header">
-                            <div className="container-heading">Floor 1</div>
+                            <div className="container-heading">
+                                <span>Floor 1</span>
+                                <i className="uil uil-pen ml-2"></i>
+                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
+                                    <i className="uil uil-filter mr-3"></i>
+                                    <i className="uil uil-plus mr-2"></i>
+                                </div>
+                            </div>
                             <div className="container-content-group">
-                                <div className="container-single-content">Map Area</div>
-                                <div className="container-single-content">Main Conference Room</div>
-                                <div className="container-single-content">Conference Room 2</div>
-                                <div className="container-single-content">Lighting/HVAC Zones</div>
-                                <div className="container-single-content">Primary HVAC Zone</div>
-                                <div className="container-single-content">Lighting Zone 1</div>
-                                <div className="container-single-content">Lighting Zone 2</div>
+                                {floor1.map((floor) => (
+                                    <div className="container-single-content mr-4">
+                                        <span>{floor.area}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
+                                            {floor.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                         <div className="header">
-                            <div className="container-heading">Main Area</div>
+                            <div className="container-heading">
+                                <span>Main Area</span>
+                                <i className="uil uil-pen ml-2"></i>
+                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
+                                    <i className="uil uil-filter mr-3"></i>
+                                    <i className="uil uil-plus mr-2"></i>
+                                </div>
+                            </div>
                             <div className="container-content-group">
-                                <div className="container-single-content">1WE (Mech. Room)</div>
-                                <div className="container-single-content">123</div>
-                                <div className="container-single-content">124</div>
-                                <div className="container-single-content">125</div>
-                                <div className="container-single-content">126</div>
-                                <div className="container-single-content">127</div>
-                                <div className="container-single-content">128</div>
-                                <div className="container-single-content">129</div>
-                                <div className="container-single-content">130</div>
-                                <div className="container-single-content">131</div>
-                                <div className="container-single-content">132</div>
-                                <div className="container-single-content">133</div>
-                                <div className="container-single-content">134</div>
-                                <div className="container-single-content">135</div>
+                                {mainArea.map((record) => (
+                                    <div className="container-single-content mr-4">
+                                        <span>{record.name}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
+                                            {record.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                         <div className="header">
-                            <div className="container-heading">123</div>
+                            <div className="container-heading">
+                                <span>123</span>
+                                <i className="uil uil-pen ml-2"></i>
+                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
+                                    <i className="uil uil-plus mr-2"></i>
+                                </div>
+                            </div>
                             <div className="container-content-group">
-                                <div className="container-single-content">No areas in this room</div>
+                                <span className="text-center m-2">No area in this room</span>
+                                <span className="text-left text-uppercase m-2 equip-head-style">
+                                    Equipment in this space
+                                </span>
+                                <div className="m-2">
+                                    <span style={{ fontWeight: 600 }} className="mt-3">
+                                        4 items
+                                    </span>
+                                    <button type="button" class="btn btn-light btn-sm float-right font-weight-bold">
+                                        Views
+                                    </button>
+                                </div>
+
+                                {/* <div className="container-single-content">No areas in this room</div>
                                 <div className="container-single-content">Equipment in this space</div>
-                                <div className="container-single-content">4 items</div>
+                                <div className="container-single-content">4 items</div> */}
                             </div>
                         </div>
                     </div>

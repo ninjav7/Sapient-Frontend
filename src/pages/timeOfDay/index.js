@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
 import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
-import DonutChart from '../portfolio/PortfolioDonutChart';
+import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
 import './style.css';
 
@@ -876,6 +876,89 @@ const TimeOfDay = () => {
 
     const weekdaysChartHeight = 235;
 
+    const [donutChartOpts, setDonutChartOpts] = useState({
+        chart: {
+            type: 'donut',
+        },
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        series: [12553, 11553, 6503, 2333],
+        plotOptions: {
+            pie: {
+                expandOnClick: false,
+                size: 200,
+                donut: {
+                    size: '77%',
+                    labels: {
+                        show: true,
+                        // name: {
+                        //     show: true,
+                        //     fontSize: '22px',
+                        //     fontFamily: undefined,
+                        //     color: '#dfsda',
+                        //     offsetY: -10,
+                        // },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            color: '#d14065',
+                            offsetY: 16,
+                            // formatter: function (val) {
+                            //     return val;
+                            // },
+                        },
+                        total: {
+                            show: true,
+                            showAlways: true,
+                            label: 'Total',
+                            color: '#373d3f',
+                            formatter: function (w) {
+                                return w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b;
+                                }, 0);
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 300,
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+        dataLabels: {
+            enabled: false,
+        },
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        legend: {
+            show: false,
+        },
+        stroke: {
+            width: 0,
+        },
+
+        itemMargin: {
+            horizontal: 10,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+    });
+
+    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+
     return (
         <React.Fragment>
             <Header title="Time of Day" />
@@ -887,7 +970,7 @@ const TimeOfDay = () => {
                         </h6>
                         <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
                         <div className="mt-2 ">
-                            <DonutChart />
+                            <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
                         </div>
                     </div>
                 </Col>

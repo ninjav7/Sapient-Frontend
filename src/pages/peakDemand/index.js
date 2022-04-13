@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
+import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 
 const BuildingPeakButton = (props) => {
+    // peaks api call
+
     return (
         <>
             <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
@@ -85,6 +89,26 @@ const Peaks = ({ energyConsumption }) => {
 };
 
 const PeakDemand = () => {
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}&limit=${2}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingPeak}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopContributors(res.data);
+                console.log(res.data);
+            });
+    }, []);
     const [topContributors, setTopContributors] = useState([
         {
             date: 'March 3rd',
@@ -181,7 +205,7 @@ const PeakDemand = () => {
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body">
+                        <div className="card-body peak-card-box-style">
                             <h5 className="card-title card-title-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
                             <p className="card-text card-content-style">
                                 261
@@ -302,7 +326,7 @@ const PeakDemand = () => {
                                 </i>
                             </Button>
                             <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minute period)</h6>
-                            <LineAnnotationChart title="" height={350}/>
+                            <LineAnnotationChart title="" height={350} />
                         </CardBody>
                     </Card>
                 </Col>
