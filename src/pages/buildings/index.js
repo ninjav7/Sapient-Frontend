@@ -22,6 +22,7 @@ import {
     portfolioEndUser,
 } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
+
 const BuildingOverview = () => {
     const [overview, setOverview] = useState({
         total_building: 0,
@@ -175,145 +176,6 @@ const BuildingOverview = () => {
     });
 
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingOverview}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setOverview(res.data);
-                console.log(res.data);
-            });
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        axios
-            .post(
-                `${BaseUrl}${portfolioEndUser}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEnergyConsumption(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingAlerts}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setBuildingAlerts(res.data);
-                console.log('Building Alert => ', res.data);
-            });
-    }, []);
-
-    // peaks api call
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}&limit=${2}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingPeak}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopContributors(res.data);
-                console.log(res.data);
-            });
-    }, []);
-    // builidingEquipments
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingEquipments}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopEnergyConsumption(res.data[0].top_contributors);
-                console.log(res.data);
-            });
-    }, []);
-    // builidingHourly
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}&aggregate=${'hi'}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingHourly}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                const data = res.data.map((el) => {
-                    return {
-                        x: el.energy_consumption,
-                        y: el.timestamp,
-                    };
-                });
-                const arr = [
-                    {
-                        data: data,
-                    },
-                ];
-                console.log(res.data);
-                console.log(arr);
-                // setLineChartSeries(arr);
-            });
-    }, []);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -932,6 +794,147 @@ const BuildingOverview = () => {
             ],
         },
     ];
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingOverview}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setOverview(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios
+            .post(
+                `${BaseUrl}${portfolioEndUser}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEnergyConsumption(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {});
+    }, []);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingAlerts}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setBuildingAlerts(res.data);
+                console.log('Building Alert => ', res.data);
+            });
+    }, []);
+
+    // peaks api call
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}&limit=${2}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingPeak}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopContributors(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
+    // builidingEquipments
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingEquipments}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopEnergyConsumption(res.data[0].top_contributors);
+                console.log(res.data);
+            });
+    }, []);
+
+    // builidingHourly
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=${1}&aggregate=${'hi'}`;
+        axios
+            .post(
+                `${BaseUrl}${builidingHourly}${params}`,
+                {
+                    time_horizon: 0,
+                    custom_time_horizon: 0,
+                },
+                { headers }
+            )
+            .then((res) => {
+                const data = res.data.map((el) => {
+                    return {
+                        x: el.energy_consumption,
+                        y: el.timestamp,
+                    };
+                });
+                const arr = [
+                    {
+                        data: data,
+                    },
+                ];
+                console.log(res.data);
+                console.log(arr);
+                // setLineChartSeries(arr);
+            });
+    }, []);
 
     return (
         <React.Fragment>

@@ -292,18 +292,95 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
             </Row>
 
             <Row>
-                <Col xl={7} className="mt-5 ml-3">
+                <Col xl={8} className="mt-5 ml-3">
                     <h6 className="card-title" style={{ fontWeight: 'bold' }}>
                         HVAC Usage vs. OA Temperature
                     </h6>
                     <h6 className="card-subtitle mb-2 text-muted">Energy Usage By Hour Trend</h6>
+                    <div style={{ width: '700px' }}>
+                        {/* Buttons */}
+
+                        <div className="card-group button-style mt-2" style={{ display: 'inline-block' }}>
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div>
+                                        <p className="dot" style={{ backgroundColor: '#3094B9' }}>
+                                            <span className="card-title card-title-style">
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AHUs
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <p className="card-text card-content-style">
+                                        {(3356).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div>
+                                        <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
+                                            <span className="card-title card-title-style">
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chillers
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <p className="card-text card-content-style">
+                                        {(2353).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div>
+                                        <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
+                                            <span className="card-title card-title-style">
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CRACs
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <p className="card-text card-content-style">
+                                        {(1365).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div>
+                                        <p className="dot" style={{ backgroundColor: '#3B8554' }}>
+                                            <span className="card-title card-title-style">
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Other
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <p className="card-text card-content-style">
+                                        {(1332).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* QA Temp Icon  */}
+
+                        <div style={{ display: 'inline-block', float: 'right' }} className="mt-4 mr-2">
+                            <p className="dot" style={{ backgroundColor: '#DF3C9E' }}>
+                                <span className="card-title card-title-style" style={{ width: '100px' }}>
+                                    &nbsp;&nbsp;&nbsp;OA Temp
+                                </span>
+                            </p>
+                        </div>
+                    </div>
                     <StackedBarChart options={barChartOptions} series={barChartData} height={440} />
                 </Col>
-                <Col xl={4} className="mt-5 ml-3">
+                <Col xl={3} className="mt-5 ml-3">
                     <h6 className="card-title" style={{ fontWeight: 'bold' }}>
                         Consumption by System
                     </h6>
                     <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+
                     <div className="card-body">
                         <div>
                             <DonutChart options={donutChartOpts} series={donutChartData} height={200} />

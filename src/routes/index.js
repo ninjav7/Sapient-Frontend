@@ -75,6 +75,7 @@ const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 const HVACUsage = React.lazy(() => import('../pages/endUses/UsagePageOne'));
 const LightningUsage = React.lazy(() => import('../pages/endUses/UsagePageTwo'));
 const PlugUsage = React.lazy(() => import('../pages/endUses/UsagePageThree'));
+const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
@@ -87,6 +88,9 @@ const Editor = React.lazy(() => import('../pages/forms/Editor'));
 // tables
 const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
+
+// explore
+const Explore = React.lazy(() => import('../pages/explore/Explore'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -424,6 +428,18 @@ const portfolioRoutes = {
             path: '/energy/plug',
             name: 'Plug Usage',
             component: PlugUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/explore',
+            name: 'Explore',
+            component: Explore,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/building-peak-explore',
+            name: 'BuildingPeak Explore',
+            component: ExploreBuildingPeak,
             route: PrivateRoute,
         },
     ],

@@ -2,9 +2,11 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
+import { Link } from 'react-router-dom';
 import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
+import exploreBuildingPeak from './ExploreBuildingPeak';
 
 const BuildingPeakButton = (props) => {
     // peaks api call
@@ -40,19 +42,21 @@ const BuildingPeakButton = (props) => {
     );
 };
 
-const Peaks = ({ energyConsumption }) => {
+const Peaks = ({ energyConsumption, title, subtitle }) => {
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
                 <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                    Equipment Type Peaks
+                    {title}
                 </h6>
-                <div className="float-right ml-2">
-                    <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                        <i className="uil uil-pen mr-1"></i>Explore
-                    </button>
-                </div>
-                <h6 className="card-subtitle mb-2 text-muted">At building peak time</h6>
+                <Link to="/energy/building-peak-explore">
+                    <div className="float-right ml-2">
+                        <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                            <i className="uil uil-pen mr-1"></i>Explore
+                        </button>
+                    </div>
+                </Link>
+                <h6 className="card-subtitle mb-2 text-muted">{subtitle}</h6>
                 <Table className="mb-0" borderless hover>
                     <thead>
                         <tr>
@@ -198,6 +202,39 @@ const PeakDemand = () => {
         },
     ]);
 
+    const [singleEquipPeak, setSingleEquipPeak] = useState([
+        {
+            equipName: 'AHU 1',
+            usage: '25.3 kW',
+            percentage: 25,
+        },
+        {
+            equipName: 'AHU 2',
+            usage: '21.3 kW',
+            percentage: 8,
+        },
+        {
+            equipName: 'RTU 1',
+            usage: '5.3 kW',
+            percentage: 6,
+        },
+        {
+            equipName: 'Front RTU',
+            usage: '2.3 kW',
+            percentage: 2,
+        },
+        {
+            equipName: 'Chiller',
+            usage: '1.2 kW',
+            percentage: 1,
+        },
+        {
+            equipName: 'Chiller',
+            usage: '0.2 kW',
+            percentage: 2,
+        },
+    ]);
+
     return (
         <React.Fragment>
             <Header title="Peak Demand" />
@@ -300,10 +337,18 @@ const PeakDemand = () => {
 
                     <Row className="mt-4" style={{}}>
                         <Col xl={6}>
-                            <Peaks energyConsumption={energyConsumption} />
+                            <Peaks
+                                energyConsumption={energyConsumption}
+                                title="Equipment Type Peaks"
+                                subtitle="At building peak time"
+                            />
                         </Col>
                         <Col xl={6}>
-                            <Peaks energyConsumption={energyConsumption} />
+                            <Peaks
+                                energyConsumption={singleEquipPeak}
+                                title="Individual Equipment Peaks"
+                                subtitle="At building peak time"
+                            />
                         </Col>
                     </Row>
                 </div>
