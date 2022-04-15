@@ -354,11 +354,11 @@
     text-align: center;
 }
 
-.table-peak-power {
-    /* display: flex; */
-    /* justify-content: center; */
-    /* align-items: center; */
-}
+/* .table-peak-power {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} */
 
 .table-container {
     width: 1150px;
