@@ -88,9 +88,12 @@ const BuildingTable = () => {
                                     <td>
                                         {record.energyDensity} kWh / sq. ft.sq. ft.
                                         <br />
-                                        <progress id="file" value={72} min={50} max={100}>
-                                            32%
-                                        </progress>
+                                        <div class="progress" style={{ height: '10px' }}>
+                                            <div
+                                                class="progress-bar"
+                                                aria-valuenow="70"
+                                                style={{ width: '50%', marginLeft: '50%', height: '10px' }}></div>
+                                        </div>
                                     </td>
                                     <td>
                                         {record.energyPerChgStatus === 'up' && (

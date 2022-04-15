@@ -16,6 +16,15 @@ import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/ActiveDevices';
 import PassiveDevices from '../pages/settings/PassiveDevices';
 import Gateways from '../pages/settings/Gateways';
+import AccountSettings from '../pages/settings/AccountSettings';
+import Buildings from '../pages/settings/Buildings';
+import Users from '../pages/settings/Users';
+import UserProfile from '../pages/settings/UserProfile';
+import Roles from '../pages/settings/Roles';
+import SingleRole from '../pages/settings/SingleRole';
+
+// controls
+import PlugRules from '../pages/controls/PlugRules';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -75,6 +84,7 @@ const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 const HVACUsage = React.lazy(() => import('../pages/endUses/UsagePageOne'));
 const LightningUsage = React.lazy(() => import('../pages/endUses/UsagePageTwo'));
 const PlugUsage = React.lazy(() => import('../pages/endUses/UsagePageThree'));
+const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
 const BasicForms = React.lazy(() => import('../pages/forms/Basic'));
@@ -87,6 +97,9 @@ const Editor = React.lazy(() => import('../pages/forms/Editor'));
 // tables
 const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
+
+// explore
+const Explore = React.lazy(() => import('../pages/explore/Explore'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -426,6 +439,12 @@ const portfolioRoutes = {
             component: PlugUsage,
             route: PrivateRoute,
         },
+        {
+            path: '/energy/building-peak-explore',
+            name: 'BuildingPeak Explore',
+            component: ExploreBuildingPeak,
+            route: PrivateRoute,
+        },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
@@ -496,12 +515,78 @@ const settingsRoutes = {
             component: Gateways,
             route: PrivateRoute,
         },
+        {
+            path: '/settings/account',
+            name: 'Account Settings',
+            component: AccountSettings,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/buildings',
+            name: 'Buildings',
+            component: Buildings,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/users',
+            name: 'Users',
+            component: Users,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/roles',
+            name: 'Roles',
+            component: Roles,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/user-profile',
+            name: 'User Profile',
+            component: UserProfile,
+            route: PrivateRoute,
+        },
+        {
+            path: '/settings/role-config',
+            name: 'Single Role',
+            component: SingleRole,
+            route: PrivateRoute,
+        },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
 };
 
-// endUses
+const exploreRoutes = {
+    path: '/explore',
+    name: 'Explore',
+    children: [
+        {
+            path: '/explore/by-floor',
+            name: 'Explore',
+            component: Explore,
+            route: PrivateRoute,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
+const controlRoutes = {
+    path: '/control',
+    name: 'Control',
+    children: [
+        {
+            path: '/control/plug-rules',
+            name: 'Plug Rules',
+            component: PlugRules,
+            component: PlugRules,
+            route: PrivateRoute,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
 const endUsesRoutes = {
     path: '/endUses',
     name: 'End Uses',
@@ -637,6 +722,8 @@ const allRoutes = [
     portfolioRoutes,
     buildingRoutes,
     settingsRoutes,
+    controlRoutes,
+    exploreRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -649,6 +736,8 @@ const authProtectedRoutes = [
     dashboardRoutes,
     portfolioRoutes,
     settingsRoutes,
+    controlRoutes,
+    exploreRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

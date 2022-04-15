@@ -1,17 +1,5 @@
 import React from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    CustomInput,
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    FormText,
-    Button,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, CustomInput, Form, FormGroup, Label, Input, FormText, Button } from 'reactstrap';
 
 import PageTitle from '../../components/PageTitle';
 
@@ -268,7 +256,6 @@ const CustomRadios = () => {
     );
 };
 
-
 const DefaultForm = () => {
     return (
         <Card>
@@ -403,7 +390,8 @@ const BasicForms = () => {
                         ]}
                         title={'Form Elements'}
                     />
-                </Col></Row>
+                </Col>
+            </Row>
 
             <Row>
                 <Col>
