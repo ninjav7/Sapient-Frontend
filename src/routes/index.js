@@ -583,7 +583,7 @@ const controlRoutes = {
             route: PrivateRoute,
         },
     ],
-    icon: FeatherIcon.PieChart,
+    icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],
 };
 

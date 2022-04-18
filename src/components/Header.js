@@ -5,7 +5,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
-    let today = new Date();
     const TABS = {
         Tab1: '24 Hours',
         Tab2: '7 Days',
@@ -14,13 +13,18 @@ const Header = (props) => {
     };
 
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
+
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
     useEffect(() => {
-        console.log('startDate => ', startDate);
-        console.log('endDate => ', endDate);
-    });
+        //today
+        let endCustomDate = new Date();
+        // 7 days
+        let startCustomDate = new Date();
+        startCustomDate.setDate(startCustomDate.getDate() - 7);
+        setDateRange([startCustomDate, endCustomDate]);
+    }, []);
 
     return (
         <React.Fragment>

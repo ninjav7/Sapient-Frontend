@@ -1084,7 +1084,7 @@ const BuildingOverview = () => {
                                                                     style={{ backgroundColor: '#3B8554' }}></div>
                                                             )}
                                                         </td>
-                                                        <td className="custom-equip-style table-font-style font-weight-bold">
+                                                        <td className="building-table-font-style font-weight-bold">
                                                             {record.device}
                                                         </td>
                                                         <td className="custom-usage-style muted table-font-style">

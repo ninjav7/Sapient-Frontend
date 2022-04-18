@@ -203,11 +203,18 @@ const SingleRole = () => {
                                                     id="edit"
                                                     label="Edit"
                                                     inline
-                                                    disabled={true}
+                                                    disabled={false}
                                                 />
                                             </div>
                                             <div>
-                                                {/* <CustomInput type="checkbox" id="delete" label="Delete" inline /> */}
+                                                {/* <div key={`default-checkbox`} className="mb-3">
+                                                    <Form.Check
+                                                        type="checkbox"
+                                                        id={`default-checkbox`}
+                                                        label={`disabled checkbox`}
+                                                        disabled={true}
+                                                    />
+                                                </div> */}
                                             </div>
                                         </div>
                                     </FormGroup>
