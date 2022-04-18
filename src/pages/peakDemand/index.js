@@ -9,8 +9,6 @@ import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
 
 const BuildingPeakButton = (props) => {
-    // peaks api call
-
     return (
         <>
             <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
@@ -93,6 +91,8 @@ const Peaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
+    const [selectedTab, setSelectedTab] = useState(1);
+
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
@@ -235,6 +235,10 @@ const PeakDemand = () => {
         },
     ]);
 
+    useEffect(() => {
+        console.log('Selected Tab => ', selectedTab);
+    });
+
     return (
         <React.Fragment>
             <Header title="Peak Demand" />
@@ -242,7 +246,7 @@ const PeakDemand = () => {
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body peak-card-box-style">
+                        <div className="card-body card-box-style">
                             <h5 className="card-title card-title-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
                             <p className="card-text card-content-style">
                                 261
@@ -276,81 +280,251 @@ const PeakDemand = () => {
                     </h6>
 
                     <Row>
-                        <div className="card-group button-style" style={{ marginLeft: '10px' }}>
-                            <div className="card card-box-style button-style">
-                                <div className="card-body">
-                                    <BuildingPeakButton
-                                        title="March 3rd @ 3:20 PM"
-                                        description="225.3"
-                                        unit="kW"
-                                        value="12"
-                                        consumptionNormal={true}
-                                    />
+                        <div className="button-style" style={{ marginLeft: '10px' }}>
+                            {selectedTab === 1 ? (
+                                <div
+                                    onClick={() => setSelectedTab(1)}
+                                    className="card peak-card-box-style-selected button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="March 3rd @ 3:20 PM"
+                                            description="225.3"
+                                            unit="kW"
+                                            value="12"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="card card-box-style button-style">
-                                <div className="card-body">
-                                    <BuildingPeakButton
-                                        title="March 1st @ 3:50 PM"
-                                        description="221.3"
-                                        unit="kW"
-                                        value="8"
-                                        consumptionNormal={false}
-                                    />
+                            ) : (
+                                <div
+                                    onClick={() => setSelectedTab(1)}
+                                    className="card peak-card-box-style button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="March 3rd @ 3:20 PM"
+                                            description="225.3"
+                                            unit="kW"
+                                            value="12"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="card card-box-style button-style">
-                                <div className="card-body">
-                                    <BuildingPeakButton
-                                        title="April 12th @ 3:20 PM"
-                                        description="202.3"
-                                        unit="kW"
-                                        value="1"
-                                        consumptionNormal={true}
-                                    />
+                            )}
+                            {selectedTab === 2 ? (
+                                <div
+                                    onClick={() => setSelectedTab(2)}
+                                    className="card peak-card-box-style-selected button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="March 1st @ 3:50 PM"
+                                            description="221.3"
+                                            unit="kW"
+                                            value="8"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="card card-box-style button-style">
-                                <div className="card-body">
-                                    <BuildingPeakButton
-                                        title="April 12th @ 3:20 PM"
-                                        description="202.3"
-                                        unit="kW"
-                                        value="1"
-                                        consumptionNormal={false}
-                                    />
+                            ) : (
+                                <div
+                                    onClick={() => setSelectedTab(2)}
+                                    className="card peak-card-box-style button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="March 1st @ 3:50 PM"
+                                            description="221.3"
+                                            unit="kW"
+                                            value="8"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="card card-box-style button-style">
-                                <div className="card-body">
-                                    <BuildingPeakButton
-                                        title="Jan 2nd @ 4:20 PM"
-                                        description="125.3"
-                                        unit="kW"
-                                        value="2"
-                                        consumptionNormal={false}
-                                    />
+                            )}
+
+                            {selectedTab === 3 ? (
+                                <div
+                                    onClick={() => setSelectedTab(3)}
+                                    className="card peak-card-box-style-selected button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="April 12th @ 3:20 PM"
+                                            description="202.3"
+                                            unit="kW"
+                                            value="1"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div
+                                    onClick={() => setSelectedTab(3)}
+                                    className="card peak-card-box-style button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="April 12th @ 3:20 PM"
+                                            description="202.3"
+                                            unit="kW"
+                                            value="1"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedTab === 4 ? (
+                                <div
+                                    onClick={() => setSelectedTab(4)}
+                                    className="card peak-card-box-style-selected button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="April 25th @ 11:30 AM"
+                                            description="192.8"
+                                            unit="kW"
+                                            value="5"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    onClick={() => setSelectedTab(4)}
+                                    className="card peak-card-box-style button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="April 25th @ 11:30 AM"
+                                            description="192.8"
+                                            unit="kW"
+                                            value="5"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {selectedTab === 5 ? (
+                                <div
+                                    onClick={() => setSelectedTab(5)}
+                                    className="card peak-card-box-style-selected button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="Jan 2nd @ 4:20 PM"
+                                            description="125.3"
+                                            unit="kW"
+                                            value="2"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    onClick={() => setSelectedTab(5)}
+                                    className="card peak-card-box-style button-style">
+                                    <div className="card-body">
+                                        <BuildingPeakButton
+                                            title="Jan 2nd @ 4:20 PM"
+                                            description="125.3"
+                                            unit="kW"
+                                            value="2"
+                                            consumptionNormal={false}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </Row>
 
-                    <Row className="mt-4" style={{}}>
-                        <Col xl={6}>
-                            <Peaks
-                                energyConsumption={energyConsumption}
-                                title="Equipment Type Peaks"
-                                subtitle="At building peak time"
-                            />
-                        </Col>
-                        <Col xl={6}>
-                            <Peaks
-                                energyConsumption={singleEquipPeak}
-                                title="Individual Equipment Peaks"
-                                subtitle="At building peak time"
-                            />
-                        </Col>
-                    </Row>
+                    {selectedTab === 1 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={singleEquipPeak}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {selectedTab === 2 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={singleEquipPeak}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {selectedTab === 3 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={singleEquipPeak}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {selectedTab === 4 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={singleEquipPeak}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {selectedTab === 5 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <Peaks
+                                    energyConsumption={singleEquipPeak}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
                 </div>
             </Row>
 

@@ -204,7 +204,6 @@ const PortfolioOverview = () => {
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-        series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
                 expandOnClick: false,
@@ -220,15 +219,15 @@ const PortfolioOverview = () => {
                         //     color: '#dfsda',
                         //     offsetY: -10,
                         // },
-                        value: {
-                            show: true,
-                            fontSize: '16px',
-                            color: '#d14065',
-                            offsetY: 16,
-                            // formatter: function (val) {
-                            //     return val;
-                            // },
-                        },
+                        // value: {
+                        //     show: true,
+                        //     fontSize: '16px',
+                        //     color: '#d14065',
+                        //     offsetY: 16,
+                        //     formatter: function (val) {
+                        //         return val;
+                        //     },
+                        // },
                         total: {
                             show: true,
                             showAlways: true,
@@ -582,10 +581,12 @@ const PortfolioOverview = () => {
                                                             {record.device === 'Process' && (
                                                                 <div
                                                                     className="dot"
-                                                                    style={{ backgroundColor: '#3B8554' }}></div>
+                                                                    style={{
+                                                                        backgroundColor: '#3B8554',
+                                                                    }}></div>
                                                             )}
                                                         </td>
-                                                        <td className="custom-equip-style table-font-style font-weight-bold">
+                                                        <td className="custom-equip-style record-style font-weight-bold">
                                                             {record.device}
                                                         </td>
                                                         <td className="custom-usage-style muted table-font-style">
