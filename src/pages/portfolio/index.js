@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
+import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
 import MapChart from '../charts/MapChart';
 import SimpleMaps from '../charts/SimpleMaps';
@@ -551,6 +552,7 @@ const PortfolioOverview = () => {
                             <div className="card-body mt-2">
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
+                                    {/* <DoughnutChart /> */}
                                 </div>
                             </div>
                         </Col>
