@@ -66,7 +66,6 @@
 
 .peak-demand-container {
     margin-right: 1rem;
-    /* box-shadow: 0px 0px 5px rgb(170, 170, 170); */
     background: #f9fafb;
     border: 2px soild red;
 }
@@ -89,7 +88,7 @@
 
 .building-consumption-style {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 0.3fr 0.7fr 1fr;
     gap: 2px;
     margin-bottom: 5px;
 }
@@ -161,13 +160,13 @@
     line-height: 21px;
 }
 
-.equip-table-content {
+/* .equip-table-content {
     color: #1d2939;
     font-style: normal;
     font-weight: 800;
     font-size: 14px;
     line-height: 100%;
-}
+} */
 
 .equip-table-unit {
     font-size: 12px;
@@ -178,15 +177,16 @@
 .equip-table-button {
     background: #fef3f2;
     border-radius: 6px;
-    width: 54px;
+    /* width: 54px; */
     height: 20px;
-    padding: 1px 4px;
+    /* padding: 1px 4px; */
+    padding: 0px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 12px;
-    line-height: 18px;
+    line-height: 12px;
 }
 
 .equip-table-container {
@@ -223,3 +223,84 @@
     border-radius: 8px;
     margin-top: 15px;
 }
+
+.top-peak-demand-style {
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+}
+
+.peak-demand-card-style {
+    color: #667085;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.peak-card-label {
+    margin: 0px;
+    color: #000000;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.peak-table-content {
+    padding: 2px !important;
+}
+
+.peak-table-content-two {
+    padding: 0px !important;
+    margin-left: 5px !important;
+}
+
+.peak-table-font {
+    color: #667085;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.equip-table-content {
+    color: #667085;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 100%;
+}
+
+.energy-blg-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.energy-blg-container-one {
+    display: grid;
+}
+
+.energy-blg-container-one-content {
+    display: grid;
+    grid-template-columns: 0.8fr 1fr;
+}
+
+.energy-blg-container-two-content {
+}
+
+.energy-chart-style {
+    width: 250px;
+}
+
+/* .bldg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+} */
