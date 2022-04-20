@@ -386,3 +386,11 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 8px;
 }
+
+.text-center-head {
+    margin-top: 5px;
+}
+
+.text-center-content {
+    margin-top: 4px;
+}

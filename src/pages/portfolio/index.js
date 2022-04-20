@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
+// import PortfolioDonutChart from './PortfolioDonutChart';
 import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
 import MapChart from '../charts/MapChart';
@@ -14,6 +15,7 @@ import axios from 'axios';
 import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
+import ReactDonutChart from './ReactDonutChart';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -553,6 +555,8 @@ const PortfolioOverview = () => {
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
                                     {/* <DoughnutChart /> */}
+                                    {/* <PortfolioDonutChart /> */}
+                                    {/* <ReactDonutChart /> */}
                                 </div>
                             </div>
                         </Col>

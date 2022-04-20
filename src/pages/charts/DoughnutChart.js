@@ -44,7 +44,6 @@ const DoughnutChart = () => {
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         datasets: [
             {
-                label: '# of Votes',
                 data: [12553, 11553, 6503, 2333],
                 backgroundColor: [
                     'rgba(48, 148, 185, 1)',
@@ -53,9 +52,37 @@ const DoughnutChart = () => {
                     'rgba(59, 133, 84, 1)',
                 ],
                 borderWidth: 0.1,
-                text: '23%',
+                cutout: '90%',
+                borderRadius: 20,
             },
         ],
+        options: {
+            plugins: {
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                        color: 'red',
+                        weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                    labels: [
+                        {
+                            text: '550',
+                            font: {
+                                size: 20,
+                                weight: 'bold',
+                            },
+                        },
+                        {
+                            text: 'total',
+                        },
+                    ],
+                },
+            },
+        },
         // options: {
         //     responsive: true,
         //     legend: {
