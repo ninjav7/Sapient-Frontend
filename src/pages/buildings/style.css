@@ -1,11 +1,12 @@
 .card-title-style {
-    font-style: normal;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 15px;
     display: flex;
     align-items: center;
     color: #5a6472;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 15px;
 }
 
 .card-box-style {
@@ -83,7 +84,12 @@
 }
 
 .building-table-font-style {
-    font-size: small;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
 }
 
 .building-consumption-style {
@@ -102,44 +108,47 @@
 }
 
 .alert-card {
-    /* justify-content: space-between; */
     align-items: flex-start;
     padding: 10px;
-    /* background: #f9fafb; */
+    background: #f9fafb;
     border-radius: 8px;
     width: 314px;
     height: 60px;
     display: grid;
     grid-template-columns: 0.5fr 2.5fr 1fr;
     gap: 2px;
-    /* border: 2px soild red !important; */
 }
 
 .alert-card:hover {
-    background: #f9fafb;
-    border-radius: 8px;
+    box-shadow: 0px 0px 1px rgb(179, 179, 179);
 }
 
 .alert-weekday {
-    color: #667085;
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 12px;
-    justify-self: end;
+    line-height: 18px;
+    color: #667085;
+    margin-right: 0px;
 }
 
 .alert-heading {
-    color: #1d2939;
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
 }
 
 .alert-content {
-    color: #667085;
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 12px;
+    line-height: 18px;
+    color: #667085;
 }
 
 .right-side-container {
@@ -152,26 +161,31 @@
     gap: 4px;
 } */
 
-.equip-table-heading {
-    color: #667085;
+.custom-usage-style {
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
-    line-height: 21px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #667085;
 }
 
-/* .equip-table-content {
-    color: #1d2939;
+.equip-table-heading {
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 800;
-    font-size: 14px;
-    line-height: 100%;
-} */
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 21px;
+    color: #667085;
+}
 
 .equip-table-unit {
-    font-size: 12px;
-    color: #4c5e75;
+    font-family: 'Inter';
+    font-style: normal;
     font-weight: 700;
+    font-size: 12px;
+    line-height: 10%;
+    color: #4c5e75;
 }
 
 .equip-table-button {
@@ -243,12 +257,12 @@
 
 .peak-card-label {
     margin: 0px;
-    color: #000000;
     font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
+    color: #000000;
 }
 
 .peak-table-content {
@@ -258,6 +272,12 @@
 .peak-table-content-two {
     padding: 0px !important;
     margin-left: 5px !important;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    color: #667085;
 }
 
 .peak-table-font {
@@ -270,11 +290,12 @@
 }
 
 .equip-table-content {
-    color: #667085;
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
-    font-size: 12px;
+    font-weight: 700;
+    font-size: 14px;
     line-height: 100%;
+    color: #1d2939;
 }
 
 .energy-blg-container {
@@ -304,3 +325,22 @@
     border-radius: 20px;
     margin-top: 6px;
 } */
+
+.custom-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
+    margin-bottom: 7px;
+}
+
+.custom-subtitle-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 18px;
+    color: #667085;
+}

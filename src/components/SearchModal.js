@@ -51,7 +51,6 @@ const SearchModal = () => {
                     <Form>
                         <FormGroup>
                             <div>
-                                {/* <i className="uil uil-building" style={{ display: 'inline-block' }}></i> */}
                                 <Input
                                     type="select"
                                     name="select"
@@ -149,6 +148,89 @@ const SearchModal = () => {
                                 </div>
                             </div>
                         </FormGroup>
+                        {/* --------------------------------------------------------------------------------------------------- */}
+                        {/* <FormGroup>
+                            <div className="search-result-body">
+                                <div className="recent-btn-grp">
+                                    <div className="recent-btn">
+                                        <div>Recently Visited Pages</div>
+                                        <div className="recent-search-nmbr ml-2">5</div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-2">
+                                    <div className="search-filter search-content-style p-2">
+                                        <div className="search-border"></div>
+                                        <div className="search-icon-style" style={{ fontSize: '18px' }}>
+                                            <i className="uil uil-clipboard-alt"></i>
+                                        </div>
+                                        <div className="search-result-header">
+                                            <div className="search-result-title">Page Name</div>
+                                            <div className="search-result-subtitle">Page description</div>
+                                        </div>
+                                        <div className="search-icon-style icon-display">
+                                            <i className="uil uil-angle-right-b"></i>
+                                        </div>
+                                    </div>
+
+                                    <div className="search-filter search-content-style p-2">
+                                        <div className="search-border"></div>
+                                        <div className="search-icon-style" style={{ fontSize: '18px' }}>
+                                            <i className="uil uil-clipboard-alt"></i>
+                                        </div>
+                                        <div className="search-result-header">
+                                            <div className="search-result-title">Page Name</div>
+                                            <div className="search-result-subtitle">Page description</div>
+                                        </div>
+                                        <div className="search-icon-style icon-display">
+                                            <i className="uil uil-angle-right-b"></i>
+                                        </div>
+                                    </div>
+
+                                    <div className="search-filter search-content-style p-2">
+                                        <div className="search-border"></div>
+                                        <div className="search-icon-style" style={{ fontSize: '18px' }}>
+                                            <i className="uil uil-clipboard-alt"></i>
+                                        </div>
+                                        <div className="search-result-header">
+                                            <div className="search-result-title">Page Name</div>
+                                            <div className="search-result-subtitle">Page description</div>
+                                        </div>
+                                        <div className="search-icon-style icon-display">
+                                            <i className="uil uil-angle-right-b"></i>
+                                        </div>
+                                    </div>
+
+                                    <div className="search-filter search-content-style p-2">
+                                        <div className="search-border"></div>
+                                        <div className="search-icon-style" style={{ fontSize: '18px' }}>
+                                            <i className="uil uil-clipboard-alt"></i>
+                                        </div>
+                                        <div className="search-result-header">
+                                            <div className="search-result-title">Page Name</div>
+                                            <div className="search-result-subtitle">Page description</div>
+                                        </div>
+                                        <div className="search-icon-style icon-display">
+                                            <i className="uil uil-angle-right-b"></i>
+                                        </div>
+                                    </div>
+
+                                    <div className="search-filter search-content-style p-2">
+                                        <div className="search-border"></div>
+                                        <div className="search-icon-style" style={{ fontSize: '18px' }}>
+                                            <i className="uil uil-clipboard-alt"></i>
+                                        </div>
+                                        <div className="search-result-header">
+                                            <div className="search-result-title">Page Name</div>
+                                            <div className="search-result-subtitle">Page description</div>
+                                        </div>
+                                        <div className="search-icon-style icon-display">
+                                            <i className="uil uil-angle-right-b"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </FormGroup> */}
                     </Form>
                 </Modal.Body>
             </Modal>

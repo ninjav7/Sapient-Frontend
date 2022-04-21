@@ -56,35 +56,33 @@ const UsagePageTwo = () => {
             <Header title="Lightning" />
 
             <Row>
-                <div className="card-group button-style mt-2" style={{ marginLeft: '29px' }}>
-                    <div className="card usage-card-box-style button-style">
+                <div className="endUses-button-container mt-2" style={{ marginLeft: '29px' }}>
+                    <div className="card usage-card-box-style enduses-button-style">
                         <div className="card-body">
-                            <p className="subtitle-style muted" style={{ margin: '2px', fontWeight: 'bold' }}>
+                            <p className="subtitle-style muted" style={{ margin: '2px' }}>
                                 Total Consumption
                             </p>
                             <p className="card-text usage-card-content-style">
                                 {usage.totalConsumption.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                                 <span className="card-unit-style">&nbsp;kWh</span>
                             </p>
-                            <button
-                                className="button-danger text-danger font-weight-bold font-size-5"
-                                style={{ width: 'auto' }}>
+                            <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val1.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span className="muted">since last period</span>
+                            <span className="light-content-style">since last period</span>
                             <br />
                             <button
-                                className="button-danger text-danger font-weight-bold font-size-5 content-stying"
+                                className="button-danger text-danger btn-font-style"
                                 style={{ width: 'auto', marginTop: '3px' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val2.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span className="muted">from same period last year</span>
+                            <span className="light-content-style">from same period last year</span>
                         </div>
                     </div>
 
@@ -97,25 +95,23 @@ const UsagePageTwo = () => {
                                 {usage.afterHourConsumption.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                                 <span className="card-unit-style">&nbsp;kWh</span>
                             </p>
-                            <button
-                                className="button-danger text-danger font-weight-bold font-size-5 content-stying"
-                                style={{ width: 'auto' }}>
+                            <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val3.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span>since last period</span>
+                            <span className="light-content-style">since last period</span>
                             <br />
                             <button
-                                className="button-danger text-danger font-weight-bold font-size-5"
+                                className="button-danger text-danger btn-font-style"
                                 style={{ width: 'auto', marginTop: '3px' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val4.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span>from same period last year</span>
+                            <span className="light-content-style">from same period last year</span>
                         </div>
                     </div>
 
@@ -125,31 +121,29 @@ const UsagePageTwo = () => {
                                 Lightning Utilization
                             </p>
                             <p className="card-text usage-card-content-style">{usage.lightningUtilization} %</p>
-                            <button
-                                className="button-danger text-danger font-weight-bold font-size-5 content-stying"
-                                style={{ width: 'auto' }}>
+                            <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val3.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span>since last period</span>
+                            <span className="light-content-style">since last period</span>
                             <br />
                             <button
-                                className="button-danger text-danger font-weight-bold font-size-5"
+                                className="button-danger text-danger btn-font-style"
                                 style={{ width: 'auto', marginTop: '3px' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>{usage.val4.value} %</strong>
                                 </i>
                             </button>
                             &nbsp;&nbsp;
-                            <span>from same period last year</span>
+                            <span className="light-content-style">from same period last year</span>
                         </div>
                     </div>
 
-                    <div className="card button-style float-right">
+                    <div className="float-right">
                         <div className="card-body">
-                            <p className="subtitle-style" style={{ margin: '2px', fontWeight: 'bold' }}>
+                            <p className="subtitle-style" style={{ margin: '2px' }}>
                                 Installed Lighting Density
                             </p>
                             <p className="card-text usage-card-content-style density-content-style">
@@ -162,18 +156,14 @@ const UsagePageTwo = () => {
 
             <Row>
                 <Col xl={6} className="mt-5 ml-3">
-                    <h6 className="card-title" style={{ fontWeight: 'bold' }}>
-                        Lighting Usage vs. Occupancy
-                    </h6>
-                    <h6 className="card-subtitle mb-2 text-muted">Energy Usage By Hour Trend</h6>
+                    <h6 className="card-title custom-title">Lighting Usage vs. Occupancy</h6>
+                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
                     {/* <MixedChart title="" /> */}
                     <LineColumnChart title="" />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
-                    <h6 className="card-title" style={{ fontWeight: 'bold' }}>
-                        Usage by Floor
-                    </h6>
-                    <h6 className="card-subtitle mb-2 text-muted">Energy Consumption</h6>
+                    <h6 className="card-title custom-title">Usage by Floor</h6>
+                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
                     <div className="card-body">
                         <div>
                             <UsageBarChart />
