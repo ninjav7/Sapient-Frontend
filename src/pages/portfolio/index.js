@@ -442,7 +442,7 @@ const PortfolioOverview = () => {
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
                         <div className="card-body" style={{ marginTop: '2px' }}>
-                            <h5 className="card-title card-title-style">Total Buildings</h5>
+                            <h5 className="card-title subtitle-style">Total Buildings</h5>
                             <p className="card-text card-content-style">{overalldata.total_building}</p>
                         </div>
                     </div>
@@ -503,8 +503,8 @@ const PortfolioOverview = () => {
             <Row className="mt-2">
                 <Col xl={5}>
                     <div className="card-body mt-2">
-                        <h6 className="card-title">Energy Density Top Buildings</h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Consumption / Sq. Ft. Average</h6>
+                        <h6 className="custom-title">Energy Density Top Buildings</h6>
+                        <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                         <div className="map-widget">
                             {/* <MapChart /> */}
                             <SimpleMaps />
@@ -549,8 +549,8 @@ const PortfolioOverview = () => {
                 <Col xl={7}>
                     <Row>
                         <Col xl={5} className="mt-4">
-                            <h6 className="card-title">Energy Consumption by End Use</h6>
-                            <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                            <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                             <div className="card-body mt-2">
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
@@ -605,7 +605,7 @@ const PortfolioOverview = () => {
                                                             {record.energy_consumption.now <=
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-success text-success font-weight-bold font-size-5"
+                                                                    className="button-success text-success btn-font-style"
                                                                     style={{ width: '100px' }}>
                                                                     <i className="uil uil-chart-down">
                                                                         <strong>
@@ -621,7 +621,7 @@ const PortfolioOverview = () => {
                                                             {record.energy_consumption.now >
                                                                 record.energy_consumption.old && (
                                                                 <button
-                                                                    className="button-danger text-danger font-weight-bold font-size-5"
+                                                                    className="button-danger text-danger btn-font-style"
                                                                     style={{ width: '100px' }}>
                                                                     <i className="uil uil-arrow-growth">
                                                                         <strong>
@@ -648,8 +648,8 @@ const PortfolioOverview = () => {
 
                 <Col xl={5}>
                     <div className="card-body">
-                        <h6 className="card-title">Energy Consumption History</h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Totals by Day</h6>
+                        <h6 className="card-title custom-title">Energy Consumption History</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals by Day</h6>
                         <LineChart options={lineChartOptions} series={lineChartSeries} />
                     </div>
                 </Col>

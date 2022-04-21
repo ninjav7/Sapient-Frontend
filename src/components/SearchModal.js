@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import {
     Row,
     Col,
@@ -18,7 +17,8 @@ import {
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { Search } from 'react-feather';
-import '../pages/settings/style.css';
+import { allRoutes } from '../routes/index';
+import './style.css';
 
 const SearchModal = () => {
     const [searchModalShow, setSearchModalShow] = useState(false);
@@ -32,6 +32,26 @@ const SearchModal = () => {
         { value: 'Building 4', label: '246 Blackburn Rd. Philadelphia, PA' },
     ]);
 
+    console.log('allRoutes => ', allRoutes);
+    const pageList = [];
+
+    for (let route in allRoutes) {
+        // code block to be executed
+        if (route.name) {
+            pageList.push(route.name);
+            console.log('pageList => ', pageList);
+            // if (route.children) {
+            //     for (let child in route.children) {
+            //         if (child.name) {
+            //             pageList.push(child.name);
+            //         }
+            //     }
+            // }
+        }
+    }
+
+    console.log('pageList => ', pageList);
+
     return (
         <>
             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
@@ -39,15 +59,8 @@ const SearchModal = () => {
             </button>
 
             {/* Search Modal  */}
-            <Modal show={searchModalShow} onHide={searchModalClose} size={'lg'}>
-                <Modal.Body
-                    style={{
-                        backgroundColor: 'snowwhite',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
+            <Modal show={searchModalShow} onHide={searchModalClose} size={'lg'} className="modal-custom-container">
+                <Modal.Body className="search-modal-body">
                     <Form>
                         <FormGroup>
                             <div>
@@ -74,7 +87,7 @@ const SearchModal = () => {
                                 name="text"
                                 id="text1"
                                 placeholder="Search for pages, users, equipment, and more..."
-                                className="search-box"
+                                className="custom-search-box"
                             />
                         </FormGroup>
 

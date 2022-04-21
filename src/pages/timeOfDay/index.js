@@ -965,10 +965,10 @@ const TimeOfDay = () => {
             <Row className="">
                 <Col xl={3}>
                     <div className="card-body container-style">
-                        <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Off Hours Energy
                         </h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                         <div className="mt-2 ">
                             <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
                         </div>
@@ -976,10 +976,10 @@ const TimeOfDay = () => {
                 </Col>
                 <Col xl={9}>
                     <div className="card-body">
-                        <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Average Daily Usage by Hour
                         </h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Usage By Hour</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour</h6>
                         <HeatMapChart options={weekdaysOptions} series={weekdaysSeries} height={weekdaysChartHeight} />
                     </div>
                 </Col>
@@ -989,7 +989,7 @@ const TimeOfDay = () => {
                 <Col xl={11}>
                     <div className="card-body ">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Usage By Hour Trend</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
                         <div className="mt-2">
                             {/* <LineChart title="" /> */}
                             <LineChart

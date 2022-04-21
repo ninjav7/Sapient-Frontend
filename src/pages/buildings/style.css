@@ -136,7 +136,7 @@
 .alert-heading {
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 14px;
     line-height: 20px;
     color: #1d2939;
@@ -333,7 +333,7 @@
     font-size: 14px;
     line-height: 20px;
     color: #1d2939;
-    margin-bottom: 7px;
+    margin-bottom: 0px;
 }
 
 .custom-subtitle-style {

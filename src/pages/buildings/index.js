@@ -451,16 +451,24 @@ const BuildingOverview = () => {
     const weekdaysOptions = {
         chart: {
             type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
         },
         dataLabels: {
             enabled: false,
         },
         title: {
             text: 'Weekdays',
+            align: 'left',
+            margin: 1,
+            offsetX: 12,
+            offsetY: 20,
+            floating: false,
             style: {
-                fontSize: '15px',
-                fontWeight: 'bold',
-                fontFamily: undefined,
+                fontSize: '14px',
+                fontWeight: '600',
+                fontFamily: 'Inter',
                 color: '#98A2B3',
             },
         },
@@ -626,16 +634,24 @@ const BuildingOverview = () => {
     const weekendsOptions = {
         chart: {
             type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
         },
         dataLabels: {
             enabled: false,
         },
         title: {
             text: 'Weekends',
+            align: 'left',
+            margin: 1,
+            offsetX: 12,
+            offsetY: 20,
+            floating: false,
             style: {
-                fontSize: '15px',
-                fontWeight: 'bold',
-                fontFamily: undefined,
+                fontSize: '14px',
+                fontWeight: '600',
+                fontFamily: 'Inter',
                 color: '#98A2B3',
             },
         },
@@ -957,7 +973,7 @@ const BuildingOverview = () => {
                     </div>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
-                            <h5 className="card-title card-title-style">
+                            <h5 className="card-title subtitle-style">
                                 Portfolio Rank&nbsp;&nbsp;
                                 <div>
                                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -1006,7 +1022,7 @@ const BuildingOverview = () => {
                     </div>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
-                            <h5 className="card-title card-title-style" style={{ marginTop: '3px' }}>
+                            <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
                                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -1531,7 +1547,7 @@ const BuildingOverview = () => {
                             </a>
                         </Link>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                        <div className="hour-avg-consumtn">
+                        <div className="hour-avg-consumtn p-1">
                             <HeatMapChart
                                 options={weekdaysOptions}
                                 series={weekdaysSeries}
