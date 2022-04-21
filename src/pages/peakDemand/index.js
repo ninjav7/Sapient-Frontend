@@ -44,7 +44,7 @@ const Peaks = ({ energyConsumption, title, subtitle }) => {
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
-                <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                     {title}
                 </h6>
                 <Link to="/energy/building-peak-explore">
@@ -54,7 +54,7 @@ const Peaks = ({ energyConsumption, title, subtitle }) => {
                         </button>
                     </div>
                 </Link>
-                <h6 className="card-subtitle mb-2 text-muted">{subtitle}</h6>
+                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
                 <Table className="mb-0" borderless hover>
                     <thead>
                         <tr>
@@ -275,11 +275,11 @@ const PeakDemand = () => {
 
             <Row style={{ marginLeft: '0.5px' }}>
                 <div className="card-body">
-                    <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top 5 Building Peaks
                     </h6>
 
-                    <Row>
+                    <Row className='mt-2'>
                         <div className="button-style" style={{ marginLeft: '10px' }}>
                             {selectedTab === 1 ? (
                                 <div

@@ -5,11 +5,9 @@ import { Card, CardBody } from 'reactstrap';
 
 const HeatMapChart = ({ options, series, height }) => {
     return (
-        <Card>
-            <CardBody>
-                <Chart options={options} series={series} type="heatmap" height={height} className="apex-charts" />
-            </CardBody>
-        </Card>
+        <div>
+            <Chart options={options} series={series} type="heatmap" height={height} className="apex-charts" />
+        </div>
     );
 };
 

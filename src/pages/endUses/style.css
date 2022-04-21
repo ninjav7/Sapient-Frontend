@@ -20,76 +20,86 @@
     margin: 350px;
 }
 
-.title-style {
+.usage-title-style {
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 18px;
     line-height: 120%;
-    display: flex;
-    align-items: center;
+    color: #1d2939;
 }
 
 .subtitle-style {
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 600;
     font-size: 14px;
     line-height: 17px;
     display: flex;
     align-items: center;
+    color: #667085;
 }
 
 .usage-card-content-style {
-    margin-top: 5px;
-    margin-bottom: 7px;
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
-    font-size: 20px;
-    line-height: 26px;
+    font-size: 22px;
+    line-height: 27px;
     display: flex;
     align-items: center;
     text-align: right;
-    color: #1f2937;
+    color: #1d2939;
 }
 
 .card-unit-style {
+    margin-top: 8px;
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 800;
-    font-size: 12px;
     line-height: 12px;
-
     display: flex;
     align-items: center;
     text-align: right;
-    color: black;
+    color: #1d2939;
 }
 
 .content-stying {
     width: 13%;
 }
 
-.button-style {
-    background: #ffffff;
-    /* width: 100%;
-    display: flex;
-    flex-direction: row; */
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
-    border-radius: 4px;
+.light-content-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 22px;
+    color: #667085;
 }
 
-.custom-title {
+.enduses-button-style {
+    display: inline-block;
+}
+
+.btn-font-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #f04438;
+}
+
+/* .custom-title {
     font-style: normal;
     font-weight: 700;
     font-size: 14px;
     line-height: 17px;
-    /* identical to box height */
 
     display: flex;
     align-items: center;
-
-    /* text/dark */
-
     color: #1f2937;
-}
+} */
 
 .energy-chart-style {
     height: 50%;
@@ -105,26 +115,43 @@
 
 .usage-card-box-style {
     height: auto;
+    background: red;
     background: #f9fafb;
-    border: 1px solid #f3f4f6;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
-    /* box-shadow: 0px 0px 5px black; */
-    border-radius: 10px;
 }
-
-/* .usage-card-box-style:hover {
-    height: auto;
-    background: rgb(224, 222, 222);
-    border: 1px solid #f3f4f6;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
-    border-radius: 10px;
-} */
 
 .dot {
     width: 8px;
     height: 8px;
     border-radius: 20px;
     margin-top: 6px;
+}
+
+.endUses-button-container {
+    background: #f9fafb;
+    border: 1px solid #f2f4f7;
+    box-sizing: border-box;
+    border-radius: 8px;
+    width: 96%;
+    height: 147px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.custom-subtitle-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 18px;
+    color: #667085;
+    margin-top: 0px;
+}
+
+.custom-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
+    margin-bottom: 0px;
 }

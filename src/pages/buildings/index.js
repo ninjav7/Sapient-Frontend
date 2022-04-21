@@ -451,16 +451,24 @@ const BuildingOverview = () => {
     const weekdaysOptions = {
         chart: {
             type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
         },
         dataLabels: {
             enabled: false,
         },
         title: {
             text: 'Weekdays',
+            align: 'left',
+            margin: 1,
+            offsetX: 12,
+            offsetY: 20,
+            floating: false,
             style: {
-                fontSize: '15px',
-                fontWeight: 'bold',
-                fontFamily: undefined,
+                fontSize: '14px',
+                fontWeight: '600',
+                fontFamily: 'Inter',
                 color: '#98A2B3',
             },
         },
@@ -626,16 +634,24 @@ const BuildingOverview = () => {
     const weekendsOptions = {
         chart: {
             type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
         },
         dataLabels: {
             enabled: false,
         },
         title: {
             text: 'Weekends',
+            align: 'left',
+            margin: 1,
+            offsetX: 12,
+            offsetY: 20,
+            floating: false,
             style: {
-                fontSize: '15px',
-                fontWeight: 'bold',
-                fontFamily: undefined,
+                fontSize: '14px',
+                fontWeight: '600',
+                fontFamily: 'Inter',
                 color: '#98A2B3',
             },
         },
@@ -957,7 +973,7 @@ const BuildingOverview = () => {
                     </div>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
-                            <h5 className="card-title card-title-style">
+                            <h5 className="card-title subtitle-style">
                                 Portfolio Rank&nbsp;&nbsp;
                                 <div>
                                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -1006,7 +1022,7 @@ const BuildingOverview = () => {
                     </div>
                     <div className="card card-box-style button-style">
                         <div className="card-body">
-                            <h5 className="card-title card-title-style" style={{ marginTop: '3px' }}>
+                            <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
                                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -1041,7 +1057,7 @@ const BuildingOverview = () => {
                                 More Details
                             </a>
                         </Link>
-                        <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                     </div>
                     <div className="energy-blg-container-one-content mr-2">
                         {/* Chart  */}
@@ -1077,9 +1093,7 @@ const BuildingOverview = () => {
                                                             style={{ backgroundColor: '#3B8554' }}></div>
                                                     )}
                                                 </td>
-                                                <td className="building-table-font-style font-weight-bold">
-                                                    {record.device}
-                                                </td>
+                                                <td className="building-table-font-style">{record.device}</td>
                                                 <td className="custom-usage-style muted table-font-style">
                                                     {record.energy_consumption.now.toLocaleString(undefined, {
                                                         maximumFractionDigits: 2,
@@ -1097,9 +1111,7 @@ const BuildingOverview = () => {
 
                 <div className="energy-blg-container-two mr-4">
                     {/* Equipment Alert */}
-                    <h6
-                        className="card-title custom-title mt-4"
-                        style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                    <h6 className="card-title custom-title mt-4" style={{ display: 'inline-block' }}>
                         Top Equipment Consumption
                     </h6>
                     <div className="equip-table-container">
@@ -1189,7 +1201,7 @@ const BuildingOverview = () => {
 
                 <div className="energy-blg-container-three mt-4">
                     {/* Building Alert  */}
-                    <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Building Alerts
                     </h6>
                     <Link to="/energy/end-uses">
@@ -1518,7 +1530,7 @@ const BuildingOverview = () => {
             <Row>
                 <Col lg={8}>
                     <div className="card-body">
-                        <h6 className="card-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                        <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
                             Hourly Average Consumption
                         </h6>
                         <Link to="/energy/time-of-day">
@@ -1534,8 +1546,8 @@ const BuildingOverview = () => {
                                 More Details
                             </a>
                         </Link>
-                        <h6 className="card-subtitle mb-2 text-muted">Average by Hour</h6>
-                        <div className="hour-avg-consumtn">
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
+                        <div className="hour-avg-consumtn p-1">
                             <HeatMapChart
                                 options={weekdaysOptions}
                                 series={weekdaysSeries}
@@ -1554,7 +1566,7 @@ const BuildingOverview = () => {
             <Row>
                 <Col lg={8}>
                     <div className="card-body">
-                        <h6 className="card-title" style={{ display: 'inline-block' }}>
+                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Top 3 Peak Demand Periods
                         </h6>
                         <Link to="/energy/peak-demand">
@@ -1569,7 +1581,7 @@ const BuildingOverview = () => {
                                 More Details
                             </a>
                         </Link>
-                        <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minutes period)</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Max power draw (15 minutes period)</h6>
                         <div className="card-group mt-2 top-peak-demand-style">
                             {topContributors.map((item, index) => (
                                 <div className="card peak-demand-container mt-3">
@@ -1603,9 +1615,7 @@ const BuildingOverview = () => {
                                                     <td className="peak-table-content-two">
                                                         {item.top_contributors.map((el2) => (
                                                             <tr>
-                                                                <div className="font-weight-bold">
-                                                                    {el2.energy_consumption.now} kW
-                                                                </div>
+                                                                <div className="">{el2.energy_consumption.now} kW</div>
                                                             </tr>
                                                         ))}
                                                     </td>
@@ -1623,8 +1633,8 @@ const BuildingOverview = () => {
             <Row>
                 <Col xl={8}>
                     <div className="card-body">
-                        <h6 className="card-title">Total Energy Consumption</h6>
-                        <h6 className="card-subtitle mb-2 text-muted">Totaled by Hour</h6>
+                        <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
                         <div className="total-eng-consumtn">
                             <LineChart options={lineChartOptions} series={lineChartSeries} />
                         </div>

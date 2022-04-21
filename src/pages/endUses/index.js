@@ -229,10 +229,12 @@ const EndUses = () => {
 
             <Row style={{ marginLeft: '0.5px' }}>
                 <div className="card-body">
-                    <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top End Uses by Usage
                     </h6>
-                    <h6 className="card-subtitle mb-2 text-muted">Click explore to see more energy usage details.</h6>
+                    <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                        Click explore to see more energy usage details.
+                    </h6>
 
                     <Row className="mt-4 energy-container">
                         {endUsage.map((usage, index) => {

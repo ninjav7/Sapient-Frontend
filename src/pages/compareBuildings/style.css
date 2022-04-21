@@ -4,12 +4,50 @@
 }
 
 .building-name {
+    font-family: 'Inter';
+    font-style: normal;
     font-weight: 600;
     font-size: 14px;
     line-height: 17px;
     display: flex;
     align-items: center;
     color: #2955e7;
+}
+
+.table-heading-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 17px;
+    color: #475467;
+}
+
+.table-content-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 22px;
+    color: #475467;
+}
+
+.btn-font-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #f04438;
+}
+
+.value-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 17px;
+    color: #475467;
 }
 
 .building-name :hover {

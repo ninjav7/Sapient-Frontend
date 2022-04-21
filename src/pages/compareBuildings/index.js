@@ -73,14 +73,14 @@ const BuildingTable = () => {
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Energy Density</th>
-                            <th>% Change</th>
-                            <th>HVAC Consumption</th>
-                            <th>% Change</th>
-                            <th>Total Consumption</th>
-                            <th>% Change</th>
-                            <th>Sq. Ft.</th>
+                            <th className="table-heading-style">Name</th>
+                            <th className="table-heading-style">Energy Density</th>
+                            <th className="table-heading-style">% Change</th>
+                            <th className="table-heading-style">HVAC Consumption</th>
+                            <th className="table-heading-style">% Change</th>
+                            <th className="table-heading-style">Total Consumption</th>
+                            <th className="table-heading-style">% Change</th>
+                            <th className="table-heading-style">Sq. Ft.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,7 +93,7 @@ const BuildingTable = () => {
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
-                                    <td>
+                                    <td className="table-content-style">
                                         {record.energyDensity} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '50%', display: 'inline-block' }}>
@@ -184,7 +184,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.energyPerChgStatus === 'down' && (
                                             <button
-                                                className="button-danger text-danger font-weight-bold font-size-5"
+                                                className="button-danger text-danger btn-font-style"
                                                 style={{ width: '100%' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -193,7 +193,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.energyPerChgStatus === 'normal' && (
                                             <button
-                                                className="button text-muted font-weight-bold font-size-5"
+                                                className="button text-muted btn-font-style"
                                                 style={{ width: '100%', border: 'none' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -201,7 +201,7 @@ const BuildingTable = () => {
                                             </button>
                                         )}
                                     </td>
-                                    <td>
+                                    <td className="table-content-style">
                                         {record.hvacConsumption} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '50%', display: 'inline-block' }}>
@@ -283,7 +283,7 @@ const BuildingTable = () => {
                                     <td>
                                         {record.hvacPerChgStatus === 'up' && (
                                             <button
-                                                className="button-danger text-danger font-weight-bold font-size-5"
+                                                className="button-danger text-danger btn-font-style"
                                                 style={{ width: '100%' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -292,7 +292,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.hvacPerChgStatus === 'down' && (
                                             <button
-                                                className="button-success text-success font-weight-bold font-size-5"
+                                                className="button-success text-success btn-font-style"
                                                 style={{ width: '100%' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -301,7 +301,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.hvacPerChgStatus === 'normal' && (
                                             <button
-                                                className="button text-muted font-weight-bold font-size-5"
+                                                className="button text-muted btn-font-style"
                                                 style={{ width: '100%', border: 'none' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -309,7 +309,7 @@ const BuildingTable = () => {
                                             </button>
                                         )}
                                     </td>
-                                    <td className="text-muted font-weight-bold">
+                                    <td className="value-style">
                                         {record.totalConsumption.toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
@@ -319,7 +319,7 @@ const BuildingTable = () => {
                                     <td>
                                         {record.totalPerChgStatus === 'up' && (
                                             <button
-                                                className="button-danger text-danger font-weight-bold font-size-5"
+                                                className="button-danger text-danger btn-font-style"
                                                 style={{ width: '100%' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -328,7 +328,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.totalPerChgStatus === 'down' && (
                                             <button
-                                                className="button-success text-success font-weight-bold font-size-5"
+                                                className="button-success text-success btn-font-style"
                                                 style={{ width: '100%' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -337,7 +337,7 @@ const BuildingTable = () => {
                                         )}
                                         {record.totalPerChgStatus === 'normal' && (
                                             <button
-                                                className="button text-muted font-weight-bold font-size-5"
+                                                className="button text-muted btn-font-style"
                                                 style={{ width: '100%', border: 'none' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>{record.energyPerChg} %</strong>
@@ -345,7 +345,7 @@ const BuildingTable = () => {
                                             </button>
                                         )}
                                     </td>
-                                    <td className="text-muted font-weight-bold">
+                                    <td className="value-style">
                                         {record.sqFt.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                     </td>
                                 </tr>

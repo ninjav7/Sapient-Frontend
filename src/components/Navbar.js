@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom';
 import { Collapse } from 'reactstrap';
 import logo from '../assets/images/logo.png';
 import sapientLogo from '../assets/images/Sapient_Logo.png';
-import { Settings, User } from 'react-feather';
+import { Settings, User, Search } from 'react-feather';
+import SearchModal from './SearchModal';
 import '../pages/portfolio/style.css';
 
 const Navbar = (props) => {
@@ -26,6 +27,11 @@ const Navbar = (props) => {
                     <Collapse isOpen={props.isMenuOpened} className="navbar-collapse" id="topnav-menu-content">
                         <AppMenu mode={'vertical'} />
                     </Collapse>
+
+                    {/* <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
+                        <Search className="icon-sm" />
+                    </button> */}
+                    <SearchModal />
 
                     <Link to="/settings/general">
                         <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">

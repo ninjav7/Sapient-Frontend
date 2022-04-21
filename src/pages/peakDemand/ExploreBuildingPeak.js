@@ -6,6 +6,7 @@ import StackedColumnChart from '../charts/StackedColumnChart';
 import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-datepicker/dist/react-datepicker.css';
 import SelectTableComponent from './SelectTableComponent';
+import { Line } from 'rc-progress';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -225,11 +226,12 @@ const SelectPeakTable = () => {
                     <div className="col-md-12">
                         <table className="table">
                             <thead>
-                                <tr>
+                                <tr style={{ height: '42px' }}>
                                     <th scope="col">
                                         <input
                                             type="checkbox"
-                                            className="form-check-input"
+                                            // className="form-check-input"
+                                            className="text-center-head"
                                             checked={masterCheck}
                                             id="mastercheck"
                                             onChange={(e) => onMasterCheck(e)}
@@ -237,18 +239,24 @@ const SelectPeakTable = () => {
                                     </th>
                                     <th scope="col">Name</th>
                                     <th scope="col">% Change</th>
+                                    {/* <th scope="col">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    </th> */}
                                     <th scope="col">Peak Power</th>
                                     <th scope="col">Peak Power Time</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {list.map((record, index) => (
-                                    <tr key={index} className={record.selected ? 'selected' : ''}>
+                                    <tr
+                                        key={index}
+                                        className={record.selected ? 'selected' : ''}
+                                        style={{ height: '42px' }}>
                                         <th scope="row">
                                             <input
                                                 type="checkbox"
                                                 checked={record.selected}
-                                                className="form-check-input"
+                                                className="text-center-content"
                                                 id="rowcheck{user.id}"
                                                 onChange={(e) => onItemCheck(e, record)}
                                             />
@@ -257,37 +265,68 @@ const SelectPeakTable = () => {
                                         <td>
                                             +{record.changePercent}% ({record.changeKWH} kWh)
                                         </td>
-                                        <td>
-                                            {' '}
-                                            <progress
-                                                id="file"
-                                                value={record.changePercent}
-                                                min={50}
-                                                max={100}
-                                                style={{ height: '30px' }}>
-                                                {record.peakPower}%
-                                            </progress>
-                                        </td>
+
+                                        {/* <td>
+                                            <div className="table-peak-power">
+                                                <span style={{ color: '#3C6DF5' }} className="font-weight-bold">
+                                                    -
+                                                </span>
+                                                <br />
+                                                <span style={{ margin: '0px' }}>
+                                                    <Line
+                                                        percent={record.peakPower}
+                                                        strokeWidth="4"
+                                                        trailWidth="4"
+                                                        strokeColor="#FEC84B"
+                                                        strokeLinecap="round"
+                                                    />
+                                                </span>
+                                            </div>
+                                        </td> */}
+
                                         <td>
                                             <div className="table-peak-power">
-                                                <span>-</span>
+                                                <span style={{ color: '#3C6DF5' }} className="font-weight-bold">
+                                                    -
+                                                </span>
                                                 <br />
-                                                <progress
+                                                <span style={{ margin: '0px' }}>
+                                                    <Line
+                                                        percent={record.peakPower}
+                                                        strokeWidth="4"
+                                                        trailWidth="4"
+                                                        strokeColor="#FEC84B"
+                                                        strokeLinecap="round"
+                                                    />
+                                                </span>
+
+                                                {/* <progress
                                                     id="file"
                                                     value={record.peakPower}
                                                     min={50}
-                                                    max={100}></progress>
+                                                    max={100}></progress> */}
                                             </div>
                                         </td>
                                         <td>
                                             <div>
-                                                <span>-</span>
+                                                <span style={{ color: '#3C6DF5' }} className="font-weight-bold">
+                                                    -
+                                                </span>
                                                 <br />
-                                                <progress
+                                                <span style={{ width: '14px' }}>
+                                                    <Line
+                                                        percent={record.peakPowerTime}
+                                                        strokeWidth="3"
+                                                        trailWidth="3"
+                                                        strokeColor="#D0D5DD"
+                                                        strokeLinecap="round"
+                                                    />
+                                                </span>
+                                                {/* <progress
                                                     id="file"
                                                     value={record.peakPowerTime}
                                                     min={50}
-                                                    max={100}></progress>
+                                                    max={100}></progress> */}
                                             </div>
                                         </td>
                                     </tr>
@@ -356,7 +395,7 @@ const ExploreBuildingPeak = (props) => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <div className="explore-blg-peak">
                         <Link to="/energy/peak-demand">
@@ -412,25 +451,17 @@ const ExploreBuildingPeak = (props) => {
                     </div>
                 </Col>
             </Row>
-            <Row>
+            <Row className="ml-2">
                 <div className="explore-graph-container">
                     <StackedColumnChart options={columnChartOptions} series={columnChartSeries} height={350} />
                 </div>
             </Row>
-            <Row className="ml-1">
-                {/* <BootstrapTable
-                    bootstrap4
-                    keyField="id"
-                    bordered={false}
-                    data={records}
-                    columns={columns}
-                    selectRow={selectRow}
-                    wrapperClasses="table-responsive"
-                /> */}
-
-                {/* Working  */}
-                {/* <BuildingPeakTable /> */}
-                <SelectPeakTable />
+            <Row className="ml-2">
+                <Col xl={12}>
+                    {/* Working  */}
+                    {/* <BuildingPeakTable /> */}
+                    <SelectPeakTable />
+                </Col>
             </Row>
         </React.Fragment>
     );

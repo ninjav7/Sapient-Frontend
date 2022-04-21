@@ -4,7 +4,7 @@ import { UncontrolledTooltip } from 'reactstrap';
 const DetailedButton = (props) => {
     return (
         <>
-            <h5 className="card-title card-title-style">
+            <h5 className="card-title subtitle-style">
                 {props.title}&nbsp;&nbsp;
                 <div>
                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
@@ -18,18 +18,14 @@ const DetailedButton = (props) => {
                 <span className="card-unit-style">
                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
                     {props.consumptionNormal && (
-                        <button
-                            className="button-success text-success font-weight-bold font-size-5"
-                            style={{ width: '100%' }}>
+                        <button className="button-success text-success btn-font-style" style={{ width: '100%' }}>
                             <i className="uil uil-arrow-growth">
                                 <strong>{props.value} %</strong>
                             </i>
                         </button>
                     )}
                     {!props.consumptionNormal && (
-                        <button
-                            className="button-danger text-danger font-weight-bold font-size-5"
-                            style={{ width: '100%' }}>
+                        <button className="button-danger text-danger btn-font-style" style={{ width: '100%' }}>
                             <i className="uil uil-chart-down">
                                 <strong>{props.value} %</strong>
                             </i>
