@@ -279,7 +279,7 @@ const PeakDemand = () => {
                         Top 5 Building Peaks
                     </h6>
 
-                    <Row className='mt-2'>
+                    <Row className="mt-2">
                         <div className="button-style" style={{ marginLeft: '10px' }}>
                             {selectedTab === 1 ? (
                                 <div

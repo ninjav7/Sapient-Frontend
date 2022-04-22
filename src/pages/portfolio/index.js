@@ -207,35 +207,91 @@ const PortfolioOverview = () => {
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        // plotOptions: {
+        //     pie: {
+        //         expandOnClick: false,
+        //         size: 200,
+        //         donut: {
+        //             size: '77%',
+        //             labels: {
+        //                 show: true,
+        //                 name: {
+        //                     show: true,
+        //                     fontSize: '22px',
+        //                     fontFamily: undefined,
+        //                     color: '#dfsda',
+        //                     offsetY: -10,
+        //                 },
+        //                 value: {
+        //                     show: true,
+        //                     fontSize: '16px',
+        //                     color: '#d14065',
+        //                     offsetY: 16,
+        //                     formatter: function (val) {
+        //                         return val;
+        //                     },
+        //                 },
+        //                 total: {
+        //                     show: true,
+        //                     showAlways: true,
+        //                     label: 'Total',
+        //                     color: '#373d3f',
+        //                     formatter: function (w) {
+        //                         return w.globals.seriesTotals.reduce((a, b) => {
+        //                             return a + b;
+        //                         }, 0);
+        //                     },
+        //                 },
+        //             },
+        //         },
+        //     },
+        // },
         plotOptions: {
             pie: {
+                startAngle: 0,
+                endAngle: 360,
                 expandOnClick: false,
-                size: 200,
+                offsetX: 0,
+                offsetY: 0,
+                customScale: 1,
+                dataLabels: {
+                    offset: 0,
+                    minAngleToShowLabel: 10,
+                },
                 donut: {
-                    size: '77%',
+                    size: '80%',
+                    background: 'grey',
                     labels: {
                         show: true,
-                        // name: {
-                        //     show: true,
-                        //     fontSize: '22px',
-                        //     fontFamily: undefined,
-                        //     color: '#dfsda',
-                        //     offsetY: -10,
-                        // },
-                        // value: {
-                        //     show: true,
-                        //     fontSize: '16px',
-                        //     color: '#d14065',
-                        //     offsetY: 16,
-                        //     formatter: function (val) {
-                        //         return val;
-                        //     },
-                        // },
+                        name: {
+                            show: true,
+                            fontSize: '22px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 600,
+                            color: '#373d3f',
+                            offsetY: -10,
+                            // formatter: function (val) {
+                            //     return val;
+                            // },
+                        },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                            color: '#373d3f',
+                            offsetY: 16,
+                            formatter: function (val) {
+                                return val;
+                            },
+                        },
                         total: {
                             show: true,
-                            showAlways: true,
+                            showAlways: false,
                             label: 'Total',
                             color: '#373d3f',
+                            fontSize: '22px',
+                            fontWeight: 600,
                             formatter: function (w) {
                                 return w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
@@ -263,6 +319,7 @@ const PortfolioOverview = () => {
             enabled: false,
         },
         tooltip: {
+            enabled: false,
             theme: 'dark',
             x: { show: false },
         },
@@ -551,6 +608,7 @@ const PortfolioOverview = () => {
                         <Col xl={5} className="mt-4">
                             <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+                            {/* <div className="card-body mt-2" style={{ background: 'red' }}> */}
                             <div className="card-body mt-2">
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
@@ -558,6 +616,10 @@ const PortfolioOverview = () => {
                                     {/* <PortfolioDonutChart /> */}
                                     {/* <ReactDonutChart /> */}
                                 </div>
+                                {/* <div className="donut-content-style">
+                                    125,334 <br />
+                                    kWh
+                                </div> */}
                             </div>
                         </Col>
                         <Col xl={7} className="mt-4">

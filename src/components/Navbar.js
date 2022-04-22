@@ -28,17 +28,15 @@ const Navbar = (props) => {
                         <AppMenu mode={'vertical'} />
                     </Collapse>
 
-                    {/* <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
-                        <Search className="icon-sm" />
-                    </button> */}
-                    <SearchModal />
+                    <div className="nav-right-icon-style">
+                        <SearchModal />
 
-                    <Link to="/settings/general">
-                        <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
-                            <Settings className="icon-sm" />
-                        </button>
-                    </Link>
-
+                        <Link to="/settings/general">
+                            <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
+                                <Settings className="icon-sm" />
+                            </button>
+                        </Link>
+                    </div>
                     {/* <ul className="navbar-nav flex-row ml-auto d-flex list-unstyled topnav-menu float-right mb-0"> */}
                     {/*
             <LanguageDropdown tag="li" />

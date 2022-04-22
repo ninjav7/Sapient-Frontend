@@ -214,17 +214,17 @@ const General = () => {
                                         </div>
                                     </FormGroup>
 
-                                    <FormGroup>
-                                        <div className="singleline-box-style">
-                                            <Input
+                                    {/* <FormGroup>
+                                        <div className="singleline-box-style"> */}
+                                    {/* <Input
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
                                                 className="font-weight-bold">
                                                 <option>Office Building</option>
                                                 <option>Residential Building</option>
-                                            </Input>
-                                            {/* <Input
+                                            </Input> */}
+                                    {/* <Input
                                                 type="select"
                                                 name="buildingType"
                                                 id="buildingType"
@@ -242,8 +242,8 @@ const General = () => {
                                                     );
                                                 })}
                                             </Input> */}
-                                        </div>
-                                    </FormGroup>
+                                    {/* </div>
+                                    </FormGroup> */}
 
                                     <FormGroup>
                                         <div className="single-line-style">
