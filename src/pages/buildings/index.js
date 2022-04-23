@@ -119,38 +119,44 @@ const BuildingOverview = () => {
                     labels: {
                         show: true,
                         name: {
-                            show: true,
-                            fontSize: '22px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 600,
-                            color: '#373d3f',
-                            offsetY: -10,
+                            show: false,
+                            // fontSize: '22px',
+                            // fontFamily: 'Helvetica, Arial, sans-serif',
+                            // fontWeight: 600,
+                            // color: '#373d3f',
+                            // offsetY: -10,
                             // formatter: function (val) {
                             //     return val;
                             // },
                         },
                         value: {
                             show: true,
-                            fontSize: '16px',
+                            fontSize: '15px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
-                            color: '#373d3f',
-                            offsetY: 16,
+                            color: 'red',
+                            // offsetY: 16,
                             formatter: function (val) {
-                                return val;
+                                return `${val} kWh`;
                             },
                         },
                         total: {
                             show: true,
                             showAlways: false,
                             label: 'Total',
-                            color: '#373d3f',
+                            // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
+                            // formatter: function (w) {
+                            //     return w.globals.seriesTotals.reduce((a, b) => {
+                            //         return a + b;
+                            //     }, 0);
+                            // },
                             formatter: function (w) {
-                                return w.globals.seriesTotals.reduce((a, b) => {
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
                                 }, 0);
+                                return `${sum} kWh`;
                             },
                         },
                     },

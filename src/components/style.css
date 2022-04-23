@@ -235,11 +235,43 @@
     border: none;
     box-shadow: none;
     margin-left: 0px;
-    margin-right: 10px;
+    margin-right: 0px;
 }
 
 #bts-button-styling:hover {
     background: #f2f4f7 !important;
+}
+
+.custom-breadcrumb-style {
+    margin: 0px;
+    background: #ffffff;
+    height: 100%;
+}
+
+.breadcrumb {
+    background: #ffffff;
+}
+
+.custom-breadcrumb-font {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #667085 !important;
+}
+
+.custom-breadcrumb-font-bold {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939 !important;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: '>' !important;
 }
 
 .navbar-container {

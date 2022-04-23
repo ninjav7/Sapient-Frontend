@@ -16,6 +16,7 @@ import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall } from
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
 import ReactDonutChart from './ReactDonutChart';
+import PageTracker from '../../components/PageTracker';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -207,45 +208,6 @@ const PortfolioOverview = () => {
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-        // plotOptions: {
-        //     pie: {
-        //         expandOnClick: false,
-        //         size: 200,
-        //         donut: {
-        //             size: '77%',
-        //             labels: {
-        //                 show: true,
-        //                 name: {
-        //                     show: true,
-        //                     fontSize: '22px',
-        //                     fontFamily: undefined,
-        //                     color: '#dfsda',
-        //                     offsetY: -10,
-        //                 },
-        //                 value: {
-        //                     show: true,
-        //                     fontSize: '16px',
-        //                     color: '#d14065',
-        //                     offsetY: 16,
-        //                     formatter: function (val) {
-        //                         return val;
-        //                     },
-        //                 },
-        //                 total: {
-        //                     show: true,
-        //                     showAlways: true,
-        //                     label: 'Total',
-        //                     color: '#373d3f',
-        //                     formatter: function (w) {
-        //                         return w.globals.seriesTotals.reduce((a, b) => {
-        //                             return a + b;
-        //                         }, 0);
-        //                     },
-        //                 },
-        //             },
-        //         },
-        //     },
-        // },
         plotOptions: {
             pie: {
                 startAngle: 0,
@@ -292,10 +254,16 @@ const PortfolioOverview = () => {
                             // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
+                            // formatter: function (w) {
+                            //     return w.globals.seriesTotals.reduce((a, b) => {
+                            //         return a + b;
+                            //     }, 0);
+                            // },
                             formatter: function (w) {
-                                return w.globals.seriesTotals.reduce((a, b) => {
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
                                 }, 0);
+                                return `${sum} kWh`;
                             },
                         },
                     },
@@ -494,6 +462,13 @@ const PortfolioOverview = () => {
     return (
         <React.Fragment>
             <Header title="Portfolio Overview" />
+
+            {/* <PageTracker
+                breadCrumbItems={[
+                    { label: 'Apps', path: '/apps/calendar' },
+                    { label: 'Calendar', path: '/apps/calendar', active: true },
+                ]}
+            /> */}
 
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>

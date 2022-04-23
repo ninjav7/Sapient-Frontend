@@ -1,5 +1,18 @@
 import React from 'react';
-import { Row, Col, Card, CardBody, CardHeader, Form } from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    CardHeader,
+    Form,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownItem,
+    DropdownToggle,
+    Media,
+    Button,
+} from 'reactstrap';
 import { Filter } from 'react-feather';
 import './style.css';
 
@@ -152,7 +165,17 @@ const Layout = () => {
                                 <span>Building Root</span>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
-                                    <i className="uil uil-plus mr-2"></i>
+                                    <UncontrolledDropdown className="align-self-center float-right">
+                                        <DropdownToggle
+                                            tag="button"
+                                            className="btn btn-link p-0 dropdown-toggle text-muted">
+                                            <i className="uil uil-plus mr-2"></i>
+                                        </DropdownToggle>
+                                        <DropdownMenu right>
+                                            <DropdownItem>Add Floor</DropdownItem>
+                                        </DropdownMenu>
+                                    </UncontrolledDropdown>
+                                    {/* <i className="uil uil-plus mr-2"></i> */}
                                 </div>
                             </div>
                             <div className="container-content-group">
@@ -172,7 +195,20 @@ const Layout = () => {
                                 <i className="uil uil-pen ml-2"></i>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
-                                    <i className="uil uil-plus mr-2"></i>
+                                    {/* <i className="uil uil-plus mr-2"></i> */}
+                                    <UncontrolledDropdown className="align-self-center float-right">
+                                        <DropdownToggle
+                                            tag="button"
+                                            className="btn btn-link p-0 dropdown-toggle text-muted">
+                                            <i className="uil uil-plus mr-2"></i>
+                                        </DropdownToggle>
+                                        <DropdownMenu right>
+                                            <DropdownItem>Add Space</DropdownItem>
+                                            <DropdownItem>Add HVAC Zone</DropdownItem>
+                                            <DropdownItem>Add Lightning Zone</DropdownItem>
+                                            <DropdownItem>Add Panel</DropdownItem>
+                                        </DropdownMenu>
+                                    </UncontrolledDropdown>
                                 </div>
                             </div>
                             <div className="container-content-group">
