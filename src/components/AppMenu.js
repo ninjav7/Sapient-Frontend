@@ -124,7 +124,7 @@ class AppMenu extends Component {
 
         return (
             <React.Fragment>
-                {this.props.showBuilding && (
+                {/* {this.props.showBuilding && (
                     <div className="pl-2 pr-2 pt-2 mb-4">
                         <Select
                             className="react-select"
@@ -137,7 +137,7 @@ class AppMenu extends Component {
                                 { value: 'Building 4', label: '246 Blackburn Rd. Philadelphia, PA' },
                             ]}></Select>
                     </div>
-                )}
+                )} */}
                 {this.props.menu && this.props.menu.menuItems && (
                     <ul className="metismenu" id="menu-bar">
                         {this.props.menu.menuItems.map((item, i) => {

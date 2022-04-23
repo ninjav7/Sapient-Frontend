@@ -221,8 +221,20 @@
 
 .custom-navbar {
     margin: 0px !important;
-    padding: 0px !important;
-    background: #141924 !important;
+    height: 45px !important;
+    left: 0px !important;
+    right: 0px !important;
+    top: 0px !important;
+    background: #101828 !important;
+    padding: 0px 8px 0px 0px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    color: red !important;
+}
+
+.nav-right-icon-style {
+    /* background: red; */
 }
 
 .custom-navbar-fonts {
@@ -345,6 +357,18 @@
     color: #1d2939;
     margin-bottom: 0px;
 }
+
+/* .donut-container-style {
+    background: red;
+}
+
+.donut-content-style {
+    background: white;
+    width: fit-content;
+    position: absolute;
+    bottom: 40%;
+    left: 40%;
+} */
 
 .custom-subtitle-style {
     font-family: 'Inter';

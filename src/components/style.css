@@ -42,6 +42,22 @@
 .search-result-row {
 }
 
+.route-tracker {
+    width: fit-content;
+    height: 100%;
+    left: 8px;
+    top: 6px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
 .recent-btn-grp {
     padding: 4px;
     background: #f9fafb;
@@ -150,10 +166,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #ccd6e1;
+    /* background-color: #ccd6e1;
     background-color: #f9fafb;
-    /* background-color: red; */
-    opacity: 1;
+    background: red; */
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .modal-custom-container {
@@ -165,5 +181,77 @@
     left: calc(50% - 300px);
     bottom: 40px;
     border-radius: 8px;
+    background: rgba(255, 255, 255, 0.15);
     /* opacity: 0.5 !important; */
+}
+
+/* page tracker  */
+.page-tracker-container {
+    height: 45px;
+    left: 0px;
+    right: 0px;
+    top: 45px;
+    background: #ffffff;
+    margin: 0px;
+    display: flex;
+    flex-direction: row;
+}
+
+.tracker-dropdown {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    width: fit-content;
+}
+
+.vl {
+    background: #eaecf0;
+    width: 1px;
+    height: auto;
+    left: 279px;
+    top: 8.5px;
+    margin: 4px;
+}
+
+.content-font-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 17px;
+    color: #1d2939;
+    margin-bottom: 0px;
+}
+
+#bts-button-styling {
+    background: #ffffff;
+    width: fit-content;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #1d2939;
+    border: none;
+    box-shadow: none;
+    margin-left: 0px;
+    margin-right: 10px;
+}
+
+#bts-button-styling:hover {
+    background: #f2f4f7 !important;
+}
+
+.navbar-container {
+    /* display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start; */
+    padding: 0px 8px 0px 0px;
+    position: fixed;
+    height: 45px;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    background: #101828;
 }

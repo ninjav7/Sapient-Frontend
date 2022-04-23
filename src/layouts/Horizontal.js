@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
+import PageTracker from '../components/PageTracker';
 
 import ThemeCustomizer from '../components/ThemeCustomizer';
 const CustomSideBar = React.lazy(() => import('../components/CustomSideBar'));
@@ -61,22 +62,24 @@ class HorizontalLayout extends Component {
                         <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
                     </Suspense>
 
+                    <PageTracker />
+
                     <div className="content-page">
                         <div className="content">
                             <Container fluid className="p-0">
                                 <Row>
                                     <Col md={2} className="pr-0">
-                                    <Suspense fallback={loading()}>
-                                    <CustomSideBar
-                                        isCondensed={isCondensed}
-                                        isLight={isLight}
-                                        {...this.props}
-                                    />
-                                </Suspense>
-                                </Col>
+                                        <Suspense fallback={loading()}>
+                                            <CustomSideBar
+                                                isCondensed={isCondensed}
+                                                isLight={isLight}
+                                                {...this.props}
+                                            />
+                                        </Suspense>
+                                    </Col>
                                     <Col md={10} className="pl-0">
                                         <Suspense fallback={loading()}>
-                                            <Card className="p-4">{children}</Card>
+                                            <Card className="pl-2 pr-2 pt-1">{children}</Card>
                                         </Suspense>
                                     </Col>
                                 </Row>
