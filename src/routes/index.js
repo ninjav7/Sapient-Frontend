@@ -382,88 +382,67 @@ const buildingRoutes = {
 
 // portfolio
 const portfolioRoutes = {
-    path: '/energy/portfolio/overview',
+    path: '/energy',
     name: 'Energy',
     children: [
         {
-            path: '/energy',
-            name: 'Portfolio',
-            children: [
-                {
-                    path: '/energy/portfolio/overview',
-                    name: 'Portfolio Overview',
-                    component: Portfolio,
-                    route: PrivateRoute,
-                },
-                {
-                    path: '/energy/portfolio/compare-buildings',
-                    name: 'Compare Buildings',
-                    component: CompareBuildings,
-                    route: PrivateRoute,
-                },
-            ],
+            path: '/energy/portfolio/overview',
+            name: 'Portfolio Overview',
+            component: Portfolio,
             route: PrivateRoute,
         },
         {
-            path: '/energy/building',
-            name: 'Building',
-            children: [
-                {
-                    path: '/energy/building/overview',
-                    name: 'Building Overview',
-                    component: Building,
-                    route: PrivateRoute,
-                },
-                {
-                    path: '/energy/building/peak-demand',
-                    name: 'Peak Demand',
-                    component: PeakDemand,
-                    route: PrivateRoute,
-                },
-                {
-                    path: '/energy/building/time-of-day',
-                    name: 'Time Of Day',
-                    component: TimeOfDay,
-                    route: PrivateRoute,
-                },
-                {
-                    path: '/energy/building/end-uses',
-                    name: 'End Uses',
-                    children: [
-                        {
-                            path: '/energy/building/end-uses/overview',
-                            name: 'Overview',
-                            component: EndUses,
-                            route: PrivateRoute,
-                        },
-                        {
-                            path: '/energy/building/end-uses/hvac',
-                            name: 'HVAC',
-                            component: HVACUsage,
-                            route: PrivateRoute,
-                        },
-                        {
-                            path: '/energy/building/end-uses/lightning',
-                            name: 'Lightning',
-                            component: LightningUsage,
-                            route: PrivateRoute,
-                        },
-                        {
-                            path: '/energy/building/end-uses/plug',
-                            name: 'Plug',
-                            component: PlugUsage,
-                            route: PrivateRoute,
-                        },
-                    ],
-                    route: PrivateRoute,
-                },
-                {
-                    path: '/energy/building/peak-explore',
-                    name: 'Building Peak Explore',
-                    component: ExploreBuildingPeak,
-                    route: PrivateRoute,
-                },
-            ],
+            path: '/energy/building/overview',
+            name: 'Building Overview',
+            component: Building,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/peak-demand',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/end-uses',
+            name: 'End Uses',
+            component: EndUses,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/time-of-day',
+            name: 'Time Of Day',
+            component: TimeOfDay,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/compare-buildings',
+            name: 'Compare Buildings',
+            component: CompareBuildings,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/hvac',
+            name: 'HVAC Usage',
+            component: HVACUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/lightning',
+            name: 'Lightning Usage',
+            component: LightningUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/plug',
+            name: 'Plug Usage',
+            component: PlugUsage,
+            route: PrivateRoute,
+        },
+        {
+            path: '/energy/building-peak-explore',
+            name: 'BuildingPeak Explore',
+            component: ExploreBuildingPeak,
             route: PrivateRoute,
         },
     ],

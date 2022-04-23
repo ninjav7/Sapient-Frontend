@@ -8,10 +8,14 @@ import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings, User, Search } from 'react-feather';
 import SearchModal from './SearchModal';
 import '../pages/portfolio/style.css';
+import './style.css';
 
 const Navbar = (props) => {
     return (
         <React.Fragment>
+            {/* <div className="navbar-container">
+                <h5>Navbar</h5>
+            </div> */}
             <div className="topnav shadow-sm">
                 <div className="container-fluid navbar navbar-expand-lg topbar-nav custom-navbar">
                     {/* <nav className="navbar navbar-expand-lg topbar-nav custom-navbar custom-navbar-fonts"> */}

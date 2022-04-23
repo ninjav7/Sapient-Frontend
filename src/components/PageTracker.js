@@ -14,6 +14,7 @@ const PageTracker = () => {
         <>
             <div className="page-tracker-container">
                 <div className="tracker-dropdown">
+                    <i className="uil uil-building ml-2"></i>
                     <DropdownButton
                         id="bts-button-styling"
                         title="123 Main St. Portland, O"
@@ -48,7 +49,9 @@ const PageTracker = () => {
                     </DropdownButton>
                 </div>
                 <div class="vl"></div>
-                {/* <div className='route-tracker'>Portfolio Overview</div> */}
+                <div className="route-tracker">
+                    <span className='font-weight-bold'>Portfolio Overview</span>
+                </div>
             </div>
         </>
     );

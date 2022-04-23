@@ -149,33 +149,50 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
+                startAngle: 0,
+                endAngle: 360,
                 expandOnClick: false,
-                size: 200,
+                offsetX: 0,
+                offsetY: 0,
+                customScale: 1,
+                dataLabels: {
+                    offset: 0,
+                    minAngleToShowLabel: 10,
+                },
                 donut: {
-                    size: '77%',
+                    size: '80%',
+                    background: 'grey',
                     labels: {
                         show: true,
-                        // name: {
-                        //     show: true,
-                        //     fontSize: '22px',
-                        //     fontFamily: undefined,
-                        //     color: '#dfsda',
-                        //     offsetY: -10,
-                        // },
-                        value: {
+                        name: {
                             show: true,
-                            fontSize: '16px',
-                            color: '#d14065',
-                            offsetY: 16,
+                            fontSize: '22px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 600,
+                            color: '#373d3f',
+                            offsetY: -10,
                             // formatter: function (val) {
                             //     return val;
                             // },
                         },
+                        value: {
+                            show: true,
+                            fontSize: '16px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                            color: '#373d3f',
+                            offsetY: 16,
+                            formatter: function (val) {
+                                return val;
+                            },
+                        },
                         total: {
                             show: true,
-                            showAlways: true,
+                            showAlways: false,
                             label: 'Total',
                             color: '#373d3f',
+                            fontSize: '22px',
+                            fontWeight: 600,
                             formatter: function (w) {
                                 return w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;

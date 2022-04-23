@@ -49,9 +49,11 @@ const Peaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                            <i className="uil uil-pen mr-1"></i>Explore
-                        </button>
+                        <Link to="/energy/building-peak-explore">
+                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                                <i className="uil uil-pen mr-1"></i>Explore
+                            </button>
+                        </Link>
                     </div>
                 </Link>
                 <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>

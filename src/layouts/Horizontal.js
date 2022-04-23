@@ -79,7 +79,7 @@ class HorizontalLayout extends Component {
                                     </Col>
                                     <Col md={10} className="pl-0">
                                         <Suspense fallback={loading()}>
-                                            <Card className="p-4">{children}</Card>
+                                            <Card className="pl-2 pr-2 pt-1">{children}</Card>
                                         </Suspense>
                                     </Col>
                                 </Row>
