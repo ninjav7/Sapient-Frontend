@@ -36,3 +36,6 @@ export const generalGateway = '/api/config/gateway/equipments_details';
 
 // panel
 export const generalPanels = '/api/config/panels/panels_details';
+
+// getBuilding
+export const getBuilding = '/api/config/get_buildings';

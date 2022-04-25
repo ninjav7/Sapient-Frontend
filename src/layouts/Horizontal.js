@@ -1,11 +1,10 @@
 import React, { Component, Suspense } from 'react';
 import { Card, Col, Container, Row } from 'reactstrap';
 import { connect } from 'react-redux';
-
+import './style.css';
 import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker';
-
 import ThemeCustomizer from '../components/ThemeCustomizer';
 const CustomSideBar = React.lazy(() => import('../components/CustomSideBar'));
 
@@ -58,17 +57,36 @@ class HorizontalLayout extends Component {
                         
                     </Suspense>
                 */}
-                    <Suspense fallback={loading()}>
+                    {/* <Suspense fallback={loading()}>
                         <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
-                    </Suspense>
+                    </Suspense> */}
 
-                    <PageTracker />
+                    {/* <PageTracker /> */}
+
+                    {/* Worked yesterday! */}
+                    <div className="">
+                        <nav className="navbar fixed-top pokemon1">
+                            <div className="navbar-brand">
+                                <Suspense fallback={loading()}>
+                                    <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
+                                </Suspense>
+                            </div>
+                        </nav>
+                    </div>
+
+                    <div className="">
+                        <nav className="navbar fixed-top pokemon2">
+                            <div className="navbar-brand">
+                                <PageTracker />
+                            </div>
+                        </nav>
+                    </div>
 
                     <div className="content-page">
                         <div className="content">
                             <Container fluid className="p-0">
                                 <Row>
-                                    <Col md={2} className="pr-0">
+                                    <Col md={2} className="pr-0 energy-side-nav-style">
                                         <Suspense fallback={loading()}>
                                             <CustomSideBar
                                                 isCondensed={isCondensed}
@@ -77,7 +95,7 @@ class HorizontalLayout extends Component {
                                             />
                                         </Suspense>
                                     </Col>
-                                    <Col md={10} className="pl-0">
+                                    <Col md={10} className="pl-0 energy-content-page-style">
                                         <Suspense fallback={loading()}>
                                             <Card className="pl-2 pr-2 pt-1">{children}</Card>
                                         </Suspense>

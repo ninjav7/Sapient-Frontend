@@ -546,7 +546,9 @@ const PeakDemand = () => {
                                     <strong>5 %</strong>
                                 </i>
                             </Button>
-                            <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minute period)</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                Max power draw (15 minute period)
+                            </h6>
                             <LineAnnotationChart title="" height={350} />
                         </CardBody>
                     </Card>

@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
-import { BaseUrl, portfolioBuilidings } from '../services/Network';
+import { BaseUrl, getBuilding } from '../services/Network';
 // import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { Link } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+
 import './style.css';
 
 const PageTracker = (props) => {
@@ -21,12 +26,12 @@ const PageTracker = (props) => {
             accept: 'application/json',
         };
         axios
-            .post(
-                `${BaseUrl}${portfolioBuilidings}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
+            .get(
+                `${BaseUrl}${getBuilding}`,
+                // {
+                //     time_horizon: 0,
+                //     custom_time_horizon: 0,
+                // },
                 { headers }
             )
             .then((res) => {
@@ -37,9 +42,13 @@ const PageTracker = (props) => {
 
     return (
         <React.Fragment>
-            <div className="page-tracker-container">
+            <div className="page-tracker-container energy-second-nav-custom">
                 <div className="tracker-dropdown">
-                    <i className="uil uil-building ml-2"></i>
+                    {/* <i className="uil uil-building ml-2"></i> */}
+                    {/* <FontAwesomeIcon icon={building} /> */}
+                    {/* <i class="fa-solid fa-building"></i> */}
+
+                    <FontAwesomeIcon icon={faBuilding} className="ml-2" />
                     <DropdownButton
                         id="bts-button-styling"
                         title={activeBuildingName}
@@ -61,31 +70,24 @@ const PageTracker = (props) => {
 
                             <div>
                                 <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header>
-                                <Dropdown.Item href="#/action-1">123 Main St. Portland, O</Dropdown.Item>
-                                <Dropdown.Item href="#/action-2">15 University Bivd. Hartford, CT</Dropdown.Item>
-
+                                {buildingRecord.map((building, index) => (
+                                    <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
+                                        {building.building_name}
+                                    </Dropdown.Item>
+                                ))}
                                 <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                                 {buildingRecord.map((building, index) => (
-                                    <>
-                                        <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
-                                            {building.buildingName}
-                                        </Dropdown.Item>
-                                        {/* <Dropdown.Item href="#/action-2">
-                                            15 University Bivd. Hartford, CT
-                                        </Dropdown.Item>
-                                        <Dropdown.Item href="#/action-1">
-                                            6223 Syncamore Ave. Pittsburgh, PA
-                                        </Dropdown.Item>
-                                        <Dropdown.Item href="#/action-2">
-                                            246 Blackburn Rd. Philadelphia, PA
-                                        </Dropdown.Item> */}
-                                    </>
+                                    <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
+                                        {building.building_name}
+                                    </Dropdown.Item>
                                 ))}
                             </div>
                         </div>
                     </DropdownButton>
-                    <i className="uil uil-cog"></i>
-                    <i className="uil uil-angle-down ml-1"></i>
+                    <FontAwesomeIcon icon={faGear} />
+                    <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
+                    {/* <i className="uil uil-cog"></i>
+                    <i className="uil uil-angle-down ml-1"></i> */}
                 </div>
                 <div class="vl"></div>
                 <div className="route-tracker">
@@ -95,7 +97,7 @@ const PageTracker = (props) => {
                         <Breadcrumb.Item active>Details</Breadcrumb.Item>
                     </Breadcrumb> */}
 
-                    {/* <span className="font-weight-bold">Portfolio Overview</span> */}
+                    <span className="font-weight-bold">Portfolio Overview</span>
 
                     <Breadcrumb className="custom-breadcrumb-style">
                         {items.map((item, index) => {

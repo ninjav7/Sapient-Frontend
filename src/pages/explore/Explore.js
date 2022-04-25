@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { List } from 'react-feather';
 import { Link } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
-import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import BrushChart from '../charts/BrushChart';
+import ExploreTable from './ExploreTable';
+import { MoreVertical } from 'react-feather';
+import './style.css';
 
 // const BuildingPeakTable = () => {
 //     const records = [
@@ -269,20 +272,40 @@ const Explore = () => {
     };
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
 
+    const [metric, setMetric] = useState([
+        { value: 'energy', label: 'Energy (kWh)' },
+        { value: 'peak-power', label: 'Peak Power (kW)' },
+        { value: 'carbon-emissions', label: 'Carbon Emissions' },
+    ]);
+
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <DropdownButton id="dropdown-item-button" title="By Floor">
-                        <Dropdown.ItemText>Group by</Dropdown.ItemText>
-                        <Dropdown.Divider />
-                        <Dropdown.Item as="button">No Grouping</Dropdown.Item>
-                        <Dropdown.Item as="button">End Use</Dropdown.Item>
-                        <Dropdown.Item as="button">Equipment Type</Dropdown.Item>
-                        <Dropdown.Item as="button">Floor</Dropdown.Item>
-                        <Dropdown.Item as="button">Location</Dropdown.Item>
-                        <Dropdown.Item as="button">Location Type</Dropdown.Item>
-                    </DropdownButton>
+                    <select className="selectpicker show-tick explorer-select-style" data-width="fit">
+                        <optgroup label="Group by">
+                            <option>No Grouping</option>
+                            <option>End Use</option>
+                            <option>Equipment Type</option>
+                            <option>Floor</option>
+                            <option>Location</option>
+                            <option>Location Type</option>
+                        </optgroup>
+                    </select>
+
+                    {/* <select className="selectpicker">
+                        <optgroup label="Picnic">
+                            <option>Mustard</option>
+                            <option>Ketchup</option>
+                            <option>Relish</option>
+                        </optgroup>
+                        <optgroup label="Camping">
+                            <option>Tent</option>
+                            <option>Flashlight</option>
+                            <option>Toilet Paper</option>
+                        </optgroup>
+                    </select> */}
+
                     <div
                         className="btn-group custom-button-group header-widget-styling"
                         role="group"
@@ -294,7 +317,21 @@ const Explore = () => {
                             <Dropdown.Item as="button">Peak Hour (kW)</Dropdown.Item>
                             <Dropdown.Item as="button">Carbon Emissions</Dropdown.Item>
                         </DropdownButton> */}
+
                         <div>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                style={{ display: 'inline-block' }}>
+                                {metric.map((record, index) => {
+                                    return <option value={record.value}>{record.label}</option>;
+                                })}
+                            </Input>
+                        </div>
+
+                        <div className="ml-2">
                             <Input
                                 type="select"
                                 name="select"
@@ -307,7 +344,8 @@ const Explore = () => {
                                 <option>Last 1 Day</option>
                             </Input>
                         </div>
-                        <div className="mr-3">
+
+                        <div className="mr-2">
                             <DatePicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -320,11 +358,16 @@ const Explore = () => {
                                 placeholderText="Select Date Range"
                             />
                         </div>
+
+                        <div className="mr-3 explore-three-dot">
+                            <MoreVertical className="icon-sm" />
+                        </div>
                     </div>
                 </Col>
             </Row>
             <BrushChart />
-            <BuildingPeakTable />
+            {/* <BuildingPeakTable /> */}
+            <ExploreTable />
         </React.Fragment>
     );
 };

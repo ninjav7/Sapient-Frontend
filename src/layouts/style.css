@@ -1,0 +1,18 @@
+.energy-side-nav-style {
+    top: 13vh;
+    /* z-index: -1; */
+    position: relative;
+}
+
+.energy-content-page-style {
+    top: 13vh;
+    /* z-index: -1; */
+}
+
+.pokemon1 {
+    padding: 0vh;
+    top: -2vh;
+}
+
+.pokemon2 {
+}

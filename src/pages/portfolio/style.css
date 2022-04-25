@@ -221,16 +221,15 @@
 
 .custom-navbar {
     margin: 0px !important;
-    height: 45px !important;
-    left: 0px !important;
-    right: 0px !important;
-    top: 0px !important;
+    height: fit-content !important;
     background: #101828 !important;
     padding: 0px 8px 0px 0px !important;
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
+    align-items: center !important;
     color: red !important;
+    padding-top: 5px !important;
 }
 
 .nav-right-icon-style {
@@ -243,7 +242,6 @@
     font-size: 12px;
     line-height: 22px;
     color: #ffffff !important;
-    background: green !important;
     /* font-family: 'Inter', sans-serif; */
 }
 

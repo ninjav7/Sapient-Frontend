@@ -15,6 +15,8 @@ import {
 } from 'reactstrap';
 import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import './style.css';
 
@@ -362,6 +364,13 @@ const CompareBuildings = () => {
     return (
         <React.Fragment>
             <Header title="Compare Buildings" />
+
+            <Row className="m-4">
+                <div>
+                    <FontAwesomeIcon icon={faHome} />
+                </div>
+            </Row>
+
             <Row className="mt-2">
                 <Col xl={3}>
                     <div class="input-group rounded ml-4">
