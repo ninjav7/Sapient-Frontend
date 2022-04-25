@@ -365,11 +365,11 @@ const CompareBuildings = () => {
         <React.Fragment>
             <Header title="Compare Buildings" />
 
-            <Row className="m-4">
+            {/* <Row className="m-4">
                 <div>
                     <FontAwesomeIcon icon={faHome} />
                 </div>
-            </Row>
+            </Row> */}
 
             <Row className="mt-2">
                 <Col xl={3}>
