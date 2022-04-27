@@ -291,30 +291,30 @@ const ExploreTable = () => {
                                             </div>
                                         </td>
                                         <td>
-                                            {record.hvacPerChgStatus === 'up' && (
+                                            {record.peakPerChgStatus === 'up' && (
                                                 <button
                                                     className="button-danger text-danger btn-font-style"
                                                     style={{ width: '100%' }}>
                                                     <i className="uil uil-arrow-growth">
-                                                        <strong>{record.energyPerChg} %</strong>
+                                                        <strong>{record.peakPerChg} %</strong>
                                                     </i>
                                                 </button>
                                             )}
-                                            {record.hvacPerChgStatus === 'down' && (
+                                            {record.peakPerChgStatus === 'down' && (
                                                 <button
                                                     className="button-success text-success btn-font-style"
                                                     style={{ width: '100%' }}>
                                                     <i className="uil uil-chart-down">
-                                                        <strong>{record.energyPerChg} %</strong>
+                                                        <strong>{record.peakPerChg} %</strong>
                                                     </i>
                                                 </button>
                                             )}
-                                            {record.hvacPerChgStatus === 'normal' && (
+                                            {record.peakPerChgStatus === 'normal' && (
                                                 <button
                                                     className="button text-muted btn-font-style"
                                                     style={{ width: '100%', border: 'none' }}>
                                                     <i className="uil uil-arrow-growth">
-                                                        <strong>{record.energyPerChg} %</strong>
+                                                        <strong>{record.peakPerChg} %</strong>
                                                     </i>
                                                 </button>
                                             )}

@@ -12,11 +12,15 @@ import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
 import { servicePost, serviceGet } from '../../helpers/api';
 import axios from 'axios';
-import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall } from '../../services/Network';
+import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
 import ReactDonutChart from './ReactDonutChart';
-import PageTracker from '../../components/PageTracker';
+// import PageTracker from '../../components/PageTracker';
+
+import { connect } from 'react-redux';
+import { breadCrumbItems } from '../../redux/actions';
+// import { useDispatch } from 'react-redux';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -385,6 +389,10 @@ const PortfolioOverview = () => {
 
     const [energyConsumption, setenergyConsumption] = useState([]);
 
+    const [buildingRecord, setBuildingRecord] = useState([]);
+
+    // const dispatch = useDispatch();
+
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
@@ -456,13 +464,26 @@ const PortfolioOverview = () => {
     }, [energyConsumption]);
 
     useEffect(() => {
-        console.log('donutChartData => ', donutChartData);
-    });
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+            setBuildingRecord(res.data);
+            console.log('setBuildingRecord => ', res.data);
+        });
+    }, []);
+
+    useEffect(() => {
+        console.log('breadCrumbItems => ', typeof breadCrumbItems);
+        // breadCrumbItems((record) => console.log('record => ', record.type));
+        // breadCrumbItems();
+        // dispatch({ type: 'BreadcrumbList' });
+    }, []);
 
     return (
         <React.Fragment>
             <Header title="Portfolio Overview" />
-
             {/* <PageTracker
                 breadCrumbItems={[
                     { label: 'Apps', path: '/apps/calendar' },
@@ -475,7 +496,7 @@ const PortfolioOverview = () => {
                     <div className="card card-box-style button-style">
                         <div className="card-body" style={{ marginTop: '2px' }}>
                             <h5 className="card-title subtitle-style">Total Buildings</h5>
-                            <p className="card-text card-content-style">{overalldata.total_building}</p>
+                            <p className="card-text card-content-style">{buildingRecord.length}</p>
                         </div>
                     </div>
 
@@ -695,4 +716,13 @@ const PortfolioOverview = () => {
     );
 };
 
-export default PortfolioOverview;
+// const mapStateToProps = (state) => {
+//     console.log('State => ', state);
+//     return {
+//         List: state.counterState.List,
+//     };
+// };
+
+// export default PortfolioOverview;
+// export default connect(mapStateToProps, { breadCrumbItems })(PortfolioOverview);
+export default connect(null, { breadCrumbItems })(PortfolioOverview);

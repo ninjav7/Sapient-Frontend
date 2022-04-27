@@ -1,14 +1,16 @@
 .explorer-select-style {
-    width: fit-content;
+    /* width: fit-content; */
+    width: 175px;
     height: 34px;
     padding: 7px 10px;
     background: #ffffff;
-    border: 0px solid #d9dde2;
+    /* border: 0px solid #d9dde2; */
+    /* border: 2px solid red; */
     border-radius: 6px;
 
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     line-height: 20px;
     color: #1d2939;

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { List } from 'react-feather';
 import { Link } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
+import Select from 'react-select';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -272,39 +273,53 @@ const Explore = () => {
     };
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
 
+    // const exploreOpts = {
+    //     Opts1: 'No Grouping',
+    //     Opts2: 'End Use',
+    //     Opts3: 'Equipment Type',
+    //     Opts4: 'Floor',
+    //     Opts5: 'Location',
+    //     Opts6: 'Location Type',
+    // };
+
+    const [exploreOpts, setExploreOpts] = useState([
+        { value: 'No Grouping', label: 'No Grouping' },
+        { value: 'End Use', label: 'End Use' },
+        { value: 'Equipment Type', label: 'Equipment Type' },
+        { value: 'Floor', label: 'Floor' },
+        { value: 'Location', label: 'Location' },
+        { value: 'Location Type', label: 'Location Type' },
+    ]);
+
+    const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0].value);
+
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
 
+    useEffect(() => {
+        console.log('activeExploreOpt => ', activeExploreOpt);
+    }, [activeExploreOpt]);
+
     return (
         <React.Fragment>
             <Row className="page-title">
-                <Col className="header-container">
-                    <select className="selectpicker show-tick explorer-select-style" data-width="fit">
-                        <optgroup label="Group by">
-                            <option>No Grouping</option>
-                            <option>End Use</option>
-                            <option>Equipment Type</option>
-                            <option>Floor</option>
-                            <option>Location</option>
-                            <option>Location Type</option>
-                        </optgroup>
-                    </select>
-
-                    {/* <select className="selectpicker">
-                        <optgroup label="Picnic">
-                            <option>Mustard</option>
-                            <option>Ketchup</option>
-                            <option>Relish</option>
-                        </optgroup>
-                        <optgroup label="Camping">
-                            <option>Tent</option>
-                            <option>Flashlight</option>
-                            <option>Toilet Paper</option>
-                        </optgroup>
-                    </select> */}
+                <Col className="header-container ml-4">
+                    <div>
+                        <Select
+                            className="react-select explorer-select-style"
+                            onChange={(e) => setActiveExploreOpt(e.value)}
+                            classNamePrefix="react-select"
+                            placeholderText="p"
+                            options={exploreOpts.map((record, index) => {
+                                return {
+                                    value: record.value,
+                                    label: record.label,
+                                };
+                            })}></Select>
+                    </div>
 
                     <div
                         className="btn-group custom-button-group header-widget-styling"
@@ -336,7 +351,7 @@ const Explore = () => {
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
-                                style={{ color: 'black', fontWeight: 'bold' }}
+                                style={{ color: 'black', fontWeight: 'bold', width: 'auto' }}
                                 className="select-button form-control form-control-md">
                                 <option className="mb-0">Last 7 Days</option>
                                 <option>Last 5 Days</option>
@@ -365,9 +380,72 @@ const Explore = () => {
                     </div>
                 </Col>
             </Row>
-            <BrushChart />
-            {/* <BuildingPeakTable /> */}
-            <ExploreTable />
+
+            {activeExploreOpt === 'No Grouping' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+            {activeExploreOpt === 'End Use' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+            {activeExploreOpt === 'Equipment Type' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+            {activeExploreOpt === 'Floor' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+            {activeExploreOpt === 'Location' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+            {activeExploreOpt === 'Location Type' && (
+                <>
+                    <BrushChart />
+                    <Row>
+                        <Col lg={10} className="ml-2">
+                            <ExploreTable />
+                        </Col>
+                    </Row>
+                </>
+            )}
         </React.Fragment>
     );
 };

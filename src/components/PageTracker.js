@@ -3,7 +3,10 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { BaseUrl, getBuilding } from '../services/Network';
-// import Breadcrumb from 'react-bootstrap/Breadcrumb';
+
+import { connect } from 'react-redux';
+import { initMenu, changeActiveMenuFromLocation, breadCrumbItems } from '../redux/actions';
+
 import { Link } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 import axios from 'axios';
@@ -11,33 +14,26 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { useSelector } from 'react-redux';
 
 import './style.css';
 
-const PageTracker = (props) => {
+const PageTracker = () => {
     const [value, setValue] = useState('');
     const [buildingRecord, setBuildingRecord] = useState([]);
+    const store = useSelector((state) => state.breadCrumbItemsReducer);
     const [activeBuildingName, setActiveBuildingName] = useState(`123 Main St. Portland, O`);
-    const items = props.breadCrumbItems || [];
+    const items = store.items || [];
 
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
         };
-        axios
-            .get(
-                `${BaseUrl}${getBuilding}`,
-                // {
-                //     time_horizon: 0,
-                //     custom_time_horizon: 0,
-                // },
-                { headers }
-            )
-            .then((res) => {
-                setBuildingRecord(res.data);
-                console.log('setBuildingRecord => ', res.data);
-            });
+        axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+            setBuildingRecord(res.data);
+            console.log('setBuildingRecord => ', res.data);
+        });
     }, []);
 
     return (
@@ -70,11 +66,11 @@ const PageTracker = (props) => {
 
                             <div>
                                 <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header>
-                                {buildingRecord.map((building, index) => (
+                                {/* {buildingRecord.map((building, index) => (
                                     <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
                                         {building.building_name}
                                     </Dropdown.Item>
-                                ))}
+                                ))} */}
                                 <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                                 {buildingRecord.map((building, index) => (
                                     <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
@@ -97,7 +93,7 @@ const PageTracker = (props) => {
                         <Breadcrumb.Item active>Details</Breadcrumb.Item>
                     </Breadcrumb> */}
 
-                    <span className="font-weight-bold">Portfolio Overview</span>
+                    {/* <span className="font-weight-bold">Portfolio Overview</span> */}
 
                     <Breadcrumb className="custom-breadcrumb-style">
                         {items.map((item, index) => {
@@ -135,3 +131,5 @@ const PageTracker = (props) => {
 };
 
 export default PageTracker;
+
+export { breadCrumbItems };
