@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
 import MixedChart from '../charts/MixedChart';
 import LineColumnChart from '../charts/LineColumnChart';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const UsagePageTwo = () => {
@@ -50,6 +51,27 @@ const UsagePageTwo = () => {
         val5: { value: 23, type: 'up' },
         val6: { value: 7, type: 'normal' },
     });
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: false,
+                    },
+                    {
+                        label: 'Lightning',
+                        path: '/energy/lightning',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

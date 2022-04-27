@@ -15,12 +15,8 @@ import axios from 'axios';
 import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
-import ReactDonutChart from './ReactDonutChart';
-// import PageTracker from '../../components/PageTracker';
 
-import { connect } from 'react-redux';
-import { breadCrumbItems } from '../../redux/actions';
-// import { useDispatch } from 'react-redux';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -391,9 +387,13 @@ const PortfolioOverview = () => {
 
     const [buildingRecord, setBuildingRecord] = useState([]);
 
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
+
     // const dispatch = useDispatch();
 
     useEffect(() => {
+        console.log('startDate in useEffect => ', startDate);
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -402,8 +402,8 @@ const PortfolioOverview = () => {
             .post(
                 `${BaseUrl}${portfolioOverall}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -475,15 +475,41 @@ const PortfolioOverview = () => {
     }, []);
 
     useEffect(() => {
-        console.log('breadCrumbItems => ', typeof breadCrumbItems);
-        // breadCrumbItems((record) => console.log('record => ', record.type));
-        // breadCrumbItems();
-        // dispatch({ type: 'BreadcrumbList' });
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Portfolio Overview',
+                        path: '/energy/portfolio/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        let endCustomDate = new Date(); // today
+        let startCustomDate = new Date(); // 7 days
+        startCustomDate.setDate(startCustomDate.getDate() - 7);
+        setDateRange([startCustomDate, endCustomDate]);
+    }, []);
+
+    // useEffect(() => {
+    //     console.log('startDate => ', startDate);
+    //     console.log('endDate => ', endDate);
+    //     const currentDayOfMonth = endDate.getDate();
+    //     const currentMonth = endDate.getMonth(); // Be careful! January is 0, not 1
+    //     const currentYear = endDate.getFullYear();
+    //     const testDateFormat = currentYear + '-' + (currentMonth + 1) + '-' + currentDayOfMonth;
+    //     console.log('testDateFormat => ', testDateFormat);
+    // }, [startDate, endDate]);
 
     return (
         <React.Fragment>
-            <Header title="Portfolio Overview" />
+            <Header title="Portfolio Overview" startDate={startDate} endDate={endDate} setDateRange={setDateRange} />
             {/* <PageTracker
                 breadCrumbItems={[
                     { label: 'Apps', path: '/apps/calendar' },
@@ -604,18 +630,11 @@ const PortfolioOverview = () => {
                         <Col xl={5} className="mt-4">
                             <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            {/* <div className="card-body mt-2" style={{ background: 'red' }}> */}
+
                             <div className="card-body mt-2">
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
-                                    {/* <DoughnutChart /> */}
-                                    {/* <PortfolioDonutChart /> */}
-                                    {/* <ReactDonutChart /> */}
                                 </div>
-                                {/* <div className="donut-content-style">
-                                    125,334 <br />
-                                    kWh
-                                </div> */}
                             </div>
                         </Col>
                         <Col xl={7} className="mt-4">
@@ -716,13 +735,4 @@ const PortfolioOverview = () => {
     );
 };
 
-// const mapStateToProps = (state) => {
-//     console.log('State => ', state);
-//     return {
-//         List: state.counterState.List,
-//     };
-// };
-
-// export default PortfolioOverview;
-// export default connect(mapStateToProps, { breadCrumbItems })(PortfolioOverview);
-export default connect(null, { breadCrumbItems })(PortfolioOverview);
+export default PortfolioOverview;

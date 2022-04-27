@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
-
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 import {
     BaseUrl,
@@ -140,6 +140,22 @@ const General = () => {
     useEffect(() => {
         console.log('startDate', startDate);
     });
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'General',
+                        path: '/settings/general',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

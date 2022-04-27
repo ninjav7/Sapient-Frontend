@@ -4,11 +4,11 @@ const initalItemState = {
         // { label: 'Calendar', path: '/apps/calendar', active: true },
     ],
 };
+
 const breadCrumbItemsReducer = (prevState = initalItemState, action) => {
-    console.log('Reducer called!');
     switch (action.type) {
-        case 'BreadcrumbList':
-            return { List: action.items };
+        case 'BREADCRUMBLIST':
+            return { BREADCRUMBLIST: action.data };
         default:
             return prevState;
     }

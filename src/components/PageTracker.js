@@ -3,10 +3,6 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { BaseUrl, getBuilding } from '../services/Network';
-
-import { connect } from 'react-redux';
-import { initMenu, changeActiveMenuFromLocation, breadCrumbItems } from '../redux/actions';
-
 import { Link } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 import axios from 'axios';
@@ -14,16 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { useSelector } from 'react-redux';
-
+import { BreadcrumbStore } from './BreadcrumbStore';
 import './style.css';
 
 const PageTracker = () => {
     const [value, setValue] = useState('');
-    const [buildingRecord, setBuildingRecord] = useState([]);
-    const store = useSelector((state) => state.breadCrumbItemsReducer);
+    const [buildingList, setBuildingList] = useState([]);
     const [activeBuildingName, setActiveBuildingName] = useState(`123 Main St. Portland, O`);
-    const items = store.items || [];
+    const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
+    const items = breadcrumList || [];
 
     useEffect(() => {
         const headers = {
@@ -31,19 +26,28 @@ const PageTracker = () => {
             accept: 'application/json',
         };
         axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-            setBuildingRecord(res.data);
-            console.log('setBuildingRecord => ', res.data);
+            setBuildingList(res.data);
+            console.log('setBuildingList => ', res.data);
         });
     }, []);
+
+    // useEffect(() => {
+    //     const headers = {
+    //         'Content-Type': 'application/json',
+    //         accept: 'application/json',
+    //     };
+    //     axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+    //         const buildingObj = res.data.find((building) => building.building_id === buildingId);
+    //         console.log('buildingObj => ', buildingObj);
+    //         setActiveBuildingName(buildingObj.building_name);
+    //         console.log('activeBuildingName => ', activeBuildingName);
+    //     });
+    // }, [buidlingStore]);
 
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
                 <div className="tracker-dropdown">
-                    {/* <i className="uil uil-building ml-2"></i> */}
-                    {/* <FontAwesomeIcon icon={building} /> */}
-                    {/* <i class="fa-solid fa-building"></i> */}
-
                     <FontAwesomeIcon icon={faBuilding} className="ml-2" />
                     <DropdownButton
                         id="bts-button-styling"
@@ -72,8 +76,12 @@ const PageTracker = () => {
                                     </Dropdown.Item>
                                 ))} */}
                                 <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
-                                {buildingRecord.map((building, index) => (
-                                    <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
+                                {buildingList.map((building, index) => (
+                                    <Dropdown.Item
+                                        onClick={() => {
+                                            setActiveBuildingName(building.buildingName);
+                                            // buildingId(building.building_id);
+                                        }}>
                                         {building.building_name}
                                     </Dropdown.Item>
                                 ))}
@@ -130,6 +138,14 @@ const PageTracker = () => {
     );
 };
 
-export default PageTracker;
+const mapStateToProps = (state) => {
+    return {
+        ID: state.counterState.ID,
+    };
+};
 
-export { breadCrumbItems };
+// export default connect(mapStateToProps, { buildingId })(PageTracker);
+// export { breadCrumbItems };
+
+// export default (connect(mapStateToProps, {  buildingId })(PageTracker));
+export default PageTracker;

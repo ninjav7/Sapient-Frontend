@@ -22,6 +22,7 @@ import {
     portfolioEndUser,
 } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const BuildingOverview = () => {
     const [overview, setOverview] = useState({
@@ -844,8 +845,8 @@ const BuildingOverview = () => {
             .post(
                 `${BaseUrl}${builidingOverview}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -886,8 +887,8 @@ const BuildingOverview = () => {
             .post(
                 `${BaseUrl}${builidingAlerts}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -908,8 +909,8 @@ const BuildingOverview = () => {
             .post(
                 `${BaseUrl}${builidingPeak}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -930,8 +931,8 @@ const BuildingOverview = () => {
             .post(
                 `${BaseUrl}${builidingEquipments}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -952,8 +953,8 @@ const BuildingOverview = () => {
             .post(
                 `${BaseUrl}${builidingHourly}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -969,10 +970,26 @@ const BuildingOverview = () => {
                         data: data,
                     },
                 ];
-                console.log(res.data);
-                console.log(arr);
+                console.log('builidingHourly Data => ', res.data);
+                console.log('builidingHourly Array => ', arr);
                 // setLineChartSeries(arr);
             });
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building Overview',
+                        path: '/energy/building/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (
@@ -1169,9 +1186,9 @@ const BuildingOverview = () => {
                                                 <div>
                                                     {item.energy_consumption.now < item.energy_consumption.old && (
                                                         <button
-                                                            className="button-danger text-danger equip-table-button"
+                                                            className="button-success text-success equip-table-button"
                                                             style={{ width: 'auto' }}>
-                                                            <i className="uil uil-chart-down">
+                                                            <i className="uil uil-arrow-growth">
                                                                 <strong>
                                                                     {percentageHandler(
                                                                         item.energy_consumption.now,
@@ -1184,9 +1201,9 @@ const BuildingOverview = () => {
                                                     )}
                                                     {item.energy_consumption.now > item.energy_consumption.old && (
                                                         <button
-                                                            className="button-success text-success equip-table-button"
+                                                            className="button-danger text-danger equip-table-button"
                                                             style={{ width: 'auto' }}>
-                                                            <i className="uil uil-arrow-growth">
+                                                            <i className="uil uil-chart-down">
                                                                 <strong>
                                                                     {percentageHandler(
                                                                         item.energy_consumption.now,

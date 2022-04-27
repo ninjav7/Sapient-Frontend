@@ -5,6 +5,7 @@ import { BaseUrl, endUses } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import axios from 'axios';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const EndUses = () => {
@@ -152,6 +153,22 @@ const EndUses = () => {
                 setEndUsesData(res.data);
                 console.log(res.data);
             });
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

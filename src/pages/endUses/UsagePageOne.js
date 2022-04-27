@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import Header from '../../components/Header';
 import DonutChart from '../charts/DonutChart';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
@@ -245,6 +246,27 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
     });
 
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: false,
+                    },
+                    {
+                        label: 'HVAC',
+                        path: '/energy/hvac',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

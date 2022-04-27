@@ -10,6 +10,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalGateway } from '../../services/Network';
@@ -34,6 +35,22 @@ const GatewaysTable = ({ generalGatewayData }) => {
             deviceCount: 5,
         },
     ];
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Gateways',
+                        path: '/energy/gateways',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <Card>

@@ -7,6 +7,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import 'react-datepicker/dist/react-datepicker.css';
 import SelectTableComponent from './SelectTableComponent';
 import { Line } from 'rc-progress';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -392,6 +393,22 @@ const ExploreBuildingPeak = (props) => {
             offsetY: 50,
         },
     });
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building Peak',
+                        path: '/energy/building-peak-explore',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

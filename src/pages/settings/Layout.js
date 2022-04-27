@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Row,
     Col,
@@ -14,6 +14,7 @@ import {
     Button,
 } from 'reactstrap';
 import { Filter } from 'react-feather';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const Layout = () => {
@@ -125,6 +126,22 @@ const Layout = () => {
             label: 'Room',
         },
     ];
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Layout',
+                        path: '/energy/layout',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

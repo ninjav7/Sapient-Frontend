@@ -14,7 +14,7 @@ import {
     FormGroup,
     Label,
 } from 'reactstrap';
-
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { Search } from 'react-feather';
 
 import Modal from 'react-bootstrap/Modal';
@@ -114,6 +114,22 @@ const ActiveDevices = () => {
                 console.log(res.data);
             })
             .catch((err) => {});
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Active Devices',
+                        path: '/settings/active-devices',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

@@ -17,16 +17,16 @@ const DetailedButton = (props) => {
                 {props.description.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 <span className="card-unit-style">
                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
-                    {props.consumptionNormal && (
+                    {!props.consumptionNormal && (
                         <button className="button-success text-success btn-font-style" style={{ width: '100%' }}>
-                            <i className="uil uil-arrow-growth">
+                            <i className="uil uil-chart-down">
                                 <strong>{props.value} %</strong>
                             </i>
                         </button>
                     )}
-                    {!props.consumptionNormal && (
+                    {props.consumptionNormal && (
                         <button className="button-danger text-danger btn-font-style" style={{ width: '100%' }}>
-                            <i className="uil uil-chart-down">
+                            <i className="uil uil-arrow-growth">
                                 <strong>{props.value} %</strong>
                             </i>
                         </button>

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
 import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
 import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const TimeOfDay = () => {
@@ -981,6 +982,22 @@ const TimeOfDay = () => {
     });
 
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Time Of Day',
+                        path: '/energy/time-of-day',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

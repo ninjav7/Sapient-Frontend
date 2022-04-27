@@ -18,6 +18,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const PassiveDevicesTable = ({ passiveDeviceData }) => {
     const records = [
@@ -36,6 +37,22 @@ const PassiveDevicesTable = ({ passiveDeviceData }) => {
             sensors: '3/3',
         },
     ];
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Passive Devices',
+                        path: '/settings/active-devices',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <Card>
