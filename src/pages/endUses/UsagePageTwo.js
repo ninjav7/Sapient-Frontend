@@ -73,6 +73,10 @@ const UsagePageTwo = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <React.Fragment>
             <Header title="Lightning" />

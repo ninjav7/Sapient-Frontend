@@ -268,6 +268,10 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <React.Fragment>
             <Header title={title} />
