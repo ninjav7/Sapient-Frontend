@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, CardHeader } from 'reactstrap';
 import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
 import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const TimeOfDay = () => {
@@ -901,38 +902,44 @@ const TimeOfDay = () => {
                     labels: {
                         show: true,
                         name: {
-                            show: true,
-                            fontSize: '22px',
-                            fontFamily: 'Helvetica, Arial, sans-serif',
-                            fontWeight: 600,
-                            color: '#373d3f',
-                            offsetY: -10,
+                            show: false,
+                            // fontSize: '22px',
+                            // fontFamily: 'Helvetica, Arial, sans-serif',
+                            // fontWeight: 600,
+                            // color: '#373d3f',
+                            // offsetY: -10,
                             // formatter: function (val) {
                             //     return val;
                             // },
                         },
                         value: {
                             show: true,
-                            fontSize: '16px',
+                            fontSize: '20px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
-                            color: '#373d3f',
-                            offsetY: 16,
+                            color: 'red',
+                            // offsetY: 16,
                             formatter: function (val) {
-                                return val;
+                                return `${val} kWh`;
                             },
                         },
                         total: {
                             show: true,
                             showAlways: false,
                             label: 'Total',
-                            color: '#373d3f',
+                            // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
+                            // formatter: function (w) {
+                            //     return w.globals.seriesTotals.reduce((a, b) => {
+                            //         return a + b;
+                            //     }, 0);
+                            // },
                             formatter: function (w) {
-                                return w.globals.seriesTotals.reduce((a, b) => {
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
                                 }, 0);
+                                return `${sum} kWh`;
                             },
                         },
                     },
@@ -975,6 +982,22 @@ const TimeOfDay = () => {
     });
 
     const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Time Of Day',
+                        path: '/energy/time-of-day',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

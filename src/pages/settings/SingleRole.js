@@ -31,6 +31,7 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 import classnames from 'classnames';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const SingleRole = () => {
     const [checked, setChecked] = useState(true);
@@ -54,6 +55,22 @@ const SingleRole = () => {
             setActiveTab(tab);
         }
     };
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Account Administrator',
+                        path: '/settings/role-config',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

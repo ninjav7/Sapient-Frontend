@@ -4,6 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { serviceGet } from '../../helpers/api';
 // import { generalUtilityBills } from '../../services/Network';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const UtilityBills = () => {
@@ -88,6 +89,22 @@ const UtilityBills = () => {
             }
         }
         getUtilityBillsData();
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Utility Bills',
+                        path: '/settings/utility-bills',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
+import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {
@@ -95,6 +96,22 @@ const Panels = () => {
                 console.log(res.data);
             })
             .catch((err) => {});
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panels',
+                        path: '/settings/panels',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

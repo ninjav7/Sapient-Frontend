@@ -701,6 +701,7 @@ const authRoutes = {
 
 // flatten the list of all nested routes
 const flattenRoutes = (routes) => {
+    console.log('routes => ', routes);
     let flatRoutes = [];
 
     routes = routes || [];
@@ -711,6 +712,7 @@ const flattenRoutes = (routes) => {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
+    console.log('routes after forEach => ', flatRoutes);
     return flatRoutes;
 };
 

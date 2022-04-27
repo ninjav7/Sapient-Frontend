@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -14,6 +14,7 @@ import {
     DropdownItem,
 } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
 import '../style.css';
 
 const CreatePanel = () => {
@@ -67,6 +68,22 @@ const CreatePanel = () => {
         { serialNo: 47, name: '' },
         { serialNo: 48, name: '' },
     ]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Create Panel',
+                        path: '/settings/createPanel',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

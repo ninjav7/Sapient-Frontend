@@ -19,9 +19,26 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const RoleTable = ({ roleData }) => {
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Roles',
+                        path: '/settings/roles',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <Card>
             <CardBody>

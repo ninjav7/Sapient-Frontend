@@ -13,6 +13,7 @@ import {
     Input,
     FormGroup,
 } from 'reactstrap';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, generalEquipments } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
@@ -319,6 +320,22 @@ const Equipment = () => {
                 console.log(res.data);
             })
             .catch((err) => {});
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Equipment',
+                        path: '/settings/equipment',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 import {
     BaseUrl,
@@ -17,6 +18,22 @@ import axios from 'axios';
 
 const AccountSettings = () => {
     const [checked, setChecked] = useState(true);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Account Settings',
+                        path: '/settings/account',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

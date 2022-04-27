@@ -7,6 +7,7 @@ import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const BuildingPeakButton = (props) => {
     return (
@@ -41,6 +42,22 @@ const BuildingPeakButton = (props) => {
 };
 
 const Peaks = ({ energyConsumption, title, subtitle }) => {
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Peak Demand',
+                        path: '/energy/peak-demand',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
@@ -546,7 +563,9 @@ const PeakDemand = () => {
                                     <strong>5 %</strong>
                                 </i>
                             </Button>
-                            <h6 className="card-subtitle mb-2 text-muted">Max power draw (15 minute period)</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                Max power draw (15 minute period)
+                            </h6>
                             <LineAnnotationChart title="" height={350} />
                         </CardBody>
                     </Card>

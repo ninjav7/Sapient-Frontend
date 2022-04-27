@@ -14,18 +14,6 @@ const Header = (props) => {
 
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
 
-    const [dateRange, setDateRange] = useState([null, null]);
-    const [startDate, endDate] = dateRange;
-
-    useEffect(() => {
-        //today
-        let endCustomDate = new Date();
-        // 7 days
-        let startCustomDate = new Date();
-        startCustomDate.setDate(startCustomDate.getDate() - 7);
-        setDateRange([startCustomDate, endCustomDate]);
-    }, []);
-
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -80,10 +68,10 @@ const Header = (props) => {
                             <div>
                                 <DatePicker
                                     selectsRange={true}
-                                    startDate={startDate}
-                                    endDate={endDate}
+                                    startDate={props.startDate}
+                                    endDate={props.endDate}
                                     onChange={(update) => {
-                                        setDateRange(update);
+                                        props.setDateRange(update);
                                     }}
                                     dateFormat="MMMM d"
                                     className="select-button form-control form-control-md font-weight-bold"

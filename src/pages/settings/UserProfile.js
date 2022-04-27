@@ -15,6 +15,7 @@ import {
     generalOperatingHours,
 } from '../../services/Network';
 import axios from 'axios';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const UserProfile = () => {
     const [buildingId, setBuildingId] = useState(1);
@@ -26,6 +27,22 @@ const UserProfile = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [value, onChange] = useState('10:00');
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'User Profile',
+                        path: '/energy/portfolio/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

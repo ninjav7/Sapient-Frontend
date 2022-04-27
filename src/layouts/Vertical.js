@@ -15,11 +15,9 @@ const Topbar = React.lazy(() => import('../components/Topbar'));
 const Footer = React.lazy(() => import('../components/Footer'));
 const RightSidebar = React.lazy(() => import('../components/RightSidebar'));
 
-
 // loading
 const emptyLoading = () => <div></div>;
 const loading = () => <div className="text-center"></div>;
-
 
 class VerticalLayout extends Component {
     constructor(props) {
@@ -32,13 +30,13 @@ class VerticalLayout extends Component {
      */
     openLeftMenu = () => {
         if (document.body) {
-            if (document.body.classList.contains("sidebar-enable")) {
-                document.body.classList.remove("sidebar-enable");
+            if (document.body.classList.contains('sidebar-enable')) {
+                document.body.classList.remove('sidebar-enable');
                 this.props.changeSidebarType(layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED);
             } else {
-                if (document.body.classList.contains("left-side-menu-condensed"))
-                    document.body.classList.remove("left-side-menu-condensed");
-                document.body.classList.add("sidebar-enable");
+                if (document.body.classList.contains('left-side-menu-condensed'))
+                    document.body.classList.remove('left-side-menu-condensed');
+                document.body.classList.add('sidebar-enable');
             }
         }
     };
@@ -64,11 +62,7 @@ class VerticalLayout extends Component {
                         <Topbar openLeftMenuCallBack={this.openLeftMenu} {...this.props} />
                     </Suspense>
                     <Suspense fallback={emptyLoading()}>
-                        <LeftSidebar
-                            isCondensed={isCondensed}
-                            isLight={isLight}
-                            {...this.props}
-                        />
+                        <LeftSidebar isCondensed={isCondensed} isLight={isLight} {...this.props} />
                     </Suspense>
 
                     <div className="content-page">
@@ -94,12 +88,9 @@ class VerticalLayout extends Component {
     }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
     return {
         layout: state.Layout,
     };
 };
-export default connect(
-    mapStateToProps,
-    { changeSidebarTheme, changeSidebarType }
-)(VerticalLayout);
+export default connect(mapStateToProps, { changeSidebarTheme, changeSidebarType })(VerticalLayout);

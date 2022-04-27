@@ -12,10 +12,11 @@ import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
 import { servicePost, serviceGet } from '../../helpers/api';
 import axios from 'axios';
-import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall } from '../../services/Network';
+import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
-import ReactDonutChart from './ReactDonutChart';
+
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -207,45 +208,6 @@ const PortfolioOverview = () => {
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-        // plotOptions: {
-        //     pie: {
-        //         expandOnClick: false,
-        //         size: 200,
-        //         donut: {
-        //             size: '77%',
-        //             labels: {
-        //                 show: true,
-        //                 name: {
-        //                     show: true,
-        //                     fontSize: '22px',
-        //                     fontFamily: undefined,
-        //                     color: '#dfsda',
-        //                     offsetY: -10,
-        //                 },
-        //                 value: {
-        //                     show: true,
-        //                     fontSize: '16px',
-        //                     color: '#d14065',
-        //                     offsetY: 16,
-        //                     formatter: function (val) {
-        //                         return val;
-        //                     },
-        //                 },
-        //                 total: {
-        //                     show: true,
-        //                     showAlways: true,
-        //                     label: 'Total',
-        //                     color: '#373d3f',
-        //                     formatter: function (w) {
-        //                         return w.globals.seriesTotals.reduce((a, b) => {
-        //                             return a + b;
-        //                         }, 0);
-        //                     },
-        //                 },
-        //             },
-        //         },
-        //     },
-        // },
         plotOptions: {
             pie: {
                 startAngle: 0,
@@ -292,10 +254,16 @@ const PortfolioOverview = () => {
                             // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
+                            // formatter: function (w) {
+                            //     return w.globals.seriesTotals.reduce((a, b) => {
+                            //         return a + b;
+                            //     }, 0);
+                            // },
                             formatter: function (w) {
-                                return w.globals.seriesTotals.reduce((a, b) => {
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
                                 }, 0);
+                                return `${sum} kWh`;
                             },
                         },
                     },
@@ -417,7 +385,15 @@ const PortfolioOverview = () => {
 
     const [energyConsumption, setenergyConsumption] = useState([]);
 
+    const [buildingRecord, setBuildingRecord] = useState([]);
+
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
+
+    // const dispatch = useDispatch();
+
     useEffect(() => {
+        console.log('startDate in useEffect => ', startDate);
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -426,8 +402,8 @@ const PortfolioOverview = () => {
             .post(
                 `${BaseUrl}${portfolioOverall}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
@@ -488,19 +464,65 @@ const PortfolioOverview = () => {
     }, [energyConsumption]);
 
     useEffect(() => {
-        console.log('donutChartData => ', donutChartData);
-    });
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+            setBuildingRecord(res.data);
+            console.log('setBuildingRecord => ', res.data);
+        });
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Portfolio Overview',
+                        path: '/energy/portfolio/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        let endCustomDate = new Date(); // today
+        let startCustomDate = new Date(); // 7 days
+        startCustomDate.setDate(startCustomDate.getDate() - 7);
+        setDateRange([startCustomDate, endCustomDate]);
+    }, []);
+
+    // useEffect(() => {
+    //     console.log('startDate => ', startDate);
+    //     console.log('endDate => ', endDate);
+    //     const currentDayOfMonth = endDate.getDate();
+    //     const currentMonth = endDate.getMonth(); // Be careful! January is 0, not 1
+    //     const currentYear = endDate.getFullYear();
+    //     const testDateFormat = currentYear + '-' + (currentMonth + 1) + '-' + currentDayOfMonth;
+    //     console.log('testDateFormat => ', testDateFormat);
+    // }, [startDate, endDate]);
 
     return (
         <React.Fragment>
-            <Header title="Portfolio Overview" />
+            <Header title="Portfolio Overview" startDate={startDate} endDate={endDate} setDateRange={setDateRange} />
+            {/* <PageTracker
+                breadCrumbItems={[
+                    { label: 'Apps', path: '/apps/calendar' },
+                    { label: 'Calendar', path: '/apps/calendar', active: true },
+                ]}
+            /> */}
 
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
                         <div className="card-body" style={{ marginTop: '2px' }}>
                             <h5 className="card-title subtitle-style">Total Buildings</h5>
-                            <p className="card-text card-content-style">{overalldata.total_building}</p>
+                            <p className="card-text card-content-style">{buildingRecord.length}</p>
                         </div>
                     </div>
 
@@ -608,18 +630,11 @@ const PortfolioOverview = () => {
                         <Col xl={5} className="mt-4">
                             <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            {/* <div className="card-body mt-2" style={{ background: 'red' }}> */}
+
                             <div className="card-body mt-2">
                                 <div className="mt-4">
                                     <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
-                                    {/* <DoughnutChart /> */}
-                                    {/* <PortfolioDonutChart /> */}
-                                    {/* <ReactDonutChart /> */}
                                 </div>
-                                {/* <div className="donut-content-style">
-                                    125,334 <br />
-                                    kWh
-                                </div> */}
                             </div>
                         </Col>
                         <Col xl={7} className="mt-4">

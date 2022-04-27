@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import {
@@ -15,6 +15,9 @@ import {
 } from 'reactstrap';
 import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 import './style.css';
 
@@ -359,9 +362,32 @@ const BuildingTable = () => {
 };
 
 const CompareBuildings = () => {
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Compare Buildings',
+                        path: '/energy/compare-buildings',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
             <Header title="Compare Buildings" />
+
+            {/* <Row className="m-4">
+                <div>
+                    <FontAwesomeIcon icon={faHome} />
+                </div>
+            </Row> */}
+
             <Row className="mt-2">
                 <Col xl={3}>
                     <div class="input-group rounded ml-4">
