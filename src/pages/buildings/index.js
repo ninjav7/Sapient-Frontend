@@ -651,6 +651,41 @@ const BuildingOverview = () => {
             ],
         },
     ];
+    // const weekdaysSeries = [
+    //     {
+    //         name: 'Weekends',
+    //         data: [
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '2',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '4',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '6',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '8',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '10',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '12',
+    //             },
+    //             {
+    //                 total_consumption: 1000,
+    //                 timestamp: '14',
+    //             },
+    //         ],
+    //     },
+    // ];
 
     const weekdaysChartHeight = 125;
     const weekendsChartHeight = 125;
@@ -961,8 +996,8 @@ const BuildingOverview = () => {
             .then((res) => {
                 const data = res.data.map((el) => {
                     return {
-                        x: el.energy_consumption,
-                        y: el.timestamp,
+                        x: el.timestamp,
+                        y: el.energy_consumption,
                     };
                 });
                 const arr = [
