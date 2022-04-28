@@ -1,4 +1,3 @@
-import React from 'react';
 import { Store } from 'pullstate';
 
 export const BreadcrumbStore = new Store({
