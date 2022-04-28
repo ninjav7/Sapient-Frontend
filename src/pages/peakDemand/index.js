@@ -7,6 +7,7 @@ import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
+import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const BuildingPeakButton = (props) => {
@@ -21,7 +22,7 @@ const BuildingPeakButton = (props) => {
                         <button
                             className="button-success text-success font-weight-bold font-size-5"
                             style={{ width: '100%' }}>
-                            <i className="uil uil-arrow-growth">
+                            <i className="uil uil-chart-down">
                                 <strong>{props.value} %</strong>
                             </i>
                         </button>
@@ -30,7 +31,7 @@ const BuildingPeakButton = (props) => {
                         <button
                             className="button-danger text-danger font-weight-bold font-size-5"
                             style={{ width: '100%' }}>
-                            <i className="uil uil-chart-down">
+                            <i className="uil uil-arrow-growth">
                                 <strong>{props.value} %</strong>
                             </i>
                         </button>
@@ -41,7 +42,7 @@ const BuildingPeakButton = (props) => {
     );
 };
 
-const Peaks = ({ energyConsumption, title, subtitle }) => {
+const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -109,61 +110,117 @@ const Peaks = ({ energyConsumption, title, subtitle }) => {
     );
 };
 
+const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Peak Demand',
+                        path: '/energy/peak-demand',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
+    return (
+        <Card>
+            <CardBody className="pb-0 pt-2">
+                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                    {title}
+                </h6>
+                <Link to="/energy/building-peak-explore">
+                    <div className="float-right ml-2">
+                        <Link to="/energy/building-peak-explore">
+                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                                <i className="uil uil-pen mr-1"></i>Explore
+                            </button>
+                        </Link>
+                    </div>
+                </Link>
+                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
+                <Table className="mb-0" borderless hover>
+                    <thead>
+                        <tr>
+                            <th scope="col">Equipment</th>
+                            <th scope="col">Power</th>
+                            <th scope="col">Change from Previous Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {energyConsumption.map((record, index) => {
+                            return (
+                                <tr key={index}>
+                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
+                                        {record.equipment_name}
+                                    </td>
+                                    <td className="custom-usage-style muted">{record.energy_consumption.now}</td>
+                                    <td>
+                                        <button
+                                            className="button-danger text-danger font-weight-bold font-size-5"
+                                            style={{ width: 'auto' }}>
+                                            <i className="uil uil-chart-down">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}{' '}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </Table>
+            </CardBody>
+        </Card>
+    );
+};
+
 const PeakDemand = () => {
     const [selectedTab, setSelectedTab] = useState(1);
 
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}&limit=${2}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingPeak}${params}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopContributors(res.data);
-                console.log(res.data);
-            });
-    }, []);
-    const [topContributors, setTopContributors] = useState([
-        {
-            date: 'March 3rd',
-            time: '3:20 PM',
-            power: 225.3,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 15.3,
-                compressor: 0.2,
-            },
-        },
-        {
-            date: 'April 3rd',
-            time: '4:20 PM',
-            power: 219.2,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 0.4,
-                compressor: 0.2,
-            },
-        },
-        {
-            date: 'March 3rd',
-            time: '3:20 PM',
-            power: 202.2,
-            contributor: {
-                ahu1: 22.2,
-                ahu2: 0.4,
-                compressor: 0.2,
-            },
-        },
-    ]);
+    const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
+
+    // const [topContributors, setTopContributors] = useState([
+    //     {
+    //         date: 'March 3rd',
+    //         time: '3:20 PM',
+    //         power: 225.3,
+    //         contributor: {
+    //             ahu1: 22.2,
+    //             ahu2: 15.3,
+    //             compressor: 0.2,
+    //         },
+    //     },
+    //     {
+    //         date: 'April 3rd',
+    //         time: '4:20 PM',
+    //         power: 219.2,
+    //         contributor: {
+    //             ahu1: 22.2,
+    //             ahu2: 0.4,
+    //             compressor: 0.2,
+    //         },
+    //     },
+    //     {
+    //         date: 'March 3rd',
+    //         time: '3:20 PM',
+    //         power: 202.2,
+    //         contributor: {
+    //             ahu1: 22.2,
+    //             ahu2: 0.4,
+    //             compressor: 0.2,
+    //         },
+    //     },
+    // ]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
@@ -254,8 +311,46 @@ const PeakDemand = () => {
         },
     ]);
 
+    // const [peakTypeOne, setPeakTypeOne] = useState({});
+    // const [peakTypeTwo, setPeakTypeTwo] = useState({});
+    // const [peakTypeThree, setPeakTypeThree] = useState({});
+
+    const [singleEquipPeakOne, setSingleEquipPeakOne] = useState([]);
+    const [singleEquipPeakTwo, setSingleEquipPeakTwo] = useState([]);
+    const [singleEquipPeakThree, setSingleEquipPeakThree] = useState([]);
+
     useEffect(() => {
-        console.log('Selected Tab => ', selectedTab);
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=62581924c65bf3a1d702e427`;
+        axios
+            .post(
+                `${BaseUrl}${builidingPeak}${params}`,
+                {
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
+                },
+                { headers }
+            )
+            .then((res) => {
+                setTopBuildingPeaks('setTopBuildingPeaks => ', res.data);
+                // setPeakTypeOne(res.data[0]);
+                // setPeakTypeTwo(res.data[1]);
+                // setPeakTypeThree(res.data[2]);
+                // console.log('peakTypeOne => ', peakTypeOne);
+                setSingleEquipPeakOne(res.data[0].top_contributors);
+                setSingleEquipPeakTwo(res.data[1].top_contributors);
+                setSingleEquipPeakThree(res.data[2].top_contributors);
+                console.log('setTopBuildingPeaks => ', res.data);
+            });
+    }, []);
+
+    useEffect(() => {
+        console.log('singleEquipPeakOne => ', singleEquipPeakOne);
+        console.log('singleEquipPeakTwo => ', singleEquipPeakTwo);
+        console.log('singleEquipPeakThree => ', singleEquipPeakThree);
     });
 
     return (
@@ -306,10 +401,11 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style-selected button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="March 3rd @ 3:20 PM"
-                                            description="225.3"
+                                            // title="March 3rd @ 3:20 PM"
+                                            title="April 24"
+                                            description="2335"
                                             unit="kW"
-                                            value="12"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
@@ -320,10 +416,12 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="March 3rd @ 3:20 PM"
-                                            description="225.3"
+                                            // title="March 3rd @ 3:20 PM"
+                                            title="April 24"
+                                            description="2335"
+                                            // description={topBuildingPeaks[0].overall_energy_consumption}
                                             unit="kW"
-                                            value="12"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
@@ -335,10 +433,11 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style-selected button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="March 1st @ 3:50 PM"
-                                            description="221.3"
+                                            // title="March 1st @ 3:50 PM"
+                                            title="April 25"
+                                            description="65"
                                             unit="kW"
-                                            value="8"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
@@ -349,10 +448,11 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="March 1st @ 3:50 PM"
-                                            description="221.3"
+                                            // title="March 1st @ 3:50 PM"
+                                            title="April 25"
+                                            description="65"
                                             unit="kW"
-                                            value="8"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
@@ -365,10 +465,11 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style-selected button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="April 12th @ 3:20 PM"
-                                            description="202.3"
+                                            // title="April 12th @ 3:20 PM"
+                                            title="April 26"
+                                            description="1646"
                                             unit="kW"
-                                            value="1"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
@@ -379,17 +480,18 @@ const PeakDemand = () => {
                                     className="card peak-card-box-style button-style">
                                     <div className="card-body">
                                         <BuildingPeakButton
-                                            title="April 12th @ 3:20 PM"
-                                            description="202.3"
+                                            // title="April 12th @ 3:20 PM"
+                                            title="April 26"
+                                            description="1646"
                                             unit="kW"
-                                            value="1"
+                                            value="100"
                                             consumptionNormal={false}
                                         />
                                     </div>
                                 </div>
                             )}
 
-                            {selectedTab === 4 ? (
+                            {/* {selectedTab === 4 ? (
                                 <div
                                     onClick={() => setSelectedTab(4)}
                                     className="card peak-card-box-style-selected button-style">
@@ -446,22 +548,22 @@ const PeakDemand = () => {
                                         />
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
                     </Row>
 
                     {selectedTab === 1 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
-                                <Peaks
+                                <EquipmentTypePeaks
                                     energyConsumption={energyConsumption}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={singleEquipPeak}
+                                <IndividualEquipmentPeaks
+                                    energyConsumption={singleEquipPeakOne}
                                     title="Individual Equipment Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -472,15 +574,15 @@ const PeakDemand = () => {
                     {selectedTab === 2 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
-                                <Peaks
+                                <EquipmentTypePeaks
                                     energyConsumption={energyConsumption}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={singleEquipPeak}
+                                <IndividualEquipmentPeaks
+                                    energyConsumption={singleEquipPeakTwo}
                                     title="Individual Equipment Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -491,15 +593,15 @@ const PeakDemand = () => {
                     {selectedTab === 3 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
-                                <Peaks
+                                <EquipmentTypePeaks
                                     energyConsumption={energyConsumption}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={singleEquipPeak}
+                                <IndividualEquipmentPeaks
+                                    energyConsumption={singleEquipPeakThree}
                                     title="Individual Equipment Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -507,7 +609,7 @@ const PeakDemand = () => {
                         </Row>
                     )}
 
-                    {selectedTab === 4 && (
+                    {/* {selectedTab === 4 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <Peaks
@@ -543,7 +645,7 @@ const PeakDemand = () => {
                                 />
                             </Col>
                         </Row>
-                    )}
+                    )} */}
                 </div>
             </Row>
 

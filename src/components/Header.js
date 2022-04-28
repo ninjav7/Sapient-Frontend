@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { DateRangeStore } from './DateRangeStore';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
@@ -11,8 +12,54 @@ const Header = (props) => {
         Tab3: '30 Days',
         Tab4: 'Custom',
     };
-
     const [activeTab, setActiveTab] = useState(TABS.Tab3);
+
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [startDate, endDate] = dateRange;
+
+    const [dateFilter, setDateFilter] = useState(30);
+
+    const customDaySelect = [
+        {
+            label: 'Last 30 Days',
+            value: 30,
+        },
+        {
+            label: 'Last 7 Days',
+            value: 7,
+        },
+        {
+            label: 'Last 5 Days',
+            value: 5,
+        },
+        {
+            label: 'Last 3 Days',
+            value: 3,
+        },
+        {
+            label: 'Last 1 Day',
+            value: 1,
+        },
+    ];
+
+    useEffect(() => {
+        const setCustomDate = (date) => {
+            let endCustomDate = new Date(); // today
+            let startCustomDate = new Date();
+            startCustomDate.setDate(startCustomDate.getDate() - date);
+            setDateRange([startCustomDate, endCustomDate]);
+            DateRangeStore.update((s) => {
+                s.dateFilter = date;
+                s.startDate = startCustomDate;
+                s.endDate = endCustomDate;
+            });
+        };
+        setCustomDate(dateFilter);
+    }, [dateFilter]);
+
+    useEffect(() => {
+        console.log('DateRangeStore => ', DateRangeStore.currentState);
+    });
 
     return (
         <React.Fragment>
@@ -58,20 +105,25 @@ const Header = (props) => {
                                     name="select"
                                     id="exampleSelect"
                                     style={{ color: 'black', fontWeight: 'bold' }}
-                                    className="select-button form-control form-control-md">
-                                    <option className="mb-0">Last 7 Days</option>
-                                    <option>Last 5 Days</option>
-                                    <option>Last 3 Days</option>
-                                    <option>Last 1 Day</option>
+                                    className="select-button form-control form-control-md"
+                                    onChange={(e) => {
+                                        setDateFilter(e.target.value);
+                                        DateRangeStore.update((s) => {
+                                            s.dateFilter = e.target.value;
+                                        });
+                                    }}>
+                                    {customDaySelect.map((el, index) => {
+                                        return <option value={el.value}>{el.label}</option>;
+                                    })}
                                 </Input>
                             </div>
                             <div>
                                 <DatePicker
                                     selectsRange={true}
-                                    startDate={props.startDate}
-                                    endDate={props.endDate}
+                                    startDate={startDate}
+                                    endDate={endDate}
                                     onChange={(update) => {
-                                        props.setDateRange(update);
+                                        setDateRange(update);
                                     }}
                                     dateFormat="MMMM d"
                                     className="select-button form-control form-control-md font-weight-bold"

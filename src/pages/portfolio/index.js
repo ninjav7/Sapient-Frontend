@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
-// import PortfolioDonutChart from './PortfolioDonutChart';
 import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
 import MapChart from '../charts/MapChart';
@@ -14,9 +13,9 @@ import { servicePost, serviceGet } from '../../helpers/api';
 import axios from 'axios';
 import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
-import './style.css';
-
+import { DateRangeStore } from '../../components/DateRangeStore';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import './style.css';
 
 const PortfolioOverview = () => {
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -306,7 +305,8 @@ const PortfolioOverview = () => {
         },
     });
 
-    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    const [donutChartData, setDonutChartData] = useState([]);
     // const [donutChartData, setDonutChartData] = useState([]);
 
     // const buildingsEnergyConsume = [
@@ -429,7 +429,7 @@ const PortfolioOverview = () => {
             )
             .then((res) => {
                 setBuildingsEnergyConsume(res.data);
-                console.log(res.data);
+                console.log('setBuildingsEnergyConsume => ', res.data);
             })
             .catch((err) => {});
     }, []);
@@ -443,25 +443,24 @@ const PortfolioOverview = () => {
             .post(
                 `${BaseUrl}${portfolioEndUser}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
             .then((res) => {
                 setenergyConsumption(res.data);
-                console.log(res.data);
+                console.log('setenergyConsumption', res.data);
+                const energyData = res.data;
+                let newArray = [];
+                energyData.forEach((record) => {
+                    let fixedConsumption = record.energy_consumption.now;
+                    newArray.push(fixedConsumption);
+                });
+                console.log('newArray => ', newArray);
+                setDonutChartData(newArray);
             });
     }, []);
-
-    useEffect(() => {
-        let newArray = [];
-        for (let element of energyConsumption) {
-            newArray.push(element.energy_consumption.now);
-        }
-        console.log(newArray);
-        setDonutChartData(newArray);
-    }, [energyConsumption]);
 
     useEffect(() => {
         const headers = {
@@ -509,13 +508,7 @@ const PortfolioOverview = () => {
 
     return (
         <React.Fragment>
-            <Header title="Portfolio Overview" startDate={startDate} endDate={endDate} setDateRange={setDateRange} />
-            {/* <PageTracker
-                breadCrumbItems={[
-                    { label: 'Apps', path: '/apps/calendar' },
-                    { label: 'Calendar', path: '/apps/calendar', active: true },
-                ]}
-            /> */}
+            <Header title="Portfolio Overview" />
 
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
@@ -600,15 +593,8 @@ const PortfolioOverview = () => {
 
                         {buildingsEnergyConsume.map((item, index) => (
                             <Col md={6} xl={12}>
-                                <Link to="/energy/building/overview">
+                                <Link to="/energy/building/overview" state={{ buildId: 'occupation' }}>
                                     <div className="progress-bar-container mt-4">
-                                        {/* <ProgressBar
-                                            color="danger"
-                                            progressValue={item.value}
-                                            progressTitle={item.buildingName}
-                                            progressUnit={item.density + ' k.W /Sq. feet'}
-                                            className="progress-bar-container"
-                                        /> */}
                                         <ProgressBar
                                             color="danger"
                                             progressValue={(item.density / 2) * 100}
@@ -651,7 +637,7 @@ const PortfolioOverview = () => {
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#3094B9' }}></div>
                                                             )}
-                                                            {record.device === 'Lightning' && (
+                                                            {record.device === 'Lighting' && (
                                                                 <div
                                                                     className="dot"
                                                                     style={{ backgroundColor: '#2C4A5E' }}></div>
