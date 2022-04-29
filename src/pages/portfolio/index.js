@@ -577,8 +577,7 @@ const PortfolioOverview = () => {
                     <div className="card-body mt-2">
                         <h6 className="custom-title">Energy Density Top Buildings</h6>
                         <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
-                        <div className="map-widget">
-                            {/* <MapChart /> */}
+                        <div className="portfolio-map-widget">
                             <SimpleMaps />
                         </div>
                     </div>

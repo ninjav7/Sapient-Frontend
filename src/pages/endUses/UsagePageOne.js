@@ -497,40 +497,68 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                                     <div className="card usage-card-box-style button-style">
                                         <div className="card-body">
                                             {index === 0 && (
-                                                <div>
-                                                    <p className="indicate" style={{ backgroundColor: '#3094B9' }}>
-                                                        <span className="card-title card-title-style">
-                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <>
+                                                    <span
+                                                        className="indicate"
+                                                        style={{
+                                                            backgroundColor: '#3094B9',
+                                                            display: 'inline-block',
+                                                        }}
+                                                    />
+                                                    <span
+                                                        className="card-title card-title-style"
+                                                        style={{ display: 'inline-block' }}>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </>
                                             )}
                                             {index === 1 && (
-                                                <div>
-                                                    <p className="indicate" style={{ backgroundColor: '#2C4A5E' }}>
-                                                        <span className="card-title card-title-style">
-                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <>
+                                                    <span
+                                                        className="indicate"
+                                                        style={{
+                                                            backgroundColor: '#66D6BC',
+                                                            display: 'inline-block',
+                                                        }}
+                                                    />
+                                                    <span
+                                                        className="card-title card-title-style"
+                                                        style={{ display: 'inline-block' }}>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </>
                                             )}
                                             {index === 2 && (
-                                                <div>
-                                                    <p className="indicate" style={{ backgroundColor: '#66D6BC' }}>
-                                                        <span className="card-title card-title-style">
-                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <>
+                                                    <span
+                                                        className="indicate"
+                                                        style={{
+                                                            backgroundColor: '#66D6BC',
+                                                            display: 'inline-block',
+                                                        }}
+                                                    />
+                                                    <span
+                                                        className="card-title card-title-style"
+                                                        style={{ display: 'inline-block' }}>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </>
                                             )}
                                             {index === 3 && (
-                                                <div>
-                                                    <p className="indicate" style={{ backgroundColor: '#3B8554' }}>
-                                                        <span className="card-title card-title-style">
-                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                        </span>
-                                                    </p>
-                                                </div>
+                                                <>
+                                                    <span
+                                                        className="indicate"
+                                                        style={{
+                                                            backgroundColor: '#3B8554',
+                                                            display: 'inline-block',
+                                                        }}
+                                                    />
+                                                    <span
+                                                        className="card-title card-title-style"
+                                                        style={{ display: 'inline-block' }}>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </>
                                             )}
 
                                             <p className="card-text card-content-style">
