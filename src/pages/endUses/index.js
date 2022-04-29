@@ -6,6 +6,7 @@ import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { percentageHandler } from '../../utils/helper';
 import './style.css';
 
 const EndUses = () => {
@@ -139,19 +140,19 @@ const EndUses = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
         };
-        const params = `?building_id=${1}`;
+        const params = `?building_id=62581924c65bf3a1d702e427`;
         axios
             .post(
                 `${BaseUrl}${endUses}${params}`,
                 {
-                    time_horizon: 0,
-                    custom_time_horizon: '2022-04-01&2022-04-05',
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
                 },
                 { headers }
             )
             .then((res) => {
                 setEndUsesData(res.data);
-                console.log(res.data);
+                console.log('setEndUsesData => ', res.data);
             });
     }, []);
 
@@ -176,22 +177,52 @@ const EndUses = () => {
             <Header title="End Uses" />
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    <div className="card usage-card-box-style button-style">
-                        <div className="card-body">
-                            <div>
-                                <p className="dot" style={{ backgroundColor: '#3094B9' }}>
-                                    <span className="card-title card-title-style">
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HVAC
-                                    </span>
-                                </p>
+                    {endUsesData.map((record) => {
+                        return (
+                            <div className="card usage-card-box-style button-style">
+                                <div className="card-body">
+                                    <div>
+                                        {record.device === 'HVAC' && (
+                                            <p className="dot" style={{ backgroundColor: '#3094B9' }}>
+                                                <span className="card-title card-title-style">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                </span>
+                                            </p>
+                                        )}
+                                        {record.device === 'Lighting' && (
+                                            <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
+                                                <span className="card-title card-title-style">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                </span>
+                                            </p>
+                                        )}
+                                        {record.device === 'Plug' && (
+                                            <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
+                                                <span className="card-title card-title-style">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                </span>
+                                            </p>
+                                        )}
+                                        {record.device === 'Process' && (
+                                            <p className="dot" style={{ backgroundColor: '#847CB5' }}>
+                                                <span className="card-title card-title-style">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                </span>
+                                            </p>
+                                        )}
+                                    </div>
+                                    <p className="card-text card-content-style">
+                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                            maximumFractionDigits: 2,
+                                        })}
+                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                    </p>
+                                </div>
                             </div>
-                            <p className="card-text card-content-style">
-                                {(11441).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div className="card usage-card-box-style button-style">
+                        );
+                    })}
+
+                    {/* <div className="card usage-card-box-style button-style">
                         <div className="card-body">
                             <div>
                                 <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
@@ -235,7 +266,7 @@ const EndUses = () => {
                                 <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
                             </p>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </Row>
             <Row>
@@ -254,10 +285,43 @@ const EndUses = () => {
                     </h6>
 
                     <Row className="mt-4 energy-container">
-                        {endUsage.map((usage, index) => {
+                        {endUsesData.slice(0, 3).map((usage, index) => {
                             return (
                                 <div className="usage-card">
-                                    <EnergyUsageCard usage={usage} button="View" />
+                                    <EnergyUsageCard
+                                        usage={usage}
+                                        button="View"
+                                        lastPeriodPerTotalHrs={percentageHandler(
+                                            usage.energy_consumption.now,
+                                            usage.energy_consumption.old
+                                        )}
+                                        lastPeriodPerTotalHrsNormal={
+                                            usage.energy_consumption.now >= usage.energy_consumption.old
+                                        }
+                                        lastYearPerTotalHrs={percentageHandler(
+                                            usage.energy_consumption.now,
+                                            usage.energy_consumption.yearly
+                                        )}
+                                        lastYearPerTotalHrsNormal={
+                                            usage.energy_consumption.now >= usage.energy_consumption.yearly
+                                        }
+                                        lastPeriodPerAfterHrs={percentageHandler(
+                                            usage.after_hours_energy_consumption.now,
+                                            usage.after_hours_energy_consumption.old
+                                        )}
+                                        lastPeriodPerAfterHrsNormal={
+                                            usage.after_hours_energy_consumption.now >=
+                                            usage.after_hours_energy_consumption.old
+                                        }
+                                        lastYearPerAfterHrs={percentageHandler(
+                                            usage.after_hours_energy_consumption.now,
+                                            usage.after_hours_energy_consumption.yearly
+                                        )}
+                                        lastYearPerAfterHrsNormal={
+                                            usage.after_hours_energy_consumption.now >=
+                                            usage.after_hours_energy_consumption.yearly
+                                        }
+                                    />
                                 </div>
                             );
                         })}

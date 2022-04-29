@@ -1,4 +1,5 @@
-export const BaseUrl = 'https://sapient-ele.herokuapp.com';
+// export const BaseUrl = 'https://sapient-ele.herokuapp.com';
+export const BaseUrl = 'http://127.0.0.1:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -39,3 +40,4 @@ export const generalPanels = '/api/config/panels/panels_details';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
+export const energyUsage = '/api/energy/energy/usage';
