@@ -1,4 +1,22 @@
 export const percentageHandler = (v1, v2) => {
-    const percentage = ((v1 - v2) / v1) * 100;
-    return Math.abs(percentage).toFixed(2) || 0;
+    if (v1 === v2) {
+        return 0;
+    } else {
+        const percentage = ((v1 - v2) / v1) * 100;
+        const value = Math.abs(percentage).toFixed(2) || 0;
+        return value;
+    }
+};
+
+export const convert24hourTo12HourFormat = (time) => {
+    const time_part_array = time.split(':');
+    let ampm = 'AM';
+    if (time_part_array[0] >= 12) {
+        ampm = 'PM';
+    }
+    if (time_part_array[0] > 12) {
+        time_part_array[0] = time_part_array[0] - 12;
+    }
+    const formatted_time = time_part_array[0] + ':' + time_part_array[1] + ':' + time_part_array[2] + ' ' + ampm;
+    return formatted_time;
 };

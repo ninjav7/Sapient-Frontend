@@ -7,35 +7,70 @@ import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
-import { percentageHandler } from '../../utils/helper';
+import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
-const BuildingPeakButton = (props) => {
+// const BuildingPeakButton = (props) => {
+//     return (
+//         <>
+//             <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
+//             <p className="card-text card-content-style">
+//                 {props.description}
+//                 <span className="card-unit-style">
+//                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
+//                     {props.consumptionNormal && (
+//                         <button
+//                             className="button-success text-success font-weight-bold font-size-5"
+//                             style={{ width: '100%' }}>
+//                             <i className="uil uil-chart-down">
+//                                 <strong>{props.value} %</strong>
+//                             </i>
+//                         </button>
+//                     )}
+//                     {!props.consumptionNormal && (
+//                         <button
+//                             className="button-danger text-danger font-weight-bold font-size-5"
+//                             style={{ width: '100%' }}>
+//                             <i className="uil uil-arrow-growth">
+//                                 <strong>{props.value} %</strong>
+//                             </i>
+//                         </button>
+//                     )}
+//                 </span>
+//             </p>
+//         </>
+//     );
+// };
+
+const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
     return (
         <>
-            <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
+            {/* <h5 className="card-title card-title-style">{`March 3rd @ 3:20 PM`}&nbsp;&nbsp;</h5> */}
+            <h5 className="card-title card-title-style">{`${recordDate} @ ${recordTime}`}&nbsp;&nbsp;</h5>
             <p className="card-text card-content-style">
-                {props.description}
+                {buildingPeakData.overall_energy_consumption.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                })}
                 <span className="card-unit-style">
-                    &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
-                    {props.consumptionNormal && (
-                        <button
-                            className="button-success text-success font-weight-bold font-size-5"
-                            style={{ width: '100%' }}>
-                            <i className="uil uil-chart-down">
-                                <strong>{props.value} %</strong>
-                            </i>
-                        </button>
-                    )}
-                    {!props.consumptionNormal && (
-                        <button
-                            className="button-danger text-danger font-weight-bold font-size-5"
-                            style={{ width: '100%' }}>
-                            <i className="uil uil-arrow-growth">
-                                <strong>{props.value} %</strong>
-                            </i>
-                        </button>
-                    )}
+                    &nbsp;&nbsp;{`kW`}&nbsp;&nbsp;&nbsp;
+                    {/* {props.consumptionNormal && ( */}
+                    {/* <button
+                        className="button-success text-success font-weight-bold font-size-5"
+                        style={{ width: '100%' }}>
+                        <i className="uil uil-chart-down">
+                            <strong>{`12`} %</strong>
+                        </i>
+                    </button> */}
+                    {/* )} */}
+                    {/* {!props.consumptionNormal && (*/}
+                    <button
+                        className="button-danger text-danger font-weight-bold font-size-5"
+                        style={{ width: '100%' }}>
+                        <i className="uil uil-arrow-growth">
+                            <strong>{`100`} %</strong>
+                        </i>
+                    </button>
+                    {/* )}  */}
                 </span>
             </p>
         </>
@@ -185,42 +220,9 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
-    const [selectedTab, setSelectedTab] = useState(1);
+    const [selectedTab, setSelectedTab] = useState(0);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
-
-    // const [topContributors, setTopContributors] = useState([
-    //     {
-    //         date: 'March 3rd',
-    //         time: '3:20 PM',
-    //         power: 225.3,
-    //         contributor: {
-    //             ahu1: 22.2,
-    //             ahu2: 15.3,
-    //             compressor: 0.2,
-    //         },
-    //     },
-    //     {
-    //         date: 'April 3rd',
-    //         time: '4:20 PM',
-    //         power: 219.2,
-    //         contributor: {
-    //             ahu1: 22.2,
-    //             ahu2: 0.4,
-    //             compressor: 0.2,
-    //         },
-    //     },
-    //     {
-    //         date: 'March 3rd',
-    //         time: '3:20 PM',
-    //         power: 202.2,
-    //         contributor: {
-    //             ahu1: 22.2,
-    //             ahu2: 0.4,
-    //             compressor: 0.2,
-    //         },
-    //     },
-    // ]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
@@ -311,10 +313,6 @@ const PeakDemand = () => {
         },
     ]);
 
-    // const [peakTypeOne, setPeakTypeOne] = useState({});
-    // const [peakTypeTwo, setPeakTypeTwo] = useState({});
-    // const [peakTypeThree, setPeakTypeThree] = useState({});
-
     const [singleEquipPeakOne, setSingleEquipPeakOne] = useState([]);
     const [singleEquipPeakTwo, setSingleEquipPeakTwo] = useState([]);
     const [singleEquipPeakThree, setSingleEquipPeakThree] = useState([]);
@@ -335,19 +333,15 @@ const PeakDemand = () => {
                 { headers }
             )
             .then((res) => {
-                setTopBuildingPeaks('setTopBuildingPeaks => ', res.data);
-                // setPeakTypeOne(res.data[0]);
-                // setPeakTypeTwo(res.data[1]);
-                // setPeakTypeThree(res.data[2]);
-                // console.log('peakTypeOne => ', peakTypeOne);
+                setTopBuildingPeaks(res.data);
                 setSingleEquipPeakOne(res.data[0].top_contributors);
                 setSingleEquipPeakTwo(res.data[1].top_contributors);
                 setSingleEquipPeakThree(res.data[2].top_contributors);
-                console.log('setTopBuildingPeaks => ', res.data);
             });
     }, []);
 
     useEffect(() => {
+        console.log('topBuildingPeaks => ', topBuildingPeaks);
         console.log('singleEquipPeakOne => ', singleEquipPeakOne);
         console.log('singleEquipPeakTwo => ', singleEquipPeakTwo);
         console.log('singleEquipPeakThree => ', singleEquipPeakThree);
@@ -395,164 +389,45 @@ const PeakDemand = () => {
 
                     <Row className="mt-2">
                         <div className="button-style" style={{ marginLeft: '10px' }}>
-                            {selectedTab === 1 ? (
-                                <div
-                                    onClick={() => setSelectedTab(1)}
-                                    className="card peak-card-box-style-selected button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="March 3rd @ 3:20 PM"
-                                            title="April 24"
-                                            description="2335"
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setSelectedTab(1)}
-                                    className="card peak-card-box-style button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="March 3rd @ 3:20 PM"
-                                            title="April 24"
-                                            description="2335"
-                                            // description={topBuildingPeaks[0].overall_energy_consumption}
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            {selectedTab === 2 ? (
-                                <div
-                                    onClick={() => setSelectedTab(2)}
-                                    className="card peak-card-box-style-selected button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="March 1st @ 3:50 PM"
-                                            title="April 25"
-                                            description="65"
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setSelectedTab(2)}
-                                    className="card peak-card-box-style button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="March 1st @ 3:50 PM"
-                                            title="April 25"
-                                            description="65"
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {selectedTab === 3 ? (
-                                <div
-                                    onClick={() => setSelectedTab(3)}
-                                    className="card peak-card-box-style-selected button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="April 12th @ 3:20 PM"
-                                            title="April 26"
-                                            description="1646"
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setSelectedTab(3)}
-                                    className="card peak-card-box-style button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            // title="April 12th @ 3:20 PM"
-                                            title="April 26"
-                                            description="1646"
-                                            unit="kW"
-                                            value="100"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* {selectedTab === 4 ? (
-                                <div
-                                    onClick={() => setSelectedTab(4)}
-                                    className="card peak-card-box-style-selected button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            title="April 25th @ 11:30 AM"
-                                            description="192.8"
-                                            unit="kW"
-                                            value="5"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setSelectedTab(4)}
-                                    className="card peak-card-box-style button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            title="April 25th @ 11:30 AM"
-                                            description="192.8"
-                                            unit="kW"
-                                            value="5"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            {selectedTab === 5 ? (
-                                <div
-                                    onClick={() => setSelectedTab(5)}
-                                    className="card peak-card-box-style-selected button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            title="Jan 2nd @ 4:20 PM"
-                                            description="125.3"
-                                            unit="kW"
-                                            value="2"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setSelectedTab(5)}
-                                    className="card peak-card-box-style button-style">
-                                    <div className="card-body">
-                                        <BuildingPeakButton
-                                            title="Jan 2nd @ 4:20 PM"
-                                            description="125.3"
-                                            unit="kW"
-                                            value="2"
-                                            consumptionNormal={false}
-                                        />
-                                    </div>
-                                </div>
-                            )} */}
+                            {topBuildingPeaks.map((record, index) => {
+                                return (
+                                    <>
+                                        {selectedTab === index ? (
+                                            <div
+                                                onClick={() => setSelectedTab(index)}
+                                                className="card peak-card-box-style-selected button-style">
+                                                <div className="card-body">
+                                                    <BuildingPeakButton
+                                                        buildingPeakData={record}
+                                                        recordDate={record.timeRange.to.split(' ')[0]}
+                                                        recordTime={convert24hourTo12HourFormat(
+                                                            record.timeRange.to.split(' ')[1].split('.')[0]
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div
+                                                onClick={() => setSelectedTab(index)}
+                                                className="card peak-card-box-style button-style">
+                                                <div className="card-body">
+                                                    <BuildingPeakButton
+                                                        buildingPeakData={record}
+                                                        recordDate={record.timeRange.to.split(' ')[0]}
+                                                        recordTime={convert24hourTo12HourFormat(
+                                                            record.timeRange.to.split(' ')[1].split('.')[0]
+                                                        )}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })}
                         </div>
                     </Row>
 
-                    {selectedTab === 1 && (
+                    {selectedTab === 0 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
@@ -571,7 +446,7 @@ const PeakDemand = () => {
                         </Row>
                     )}
 
-                    {selectedTab === 2 && (
+                    {selectedTab === 1 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
@@ -583,6 +458,25 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakTwo}
+                                    title="Individual Equipment Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                        </Row>
+                    )}
+
+                    {selectedTab === 2 && (
+                        <Row className="equip-peak-container">
+                            <Col xl={6}>
+                                <EquipmentTypePeaks
+                                    energyConsumption={energyConsumption}
+                                    title="Equipment Type Peaks"
+                                    subtitle="At building peak time"
+                                />
+                            </Col>
+                            <Col xl={6}>
+                                <IndividualEquipmentPeaks
+                                    energyConsumption={singleEquipPeakThree}
                                     title="Individual Equipment Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -609,43 +503,24 @@ const PeakDemand = () => {
                         </Row>
                     )}
 
-                    {/* {selectedTab === 4 && (
+                    {selectedTab === 4 && (
                         <Row className="equip-peak-container">
                             <Col xl={6}>
-                                <Peaks
+                                <EquipmentTypePeaks
                                     energyConsumption={energyConsumption}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={singleEquipPeak}
+                                <IndividualEquipmentPeaks
+                                    energyConsumption={singleEquipPeakThree}
                                     title="Individual Equipment Peaks"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                         </Row>
                     )}
-
-                    {selectedTab === 5 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={energyConsumption}
-                                    title="Equipment Type Peaks"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <Peaks
-                                    energyConsumption={singleEquipPeak}
-                                    title="Individual Equipment Peaks"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )} */}
                 </div>
             </Row>
 

@@ -5,9 +5,15 @@ import DonutChart from '../charts/DonutChart';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BaseUrl, endUses, energyUsage } from '../../services/Network';
+import axios from 'axios';
+import { percentageHandler } from '../../utils/helper';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
+    const [endUsesData, setEndUsesData] = useState([]);
+    const [endUsesTitle, setEndUsesTitle] = useState('');
+
     const [endUsage, seteEndUsage] = useState([
         {
             title: 'AHUs',
@@ -37,6 +43,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
             val4: { value: 2, type: 'decreased' },
         },
     ]);
+
+    const [endUsageData, setEndUsageData] = useState([]);
 
     const [usage, seUsage] = useState({
         title: 'HVAC',
@@ -272,68 +280,210 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         window.scrollTo(0, 0);
     }, []);
 
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?building_id=62581924c65bf3a1d702e427&end_uses_type=HVAC`;
+        axios
+            .post(
+                `${BaseUrl}${endUses}${params}`,
+                {
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEndUsesData(res.data);
+                console.log(res.data);
+            });
+    }, []);
+
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        const params = `?end_uses_type=HVAC&building_id=62581924c65bf3a1d702e427`;
+        axios
+            .post(
+                `${BaseUrl}${energyUsage}${params}`,
+                {
+                    date_from: '2022-04-20',
+                    date_to: '2022-04-27',
+                },
+                { headers }
+            )
+            .then((res) => {
+                setEndUsageData(res.data);
+                console.log('setEndUsageData => ', res.data);
+            });
+    }, []);
+
     return (
         <React.Fragment>
             <Header title={title} />
 
             <Row>
-                <div className="endUses-button-container mt-2" style={{ marginLeft: '29px' }}>
-                    <div className="card usage-card-box-style enduses-button-style">
-                        <div className="card-body">
-                            <p className="subtitle-style" style={{ margin: '2px' }}>
-                                Total Consumption
-                            </p>
-                            <p className="card-text usage-card-content-style">
-                                {usage.totalConsumption} <span className="card-unit-style">&nbsp;kWh</span>
-                            </p>
-                            <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>
-                                <i className="uil uil-arrow-growth">
-                                    <strong>{usage.val1.value} %</strong>
-                                </i>
-                            </button>
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">since last period</span>
-                            <br />
-                            <button
-                                className="button-danger text-danger btn-font-style"
-                                style={{ width: 'auto', marginTop: '3px' }}>
-                                <i className="uil uil-arrow-growth">
-                                    <strong>{usage.val2.value} %</strong>
-                                </i>
-                            </button>
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">from same period last year</span>
-                        </div>
-                    </div>
+                {endUsesData.map((record, index) => {
+                    return (
+                        <div className="endUses-button-container mt-2" style={{ marginLeft: '29px' }}>
+                            <div className="card usage-card-box-style enduses-button-style">
+                                <div className="card-body">
+                                    <p className="subtitle-style" style={{ margin: '2px' }}>
+                                        Total Consumption
+                                    </p>
+                                    <p className="card-text usage-card-content-style">
+                                        {record.energy_consumption.now}{' '}
+                                        <span className="card-unit-style">&nbsp;kWh</span>
+                                    </p>
+                                    {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                        <button
+                                            className="button-danger text-danger btn-font-style"
+                                            style={{ width: 'auto', marginBottom: '4px' }}>
+                                            <i className="uil uil-arrow-growth">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="button-success text-success btn-font-style"
+                                            style={{ width: 'auto' }}>
+                                            <i className="uil uil-chart-down">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    )}
+                                    &nbsp;&nbsp;
+                                    <span className="light-content-style">since last period</span>
+                                    <br />
+                                    {record.energy_consumption.now >= record.energy_consumption.yearly ? (
+                                        <button
+                                            className="button-danger text-danger btn-font-style"
+                                            style={{ width: 'auto', marginBottom: '4px' }}>
+                                            <i className="uil uil-arrow-growth">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="button-success text-success btn-font-style"
+                                            style={{ width: 'auto' }}>
+                                            <i className="uil uil-chart-down">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    )}
+                                    &nbsp;&nbsp;
+                                    <span className="light-content-style">from same period last year</span>
+                                </div>
+                            </div>
 
-                    <div className="card usage-card-box-style enduses-button-style">
-                        <div className="card-body">
-                            <p className="subtitle-style" style={{ margin: '2px' }}>
-                                After-Hours Consumption
-                            </p>
-                            <p className="card-text usage-card-content-style">
-                                {usage.afterHourConsumption} <span className="card-unit-style">&nbsp;kWh</span>
-                            </p>
-                            <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>
-                                <i className="uil uil-arrow-growth">
-                                    <strong>{usage.val3.value} %</strong>
-                                </i>
-                            </button>
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">since last period</span>
-                            <br />
-                            <button
-                                className="button-danger text-danger btn-font-style"
-                                style={{ width: 'auto', marginTop: '3px' }}>
-                                <i className="uil uil-arrow-growth">
-                                    <strong>{usage.val4.value} %</strong>
-                                </i>
-                            </button>
-                            &nbsp;&nbsp;
-                            <span className="light-content-style">from same period last year</span>
+                            <div className="card usage-card-box-style enduses-button-style">
+                                <div className="card-body">
+                                    <p className="subtitle-style" style={{ margin: '2px' }}>
+                                        After-Hours Consumption
+                                    </p>
+                                    <p className="card-text usage-card-content-style">
+                                        {record.after_hours_energy_consumption.now}{' '}
+                                        <span className="card-unit-style">&nbsp;kWh</span>
+                                    </p>
+                                    {record.after_hours_energy_consumption.now >=
+                                    record.after_hours_energy_consumption.old ? (
+                                        <button
+                                            className="button-danger text-danger btn-font-style"
+                                            style={{ width: 'auto', marginBottom: '4px' }}>
+                                            <i className="uil uil-arrow-growth">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="button-success text-success btn-font-style"
+                                            style={{ width: 'auto' }}>
+                                            <i className="uil uil-chart-down">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    )}
+                                    &nbsp;&nbsp;
+                                    <span className="light-content-style">since last period</span>
+                                    <br />
+                                    {record.after_hours_energy_consumption.now >=
+                                    record.after_hours_energy_consumption.yearly ? (
+                                        <button
+                                            className="button-danger text-danger btn-font-style"
+                                            style={{ width: 'auto', marginBottom: '4px' }}>
+                                            <i className="uil uil-arrow-growth">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="button-success text-success btn-font-style"
+                                            style={{ width: 'auto' }}>
+                                            <i className="uil uil-chart-down">
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
+                                            </i>
+                                        </button>
+                                    )}
+                                    &nbsp;&nbsp;
+                                    <span className="light-content-style">from same period last year</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    );
+                })}
             </Row>
 
             <Row>
@@ -341,25 +491,62 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     <h6 className="card-title custom-title">HVAC Usage vs. OA Temperature</h6>
                     <h6 className="custom-subtitle-style">Energy Usage By Hour Trend</h6>
                     <div style={{ width: '700px' }}>
-                        {/* Buttons */}
-
                         <div className="card-group button-style mt-2" style={{ display: 'inline-block' }}>
-                            <div className="card usage-card-box-style button-style">
-                                <div className="card-body">
-                                    <div>
-                                        <p className="dot" style={{ backgroundColor: '#3094B9' }}>
-                                            <span className="card-title card-title-style">
-                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AHUs
-                                            </span>
-                                        </p>
+                            {endUsageData.map((record, index) => {
+                                return (
+                                    <div className="card usage-card-box-style button-style">
+                                        <div className="card-body">
+                                            {index === 0 && (
+                                                <div>
+                                                    <p className="indicate" style={{ backgroundColor: '#3094B9' }}>
+                                                        <span className="card-title card-title-style">
+                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {index === 1 && (
+                                                <div>
+                                                    <p className="indicate" style={{ backgroundColor: '#2C4A5E' }}>
+                                                        <span className="card-title card-title-style">
+                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {index === 2 && (
+                                                <div>
+                                                    <p className="indicate" style={{ backgroundColor: '#66D6BC' }}>
+                                                        <span className="card-title card-title-style">
+                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {index === 3 && (
+                                                <div>
+                                                    <p className="indicate" style={{ backgroundColor: '#3B8554' }}>
+                                                        <span className="card-title card-title-style">
+                                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <p className="card-text card-content-style">
+                                                {record.energy_consumption.now.toLocaleString(undefined, {
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                                <span className="card-unit-style">
+                                                    &nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
-                                    <p className="card-text card-content-style">
-                                        {(3356).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="card usage-card-box-style button-style">
+                                );
+                            })}
+
+                            {/* <div className="card usage-card-box-style button-style">
                                 <div className="card-body">
                                     <div>
                                         <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
@@ -403,7 +590,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                                         <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
                                     </p>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         {/* QA Temp Icon  */}
@@ -418,7 +605,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     </div>
                     <StackedBarChart options={barChartOptions} series={barChartData} height={440} />
                 </Col>
-                <Col xl={3} className="mt-5 ml-3">
+                <Col xl={3} className="mt-4 ml-3">
                     <h6 className="custom-title">Consumption by System</h6>
                     <h6 className="custom-subtitle-style">Energy Totals</h6>
 
@@ -438,10 +625,43 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     <h6 className="custom-subtitle-style">Click explore to see more energy usage details.</h6>
 
                     <Row className="mt-4 energy-container">
-                        {endUsage.map((usage, index) => {
+                        {endUsageData.map((usage, index) => {
                             return (
                                 <div className="usage-card">
-                                    <EnergyUsageCard usage={usage} button="Explore" />
+                                    <EnergyUsageCard
+                                        usage={usage}
+                                        button="Explore"
+                                        lastPeriodPerTotalHrs={percentageHandler(
+                                            usage.energy_consumption.now,
+                                            usage.energy_consumption.old
+                                        )}
+                                        lastPeriodPerTotalHrsNormal={
+                                            usage.energy_consumption.now >= usage.energy_consumption.old
+                                        }
+                                        lastYearPerTotalHrs={percentageHandler(
+                                            usage.energy_consumption.now,
+                                            usage.energy_consumption.yearly
+                                        )}
+                                        lastYearPerTotalHrsNormal={
+                                            usage.energy_consumption.now >= usage.energy_consumption.yearly
+                                        }
+                                        lastPeriodPerAfterHrs={percentageHandler(
+                                            usage.after_hours_energy_consumption.now,
+                                            usage.after_hours_energy_consumption.old
+                                        )}
+                                        lastPeriodPerAfterHrsNormal={
+                                            usage.after_hours_energy_consumption.now >=
+                                            usage.after_hours_energy_consumption.old
+                                        }
+                                        lastYearPerAfterHrs={percentageHandler(
+                                            usage.after_hours_energy_consumption.now,
+                                            usage.after_hours_energy_consumption.yearly
+                                        )}
+                                        lastYearPerAfterHrsNormal={
+                                            usage.after_hours_energy_consumption.now >=
+                                            usage.after_hours_energy_consumption.yearly
+                                        }
+                                    />
                                 </div>
                             );
                         })}
