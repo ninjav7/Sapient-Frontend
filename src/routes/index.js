@@ -347,12 +347,12 @@ const chartRoutes = {
 
 // builindgs
 const buildingRoutes = {
-    path: '/energy/building/overview',
+    path: '/energy/building/overview/:bldgId',
     name: 'Building Overview',
     component: Building,
     children: [
         {
-            path: '/energy/building/overview',
+            path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
@@ -392,7 +392,7 @@ const portfolioRoutes = {
             route: PrivateRoute,
         },
         {
-            path: '/energy/building/overview',
+            path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,

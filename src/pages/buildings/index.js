@@ -26,6 +26,7 @@ import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { BrowserRouter as Router, Switch, Route, Link, useParams } from 'react-router-dom';
 
 const BuildingOverview = () => {
+    const { bldgId } = useParams();
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -961,7 +962,6 @@ const BuildingOverview = () => {
             });
     }, []);
 
-    // builidingHourly
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
@@ -1036,6 +1036,7 @@ const BuildingOverview = () => {
         <React.Fragment>
             <Router>
                 <Header title="Building Overview" />
+                <h3>ID : {bldgId}</h3>
                 <Row xl={12}>
                     <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                         <div className="card card-box-style button-style">

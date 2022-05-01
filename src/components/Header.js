@@ -17,7 +17,8 @@ const Header = (props) => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
-    const [dateFilter, setDateFilter] = useState(30);
+    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
+    const [dateFilter, setDateFilter] = useState(dateValue);
 
     const customDaySelect = [
         {
@@ -57,10 +58,6 @@ const Header = (props) => {
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
-    useEffect(() => {
-        console.log('DateRangeStore => ', DateRangeStore.currentState);
-    });
-
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -69,7 +66,7 @@ const Header = (props) => {
                         {props.title}
                     </span>
 
-                    {props.title === 'Compare Buildings' && (
+                    {/* {props.title === 'Compare Buildings' && (
                         <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                             <div>
                                 {Object.keys(TABS).map((key) => (
@@ -86,51 +83,44 @@ const Header = (props) => {
                                     </button>
                                 ))}
                             </div>
-                            {/* <div className="float-right ml-2">
-                                <button type="button" className="btn btn-sm btn-primary font-weight-bold">
-                                    <i className="uil uil-pen mr-1"></i>Explore
-                                </button>
-                            </div> */}
                         </div>
                     )}
 
-                    {props.title !== 'Compare Buildings' && (
-                        <div
-                            className="btn-group custom-button-group header-widget-styling"
-                            role="group"
-                            aria-label="Basic example">
-                            <div>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="exampleSelect"
-                                    style={{ color: 'black', fontWeight: 'bold' }}
-                                    className="select-button form-control form-control-md"
-                                    onChange={(e) => {
-                                        setDateFilter(e.target.value);
-                                        DateRangeStore.update((s) => {
-                                            s.dateFilter = e.target.value;
-                                        });
-                                    }}>
-                                    {customDaySelect.map((el, index) => {
-                                        return <option value={el.value}>{el.label}</option>;
-                                    })}
-                                </Input>
-                            </div>
-                            <div>
-                                <DatePicker
-                                    selectsRange={true}
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    onChange={(update) => {
-                                        setDateRange(update);
-                                    }}
-                                    dateFormat="MMMM d"
-                                    className="select-button form-control form-control-md font-weight-bold"
-                                    placeholderText="Select Date Range"
-                                />
-                            </div>
-                            {/* <div>
+                    {props.title !== 'Compare Buildings' && ( */}
+                    <div
+                        className="btn-group custom-button-group header-widget-styling"
+                        role="group"
+                        aria-label="Basic example">
+                        <div>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                style={{ color: 'black', fontWeight: 'bold' }}
+                                className="select-button form-control form-control-md"
+                                onChange={(e) => {
+                                    setDateFilter(e.target.value);
+                                }}
+                                defaultValue={dateFilter}>
+                                {customDaySelect.map((el, index) => {
+                                    return <option value={el.value}>{el.label}</option>;
+                                })}
+                            </Input>
+                        </div>
+                        <div>
+                            <DatePicker
+                                selectsRange={true}
+                                startDate={startDate}
+                                endDate={endDate}
+                                onChange={(update) => {
+                                    setDateRange(update);
+                                }}
+                                dateFormat="MMMM d"
+                                className="select-button form-control form-control-md font-weight-bold"
+                                placeholderText="Select Date Range"
+                            />
+                        </div>
+                        {/* <div>
                                 <Input
                                     type="week"
                                     name="week"
@@ -140,15 +130,15 @@ const Header = (props) => {
                                     className="select-button form-control form-control-md"
                                 />
                             </div> */}
-                            {props.title !== 'Portfolio Overview' && (
-                                <div className="float-right ml-2">
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                        <i className="uil uil-pen mr-1"></i>Explore
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                        {props.title !== 'Portfolio Overview' && (
+                            <div className="float-right ml-2">
+                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                                    <i className="uil uil-pen mr-1"></i>Explore
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    {/* )} */}
                 </Col>
             </Row>
         </React.Fragment>

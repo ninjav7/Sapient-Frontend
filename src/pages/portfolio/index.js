@@ -592,7 +592,10 @@ const PortfolioOverview = () => {
 
                         {buildingsEnergyConsume.map((item, index) => (
                             <Col md={6} xl={12}>
-                                <Link to="/energy/building/overview" state={{ buildId: 'occupation' }}>
+                                <Link
+                                    to={{
+                                        pathname: `/energy/building/overview/${item.buildingID}`,
+                                    }}>
                                     <div className="progress-bar-container mt-4">
                                         <ProgressBar
                                             color="danger"
