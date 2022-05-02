@@ -9,6 +9,11 @@
     line-height: 15px;
 }
 
+.energy-blg-container-three {
+    width: 20vw;
+    /* margin-right: 3vw; */
+}
+
 .card-box-style {
     height: 90px;
     background: #f9fafb;
@@ -312,7 +317,8 @@
     grid-template-columns: 0.8fr 1fr;
 }
 
-.energy-blg-container-two-content {
+.energy-blg-container-two {
+    /* width: 100%; */
 }
 
 .energy-chart-style {

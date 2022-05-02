@@ -41,3 +41,5 @@ export const generalPanels = '/api/config/panels/panels_details';
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
 export const energyUsage = '/api/energy/energy/usage';
+
+export const compareBuildings = '/api/energy/energy/compare_building';

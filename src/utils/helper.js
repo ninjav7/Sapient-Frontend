@@ -20,3 +20,9 @@ export const convert24hourTo12HourFormat = (time) => {
     const formatted_time = time_part_array[0] + ':' + time_part_array[1] + ':' + time_part_array[2] + ' ' + ampm;
     return formatted_time;
 };
+
+export const dateFormatHandler = (dt) => {
+    const date = new Date(dt);
+    const customDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate(); //prints expected format.
+    return customDate;
+};

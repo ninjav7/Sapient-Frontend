@@ -42,6 +42,12 @@
     /* font-family: 'Inter', sans-serif; */
 }
 
+.custom-loading-style {
+    margin-top: 30vh !important;
+    align-items: center !important;
+    margin-left: 30vw;
+}
+
 /* .card-box-style:hover {
     height: 90px;
     background: rgb(224, 222, 222);

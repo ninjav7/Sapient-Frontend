@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import DonutChart from '../charts/DonutChart';
 import Header from '../../components/Header';
-import './style.css';
 import LineChart from '../charts/LineChart';
 import DetailedButton from './DetailedButton';
 import EnergyLineChart from './EnergyLineChart';
@@ -21,9 +20,11 @@ import {
     portfolioEndUser,
     portfolioOverall,
 } from '../../services/Network';
-import { percentageHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { BrowserRouter as Router, Switch, Route, Link, useParams } from 'react-router-dom';
+import { DateRangeStore } from '../../components/DateRangeStore';
+import './style.css';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
@@ -845,176 +846,209 @@ const BuildingOverview = () => {
         },
     ];
 
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${portfolioOverall}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setOverview(res.data);
-                console.log(res.data);
-            });
-    }, []);
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const buildingOverallData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioOverall}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setOverview(res.data);
+                        console.log('setOverview => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Overall Data');
+            }
         };
-        const params = `?building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${portfolioEndUser}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEnergyConsumption(res.data);
-                console.log('setenergyConsumption', res.data);
-                const energyData = res.data;
-                let newArray = [];
-                energyData.forEach((record) => {
-                    let fixedConsumption = record.energy_consumption.now;
-                    newArray.push(fixedConsumption);
-                });
-                console.log('newArray => ', newArray);
-                console.log('newArray => ', typeof newArray[0].energyConsumption.now);
-                setDonutChartData(newArray);
-            })
-            .catch((err) => {});
-    }, []);
 
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=${1}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingAlerts}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setBuildingAlerts(res.data);
-                console.log('Building Alert => ', res.data);
-            });
-    }, []);
-
-    // peaks api call
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=62581924c65bf3a1d702e427&limit=${2}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingPeak}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopContributors(res.data);
-                console.log(res.data);
-            });
-    }, []);
-
-    // builidingEquipments
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${builidingEquipments}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopEnergyConsumption(res.data[0].top_contributors);
-                console.log(res.data);
-            });
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        const params = `?building_id=62581924c65bf3a1d702e427&aggregate=${'hi'}`;
-        axios
-            .post(
-                `${BaseUrl}${builidingHourly}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                const data = res.data.map((el) => {
-                    return {
-                        x: parseInt(el.timestamp),
-                        y: el.energy_consumption,
-                    };
-                });
-
-                const newHeatMapData = [
-                    {
-                        name: 'Weekdays',
-                        data: [],
-                    },
-                ];
-
-                console.log('data => ', data);
-
-                for (let i = 1; i <= 24; i++) {
-                    let matchedRecord = data.find((record) => record.x === i);
-
-                    console.log('matchedRecord => ', matchedRecord);
-
-                    if (matchedRecord) {
-                        newHeatMapData[0].data.push(matchedRecord);
-                    } else {
-                        newHeatMapData[0].data.push({
-                            x: i,
-                            y: 0,
+        const buildingEndUserData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioEndUser}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEnergyConsumption(res.data);
+                        console.log('setenergyConsumption', res.data);
+                        const energyData = res.data;
+                        let newArray = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = record.energy_consumption.now;
+                            newArray.push(fixedConsumption);
                         });
-                    }
-                }
+                        setDonutChartData(newArray);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building EndUses Data');
+            }
+        };
 
-                console.log('builidingHourly Data => ', data);
-                console.log('newHeatMapData Data => ', newHeatMapData);
+        const buildingAlertsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${1}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingAlerts}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setBuildingAlerts(res.data);
+                        console.log('Building Alert => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Alert Data');
+            }
+        };
 
-                setWeekDaysSeries(newHeatMapData);
-            });
-    }, []);
+        const buildingPeaksData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&limit=${2}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingPeak}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setTopContributors(res.data);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Peak Data');
+            }
+        };
+
+        const builidingEquipmentsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingEquipments}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setTopEnergyConsumption(res.data[0].top_contributors);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Equipments Data');
+            }
+        };
+
+        const builidingHourlyData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&aggregate=${'hi'}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingHourly}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        const data = res.data.map((el) => {
+                            return {
+                                x: parseInt(el.timestamp),
+                                y: el.energy_consumption,
+                            };
+                        });
+
+                        const newHeatMapData = [
+                            {
+                                name: 'Weekdays',
+                                data: [],
+                            },
+                        ];
+
+                        console.log('data => ', data);
+
+                        for (let i = 1; i <= 24; i++) {
+                            let matchedRecord = data.find((record) => record.x === i);
+
+                            console.log('matchedRecord => ', matchedRecord);
+
+                            if (matchedRecord) {
+                                newHeatMapData[0].data.push(matchedRecord);
+                            } else {
+                                newHeatMapData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
+                        setWeekDaysSeries(newHeatMapData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Hourly Data');
+            }
+        };
+
+        buildingOverallData();
+        buildingEndUserData();
+        buildingAlertsData();
+        buildingPeaksData();
+        builidingEquipmentsData();
+        builidingHourlyData();
+    }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1032,11 +1066,16 @@ const BuildingOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        console.log('startDate => ', dateFormatHandler(startDate));
+        console.log('endDate => ', dateFormatHandler(endDate));
+    });
+
     return (
         <React.Fragment>
             <Router>
                 <Header title="Building Overview" />
-                <h3>ID : {bldgId}</h3>
+                {/* <h3>ID : {bldgId}</h3> */}
                 <Row xl={12}>
                     <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                         <div className="card card-box-style button-style">
@@ -1225,7 +1264,11 @@ const BuildingOverview = () => {
                                             <td className="equip-table-content">
                                                 <div>
                                                     <div>
-                                                        <span>{item.energy_consumption.now.toFixed(2)}</span>
+                                                        <span>
+                                                            {item.energy_consumption.now.toLocaleString(undefined, {
+                                                                maximumFractionDigits: 2,
+                                                            })}
+                                                        </span>
                                                         <span className="equip-table-unit">&nbsp;kWh</span>
                                                     </div>
                                                 </div>
@@ -1290,23 +1333,22 @@ const BuildingOverview = () => {
                     </div>
 
                     <div className="energy-blg-container-three mt-4">
-                        {/* Building Alert  */}
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Building Alerts
                         </h6>
-                        <Link to="/energy/end-uses">
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary mr-2"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}>
-                                Clear
-                            </a>
-                        </Link>
+                        <a
+                            rel="noopener noreferrer"
+                            className="link-primary mr-2"
+                            style={{
+                                display: 'inline-block',
+                                float: 'right',
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                            }}></a>
+                        <span className="float-right" onClick={() => setBuildingAlerts([])}>
+                            Clear
+                        </span>
+                        {/* </Link> */}
 
                         <div className="mt-2 alert-container">
                             {buildingAlert.map((record) => {
@@ -1698,7 +1740,9 @@ const BuildingOverview = () => {
                                             </h6>
                                             <h5 className="card-title ml-1">
                                                 <span style={{ color: 'black' }}>
-                                                    {item.overall_energy_consumption}
+                                                    {item.overall_energy_consumption.toLocaleString(undefined, {
+                                                        maximumFractionDigits: 2,
+                                                    })}
                                                 </span>{' '}
                                                 kW
                                             </h5>
@@ -1719,7 +1763,13 @@ const BuildingOverview = () => {
                                                             {item.top_contributors.map((el2) => (
                                                                 <tr>
                                                                     <div className="">
-                                                                        {el2.energy_consumption.now} kW
+                                                                        {el2.energy_consumption.now.toLocaleString(
+                                                                            undefined,
+                                                                            {
+                                                                                maximumFractionDigits: 2,
+                                                                            }
+                                                                        )}{' '}
+                                                                        kW
                                                                     </div>
                                                                 </tr>
                                                             ))}

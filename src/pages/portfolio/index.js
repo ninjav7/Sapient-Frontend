@@ -9,15 +9,23 @@ import SimpleMaps from '../charts/SimpleMaps';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
-import { servicePost, serviceGet } from '../../helpers/api';
 import axios from 'axios';
 import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
 import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../components/DateRangeStore';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { TailSpin } from 'react-loader-spinner';
 import './style.css';
 
 const PortfolioOverview = () => {
+    const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
+    const [energyConsumption, setenergyConsumption] = useState([]);
+    const [buildingRecord, setBuildingRecord] = useState([]);
+    const [dateRange, setDateRange] = useState([null, null]);
+    // const [startDate, endDate] = dateRange;
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
     const [lineChartSeries, setLineChartSeries] = useState([
         {
             data: [
@@ -144,7 +152,6 @@ const PortfolioOverview = () => {
             ],
         },
     ]);
-
     const [lineChartOptions, setLineChartOptions] = useState({
         chart: {
             type: 'line',
@@ -200,7 +207,24 @@ const PortfolioOverview = () => {
             },
         },
     });
+    const [overalldata, setOveralldata] = useState({
+        total_building: 0,
+        total_consumption: {
+            now: 0,
+            old: 0,
+        },
+        average_energy_density: {
+            now: 0,
+            old: 0,
+        },
+        yearly_electric_eui: {
+            now: 0,
+            old: 0,
+        },
+    });
 
+    // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    const [donutChartData, setDonutChartData] = useState([]);
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
@@ -305,173 +329,120 @@ const PortfolioOverview = () => {
         },
     });
 
-    // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
-    const [donutChartData, setDonutChartData] = useState([]);
-    // const [donutChartData, setDonutChartData] = useState([]);
-
-    // const buildingsEnergyConsume = [
-    //     {
-    //         storeName: '123 Main St. Portland, OR',
-    //         energyDensity: '1.5 kWh / Sq. Ft.',
-    //         value: 95,
-    //     },
-    //     {
-    //         storeName: '15 University Blvd.',
-    //         energyDensity: '1.4 kWh / Sq. Ft.',
-    //         value: 80,
-    //     },
-    //     {
-    //         storeName: '6223 Sycamore Ave.',
-    //         energyDensity: '1.2 kWh / Sq. Ft.',
-    //         value: 75,
-    //     },
-    //     {
-    //         storeName: '246 Blackburn Rd.',
-    //         energyDensity: '1.1 kWh / Sq. Ft.',
-    //         value: 50,
-    //     },
-    //     {
-    //         storeName: '523 James St.',
-    //         energyDensity: '0.9 kWh / Sq. Ft.',
-    //         value: 25,
-    //     },
-    //     {
-    //         storeName: 'Philadelphia PA - North Side',
-    //         energyDensity: '0.8 kWh / Sq. Ft.',
-    //         value: 10,
-    //     },
-    // ];
-
-    // const energyConsumption = [
-    //     {
-    //         equipName: 'HVAC',
-    //         usage: 12553,
-    //         percentage: 22,
-    //     },
-    //     {
-    //         equipName: 'Lightning',
-    //         usage: 11553,
-    //         percentage: 22,
-    //     },
-    //     {
-    //         equipName: 'Plug',
-    //         usage: 11553,
-    //         percentage: 22,
-    //     },
-    //     {
-    //         equipName: 'Process',
-    //         usage: 2333,
-    //         percentage: 22,
-    //     },
-    // ];
-
-    const [overalldata, setOveralldata] = useState({
-        total_building: 0,
-        total_consumption: {
-            now: 0,
-            old: 0,
-        },
-        average_energy_density: {
-            now: 0,
-            old: 0,
-        },
-        yearly_electric_eui: {
-            now: 0,
-            old: 0,
-        },
-    });
-
-    const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
-
-    const [energyConsumption, setenergyConsumption] = useState([]);
-
-    const [buildingRecord, setBuildingRecord] = useState([]);
-
-    const [dateRange, setDateRange] = useState([null, null]);
-    const [startDate, endDate] = dateRange;
-
-    // const dispatch = useDispatch();
+    // let [loading, setLoading] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    let [color, setColor] = useState('#ffffff');
 
     useEffect(() => {
-        console.log('startDate in useEffect => ', startDate);
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        axios
-            .post(
-                `${BaseUrl}${portfolioOverall}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setOveralldata(res.data);
-                console.log(res.data);
-            });
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        axios
-            .post(
-                `${BaseUrl}${portfolioBuilidings}`,
-                {
-                    time_horizon: 0,
-                    custom_time_horizon: 0,
-                },
-                { headers }
-            )
-            .then((res) => {
-                setBuildingsEnergyConsume(res.data);
-                console.log('setBuildingsEnergyConsume => ', res.data);
-            })
-            .catch((err) => {});
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-        };
-        axios
-            .post(
-                `${BaseUrl}${portfolioEndUser}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setenergyConsumption(res.data);
-                console.log('setenergyConsumption', res.data);
-                const energyData = res.data;
-                let newArray = [];
-                energyData.forEach((record) => {
-                    let fixedConsumption = record.energy_consumption.now;
-                    newArray.push(fixedConsumption);
+        const getBuildingData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+                    setBuildingRecord(res.data);
+                    console.log('setBuildingRecord => ', res.data);
                 });
-                console.log('newArray => ', newArray);
-                setDonutChartData(newArray);
-            });
-    }, []);
-
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+            } catch (error) {
+                console.log(error);
+                setIsProcessing(false);
+                alert('Failed to fetch Building Data');
+            }
         };
-        axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-            setBuildingRecord(res.data);
-            console.log('setBuildingRecord => ', res.data);
-        });
-    }, []);
+
+        const portfolioOverallData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioOverall}`,
+                        {
+                            date_from: '2022-04-20',
+                            date_to: '2022-04-27',
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setOveralldata(res.data);
+                        console.log('setOveralldata => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                setIsProcessing(false);
+                alert('Failed to fetch Portfolio Overall Data');
+            }
+        };
+
+        const portfolioBuilidingsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioBuilidings}`,
+                        {
+                            time_horizon: 0,
+                            custom_time_horizon: 0,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setBuildingsEnergyConsume(res.data);
+                        console.log('setBuildingsEnergyConsume => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                setIsProcessing(false);
+                alert('Failed to fetch Portfolio Builidings Data');
+            }
+        };
+
+        const portfolioEndUsesData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioEndUser}`,
+                        {
+                            date_from: '2022-04-20',
+                            date_to: '2022-04-27',
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setenergyConsumption(res.data);
+                        const energyData = res.data;
+                        let newArray = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = record.energy_consumption.now;
+                            newArray.push(fixedConsumption);
+                        });
+                        setDonutChartData(newArray);
+                        console.log('setDonutChartData => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                setIsProcessing(false);
+                alert('Failed to fetch Portfolio EndUses Data');
+            }
+        };
+
+        setIsProcessing(true);
+        getBuildingData();
+        portfolioOverallData();
+        portfolioBuilidingsData();
+        portfolioEndUsesData();
+        setIsProcessing(false);
+    }, [startDate, endDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -490,235 +461,250 @@ const PortfolioOverview = () => {
     }, []);
 
     useEffect(() => {
-        let endCustomDate = new Date(); // today
-        let startCustomDate = new Date(); // 7 days
-        startCustomDate.setDate(startCustomDate.getDate() - 7);
-        setDateRange([startCustomDate, endCustomDate]);
-    }, []);
-
-    // useEffect(() => {
-    //     console.log('startDate => ', startDate);
-    //     console.log('endDate => ', endDate);
-    //     const currentDayOfMonth = endDate.getDate();
-    //     const currentMonth = endDate.getMonth(); // Be careful! January is 0, not 1
-    //     const currentYear = endDate.getFullYear();
-    //     const testDateFormat = currentYear + '-' + (currentMonth + 1) + '-' + currentDayOfMonth;
-    //     console.log('testDateFormat => ', testDateFormat);
-    // }, [startDate, endDate]);
+        console.log('DateRangeStore startDate => ', startDate);
+        console.log('DateRangeStore endDate => ', endDate);
+    });
 
     return (
         <React.Fragment>
-            <Header title="Portfolio Overview" />
-
-            <Row>
-                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    <div className="card card-box-style button-style">
-                        <div className="card-body" style={{ marginTop: '2px' }}>
-                            <h5 className="card-title subtitle-style">Total Buildings</h5>
-                            <p className="card-text card-content-style">{buildingRecord.length}</p>
-                        </div>
-                    </div>
-
-                    <div className="card card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="Total Consumption"
-                                description={overalldata.total_consumption.now}
-                                unit="kWh"
-                                value={percentageHandler(
-                                    overalldata.total_consumption.now,
-                                    overalldata.total_consumption.old
-                                )}
-                                consumptionNormal={
-                                    overalldata.total_consumption.now >= overalldata.total_consumption.old
-                                }
-                            />
-                        </div>
-                    </div>
-
-                    <div className="card card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="Average Energy Density"
-                                description={overalldata.average_energy_density.now}
-                                unit="kWh/sq.ft."
-                                value={percentageHandler(
-                                    overalldata.average_energy_density.now,
-                                    overalldata.average_energy_density.old
-                                )}
-                                consumptionNormal={
-                                    overalldata.average_energy_density.now >= overalldata.average_energy_density.old
-                                }
-                            />
-                        </div>
-                    </div>
-
-                    <div className="card card-box-style button-style">
-                        <div className="card-body">
-                            <DetailedButton
-                                title="12 Mo. Electric EUI"
-                                description={overalldata.yearly_electric_eui.now}
-                                unit="kBtu/ft/yr"
-                                value={percentageHandler(
-                                    overalldata.yearly_electric_eui.now,
-                                    overalldata.yearly_electric_eui.old
-                                )}
-                                consumptionNormal={
-                                    overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
-                                }
-                            />
-                        </div>
-                    </div>
+            {isProcessing && (
+                <div className="custom-loading-style">
+                    <TailSpin color="#4A4A4A" height={80} width={80} />
                 </div>
-            </Row>
+            )}
 
-            <Row className="mt-2">
-                <Col xl={5}>
-                    <div className="card-body mt-2">
-                        <h6 className="custom-title">Energy Density Top Buildings</h6>
-                        <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
-                        <div className="portfolio-map-widget">
-                            <SimpleMaps />
-                        </div>
-                    </div>
-                </Col>
+            {!isProcessing && (
+                <>
+                    <Header title="Portfolio Overview" />
 
-                <Col xl={7} className="mt-5">
-                    <div className="card-body mt-4">
-                        <span className="font-weight-bold text-muted float-left store-value-style">Store Name</span>
-                        <span className="font-weight-bold text-muted float-right store-value-style">
-                            Energy Density
-                        </span>
-
-                        {buildingsEnergyConsume.map((item, index) => (
-                            <Col md={6} xl={12}>
-                                <Link
-                                    to={{
-                                        pathname: `/energy/building/overview/${item.buildingID}`,
-                                    }}>
-                                    <div className="progress-bar-container mt-4">
-                                        <ProgressBar
-                                            color="danger"
-                                            progressValue={(item.density / 2) * 100}
-                                            progressTitle={item.buildingName}
-                                            progressUnit={item.density + ' k.W /Sq. feet'}
-                                            className="progress-bar-container"
-                                        />
-                                    </div>
-                                </Link>
-                            </Col>
-                        ))}
-                    </div>
-                </Col>
-            </Row>
-
-            <Row className="mt-2 ml-2">
-                <Col xl={7}>
                     <Row>
-                        <Col xl={5} className="mt-4">
-                            <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+                        <div className="card-group button-style" style={{ marginLeft: '29px' }}>
+                            <div className="card card-box-style button-style">
+                                <div className="card-body" style={{ marginTop: '2px' }}>
+                                    <h5 className="card-title subtitle-style">Total Buildings</h5>
+                                    <p className="card-text card-content-style">{buildingRecord.length}</p>
+                                </div>
+                            </div>
 
+                            <div className="card card-box-style button-style">
+                                <div className="card-body">
+                                    <DetailedButton
+                                        title="Total Consumption"
+                                        description={overalldata.total_consumption.now}
+                                        unit="kWh"
+                                        value={percentageHandler(
+                                            overalldata.total_consumption.now,
+                                            overalldata.total_consumption.old
+                                        )}
+                                        consumptionNormal={
+                                            overalldata.total_consumption.now >= overalldata.total_consumption.old
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="card card-box-style button-style">
+                                <div className="card-body">
+                                    <DetailedButton
+                                        title="Average Energy Density"
+                                        description={overalldata.average_energy_density.now}
+                                        unit="kWh/sq.ft."
+                                        value={percentageHandler(
+                                            overalldata.average_energy_density.now,
+                                            overalldata.average_energy_density.old
+                                        )}
+                                        consumptionNormal={
+                                            overalldata.average_energy_density.now >=
+                                            overalldata.average_energy_density.old
+                                        }
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="card card-box-style button-style">
+                                <div className="card-body">
+                                    <DetailedButton
+                                        title="12 Mo. Electric EUI"
+                                        description={overalldata.yearly_electric_eui.now}
+                                        unit="kBtu/ft/yr"
+                                        value={percentageHandler(
+                                            overalldata.yearly_electric_eui.now,
+                                            overalldata.yearly_electric_eui.old
+                                        )}
+                                        consumptionNormal={
+                                            overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </Row>
+
+                    <Row className="mt-2">
+                        <Col xl={5}>
                             <div className="card-body mt-2">
-                                <div className="mt-4">
-                                    <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
+                                <h6 className="custom-title">Energy Density Top Buildings</h6>
+                                <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
+                                <div className="portfolio-map-widget">
+                                    <SimpleMaps />
                                 </div>
                             </div>
                         </Col>
-                        <Col xl={7} className="mt-4">
-                            <Card style={{ marginTop: '80px' }}>
-                                <CardBody>
-                                    <Table className="table-font-style" borderless>
-                                        <tbody>
-                                            {energyConsumption.map((record, index) => {
-                                                return (
-                                                    <tr key={index} className="consumption-style">
-                                                        <td>
-                                                            {record.device === 'HVAC' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#3094B9' }}></div>
-                                                            )}
-                                                            {record.device === 'Lighting' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#2C4A5E' }}></div>
-                                                            )}
-                                                            {record.device === 'Plug' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#66D6BC' }}></div>
-                                                            )}
-                                                            {record.device === 'Process' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{
-                                                                        backgroundColor: '#3B8554',
-                                                                    }}></div>
-                                                            )}
-                                                        </td>
-                                                        <td className="custom-equip-style record-style font-weight-bold">
-                                                            {record.device}
-                                                        </td>
-                                                        <td className="custom-usage-style muted table-font-style">
-                                                            {record.energy_consumption.now.toLocaleString(undefined, {
-                                                                maximumFractionDigits: 2,
-                                                            })}
-                                                            kWh
-                                                        </td>
-                                                        <td>
-                                                            {record.energy_consumption.now <=
-                                                                record.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-success text-success btn-font-style"
-                                                                    style={{ width: '100px' }}>
-                                                                    <i className="uil uil-chart-down">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                record.energy_consumption.now,
-                                                                                record.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {record.energy_consumption.now >
-                                                                record.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-danger text-danger btn-font-style"
-                                                                    style={{ width: '100px' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                record.energy_consumption.now,
-                                                                                record.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
+
+                        <Col xl={7} className="mt-5">
+                            <div className="card-body mt-4">
+                                <span className="font-weight-bold text-muted float-left store-value-style">
+                                    Store Name
+                                </span>
+                                <span className="font-weight-bold text-muted float-right store-value-style">
+                                    Energy Density
+                                </span>
+
+                                {buildingsEnergyConsume.map((item, index) => (
+                                    <Col md={6} xl={12}>
+                                        <Link
+                                            to={{
+                                                pathname: `/energy/building/overview/${item.buildingID}`,
+                                            }}>
+                                            <div className="progress-bar-container mt-4">
+                                                <ProgressBar
+                                                    color="danger"
+                                                    progressValue={(item.density / 2) * 100}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            </div>
+                                        </Link>
+                                    </Col>
+                                ))}
+                            </div>
                         </Col>
                     </Row>
-                </Col>
 
-                <Col xl={5}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title">Energy Consumption History</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals by Day</h6>
-                        <LineChart options={lineChartOptions} series={lineChartSeries} />
-                    </div>
-                </Col>
-            </Row>
+                    <Row className="mt-2 ml-2">
+                        <Col xl={7}>
+                            <Row>
+                                <Col xl={5} className="mt-4">
+                                    <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
+                                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+
+                                    <div className="card-body mt-2">
+                                        <div className="mt-4" id={Date.now()}>
+                                            <DonutChart
+                                                donutChartOpts={donutChartOpts}
+                                                donutChartData={donutChartData}
+                                                height={200}
+                                                id={Date.now()}
+                                            />
+                                        </div>
+                                    </div>
+                                </Col>
+                                <Col xl={7} className="mt-4">
+                                    <Card style={{ marginTop: '80px' }}>
+                                        <CardBody>
+                                            <Table className="table-font-style" borderless>
+                                                <tbody>
+                                                    {energyConsumption.map((record, index) => {
+                                                        return (
+                                                            <tr key={index} className="consumption-style">
+                                                                <td>
+                                                                    {record.device === 'HVAC' && (
+                                                                        <div
+                                                                            className="dot"
+                                                                            style={{
+                                                                                backgroundColor: '#3094B9',
+                                                                            }}></div>
+                                                                    )}
+                                                                    {record.device === 'Lighting' && (
+                                                                        <div
+                                                                            className="dot"
+                                                                            style={{
+                                                                                backgroundColor: '#2C4A5E',
+                                                                            }}></div>
+                                                                    )}
+                                                                    {record.device === 'Plug' && (
+                                                                        <div
+                                                                            className="dot"
+                                                                            style={{
+                                                                                backgroundColor: '#66D6BC',
+                                                                            }}></div>
+                                                                    )}
+                                                                    {record.device === 'Process' && (
+                                                                        <div
+                                                                            className="dot"
+                                                                            style={{
+                                                                                backgroundColor: '#3B8554',
+                                                                            }}></div>
+                                                                    )}
+                                                                </td>
+                                                                <td className="custom-equip-style record-style font-weight-bold">
+                                                                    {record.device}
+                                                                </td>
+                                                                <td className="custom-usage-style muted table-font-style">
+                                                                    {record.energy_consumption.now.toLocaleString(
+                                                                        undefined,
+                                                                        {
+                                                                            maximumFractionDigits: 2,
+                                                                        }
+                                                                    )}
+                                                                    kWh
+                                                                </td>
+                                                                <td>
+                                                                    {record.energy_consumption.now <=
+                                                                        record.energy_consumption.old && (
+                                                                        <button
+                                                                            className="button-success text-success btn-font-style"
+                                                                            style={{ width: '100px' }}>
+                                                                            <i className="uil uil-chart-down">
+                                                                                <strong>
+                                                                                    {percentageHandler(
+                                                                                        record.energy_consumption.now,
+                                                                                        record.energy_consumption.old
+                                                                                    )}{' '}
+                                                                                    %
+                                                                                </strong>
+                                                                            </i>
+                                                                        </button>
+                                                                    )}
+                                                                    {record.energy_consumption.now >
+                                                                        record.energy_consumption.old && (
+                                                                        <button
+                                                                            className="button-danger text-danger btn-font-style"
+                                                                            style={{ width: '100px' }}>
+                                                                            <i className="uil uil-arrow-growth">
+                                                                                <strong>
+                                                                                    {percentageHandler(
+                                                                                        record.energy_consumption.now,
+                                                                                        record.energy_consumption.old
+                                                                                    )}{' '}
+                                                                                    %
+                                                                                </strong>
+                                                                            </i>
+                                                                        </button>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </Table>
+                                        </CardBody>
+                                    </Card>
+                                </Col>
+                            </Row>
+                        </Col>
+
+                        <Col xl={5}>
+                            <div className="card-body">
+                                <h6 className="card-title custom-title">Energy Consumption History</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals by Day</h6>
+                                <LineChart options={lineChartOptions} series={lineChartSeries} />
+                            </div>
+                        </Col>
+                    </Row>
+                </>
+            )}
         </React.Fragment>
     );
 };

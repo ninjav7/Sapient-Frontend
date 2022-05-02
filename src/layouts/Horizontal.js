@@ -65,7 +65,7 @@ class HorizontalLayout extends Component {
 
                     {/* Worked yesterday! */}
                     <div className="">
-                        <nav className="navbar fixed-top pokemon1">
+                        <nav className="navbar fixed-top custom-top-fix">
                             <div className="navbar-brand">
                                 <Suspense fallback={loading()}>
                                     <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
@@ -75,7 +75,7 @@ class HorizontalLayout extends Component {
                     </div>
 
                     <div className="">
-                        <nav className="navbar fixed-top pokemon2">
+                        <nav className="navbar fixed-top">
                             <div className="navbar-brand">
                                 <PageTracker />
                             </div>
@@ -97,7 +97,7 @@ class HorizontalLayout extends Component {
                                     </Col>
                                     <Col md={10} className="pl-0 energy-content-page-style">
                                         <Suspense fallback={loading()}>
-                                            <Card className="pl-2 pr-2 pt-1">{children}</Card>
+                                            <Card className="pl-2 pr-2 pt-1 page-card-style">{children}</Card>
                                         </Suspense>
                                     </Col>
                                 </Row>
