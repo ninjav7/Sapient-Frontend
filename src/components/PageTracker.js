@@ -11,38 +11,38 @@ import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { BreadcrumbStore } from './BreadcrumbStore';
+import { BuildingStore } from './BuildingStore';
+import { DateRangeStore } from './DateRangeStore';
 import './style.css';
 
 const PageTracker = () => {
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
-    const [activeBuildingName, setActiveBuildingName] = useState(`123 Main St. Portland, O`);
+    const bldStoreId = BuildingStore.useState((s) => s.BldgId);
+    const bldStoreName = BuildingStore.useState((s) => s.BldgName);
+    const [activeBuildingName, setActiveBuildingName] = useState('Select Building');
     const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
     const items = breadcrumList || [];
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const getBuildingList = async () => {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            };
+            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+                setBuildingList(res.data);
+                console.log('setBuildingList => ', res.data);
+            });
         };
-        axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-            setBuildingList(res.data);
-            console.log('setBuildingList => ', res.data);
-        });
-    }, []);
+        getBuildingList();
+    }, [startDate, endDate]);
 
-    // useEffect(() => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //     };
-    //     axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-    //         const buildingObj = res.data.find((building) => building.building_id === buildingId);
-    //         console.log('buildingObj => ', buildingObj);
-    //         setActiveBuildingName(buildingObj.building_name);
-    //         console.log('activeBuildingName => ', activeBuildingName);
-    //     });
-    // }, [buidlingStore]);
+    useEffect(() => {
+        console.log('BuildingStore => ', BuildingStore);
+    });
 
     return (
         <React.Fragment>
@@ -79,8 +79,11 @@ const PageTracker = () => {
                                 {buildingList.map((building, index) => (
                                     <Dropdown.Item
                                         onClick={() => {
-                                            setActiveBuildingName(building.buildingName);
-                                            // buildingId(building.building_id);
+                                            setActiveBuildingName(building.building_name);
+                                            BuildingStore.update((s) => {
+                                                s.BldgId = building.building_id;
+                                                s.BldgName = building.building_name;
+                                            });
                                         }}>
                                         {building.building_name}
                                     </Dropdown.Item>
