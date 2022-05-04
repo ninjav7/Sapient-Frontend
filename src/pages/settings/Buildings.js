@@ -18,11 +18,12 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { BaseUrl, generalActiveDevices } from '../../services/Network';
+import { BaseUrl, getBuildings } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
+import { BuildingStore } from '../../components/BuildingStore';
 import './style.css';
 
-const BuildingTable = ({ buildingData }) => {
+const BuildingTable = ({ buildingsData }) => {
     return (
         <Card>
             <CardBody>
@@ -35,21 +36,21 @@ const BuildingTable = ({ buildingData }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {buildingData.map((record, index) => {
+                        {buildingsData.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <th scope="row">
                                         <Link to="#">
-                                            <a className="buildings-name">{record.name}</a>
+                                            <a className="buildings-name">{record.building_name}</a>
                                         </Link>
                                         <span className="badge badge-soft-secondary label-styling mr-2">
-                                            {record.label}
+                                            {record.building_type}
                                         </span>
                                     </th>
                                     <td className="font-weight-bold">
-                                        {record.area.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        {record.building_size.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                     </td>
-                                    <td className="font-weight-bold">{record.devices}</td>
+                                    <td className="font-weight-bold">{0}</td>
                                 </tr>
                             );
                         })}
@@ -67,26 +68,30 @@ const Buildings = () => {
     const handleShow = () => setShow(true);
 
     const [buildingId, setBuildingId] = useState(1);
-    const [buildingData, setBuildingData] = useState([
-        {
-            name: '123 Main St. Portland, OR',
-            label: 'Office',
-            area: 46332,
-            devices: 1221,
-        },
-        {
-            name: '15 University Blvd.',
-            label: 'Office',
-            area: 31834,
-            devices: 852,
-        },
-        {
-            name: '6223 Sycamore Ave.',
-            label: 'Office',
-            area: 25613,
-            devices: 25,
-        },
-    ]);
+    // const [buildingData, setBuildingData] = useState([
+    //     {
+    //         name: '123 Main St. Portland, OR',
+    //         label: 'Office',
+    //         area: 46332,
+    //         devices: 1221,
+    //     },
+    //     {
+    //         name: '15 University Blvd.',
+    //         label: 'Office',
+    //         area: 31834,
+    //         devices: 852,
+    //     },
+    //     {
+    //         name: '6223 Sycamore Ave.',
+    //         label: 'Office',
+    //         area: 25613,
+    //         devices: 25,
+    //     },
+    // ]);
+
+    const [buildingsData, setBuildingsData] = useState([]);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const bldgName = BuildingStore.useState((s) => s.BldgName);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -103,6 +108,25 @@ const Buildings = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        const fetchBuildingData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                    setBuildingsData(res.data);
+                    // console.log('buildingData Sudhanshu => ', res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Data List');
+            }
+        };
+        fetchBuildingData();
+    }, [bldgId]);
 
     return (
         <React.Fragment>
@@ -146,7 +170,7 @@ const Buildings = () => {
 
             <Row>
                 <Col lg={5}>
-                    <BuildingTable buildingData={buildingData} />
+                    <BuildingTable buildingsData={buildingsData} />
                 </Col>
             </Row>
 

@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
+import { BuildingStore } from '../../../components/BuildingStore';
 import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
 import '../style.css';
 
@@ -81,21 +82,26 @@ const PanelsTable = ({ generalPanelData }) => {
 };
 
 const Panels = () => {
-    const [buildingId, setBuildingId] = useState(1);
+    // const [buildingId, setBuildingId] = useState(1);
     const [generalPanelData, setGeneralPanelData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchPanelsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                    setGeneralPanelData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Panels Data List');
+            }
         };
-        axios
-            .post(`${BaseUrl}${generalPanels}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setGeneralPanelData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
+        fetchPanelsData();
     }, []);
 
     useEffect(() => {

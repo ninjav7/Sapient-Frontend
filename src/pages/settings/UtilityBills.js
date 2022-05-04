@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { serviceGet } from '../../helpers/api';
-// import { generalUtilityBills } from '../../services/Network';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
+import axios from 'axios';
+import { BaseUrl, generalUtilityBills } from '../../services/Network';
+import moment from 'moment';
+import { BuildingStore } from '../../components/BuildingStore';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const UtilityBills = () => {
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [avgRate, setAvgRate] = useState(0.6);
-
+    const [inputField, setInputField] = useState({
+        kWh: 0,
+        total_paid: 0,
+    });
     // Table data
     const [records, setRecords] = useState([
         {
@@ -51,6 +57,8 @@ const UtilityBills = () => {
 
     const [utilityData, setUtilityData] = useState([]);
     const [buildingId, setBuildingId] = useState(1);
+    const [billId, setBillId] = useState('');
+    const [render, setRender] = useState(false);
 
     // Modal states
     const [show, setShow] = useState(false);
@@ -74,22 +82,42 @@ const UtilityBills = () => {
     //     }
     //   }
 
+    // useEffect(() => {
+    //     async function getUtilityBillsData() {
+    //         try {
+    //             let req = {};
+    //             let response = await serviceGet(`/api/config/utility_bills/${buildingId}`, req);
+    //             console.log('Response fetched');
+    //             // setUtilityData(response);
+    //             console.log('Response Set');
+    //             console.log('Response => ', response);
+    //         } catch (error) {
+    //             console.log(error);
+    //             alert('Failed to fetch utility bills data!');
+    //         }
+    //     }
+    //     getUtilityBillsData();
+    // }, []);
     useEffect(() => {
-        async function getUtilityBillsData() {
+        const fetchUtilityBillsData = async () => {
             try {
-                let req = {};
-                let response = await serviceGet(`/api/config/utility_bills/${buildingId}`, req);
-                console.log('Response fetched');
-                setUtilityData(response);
-                console.log('Response Set');
-                console.log('Response => ', response);
+                if (bldgId) {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
+                        console.log(res);
+                        setUtilityData(res.data);
+                    });
+                }
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch utility bills data!');
+                console.log('Failed to fetch UtilityBills Data');
             }
-        }
-        getUtilityBillsData();
-    }, []);
+        };
+        fetchUtilityBillsData();
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -107,6 +135,25 @@ const UtilityBills = () => {
         updateBreadcrumbStore();
     }, []);
 
+    const dateFormater = (date) => {
+        return moment().format('MMM YYYY');
+    };
+
+    const inputsHandler = (e) => {
+        setInputField({ ...inputField, [e.target.name]: e.target.value });
+    };
+    const EditHandler = (e) => {
+        e.preventDefault();
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios.patch(`${BaseUrl}${generalUtilityBills}/${billId}`, inputField, { headers }).then((res) => {
+            console.log(res.data);
+            handleClose();
+            setRender(!render);
+        });
+    };
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -126,55 +173,47 @@ const UtilityBills = () => {
                                     <tr>
                                         <th>Date</th>
                                         <th>kWh</th>
+                                        <th>Total Paid</th>
                                         <th>Blended Rate</th>
-                                        <th className="grey-out">Blended Rate</th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
-                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {utilityData.map((record, index) => {
                                         return record.kWh === null ? (
                                             <tr key={index} className="table-warning">
-                                                <td className="text-warning font-weight-bold">{record.date}</td>
+                                                <td className="text-warning font-weight-bold">
+                                                    {dateFormater(record.date)}
+                                                </td>
                                                 {record.kWh === null ? (
                                                     record.kWh === null && <td>-</td>
                                                 ) : (
                                                     <td>{record.kWh} kWh</td>
+                                                )}
+                                                {record.total_paid === null ? (
+                                                    record.total_paid === null && <td>-</td>
+                                                ) : (
+                                                    <td>{record.total_paid} kWh</td>
                                                 )}
                                                 {record.blended_rate === null ? (
                                                     record.blended_rate === null && <td>-</td>
                                                 ) : (
                                                     <td>{record.blended_rate} kWh</td>
                                                 )}
-                                                {avgRate === null ? (
-                                                    avgRate === null && <td>-</td>
-                                                ) : (
-                                                    <td>{avgRate} kWh</td>
-                                                )}
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                {/* <td className="text-primary font-weight-bold">Add</td> */}
                                                 <td className="font-weight-bold">
                                                     <a
                                                         class="link-primary"
                                                         onClick={() => {
                                                             handleShow();
+                                                            setBillId(record.id);
                                                             // handleEditItem(record);
                                                         }}>
                                                         Add
                                                     </a>
-                                                    {/* <button type="button" class="btn btn-link" onClick={handleShow}>
-                                                        Add
-                                                    </button> */}
                                                 </td>
                                             </tr>
                                         ) : (
                                             <tr key={index}>
-                                                <td className="font-weight-bold">{record.date}</td>
+                                                <td className="font-weight-bold">{dateFormater(record.date)}</td>
                                                 {record.kWh === null ? (
                                                     record.kWh === null && <td>-</td>
                                                 ) : (
@@ -183,23 +222,19 @@ const UtilityBills = () => {
                                                         kWh
                                                     </td>
                                                 )}
-                                                {record.rate === null ? (
-                                                    record.rate === null && <td>-</td>
+                                                {record.total_paid === null ? (
+                                                    record.total_paid === null && <td>-</td>
                                                 ) : (
                                                     <td className="font-weight-bold">
-                                                        {record.rate}
+                                                        {record.total_paid}
                                                         kWh
                                                     </td>
                                                 )}
-                                                {avgRate === null ? (
-                                                    avgRate === null && <td className="text-muted grey-out">-</td>
+                                                {record.blended_rate === null ? (
+                                                    record.blended_rate === null && <td>-</td>
                                                 ) : (
-                                                    <td className="grey-out">{avgRate} kWh</td>
+                                                    <td>{record.blended_rate} kWh</td>
                                                 )}
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
                                             </tr>
                                         );
                                     })}
@@ -214,26 +249,37 @@ const UtilityBills = () => {
                 <Modal.Header>
                     <Modal.Title>Edit Utility Bill</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <Form>
+                <Form onSubmit={EditHandler}>
+                    <Modal.Body>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>kWh</Form.Label>
-                            <Form.Control type="number" placeholder="Enter kWh" autoFocus />
+                            <Form.Control
+                                type="number"
+                                placeholder="Enter kWh"
+                                autoFocus
+                                onChange={inputsHandler}
+                                name="kWh"
+                            />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Total Paid</Form.Label>
-                            <Form.Control type="number" placeholder="Enter total paid on bill" />
+                            <Form.Control
+                                type="number"
+                                placeholder="Enter total paid on bill"
+                                onChange={inputsHandler}
+                                name="total_paid"
+                            />
                         </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Save
-                    </Button>
-                </Modal.Footer>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="light" onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" type="submit">
+                            Save
+                        </Button>
+                    </Modal.Footer>
+                </Form>
             </Modal>
         </React.Fragment>
     );
