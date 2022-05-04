@@ -11,13 +11,16 @@ import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
 import axios from 'axios';
 import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
-import { percentageHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../components/DateRangeStore';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { TailSpin } from 'react-loader-spinner';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const PortfolioOverview = () => {
+    const [isProcessing, setIsProcessing] = useState(true);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
@@ -330,7 +333,6 @@ const PortfolioOverview = () => {
     });
 
     // let [loading, setLoading] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
     let [color, setColor] = useState('#ffffff');
 
     useEffect(() => {
@@ -342,7 +344,6 @@ const PortfolioOverview = () => {
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     setBuildingRecord(res.data);
-                    console.log('setBuildingRecord => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -361,8 +362,10 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}`,
                         {
-                            date_from: '2022-04-20',
-                            date_to: '2022-04-27',
+                            // date_from: '2022-04-20',
+                            // date_to: '2022-04-27',
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
                         },
                         { headers }
                     )
@@ -373,7 +376,8 @@ const PortfolioOverview = () => {
             } catch (error) {
                 console.log(error);
                 setIsProcessing(false);
-                alert('Failed to fetch Portfolio Overall Data');
+                // alert('Failed to fetch Portfolio Overall Data');
+                console.log('Failed to fetch Portfolio Overall Data');
             }
         };
 
@@ -383,19 +387,10 @@ const PortfolioOverview = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                 };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioBuilidings}`,
-                        {
-                            time_horizon: 0,
-                            custom_time_horizon: 0,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setBuildingsEnergyConsume(res.data);
-                        console.log('setBuildingsEnergyConsume => ', res.data);
-                    });
+                await axios.post(`${BaseUrl}${portfolioBuilidings}`, { headers }).then((res) => {
+                    setBuildingsEnergyConsume(res.data);
+                    console.log('setBuildingsEnergyConsume => ', res.data);
+                });
             } catch (error) {
                 console.log(error);
                 setIsProcessing(false);
@@ -413,8 +408,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}`,
                         {
-                            date_from: '2022-04-20',
-                            date_to: '2022-04-27',
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
                         },
                         { headers }
                     )
@@ -424,8 +419,10 @@ const PortfolioOverview = () => {
                         let newArray = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newArray.push(fixedConsumption);
+                            newArray.push(parseInt(fixedConsumption));
                         });
+                        console.log('newArray => ', newArray);
+                        console.log('newArray Type => ', typeof newArray[0]);
                         setDonutChartData(newArray);
                         console.log('setDonutChartData => ', res.data);
                     });
@@ -458,12 +455,7 @@ const PortfolioOverview = () => {
             });
         };
         updateBreadcrumbStore();
-    }, []);
-
-    useEffect(() => {
-        console.log('DateRangeStore startDate => ', startDate);
-        console.log('DateRangeStore endDate => ', endDate);
-    });
+    }, [startDate, endDate]);
 
     return (
         <React.Fragment>
@@ -476,7 +468,9 @@ const PortfolioOverview = () => {
             {!isProcessing && (
                 <>
                     <Header title="Portfolio Overview" />
-
+                    {/* <Row>
+                        <Skeleton width={80} height={20} />
+                    </Row> */}
                     <Row>
                         <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                             <div className="card card-box-style button-style">

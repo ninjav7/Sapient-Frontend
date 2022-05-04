@@ -4,10 +4,12 @@ import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
 import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
+import { useParams } from 'react-router-dom';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const TimeOfDay = () => {
+    const { bldgId } = useParams();
     const apexLineChartWithLables = {
         chart: {
             height: 380,

@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
@@ -79,22 +79,6 @@ const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
 };
 
 const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Peak Demand',
-                        path: '/energy/peak-demand',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
@@ -173,22 +157,6 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Peak Demand',
-                        path: '/energy/peak-demand',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
@@ -267,6 +235,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
+    const { bldgId } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
@@ -377,7 +346,7 @@ const PeakDemand = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                 };
-                let params = `?building_id=62581924c65bf3a1d702e427`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingPeak}${params}`,
@@ -403,6 +372,22 @@ const PeakDemand = () => {
         };
         buildingPeaksData();
     }, [startDate, endDate]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Peak Demand',
+                        path: '/energy/peak-demand',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
