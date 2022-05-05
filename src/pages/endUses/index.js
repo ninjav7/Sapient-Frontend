@@ -6,10 +6,15 @@ import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { percentageHandler } from '../../utils/helper';
+import { useParams } from 'react-router-dom';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
 
 const EndUses = () => {
+    const { bldgId } = useParams();
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
     const [endUsage, seteEndUsage] = useState([
         {
             title: 'HVAC',
@@ -136,25 +141,33 @@ const EndUses = () => {
     const [endUsesData, setEndUsesData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const endUsesDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUses}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEndUsesData(res.data);
+                        console.log('setEndUsesData => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUses Data');
+            }
         };
-        const params = `?building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${endUses}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEndUsesData(res.data);
-                console.log('setEndUsesData => ', res.data);
-            });
-    }, []);
+        endUsesDataFetch();
+    }, [startDate, endDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

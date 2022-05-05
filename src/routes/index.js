@@ -347,30 +347,30 @@ const chartRoutes = {
 
 // builindgs
 const buildingRoutes = {
-    path: '/energy/building/overview',
+    path: '/energy/building/overview/:bldgId',
     name: 'Building Overview',
     component: Building,
     children: [
         {
-            path: '/energy/building/overview',
+            path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
         },
         {
-            path: '/energy/peak-demand',
+            path: '/energy/peak-demand/:bldgId',
             name: 'Peak Demand',
             component: PeakDemand,
             route: PrivateRoute,
         },
         {
-            path: '/energy/end-uses',
+            path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
             component: EndUses,
             route: PrivateRoute,
         },
         {
-            path: '/energy/time-of-day',
+            path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
             component: TimeOfDay,
             route: PrivateRoute,
@@ -392,25 +392,25 @@ const portfolioRoutes = {
             route: PrivateRoute,
         },
         {
-            path: '/energy/building/overview',
+            path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
         },
         {
-            path: '/energy/peak-demand',
+            path: '/energy/peak-demand/:bldgId',
             name: 'Peak Demand',
             component: PeakDemand,
             route: PrivateRoute,
         },
         {
-            path: '/energy/end-uses',
+            path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
             component: EndUses,
             route: PrivateRoute,
         },
         {
-            path: '/energy/time-of-day',
+            path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
             component: TimeOfDay,
             route: PrivateRoute,

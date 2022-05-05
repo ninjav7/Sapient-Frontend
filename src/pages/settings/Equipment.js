@@ -13,7 +13,6 @@ import {
     Input,
     FormGroup,
 } from 'reactstrap';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, generalEquipments } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
@@ -21,6 +20,8 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
+import { BuildingStore } from '../../components/BuildingStore';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const ModalEquipment = ({ show, equipData, close }) => {
     return (
@@ -288,7 +289,7 @@ const BuildingTable = ({ generalEquipmentData }) => {
                                             }
                                         </td>
                                         <td>{record.sensor_number}</td>
-                                        <td>{record.last_data}</td>
+                                        <td>{record.last_data === '' ? '-' : record.last_data}</td>
                                         <td className="font-weight-bold">{record.device_id}</td>
                                     </tr>
                                 );
@@ -305,22 +306,27 @@ const BuildingTable = ({ generalEquipmentData }) => {
 };
 
 const Equipment = () => {
-    const [buildingId, setBuildingId] = useState(1);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchEquipmentData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${generalEquipments}`, { headers }).then((res) => {
+                    setGeneralEquipmentData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Equipment Data');
+            }
         };
-        axios
-            .post(`${BaseUrl}${generalEquipments}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setGeneralEquipmentData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
-    }, []);
+        fetchEquipmentData();
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -399,7 +405,7 @@ const Equipment = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
+                    <UncontrolledDropdown className="d-inline float-right mr-3">
                         <DropdownToggle color="white">
                             Columns
                             <i className="icon">
@@ -416,7 +422,7 @@ const Equipment = () => {
             </Row>
 
             <Row>
-                <Col lg={12}>
+                <Col lg={11}>
                     <BuildingTable generalEquipmentData={generalEquipmentData} />
                 </Col>
             </Row>

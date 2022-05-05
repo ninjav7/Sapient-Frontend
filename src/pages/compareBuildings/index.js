@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import {
@@ -17,11 +17,14 @@ import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { percentageHandler } from '../../utils/helper';
+import axios from 'axios';
 
 import './style.css';
 
-const BuildingTable = () => {
+const BuildingTable = ({ buildingsData }) => {
     const records = [
         {
             name: '123 Main St. Portland OR',
@@ -87,17 +90,17 @@ const BuildingTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {records.map((record, index) => {
+                        {buildingsData.map((record, index) => {
                             return (
-                                <tr key={index}>
+                                <tr key={record.building_id}>
                                     <th scope="row">
                                         <Link to="/energy/building/overview">
-                                            <a className="building-name">{record.name}</a>
+                                            <a className="building-name">{record.building_name}</a>
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {record.energyDensity} kWh / sq. ft.sq. ft.
+                                        {record.energy_density.toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '50%', display: 'inline-block' }}>
                                             <Line
@@ -109,7 +112,7 @@ const BuildingTable = () => {
                                                 strokeLinecap="round"
                                             />
                                         </div>
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
+                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
                                             {record.consumtnPer >= 90 && (
                                                 <Line
                                                     percent={record.consumtnPer}
@@ -173,39 +176,41 @@ const BuildingTable = () => {
                                                     strokeLinecap="square"
                                                 />
                                             )}
-                                        </div>
+                                        </div> */}
                                     </td>
                                     <td>
-                                        {record.energyPerChgStatus === 'up' && (
-                                            <button
-                                                className="button-danger text-danger font-weight-bold font-size-5"
-                                                style={{ width: '100%' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
-                                                </i>
-                                            </button>
-                                        )}
-                                        {record.energyPerChgStatus === 'down' && (
+                                        {record.energy_consumption.now >= record.energy_consumption.old ? (
                                             <button
                                                 className="button-danger text-danger btn-font-style"
-                                                style={{ width: '100%' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                style={{ width: 'auto', marginBottom: '4px' }}>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
-                                        )}
-                                        {record.energyPerChgStatus === 'normal' && (
+                                        ) : (
                                             <button
-                                                className="button text-muted btn-font-style"
-                                                style={{ width: '100%', border: 'none' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                className="button-success text-success btn-font-style"
+                                                style={{ width: 'auto' }}>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
                                         )}
                                     </td>
                                     <td className="table-content-style">
-                                        {record.hvacConsumption} kWh / sq. ft.sq. ft.
+                                        {record.hvac_consumption.now.toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '50%', display: 'inline-block' }}>
                                             <Line
@@ -217,7 +222,7 @@ const BuildingTable = () => {
                                                 strokeLinecap="round"
                                             />
                                         </div>
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
+                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
                                             {record.consumtnPer >= 90 && (
                                                 <Line
                                                     percent={record.consumtnPer}
@@ -281,75 +286,78 @@ const BuildingTable = () => {
                                                     strokeLinecap="square"
                                                 />
                                             )}
-                                        </div>
+                                        </div> */}
                                     </td>
                                     <td>
-                                        {record.hvacPerChgStatus === 'up' && (
+                                        {record.hvac_consumption.now >= record.hvac_consumption.old ? (
                                             <button
                                                 className="button-danger text-danger btn-font-style"
-                                                style={{ width: '100%' }}>
+                                                style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.hvac_consumption.now,
+                                                            record.hvac_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
-                                        )}
-                                        {record.hvacPerChgStatus === 'down' && (
+                                        ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
-                                                style={{ width: '100%' }}>
+                                                style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
-                                                    <strong>{record.energyPerChg} %</strong>
-                                                </i>
-                                            </button>
-                                        )}
-                                        {record.hvacPerChgStatus === 'normal' && (
-                                            <button
-                                                className="button text-muted btn-font-style"
-                                                style={{ width: '100%', border: 'none' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.hvac_consumption.now,
+                                                            record.hvac_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
                                         )}
                                     </td>
                                     <td className="value-style">
-                                        {record.totalConsumption.toLocaleString(undefined, {
+                                        {record.total_consumption.toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                         kWh
                                     </td>
-                                    {/* <td>{record.totalPerChg} %</td> */}
                                     <td>
-                                        {record.totalPerChgStatus === 'up' && (
+                                        {record.total_consumption >= record.energy_consumption.old ? (
                                             <button
                                                 className="button-danger text-danger btn-font-style"
-                                                style={{ width: '100%' }}>
+                                                style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.total_consumption,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
-                                        )}
-                                        {record.totalPerChgStatus === 'down' && (
+                                        ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
-                                                style={{ width: '100%' }}>
+                                                style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
-                                                    <strong>{record.energyPerChg} %</strong>
-                                                </i>
-                                            </button>
-                                        )}
-                                        {record.totalPerChgStatus === 'normal' && (
-                                            <button
-                                                className="button text-muted btn-font-style"
-                                                style={{ width: '100%', border: 'none' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>{record.energyPerChg} %</strong>
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.total_consumption,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
                                                 </i>
                                             </button>
                                         )}
                                     </td>
                                     <td className="value-style">
-                                        {record.sqFt.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                        {record.sq_ft.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                     </td>
                                 </tr>
                             );
@@ -362,6 +370,8 @@ const BuildingTable = () => {
 };
 
 const CompareBuildings = () => {
+    const [buildingsData, setBuildingsData] = useState([]);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -376,6 +386,26 @@ const CompareBuildings = () => {
             });
         };
         updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        const compareBuildingsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?days=30`;
+                await axios.post(`${BaseUrl}${compareBuildings}${params}`, { headers }).then((res) => {
+                    setBuildingsData(res.data);
+                    console.log('setBuildingsData => ', res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                alert('Failed to fetch Buildings Data');
+            }
+        };
+        compareBuildingsData();
     }, []);
 
     return (
@@ -425,7 +455,7 @@ const CompareBuildings = () => {
             </Row>
             <Row>
                 <Col xl={12}>
-                    <BuildingTable />
+                    <BuildingTable buildingsData={buildingsData} />
                 </Col>
             </Row>
         </React.Fragment>

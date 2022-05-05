@@ -17,8 +17,8 @@ import { BaseUrl, generalPassiveDevices } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import './style.css';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import './style.css';
 
 const PassiveDevicesTable = ({ passiveDeviceData }) => {
     const records = [
@@ -37,22 +37,6 @@ const PassiveDevicesTable = ({ passiveDeviceData }) => {
             sensors: '3/3',
         },
     ];
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Passive Devices',
-                        path: '/settings/active-devices',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
 
     return (
         <Card>
@@ -112,17 +96,38 @@ const PassiveDevices = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchActiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+                    setPassiveDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active devices');
+            }
         };
-        axios
-            .post(`${BaseUrl}${generalPassiveDevices}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setPassiveDeviceData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
+        fetchActiveDeviceData();
+    }, []);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Passive Devices',
+                        path: '/settings/passive-devices',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
     }, []);
 
     return (

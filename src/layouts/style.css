@@ -9,10 +9,11 @@
     /* z-index: -1; */
 }
 
-.pokemon1 {
-    padding: 0vh;
-    top: -2vh;
+.page-card-style {
+    height: 300vh;
 }
 
-.pokemon2 {
+.custom-top-fix {
+    padding: 0vh;
+    top: -2vh;
 }

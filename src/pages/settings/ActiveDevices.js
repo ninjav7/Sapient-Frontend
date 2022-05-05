@@ -14,7 +14,7 @@ import {
     FormGroup,
     Label,
 } from 'reactstrap';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+
 import { Search } from 'react-feather';
 
 import Modal from 'react-bootstrap/Modal';
@@ -22,6 +22,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const ActiveDevicesTable = ({ activeDeviceData }) => {
@@ -103,17 +104,22 @@ const ActiveDevices = () => {
     const [activeDeviceData, setActiveDeviceData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchPassiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+                    setActiveDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active devices');
+            }
         };
-        axios
-            .post(`${BaseUrl}${generalActiveDevices}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setActiveDeviceData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
+        fetchPassiveDeviceData();
     }, []);
 
     useEffect(() => {

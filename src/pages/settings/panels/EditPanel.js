@@ -14,6 +14,7 @@ import {
     DropdownItem,
 } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { BuildingStore } from '../../../components/BuildingStore';
 import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
 import '../style.css';
 

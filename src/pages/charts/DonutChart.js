@@ -1,10 +1,18 @@
 // @flow
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // simple donut chart
-const DonutChart = ({ options, series, height, title }) => {
+const DonutChart = ({ donutChartOpts, donutChartData, height, title }) => {
+    const [series, setSeries] = useState([]);
+    const [options, setOptions] = useState({});
+
+    useEffect(() => {
+        setSeries(donutChartData);
+        setOptions(donutChartOpts);
+    }, [donutChartOpts, donutChartData]);
+
     return (
         <Card>
             <CardBody>

@@ -2,13 +2,14 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { BaseUrl, builidingPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
-import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
+import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { DateRangeStore } from '../../components/DateRangeStore';
 
 // const BuildingPeakButton = (props) => {
 //     return (
@@ -78,90 +79,6 @@ const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
 };
 
 const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Peak Demand',
-                        path: '/energy/peak-demand',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
-    return (
-        <Card>
-            <CardBody className="pb-0 pt-2">
-                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                    {title}
-                </h6>
-                <Link to="/energy/building-peak-explore">
-                    <div className="float-right ml-2">
-                        <Link to="/energy/building-peak-explore">
-                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </Link>
-                    </div>
-                </Link>
-                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
-                <Table className="mb-0" borderless hover>
-                    <thead>
-                        <tr>
-                            <th scope="col">Equipment</th>
-                            <th scope="col">Power</th>
-                            <th scope="col">Change from Previous Year</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {energyConsumption.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
-                                        {record.equipName}
-                                    </td>
-                                    <td className="custom-usage-style muted">{record.usage}</td>
-                                    <td>
-                                        <button
-                                            className="button-danger text-danger font-weight-bold font-size-5"
-                                            style={{ width: 'auto' }}>
-                                            <i className="uil uil-chart-down">
-                                                <strong>{record.percentage} %</strong>
-                                            </i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </Table>
-            </CardBody>
-        </Card>
-    );
-};
-
-const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Peak Demand',
-                        path: '/energy/peak-demand',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
     return (
         <Card>
             <CardBody className="pb-0 pt-2">
@@ -193,21 +110,119 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                                     <td className="custom-equip-style" style={{ color: '#2955e7' }}>
                                         {record.equipment_name}
                                     </td>
-                                    <td className="custom-usage-style muted">{record.energy_consumption.now}</td>
+                                    <td className="custom-usage-style muted">
+                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </td>
                                     <td>
-                                        <button
-                                            className="button-danger text-danger font-weight-bold font-size-5"
-                                            style={{ width: 'auto' }}>
-                                            <i className="uil uil-chart-down">
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.energy_consumption.now,
-                                                        record.energy_consumption.old
-                                                    )}{' '}
-                                                    %
-                                                </strong>
-                                            </i>
-                                        </button>
+                                        {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                            <button
+                                                className="button-danger text-danger btn-font-style"
+                                                style={{ width: 'auto', marginBottom: '4px' }}>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="button-success text-success btn-font-style"
+                                                style={{ width: 'auto' }}>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </Table>
+            </CardBody>
+        </Card>
+    );
+};
+
+const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
+    return (
+        <Card>
+            <CardBody className="pb-0 pt-2">
+                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                    {title}
+                </h6>
+                <Link to="/energy/building-peak-explore">
+                    <div className="float-right ml-2">
+                        <Link to="/energy/building-peak-explore">
+                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                                <i className="uil uil-pen mr-1"></i>Explore
+                            </button>
+                        </Link>
+                    </div>
+                </Link>
+                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
+                <Table className="mb-0" borderless hover>
+                    <thead>
+                        <tr>
+                            <th scope="col">Equipment</th>
+                            <th scope="col">Power</th>
+                            <th scope="col">Change from Previous Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {energyConsumption.map((record, index) => {
+                            return (
+                                <tr key={index}>
+                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
+                                        {record.equipment_name}
+                                    </td>
+                                    <td className="custom-usage-style muted">
+                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </td>
+                                    <td>
+                                        {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                            <button
+                                                className="button-danger text-danger btn-font-style"
+                                                style={{ width: 'auto', marginBottom: '4px' }}>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="button-success text-success btn-font-style"
+                                                style={{ width: 'auto' }}>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -220,6 +235,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
+    const { bldgId } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
@@ -316,36 +332,62 @@ const PeakDemand = () => {
     const [singleEquipPeakOne, setSingleEquipPeakOne] = useState([]);
     const [singleEquipPeakTwo, setSingleEquipPeakTwo] = useState([]);
     const [singleEquipPeakThree, setSingleEquipPeakThree] = useState([]);
+    const [equipTypePeakOne, setEquipTypePeakOne] = useState([]);
+    const [equipTypePeakTwo, setEquipTypePeakTwo] = useState([]);
+    const [equipTypePeakThree, setEquipTypePeakThree] = useState([]);
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const buildingPeaksData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingPeak}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setTopBuildingPeaks(res.data);
+                        setSingleEquipPeakOne(res.data[0].top_contributors);
+                        setSingleEquipPeakTwo(res.data[1].top_contributors);
+                        setSingleEquipPeakThree(res.data[2].top_contributors);
+                        setEquipTypePeakOne(res.data[0].top_eq_type_contributors);
+                        setEquipTypePeakTwo(res.data[1].top_eq_type_contributors);
+                        setEquipTypePeakThree(res.data[2].top_eq_type_contributors);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Peak Data');
+            }
         };
-        const params = `?building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${builidingPeak}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setTopBuildingPeaks(res.data);
-                setSingleEquipPeakOne(res.data[0].top_contributors);
-                setSingleEquipPeakTwo(res.data[1].top_contributors);
-                setSingleEquipPeakThree(res.data[2].top_contributors);
-            });
-    }, []);
+        buildingPeaksData();
+    }, [startDate, endDate]);
 
     useEffect(() => {
-        console.log('topBuildingPeaks => ', topBuildingPeaks);
-        console.log('singleEquipPeakOne => ', singleEquipPeakOne);
-        console.log('singleEquipPeakTwo => ', singleEquipPeakTwo);
-        console.log('singleEquipPeakThree => ', singleEquipPeakThree);
-    });
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Peak Demand',
+                        path: '/energy/peak-demand',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
@@ -431,7 +473,7 @@ const PeakDemand = () => {
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
-                                    energyConsumption={energyConsumption}
+                                    energyConsumption={equipTypePeakOne}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -450,7 +492,7 @@ const PeakDemand = () => {
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
-                                    energyConsumption={energyConsumption}
+                                    energyConsumption={equipTypePeakTwo}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -469,7 +511,7 @@ const PeakDemand = () => {
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
-                                    energyConsumption={energyConsumption}
+                                    energyConsumption={equipTypePeakThree}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -488,7 +530,7 @@ const PeakDemand = () => {
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
-                                    energyConsumption={energyConsumption}
+                                    energyConsumption={equipTypePeakThree}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />
@@ -507,7 +549,7 @@ const PeakDemand = () => {
                         <Row className="equip-peak-container">
                             <Col xl={6}>
                                 <EquipmentTypePeaks
-                                    energyConsumption={energyConsumption}
+                                    energyConsumption={equipTypePeakThree}
                                     title="Equipment Type Peaks"
                                     subtitle="At building peak time"
                                 />

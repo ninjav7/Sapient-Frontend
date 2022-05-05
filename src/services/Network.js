@@ -24,20 +24,37 @@ export const generalOperatingHours = '/api/config/general/operating_hours';
 export const endUses = '/api/energy/portfolio/end-user';
 
 // equipments
-export const generalEquipments = '/api/config/equipments/equipments_details';
+export const generalEquipments = '/api/config/equipments_details';
+// export const generalEquipments = '/api/config/equipments/equipments_details';  --- Old API
 
 // active
-export const generalActiveDevices = '/api/config/active/equipments_details';
+// export const generalActiveDevices = '/api/config/active/equipments_details';
+export const generalActiveDevices = '/api/config/devices/active';
 
 // passive
-export const generalPassiveDevices = '/api/config/passive/equipments_details';
+// export const generalPassiveDevices = '/api/config/passive/equipments_details';
+export const generalPassiveDevices = '/api/config/devices/passive';
 
 //gateway
 export const generalGateway = '/api/config/gateway/equipments_details';
 
 // panel
-export const generalPanels = '/api/config/panels/panels_details';
+export const generalPanels = '/api/config/panels';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
 export const energyUsage = '/api/energy/energy/usage';
+
+export const compareBuildings = '/api/energy/energy/compare_building';
+
+//config settings
+export const getBuildings = '/api/config/get_buildings';
+
+// general settings
+export const deleteBuilding = '/api/config/general/delete_building';
+
+// layout
+export const getLayouts = '/api/config/get_layout';
+
+// getLocation
+export const getLocation = '/api/config/get_location';
