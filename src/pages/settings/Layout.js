@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Row,
     Col,
@@ -10,14 +10,25 @@ import {
     DropdownMenu,
     DropdownItem,
     DropdownToggle,
-    Media,
-    Button,
 } from 'reactstrap';
 import { Filter } from 'react-feather';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
+// import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { BaseUrl, getLayouts } from '../../services/Network';
+import { BuildingStore } from '../../components/BuildingStore';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const Layout = () => {
+    // const store = useSelector((state) => state.counterState);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [floorsData, setfloorsData] = useState([]);
+    const [indexSpace1, setIndexSpace1] = useState([]);
+    const [indexSpace1Name, setIndexSpace1Name] = useState('');
+    const [indexSpace2, setIndexSpace2] = useState([]);
+    const [indexSpace2Name, setIndexSpace2Name] = useState('');
+    const [indexSpace3, setIndexSpace3] = useState([]);
+    const [indexSpace3Name, setIndexSpace3Name] = useState('');
     const floors = [
         {
             number: 1,
@@ -126,6 +137,52 @@ const Layout = () => {
             label: 'Room',
         },
     ];
+    const relatedSpaceHandler = (i, item) => {
+        console.log(i);
+
+        setIndexSpace1(floorsData[i]['related_spaces']);
+        setIndexSpace1Name(item.floor_name);
+        console.log(floorsData[i]['related_spaces']);
+    };
+    const relatedSpaceHandler2 = (i, item) => {
+        const relatedSpaceArray = indexSpace1[i];
+        if (indexSpace1[i]['related_space']) {
+            setIndexSpace2(relatedSpaceArray['related_space']);
+            setIndexSpace2Name(item.name);
+        }
+    };
+    const relatedSpaceHandler3 = (i, item) => {
+        console.log('indexSpace3', indexSpace3);
+        console.log('index', i);
+        const relatedSpaceArray = indexSpace2[i];
+        console.log(relatedSpaceArray);
+        if (indexSpace2[i]['related_space']) {
+            setIndexSpace3(relatedSpaceArray['related_space']);
+            setIndexSpace3Name(item.name);
+            console.log(indexSpace2[i]['related_space']);
+        }
+    };
+    useEffect(() => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+        };
+        axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
+            console.log(res.data);
+            setfloorsData(res.data);
+            let data = {};
+            if (bldgId) {
+                console.log(data);
+            }
+        });
+    }, [bldgId]);
+
+    useEffect(() => {
+        setIndexSpace2([]);
+        setIndexSpace3([]);
+        setIndexSpace2Name('');
+        setIndexSpace3Name('');
+    }, [indexSpace1]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -133,7 +190,7 @@ const Layout = () => {
                 let newList = [
                     {
                         label: 'Layout',
-                        path: '/energy/layout',
+                        path: '/settings/layout',
                         active: true,
                     },
                 ];
@@ -182,6 +239,7 @@ const Layout = () => {
                                 <span>Building Root</span>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
+                                    {/* <i className="uil uil-plus mr-2"></i> */}
                                     <UncontrolledDropdown className="align-self-center float-right">
                                         <DropdownToggle
                                             tag="button"
@@ -192,15 +250,17 @@ const Layout = () => {
                                             <DropdownItem>Add Floor</DropdownItem>
                                         </DropdownMenu>
                                     </UncontrolledDropdown>
-                                    {/* <i className="uil uil-plus mr-2"></i> */}
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floors.map((floor) => (
-                                    <div className="container-single-content mr-4">
-                                        <span>Floor {floor.number}</span>
+                                {floorsData.map((floor, i) => (
+                                    <div
+                                        className="container-single-content mr-4"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => relatedSpaceHandler(i, floor)}>
+                                        <span> {floor.floor_name}</span>
                                         <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {floor.label}
+                                            {/* {floor.tag[0]} */}
                                         </span>
                                     </div>
                                 ))}
@@ -208,7 +268,7 @@ const Layout = () => {
                         </div>
                         <div className="header">
                             <div className="container-heading">
-                                <span>Floor 1</span>
+                                <span>{indexSpace1Name}</span>
                                 <i className="uil uil-pen ml-2"></i>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
@@ -229,11 +289,14 @@ const Layout = () => {
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floor1.map((floor) => (
-                                    <div className="container-single-content mr-4">
-                                        <span>{floor.area}</span>
+                                {indexSpace1.map((floor, i) => (
+                                    <div
+                                        className="container-single-content mr-4"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => relatedSpaceHandler2(i, floor)}>
+                                        <span>{floor.name}</span>
                                         <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {floor.label}
+                                            {floor.tag[0]}
                                         </span>
                                     </div>
                                 ))}
@@ -241,19 +304,32 @@ const Layout = () => {
                         </div>
                         <div className="header">
                             <div className="container-heading">
-                                <span>Main Area</span>
+                                <span>{indexSpace2Name}</span>
                                 <i className="uil uil-pen ml-2"></i>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
-                                    <i className="uil uil-plus mr-2"></i>
+                                    {/* <i className="uil uil-plus mr-2"></i> */}
+                                    <UncontrolledDropdown className="align-self-center float-right">
+                                        <DropdownToggle
+                                            tag="button"
+                                            className="btn btn-link p-0 dropdown-toggle text-muted">
+                                            <i className="uil uil-plus mr-2"></i>
+                                        </DropdownToggle>
+                                        <DropdownMenu right>
+                                            <DropdownItem>Add Room</DropdownItem>
+                                        </DropdownMenu>
+                                    </UncontrolledDropdown>
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {mainArea.map((record) => (
-                                    <div className="container-single-content mr-4">
+                                {indexSpace2.map((record, i) => (
+                                    <div
+                                        className="container-single-content mr-4"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => relatedSpaceHandler3(i, record)}>
                                         <span>{record.name}</span>
                                         <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {record.label}
+                                            {record.tag[0]}
                                         </span>
                                     </div>
                                 ))}
@@ -261,13 +337,21 @@ const Layout = () => {
                         </div>
                         <div className="header">
                             <div className="container-heading">
-                                <span>123</span>
+                                <span>{indexSpace3Name}</span>
                                 <i className="uil uil-pen ml-2"></i>
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-plus mr-2"></i>
                                 </div>
                             </div>
                             <div className="container-content-group">
+                                {indexSpace3.map((record) => (
+                                    <div className="container-single-content mr-4">
+                                        <span>{record.name || ''}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4">
+                                            {record.tag[0] || ''}
+                                        </span>
+                                    </div>
+                                ))}
                                 <span className="text-center m-2">No area in this room</span>
                                 <span className="text-left text-uppercase m-2 equip-head-style">
                                     Equipment in this space

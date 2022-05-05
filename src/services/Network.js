@@ -58,3 +58,6 @@ export const getLayouts = '/api/config/get_layout';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
+
+// charts
+export const getEnergyConsumption = '/api/energy/chart';

@@ -25,7 +25,7 @@ import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
-const ActiveDevicesTable = ({ activeDeviceData }) => {
+const ActiveDevicesTable = ({ deviceData }) => {
     const records = [
         {
             status: 'available',
@@ -63,7 +63,7 @@ const ActiveDevicesTable = ({ activeDeviceData }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {activeDeviceData.map((record, index) => {
+                        {deviceData.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <td scope="row" className="text-center">
@@ -96,15 +96,17 @@ const ActiveDevicesTable = ({ activeDeviceData }) => {
 
 const ActiveDevices = () => {
     // Modal states
+    const [selectedTab, setSelectedTab] = useState(0);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [buildingId, setBuildingId] = useState(1);
     const [activeDeviceData, setActiveDeviceData] = useState([]);
+    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
+    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
 
     useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
+        const fetchActiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -116,10 +118,44 @@ const ActiveDevices = () => {
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Active devices');
+                console.log('Failed to fetch all Active Devices');
             }
         };
-        fetchPassiveDeviceData();
+        const fetchOnlineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=true`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                    setOnlineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Online Devices');
+            }
+        };
+        const fetchOfflineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=false`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                    setOfflineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Offline Devices');
+            }
+        };
+        fetchActiveDeviceData();
+        fetchOnlineDeviceData();
+        fetchOfflineDeviceData();
     }, []);
 
     useEffect(() => {
@@ -186,19 +222,37 @@ const ActiveDevices = () => {
                         <div>
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}>
+                                className={
+                                    selectedTab === 0
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
+                                onClick={() => setSelectedTab(0)}>
                                 All Statuses
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline" style={{ borderRadius: '0px' }}>
+                            <button
+                                type="button"
+                                className={
+                                    selectedTab === 1
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderRadius: '0px' }}
+                                onClick={() => setSelectedTab(1)}>
                                 <i className="uil uil-wifi mr-1"></i>Online
                             </button>
 
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}>
+                                className={
+                                    selectedTab === 2
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
+                                onClick={() => setSelectedTab(2)}>
                                 <i className="uil uil-wifi-slash mr-1"></i>Offline
                             </button>
                         </div>
@@ -228,8 +282,10 @@ const ActiveDevices = () => {
             </Row>
 
             <Row>
-                <Col lg={12}>
-                    <ActiveDevicesTable activeDeviceData={activeDeviceData} />
+                <Col lg={10}>
+                    {selectedTab === 0 && <ActiveDevicesTable deviceData={activeDeviceData} />}
+                    {selectedTab === 1 && <ActiveDevicesTable deviceData={onlineDeviceData} />}
+                    {selectedTab === 2 && <ActiveDevicesTable deviceData={offlineDeviceData} />}
                 </Col>
             </Row>
 

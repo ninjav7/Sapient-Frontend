@@ -202,7 +202,7 @@ const BuildingOverview = () => {
         },
     });
 
-    const [donutChartData, setDonutChartData] = useState([]);
+    const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -896,12 +896,13 @@ const BuildingOverview = () => {
                         setEnergyConsumption(res.data);
                         console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
-                        let newArray = [];
+                        let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newArray.push(fixedConsumption);
+                            // newArray.push(fixedConsumption);
+                            newDonutData.push(parseInt(fixedConsumption));
                         });
-                        setDonutChartData(newArray);
+                        setDonutChartData(newDonutData);
                     });
             } catch (error) {
                 console.log(error);
@@ -1186,11 +1187,10 @@ const BuildingOverview = () => {
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                     </div>
                     <div className="energy-blg-container-one-content mr-2">
-                        {/* Chart  */}
                         <div className="energy-chart-style">
-                            <DonutChart options={donutChartOpts} series={donutChartData} height={170} />
+                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={180} />
                         </div>
-                        {/* Table  */}
+
                         <div>
                             <Table className="mb-0 building-table-font-style" borderless>
                                 <tbody>

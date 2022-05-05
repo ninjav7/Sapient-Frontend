@@ -40,10 +40,6 @@ const PageTracker = () => {
         getBuildingList();
     }, [startDate, endDate]);
 
-    useEffect(() => {
-        console.log('BuildingStore => ', BuildingStore);
-    });
-
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
@@ -63,11 +59,11 @@ const PageTracker = () => {
                                     value={value}
                                 />
                             </div>
-
-                            <div>
-                                <Dropdown.Item href="#/action-1">Portfolio</Dropdown.Item>
-                            </div>
-
+                            <Link to="/energy/portfolio/overview">
+                                <div>
+                                    <Dropdown.Item>Portfolio</Dropdown.Item>
+                                </div>
+                            </Link>
                             <div>
                                 <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header>
                                 {/* {buildingRecord.map((building, index) => (

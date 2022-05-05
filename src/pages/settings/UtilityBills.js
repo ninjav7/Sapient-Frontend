@@ -108,7 +108,12 @@ const UtilityBills = () => {
                     };
                     await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
                         console.log(res);
-                        setUtilityData(res.data);
+                        let responseData = res.data;
+                        responseData.sort(
+                            (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
+                        );
+                        console.log('responseData => ', responseData);
+                        setUtilityData(responseData);
                     });
                 }
             } catch (error) {
@@ -136,7 +141,7 @@ const UtilityBills = () => {
     }, []);
 
     const dateFormater = (date) => {
-        return moment().format('MMM YYYY');
+        return moment(date).format('MMM YYYY');
     };
 
     const inputsHandler = (e) => {

@@ -196,7 +196,7 @@ const ModalEquipment = ({ show, equipData, close }) => {
     );
 };
 
-const BuildingTable = ({ generalEquipmentData }) => {
+const BuildingTable = ({ equipmentData }) => {
     const records = [
         {
             status: 'available',
@@ -254,7 +254,7 @@ const BuildingTable = ({ generalEquipmentData }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {generalEquipmentData.map((record, index) => {
+                            {equipmentData.map((record, index) => {
                                 return (
                                     <tr
                                         key={index}
@@ -306,8 +306,11 @@ const BuildingTable = ({ generalEquipmentData }) => {
 };
 
 const Equipment = () => {
+    const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
+    const [onlineEquipData, setOnlineEquipData] = useState([]);
+    const [offlineEquipData, setOfflineEquipData] = useState([]);
 
     useEffect(() => {
         const fetchEquipmentData = async () => {
@@ -322,11 +325,45 @@ const Equipment = () => {
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Equipment Data');
+                console.log('Failed to fetch all Equipments Data');
+            }
+        };
+        const fetchOnlineEquipData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=true`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    setOnlineEquipData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch online Equipments Data');
+            }
+        };
+        const fetchOfflineEquipData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=false`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    setOfflineEquipData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch offline Equipments Data');
             }
         };
         fetchEquipmentData();
-    }, [bldgId]);
+        fetchOnlineEquipData();
+        fetchOfflineEquipData();
+    }, []);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -382,19 +419,37 @@ const Equipment = () => {
                         <div>
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}>
+                                className={
+                                    selectedTab === 0
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
+                                onClick={() => setSelectedTab(0)}>
                                 All Statuses
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline" style={{ borderRadius: '0px' }}>
+                            <button
+                                type="button"
+                                className={
+                                    selectedTab === 1
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderRadius: '0px' }}
+                                onClick={() => setSelectedTab(1)}>
                                 <i className="uil uil-wifi mr-1"></i>Online
                             </button>
 
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}>
+                                className={
+                                    selectedTab === 2
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
+                                onClick={() => setSelectedTab(2)}>
                                 <i className="uil uil-wifi-slash mr-1"></i>Offline
                             </button>
                         </div>
@@ -423,7 +478,9 @@ const Equipment = () => {
 
             <Row>
                 <Col lg={11}>
-                    <BuildingTable generalEquipmentData={generalEquipmentData} />
+                    {selectedTab === 0 && <BuildingTable equipmentData={generalEquipmentData} />}
+                    {selectedTab === 1 && <BuildingTable equipmentData={onlineEquipData} />}
+                    {selectedTab === 2 && <BuildingTable equipmentData={offlineEquipData} />}
                 </Col>
             </Row>
         </React.Fragment>

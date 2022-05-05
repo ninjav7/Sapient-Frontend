@@ -639,7 +639,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
 
                     <div className="card-body">
                         <div>
-                            <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
+                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={200} />
                         </div>
                     </div>
                 </Col>

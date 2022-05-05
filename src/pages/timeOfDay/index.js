@@ -1012,7 +1012,7 @@ const TimeOfDay = () => {
                         </h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                         <div className="mt-2 ">
-                            <DonutChart options={donutChartOpts} series={donutChartData} height={200} />
+                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={200} />
                         </div>
                     </div>
                 </Col>
