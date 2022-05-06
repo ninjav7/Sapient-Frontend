@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -9,6 +9,11 @@ import Select from 'react-select';
 
 const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activatedMenuItemIds }) => {
     const Icon = item.icon || null;
+
+    useEffect(() => {
+        console.log('MenuItemWithChildren => ', item);
+    });
+
     return (
         <li className={classNames('side-nav-item', { 'mm-active': activatedMenuItemIds.indexOf(item.id) >= 0 })}>
             <ul
@@ -42,9 +47,13 @@ const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activat
 };
 
 const MenuItem = ({ item, className, linkClassName }) => {
+    useEffect(() => {
+        console.log('MenuItem => ', item);
+    });
+
     return (
         <li className={classNames('side-nav-item', className)}>
-            <MenuItemLink item={item} className={linkClassName} />
+            {item.visibility && <MenuItemLink item={item} className={linkClassName} />}
         </li>
     );
 };

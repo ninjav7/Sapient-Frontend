@@ -8,6 +8,8 @@ import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings, User, Search } from 'react-feather';
 import SearchModal from './SearchModal';
 import '../pages/portfolio/style.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import './style.css';
 
 const Navbar = (props) => {
@@ -43,6 +45,7 @@ const Navbar = (props) => {
                         <Link to="/settings/general">
                             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
                                 <Settings className="icon-sm" />
+                                {/* <FontAwesomeIcon icon={faGear} className="mt-1" size="xl" /> */}
                             </button>
                         </Link>
                     </div>

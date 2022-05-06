@@ -1,5 +1,5 @@
 // @flow
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 
 import PageTitle from '../../components/PageTitle';
@@ -13,6 +13,7 @@ import StackedBarChart from './StackedBarChart';
 import DonutChart from './DonutChart';
 import PieChart from './PieChart';
 import MixedChart from './MixedChart';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 
 const ApexChart = () => {
     const apexLineChartWithLables = {
@@ -235,6 +236,22 @@ const ApexChart = () => {
 
     const [apexDonutData, setApexDonutData] = useState([44, 55, 41, 17, 15]);
 
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Charts',
+                        path: '/charts',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -290,7 +307,12 @@ const ApexChart = () => {
 
             <Row>
                 <Col xl={6}>
-                    <DonutChart donutChartOpts={apexDonutOpts} donutChartData={apexDonutData} height={320} title="Donut Chart" />
+                    <DonutChart
+                        donutChartOpts={apexDonutOpts}
+                        donutChartData={apexDonutData}
+                        height={320}
+                        title="Donut Chart"
+                    />
                 </Col>
 
                 <Col xl={6}>

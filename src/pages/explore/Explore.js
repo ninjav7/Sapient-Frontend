@@ -6,9 +6,12 @@ import Select from 'react-select';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
+import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
+import { BaseUrl, getExplore } from '../../services/Network';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -299,9 +302,90 @@ const Explore = () => {
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
 
+    const [seriesData, setSeriesData] = useState([]);
+    const [optionsData, setOptionsData] = useState({
+        chart: {
+            id: 'chart2',
+            type: 'line',
+            height: 230,
+            toolbar: {
+                autoSelected: 'pan',
+                show: false,
+            },
+        },
+        colors: ['#546E7A'],
+        stroke: {
+            width: 3,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        fill: {
+            opacity: 1,
+        },
+        markers: {
+            size: 0,
+        },
+        xaxis: {
+            type: 'datetime',
+        },
+    });
+
+    const [seriesLineData, setSeriesLineData] = useState([]);
+    const [optionsLineData, setOptionsLineData] = useState({});
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Explore',
+                        path: '/explore',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
+    useEffect(() => {
+        const exploreDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.post(`${BaseUrl}${getExplore}`, { headers }).then((res) => {
+                    // console.log('exploreDataFetch => ', res.data);
+                    let fetchedData = res.data;
+                    let exploreData = [];
+                    fetchedData.forEach((record) => {
+                        if (record.eq_name !== null) {
+                            let recordToInsert = {
+                                name: record.eq_name,
+                                data: record.data,
+                            };
+                            exploreData.push(recordToInsert);
+                        }
+                    });
+                    console.log('exploreData => ', exploreData);
+                    setSeriesData(exploreData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+            }
+        };
+        exploreDataFetch();
+    }, [activeExploreOpt]);
+
     useEffect(() => {
         console.log('activeExploreOpt => ', activeExploreOpt);
-    }, [activeExploreOpt]);
+        console.log('seriesData => ', seriesData);
+    });
 
     return (
         <React.Fragment>
@@ -386,7 +470,7 @@ const Explore = () => {
                     <BrushChart />
                     <Row>
                         <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                            <ExploreTable seriesData={seriesData} optionsData={optionsData} />
                         </Col>
                     </Row>
                 </>
@@ -397,7 +481,7 @@ const Explore = () => {
                     <BrushChart />
                     <Row>
                         <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                            <ExploreTable seriesData={seriesData} optionsData={optionsData} />
                         </Col>
                     </Row>
                 </>

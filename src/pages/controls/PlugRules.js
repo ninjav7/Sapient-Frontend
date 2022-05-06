@@ -19,6 +19,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
+import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
 const RuleTable = ({ ruleData }) => {
@@ -100,6 +101,22 @@ const PlugRules = () => {
             socketCount: 25,
         },
     ]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Plug Rules',
+                        path: '/control/plug-rules',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>

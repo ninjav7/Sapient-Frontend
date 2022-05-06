@@ -2,6 +2,10 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTelescope } from '@fortawesome/free-solid-svg-icons';
+import { faToggleOn } from '@fortawesome/free-solid-svg-icons';
+import { faCircleBolt } from '@fortawesome/free-solid-svg-icons';
 
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
@@ -104,6 +108,7 @@ const Explore = React.lazy(() => import('../pages/explore/Explore'));
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
     <Route
+        exact
         {...rest}
         render={(props) => {
             if (!isUserAuthenticated()) {
@@ -128,8 +133,10 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
 const rootRoute = {
     path: '/',
     exact: true,
-    component: () => <Redirect to="/dashboard" />,
+    // component: () => <Redirect to="/dashboard" />,
+    component: () => <Redirect to="/energy/portfolio/overview" />,
     route: PrivateRoute,
+    visibility: true,
 };
 
 // dashboards
@@ -343,6 +350,7 @@ const chartRoutes = {
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
     route: PrivateRoute,
+    visibility: true,
 };
 
 // builindgs
@@ -350,30 +358,35 @@ const buildingRoutes = {
     path: '/energy/building/overview/:bldgId',
     name: 'Building Overview',
     component: Building,
+    visibility: false,
     children: [
         {
             path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/peak-demand/:bldgId',
             name: 'Peak Demand',
             component: PeakDemand,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
             component: EndUses,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
             component: TimeOfDay,
             route: PrivateRoute,
+            visibility: false,
         },
     ],
     roles: ['Admin'],
@@ -384,66 +397,78 @@ const buildingRoutes = {
 const portfolioRoutes = {
     path: '/energy',
     name: 'Energy',
+    visibility: true,
     children: [
         {
             path: '/energy/portfolio/overview',
             name: 'Portfolio Overview',
             component: Portfolio,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/energy/building/overview/:bldgId',
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/peak-demand/:bldgId',
             name: 'Peak Demand',
             component: PeakDemand,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
             component: EndUses,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
             component: TimeOfDay,
             route: PrivateRoute,
+            visibility: false,
         },
         {
+            // path: '/energy/portfolio/overview/compare-buildings',
             path: '/energy/compare-buildings',
             name: 'Compare Buildings',
             component: CompareBuildings,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/energy/hvac',
             name: 'HVAC Usage',
             component: HVACUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/lightning',
             name: 'Lightning Usage',
             component: LightningUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/plug',
             name: 'Plug Usage',
             component: PlugUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/energy/building-peak-explore',
             name: 'BuildingPeak Explore',
             component: ExploreBuildingPeak,
             route: PrivateRoute,
+            visibility: false,
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -454,102 +479,119 @@ const portfolioRoutes = {
 const settingsRoutes = {
     path: '/settings',
     name: 'Settings',
+    visibility: false,
     children: [
         {
             path: '/settings/general',
             name: 'General',
             component: General,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/utility-bills',
             name: 'Utility Bills',
             component: UtilityBills,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/layout',
             name: 'Layout',
             component: Layout,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/equipment',
             name: 'Equipment',
             component: Equipment,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/panels',
             name: 'Panels',
             component: Panels,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/createPanel',
             name: 'Create Panel',
             component: CreatePanel,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/editPanel',
             name: 'Edit Panel',
             component: EditPanel,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/active-devices',
             name: 'Active Devices',
             component: ActiveDevices,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/passive-devices',
             name: 'Passive Devices',
             component: PassiveDevices,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/gateways',
             name: 'Gateways',
             component: Gateways,
             route: PrivateRoute,
+            visibility: true,
         },
         {
             path: '/settings/account',
             name: 'Account Settings',
             component: AccountSettings,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/buildings',
             name: 'Buildings',
             component: Buildings,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/roles',
             name: 'Roles',
             component: Roles,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/user-profile',
             name: 'User Profile',
             component: UserProfile,
             route: PrivateRoute,
+            visibility: false,
         },
         {
             path: '/settings/role-config',
             name: 'Single Role',
             component: SingleRole,
             route: PrivateRoute,
+            visibility: false,
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -557,23 +599,19 @@ const settingsRoutes = {
 };
 
 const exploreRoutes = {
-    path: '/explore',
     name: 'Explore',
-    children: [
-        {
-            path: '/explore/by-floor',
-            name: 'Explore',
-            component: Explore,
-            route: PrivateRoute,
-        },
-    ],
+    path: '/explore',
+    component: Explore,
+    route: PrivateRoute,
+    visibility: true,
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
 };
 
 const controlRoutes = {
-    path: '/control',
+    path: '/control/plug-rules',
     name: 'Control',
+    visibility: true,
     children: [
         {
             path: '/control/plug-rules',
@@ -581,6 +619,7 @@ const controlRoutes = {
             component: PlugRules,
             component: PlugRules,
             route: PrivateRoute,
+            visibility: true,
         },
     ],
     icon: FeatherIcon.ToggleRight,
@@ -665,73 +704,78 @@ const tableRoutes = {
 const authRoutes = {
     path: '/account',
     name: 'Auth',
+    visibility: true,
     children: [
         {
             path: '/account/login',
             name: 'Login',
             component: Login,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/logout',
             name: 'Logout',
             component: Logout,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/register',
             name: 'Register',
             component: Register,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/confirm',
             name: 'Confirm',
             component: Confirm,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/forget-password',
             name: 'Forget Password',
             component: ForgetPassword,
             route: Route,
+            visibility: true,
         },
     ],
 };
 
 // flatten the list of all nested routes
 const flattenRoutes = (routes) => {
-    console.log('routes => ', routes);
+    console.log('Sudhanshu routes before forEach => ', routes);
     let flatRoutes = [];
 
     routes = routes || [];
     routes.forEach((item) => {
         flatRoutes.push(item);
-
         if (typeof item.children !== 'undefined') {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
-    console.log('routes after forEach => ', flatRoutes);
+    console.log('Sudhanshu routes after forEach => ', flatRoutes);
     return flatRoutes;
 };
 
 // All routes
 const allRoutes = [
     rootRoute,
+    authRoutes,
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
-    buildingRoutes,
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    // buildingRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
     // formsRoutes,
     // tableRoutes,
-    authRoutes,
 ];
 
 const authProtectedRoutes = [

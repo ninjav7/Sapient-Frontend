@@ -251,6 +251,7 @@ const PortfolioOverview = () => {
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
+            foreColor: '#3b70bf',
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],

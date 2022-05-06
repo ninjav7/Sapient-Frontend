@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // stacked bar chart
-const BrushChart = () => {
+const BrushChart = ({ optionsData = {}, seriesData = [], optionsLineData = {}, seriesLineData = [] }) => {
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -42,12 +42,6 @@ const BrushChart = () => {
         min: 30,
         max: 90,
     });
-
-    // const [series, setSeries] = useState([
-    //     {
-    //         data: data,
-    //     },
-    // ]);
 
     const [series, setSeries] = useState([
         {
@@ -131,15 +125,22 @@ const BrushChart = () => {
         },
     });
 
+    useEffect(() => {
+        console.log('series Data 1 => ', data);
+        console.log('series Data 2 => ', data1);
+    });
+
     return (
         <Card>
             <CardBody>
                 <div id="wrapper">
                     <div id="chart-line2">
                         <ReactApexChart options={options} series={series} type="line" height={230} />
+                        {/* <ReactApexChart options={optionsData} series={seriesData} type="line" height={230} /> */}
                     </div>
                     <div id="chart-line">
                         <ReactApexChart options={optionsLine} series={seriesLine} type="area" height={130} />
+                        {/* <ReactApexChart options={optionsLineData} series={seriesLineData} type="area" height={130} /> */}
                     </div>
                 </div>
             </CardBody>
