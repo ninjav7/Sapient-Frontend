@@ -13,12 +13,15 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { BuildingStore } from '../../../components/BuildingStore';
 import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
+import { BaseUrl, getLocation } from '../../../services/Network';
 import '../style.css';
 
 const CreatePanel = () => {
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [breakersCount, setBreakersCount] = useState([
         { serialNo: 1, name: '' },
         { serialNo: 2, name: '' },
@@ -69,6 +72,7 @@ const CreatePanel = () => {
         { serialNo: 47, name: '' },
         { serialNo: 48, name: '' },
     ]);
+    const [locationData, setLocationData] = useState([]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -85,6 +89,27 @@ const CreatePanel = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        const fetchLocationData = async () => {
+            try {
+                if (bldgId) {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                        console.log(res);
+                        setLocationData(res.data);
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+        fetchLocationData();
+    }, [bldgId]);
 
     return (
         <React.Fragment>
@@ -134,7 +159,12 @@ const CreatePanel = () => {
                             <Label for="location" className="card-title">
                                 Location
                             </Label>
-                            <Input type="text" name="location" id="useLocation" placeholder="Select Location" />
+                            <Input type="select" name="state" id="userState" className="font-weight-bold">
+                                <option>None</option>
+                                {locationData.map((location) => {
+                                    return <option value={location.id}>{location.location_name}</option>;
+                                })}
+                            </Input>
                         </FormGroup>
                     </div>
                 </Col>

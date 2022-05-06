@@ -9,8 +9,12 @@ const DonutChart = ({ donutChartOpts, donutChartData, height, title }) => {
     const [options, setOptions] = useState({});
 
     useEffect(() => {
-        setSeries(donutChartData);
-        setOptions(donutChartOpts);
+        if (donutChartOpts) {
+            setOptions(donutChartOpts);
+        }
+        if (donutChartData) {
+            setSeries(donutChartData);
+        }
     }, [donutChartOpts, donutChartData]);
 
     return (

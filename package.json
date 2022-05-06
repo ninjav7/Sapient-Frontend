@@ -29,6 +29,7 @@
         "jwt-decode": "^2.2.0",
         "leaflet": "^1.7.1",
         "metismenujs": "^1.1.0",
+        "moment": "^2.29.3",
         "plotly.js": "^2.11.1",
         "pullstate": "^1.24.0",
         "rc-progress": "^3.2.4",

@@ -2,20 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
-import DoughnutChart from '../charts/DoughnutChart';
+// import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
-import MapChart from '../charts/MapChart';
+// import MapChart from '../charts/MapChart';
 import SimpleMaps from '../charts/SimpleMaps';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
 import axios from 'axios';
-import { BaseUrl, portfolioBuilidings, portfolioEndUser, portfolioOverall, getBuilding } from '../../services/Network';
+import {
+    BaseUrl,
+    portfolioBuilidings,
+    portfolioEndUser,
+    portfolioOverall,
+    getBuilding,
+    getEnergyConsumption,
+} from '../../services/Network';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../components/DateRangeStore';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { TailSpin } from 'react-loader-spinner';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+// import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
@@ -28,6 +35,8 @@ const PortfolioOverview = () => {
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -227,7 +236,7 @@ const PortfolioOverview = () => {
     });
 
     // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
-    const [donutChartData, setDonutChartData] = useState([]);
+    const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
@@ -336,6 +345,119 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     useEffect(() => {
+        const portfolioOverallData = async () => {
+            if (startDate !== null) {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    await axios
+                        .post(
+                            `${BaseUrl}${portfolioOverall}`,
+                            {
+                                // date_from: '2022-04-20',
+                                // date_to: '2022-04-27',
+                                date_from: dateFormatHandler(startDate),
+                                date_to: dateFormatHandler(endDate),
+                            },
+                            { headers }
+                        )
+                        .then((res) => {
+                            setOveralldata(res.data);
+                            console.log('setOveralldata => ', res.data);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    setIsProcessing(false);
+                    console.log('Failed to fetch Portfolio Overall Data');
+                }
+            }
+        };
+
+        const portfolioEndUsesData = async () => {
+            if (startDate !== null) {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    await axios
+                        .post(
+                            `${BaseUrl}${portfolioEndUser}`,
+                            {
+                                date_from: dateFormatHandler(startDate),
+                                date_to: dateFormatHandler(endDate),
+                            },
+                            { headers }
+                        )
+                        .then((res) => {
+                            setenergyConsumption(res.data);
+                            const energyData = res.data;
+                            let newDonutData = [];
+                            energyData.forEach((record) => {
+                                let fixedConsumption = record.energy_consumption.now;
+                                newDonutData.push(parseInt(fixedConsumption));
+                            });
+                            setDonutChartData(newDonutData);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    setIsProcessing(false);
+                    alert('Failed to fetch Portfolio EndUses Data');
+                }
+            }
+        };
+
+        const energyConsumptionData = async () => {
+            if (startDate !== null) {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    let params = '?aggregate=day';
+                    await axios
+                        .post(
+                            `${BaseUrl}${getEnergyConsumption}${params}`,
+                            {
+                                date_from: dateFormatHandler(startDate),
+                                date_to: dateFormatHandler(endDate),
+                            },
+                            { headers }
+                        )
+                        .then((res) => {
+                            setEnergyConsumptionChart(res.data);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    setIsProcessing(false);
+                    alert('Failed to fetch Energy Consumption Data');
+                }
+            }
+        };
+
+        setIsProcessing(true);
+        portfolioOverallData();
+        portfolioEndUsesData();
+        energyConsumptionData();
+        setIsProcessing(false);
+    }, [startDate, endDate]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Portfolio Overview',
+                        path: '/energy/portfolio/overview',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+
         const getBuildingData = async () => {
             try {
                 let headers = {
@@ -349,35 +471,6 @@ const PortfolioOverview = () => {
                 console.log(error);
                 setIsProcessing(false);
                 alert('Failed to fetch Building Data');
-            }
-        };
-
-        const portfolioOverallData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioOverall}`,
-                        {
-                            // date_from: '2022-04-20',
-                            // date_to: '2022-04-27',
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setOveralldata(res.data);
-                        console.log('setOveralldata => ', res.data);
-                    });
-            } catch (error) {
-                console.log(error);
-                setIsProcessing(false);
-                // alert('Failed to fetch Portfolio Overall Data');
-                console.log('Failed to fetch Portfolio Overall Data');
             }
         };
 
@@ -398,64 +491,10 @@ const PortfolioOverview = () => {
             }
         };
 
-        const portfolioEndUsesData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioEndUser}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setenergyConsumption(res.data);
-                        const energyData = res.data;
-                        let newArray = [];
-                        energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
-                            newArray.push(parseInt(fixedConsumption));
-                        });
-                        console.log('newArray => ', newArray);
-                        console.log('newArray Type => ', typeof newArray[0]);
-                        setDonutChartData(newArray);
-                        console.log('setDonutChartData => ', res.data);
-                    });
-            } catch (error) {
-                console.log(error);
-                setIsProcessing(false);
-                alert('Failed to fetch Portfolio EndUses Data');
-            }
-        };
-
-        setIsProcessing(true);
         getBuildingData();
-        portfolioOverallData();
-        portfolioBuilidingsData();
-        portfolioEndUsesData();
-        setIsProcessing(false);
-    }, [startDate, endDate]);
-
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Portfolio Overview',
-                        path: '/energy/portfolio/overview',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-        };
         updateBreadcrumbStore();
-    }, [startDate, endDate]);
+        portfolioBuilidingsData();
+    }, []);
 
     return (
         <React.Fragment>

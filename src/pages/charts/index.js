@@ -290,7 +290,7 @@ const ApexChart = () => {
 
             <Row>
                 <Col xl={6}>
-                    <DonutChart options={apexDonutOpts} series={apexDonutData} height={320} title="Donut Chart" />
+                    <DonutChart donutChartOpts={apexDonutOpts} donutChartData={apexDonutData} height={320} title="Donut Chart" />
                 </Col>
 
                 <Col xl={6}>

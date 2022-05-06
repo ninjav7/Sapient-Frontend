@@ -20,7 +20,7 @@ import { ChevronDown, Search } from 'react-feather';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import './style.css';
 
-const PassiveDevicesTable = ({ passiveDeviceData }) => {
+const PassiveDevicesTable = ({ deviceData }) => {
     const records = [
         {
             status: 'available',
@@ -49,15 +49,10 @@ const PassiveDevicesTable = ({ passiveDeviceData }) => {
                             <th>Model</th>
                             <th>Location</th>
                             <th>Sensors</th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {passiveDeviceData.map((record, index) => {
+                        {deviceData.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <td scope="row" className="text-center">
@@ -92,11 +87,14 @@ const PassiveDevices = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [buildingId, setBuildingId] = useState(1);
+    const [selectedTab, setSelectedTab] = useState(0);
+
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
+    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
 
     useEffect(() => {
-        const fetchActiveDeviceData = async () => {
+        const fetchPassiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -108,10 +106,44 @@ const PassiveDevices = () => {
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Active devices');
+                console.log('Failed to fetch all Passive devices');
             }
         };
-        fetchActiveDeviceData();
+        const fetchOnlineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=true`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    setOnlineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Online devices');
+            }
+        };
+        const fetchOfflineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=false`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    setOfflineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Offline devices');
+            }
+        };
+        fetchPassiveDeviceData();
+        fetchOnlineDeviceData();
+        fetchOfflineDeviceData();
     }, []);
 
     useEffect(() => {
@@ -174,19 +206,37 @@ const PassiveDevices = () => {
                         <div>
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}>
+                                className={
+                                    selectedTab === 0
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
+                                onClick={() => setSelectedTab(0)}>
                                 All Statuses
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline" style={{ borderRadius: '0px' }}>
+                            <button
+                                type="button"
+                                className={
+                                    selectedTab === 1
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderRadius: '0px' }}
+                                onClick={() => setSelectedTab(1)}>
                                 <i className="uil uil-wifi mr-1"></i>Online
                             </button>
 
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}>
+                                className={
+                                    selectedTab === 2
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
+                                onClick={() => setSelectedTab(2)}>
                                 <i className="uil uil-wifi-slash mr-1"></i>Offline
                             </button>
                         </div>
@@ -216,8 +266,10 @@ const PassiveDevices = () => {
             </Row>
 
             <Row>
-                <Col lg={12}>
-                    <PassiveDevicesTable passiveDeviceData={passiveDeviceData} />
+                <Col lg={8}>
+                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData} />}
+                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData} />}
+                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData} />}
                 </Col>
             </Row>
 
