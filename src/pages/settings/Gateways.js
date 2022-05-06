@@ -102,21 +102,26 @@ const GatewaysTable = ({ generalGatewayData }) => {
 };
 
 const Gateways = () => {
-    const [buildingId, setBuildingId] = useState(1);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchGatewayData = async () => {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            };
+            await axios
+                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .then((res) => {
+                    setGeneralGatewayData(res.data);
+                    console.log(res.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    console.log('Failed to fetch Gateway data');
+                });
         };
-        axios
-            .post(`${BaseUrl}${generalGateway}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setGeneralGatewayData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
+        fetchGatewayData();
     }, []);
 
     return (

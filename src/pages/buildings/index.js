@@ -15,11 +15,12 @@ import {
     builidingAlerts,
     builidingEquipments,
     builidingHourly,
-    builidingOverview,
+    getEnergyConsumption,
     builidingPeak,
     portfolioEndUser,
     portfolioOverall,
 } from '../../services/Network';
+import moment from 'moment';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -28,6 +29,7 @@ import './style.css';
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
+
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -44,6 +46,9 @@ const BuildingOverview = () => {
             old: 0,
         },
     });
+
+    const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
+
     // const [buildingAlert, setBuildingAlerts] = useState([
     //     {
     //         type: 'string',
@@ -370,8 +375,13 @@ const BuildingOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMM-dd');
+                    return opts.dateFormatter(new Date(timestamp), 'MMMdd');
                 },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
@@ -383,6 +393,11 @@ const BuildingOverview = () => {
                     }
                     return val;
                 },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
     });
@@ -1019,8 +1034,6 @@ const BuildingOverview = () => {
                             },
                         ];
 
-                        console.log('data => ', data);
-
                         for (let i = 1; i <= 24; i++) {
                             let matchedRecord = data.find((record) => record.x === i);
 
@@ -1043,12 +1056,53 @@ const BuildingOverview = () => {
             }
         };
 
+        const buildingConsumptionChart = async () => {
+            if (startDate !== null) {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                    };
+                    let params = `?aggregate=day&building_id=${bldgId}`;
+                    await axios
+                        .post(
+                            `${BaseUrl}${getEnergyConsumption}${params}`,
+                            {
+                                date_from: dateFormatHandler(startDate),
+                                date_to: dateFormatHandler(endDate),
+                            },
+                            { headers }
+                        )
+                        .then((res) => {
+                            let response = res.data;
+                            let newArray = [
+                                {
+                                    data: [],
+                                },
+                            ];
+                            response.forEach((record) => {
+                                newArray[0].data.push({
+                                    x: moment(record.x).format('MMM D'),
+                                    y: record.y.toFixed(2),
+                                });
+                            });
+                            console.log('newArray => ', newArray);
+                            setBuildingConsumptionChart(newArray);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    alert('Failed to fetch Building Consumption Chart');
+                }
+            }
+        };
+
         buildingOverallData();
         buildingEndUserData();
         buildingAlertsData();
         buildingPeaksData();
         builidingEquipmentsData();
         builidingHourlyData();
+        buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -1066,11 +1120,6 @@ const BuildingOverview = () => {
         };
         updateBreadcrumbStore();
     }, []);
-
-    useEffect(() => {
-        console.log('startDate => ', dateFormatHandler(startDate));
-        console.log('endDate => ', dateFormatHandler(endDate));
-    });
 
     return (
         <React.Fragment>
@@ -1786,7 +1835,7 @@ const BuildingOverview = () => {
                         <h6 className="card-title custom-title">Total Energy Consumption</h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
                         <div className="total-eng-consumtn">
-                            <LineChart options={lineChartOptions} series={lineChartSeries} />
+                            <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
                         </div>
                     </div>
                 </Col>

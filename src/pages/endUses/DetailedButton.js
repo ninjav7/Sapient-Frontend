@@ -9,7 +9,7 @@ const DetailedButton = (props) => {
                 <div>
                     <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
                     <UncontrolledTooltip placement="bottom" target="#title">
-                        Information ToolTips
+                        Total energy consumption accross all your buildings for the past 30 days.
                     </UncontrolledTooltip>
                 </div>
             </h5>

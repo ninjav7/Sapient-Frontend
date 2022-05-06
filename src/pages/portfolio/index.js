@@ -10,6 +10,7 @@ import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
 import axios from 'axios';
+import moment from 'moment';
 import {
     BaseUrl,
     portfolioBuilidings,
@@ -203,8 +204,13 @@ const PortfolioOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMM-dd');
+                    return opts.dateFormatter(new Date(timestamp), 'MMMdd');
                 },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
@@ -216,6 +222,11 @@ const PortfolioOverview = () => {
                     }
                     return val;
                 },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
     });
@@ -427,7 +438,21 @@ const PortfolioOverview = () => {
                             { headers }
                         )
                         .then((res) => {
-                            setEnergyConsumptionChart(res.data);
+                            // console.log('energyConsumptionChart => ', res.data);
+                            let response = res.data;
+                            let newArray = [
+                                {
+                                    data: [],
+                                },
+                            ];
+                            response.forEach((record) => {
+                                newArray[0].data.push({
+                                    x: moment(record.x).format('MMM D'),
+                                    y: record.y.toFixed(2),
+                                });
+                            });
+                            console.log('newArray => ', newArray);
+                            setEnergyConsumptionChart(newArray);
                         });
                 } catch (error) {
                     console.log(error);
@@ -732,7 +757,7 @@ const PortfolioOverview = () => {
                             <div className="card-body">
                                 <h6 className="card-title custom-title">Energy Consumption History</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals by Day</h6>
-                                <LineChart options={lineChartOptions} series={lineChartSeries} />
+                                <LineChart options={lineChartOptions} series={energyConsumptionChart} />
                             </div>
                         </Col>
                     </Row>

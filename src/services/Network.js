@@ -36,7 +36,8 @@ export const generalActiveDevices = '/api/config/devices/active';
 export const generalPassiveDevices = '/api/config/devices/passive';
 
 //gateway
-export const generalGateway = '/api/config/gateway/equipments_details';
+// export const generalGateway = '/api/config/gateway/equipments_details';
+export const generalGateway = '/api/config/gateway';
 
 // panel
 export const generalPanels = '/api/config/panels';
