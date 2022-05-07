@@ -10,6 +10,7 @@ import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { DateRangeStore } from '../../components/DateRangeStore';
+import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {
 //     return (
@@ -47,7 +48,9 @@ const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
     return (
         <>
             {/* <h5 className="card-title card-title-style">{`March 3rd @ 3:20 PM`}&nbsp;&nbsp;</h5> */}
-            <h5 className="card-title card-title-style">{`${recordDate} @ ${recordTime}`}&nbsp;&nbsp;</h5>
+            <h5 className="card-title card-title-style">
+                {`${moment(recordDate).format('MMMM Do')} @ ${recordTime}`}&nbsp;&nbsp;
+            </h5>
             <p className="card-text card-content-style">
                 {buildingPeakData.overall_energy_consumption.toLocaleString(undefined, {
                     maximumFractionDigits: 2,

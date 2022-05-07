@@ -23,6 +23,7 @@ export const generalOperatingHours = '/api/config/general/operating_hours';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
+export const endUsesChart = '/api/energy/chart/end-uses';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details';

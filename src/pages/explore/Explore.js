@@ -12,6 +12,7 @@ import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
 import { BaseUrl, getExplore } from '../../services/Network';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -268,6 +269,33 @@ const BuildingPeakTable = () => {
 const Explore = () => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+
+    const customDaySelect = [
+        {
+            label: 'Last 30 Days',
+            value: 30,
+        },
+        {
+            label: 'Last 7 Days',
+            value: 7,
+        },
+        {
+            label: 'Last 5 Days',
+            value: 5,
+        },
+        {
+            label: 'Last 3 Days',
+            value: 3,
+        },
+        {
+            label: 'Last 1 Day',
+            value: 1,
+        },
+    ];
+
+    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
+    const [dateFilter, setDateFilter] = useState(dateValue);
+
     const TABS = {
         Tab1: '24 Hours',
         Tab2: '7 Days',
@@ -294,7 +322,7 @@ const Explore = () => {
         { value: 'Location Type', label: 'Location Type' },
     ]);
 
-    const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0].value);
+    const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -333,7 +361,41 @@ const Explore = () => {
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
-    const [optionsLineData, setOptionsLineData] = useState({});
+    const [optionsLineData, setOptionsLineData] = useState({
+        chart: {
+            id: 'chart1',
+            height: 130,
+            type: 'area',
+            brush: {
+                target: 'chart2',
+                enabled: true,
+            },
+            selection: {
+                enabled: true,
+                xaxis: {
+                    min: new Date('25 April 2022').getTime(),
+                    max: new Date('26 April 2022').getTime(),
+                },
+            },
+        },
+        colors: ['#008FFB'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.91,
+                opacityTo: 0.1,
+            },
+        },
+        xaxis: {
+            type: 'datetime',
+            tooltip: {
+                enabled: false,
+            },
+        },
+        yaxis: {
+            tickAmount: 2,
+        },
+    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -373,6 +435,11 @@ const Explore = () => {
                     });
                     console.log('exploreData => ', exploreData);
                     setSeriesData(exploreData);
+                    setSeriesLineData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
                 });
             } catch (error) {
                 console.log(error);
@@ -383,18 +450,29 @@ const Explore = () => {
     }, [activeExploreOpt]);
 
     useEffect(() => {
-        console.log('activeExploreOpt => ', activeExploreOpt);
-        console.log('seriesData => ', seriesData);
-    });
+        const setCustomDate = (date) => {
+            let endCustomDate = new Date(); // today
+            let startCustomDate = new Date();
+            startCustomDate.setDate(startCustomDate.getDate() - date);
+            setDateRange([startCustomDate, endCustomDate]);
+            DateRangeStore.update((s) => {
+                s.dateFilter = date;
+                s.startDate = startCustomDate;
+                s.endDate = endCustomDate;
+            });
+        };
+        setCustomDate(dateFilter);
+    }, [dateFilter]);
 
     return (
         <React.Fragment>
+            {/* Explore Header  */}
             <Row className="page-title">
                 <Col className="header-container ml-4">
                     <div>
                         <Select
                             className="react-select explorer-select-style"
-                            onChange={(e) => setActiveExploreOpt(e.value)}
+                            onChange={(e) => setActiveExploreOpt(e)}
                             classNamePrefix="react-select"
                             placeholderText="p"
                             options={exploreOpts.map((record, index) => {
@@ -402,7 +480,9 @@ const Explore = () => {
                                     value: record.value,
                                     label: record.label,
                                 };
-                            })}></Select>
+                            })}
+                            defaultValue={exploreOpts[0]}
+                        />
                     </div>
 
                     <div
@@ -423,28 +503,31 @@ const Explore = () => {
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
-                                style={{ display: 'inline-block' }}>
+                                style={{ display: 'inline-block', width: 'fit-content' }}>
                                 {metric.map((record, index) => {
                                     return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         </div>
 
-                        <div className="ml-2">
+                        <div>
                             <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
-                                style={{ color: 'black', fontWeight: 'bold', width: 'auto' }}
-                                className="select-button form-control form-control-md">
-                                <option className="mb-0">Last 7 Days</option>
-                                <option>Last 5 Days</option>
-                                <option>Last 3 Days</option>
-                                <option>Last 1 Day</option>
+                                style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
+                                className="select-button form-control form-control-md"
+                                onChange={(e) => {
+                                    setDateFilter(e.target.value);
+                                }}
+                                defaultValue={dateFilter}>
+                                {customDaySelect.map((el, index) => {
+                                    return <option value={el.value}>{el.label}</option>;
+                                })}
                             </Input>
                         </div>
 
-                        <div className="mr-2">
+                        <div>
                             <DatePicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -465,29 +548,35 @@ const Explore = () => {
                 </Col>
             </Row>
 
-            {activeExploreOpt === 'No Grouping' && (
+            {/* Explore Body  */}
+            {activeExploreOpt.value === 'No Grouping' && (
                 <>
-                    <BrushChart />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
                         <Col lg={10} className="ml-2">
-                            <ExploreTable seriesData={seriesData} optionsData={optionsData} />
+                            <ExploreTable />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt === 'End Use' && (
+            {activeExploreOpt.value === 'End Use' && (
                 <>
-                    <BrushChart />
+                    <BrushChart seriesData={seriesData} optionsData={optionsData} />
                     <Row>
                         <Col lg={10} className="ml-2">
-                            <ExploreTable seriesData={seriesData} optionsData={optionsData} />
+                            <ExploreTable />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt === 'Equipment Type' && (
+            {activeExploreOpt.value === 'Equipment Type' && (
                 <>
                     <BrushChart />
                     <Row>
@@ -498,7 +587,7 @@ const Explore = () => {
                 </>
             )}
 
-            {activeExploreOpt === 'Floor' && (
+            {activeExploreOpt.value === 'Floor' && (
                 <>
                     <BrushChart />
                     <Row>
@@ -509,7 +598,7 @@ const Explore = () => {
                 </>
             )}
 
-            {activeExploreOpt === 'Location' && (
+            {activeExploreOpt.value === 'Location' && (
                 <>
                     <BrushChart />
                     <Row>
@@ -520,7 +609,7 @@ const Explore = () => {
                 </>
             )}
 
-            {activeExploreOpt === 'Location Type' && (
+            {activeExploreOpt.value === 'Location Type' && (
                 <>
                     <BrushChart />
                     <Row>

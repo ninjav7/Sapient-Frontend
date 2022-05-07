@@ -471,25 +471,27 @@ const BuildingOverview = () => {
     // ]);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([]);
 
-    const [topContributors, setTopContributors] = useState([
-        {
-            timeRange: {
-                frm: 'yyy-mm-dd',
-                to: 'yyy-mm-dd',
-            },
-            overall_energy_consumption: 0,
-            top_contributors: [
-                {
-                    equipment_id: 0,
-                    equipment_name: 'string',
-                    energy_consumption: {
-                        now: 0,
-                        ol: 0,
-                    },
-                },
-            ],
-        },
-    ]);
+    // const [topContributors, setTopContributors] = useState([
+    //     {
+    //         timeRange: {
+    //             frm: 'yyy-mm-dd',
+    //             to: 'yyy-mm-dd',
+    //         },
+    //         overall_energy_consumption: 0,
+    //         top_contributors: [
+    //             {
+    //                 equipment_id: 0,
+    //                 equipment_name: 'string',
+    //                 energy_consumption: {
+    //                     now: 0,
+    //                     ol: 0,
+    //                 },
+    //             },
+    //         ],
+    //     },
+    // ]);
+
+    const [topContributors, setTopContributors] = useState([]);
 
     const weekDaysOptions = {
         chart: {
@@ -1774,8 +1776,8 @@ const BuildingOverview = () => {
                                     <div className="card-body">
                                         <h6
                                             className="card-title text-muted peak-demand-card-style"
-                                            style={{ margin: '2px', marginLeft: '5px' }}>
-                                            {item.timeRange.frm.slice(0, 10)} @{' '}
+                                            style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
+                                            {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
                                             {new Date(item.timeRange.frm).toLocaleTimeString('en', {
                                                 timeStyle: 'short',
                                                 hour12: true,
@@ -1805,7 +1807,7 @@ const BuildingOverview = () => {
                                                     </td>
                                                     <td className="peak-table-content-two">
                                                         {item.top_contributors.map((el2) => (
-                                                            <tr>
+                                                            <tr style={{ fontSize: 12 }}>
                                                                 <div className="">
                                                                     {el2.energy_consumption.now.toLocaleString(
                                                                         undefined,

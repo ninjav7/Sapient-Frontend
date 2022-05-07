@@ -255,9 +255,10 @@
     color: #667085;
     font-family: 'Inter';
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     line-height: 20px;
+    margin-bottom: 0.2vw !important;
 }
 
 .peak-card-label {

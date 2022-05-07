@@ -118,7 +118,6 @@ const Buildings = () => {
                 };
                 await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                     setBuildingsData(res.data);
-                    // console.log('buildingData Sudhanshu => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
