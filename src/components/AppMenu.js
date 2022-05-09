@@ -46,9 +46,10 @@ const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activat
     );
 };
 
+// Side Nav Bar
 const MenuItem = ({ item, className, linkClassName }) => {
     useEffect(() => {
-        console.log('MenuItem => ', item);
+        console.log('Side Nav Bar => ', item);
     });
 
     return (
@@ -58,8 +59,14 @@ const MenuItem = ({ item, className, linkClassName }) => {
     );
 };
 
+// Top Nav Bar
 const MenuItemLink = ({ item, className }) => {
     const Icon = item.icon || null;
+
+    useEffect(() => {
+        console.log('Top Nav Bar => ', item);
+    });
+
     return (
         <Link to={item.path} className={classNames('side-nav-link-ref', 'side-sub-nav-link', className)}>
             {item.icon && <Icon />}

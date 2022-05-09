@@ -625,7 +625,12 @@ const PortfolioOverview = () => {
                                             to={{
                                                 pathname: `/energy/building/overview/${item.buildingID}`,
                                             }}>
-                                            <div className="progress-bar-container mt-4">
+                                            <div
+                                                className="progress-bar-container mt-4"
+                                                onClick={() => {
+                                                    localStorage.setItem('buildingId', item.buildingID);
+                                                    localStorage.setItem('buildingName', item.buildingName);
+                                                }}>
                                                 <ProgressBar
                                                     color="danger"
                                                     progressValue={(item.density / 2) * 100}

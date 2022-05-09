@@ -296,30 +296,13 @@ const Explore = () => {
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
 
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
-    // const exploreOpts = {
-    //     Opts1: 'No Grouping',
-    //     Opts2: 'End Use',
-    //     Opts3: 'Equipment Type',
-    //     Opts4: 'Floor',
-    //     Opts5: 'Location',
-    //     Opts6: 'Location Type',
-    // };
-
     const [exploreOpts, setExploreOpts] = useState([
-        { value: 'No Grouping', label: 'No Grouping' },
-        { value: 'End Use', label: 'End Use' },
-        { value: 'Equipment Type', label: 'Equipment Type' },
-        { value: 'Floor', label: 'Floor' },
-        { value: 'Location', label: 'Location' },
-        { value: 'Location Type', label: 'Location Type' },
+        { value: 'no-grouping', label: 'No Grouping' },
+        { value: 'enduses', label: 'End Use' },
+        { value: 'equipment', label: 'Equipment Type' },
+        { value: 'floor', label: 'Floor' },
+        { value: 'location', label: 'Location' },
+        { value: 'location-type', label: 'Location Type' },
     ]);
 
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
@@ -397,6 +380,8 @@ const Explore = () => {
         },
     });
 
+    const [exploreTableData, setExploreTableData] = useState([]);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -420,11 +405,13 @@ const Explore = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                 };
-                await axios.post(`${BaseUrl}${getExplore}`, { headers }).then((res) => {
-                    // console.log('exploreDataFetch => ', res.data);
-                    let fetchedData = res.data;
+                let params = `?filters=${activeExploreOpt.value}`;
+                await axios.get(`${BaseUrl}${getExplore}${params}`, { headers }).then((res) => {
+                    let responseData = res.data;
+                    setExploreTableData(responseData);
+                    let data = responseData;
                     let exploreData = [];
-                    fetchedData.forEach((record) => {
+                    data.forEach((record) => {
                         if (record.eq_name !== null) {
                             let recordToInsert = {
                                 name: record.eq_name,
@@ -549,7 +536,7 @@ const Explore = () => {
             </Row>
 
             {/* Explore Body  */}
-            {activeExploreOpt.value === 'No Grouping' && (
+            {activeExploreOpt.value === 'no-grouping' && (
                 <>
                     <BrushChart
                         seriesData={seriesData}
@@ -558,63 +545,88 @@ const Explore = () => {
                         optionsLineData={optionsLineData}
                     />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt.value === 'End Use' && (
+            {activeExploreOpt.value === 'enduses' && (
                 <>
-                    <BrushChart seriesData={seriesData} optionsData={optionsData} />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt.value === 'Equipment Type' && (
+            {activeExploreOpt.value === 'equipment' && (
                 <>
-                    <BrushChart />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt.value === 'Floor' && (
+            {activeExploreOpt.value === 'floor' && (
                 <>
-                    <BrushChart />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt.value === 'Location' && (
+            {activeExploreOpt.value === 'location' && (
                 <>
-                    <BrushChart />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>
             )}
 
-            {activeExploreOpt.value === 'Location Type' && (
+            {activeExploreOpt.value === 'location-type' && (
                 <>
-                    <BrushChart />
+                    <BrushChart
+                        seriesData={seriesData}
+                        optionsData={optionsData}
+                        seriesLineData={seriesLineData}
+                        optionsLineData={optionsLineData}
+                    />
                     <Row>
-                        <Col lg={10} className="ml-2">
-                            <ExploreTable />
+                        <Col lg={12} className="ml-2">
+                            <ExploreTable exploreTableData={exploreTableData} />
                         </Col>
                     </Row>
                 </>

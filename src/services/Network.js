@@ -9,7 +9,8 @@ export const portfolioEndUser = '/api/energy/portfolio/end-user';
 export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
-export const builidingHourly = '/api/energy/building/hourly';
+// export const builidingHourly = '/api/energy/building/hourly'; --- mockAPI
+export const builidingHourly = '/api/energy/chart';
 export const builidingEquipments = '/api/energy/building/equipment';
 
 // utility bills
@@ -67,3 +68,6 @@ export const getEnergyConsumption = '/api/energy/chart';
 
 // explore
 export const getExplore = '/api/energy/explorer/chart';
+
+// peakDemand Chart
+export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';

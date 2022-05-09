@@ -3,6 +3,7 @@ import { Row, Col, Input } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { DateRangeStore } from './DateRangeStore';
+import { Link } from 'react-router-dom';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
@@ -132,9 +133,14 @@ const Header = (props) => {
                             </div> */}
                         {props.title !== 'Portfolio Overview' && (
                             <div className="float-right ml-2">
-                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                    <i className="uil uil-pen mr-1"></i>Explore
-                                </button>
+                                <Link
+                                    to={{
+                                        pathname: `/energy/building-peak-explore/${localStorage.getItem('buildingId')}`,
+                                    }}>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                                        <i className="uil uil-pen mr-1"></i>Explore
+                                    </button>
+                                </Link>
                             </div>
                         )}
                     </div>

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
 import { Link, useParams } from 'react-router-dom';
-import { BaseUrl, builidingPeak } from '../../services/Network';
+import { BaseUrl, builidingPeak, peakDemandTrendChart } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
@@ -243,6 +243,113 @@ const PeakDemand = () => {
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
 
+    const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        annotations: {
+            yaxis: [
+                {
+                    y: 8200,
+                    borderColor: '#0acf97',
+                    label: {
+                        borderColor: '#0acf97',
+                        style: {
+                            color: '#fff',
+                            background: '#0acf97',
+                        },
+                    },
+                },
+            ],
+            xaxis: [
+                {
+                    x: new Date('23 Nov 2017').getTime(),
+                    borderColor: '#775DD0',
+                    label: {
+                        borderColor: '#775DD0',
+                        style: {
+                            color: '#fff',
+                            background: '#775DD0',
+                        },
+                    },
+                },
+                {
+                    x: new Date('03 Dec 2017').getTime(),
+                    borderColor: '#ffbc00',
+                    label: {
+                        borderColor: '#ffbc00',
+                        style: {
+                            color: '#fff',
+                            background: '#ffbc00',
+                        },
+                        orientation: 'horizontal',
+                    },
+                },
+            ],
+        },
+        chart: {
+            type: 'line',
+            toolbar: {
+                show: false,
+            },
+        },
+        labels: [],
+        colors: ['#39afd1'],
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: [3, 3],
+            curve: 'smooth',
+        },
+        xaxis: {
+            // type: 'datetime',
+            labels: {
+                labels: {
+                    format: 'ddd',
+                },
+            },
+            // categories: ['Week 1', 'Week 3', 'Week 5'],
+        },
+        yaxis: {
+            labels: {
+                formatter: function (val) {
+                    return val + 'K';
+                },
+            },
+        },
+        grid: {
+            row: {
+                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.2,
+            },
+            borderColor: '#e9ecef',
+        },
+        responsive: [
+            {
+                breakpoint: 600,
+                options: {
+                    chart: {
+                        toolbar: {
+                            show: false,
+                        },
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+    });
+
+    const [peakDemandTrendData, setPeakDemandTrendData] = useState([
+        {
+            name: 'Peak for Time Period',
+            data: [],
+        },
+    ]);
+
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
             equipment: 'AHU 1',
@@ -373,7 +480,40 @@ const PeakDemand = () => {
                 console.log('Failed to fetch Building Peak Data');
             }
         };
+
+        const peakDemandTrendFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${peakDemandTrendChart}${params}`, { headers }).then((res) => {
+                    let responseData = res.data;
+                    let newPeakData = [
+                        {
+                            name: 'Peak for Time Period',
+                            data: [],
+                        },
+                    ];
+                    let newData = [];
+                    let newDateLabels = [];
+                    responseData.map((record) => {
+                        newData.push(record.energy_consumption);
+                        newDateLabels.push(moment(record.date).format('LL'));
+                    });
+                    newPeakData[0].data = newData;
+                    setPeakDemandTrendData(newPeakData);
+                    setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Peak-Demand Trend Data');
+            }
+        };
+
         buildingPeaksData();
+        peakDemandTrendFetch();
     }, [startDate, endDate]);
 
     useEffect(() => {
@@ -588,7 +728,12 @@ const PeakDemand = () => {
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                 Max power draw (15 minute period)
                             </h6>
-                            <LineAnnotationChart title="" height={350} />
+                            <LineAnnotationChart
+                                title=""
+                                height={350}
+                                peakDemandTrendOptions={peakDemandTrendOptions}
+                                peakDemandTrendData={peakDemandTrendData}
+                            />
                         </CardBody>
                     </Card>
                 </Col>

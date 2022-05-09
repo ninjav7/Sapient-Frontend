@@ -28,7 +28,7 @@ import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
 
 const BuildingOverview = () => {
-    const { bldgId } = useParams();
+    const { bldgId = localStorage.getItem('buildingId') } = useParams();
 
     const [overview, setOverview] = useState({
         total_building: 0,
@@ -493,7 +493,7 @@ const BuildingOverview = () => {
 
     const [topContributors, setTopContributors] = useState([]);
 
-    const weekDaysOptions = {
+    const [weekDaysOptions, setWeekDaysOptions] = useState({
         chart: {
             type: 'heatmap',
             toolbar: {
@@ -529,27 +529,27 @@ const BuildingOverview = () => {
                     ranges: [
                         {
                             from: 0,
-                            to: 25,
+                            to: 1500,
                             color: '#9bb4da',
                         },
                         {
-                            from: 26,
-                            to: 50,
+                            from: 1501,
+                            to: 3000,
                             color: '#819dc9',
                         },
                         {
-                            from: 51,
-                            to: 100,
+                            from: 3001,
+                            to: 4500,
                             color: '#128FD9',
                         },
                         {
-                            from: 101,
-                            to: 150,
+                            from: 4501,
+                            to: 6000,
                             color: '#F87171',
                         },
                         {
-                            from: 151,
-                            to: 200,
+                            from: 6001,
+                            to: 7500,
                             color: '#FF0000',
                         },
                     ],
@@ -564,114 +564,13 @@ const BuildingOverview = () => {
         xaxis: {
             labels: {
                 show: true,
+                datetimeFormatter: {
+                    hour: 'HH',
+                },
             },
-            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
+            // categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
         },
-    };
-
-    // const weekdaysSeries = [
-    //     {
-    //         name: 'Weekdays',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    // ];
+    });
 
     const [weekDaysSeries, setWeekDaysSeries] = useState([
         {
@@ -1011,7 +910,7 @@ const BuildingOverview = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                 };
-                let params = `?building_id=${bldgId}&aggregate=${'hi'}`;
+                let params = `?building_id=${bldgId}&aggregate=${'hour'}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
@@ -1024,8 +923,8 @@ const BuildingOverview = () => {
                     .then((res) => {
                         const data = res.data.map((el) => {
                             return {
-                                x: parseInt(el.timestamp),
-                                y: el.energy_consumption,
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: el.y,
                             };
                         });
 
@@ -1038,8 +937,6 @@ const BuildingOverview = () => {
 
                         for (let i = 1; i <= 24; i++) {
                             let matchedRecord = data.find((record) => record.x === i);
-
-                            console.log('matchedRecord => ', matchedRecord);
 
                             if (matchedRecord) {
                                 newHeatMapData[0].data.push(matchedRecord);

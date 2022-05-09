@@ -63,7 +63,7 @@ const UsagePageTwo = () => {
                 let newList = [
                     {
                         label: 'End Uses',
-                        path: '/energy/end-uses',
+                        path: `/energy/end-uses/${localStorage.getItem('buildingId')}`,
                         active: false,
                     },
                     {

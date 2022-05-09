@@ -94,7 +94,10 @@ const BuildingTable = ({ buildingsData }) => {
                             return (
                                 <tr key={record.building_id}>
                                     <th scope="row">
-                                        <Link to="/energy/building/overview">
+                                        <Link
+                                            to={{
+                                                pathname: `/energy/building/overview/${record.building_id}`,
+                                            }}>
                                             <a className="building-name">{record.building_name}</a>
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>

@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // line chart with annotations
-const LineAnnotationChart = ({ title, height }) => {
+const LineAnnotationChart = ({ title, height, peakDemandTrendOptions, peakDemandTrendData }) => {
     const apexLineChartWithAnnotationOpts = {
         tooltip: {
             theme: 'dark',
@@ -164,8 +164,8 @@ const LineAnnotationChart = ({ title, height }) => {
             <CardBody>
                 <h4 className="header-title mt-0 mb-3">{title}</h4>
                 <Chart
-                    options={apexLineChartWithAnnotationOpts}
-                    series={apexLineChartWithAnnotationData}
+                    options={peakDemandTrendOptions}
+                    series={peakDemandTrendData}
                     height={height}
                     type="line"
                     className="apex-charts"

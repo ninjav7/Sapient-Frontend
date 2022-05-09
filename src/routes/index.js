@@ -464,7 +464,7 @@ const portfolioRoutes = {
             visibility: false,
         },
         {
-            path: '/energy/building-peak-explore',
+            path: '/energy/building-peak-explore/:bldgId',
             name: 'BuildingPeak Explore',
             component: ExploreBuildingPeak,
             route: PrivateRoute,
