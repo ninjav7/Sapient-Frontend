@@ -5,12 +5,18 @@ import DonutChart from '../charts/DonutChart';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { BaseUrl, endUses, energyUsage } from '../../services/Network';
+import { BaseUrl, endUses, energyUsage, hvacUsageChart } from '../../services/Network';
 import axios from 'axios';
-import { percentageHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { useParams } from 'react-router-dom';
+import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
+    const { bldgId } = useParams();
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
     const [endUsesData, setEndUsesData] = useState([]);
     const [endUsesTitle, setEndUsesTitle] = useState('');
 
@@ -67,7 +73,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         plotOptions: {
             bar: {
                 horizontal: false,
-                columnWidth: '40%',
+                columnWidth: '20%',
             },
         },
         dataLabels: {
@@ -77,25 +83,14 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
             show: false,
         },
         xaxis: {
-            categories: [
-                'Week 1',
-                'Week 2',
-                'Week 3',
-                'Week 4',
-                'Week 5',
-                'Week 6',
-                'Week 7',
-                'Week 8',
-                'Week 9',
-                'Week 10',
-            ],
+            categories: [],
         },
         yaxis: {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
                     if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
+                        val = (val / 1000).toFixed(0) + ' kWh';
                     }
                     return val;
                 },
@@ -105,7 +100,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + 'K';
+                    return val + 'kWh';
                 },
             },
             theme: 'dark',
@@ -124,34 +119,38 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
             position: 'top',
             horizontalAlign: 'center',
         },
-
         grid: {
             borderColor: '#f1f3fa',
         },
     });
-
-    const [barChartData, setBarChartData] = useState([
-        {
-            name: 'HVAC',
-            data: [15000, 14000, 12000, 11000, 12000, 14000, 12000, 11000, 12000, 10000],
-        },
-        {
-            name: 'Lighting',
-            data: [8000, 7000, 8000, 4000, 5000, 6000, 5000, 7000, 9000, 6000],
-        },
-        {
-            name: 'Plug',
-            data: [12000, 14000, 16000, 18000, 20000, 16000, 16000, 14000, 12000, 18000],
-        },
-        {
-            name: 'Other',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-    ]);
+    const [barChartData, setBarChartData] = useState([]);
+    // const [barChartData, setBarChartData] = useState([
+    //     {
+    //         name: 'HVAC',
+    //         data: [15000, 14000, 12000, 11000, 12000, 14000, 12000, 11000, 12000, 10000],
+    //     },
+    //     {
+    //         name: 'Lighting',
+    //         data: [8000, 7000, 8000, 4000, 5000, 6000, 5000, 7000, 9000, 6000],
+    //     },
+    //     {
+    //         name: 'Plug',
+    //         data: [12000, 14000, 16000, 18000, 20000, 16000, 16000, 14000, 12000, 18000],
+    //     },
+    //     {
+    //         name: 'Other',
+    //         data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    //     },
+    // ]);
 
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
+        },
+        legend: {
+            position: 'right',
+            offsetY: 0,
+            height: 230,
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -186,7 +185,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                         },
                         value: {
                             show: true,
-                            fontSize: '20px',
+                            fontSize: '15px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
                             color: 'red',
@@ -215,6 +214,11 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                             },
                         },
                     },
+                },
+                legend: {
+                    position: 'right',
+                    offsetY: 0,
+                    height: 230,
                 },
             },
         },
@@ -253,7 +257,20 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
         },
     });
 
-    const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
+    const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
+
+    const sortArrayOfObj = (arr) => {
+        let newArr = arr.sort((a, b) => a._id - b._id);
+        return newArr;
+    };
+
+    const formatData = (arr) => {
+        let newData = [];
+        sortArrayOfObj(arr).forEach((item) => {
+            newData.push(item.energy_consumption);
+        });
+        return newData;
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -281,46 +298,117 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
     }, []);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const energyUsesDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&end_uses_type=HVAC`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUses}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEndUsesData(res.data);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Enduses Data');
+            }
         };
-        const params = `?building_id=62581924c65bf3a1d702e427&end_uses_type=HVAC`;
-        axios
-            .post(
-                `${BaseUrl}${endUses}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEndUsesData(res.data);
-                console.log(res.data);
-            });
-    }, []);
 
-    useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const energyUsageDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${energyUsage}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEndUsageData(res.data);
+                        const energyData = res.data;
+                        let newDonutData = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = record.energy_consumption.now;
+                            newDonutData.push(parseInt(fixedConsumption));
+                        });
+                        setDonutChartData(newDonutData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUsage Data');
+            }
         };
-        const params = `?end_uses_type=HVAC&building_id=62581924c65bf3a1d702e427`;
-        axios
-            .post(
-                `${BaseUrl}${energyUsage}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEndUsageData(res.data);
-                console.log('setEndUsageData => ', res.data);
-            });
-    }, []);
+
+        const hvacUsageChartData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${hvacUsageChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = [];
+                        res.data.map((record) => {
+                            if (record.data.length === 0) {
+                                return;
+                            }
+                            responseData.push(record);
+                        });
+                        console.log('HVAC Response Filter Data => ', responseData);
+
+                        let newArray = [];
+                        responseData.map((element) => {
+                            let newObj = {
+                                name: element.device,
+                                data: formatData(element.data),
+                            };
+                            newArray.push(newObj);
+                        });
+                        setBarChartData(newArray);
+                        let newXaxis = {
+                            categories: [],
+                        };
+                        responseData[0].data.map((element) => {
+                            return newXaxis.categories.push(`Week ${element._id}`);
+                        });
+                        setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch HVAC Usage Chart Data');
+            }
+        };
+
+        hvacUsageChartData();
+        energyUsesDataFetch();
+        energyUsageDataFetch();
+    }, [startDate, endDate, bldgId]);
 
     return (
         <React.Fragment>

@@ -10,9 +10,7 @@ import Select from 'react-select';
 const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activatedMenuItemIds }) => {
     const Icon = item.icon || null;
 
-    useEffect(() => {
-        console.log('MenuItemWithChildren => ', item);
-    });
+    console.log('Child Items => ', item.children);
 
     return (
         <li className={classNames('side-nav-item', { 'mm-active': activatedMenuItemIds.indexOf(item.id) >= 0 })}>
@@ -46,26 +44,16 @@ const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activat
     );
 };
 
-// Side Nav Bar
 const MenuItem = ({ item, className, linkClassName }) => {
-    useEffect(() => {
-        console.log('Side Nav Bar => ', item);
-    });
-
     return (
         <li className={classNames('side-nav-item', className)}>
             {item.visibility && <MenuItemLink item={item} className={linkClassName} />}
         </li>
     );
 };
-
-// Top Nav Bar
+// Top & Side Nav Bar
 const MenuItemLink = ({ item, className }) => {
     const Icon = item.icon || null;
-
-    useEffect(() => {
-        console.log('Top Nav Bar => ', item);
-    });
 
     return (
         <Link to={item.path} className={classNames('side-nav-link-ref', 'side-sub-nav-link', className)}>

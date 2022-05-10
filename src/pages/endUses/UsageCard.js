@@ -4,6 +4,7 @@ import { Link, BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './style.css';
 
 const UsageCard = ({
+    bldgId,
     usage,
     button,
     lastPeriodPerTotalHrs,
@@ -25,7 +26,10 @@ const UsageCard = ({
                 {button === 'View' && (
                     <div className="float-right ml-2">
                         {usage.device === 'HVAC' && (
-                            <Link to="/energy/hvac" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/hvac/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">
@@ -34,7 +38,10 @@ const UsageCard = ({
                             </Link>
                         )}
                         {usage.device === 'Lighting' && (
-                            <Link to="/energy/lightning" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/lighting/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">
@@ -43,7 +50,10 @@ const UsageCard = ({
                             </Link>
                         )}
                         {usage.device === 'Plug' && (
-                            <Link to="/energy/plug" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/plug/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">

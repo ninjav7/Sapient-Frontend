@@ -83,7 +83,7 @@ const EndUses = () => {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + 'K';
+                    return val + 'kWh';
                 },
             },
             theme: 'dark',
@@ -159,6 +159,7 @@ const EndUses = () => {
                 let params = `?building_id=${bldgId}`;
                 await axios.post(`${BaseUrl}${endUsesChart}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
+                    console.log('EndUses Response Data => ', responseData);
                     let newArray = [];
                     responseData.map((element) => {
                         let newObj = {
@@ -175,8 +176,6 @@ const EndUses = () => {
                         return newXaxis.categories.push(`Week ${element._id}`);
                     });
                     setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
-                    console.log('newArray => ', newArray);
-                    console.log('newXaxis => ', newXaxis);
                 });
             } catch (error) {
                 console.log(error);
@@ -274,6 +273,7 @@ const EndUses = () => {
                             return (
                                 <div className="usage-card">
                                     <EnergyUsageCard
+                                        bldgId={bldgId}
                                         usage={usage}
                                         button="View"
                                         lastPeriodPerTotalHrs={percentageHandler(

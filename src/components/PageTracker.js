@@ -92,7 +92,7 @@ const PageTracker = () => {
                     {/* <i className="uil uil-cog"></i>
                     <i className="uil uil-angle-down ml-1"></i> */}
                 </div>
-                <div class="vl"></div>
+                <div className="vl"></div>
                 <div className="route-tracker">
                     {/* <Breadcrumb className="custom-breadcrumb-style">
                         <Breadcrumb.Item href="#">Dashboard</Breadcrumb.Item>

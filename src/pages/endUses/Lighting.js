@@ -10,7 +10,7 @@ import axios from 'axios';
 import { percentageHandler } from '../../utils/helper';
 import './style.css';
 
-const UsagePageTwo = () => {
+const UsagePageTwo = ({ title = 'Lighting' }) => {
     const [endUsesData, setEndUsesData] = useState([]);
 
     const [endUsage, seteEndUsage] = useState([
@@ -68,7 +68,7 @@ const UsagePageTwo = () => {
                     },
                     {
                         label: 'Lightning',
-                        path: '/energy/lightning',
+                        path: '/energy/lighting',
                         active: true,
                     },
                 ];
@@ -105,7 +105,7 @@ const UsagePageTwo = () => {
 
     return (
         <React.Fragment>
-            <Header title="Lighting" />
+            <Header title={title} />
 
             <Row>
                 {endUsesData.map((record, index) => {

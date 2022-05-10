@@ -408,3 +408,30 @@
 .text-center-content {
     margin-top: 4px;
 }
+
+.custom-date-time-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 15px;
+    color: #475467;
+}
+
+.custom-time-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 15px;
+    color: #1d2939;
+}
+
+.custom-kw-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    color: #1d2939;
+}

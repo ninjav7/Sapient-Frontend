@@ -6,10 +6,19 @@ import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
 import { useParams } from 'react-router-dom';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { DateRangeStore } from '../../components/DateRangeStore';
+import axios from 'axios';
+import { BaseUrl, builidingHourly } from '../../services/Network';
+import { dateFormatHandler } from '../../utils/helper';
+import moment from 'moment';
 import './style.css';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
     const apexLineChartWithLables = {
         chart: {
             height: 380,
@@ -52,17 +61,12 @@ const TimeOfDay = () => {
         //     size: 6,
         // },
         xaxis: {
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            title: {
-                text: 'Month',
-            },
+            // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            categories: [],
         },
         yaxis: {
-            title: {
-                text: 'Temperature',
-            },
-            min: 5,
-            max: 40,
+            // min: 5,
+            // max: 40,
         },
         legend: {
             position: 'top',
@@ -96,6 +100,86 @@ const TimeOfDay = () => {
             data: [5, 11, 14, 18, 17, 13, 13],
         },
     ];
+
+    const [lineChartOptions, setLineChartOptions] = useState({
+        chart: {
+            height: 380,
+            type: 'line',
+            zoom: {
+                enabled: false,
+            },
+            toolbar: {
+                show: false,
+            },
+        },
+        colors: ['#5369f8', '#43d39e'],
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: [3, 3],
+            curve: 'straight',
+        },
+        // title: {
+        //     text: 'Average High & Low Temperature',
+        //     align: 'left',
+        //     style: {
+        //         fontSize: '14px',
+        //     },
+        // },
+        grid: {
+            row: {
+                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.2,
+            },
+            borderColor: '#f1f3fa',
+        },
+        // markers: {
+        //     style: 'inverted',
+        //     size: 6,
+        // },
+        xaxis: {
+            categories: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+        },
+        yaxis: {
+            // min: 5,
+            // max: 40,
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'center',
+            floating: true,
+        },
+        responsive: [
+            {
+                breakpoint: 600,
+                options: {
+                    chart: {
+                        toolbar: {
+                            show: false,
+                        },
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+    });
+    const [lineChartData, setLineChartData] = useState([
+        {
+            name: 'Weekdays',
+            data: [],
+        },
+        {
+            name: 'Weekends',
+            data: [],
+        },
+    ]);
 
     const weekdaysOptions = {
         chart: {
@@ -1001,6 +1085,85 @@ const TimeOfDay = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        const dailyUsageByHour = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingHourly}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        console.log('SSR response => ', response);
+
+                        let weekDaysResData = response[0].weekdays;
+                        let weekEndResData = response[0].weekend;
+
+                        const weekDaysData = weekDaysResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: el.y,
+                            };
+                        });
+
+                        const weekendsData = weekEndResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: el.y,
+                            };
+                        });
+
+                        const newWeekdaysData = {
+                            name: 'Weekdays',
+                            data: [],
+                        };
+                        const newWeekendsData = {
+                            name: 'Weekends',
+                            data: [],
+                        };
+
+                        const chartData = [];
+
+                        for (let i = 1; i <= 24; i++) {
+                            let matchedRecord = weekDaysData.find((record) => record.x === i);
+                            if (matchedRecord) {
+                                newWeekdaysData.data.push(parseInt(matchedRecord.y));
+                            } else {
+                                newWeekdaysData.data.push(0);
+                            }
+                        }
+
+                        for (let i = 1; i <= 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x === i);
+
+                            if (matchedRecord) {
+                                newWeekendsData.data.push(parseInt(matchedRecord.y));
+                            } else {
+                                newWeekendsData.data.push(0);
+                            }
+                        }
+                        chartData.push(newWeekdaysData);
+                        chartData.push(newWeekendsData);
+                        setLineChartData(chartData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Daily Usage Hour Data');
+            }
+        };
+        dailyUsageByHour();
+    }, [startDate, endDate, bldgId]);
+
     return (
         <React.Fragment>
             <Header title="Time of Day" />
@@ -1034,12 +1197,7 @@ const TimeOfDay = () => {
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
                         <div className="mt-2">
                             {/* <LineChart title="" /> */}
-                            <LineChart
-                                title=""
-                                options={apexLineChartWithLables}
-                                series={apexLineChartWithLablesData}
-                                height={400}
-                            />
+                            <LineChart title="" options={lineChartOptions} series={lineChartData} height={400} />
                         </div>
                     </div>
                 </Col>
