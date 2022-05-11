@@ -672,6 +672,12 @@ const BuildingOverview = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const buildingOverallData = async () => {
             try {
                 let headers = {
@@ -896,42 +902,40 @@ const BuildingOverview = () => {
         };
 
         const buildingConsumptionChart = async () => {
-            if (startDate !== null) {
-                try {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                    };
-                    let params = `?aggregate=day&building_id=${bldgId}`;
-                    await axios
-                        .post(
-                            `${BaseUrl}${getEnergyConsumption}${params}`,
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?aggregate=day&building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getEnergyConsumption}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        let newArray = [
                             {
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
+                                data: [],
                             },
-                            { headers }
-                        )
-                        .then((res) => {
-                            let response = res.data;
-                            let newArray = [
-                                {
-                                    data: [],
-                                },
-                            ];
-                            response.forEach((record) => {
-                                newArray[0].data.push({
-                                    x: moment(record.x).format('MMM D'),
-                                    y: record.y.toFixed(2),
-                                });
+                        ];
+                        response.forEach((record) => {
+                            newArray[0].data.push({
+                                x: moment(record.x).format('MMM D'),
+                                y: record.y.toFixed(2),
                             });
-                            console.log('newArray => ', newArray);
-                            setBuildingConsumptionChart(newArray);
                         });
-                } catch (error) {
-                    console.log(error);
-                    alert('Failed to fetch Building Consumption Chart');
-                }
+                        console.log('newArray => ', newArray);
+                        setBuildingConsumptionChart(newArray);
+                    });
+            } catch (error) {
+                console.log(error);
+                alert('Failed to fetch Building Consumption Chart');
             }
         };
 

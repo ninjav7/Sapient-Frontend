@@ -207,10 +207,13 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
     }, []);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const endUsesDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -237,9 +240,6 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
         };
 
         const endUsesFloorDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -289,9 +289,6 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
         };
 
         const endUsesUsageDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',

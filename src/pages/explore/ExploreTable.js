@@ -80,10 +80,6 @@ const ExploreTable = ({ exploreTableData }) => {
         },
     ];
 
-    useEffect(() => {
-        console.log('exploreTableData => ', exploreTableData);
-    });
-
     return (
         <>
             <Card>

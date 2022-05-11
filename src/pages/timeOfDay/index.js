@@ -1086,6 +1086,12 @@ const TimeOfDay = () => {
     }, []);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const dailyUsageByHour = async () => {
             try {
                 let headers = {

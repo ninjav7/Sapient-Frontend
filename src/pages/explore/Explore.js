@@ -399,6 +399,12 @@ const Explore = () => {
     }, []);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const exploreDataFetch = async () => {
             try {
                 let headers = {

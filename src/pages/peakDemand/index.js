@@ -452,6 +452,13 @@ const PeakDemand = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+
         const buildingPeaksData = async () => {
             try {
                 let headers = {

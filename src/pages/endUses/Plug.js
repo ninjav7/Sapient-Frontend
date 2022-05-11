@@ -208,10 +208,13 @@ const UsagePageThree = () => {
     }, []);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const endUsesDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -238,9 +241,6 @@ const UsagePageThree = () => {
         };
 
         const plugFloorDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -290,9 +290,6 @@ const UsagePageThree = () => {
         };
 
         const plugUsageDataFetch = async () => {
-            if (startDate === null) {
-                return;
-            }
             try {
                 let headers = {
                     'Content-Type': 'application/json',

@@ -298,6 +298,12 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
     }, []);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const energyUsesDataFetch = async () => {
             try {
                 let headers = {

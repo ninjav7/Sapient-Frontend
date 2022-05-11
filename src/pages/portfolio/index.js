@@ -28,7 +28,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const PortfolioOverview = () => {
-    const [isProcessing, setIsProcessing] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
@@ -357,117 +357,117 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const portfolioOverallData = async () => {
-            if (startDate !== null) {
-                try {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                    };
-                    await axios
-                        .post(
-                            `${BaseUrl}${portfolioOverall}`,
-                            {
-                                // date_from: '2022-04-20',
-                                // date_to: '2022-04-27',
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
-                            },
-                            { headers }
-                        )
-                        .then((res) => {
-                            setOveralldata(res.data);
-                            console.log('setOveralldata => ', res.data);
-                        });
-                } catch (error) {
-                    console.log(error);
-                    setIsProcessing(false);
-                    console.log('Failed to fetch Portfolio Overall Data');
-                }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioOverall}`,
+                        {
+                            // date_from: '2022-04-20',
+                            // date_to: '2022-04-27',
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setOveralldata(res.data);
+                        console.log('setOveralldata => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                // setIsProcessing(false);
+                console.log('Failed to fetch Portfolio Overall Data');
             }
         };
 
         const portfolioEndUsesData = async () => {
-            if (startDate !== null) {
-                try {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                    };
-                    await axios
-                        .post(
-                            `${BaseUrl}${portfolioEndUser}`,
-                            {
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
-                            },
-                            { headers }
-                        )
-                        .then((res) => {
-                            setenergyConsumption(res.data);
-                            const energyData = res.data;
-                            let newDonutData = [];
-                            energyData.forEach((record) => {
-                                let fixedConsumption = record.energy_consumption.now;
-                                newDonutData.push(parseInt(fixedConsumption));
-                            });
-                            setDonutChartData(newDonutData);
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioEndUser}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setenergyConsumption(res.data);
+                        const energyData = res.data;
+                        let newDonutData = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = record.energy_consumption.now;
+                            newDonutData.push(parseInt(fixedConsumption));
                         });
-                } catch (error) {
-                    console.log(error);
-                    setIsProcessing(false);
-                    alert('Failed to fetch Portfolio EndUses Data');
-                }
+                        setDonutChartData(newDonutData);
+                    });
+            } catch (error) {
+                console.log(error);
+                // setIsProcessing(false);
+                alert('Failed to fetch Portfolio EndUses Data');
             }
         };
 
         const energyConsumptionData = async () => {
-            if (startDate !== null) {
-                try {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                    };
-                    let params = '?aggregate=day';
-                    await axios
-                        .post(
-                            `${BaseUrl}${getEnergyConsumption}${params}`,
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = '?aggregate=day';
+                await axios
+                    .post(
+                        `${BaseUrl}${getEnergyConsumption}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        // console.log('energyConsumptionChart => ', res.data);
+                        let response = res.data;
+                        let newArray = [
                             {
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
+                                data: [],
                             },
-                            { headers }
-                        )
-                        .then((res) => {
-                            // console.log('energyConsumptionChart => ', res.data);
-                            let response = res.data;
-                            let newArray = [
-                                {
-                                    data: [],
-                                },
-                            ];
-                            response.forEach((record) => {
-                                newArray[0].data.push({
-                                    x: moment(record.x).format('MMM D'),
-                                    y: record.y.toFixed(2),
-                                });
+                        ];
+                        response.forEach((record) => {
+                            newArray[0].data.push({
+                                x: moment(record.x).format('MMM D'),
+                                y: record.y.toFixed(2),
                             });
-                            console.log('newArray => ', newArray);
-                            setEnergyConsumptionChart(newArray);
                         });
-                } catch (error) {
-                    console.log(error);
-                    setIsProcessing(false);
-                    alert('Failed to fetch Energy Consumption Data');
-                }
+                        console.log('newArray => ', newArray);
+                        setEnergyConsumptionChart(newArray);
+                    });
+            } catch (error) {
+                console.log(error);
+                // setIsProcessing(false);
+                alert('Failed to fetch Energy Consumption Data');
             }
         };
 
-        setIsProcessing(true);
+        // setIsProcessing(true);
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
-        setIsProcessing(false);
+        // setIsProcessing(false);
     }, [startDate, endDate]);
 
     useEffect(() => {
@@ -495,7 +495,7 @@ const PortfolioOverview = () => {
                 });
             } catch (error) {
                 console.log(error);
-                setIsProcessing(false);
+                // setIsProcessing(false);
                 alert('Failed to fetch Building Data');
             }
         };
@@ -512,7 +512,7 @@ const PortfolioOverview = () => {
                 });
             } catch (error) {
                 console.log(error);
-                setIsProcessing(false);
+                // setIsProcessing(false);
                 alert('Failed to fetch Portfolio Builidings Data');
             }
         };

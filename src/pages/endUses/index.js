@@ -125,6 +125,12 @@ const EndUses = () => {
     };
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const endUsesDataFetch = async () => {
             try {
                 let headers = {

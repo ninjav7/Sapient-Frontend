@@ -27,6 +27,12 @@ const PageTracker = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const getBuildingList = async () => {
             let headers = {
                 'Content-Type': 'application/json',
@@ -34,7 +40,7 @@ const PageTracker = () => {
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                 setBuildingList(res.data);
-                console.log('setBuildingList => ', res.data);
+                // console.log('setBuildingList => ', res.data);
             });
         };
         getBuildingList();
