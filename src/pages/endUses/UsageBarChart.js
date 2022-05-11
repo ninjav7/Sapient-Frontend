@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // simple bar chart
-const BarChart = () => {
+const BarChart = ({ floorUsageChartOptions, floorUsageChartData }) => {
     const apexBarChartOpts = {
         chart: {
             height: 380,
@@ -79,7 +79,12 @@ const BarChart = () => {
         <Card>
             <CardBody>
                 {/* <h4 className="header-title mt-0 mb-3">Bar Chart</h4> */}
-                <Chart options={apexBarChartOpts} series={apexBarChartData} type="bar" className="apex-charts" />
+                <Chart
+                    options={floorUsageChartOptions}
+                    series={floorUsageChartData}
+                    type="bar"
+                    className="apex-charts"
+                />
             </CardBody>
         </Card>
     );

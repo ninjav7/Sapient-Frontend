@@ -5,12 +5,137 @@ import UsageBarChart from './UsageBarChart';
 import MixedChart from '../charts/MixedChart';
 import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { BaseUrl, endUses } from '../../services/Network';
 import axios from 'axios';
-import { percentageHandler } from '../../utils/helper';
+import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../services/Network';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { useParams } from 'react-router-dom';
+import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
 
 const UsagePageThree = () => {
+    const { bldgId } = useParams();
+
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const [floorUsageChartOptions, setFloorUsageChartOptions] = useState({
+        chart: {
+            height: 380,
+            type: 'bar',
+            toolbar: {
+                show: false,
+            },
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                dataLabels: {
+                    position: 'top',
+                },
+            },
+        },
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        dataLabels: {
+            enabled: false,
+            offsetX: -6,
+            style: {
+                fontSize: '12px',
+                colors: ['#fff'],
+            },
+        },
+        // colors: ['#847CB5'],
+        colors: ['#6d669b'],
+        stroke: {
+            show: true,
+            width: 1,
+            colors: ['#fff'],
+        },
+
+        xaxis: {
+            categories: ['Floor 1', 'Floor 2', 'Floor 3', 'Floor 4', 'Floor 5'],
+            axisBorder: {
+                color: '#d6ddea',
+            },
+            axisTicks: {
+                color: '#d6ddea',
+            },
+        },
+        yaxis: {
+            labels: {
+                offsetX: -10,
+            },
+        },
+        legend: {
+            offsetY: -10,
+        },
+        states: {
+            hover: {
+                filter: 'none',
+            },
+        },
+        grid: {
+            borderColor: '#f1f3fa',
+        },
+    });
+
+    const [floorUsageChartData, setFloorUsageChartData] = useState([
+        {
+            name: 'Usage by Floor',
+            data: [],
+        },
+    ]);
+
+    const [energyChartOptions, setEnergyChartOptions] = useState({
+        options: {
+            chart: {
+                height: 350,
+                type: 'line',
+            },
+            stroke: {
+                width: 0.2,
+                show: true,
+                curve: 'straight',
+            },
+            dataLabels: {
+                enabled: true,
+                enabledOnSeries: [1],
+            },
+            labels: ['01 Jan 2001', '02 Jan 2001', '03 Jan 2001'],
+            xaxis: {
+                type: 'datetime',
+            },
+            yaxis: [
+                {
+                    title: {
+                        text: 'Consumption',
+                    },
+                },
+                {
+                    opposite: true,
+                    title: {
+                        text: 'Occupancy',
+                    },
+                },
+            ],
+        },
+    });
+
+    const [energyChartData, setEnergyChartData] = useState([
+        {
+            name: 'CONSUMPTION',
+            type: 'column',
+            data: [],
+        },
+        {
+            name: 'OCCUPANCY',
+            type: 'line',
+            data: [],
+        },
+    ]);
+
     const [endUsesData, setEndUsesData] = useState([]);
 
     const [endUsage, seteEndUsage] = useState([
@@ -83,25 +208,136 @@ const UsagePageThree = () => {
     }, []);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const endUsesDataFetch = async () => {
+            if (startDate === null) {
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&end_uses_type=Plug`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUses}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setEndUsesData(res.data);
+                        console.log('setEndUsesData => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUses Data');
+            }
         };
-        const params = `?building_id=62581924c65bf3a1d702e427&end_uses_type=Plug`;
-        axios
-            .post(
-                `${BaseUrl}${endUses}${params}`,
-                {
-                    date_from: '2022-04-20',
-                    date_to: '2022-04-27',
-                },
-                { headers }
-            )
-            .then((res) => {
-                setEndUsesData(res.data);
-                console.log('setEndUsesData => ', res.data);
-            });
-    }, []);
+
+        const plugFloorDataFetch = async () => {
+            if (startDate === null) {
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&end_uses_type=plug`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUsesFloorChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let data = res.data;
+                        let floorName = [];
+                        let floorConsumption = [];
+                        data.map((record, index) => {
+                            floorName.push(record.floor);
+                            floorConsumption.push(parseInt(record.energy_consumption.toFixed(2)));
+                        });
+                        let floorConsumptionData = [
+                            {
+                                name: 'Usage by Floor',
+                                data: floorConsumption,
+                            },
+                        ];
+
+                        let xaxisData = {
+                            categories: floorName,
+                            axisBorder: {
+                                color: '#d6ddea',
+                            },
+                            axisTicks: {
+                                color: '#d6ddea',
+                            },
+                        };
+                        setFloorUsageChartOptions({ ...floorUsageChartOptions, xaxis: xaxisData });
+                        setFloorUsageChartData(floorConsumptionData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUses Floor Data');
+            }
+        };
+
+        const plugUsageDataFetch = async () => {
+            if (startDate === null) {
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${bldgId}&end_uses_type=plug`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUsesUsageChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        console.log('endUsesUsageChart => ', res.data);
+                        let data = res.data;
+                        let energyUsage = [
+                            {
+                                name: 'CONSUMPTION',
+                                type: 'column',
+                                data: [],
+                            },
+                            {
+                                name: 'OCCUPANCY',
+                                type: 'line',
+                                data: [],
+                            },
+                        ];
+                        data.map((record) => {
+                            energyUsage[0].data.push(record.energy_consumption);
+                        });
+                        setEnergyChartData(energyUsage);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUses Usage Data');
+            }
+        };
+
+        endUsesDataFetch();
+        plugFloorDataFetch();
+        plugUsageDataFetch();
+    }, [startDate, endDate, bldgId]);
 
     return (
         <React.Fragment>
@@ -375,15 +611,21 @@ const UsagePageThree = () => {
                 <Col xl={6} className="mt-5 ml-3">
                     <h6 className="card-title custom-title">Lighting Usage vs. Occupancy</h6>
                     <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
-                    {/* <MixedChart title="" /> */}
-                    <LineColumnChart title="" />
+                    <LineColumnChart
+                        title=""
+                        energyChartData={energyChartData}
+                        energyChartOptions={energyChartOptions}
+                    />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
                     <h6 className="card-title custom-title">Usage by Floor</h6>
                     <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
                     <div className="card-body">
                         <div>
-                            <UsageBarChart />
+                            <UsageBarChart
+                                floorUsageChartOptions={floorUsageChartOptions}
+                                floorUsageChartData={floorUsageChartData}
+                            />
                         </div>
                     </div>
                 </Col>

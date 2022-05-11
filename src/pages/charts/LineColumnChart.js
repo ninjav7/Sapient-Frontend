@@ -4,7 +4,7 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // line column chart
-const LineColumnChart = ({ title = 'Line with Data Labels' }) => {
+const LineColumnChart = ({ title = 'Line with Data Labels', energyChartOptions, energyChartData }) => {
     const apexLineChartWithLables = {
         options: {
             chart: {
@@ -23,20 +23,20 @@ const LineColumnChart = ({ title = 'Line with Data Labels' }) => {
                 enabled: true,
                 enabledOnSeries: [1],
             },
-            labels: [
-                '01 April 2022',
-                '02 April 2022',
-                '03 April 2022',
-                '04 April 2022',
-                '05 April 2022',
-                '06 April 2022',
-                '07 April 2022',
-                '08 April 2022',
-                '09 April 2022',
-                '10 April 2022',
-                '11 April 2022',
-                '12 April 2022',
-            ],
+            // labels: [
+            //     '01 April 2022',
+            //     '02 April 2022',
+            //     '03 April 2022',
+            //     '04 April 2022',
+            //     '05 April 2022',
+            //     '06 April 2022',
+            //     '07 April 2022',
+            //     '08 April 2022',
+            //     '09 April 2022',
+            //     '10 April 2022',
+            //     '11 April 2022',
+            //     '12 April 2022',
+            // ],
             xaxis: {
                 type: 'datetime',
             },
@@ -73,12 +73,7 @@ const LineColumnChart = ({ title = 'Line with Data Labels' }) => {
         <Card>
             <CardBody>
                 <h4 className="header-title mt-0 mb-3">{title}</h4>
-                <Chart
-                    options={apexLineChartWithLables}
-                    series={apexLineChartWithLablesData}
-                    type="line"
-                    className="apex-charts"
-                />
+                <Chart options={energyChartOptions} series={energyChartData} type="line" className="apex-charts" />
             </CardBody>
         </Card>
     );
