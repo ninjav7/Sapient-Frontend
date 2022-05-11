@@ -74,10 +74,10 @@
     margin-right: 1rem;
     background: #f9fafb;
     border: 2px soild red;
+    height: 175px !important;
 }
 
 .peak-demand-container:hover {
-    /* background: rgb(224, 222, 222); */
     background-color: white;
 }
 
@@ -350,4 +350,14 @@
     font-size: 12px;
     line-height: 18px;
     color: #667085;
+}
+
+.custom-hover-btn-style {
+    gap: 8px;
+    width: 101px;
+    height: 34px;
+    background: #ffffff;
+    border: 1px solid #d9dde2;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+    border-radius: 6px;
 }

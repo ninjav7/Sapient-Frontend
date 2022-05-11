@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import DonutChart from '../charts/DonutChart';
 import Header from '../../components/Header';
@@ -26,6 +26,33 @@ import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../components/DateRangeStore';
 import './style.css';
+
+export function useHover() {
+    const [value, setValue] = useState(false);
+
+    const ref = useRef(null);
+
+    const handleMouseOver = () => setValue(true);
+    const handleMouseOut = () => setValue(false);
+
+    useEffect(
+        () => {
+            const node = ref.current;
+            if (node) {
+                node.addEventListener('mouseover', handleMouseOver);
+                node.addEventListener('mouseout', handleMouseOut);
+
+                return () => {
+                    node.removeEventListener('mouseover', handleMouseOver);
+                    node.removeEventListener('mouseout', handleMouseOut);
+                };
+            }
+        },
+        [ref.current] // Recall only if ref changes
+    );
+
+    return [ref, value];
+}
 
 const BuildingOverview = () => {
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
@@ -671,6 +698,8 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
+    const [hoverRef, isHovered] = useHover();
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1151,7 +1180,7 @@ const BuildingOverview = () => {
                                     textDecoration: 'none',
                                     fontWeight: 'bold',
                                 }}></a>
-                            <span className="float-right" onClick={() => setBuildingAlerts([])}>
+                            <span className="float-right mr-4" onClick={() => setBuildingAlerts([])}>
                                 Clear
                             </span>
 
@@ -1312,8 +1341,6 @@ const BuildingOverview = () => {
                 </div>
             </Row>
 
-            {/* ------------------------- Working fine -------------------------  */}
-
             {/* Top 3 Peak Demand Periods  */}
             <Row>
                 <Col lg={8}>
@@ -1339,7 +1366,7 @@ const BuildingOverview = () => {
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Max power draw (15 minutes period)</h6>
                         <div className="card-group mt-2 top-peak-demand-style">
                             {topContributors.map((item, index) => (
-                                <div className="card peak-demand-container mt-3">
+                                <div className="card peak-demand-container mt-3" ref={hoverRef}>
                                     <div className="card-body">
                                         <h6
                                             className="card-title text-muted peak-demand-card-style"
@@ -1359,37 +1386,60 @@ const BuildingOverview = () => {
                                             </span>{' '}
                                             kW
                                         </h5>
-                                        <p className="card-text peak-card-label">Top Contributors</p>
-                                        <table className="table table-borderless small peak-table-font">
-                                            <tbody>
-                                                <tr>
-                                                    <td className="peak-table-content">
-                                                        {item.top_contributors.map((el) => (
+                                        <div style={{ height: '75%' }}>
+                                            {isHovered ? (
+                                                <div
+                                                    style={{ display: 'flex', justifyContent: 'center' }}
+                                                    className="m-4">
+                                                    <Link
+                                                        to={{
+                                                            pathname: `/energy/building-peak-explore/${localStorage.getItem(
+                                                                'buildingId'
+                                                            )}`,
+                                                        }}>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
+                                                            <i className="uil uil-pen mr-1"></i>Explore
+                                                        </button>
+                                                    </Link>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <p className="card-text peak-card-label">Top Contributors</p>
+                                                    <table className="table table-borderless small peak-table-font">
+                                                        <tbody>
                                                             <tr>
-                                                                <div className="font-weight-bold text-dark">
-                                                                    {el.equipment_name}
-                                                                </div>
+                                                                <td className="peak-table-content">
+                                                                    {item.top_contributors.map((el) => (
+                                                                        <tr>
+                                                                            <div className="font-weight-bold text-dark">
+                                                                                {el.equipment_name}
+                                                                            </div>
+                                                                        </tr>
+                                                                    ))}
+                                                                </td>
+                                                                <td className="peak-table-content-two">
+                                                                    {item.top_contributors.map((el2) => (
+                                                                        <tr style={{ fontSize: 12 }}>
+                                                                            <div className="">
+                                                                                {el2.energy_consumption.now.toLocaleString(
+                                                                                    undefined,
+                                                                                    {
+                                                                                        maximumFractionDigits: 2,
+                                                                                    }
+                                                                                )}{' '}
+                                                                                kW
+                                                                            </div>
+                                                                        </tr>
+                                                                    ))}
+                                                                </td>
                                                             </tr>
-                                                        ))}
-                                                    </td>
-                                                    <td className="peak-table-content-two">
-                                                        {item.top_contributors.map((el2) => (
-                                                            <tr style={{ fontSize: 12 }}>
-                                                                <div className="">
-                                                                    {el2.energy_consumption.now.toLocaleString(
-                                                                        undefined,
-                                                                        {
-                                                                            maximumFractionDigits: 2,
-                                                                        }
-                                                                    )}{' '}
-                                                                    kW
-                                                                </div>
-                                                            </tr>
-                                                        ))}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                        </tbody>
+                                                    </table>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

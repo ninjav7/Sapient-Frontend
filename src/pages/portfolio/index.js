@@ -33,6 +33,7 @@ const PortfolioOverview = () => {
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
+    const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -252,6 +253,7 @@ const PortfolioOverview = () => {
         chart: {
             type: 'donut',
             foreColor: '#3b70bf',
+            background: 'transparent',
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -285,10 +287,10 @@ const PortfolioOverview = () => {
                         },
                         value: {
                             show: true,
+                            color: '#ffe700',
                             fontSize: '20px',
                             fontFamily: 'Helvetica, Arial, sans-serif',
                             fontWeight: 400,
-                            color: 'red',
                             // offsetY: 16,
                             formatter: function (val) {
                                 return `${val} kWh`;
@@ -301,11 +303,6 @@ const PortfolioOverview = () => {
                             // color: '#373d3f',
                             fontSize: '22px',
                             fontWeight: 600,
-                            // formatter: function (w) {
-                            //     return w.globals.seriesTotals.reduce((a, b) => {
-                            //         return a + b;
-                            //     }, 0);
-                            // },
                             formatter: function (w) {
                                 let sum = w.globals.seriesTotals.reduce((a, b) => {
                                     return a + b;
@@ -353,7 +350,6 @@ const PortfolioOverview = () => {
         },
     });
 
-    // let [loading, setLoading] = useState(false);
     let [color, setColor] = useState('#ffffff');
 
     useEffect(() => {
@@ -386,7 +382,6 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                // setIsProcessing(false);
                 console.log('Failed to fetch Portfolio Overall Data');
             }
         };
@@ -418,7 +413,6 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                // setIsProcessing(false);
                 alert('Failed to fetch Portfolio EndUses Data');
             }
         };
@@ -509,6 +503,18 @@ const PortfolioOverview = () => {
                 await axios.post(`${BaseUrl}${portfolioBuilidings}`, { headers }).then((res) => {
                     setBuildingsEnergyConsume(res.data);
                     console.log('setBuildingsEnergyConsume => ', res.data);
+                    let responseData = res.data;
+                    let markerArray = [];
+                    responseData.map((record) => {
+                        let markerObj = {
+                            markerOffset: 25,
+                            name: record.buildingName,
+                            coordinates: [parseInt(record.lat), parseInt(record.long)],
+                        };
+                        markerArray.push(markerObj);
+                    });
+                    console.log('markerArray => ', markerArray);
+                    setMarkers(markerArray);
                 });
             } catch (error) {
                 console.log(error);
@@ -605,7 +611,7 @@ const PortfolioOverview = () => {
                                 <h6 className="custom-title">Energy Density Top Buildings</h6>
                                 <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                                 <div className="portfolio-map-widget">
-                                    <SimpleMaps />
+                                    <SimpleMaps markers={markers} />
                                 </div>
                             </div>
                         </Col>
@@ -633,9 +639,9 @@ const PortfolioOverview = () => {
                                                 }}>
                                                 <ProgressBar
                                                     color="danger"
-                                                    progressValue={(item.density / 2) * 100}
+                                                    progressValue={item.density.toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={item.density + ' k.W /Sq. feet'}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
                                                     className="progress-bar-container"
                                                 />
                                             </div>

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import StackedColumnChart from '../charts/StackedColumnChart';
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -8,6 +7,13 @@ import 'react-datepicker/dist/react-datepicker.css';
 import SelectTableComponent from './SelectTableComponent';
 import { Line } from 'rc-progress';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import axios from 'axios';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { Link, useParams } from 'react-router-dom';
+import { DateRangeStore } from '../../components/DateRangeStore';
+import { BaseUrl, builidingAlerts } from '../../services/Network';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -140,7 +146,153 @@ const BuildingPeakTable = () => {
     );
 };
 
+const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAlerts }) => {
+    return (
+        <>
+            {show ? (
+                <Modal show={show} onHide={close} dialogClassName="modal-container-style" centered>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={12}>
+                                <h4>AHU 1</h4>
+                                <span className="mr-4 font-weight-bold">{`Building 1 > Main Floor`}</span>
+                                <span className="mr-4 font-weight-bold">{`AHU`}</span>
+                                <span className="mr-4 font-weight-bold">{`None`}</span>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={10}>
+                                <div>
+                                    <span className="heading-style">{equipData.equipType}</span>
+                                </div>
+                            </Col>
+                            <Col lg={2}>
+                                <div className="float-right">
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
+                                        Turn Off
+                                    </button>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={12}>
+                                <div className="mt-2 modal-tabs-style">
+                                    <span className="mr-3 tab-styling">Metrics</span>
+                                    <span className="mr-3">Metadata</span>
+                                    <span className="mr-3">Activity</span>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={4}>
+                                <div className="modal-side-container">
+                                    <div className="total-usage-container"></div>
+                                    <div className="equipment-alert-container">
+                                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                                            Building Alerts
+                                        </h6>
+                                        <a
+                                            rel="noopener noreferrer"
+                                            className="link-primary mr-2"
+                                            style={{
+                                                display: 'inline-block',
+                                                float: 'right',
+                                                textDecoration: 'none',
+                                                fontWeight: 'bold',
+                                            }}></a>
+                                        <span className="float-right" onClick={() => setBuildingAlerts([])}>
+                                            Clear
+                                        </span>
+
+                                        <div className="mt-2 alert-container">
+                                            {buildingAlert.map((record) => {
+                                                return (
+                                                    <>
+                                                        {record.type === 'building-add' && (
+                                                            <div className="alert-card mb-2">
+                                                                <div>
+                                                                    <i className="uil uil-triangle" />
+                                                                </div>
+                                                                <div>
+                                                                    <span className="alert-heading">
+                                                                        New Building Peak
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="alert-content">
+                                                                        225.3 kW &nbsp; 3/3/22 @ 3:20 PM
+                                                                    </span>
+                                                                </div>
+                                                                <div className="float-right ml-4 alert-weekday">
+                                                                    Today
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {record.type === 'energy-trend' && (
+                                                            <div className="alert-card mb-2">
+                                                                <div>
+                                                                    <i className="uil uil-arrow-growth" />
+                                                                </div>
+                                                                <div>
+                                                                    <span className="alert-heading">
+                                                                        Energy Trend Upward
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="alert-content">
+                                                                        +25% from last 30 days
+                                                                    </span>
+                                                                </div>
+                                                                <div className="float-right ml-4 alert-weekday">
+                                                                    Yesterday
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {record.type === 'notification' && (
+                                                            <div className="alert-card">
+                                                                <div>
+                                                                    <i className="uil uil-exclamation-triangle" />
+                                                                </div>
+                                                                <div>
+                                                                    <span className="alert-heading">
+                                                                        Service Due Soon (AHU 1)
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="alert-content">
+                                                                        40 Run Hours &nbsp; in 25 Days
+                                                                    </span>
+                                                                </div>
+                                                                <div className="float-right ml-4 alert-weekday">
+                                                                    Tuesday
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Col>
+                            <Col lg={8}></Col>
+                        </Row>
+                    </Modal.Body>
+                </Modal>
+            ) : null}
+        </>
+    );
+};
+
 const SelectPeakTable = () => {
+    const { bldgId = localStorage.getItem('buildingId') } = useParams();
+    const startDate = DateRangeStore.useState((s) => s.startDate);
+    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const [modal, setModal] = useState(false);
+    const Toggle = () => setModal(!modal);
+    const [equipData, setEquipData] = useState(null);
+
+    const [buildingAlert, setBuildingAlerts] = useState([]);
+
     const [list, setList] = useState([
         {
             name: 'AHU 1',
@@ -220,6 +372,35 @@ const SelectPeakTable = () => {
         setSelectedList(list.filter((e) => e.selected));
     };
 
+    useEffect(() => {
+        const buildingAlertsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?building_id=${1}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingAlerts}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setBuildingAlerts(res.data);
+                        console.log('Building Alert => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Alert Data');
+            }
+        };
+        buildingAlertsData();
+    }, [startDate, endDate, bldgId]);
+
     return (
         <>
             <div className="container">
@@ -262,7 +443,14 @@ const SelectPeakTable = () => {
                                                 onChange={(e) => onItemCheck(e, record)}
                                             />
                                         </th>
-                                        <td>{record.name}</td>
+                                        <td
+                                            className="peak-name-style"
+                                            onClick={() => {
+                                                setEquipData(record);
+                                                Toggle();
+                                            }}>
+                                            {record.name}
+                                        </td>
                                         <td>
                                             +{record.changePercent}% ({record.changeKWH} kWh)
                                         </td>
@@ -336,6 +524,15 @@ const SelectPeakTable = () => {
                         </table>
                     </div>
                 </div>
+            </div>
+            <div>
+                <ModalEquipment
+                    show={modal}
+                    equipData={equipData}
+                    close={Toggle}
+                    buildingAlert={buildingAlert}
+                    setBuildingAlerts={setBuildingAlerts}
+                />
             </div>
         </>
     );

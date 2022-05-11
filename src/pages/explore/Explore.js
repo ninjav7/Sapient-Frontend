@@ -8,6 +8,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
+import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
 import { BaseUrl, getExplore } from '../../services/Network';
@@ -399,12 +400,12 @@ const Explore = () => {
     }, []);
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
+        // if (startDate === null) {
+        //     return;
+        // }
+        // if (endDate === null) {
+        //     return;
+        // }
         const exploreDataFetch = async () => {
             try {
                 let headers = {
@@ -412,28 +413,37 @@ const Explore = () => {
                     accept: 'application/json',
                 };
                 let params = `?filters=${activeExploreOpt.value}`;
-                await axios.get(`${BaseUrl}${getExplore}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
-                    setExploreTableData(responseData);
-                    let data = responseData;
-                    let exploreData = [];
-                    data.forEach((record) => {
-                        if (record.eq_name !== null) {
-                            let recordToInsert = {
-                                name: record.eq_name,
-                                data: record.data,
-                            };
-                            exploreData.push(recordToInsert);
-                        }
-                    });
-                    console.log('exploreData => ', exploreData);
-                    setSeriesData(exploreData);
-                    setSeriesLineData([
+                await axios
+                    .post(
+                        `${BaseUrl}${getExplore}${params}`,
                         {
-                            data: exploreData[0].data,
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
                         },
-                    ]);
-                });
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.eq_name !== null) {
+                                let recordToInsert = {
+                                    name: record.eq_name,
+                                    data: record.data,
+                                };
+                                exploreData.push(recordToInsert);
+                            }
+                        });
+                        console.log('exploreData => ', exploreData);
+                        setSeriesData(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                    });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
