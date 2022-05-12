@@ -78,7 +78,7 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-                    console.log(typeof bldgId, bldgId);
+                    // console.log(typeof bldgId, bldgId);
                     setactiveToggle(data.active);
                     setTimeToggle(data.time_format);
                     // setOperatingHours(data.operating_hours)

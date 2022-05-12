@@ -493,7 +493,6 @@ const PortfolioOverview = () => {
                 });
             } catch (error) {
                 console.log(error);
-                // setIsProcessing(false);
                 alert('Failed to fetch Building Data');
             }
         };

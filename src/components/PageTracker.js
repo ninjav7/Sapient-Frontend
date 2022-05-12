@@ -116,18 +116,18 @@ const PageTracker = () => {
                                     <Dropdown.Item
                                         onClick={() => {
                                             // setActiveBuildingName(building.building_name);
-                                            // BuildingStore.update((s) => {
-                                            //     s.BldgId = record.building_id;
-                                            //     s.BldgName = record.building_name;
-                                            // });
-                                            setBuildingData(record);
+                                            BuildingStore.update((s) => {
+                                                s.BldgId = record.building_id;
+                                                s.BldgName = record.building_name;
+                                            });
+                                            // setBuildingData(record);
                                         }}>
-                                        <Link
+                                        {/* <Link
                                             to={{
                                                 pathname: `/energy/building/overview/${record.building_id}`,
-                                            }}>
+                                            }}> */}
                                             <span className="portfolio-txt-style">{record.building_name}</span>
-                                        </Link>
+                                        {/* </Link> */}
                                     </Dropdown.Item>
                                 ))}
                             </div>
