@@ -22,6 +22,7 @@ import {
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../components/DateRangeStore';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../components/BuildingStore';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -166,6 +167,7 @@ const PortfolioOverview = () => {
             ],
         },
     ]);
+
     const [lineChartOptions, setLineChartOptions] = useState({
         chart: {
             type: 'line',
@@ -231,6 +233,7 @@ const PortfolioOverview = () => {
             },
         },
     });
+
     const [overalldata, setOveralldata] = useState({
         total_building: 0,
         total_consumption: {
@@ -249,6 +252,7 @@ const PortfolioOverview = () => {
 
     // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
+
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
@@ -501,11 +505,13 @@ const PortfolioOverview = () => {
                     accept: 'application/json',
                 };
                 await axios.post(`${BaseUrl}${portfolioBuilidings}`, { headers }).then((res) => {
-                    setBuildingsEnergyConsume(res.data);
-                    console.log('setBuildingsEnergyConsume => ', res.data);
-                    let responseData = res.data;
+                    let data = res.data;
+                    data.sort((a, b) => {
+                        return b.density - a.density;
+                    });
+                    setBuildingsEnergyConsume(data);
                     let markerArray = [];
-                    responseData.map((record) => {
+                    data.map((record) => {
                         let markerObj = {
                             markerOffset: 25,
                             name: record.buildingName,
@@ -518,7 +524,6 @@ const PortfolioOverview = () => {
                 });
             } catch (error) {
                 console.log(error);
-                // setIsProcessing(false);
                 alert('Failed to fetch Portfolio Builidings Data');
             }
         };
@@ -636,6 +641,10 @@ const PortfolioOverview = () => {
                                                 onClick={() => {
                                                     localStorage.setItem('buildingId', item.buildingID);
                                                     localStorage.setItem('buildingName', item.buildingName);
+                                                    BuildingStore.update((s) => {
+                                                        s.BldgId = item.buildingID;
+                                                        s.BldgName = item.buildingName;
+                                                    });
                                                 }}>
                                                 <ProgressBar
                                                     color="danger"

@@ -46,6 +46,11 @@ const PageTracker = () => {
         getBuildingList();
     }, [startDate, endDate]);
 
+    useEffect(() => {
+        console.log('bldStoreId => ', bldStoreId);
+        console.log('bldStoreName => ', bldStoreName);
+    }, [bldStoreId]);
+
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">

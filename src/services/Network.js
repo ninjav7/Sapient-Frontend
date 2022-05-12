@@ -75,3 +75,5 @@ export const getExplore = '/api/energy/explorer/chart';
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
+
+export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';

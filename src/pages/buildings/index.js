@@ -25,6 +25,7 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../components/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../components/DateRangeStore';
+import { BuildingStore } from '../../components/BuildingStore';
 import './style.css';
 
 export function useHover() {
@@ -55,7 +56,7 @@ export function useHover() {
 }
 
 const BuildingOverview = () => {
-    const { bldgId = localStorage.getItem('buildingId') } = useParams();
+    const { bldgId } = useParams();
 
     const [overview, setOverview] = useState({
         total_building: 0,
