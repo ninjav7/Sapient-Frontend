@@ -20,19 +20,20 @@ const PageTracker = () => {
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
-    const [activeBuildingName, setActiveBuildingName] = useState('Select Building');
+    const [portfolioName, setPortfolioName] = useState('');
+    const [buildingData, setBuildingData] = useState({});
     const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
     const items = breadcrumList || [];
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
+        // if (startDate === null) {
+        //     return;
+        // }
+        // if (endDate === null) {
+        //     return;
+        // }
         const getBuildingList = async () => {
             let headers = {
                 'Content-Type': 'application/json',
@@ -40,16 +41,29 @@ const PageTracker = () => {
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                 setBuildingList(res.data);
-                // console.log('setBuildingList => ', res.data);
             });
         };
         getBuildingList();
-    }, [startDate, endDate]);
+    }, []);
+
+    // useEffect(() => {
+    //     console.log('bldStoreId => ', bldStoreId);
+    //     console.log('bldStoreName => ', bldStoreName);
+    // }, [bldStoreId]);
 
     useEffect(() => {
-        console.log('bldStoreId => ', bldStoreId);
-        console.log('bldStoreName => ', bldStoreName);
-    }, [bldStoreId]);
+        BuildingStore.update((s) => {
+            s.BldgId = 1;
+            s.BldgName = 'Portfolio';
+        });
+    }, [portfolioName]);
+
+    useEffect(() => {
+        // BuildingStore.update((s) => {
+        //     s.BldgId = 1;
+        //     s.BldgName = 'Portfolio';
+        // });
+    }, [buildingData]);
 
     return (
         <React.Fragment>
@@ -58,7 +72,7 @@ const PageTracker = () => {
                     <FontAwesomeIcon icon={faBuilding} className="ml-2" />
                     <DropdownButton
                         id="bts-button-styling"
-                        title={activeBuildingName}
+                        title={bldStoreName}
                         className="bts-btn-style"
                         variant="secondary">
                         <div className="content-font-style">
@@ -70,11 +84,26 @@ const PageTracker = () => {
                                     value={value}
                                 />
                             </div>
-                            <Link to="/energy/portfolio/overview">
-                                <div>
-                                    <Dropdown.Item>Portfolio</Dropdown.Item>
-                                </div>
-                            </Link>
+
+                            <div>
+                                <Dropdown.Item style={{ display: 'inline-block' }}>
+                                    <FontAwesomeIcon
+                                        icon={faBuilding}
+                                        className="mr-2"
+                                        style={{ display: 'inline-block' }}
+                                    />
+                                    <Link to="/energy/portfolio/overview">
+                                        <span
+                                            className="portfolio-txt-style"
+                                            onClick={() => {
+                                                setPortfolioName('Portfolio');
+                                            }}>
+                                            Portfolio
+                                        </span>
+                                    </Link>
+                                </Dropdown.Item>
+                            </div>
+
                             <div>
                                 <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header>
                                 {/* {buildingRecord.map((building, index) => (
@@ -83,16 +112,22 @@ const PageTracker = () => {
                                     </Dropdown.Item>
                                 ))} */}
                                 <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
-                                {buildingList.map((building, index) => (
+                                {buildingList.map((record, index) => (
                                     <Dropdown.Item
                                         onClick={() => {
-                                            setActiveBuildingName(building.building_name);
-                                            BuildingStore.update((s) => {
-                                                s.BldgId = building.building_id;
-                                                s.BldgName = building.building_name;
-                                            });
+                                            // setActiveBuildingName(building.building_name);
+                                            // BuildingStore.update((s) => {
+                                            //     s.BldgId = record.building_id;
+                                            //     s.BldgName = record.building_name;
+                                            // });
+                                            setBuildingData(record);
                                         }}>
-                                        {building.building_name}
+                                        <Link
+                                            to={{
+                                                pathname: `/energy/building/overview/${record.building_id}`,
+                                            }}>
+                                            <span className="portfolio-txt-style">{record.building_name}</span>
+                                        </Link>
                                     </Dropdown.Item>
                                 ))}
                             </div>

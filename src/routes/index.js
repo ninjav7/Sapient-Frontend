@@ -38,6 +38,7 @@ const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
+const PageTracker = React.lazy(() => import('../components/PageTracker'));
 // apps
 const CalendarApp = React.lazy(() => import('../pages/apps/Calendar'));
 const EmailInbox = React.lazy(() => import('../pages/apps/Email/Inbox'));
@@ -629,6 +630,16 @@ const exploreRoutes = {
     roles: ['Admin'],
 };
 
+const pageTrackerRoutes = {
+    name: 'Page Tracker',
+    path: '/page-tracker',
+    component: PageTracker,
+    route: PrivateRoute,
+    visibility: false,
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
+
 const controlRoutes = {
     path: '/control/plug-rules',
     name: 'Control',
@@ -792,6 +803,7 @@ const allRoutes = [
     controlRoutes,
     exploreRoutes,
     buildingRoutes,
+    pageTrackerRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,

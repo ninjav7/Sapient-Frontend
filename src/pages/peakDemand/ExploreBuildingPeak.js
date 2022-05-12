@@ -421,9 +421,6 @@ const SelectPeakTable = () => {
                                     </th>
                                     <th scope="col">Name</th>
                                     <th scope="col">% Change</th>
-                                    {/* <th scope="col">
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                    </th> */}
                                     <th scope="col">Peak Power</th>
                                     <th scope="col">Peak Power Time</th>
                                 </tr>

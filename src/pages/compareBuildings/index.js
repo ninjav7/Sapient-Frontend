@@ -105,81 +105,18 @@ const BuildingTable = ({ buildingsData }) => {
                                     <td className="table-content-style">
                                         {record.energy_density.toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
+                                        <div style={{ width: '100%', display: 'inline-block' }}>
                                             <Line
-                                                percent="100"
-                                                strokeWidth="7"
-                                                trailWidth="7"
-                                                strokeColor="#F0F2F5"
-                                                // strokeColor="#00FF00"
+                                                percent={percentageHandler(
+                                                    record.energy_consumption.now,
+                                                    record.energy_consumption.old
+                                                )}
+                                                strokeWidth="4"
+                                                trailWidth="4"
+                                                strokeColor="#C64245"
                                                 strokeLinecap="round"
                                             />
                                         </div>
-                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
-                                            {record.consumtnPer >= 90 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#D23C35"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer < 90 && record.consumtnPer > 75 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#C64245"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 75 && record.consumtnPer > 50 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#B04D66"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 50 && record.consumtnPer > 40 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#9B5985"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 40 && record.consumtnPer > 30 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#935C91"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 30 && record.consumtnPer > 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#8763BF"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#766CCE"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                        </div> */}
                                     </td>
                                     <td>
                                         {record.energy_consumption.now >= record.energy_consumption.old ? (
@@ -215,81 +152,18 @@ const BuildingTable = ({ buildingsData }) => {
                                     <td className="table-content-style">
                                         {record.hvac_consumption.now.toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
+                                        <div style={{ width: '100%', display: 'inline-block' }}>
                                             <Line
-                                                percent="100"
-                                                strokeWidth="7"
-                                                trailWidth="7"
-                                                strokeColor="#F0F2F5"
-                                                // strokeColor="#00FF00"
+                                                percent={percentageHandler(
+                                                    record.hvac_consumption.now,
+                                                    record.hvac_consumption.old
+                                                )}
+                                                strokeWidth="4"
+                                                trailWidth="4"
+                                                strokeColor="#C64245"
                                                 strokeLinecap="round"
                                             />
                                         </div>
-                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
-                                            {record.consumtnPer >= 90 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#D23C35"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer < 90 && record.consumtnPer > 75 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#C64245"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 75 && record.consumtnPer > 50 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#B04D66"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 50 && record.consumtnPer > 40 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#9B5985"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 40 && record.consumtnPer > 30 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#935C91"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 30 && record.consumtnPer > 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#8763BF"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#766CCE"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                        </div> */}
                                     </td>
                                     <td>
                                         {record.hvac_consumption.now >= record.hvac_consumption.old ? (

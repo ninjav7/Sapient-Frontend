@@ -283,7 +283,6 @@
     padding-left: 2px !important;
 }
 
-
 .navbar-container {
     /* padding: 0px 8px 0px 0px; */
     /* height: 45px; */
@@ -382,4 +381,13 @@
 
 .nav-height-custom {
     height: 50px !important;
+}
+
+.portfolio-txt-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    color: #1d2939;
 }
