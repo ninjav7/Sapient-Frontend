@@ -31,7 +31,7 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 import classnames from 'classnames';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const SingleRole = () => {
     const [checked, setChecked] = useState(true);

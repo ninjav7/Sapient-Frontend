@@ -17,10 +17,10 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BaseUrl, getBuildings } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
-import { BuildingStore } from '../../components/BuildingStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 
 const BuildingTable = ({ buildingsData }) => {

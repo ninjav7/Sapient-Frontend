@@ -13,7 +13,7 @@ import StackedBarChart from './StackedBarChart';
 import DonutChart from './DonutChart';
 import PieChart from './PieChart';
 import MixedChart from './MixedChart';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const ApexChart = () => {
     const apexLineChartWithLables = {

@@ -15,8 +15,8 @@ import {
 } from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BuildingStore } from '../../../components/BuildingStore';
-import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BaseUrl, getLocation } from '../../../services/Network';
 import '../style.css';
 

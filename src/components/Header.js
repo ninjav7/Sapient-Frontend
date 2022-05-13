@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { DateRangeStore } from './DateRangeStore';
+import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
 import '../pages/portfolio/style.css';
 
@@ -50,6 +50,9 @@ const Header = (props) => {
             let startCustomDate = new Date();
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
+            // localStorage.setItem('dateFilter', date);
+            // localStorage.setItem('startDate', startCustomDate);
+            // localStorage.setItem('endDate', endCustomDate);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
                 s.startDate = startCustomDate;
@@ -108,6 +111,7 @@ const Header = (props) => {
                                 })}
                             </Input>
                         </div>
+
                         <div>
                             <DatePicker
                                 selectsRange={true}
@@ -121,17 +125,8 @@ const Header = (props) => {
                                 placeholderText="Select Date Range"
                             />
                         </div>
-                        {/* <div>
-                                <Input
-                                    type="week"
-                                    name="week"
-                                    id="exampleWeek"
-                                    placeholder="date week"
-                                    style={{ color: 'black', fontWeight: 'bold' }}
-                                    className="select-button form-control form-control-md"
-                                />
-                            </div> */}
-                        {props.title !== 'Portfolio Overview' && (
+
+                        {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
                             <div className="float-right ml-2">
                                 <Link
                                     to={{

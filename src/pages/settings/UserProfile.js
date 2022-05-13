@@ -15,7 +15,7 @@ import {
     generalOperatingHours,
 } from '../../services/Network';
 import axios from 'axios';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UserProfile = () => {
     const [buildingId, setBuildingId] = useState(1);

@@ -5,10 +5,10 @@ import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import axios from 'axios';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import './style.css';
 
 const EndUses = () => {

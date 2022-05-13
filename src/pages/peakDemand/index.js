@@ -8,8 +8,8 @@ import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {

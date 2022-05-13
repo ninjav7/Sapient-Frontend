@@ -6,8 +6,8 @@ import './style.css';
 import axios from 'axios';
 import { BaseUrl, generalUtilityBills } from '../../services/Network';
 import moment from 'moment';
-import { BuildingStore } from '../../components/BuildingStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UtilityBills = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);

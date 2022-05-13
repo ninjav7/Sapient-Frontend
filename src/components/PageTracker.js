@@ -10,9 +10,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { BreadcrumbStore } from './BreadcrumbStore';
-import { BuildingStore } from './BuildingStore';
-import { DateRangeStore } from './DateRangeStore';
+import { BreadcrumbStore } from '../store/BreadcrumbStore';
+import { BuildingStore } from '../store/BuildingStore';
+import { DateRangeStore } from '../store/DateRangeStore';
 import './style.css';
 
 const PageTracker = () => {

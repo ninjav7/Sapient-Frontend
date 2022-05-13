@@ -10,7 +10,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalGateway } from '../../services/Network';

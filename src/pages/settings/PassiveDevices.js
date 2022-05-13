@@ -17,7 +17,7 @@ import { BaseUrl, generalPassiveDevices } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData }) => {

@@ -14,8 +14,8 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
-import { BuildingStore } from '../../../components/BuildingStore';
-import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {

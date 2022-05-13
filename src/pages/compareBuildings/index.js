@@ -18,7 +18,7 @@ import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings } from '../../services/Network';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
 // import DoughnutChart from '../charts/DoughnutChart';
@@ -20,16 +20,18 @@ import {
     getEnergyConsumption,
 } from '../../services/Network';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { DateRangeStore } from '../../components/DateRangeStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { BuildingStore } from '../../components/BuildingStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { LoadingStore } from '../../store/LoadingStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const PortfolioOverview = () => {
-    const [isProcessing, setIsProcessing] = useState(false);
+    // const isLoading = ProcessingStore.useState((s) => s.isLoading);
+    // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
@@ -363,6 +365,7 @@ const PortfolioOverview = () => {
         if (endDate === null) {
             return;
         }
+
         const portfolioOverallData = async () => {
             try {
                 let headers = {
@@ -456,15 +459,22 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                // setIsProcessing(false);
                 alert('Failed to fetch Energy Consumption Data');
             }
         };
 
+        // const setLoading = () => {
+        //     ProcessingStore.update((s) => {
+        //         s.isLoading = !isLoading;
+        //     });
+        // };
+
         // setIsProcessing(true);
+        // setLoading();
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
+        // setLoading();
         // setIsProcessing(false);
     }, [startDate, endDate]);
 
@@ -532,15 +542,20 @@ const PortfolioOverview = () => {
         portfolioBuilidingsData();
     }, []);
 
+    // useEffect(() => {
+    //     console.log('isLoading => ', isLoading);
+    // });
+
     return (
         <React.Fragment>
-            {isProcessing && (
-                <div className="custom-loading-style">
-                    <TailSpin color="#4A4A4A" height={80} width={80} />
+            {/* {!isLoading && (
+                <div className="custom-loading-style"> */}
+            {/* <TailSpin color="#4A4A4A" height={80} width={80} /> */}
+            {/* <Spinner className="m-2" color={'primary'} />
                 </div>
-            )}
+            )} */}
 
-            {!isProcessing && (
+            {/* {isLoading && ( */}
                 <>
                     <Header title="Portfolio Overview" />
                     {/* <Row>
@@ -782,7 +797,7 @@ const PortfolioOverview = () => {
                         </Col>
                     </Row>
                 </>
-            )}
+            {/* )} */}
         </React.Fragment>
     );
 };

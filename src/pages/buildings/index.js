@@ -22,10 +22,10 @@ import {
 } from '../../services/Network';
 import moment from 'moment';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
-import { DateRangeStore } from '../../components/DateRangeStore';
-import { BuildingStore } from '../../components/BuildingStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 
 export function useHover() {

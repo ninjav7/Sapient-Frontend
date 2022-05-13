@@ -4,12 +4,12 @@ import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
 import MixedChart from '../charts/MixedChart';
 import LineColumnChart from '../charts/LineColumnChart';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../services/Network';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import './style.css';
 
 const UsagePageThree = () => {

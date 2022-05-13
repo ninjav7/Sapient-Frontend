@@ -16,8 +16,8 @@ import './style.css';
 // import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
-import { BuildingStore } from '../../components/BuildingStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const Layout = () => {
     // const store = useSelector((state) => state.counterState);

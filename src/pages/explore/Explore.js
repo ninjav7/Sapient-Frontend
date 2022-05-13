@@ -12,8 +12,8 @@ import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } fro
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
 import { BaseUrl, getExplore } from '../../services/Network';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
