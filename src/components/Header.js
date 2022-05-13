@@ -62,6 +62,22 @@ const Header = (props) => {
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
+    useEffect(() => {
+        console.log('dateRange => ', dateRange);
+    });
+
+    useEffect(() => {
+        const setCustomDate = (date) => {
+            let startCustomDate = date[0];
+            let endCustomDate = date[1];
+            DateRangeStore.update((s) => {
+                s.startDate = startCustomDate;
+                s.endDate = endCustomDate;
+            });
+        };
+        setCustomDate(dateRange);
+    }, [dateRange]);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -89,8 +105,8 @@ const Header = (props) => {
                             </div>
                         </div>
                     )}
-
                     {props.title !== 'Compare Buildings' && ( */}
+
                     <div
                         className="btn-group custom-button-group header-widget-styling"
                         role="group"
@@ -120,6 +136,7 @@ const Header = (props) => {
                                 onChange={(update) => {
                                     setDateRange(update);
                                 }}
+                                maxDate={new Date()}
                                 dateFormat="MMMM d"
                                 className="select-button form-control form-control-md font-weight-bold"
                                 placeholderText="Select Date Range"

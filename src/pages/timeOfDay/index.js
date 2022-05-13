@@ -184,6 +184,9 @@ const TimeOfDay = () => {
     const weekdaysOptions = {
         chart: {
             type: 'heatmap',
+            toolbar: {
+                show: false,
+            },
         },
         dataLabels: {
             enabled: false,
@@ -191,11 +194,15 @@ const TimeOfDay = () => {
         stroke: {
             width: 1,
         },
+        legend: {
+            show: false,
+        },
         plotOptions: {
             heatmap: {
                 shadeIntensity: 0.5,
                 radius: 0,
                 useFillColorAsStroke: false,
+
                 // xaxis: {
                 //     range: 4,
                 // },

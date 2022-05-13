@@ -1,6 +1,5 @@
-// export const BaseUrl = 'https://sapient-ele.herokuapp.com';
-// export const BaseUrl = 'https://eneryg-service.ukwest.cloudapp.azure.com';
-export const BaseUrl = 'http://127.0.0.1:8000';
+export const BaseUrl = 'https://eneryg-service.ukwest.cloudapp.azure.com';
+// export const BaseUrl = 'http://127.0.0.1:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';

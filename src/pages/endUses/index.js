@@ -149,7 +149,7 @@ const EndUses = () => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -163,26 +163,35 @@ const EndUses = () => {
                     accept: 'application/json',
                 };
                 let params = `?building_id=${bldgId}`;
-                await axios.post(`${BaseUrl}${endUsesChart}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
-                    console.log('EndUses Response Data => ', responseData);
-                    let newArray = [];
-                    responseData.map((element) => {
-                        let newObj = {
-                            name: element.name,
-                            data: formatData(element.data),
+                await axios
+                    .post(
+                        `${BaseUrl}${endUsesChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        // console.log('EndUses Response Data => ', responseData);
+                        let newArray = [];
+                        responseData.map((element) => {
+                            let newObj = {
+                                name: element.name,
+                                data: formatData(element.data),
+                            };
+                            newArray.push(newObj);
+                        });
+                        setBarChartData(newArray);
+                        let newXaxis = {
+                            categories: [],
                         };
-                        newArray.push(newObj);
+                        responseData[0].data.map((element) => {
+                            return newXaxis.categories.push(`Week ${element._id}`);
+                        });
+                        setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
                     });
-                    setBarChartData(newArray);
-                    let newXaxis = {
-                        categories: [],
-                    };
-                    responseData[0].data.map((element) => {
-                        return newXaxis.categories.push(`Week ${element._id}`);
-                    });
-                    setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
-                });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch EndUses Data');
@@ -190,7 +199,7 @@ const EndUses = () => {
         };
         endUsesDataFetch();
         endUsesChartDataFetch();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

@@ -497,24 +497,33 @@ const PeakDemand = () => {
                     accept: 'application/json',
                 };
                 let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${peakDemandTrendChart}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
-                    let newPeakData = [
+                await axios
+                    .post(
+                        `${BaseUrl}${peakDemandTrendChart}${params}`,
                         {
-                            name: 'Peak for Time Period',
-                            data: [],
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
                         },
-                    ];
-                    let newData = [];
-                    let newDateLabels = [];
-                    responseData.map((record) => {
-                        newData.push(record.energy_consumption);
-                        newDateLabels.push(moment(record.date).format('LL'));
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        let newPeakData = [
+                            {
+                                name: 'Peak for Time Period',
+                                data: [],
+                            },
+                        ];
+                        let newData = [];
+                        let newDateLabels = [];
+                        responseData.map((record) => {
+                            newData.push(record.energy_consumption);
+                            newDateLabels.push(moment(record.date).format('LL'));
+                        });
+                        newPeakData[0].data = newData;
+                        setPeakDemandTrendData(newPeakData);
+                        setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
                     });
-                    newPeakData[0].data = newData;
-                    setPeakDemandTrendData(newPeakData);
-                    setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
-                });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Peak-Demand Trend Data');
@@ -528,19 +537,19 @@ const PeakDemand = () => {
                     accept: 'application/json',
                 };
                 let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${peakDemandYearlyPeak}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
-                    setYearlyPeakData(responseData);
-                    console.log('SSR responseData => ', responseData);
-                    // {
-                    //     "energy_consumption": {
-                    //         "now": 7843.55,
-                    //         "old": 0,
-                    //         "yearly": 0
-                    //     },
-                    //     "timestamp": "2022-04-25T08:15:44.989000"
-                    // }
-                });
+                await axios
+                    .post(
+                        `${BaseUrl}${peakDemandYearlyPeak}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        setYearlyPeakData(responseData);
+                    });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Peak-Demand Yearly Peak Data');
@@ -550,7 +559,7 @@ const PeakDemand = () => {
         buildingPeaksData();
         peakDemandTrendFetch();
         peakDemandYearlyData();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

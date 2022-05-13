@@ -559,7 +559,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                 </div>
                             </div>
 
-                            <div className="card usage-card-box-style button-style">
+                            {/* <div className="card usage-card-box-style button-style">
                                 <div className="card-body">
                                     <p className="subtitle-style" style={{ margin: '2px', fontWeight: 'bold' }}>
                                         Lightning Utilization
@@ -597,7 +597,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                         <span className="card-unit-style">&nbsp;Watts / Sq. Ft.</span>
                                     </p>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     );
                 })}
