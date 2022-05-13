@@ -685,7 +685,7 @@ const PortfolioOverview = () => {
                                         <DonutChart
                                             donutChartOpts={donutChartOpts}
                                             donutChartData={donutChartData}
-                                            height={200}
+                                            height={185}
                                             id={Date.now()}
                                         />
                                     </div>
