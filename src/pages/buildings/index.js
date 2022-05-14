@@ -1083,8 +1083,11 @@ const BuildingOverview = () => {
                 </div>
             </Row>
 
-            <Row>
-                <Col xl={8} style={{ marginTop: '2rem', marginLeft: '23px' }}>
+            {/* <Row> */}
+            <div className="bldg-page-grid-style">
+                {/* <Col md={8} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
+                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    {/* Energy Consumption by End Use  */}
                     <Row>
                         <Col xl={12}>
                             <h6
@@ -1098,13 +1101,12 @@ const BuildingOverview = () => {
                                 }}>
                                 <div
                                     rel="noopener noreferrer"
-                                    className="link-primary"
+                                    className="link-primary mr-3"
                                     style={{
                                         display: 'inline-block',
                                         float: 'right',
                                         textDecoration: 'none',
                                         fontWeight: 'bold',
-                                        marginRight: '3vw',
                                     }}>
                                     More Details
                                 </div>
@@ -1163,12 +1165,173 @@ const BuildingOverview = () => {
                             </Table>
                         </Col>
                     </Row>
-                </Col>
 
-                <div className="right-side-container">
-                    {/* Grid 1 */}
-                    <div>
-                        <Col style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    {/* Top 3 Peak Demand Periods  */}
+                    <Row>
+                        <div className="card-body">
+                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                                Top 3 Peak Demand Periods
+                            </h6>
+                            <Link
+                                to={{
+                                    pathname: `/energy/peak-demand/${bldgId}`,
+                                }}>
+                                <a
+                                    rel="noopener noreferrer"
+                                    className="link-primary font-weight-bold mr-3"
+                                    style={{
+                                        display: 'inline-block',
+                                        float: 'right',
+                                        textDecoration: 'none',
+                                    }}>
+                                    More Details
+                                </a>
+                            </Link>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                Max power draw (15 minutes period)
+                            </h6>
+                            <div className="card-group mt-2 top-peak-demand-style">
+                                {topContributors.map((item, index) => (
+                                    <div className="card peak-demand-container mt-3" ref={hoverRef}>
+                                        <div className="card-body">
+                                            <h6
+                                                className="card-title text-muted peak-demand-card-style"
+                                                style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
+                                                {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
+                                                {new Date(item.timeRange.frm).toLocaleTimeString('en', {
+                                                    timeStyle: 'short',
+                                                    hour12: true,
+                                                    timeZone: 'UTC',
+                                                })}
+                                            </h6>
+                                            <h5 className="card-title ml-1">
+                                                <span style={{ color: 'black' }}>
+                                                    {item.overall_energy_consumption.toLocaleString(undefined, {
+                                                        maximumFractionDigits: 2,
+                                                    })}
+                                                </span>{' '}
+                                                kW
+                                            </h5>
+                                            <div style={{ height: '75%' }}>
+                                                {isHovered ? (
+                                                    <div
+                                                        style={{ display: 'flex', justifyContent: 'center' }}
+                                                        className="m-4">
+                                                        <Link
+                                                            to={{
+                                                                pathname: `/energy/building-peak-explore/${localStorage.getItem(
+                                                                    'buildingId'
+                                                                )}`,
+                                                            }}>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
+                                                                <i className="uil uil-pen mr-1"></i>Explore
+                                                            </button>
+                                                        </Link>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <p className="card-text peak-card-label">Top Contributors</p>
+                                                        <table className="table table-borderless small peak-table-font">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="peak-table-content">
+                                                                        {item.top_contributors.map((el) => (
+                                                                            <tr>
+                                                                                <div className="font-weight-bold text-dark">
+                                                                                    {el.equipment_name}
+                                                                                </div>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </td>
+                                                                    <td className="peak-table-content-two">
+                                                                        {item.top_contributors.map((el2) => (
+                                                                            <tr style={{ fontSize: 12 }}>
+                                                                                <div className="">
+                                                                                    {el2.energy_consumption.now.toLocaleString(
+                                                                                        undefined,
+                                                                                        {
+                                                                                            maximumFractionDigits: 2,
+                                                                                        }
+                                                                                    )}{' '}
+                                                                                    kW
+                                                                                </div>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </Row>
+
+                    {/* Hourly Average Consumption */}
+                    <Row>
+                        <div className="card-body">
+                            <h6
+                                className="card-title custom-title"
+                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                                Hourly Average Consumption
+                            </h6>
+                            <Link
+                                to={{
+                                    pathname: `/energy/time-of-day/${bldgId}`,
+                                }}>
+                                <a
+                                    rel="noopener noreferrer"
+                                    className="link-primary mr-3"
+                                    style={{
+                                        display: 'inline-block',
+                                        float: 'right',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                    }}>
+                                    More Details
+                                </a>
+                            </Link>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
+                            <div className="hour-avg-consumtn p-1">
+                                <HeatMapChart
+                                    options={weekDaysOptions}
+                                    series={weekDaysSeries}
+                                    height={weekdaysChartHeight}
+                                />
+                                <HeatMapChart
+                                    // options={weekDaysOptions}
+                                    options={weekEndsOptions}
+                                    series={weekEndsSeries}
+                                    // series={weekDaysSeries}
+                                    height={weekendsChartHeight}
+                                />
+                            </div>
+                        </div>
+                    </Row>
+
+                    {/* Total Energy Consumption  */}
+                    <Row>
+                        <div className="card-body">
+                            <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
+                            <div className="total-eng-consumtn">
+                                <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
+                            </div>
+                        </div>
+                    </Row>
+                </div>
+                {/* </Col> */}
+
+                {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
+                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    <Row>
+                        <div>
                             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                                 Building Alerts
                             </h6>
@@ -1181,7 +1344,7 @@ const BuildingOverview = () => {
                                     textDecoration: 'none',
                                     fontWeight: 'bold',
                                 }}></a>
-                            <span className="float-right mr-4" onClick={() => setBuildingAlerts([])}>
+                            <span className="float-right mr-0" onClick={() => setBuildingAlerts([])}>
                                 Clear
                             </span>
 
@@ -1236,18 +1399,16 @@ const BuildingOverview = () => {
                                     );
                                 })}
                             </div>
-                        </Col>
-                    </div>
-
-                    {/* Grid 2 */}
-                    <div>
-                        <Col style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                        </div>
+                    </Row>
+                    <Row style={{ marginTop: '2rem' }}>
+                        <div>
                             <h6
                                 className="card-title custom-title"
                                 style={{ display: 'inline-block', fontWeight: 'bold' }}>
                                 Top Equipment Consumption
                             </h6>
-                            <div className="equip-table-container">
+                            <div className="equip-table-container mt-1">
                                 <table className="table table-borderless">
                                     <thead>
                                         <tr className="equip-table-heading">
@@ -1337,172 +1498,12 @@ const BuildingOverview = () => {
                                     </tbody>
                                 </table>
                             </div>
-                        </Col>
-                    </div>
+                        </div>
+                    </Row>
                 </div>
-            </Row>
-
-            {/* Top 3 Peak Demand Periods  */}
-            <Row>
-                <Col lg={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Top 3 Peak Demand Periods
-                        </h6>
-                        <Link
-                            to={{
-                                pathname: `/energy/peak-demand/${bldgId}`,
-                            }}>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary font-weight-bold"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                }}>
-                                More Details
-                            </a>
-                        </Link>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Max power draw (15 minutes period)</h6>
-                        <div className="card-group mt-2 top-peak-demand-style">
-                            {topContributors.map((item, index) => (
-                                <div className="card peak-demand-container mt-3" ref={hoverRef}>
-                                    <div className="card-body">
-                                        <h6
-                                            className="card-title text-muted peak-demand-card-style"
-                                            style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
-                                            {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
-                                            {new Date(item.timeRange.frm).toLocaleTimeString('en', {
-                                                timeStyle: 'short',
-                                                hour12: true,
-                                                timeZone: 'UTC',
-                                            })}
-                                        </h6>
-                                        <h5 className="card-title ml-1">
-                                            <span style={{ color: 'black' }}>
-                                                {item.overall_energy_consumption.toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
-                                                })}
-                                            </span>{' '}
-                                            kW
-                                        </h5>
-                                        <div style={{ height: '75%' }}>
-                                            {isHovered ? (
-                                                <div
-                                                    style={{ display: 'flex', justifyContent: 'center' }}
-                                                    className="m-4">
-                                                    <Link
-                                                        to={{
-                                                            pathname: `/energy/building-peak-explore/${localStorage.getItem(
-                                                                'buildingId'
-                                                            )}`,
-                                                        }}>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
-                                                            <i className="uil uil-pen mr-1"></i>Explore
-                                                        </button>
-                                                    </Link>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <p className="card-text peak-card-label">Top Contributors</p>
-                                                    <table className="table table-borderless small peak-table-font">
-                                                        <tbody>
-                                                            <tr>
-                                                                <td className="peak-table-content">
-                                                                    {item.top_contributors.map((el) => (
-                                                                        <tr>
-                                                                            <div className="font-weight-bold text-dark">
-                                                                                {el.equipment_name}
-                                                                            </div>
-                                                                        </tr>
-                                                                    ))}
-                                                                </td>
-                                                                <td className="peak-table-content-two">
-                                                                    {item.top_contributors.map((el2) => (
-                                                                        <tr style={{ fontSize: 12 }}>
-                                                                            <div className="">
-                                                                                {el2.energy_consumption.now.toLocaleString(
-                                                                                    undefined,
-                                                                                    {
-                                                                                        maximumFractionDigits: 2,
-                                                                                    }
-                                                                                )}{' '}
-                                                                                kW
-                                                                            </div>
-                                                                        </tr>
-                                                                    ))}
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </Col>
-            </Row>
-
-            {/* Hourly Average Consumption */}
-            <Row>
-                <Col lg={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                            Hourly Average Consumption
-                        </h6>
-                        <Link
-                            to={{
-                                pathname: `/energy/time-of-day/${bldgId}`,
-                            }}>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}>
-                                More Details
-                            </a>
-                        </Link>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                        <div className="hour-avg-consumtn p-1">
-                            <HeatMapChart
-                                options={weekDaysOptions}
-                                series={weekDaysSeries}
-                                height={weekdaysChartHeight}
-                            />
-                            <HeatMapChart
-                                // options={weekDaysOptions}
-                                options={weekEndsOptions}
-                                series={weekEndsSeries}
-                                // series={weekDaysSeries}
-                                height={weekendsChartHeight}
-                            />
-                        </div>
-                    </div>
-                </Col>
-            </Row>
-
-            {/* Total Energy Consumption  */}
-            <Row>
-                <Col xl={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title">Total Energy Consumption</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                        <div className="total-eng-consumtn">
-                            <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
-                        </div>
-                    </div>
-                </Col>
-            </Row>
+                {/* </Col> */}
+            </div>
+            {/* </Row> */}
         </React.Fragment>
     );
 };

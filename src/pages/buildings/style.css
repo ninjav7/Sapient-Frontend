@@ -259,6 +259,8 @@
     font-weight: 600 !important;
     font-size: 14px !important;
     line-height: 20px !important;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
 .peak-demand-card-style {
@@ -370,4 +372,9 @@
     border: 1px solid #d9dde2;
     box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
     border-radius: 6px;
+}
+
+.bldg-page-grid-style {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
 }
