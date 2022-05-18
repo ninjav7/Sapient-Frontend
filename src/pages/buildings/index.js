@@ -812,6 +812,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setTopContributors(res.data);
+                        console.log('setTopContributors => ', res.data);
                         console.log(res.data);
                     });
             } catch (error) {
@@ -1191,7 +1192,7 @@ const BuildingOverview = () => {
                                 Max power draw (15 minutes period)
                             </h6>
                             <div className="card-group mt-2 top-peak-demand-style">
-                                {topContributors.map((item, index) => (
+                                {topContributors.slice(0, 3).map((item, index) => (
                                     <div className="card peak-demand-container mt-3" ref={hoverRef}>
                                         <div className="card-body">
                                             <h6

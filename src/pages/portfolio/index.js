@@ -40,6 +40,7 @@ const PortfolioOverview = () => {
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const [daysCount, setDaysCount] = useState(0);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
@@ -202,7 +203,7 @@ const PortfolioOverview = () => {
             shared: true,
             intersect: false,
             x: {
-                show: true,
+                show: false,
             },
         },
         xaxis: {
@@ -418,7 +419,7 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Portfolio EndUses Data');
+                console.log('Failed to fetch Portfolio EndUses Data');
             }
         };
 
@@ -439,7 +440,57 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
+                        // let response = res.data;
+                        let response = [
+                            {
+                                _id: 18,
+                                x: '2022-04-18T02:34:37.354000',
+                                y: 303.1,
+                                count_total: 2,
+                            },
+                            {
+                                _id: 21,
+                                x: '2022-04-21T02:39:46.186000',
+                                y: 3866.2,
+                                count_total: 4,
+                            },
+                            {
+                                _id: 22,
+                                x: '2022-04-22T03:31:30.816000',
+                                y: 989.55,
+                                count_total: 1,
+                            },
+                            {
+                                _id: 24,
+                                x: '2022-04-24T06:47:05.689000',
+                                y: 4670.2,
+                                count_total: 4,
+                            },
+                            {
+                                _id: 25,
+                                x: '2022-04-25T06:52:55.386000',
+                                y: 8385488.6899999995,
+                                count_total: 24,
+                            },
+                            {
+                                _id: 26,
+                                x: '2022-04-26T06:49:34.141000',
+                                y: 2570.75,
+                                count_total: 5,
+                            },
+                            {
+                                _id: 12,
+                                x: '2022-05-12T06:48:51.595000',
+                                y: 40500.55,
+                                count_total: 2,
+                            },
+                            {
+                                _id: 16,
+                                x: '2022-05-16T20:19:51.595000',
+                                y: 9000,
+                                count_total: 3,
+                            },
+                        ];
                         let newArray = [
                             {
                                 data: [],
@@ -513,6 +564,12 @@ const PortfolioOverview = () => {
             }
         };
 
+        const calculateDays = () => {
+            let time_difference = endDate.getTime() - startDate.getTime();
+            let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            setDaysCount(days_difference);
+        };
+
         // const setLoading = () => {
         //     ProcessingStore.update((s) => {
         //         s.isLoading = !isLoading;
@@ -526,6 +583,7 @@ const PortfolioOverview = () => {
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
+        calculateDays();
         // setLoading();
         // setIsProcessing(false);
     }, [startDate, endDate]);
@@ -584,6 +642,8 @@ const PortfolioOverview = () => {
                                     consumptionNormal={
                                         overalldata.total_consumption.now >= overalldata.total_consumption.old
                                     }
+                                    infoText={`Total energy consumption accross all your buildings for the past ${daysCount} days.`}
+                                    infoType={`total-eng-cnsmp`}
                                 />
                             </div>
                         </div>
@@ -601,6 +661,8 @@ const PortfolioOverview = () => {
                                     consumptionNormal={
                                         overalldata.average_energy_density.now >= overalldata.average_energy_density.old
                                     }
+                                    infoText={`Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} days.`}
+                                    infoType={`avg-eng-dnty`}
                                 />
                             </div>
                         </div>
@@ -618,6 +680,8 @@ const PortfolioOverview = () => {
                                     consumptionNormal={
                                         overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
                                     }
+                                    infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                    infoType={`total-eui`}
                                 />
                             </div>
                         </div>
@@ -642,7 +706,7 @@ const PortfolioOverview = () => {
                                 Energy Density
                             </span>
 
-                            {buildingsEnergyConsume.map((item, index) => (
+                            {buildingsEnergyConsume.slice(0, 6).map((item, index) => (
                                 <Col md={6} xl={12}>
                                     <Link
                                         to={{

@@ -10,7 +10,9 @@ import Select from 'react-select';
 const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activatedMenuItemIds }) => {
     const Icon = item.icon || null;
 
-    console.log('Child Items => ', item.children);
+    console.log('AppMenu activatedMenuItemIds => ', activatedMenuItemIds);
+    console.log('AppMenu subMenuClassNames => ', subMenuClassNames);
+    console.log('AppMenu item => ', item);
 
     return (
         <li className={classNames('side-nav-item', { 'mm-active': activatedMenuItemIds.indexOf(item.id) >= 0 })}>
