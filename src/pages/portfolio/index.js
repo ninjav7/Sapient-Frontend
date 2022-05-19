@@ -517,7 +517,9 @@ const PortfolioOverview = () => {
                     accept: 'application/json',
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                    setBuildingRecord(res.data);
+                    let data = res.data;
+                    let activeBldgs = data.filter((bld) => bld.active === true);
+                    setBuildingRecord(activeBldgs);
                 });
             } catch (error) {
                 console.log(error);
@@ -620,16 +622,16 @@ const PortfolioOverview = () => {
                 {/* <Row>
                         <Skeleton width={80} height={20} />
                     </Row> */}
-                <Row>
-                    <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                        <div className="card card-box-style button-style">
-                            <div className="card-body" style={{ marginTop: '2px' }}>
+                <Row className="mt-2">
+                    <div className="energy-summary-alignment">
+                        <div className="card-box-style button-style">
+                            <div className="card-body">
                                 <h5 className="card-title subtitle-style">Total Buildings</h5>
                                 <p className="card-text card-content-style">{buildingRecord.length}</p>
                             </div>
                         </div>
 
-                        <div className="card card-box-style button-style">
+                        <div className="card-box-style button-style">
                             <div className="card-body">
                                 <DetailedButton
                                     title="Total Consumption"
@@ -648,7 +650,7 @@ const PortfolioOverview = () => {
                             </div>
                         </div>
 
-                        <div className="card card-box-style button-style">
+                        <div className="card-box-style button-style">
                             <div className="card-body">
                                 <DetailedButton
                                     title="Average Energy Density"
@@ -667,7 +669,7 @@ const PortfolioOverview = () => {
                             </div>
                         </div>
 
-                        <div className="card card-box-style button-style">
+                        <div className="card-box-style button-style">
                             <div className="card-body">
                                 <DetailedButton
                                     title="12 Mo. Electric EUI"
@@ -768,28 +770,28 @@ const PortfolioOverview = () => {
                                                                     <div
                                                                         className="dot"
                                                                         style={{
-                                                                            backgroundColor: '#3094B9',
+                                                                            background: '#3094B9',
                                                                         }}></div>
                                                                 )}
                                                                 {record.device === 'Lighting' && (
                                                                     <div
                                                                         className="dot"
                                                                         style={{
-                                                                            backgroundColor: '#2C4A5E',
+                                                                            background: '#2C4A5E',
                                                                         }}></div>
                                                                 )}
                                                                 {record.device === 'Plug' && (
                                                                     <div
                                                                         className="dot"
                                                                         style={{
-                                                                            backgroundColor: '#66D6BC',
+                                                                            background: '#66D6BC',
                                                                         }}></div>
                                                                 )}
                                                                 {record.device === 'Process' && (
                                                                     <div
                                                                         className="dot"
                                                                         style={{
-                                                                            backgroundColor: '#3B8554',
+                                                                            background: '#3B8554',
                                                                         }}></div>
                                                                 )}
                                                             </td>

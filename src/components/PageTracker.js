@@ -40,7 +40,9 @@ const PageTracker = () => {
                 accept: 'application/json',
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                setBuildingList(res.data);
+                let data = res.data;
+                let activeBldgs = data.filter((bld) => bld.active === true);
+                setBuildingList(activeBldgs);
             });
         };
         getBuildingList();
@@ -126,7 +128,7 @@ const PageTracker = () => {
                                             to={{
                                                 pathname: `/energy/building/overview/${record.building_id}`,
                                             }}> */}
-                                            <span className="portfolio-txt-style">{record.building_name}</span>
+                                        <span className="portfolio-txt-style">{record.building_name}</span>
                                         {/* </Link> */}
                                     </Dropdown.Item>
                                 ))}
