@@ -24,6 +24,14 @@
     /* font-family: 'Inter', sans-serif; */
 }
 
+.dot {
+    position: static !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 20px;
+    margin-top: 6px;
+}
+
 /* .card-box-style:hover {
     height: 90px;
     background: rgb(224, 222, 222);

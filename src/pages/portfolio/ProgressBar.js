@@ -10,10 +10,10 @@ const ProgressBar = (props) => {
             <CardBody className="p-0">
                 <div className="p-1">
                     <Progress
-                        className="my-2"
                         style={{ height: '5px' }}
                         color={progressColor}
                         value={props.progressValue}
+                        className="my-2 custom-progress-bar"
                     />
                     <span className="text-muted font-weight-bolder float-left progress-title">
                         {props.progressTitle}

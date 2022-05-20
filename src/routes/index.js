@@ -398,6 +398,7 @@ const buildingRoutes = {
 const portfolioRoutes = {
     path: '/energy',
     name: 'Energy',
+    component: () => <Redirect to="/energy/portfolio/overview" />,
     visibility: true,
     children: [
         {

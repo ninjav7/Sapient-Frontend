@@ -6,6 +6,7 @@ import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
 // import MapChart from '../charts/MapChart';
 import SimpleMaps from '../charts/SimpleMaps';
+import ReactGoogleMap from './ReactGoogleMap';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
 import Header from '../../components/Header';
@@ -40,7 +41,8 @@ const PortfolioOverview = () => {
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const [daysCount, setDaysCount] = useState(0);
+    const [daysCount, setDaysCount] = useState(1);
+    const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
@@ -440,57 +442,7 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        // let response = res.data;
-                        let response = [
-                            {
-                                _id: 18,
-                                x: '2022-04-18T02:34:37.354000',
-                                y: 303.1,
-                                count_total: 2,
-                            },
-                            {
-                                _id: 21,
-                                x: '2022-04-21T02:39:46.186000',
-                                y: 3866.2,
-                                count_total: 4,
-                            },
-                            {
-                                _id: 22,
-                                x: '2022-04-22T03:31:30.816000',
-                                y: 989.55,
-                                count_total: 1,
-                            },
-                            {
-                                _id: 24,
-                                x: '2022-04-24T06:47:05.689000',
-                                y: 4670.2,
-                                count_total: 4,
-                            },
-                            {
-                                _id: 25,
-                                x: '2022-04-25T06:52:55.386000',
-                                y: 8385488.6899999995,
-                                count_total: 24,
-                            },
-                            {
-                                _id: 26,
-                                x: '2022-04-26T06:49:34.141000',
-                                y: 2570.75,
-                                count_total: 5,
-                            },
-                            {
-                                _id: 12,
-                                x: '2022-05-12T06:48:51.595000',
-                                y: 40500.55,
-                                count_total: 2,
-                            },
-                            {
-                                _id: 16,
-                                x: '2022-05-16T20:19:51.595000',
-                                y: 9000,
-                                count_total: 3,
-                            },
-                        ];
+                        let response = res.data;
                         let newArray = [
                             {
                                 data: [],
@@ -544,9 +496,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        data.sort((a, b) => {
-                            return b.density - a.density;
-                        });
+                        console.log('setBuildingsEnergyConsume => ', data);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {
@@ -567,9 +517,22 @@ const PortfolioOverview = () => {
         };
 
         const calculateDays = () => {
-            let time_difference = endDate.getTime() - startDate.getTime();
-            let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            setDaysCount(days_difference);
+            // let time_difference = endDate.getTime() - startDate.getTime();
+            // let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            // if (days_difference === 0) {
+            //     days_difference = 1;
+            // }
+            // setDaysCount(days_difference);
+            // let days_differences = moment.duration(startDate.diff(endDate)).asDays();
+
+            let start = moment(startDate),
+                end = moment(endDate),
+                days = end.diff(start, 'days');
+
+            if (days === 0) {
+                days = 1;
+            }
+            setDaysCount(days);
         };
 
         // const setLoading = () => {
@@ -606,6 +569,14 @@ const PortfolioOverview = () => {
 
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        if (!buildingsEnergyConsume.length > 0) {
+            return;
+        }
+        let topVal = buildingsEnergyConsume[0].density;
+        setTopEnergyDensity(topVal);
+    }, [buildingsEnergyConsume]);
 
     return (
         <React.Fragment>
@@ -697,6 +668,7 @@ const PortfolioOverview = () => {
                             <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                             <div className="portfolio-map-widget">
                                 <SimpleMaps markers={markers} />
+                                {/* <ReactGoogleMap /> */}
                             </div>
                         </div>
                     </Col>
@@ -724,13 +696,23 @@ const PortfolioOverview = () => {
                                                     s.BldgName = item.buildingName;
                                                 });
                                             }}>
-                                            <ProgressBar
-                                                color="danger"
-                                                progressValue={item.density.toFixed(2)}
-                                                progressTitle={item.buildingName}
-                                                progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
-                                                className="progress-bar-container"
-                                            />
+                                            {index === 0 ? (
+                                                <ProgressBar
+                                                    color="danger"
+                                                    progressValue={100}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container custom-progress-bar"
+                                                />
+                                            ) : (
+                                                <ProgressBar
+                                                    color="danger"
+                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            )}
                                         </div>
                                     </Link>
                                 </Col>

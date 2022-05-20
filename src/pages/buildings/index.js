@@ -494,40 +494,14 @@ const BuildingOverview = () => {
         stroke: {
             width: 0.7,
         },
+        colors: ['#87AADE', '#F87171'],
         plotOptions: {
             heatmap: {
-                // shadeIntensity: 0.5,
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 1500,
-                            color: '#9bb4da',
-                        },
-                        {
-                            from: 1501,
-                            to: 3000,
-                            color: '#819dc9',
-                        },
-                        {
-                            from: 3001,
-                            to: 4500,
-                            color: '#128FD9',
-                        },
-                        {
-                            from: 4501,
-                            to: 6000,
-                            color: '#F87171',
-                        },
-                        {
-                            from: 6001,
-                            to: 7500,
-                            color: '#FF0000',
-                        },
-                    ],
-                },
             },
         },
         yaxis: {
@@ -535,14 +509,27 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        // xaxis: {
+        //     labels: {
+        //         show: true,
+        //         datetimeFormatter: {
+        //             hour: 'HH',
+        //         },
+        //     },
+        //     type: 'category',
+        //     categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
+        // },
         xaxis: {
+            axisTicks: {
+                show: true,
+            },
+            tickAmount: 12,
+            range: 24,
             labels: {
                 show: true,
-                datetimeFormatter: {
-                    hour: 'HH',
-                },
+                type: 'category',
+                categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
             },
-            // categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
         },
     });
 
@@ -631,21 +618,57 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        // xaxis: {
+        //     labels: {
+        //         show: true,
+        //         datetimeFormatter: {
+        //             hour: 'HH',
+        //         },
+        //     },
+        // },
         xaxis: {
+            axisTicks: {
+                show: true,
+            },
+            tickAmount: 6,
+            // range: 23,
+            type: 'category',
+            // categories: [
+            //     '12AM',
+            //     '1AM',
+            //     '2AM',
+            //     '3AM',
+            //     '4AM',
+            //     '5AM',
+            //     '6AM',
+            //     '7AM',
+            //     '8AM',
+            //     '9AM',
+            //     '10AM',
+            //     '11AM',
+            //     '12PM',
+            //     '1PM',
+            //     '2PM',
+            //     '3PM',
+            //     '4PM',
+            //     '5PM',
+            //     '6PM',
+            //     '7PM',
+            //     '8PM',
+            //     '9PM',
+            //     '10PM',
+            //     '11PM',
+            // ],
             labels: {
                 show: true,
-                datetimeFormatter: {
-                    hour: 'HH',
-                },
             },
-            // categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
         },
     });
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
-    const [daysCount, setDaysCount] = useState(0);
+    const [daysCount, setDaysCount] = useState(1);
 
     const [hoverRef, isHovered] = useHover();
 
@@ -861,10 +884,11 @@ const BuildingOverview = () => {
                             }
                         }
 
-                        for (let i = 1; i <= 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x === i);
-
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
                             if (matchedRecord) {
+                                matchedRecord.x = i;
+                                console.log('matchedRecord => ', matchedRecord);
                                 newWeekendsData[0].data.push(matchedRecord);
                             } else {
                                 newWeekendsData[0].data.push({
@@ -873,9 +897,17 @@ const BuildingOverview = () => {
                                 });
                             }
                         }
-
+                        console.log('newWeekendsData => ', newWeekendsData);
                         setWeekDaysSeries(newWeekdaysData);
-                        setWeekEndsSeries(newWeekendsData);
+                        // setWeekEndsSeries(newWeekendsData);
+                        setWeekEndsSeries([
+                            {
+                                name: 'Weekends',
+                                data: [
+                                    500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+                                ],
+                            },
+                        ]);
                     });
             } catch (error) {
                 console.log(error);
@@ -924,6 +956,9 @@ const BuildingOverview = () => {
         const calculateDays = () => {
             let time_difference = endDate.getTime() - startDate.getTime();
             let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            if (days_difference === 0) {
+                days_difference = 1;
+            }
             setDaysCount(days_difference);
         };
 
@@ -1104,6 +1139,38 @@ const BuildingOverview = () => {
                                                     })}
                                                     kWh
                                                 </td>
+                                                {/* <td>
+                                                    {record.energy_consumption.now <= record.energy_consumption.old && (
+                                                        <button
+                                                            className="button-success text-success btn-font-style"
+                                                            style={{ width: '100px' }}>
+                                                            <i className="uil uil-chart-down">
+                                                                <strong>
+                                                                    {percentageHandler(
+                                                                        record.energy_consumption.now,
+                                                                        record.energy_consumption.old
+                                                                    )}{' '}
+                                                                    %
+                                                                </strong>
+                                                            </i>
+                                                        </button>
+                                                    )}
+                                                    {record.energy_consumption.now > record.energy_consumption.old && (
+                                                        <button
+                                                            className="button-danger text-danger btn-font-style"
+                                                            style={{ width: '100px' }}>
+                                                            <i className="uil uil-arrow-growth">
+                                                                <strong>
+                                                                    {percentageHandler(
+                                                                        record.energy_consumption.now,
+                                                                        record.energy_consumption.old
+                                                                    )}{' '}
+                                                                    %
+                                                                </strong>
+                                                            </i>
+                                                        </button>
+                                                    )}
+                                                </td> */}
                                             </tr>
                                         );
                                     })}
@@ -1183,7 +1250,7 @@ const BuildingOverview = () => {
                                                             <tbody>
                                                                 <tr>
                                                                     <td className="peak-table-content">
-                                                                        {item.top_contributors.map((el) => (
+                                                                        {item.top_contributors.slice(0, 3).map((el) => (
                                                                             <tr>
                                                                                 <div className="font-weight-bold text-dark">
                                                                                     {el.equipment_name}

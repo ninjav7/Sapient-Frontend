@@ -7,14 +7,6 @@ import { Link } from 'react-router-dom';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
@@ -23,24 +15,24 @@ const Header = (props) => {
 
     const customDaySelect = [
         {
-            label: 'Last 30 Days',
-            value: 30,
+            label: 'Today',
+            value: 0,
         },
         {
             label: 'Last 7 Days',
             value: 7,
         },
         {
-            label: 'Last 5 Days',
-            value: 5,
+            label: 'Last 4 Weeks',
+            value: 28,
         },
         {
-            label: 'Last 3 Days',
-            value: 3,
+            label: 'Last 3 Months',
+            value: 90,
         },
         {
-            label: 'Last 1 Day',
-            value: 1,
+            label: 'Last 12 Months',
+            value: 365,
         },
     ];
 
@@ -63,10 +55,6 @@ const Header = (props) => {
     }, [dateFilter]);
 
     useEffect(() => {
-        console.log('dateRange => ', dateRange);
-    });
-
-    useEffect(() => {
         const setCustomDate = (date) => {
             let startCustomDate = date[0];
             let endCustomDate = date[1];
@@ -85,27 +73,6 @@ const Header = (props) => {
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
                         {props.title}
                     </span>
-
-                    {/* {props.title === 'Compare Buildings' && (
-                        <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                            <div>
-                                {Object.keys(TABS).map((key) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        className={
-                                            activeTab === TABS[key]
-                                                ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
-                                                : 'btn btn-sm btn-light font-weight-bold custom-buttons'
-                                        }
-                                        onClick={() => setActiveTab(TABS[key])}>
-                                        {TABS[key]}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {props.title !== 'Compare Buildings' && ( */}
 
                     <div
                         className="btn-group custom-button-group header-widget-styling"
@@ -140,6 +107,7 @@ const Header = (props) => {
                                 dateFormat="MMMM d"
                                 className="select-button form-control form-control-md font-weight-bold"
                                 placeholderText="Select Date Range"
+                                // monthsShown={2}
                             />
                         </div>
 
