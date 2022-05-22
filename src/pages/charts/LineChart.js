@@ -7,12 +7,10 @@ import { Card, CardBody } from 'reactstrap';
 // const LineChart = ({ title = 'Line with Data Labels' }) => {
 const LineChart = ({ title, options, series, height }) => {
     return (
-        <Card>
-            <CardBody>
-                <h4 className="header-title mt-0 mb-3">{title}</h4>
-                <Chart options={options} series={series} type="line" className="apex-charts" height={height} />
-            </CardBody>
-        </Card>
+        <div>
+            {/* <h4 className="header-title mt-0 mb-3">{title}</h4> */}
+            <Chart options={options} series={series} type="line" className="apex-charts" height={height} />
+        </div>
     );
 };
 

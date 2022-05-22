@@ -9,6 +9,22 @@
     color: #5a6472;
 }
 
+.custom-date-picker-block {
+    display: flex !important;
+    flex-direction: row !important;
+    width: auto;
+}
+
+.custom-day-selection {
+    width: auto;
+}
+
+.custom-date-picker-props {
+    border: none;
+    font-weight: 600;
+    width: auto;
+}
+
 .card-content-style {
     font-style: normal;
     font-weight: 700;
@@ -252,22 +268,31 @@
 }
 
 .custom-equip-style {
+    height: 20px !important;
+    font-family: 'Inter' !important;
     font-style: normal !important;
     font-weight: 600 !important;
     font-size: 14px !important;
     line-height: 20px !important;
-    color: #1f2937;
-    /* font-family: 'Inter', sans-serif; */
+    color: #1d2939 !important;
 }
 
 .custom-usage-style {
+    font-family: 'Inter';
     font-style: normal;
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
-    letter-spacing: 0.44px;
-    color: #4b5563;
-    /* font-family: 'Inter', sans-serif; */
+    color: #475467;
+    mix-blend-mode: normal;
+    width: 7vw;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    /* overflow-x: auto; */
+    text-size-adjust: auto;
 }
 
 .custom-percent-style {
@@ -324,7 +349,7 @@
 }
 
 .record-style {
-    width: 8vw !important;
+    width: 5vw !important;
     text-align: left !important;
     /* background: red; */
     /* font-family: 'Inter', sans-serif; */
@@ -384,6 +409,16 @@
     margin-top: 0px;
 }
 
+.custom-btn-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #f04438;
+    width: 7vw;
+}
+
 .btn-font-style {
     font-family: 'Inter';
     font-style: normal;
@@ -417,6 +452,18 @@
     box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 10px;
     margin-left: 30px;
+}
+
+.custom-enduse-style {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    margin-top: 10vh;
+    gap: 2vw;
+}
+
+.custom-enduse-table-style {
+    display: grid;
+    grid-template-columns: 0.7fr 1.5fr 2fr 2fr;
 }
 
 * {

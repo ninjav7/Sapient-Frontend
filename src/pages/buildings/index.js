@@ -1069,81 +1069,85 @@ const BuildingOverview = () => {
                 {/* <Col md={8} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
-                    <Row>
-                        <Col xl={12}>
-                            <h6
-                                className="card-title custom-title"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Energy Consumption by End Use
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/end-uses/${bldgId}`,
-                                }}>
-                                <div
-                                    rel="noopener noreferrer"
-                                    className="link-primary mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
+                    <div>
+                        <div>
+                            <div style={{ display: 'inline-block' }}>
+                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+                            </div>
+                            <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
+                                <Link
+                                    to={{
+                                        pathname: `/energy/end-uses/${bldgId}`,
                                     }}>
-                                    More Details
-                                </div>
-                            </Link>
-
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                        </Col>
-                        <Col xl={5} className="mt-4">
-                            <div className="energy-chart-style">
+                                    <div
+                                        rel="noopener noreferrer"
+                                        className="link-primary mr-3"
+                                        style={{
+                                            textDecoration: 'none',
+                                            fontWeight: 'bold',
+                                        }}>
+                                        More Details
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="custom-bld-enduse-style">
+                            <div>
                                 <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
-                                    height={180}
+                                    height={185}
+                                    id={Date.now()}
                                 />
                             </div>
-                        </Col>
-                        <Col xl={7} className="mt-4">
-                            <Table className="mb-0 building-table-font-style" borderless>
-                                <tbody>
-                                    {energyConsumption.map((record, index) => {
-                                        return (
-                                            <tr key={index} className="building-consumption-style">
-                                                <td>
+                            <div className="mt-3">
+                                {energyConsumption.map((record, index) => {
+                                    return (
+                                        <div>
+                                            <div className="custom-bldg-table-style building-consumption-style m-2 p-1">
+                                                <div className="ml-2">
                                                     {record.device === 'HVAC' && (
                                                         <div
                                                             className="dot"
-                                                            style={{ backgroundColor: '#3094B9' }}></div>
+                                                            style={{
+                                                                background: '#3094B9',
+                                                            }}></div>
                                                     )}
                                                     {record.device === 'Lighting' && (
                                                         <div
                                                             className="dot"
-                                                            style={{ backgroundColor: '#2C4A5E' }}></div>
+                                                            style={{
+                                                                background: '#2C4A5E',
+                                                            }}></div>
                                                     )}
                                                     {record.device === 'Plug' && (
                                                         <div
                                                             className="dot"
-                                                            style={{ backgroundColor: '#66D6BC' }}></div>
+                                                            style={{
+                                                                background: '#66D6BC',
+                                                            }}></div>
                                                     )}
                                                     {record.device === 'Process' && (
                                                         <div
                                                             className="dot"
-                                                            style={{ backgroundColor: '#3B8554' }}></div>
+                                                            style={{
+                                                                background: '#3B8554',
+                                                            }}></div>
                                                     )}
-                                                </td>
-                                                <td className="building-table-font-style">{record.device}</td>
-                                                <td className="custom-usage-style muted table-font-style">
+                                                </div>
+                                                <div className="custom-bld-equip-style record-bld-style font-weight-bold">
+                                                    {record.device}
+                                                </div>
+                                                <div className="custom-bld-usage-style muted table-font-style">
                                                     {record.energy_consumption.now.toLocaleString(undefined, {
                                                         maximumFractionDigits: 2,
                                                     })}
                                                     kWh
-                                                </td>
-                                                {/* <td>
+                                                </div>
+                                                <div className="mr-2">
                                                     {record.energy_consumption.now <= record.energy_consumption.old && (
-                                                        <button
-                                                            className="button-success text-success btn-font-style"
-                                                            style={{ width: '100px' }}>
+                                                        <button className="button-success text-success custom-bld-style">
                                                             <i className="uil uil-chart-down">
                                                                 <strong>
                                                                     {percentageHandler(
@@ -1156,9 +1160,7 @@ const BuildingOverview = () => {
                                                         </button>
                                                     )}
                                                     {record.energy_consumption.now > record.energy_consumption.old && (
-                                                        <button
-                                                            className="button-danger text-danger btn-font-style"
-                                                            style={{ width: '100px' }}>
+                                                        <button className="button-danger text-danger custom-bld-style">
                                                             <i className="uil uil-arrow-growth">
                                                                 <strong>
                                                                     {percentageHandler(
@@ -1170,14 +1172,14 @@ const BuildingOverview = () => {
                                                             </i>
                                                         </button>
                                                     )}
-                                                </td> */}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </Table>
-                        </Col>
-                    </Row>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Top 3 Peak Demand Periods  */}
                     <Row>
@@ -1260,8 +1262,11 @@ const BuildingOverview = () => {
                                                                     </td>
                                                                     <td className="peak-table-content-two">
                                                                         {item.top_contributors.map((el2) => (
-                                                                            <tr style={{ fontSize: 12 }}>
-                                                                                <div className="">
+                                                                            <tr
+                                                                                style={{
+                                                                                    fontSize: 12,
+                                                                                }}>
+                                                                                <div style={{ marginTop: '0.3vh' }}>
                                                                                     {el2.energy_consumption.now.toLocaleString(
                                                                                         undefined,
                                                                                         {

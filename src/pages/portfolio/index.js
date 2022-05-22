@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
+import ApexDonutChart from '../charts/ApexDonutChart';
 // import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
 // import MapChart from '../charts/MapChart';
@@ -69,106 +70,6 @@ const PortfolioOverview = () => {
                     x: new Date('2022-10-5').getTime(),
                     y: 20000,
                 },
-                {
-                    x: new Date('2022-10-6').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-7').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-8').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-9').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-10').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-11').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-12').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-13').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-14').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-15').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-16').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-17').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-18').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-19').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-20').getTime(),
-                    y: 22000,
-                },
-                {
-                    x: new Date('2022-10-21').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-22').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-23').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-24').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-25').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-26').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-27').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-28').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-29').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-30').getTime(),
-                    y: 20000,
-                },
             ],
         },
     ]);
@@ -182,6 +83,9 @@ const PortfolioOverview = () => {
         },
         dataLabels: {
             enabled: false,
+        },
+        toolbar: {
+            show: false,
         },
         colors: ['#87AADE'],
         stroke: {
@@ -202,24 +106,25 @@ const PortfolioOverview = () => {
             },
         },
         tooltip: {
-            shared: true,
+            shared: false,
             intersect: false,
             x: {
-                show: false,
+                show: true,
+                format: 'dd MMM',
             },
         },
         xaxis: {
             type: 'datetime',
-            labels: {
-                formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMMdd');
-                },
-            },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
+            // labels: {
+            //     formatter: function (value, timestamp, opts) {
+            //         return opts.dateFormatter(new Date(timestamp), 'MMMdd');
+            //     },
+            // },
+            // style: {
+            //     fontSize: '12px',
+            //     fontWeight: 600,
+            //     cssClass: 'apexcharts-xaxis-label',
+            // },
         },
         yaxis: {
             labels: {
@@ -361,6 +266,82 @@ const PortfolioOverview = () => {
 
     let [color, setColor] = useState('#ffffff');
 
+    // const [series, setSeries] = useState([44, 55, 41, 17]);
+    const [series, setSeries] = useState([10, 10, 10, 10]);
+
+    const [options, setOptions] = useState({
+        chart: {
+            type: 'donut',
+        },
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        legend: {
+            show: false,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: 0,
+        },
+        itemMargin: {
+            horizontal: 10,
+        },
+        plotOptions: {
+            pie: {
+                expandOnClick: false,
+                donut: {
+                    size: '80%',
+                    background: 'grey',
+                    foreColor: '#3b70bf',
+                    labels: {
+                        show: true,
+                        name: {
+                            show: false,
+                        },
+                        value: {
+                            show: true,
+                            color: '#000000',
+                            fontSize: '20px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 400,
+                            formatter: function (val) {
+                                return `${val} kWh`;
+                            },
+                        },
+                        total: {
+                            show: true,
+                            showAlways: false,
+                            label: 'Total',
+                            color: '#000000',
+                            fontSize: '22px',
+                            fontWeight: 600,
+                            formatter: function (w) {
+                                let sum = w.globals.seriesTotals.reduce((a, b) => {
+                                    return a + b;
+                                }, 0);
+                                return `${sum} kWh`;
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200,
+                    },
+                    legend: {
+                        position: 'bottom',
+                    },
+                },
+            },
+        ],
+    });
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -417,7 +398,7 @@ const PortfolioOverview = () => {
                             let fixedConsumption = record.energy_consumption.now;
                             newDonutData.push(parseInt(fixedConsumption));
                         });
-                        setDonutChartData(newDonutData);
+                        setSeries(newDonutData);
                     });
             } catch (error) {
                 console.log(error);
@@ -445,12 +426,14 @@ const PortfolioOverview = () => {
                         let response = res.data;
                         let newArray = [
                             {
+                                name: 'Energy',
                                 data: [],
                             },
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: moment(record.x).format('MMM D'),
+                                // x: moment(record.x).format('MMM D'),
+                                x: record.x,
                                 y: record.y.toFixed(2),
                             });
                         });
@@ -496,7 +479,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('setBuildingsEnergyConsume => ', data);
+                        // console.log('setBuildingsEnergyConsume => ', data);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {
@@ -507,7 +490,7 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        console.log('markerArray => ', markerArray);
+                        // console.log('markerArray => ', markerArray);
                         setMarkers(markerArray);
                     });
             } catch (error) {
@@ -566,7 +549,6 @@ const PortfolioOverview = () => {
                 bs.items = newList;
             });
         };
-
         updateBreadcrumbStore();
     }, []);
 
@@ -577,6 +559,44 @@ const PortfolioOverview = () => {
         let topVal = buildingsEnergyConsume[0].density;
         setTopEnergyDensity(topVal);
     }, [buildingsEnergyConsume]);
+
+    useEffect(() => {
+        const portfolioEndUsesData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios
+                    .post(
+                        `${BaseUrl}${portfolioEndUser}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setenergyConsumption(res.data);
+                        const energyData = res.data;
+                        let newDonutData = [];
+                        energyData.forEach((record) => {
+                            let fixedConsumption = record.energy_consumption.now;
+                            newDonutData.push(parseInt(fixedConsumption));
+                        });
+                        setSeries(newDonutData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Portfolio EndUses Data');
+            }
+        };
+        portfolioEndUsesData();
+    }, [window.devicePixelRatio]);
+
+    useEffect(() => {
+        console.log('window.devicePixelRatio => ', window.devicePixelRatio);
+    });
 
     return (
         <React.Fragment>
@@ -696,17 +716,54 @@ const PortfolioOverview = () => {
                                                     s.BldgName = item.buildingName;
                                                 });
                                             }}>
-                                            {index === 0 ? (
+                                            {index === 0 && (
                                                 <ProgressBar
-                                                    color="danger"
+                                                    colors={`#D14065`}
                                                     progressValue={100}
                                                     progressTitle={item.buildingName}
                                                     progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
                                                     className="progress-bar-container custom-progress-bar"
                                                 />
-                                            ) : (
+                                            )}
+                                            {index === 1 && (
                                                 <ProgressBar
-                                                    color="danger"
+                                                    colors={`#DF5775`}
+                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            )}
+                                            {index === 2 && (
+                                                <ProgressBar
+                                                    colors={`#EB6E87`}
+                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            )}
+                                            {index === 3 && (
+                                                <ProgressBar
+                                                    colors={`#EB6E87`}
+                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            )}
+                                            {index === 4 && (
+                                                <ProgressBar
+                                                    colors={`#FC9EAC`}
+                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container"
+                                                />
+                                            )}
+                                            {index === 5 && (
+                                                <ProgressBar
+                                                    colors={`#FFCFD6`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
                                                     progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
@@ -723,7 +780,105 @@ const PortfolioOverview = () => {
 
                 <Row className="mt-2 ml-2">
                     <Col xl={7}>
-                        <Row>
+                        <div className="mt-4">
+                            <div>
+                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+                            </div>
+                            <div className="custom-enduse-style">
+                                <div>
+                                    {/* <DonutChart
+                                        donutChartOpts={donutChartOpts}
+                                        donutChartData={donutChartData}
+                                        height={185}
+                                        id={Date.now()}
+                                    /> */}
+                                    <ApexDonutChart series={series} options={options} />
+                                </div>
+                                <div className="mt-3">
+                                    {energyConsumption.map((record, index) => {
+                                        return (
+                                            <div>
+                                                <div className="custom-enduse-table-style consumption-style m-2 p-1">
+                                                    <div className="ml-2">
+                                                        {record.device === 'HVAC' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3094B9',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Lighting' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#2C4A5E',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Plug' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#66D6BC',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Process' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3B8554',
+                                                                }}></div>
+                                                        )}
+                                                    </div>
+                                                    <div className="custom-equip-style record-style font-weight-bold">
+                                                        {record.device}
+                                                    </div>
+                                                    <div className="custom-usage-style muted table-font-style">
+                                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                        kWh
+                                                    </div>
+                                                    <div className="mr-2">
+                                                        {record.energy_consumption.now <=
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-success text-success custom-btn-style">
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {record.energy_consumption.now >
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-danger text-danger custom-btn-style">
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                )
+                            </div>
+                        </div>
+
+                        {/* <Row>
                             <Col xl={5} className="mt-4">
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
@@ -831,7 +986,7 @@ const PortfolioOverview = () => {
                                     </CardBody>
                                 </Card>
                             </Col>
-                        </Row>
+                        </Row> */}
                     </Col>
 
                     <Col xl={5}>

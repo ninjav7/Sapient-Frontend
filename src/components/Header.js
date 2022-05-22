@@ -4,6 +4,8 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
@@ -84,7 +86,7 @@ const Header = (props) => {
                                 name="select"
                                 id="exampleSelect"
                                 style={{ color: 'black', fontWeight: 'bold' }}
-                                className="select-button form-control form-control-md"
+                                className="select-button form-control form-control-md custom-day-selection"
                                 onChange={(e) => {
                                     setDateFilter(e.target.value);
                                 }}
@@ -95,7 +97,8 @@ const Header = (props) => {
                             </Input>
                         </div>
 
-                        <div>
+                        <div className="select-button form-control form-control-md font-weight-bold custom-date-picker-block">
+                            <FontAwesomeIcon icon={faCalendar} style={{ fontSize: '1.3em' }} />
                             <DatePicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -105,7 +108,7 @@ const Header = (props) => {
                                 }}
                                 maxDate={new Date()}
                                 dateFormat="MMMM d"
-                                className="select-button form-control form-control-md font-weight-bold"
+                                className="custom-date-picker-props ml-2"
                                 placeholderText="Select Date Range"
                                 // monthsShown={2}
                             />

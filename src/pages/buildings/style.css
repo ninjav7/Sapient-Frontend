@@ -401,3 +401,60 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
 }
+
+.custom-bldg-table-style {
+    display: grid;
+    grid-template-columns: 0.7fr 1.5fr 2fr 2fr;
+}
+
+.custom-bld-equip-style {
+    height: 20px !important;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    color: #1d2939 !important;
+}
+
+.custom-bld-usage-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #475467;
+    mix-blend-mode: normal;
+    width: 7vw;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    /* overflow-x: auto; */
+    text-size-adjust: auto;
+}
+
+.record-bld-style {
+    width: 5vw !important;
+    text-align: left !important;
+    /* background: red; */
+    /* font-family: 'Inter', sans-serif; */
+}
+
+.custom-bld-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: #f04438;
+    width: 7vw;
+}
+
+.custom-bld-enduse-style {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    margin-top: 3vh;
+    gap: 2vw;
+}
