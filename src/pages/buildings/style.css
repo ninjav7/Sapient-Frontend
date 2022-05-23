@@ -353,9 +353,9 @@
     grid-template-columns: 0.8fr 1fr;
 }
 
-.energy-blg-container-two {
-    /* width: 100%; */
-}
+/* .energy-blg-container-two {
+    width: 100%;
+} */
 
 .energy-chart-style {
     width: 250px;

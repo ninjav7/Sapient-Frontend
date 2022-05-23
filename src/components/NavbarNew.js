@@ -67,10 +67,6 @@ const NavbarNew = () => {
                         let str2 = location.pathname.split('/')[1];
                         let active = str1.localeCompare(str2);
 
-                        console.log('Flash item = ', str1);
-                        console.log('Flash location = ', str2);
-                        console.log('Flash Active = ', active);
-
                         return (
                             <>
                                 {active === 0 ? (

@@ -50,11 +50,6 @@ const PageTracker = () => {
     }, []);
 
     useEffect(() => {
-        console.log('SSR bldStoreId => ', bldStoreId);
-        console.log('SSR bldStoreName => ', bldStoreName);
-    });
-
-    useEffect(() => {
         BuildingStore.update((s) => {
             s.BldgId = 1;
             s.BldgName = 'Portfolio';
@@ -111,7 +106,7 @@ const PageTracker = () => {
                             </div>
 
                             <div>
-                                <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header>
+                                {/* <Dropdown.Header style={{ fontSize: '11px' }}>RECENT</Dropdown.Header> */}
                                 {/* {buildingRecord.map((building, index) => (
                                     <Dropdown.Item onClick={() => setActiveBuildingName(building.buildingName)}>
                                         {building.building_name}

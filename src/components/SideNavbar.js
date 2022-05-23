@@ -5,7 +5,7 @@ import { ComponentStore } from '../store/ComponentStore';
 import { BuildingStore } from '../store/BuildingStore';
 
 const SideNavbar = () => {
-    // const bldStoreId = BuildingStore.useState((s) => s.BldgId);
+    const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     // const [bldgId, setBldgId] = useState(bldStoreId);
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const [activeRoute, setActiveRoute] = useState([]);
@@ -23,15 +23,20 @@ const SideNavbar = () => {
     }, [parentRoute]);
 
     // useEffect(() => {
-    //     setBldgId(bldStoreId);
-    // }, [bldStoreId]);
+    //     let newBldStoreId = bldStoreId;
+    //     setBldgId(newBldStoreId);
+    // }, [BuildingStore]);
+
+    useEffect(() => {
+        console.log('localStorage.getItem => ', localStorage.getItem('buildingId'));
+    });
 
     return (
         <>
             <div className="mt-3">
                 {activeRoute.map((item, index) => {
                     if (item.path.includes(':bldgId')) {
-                        item.path = item.path.split(':')[0].concat(bldgId);
+                        item.path = item.path.split(':')[0].concat(localStorage.getItem('buildingId'));
                     }
 
                     let str1 = item.path.split('/')[2];

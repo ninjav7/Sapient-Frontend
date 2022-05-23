@@ -1010,6 +1010,24 @@ const BuildingOverview = () => {
                             />
                         </div>
                     </div>
+
+                    <div className="card-box-style button-style">
+                        <div className="card-body">
+                            <h5 className="card-title subtitle-style">
+                                Portfolio Rank&nbsp;&nbsp;
+                                <div>
+                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
+                                    <UncontrolledTooltip placement="bottom" target="#title">
+                                        Portfolio Rank
+                                    </UncontrolledTooltip>
+                                </div>
+                            </h5>
+                            <p className="card-text card-content-style">
+                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;10</span>
+                            </p>
+                        </div>
+                    </div>
+
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
