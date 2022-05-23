@@ -26,6 +26,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -453,8 +454,9 @@ const PortfolioOverview = () => {
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
-                    let activeBldgs = data.filter((bld) => bld.active === true);
-                    setBuildingRecord(activeBldgs);
+                    // console.log('Data => ', data);
+                    // let activeBldgs = data.filter((bld) => bld.active === true);
+                    setBuildingRecord(data);
                 });
             } catch (error) {
                 console.log(error);
@@ -511,6 +513,7 @@ const PortfolioOverview = () => {
             let start = moment(startDate),
                 end = moment(endDate),
                 days = end.diff(start, 'days');
+            // days = days + 1;
 
             if (days === 0) {
                 days = 1;
@@ -714,6 +717,9 @@ const PortfolioOverview = () => {
                                                 BuildingStore.update((s) => {
                                                     s.BldgId = item.buildingID;
                                                     s.BldgName = item.buildingName;
+                                                });
+                                                ComponentStore.update((s) => {
+                                                    s.parent = 'buildings';
                                                 });
                                             }}>
                                             {index === 0 && (

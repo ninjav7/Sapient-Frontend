@@ -58,11 +58,16 @@ const General = () => {
                 accept: 'application/json',
             };
             await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                console.log(res.data);
+                let response = res.data;
+                console.log('Response => ', response);
                 let data = {};
+                console.log('BldgId => ', bldgId);
                 if (bldgId) {
-                    data = res.data.find((el) => el.building_id === bldgId);
-                    console.log(data);
+                    data = response.find((el) => el.building_id === bldgId);
+                    console.log('Data => ', data);
+                    if (data === undefined) {
+                        return;
+                    }
                     setInputField({
                         ...inputField,
                         active: data.active,

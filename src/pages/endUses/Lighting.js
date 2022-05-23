@@ -192,7 +192,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     },
                     {
                         label: 'Lightning',
-                        path: '/energy/lighting',
+                        path: '/energy/end-uses/lighting',
                         active: true,
                     },
                 ];

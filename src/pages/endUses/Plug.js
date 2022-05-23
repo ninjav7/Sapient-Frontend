@@ -193,7 +193,7 @@ const UsagePageThree = () => {
                     },
                     {
                         label: 'Plug',
-                        path: '/energy/plug',
+                        path: '/energy/end-uses/plug',
                         active: true,
                     },
                 ];

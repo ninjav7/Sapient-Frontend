@@ -21,15 +21,10 @@ const Navbar = (props) => {
 
             <div className="topnav shadow energy-topnav-custom">
                 <div className="container-fluid navbar navbar-expand-lg topbar-nav custom-navbar">
-                    {/* <nav className="navbar navbar-expand-lg topbar-nav custom-navbar custom-navbar-fonts"> */}
                     <Link to="/" className="navbar-brand mr-0 mr-md-2 logo">
                         <span className="logo-lg">
                             <img src={sapientLogo} alt="" height="30" className="ml-4 mr-4" />
-                            {/* <span className="d-inline h5 ml-4 mr-5 text-logo">Sapient</span> */}
                         </span>
-                        {/* <span className="logo-sm">
-                                <img src={logo} alt="" height="24" />
-                            </span> */}
                     </Link>
                     <Collapse
                         isOpen={props.isMenuOpened}
@@ -38,6 +33,8 @@ const Navbar = (props) => {
                         style={{ height: '50px' }}>
                         <AppMenu mode={'vertical'} />
                     </Collapse>
+
+                    <AppMenu mode={'vertical'} />
 
                     <div className="nav-right-icon-style">
                         <SearchModal />

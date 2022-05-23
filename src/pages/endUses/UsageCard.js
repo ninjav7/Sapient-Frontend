@@ -66,7 +66,7 @@ const UsageCard = ({
 
                 {button === 'Explore' && (
                     <div className="float-right ml-2">
-                        <Link to="/explore">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>

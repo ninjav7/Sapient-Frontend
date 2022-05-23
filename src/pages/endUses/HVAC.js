@@ -283,7 +283,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     },
                     {
                         label: 'HVAC',
-                        path: '/energy/hvac',
+                        path: '/energy/end-uses/hvac',
                         active: true,
                     },
                 ];

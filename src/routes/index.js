@@ -152,6 +152,7 @@ const dashboardRoutes = {
     },
     component: Dashboard,
     roles: ['Admin'],
+    visibility: false,
     route: PrivateRoute,
 };
 
@@ -164,6 +165,7 @@ const calendarAppRoutes = {
     icon: FeatherIcon.Calendar,
     component: CalendarApp,
     route: PrivateRoute,
+    visibility: false,
     roles: ['Admin'],
 };
 
@@ -354,51 +356,11 @@ const chartRoutes = {
     visibility: false,
 };
 
-// builindgs
-const buildingRoutes = {
-    path: '/energy/building/overview/:bldgId',
-    name: 'Building Overview',
-    component: Building,
-    visibility: true,
-    children: [
-        {
-            path: '/energy/building/overview/:bldgId',
-            name: 'Building Overview',
-            component: Building,
-            route: PrivateRoute,
-            visibility: true,
-        },
-        {
-            path: '/energy/peak-demand/:bldgId',
-            name: 'Peak Demand',
-            component: PeakDemand,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/end-uses/:bldgId',
-            name: 'End Uses',
-            component: EndUses,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/time-of-day/:bldgId',
-            name: 'Time Of Day',
-            component: TimeOfDay,
-            route: PrivateRoute,
-            visibility: false,
-        },
-    ],
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
-
 // portfolio
 const portfolioRoutes = {
-    path: '/energy',
+    path: '/energy/portfolio/overview',
     name: 'Energy',
-    component: () => <Redirect to="/energy/portfolio/overview" />,
+    component: Portfolio,
     visibility: true,
     children: [
         {
@@ -423,7 +385,7 @@ const portfolioRoutes = {
             component: Building,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'buildings',
         },
         {
             path: '/energy/peak-demand/:bldgId',
@@ -431,7 +393,7 @@ const portfolioRoutes = {
             component: PeakDemand,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'buildings',
         },
         {
             path: '/energy/end-uses/:bldgId',
@@ -439,7 +401,7 @@ const portfolioRoutes = {
             component: EndUses,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'buildings',
         },
         {
             path: '/energy/time-of-day/:bldgId',
@@ -447,7 +409,7 @@ const portfolioRoutes = {
             component: TimeOfDay,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'buildings',
         },
         {
             path: '/energy/hvac/:bldgId',
@@ -494,15 +456,7 @@ const settingsRoutes = {
             component: General,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
-        },
-        {
-            path: '/settings/utility-bills',
-            name: 'Utility Bills',
-            component: UtilityBills,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/layout',
@@ -510,7 +464,7 @@ const settingsRoutes = {
             component: Layout,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/equipment',
@@ -518,7 +472,15 @@ const settingsRoutes = {
             component: Equipment,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/utility-bills',
+            name: 'Utility Bills',
+            component: UtilityBills,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/panels',
@@ -526,7 +488,7 @@ const settingsRoutes = {
             component: Panels,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/createPanel',
@@ -534,7 +496,7 @@ const settingsRoutes = {
             component: CreatePanel,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/editPanel',
@@ -542,7 +504,7 @@ const settingsRoutes = {
             component: EditPanel,
             route: PrivateRoute,
             visibility: false,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/active-devices',
@@ -550,7 +512,7 @@ const settingsRoutes = {
             component: ActiveDevices,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/passive-devices',
@@ -558,7 +520,7 @@ const settingsRoutes = {
             component: PassiveDevices,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/gateways',
@@ -566,7 +528,7 @@ const settingsRoutes = {
             component: Gateways,
             route: PrivateRoute,
             visibility: true,
-            parent: 'building',
+            parent: 'building-settings',
         },
         {
             path: '/settings/account',
@@ -605,7 +567,7 @@ const settingsRoutes = {
             name: 'User Profile',
             component: UserProfile,
             route: PrivateRoute,
-            visibility: true,
+            visibility: false,
             parent: 'account',
         },
         {
@@ -616,6 +578,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
+        {
+            path: '/settings/equipment',
+            name: 'Equipment Type',
+            component: Equipment,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
+        },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
@@ -623,22 +593,13 @@ const settingsRoutes = {
 
 const exploreRoutes = {
     name: 'Explore',
-    path: '/explore',
+    path: '/explore/page',
     component: Explore,
     route: PrivateRoute,
     visibility: true,
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
-};
-
-const pageTrackerRoutes = {
-    name: 'Page Tracker',
-    path: '/page-tracker',
-    component: PageTracker,
-    route: PrivateRoute,
-    visibility: false,
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
+    parent: 'explore',
 };
 
 const controlRoutes = {
@@ -652,23 +613,13 @@ const controlRoutes = {
             component: PlugRules,
             component: PlugRules,
             route: PrivateRoute,
-            visibility: true,
+            parent: 'control',
         },
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],
 };
 
-const endUsesRoutes = {
-    path: '/endUses',
-    name: 'End Uses',
-
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
-
-// forms
 const formsRoutes = {
     path: '/forms',
     name: 'Forms',
@@ -779,9 +730,7 @@ const authRoutes = {
 
 // flatten the list of all nested routes
 const flattenRoutes = (routes) => {
-    // console.log('routes before forEach => ', routes);
     let flatRoutes = [];
-
     routes = routes || [];
     routes.forEach((item) => {
         flatRoutes.push(item);
@@ -789,7 +738,6 @@ const flattenRoutes = (routes) => {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
-    // console.log('routes after forEach => ', flatRoutes);
     return flatRoutes;
 };
 
@@ -803,8 +751,6 @@ const allRoutes = [
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
-    buildingRoutes,
-    pageTrackerRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,

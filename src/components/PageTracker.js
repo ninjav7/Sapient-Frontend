@@ -13,6 +13,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { BreadcrumbStore } from '../store/BreadcrumbStore';
 import { BuildingStore } from '../store/BuildingStore';
 import { DateRangeStore } from '../store/DateRangeStore';
+import { ComponentStore } from '../store/ComponentStore';
 import './style.css';
 
 const PageTracker = () => {
@@ -48,15 +49,18 @@ const PageTracker = () => {
         getBuildingList();
     }, []);
 
-    // useEffect(() => {
-    //     console.log('bldStoreId => ', bldStoreId);
-    //     console.log('bldStoreName => ', bldStoreName);
-    // }, [bldStoreId]);
+    useEffect(() => {
+        console.log('SSR bldStoreId => ', bldStoreId);
+        console.log('SSR bldStoreName => ', bldStoreName);
+    });
 
     useEffect(() => {
         BuildingStore.update((s) => {
             s.BldgId = 1;
             s.BldgName = 'Portfolio';
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'portfolio';
         });
     }, [portfolioName]);
 

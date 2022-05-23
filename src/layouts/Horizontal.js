@@ -5,8 +5,8 @@ import './style.css';
 import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker';
-import ThemeCustomizer from '../components/ThemeCustomizer';
-const CustomSideBar = React.lazy(() => import('../components/CustomSideBar'));
+import NavbarNew from '../components/NavbarNew';
+import SideNavbar from '../components/SideNavbar';
 
 // code splitting and lazy loading
 // https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
@@ -44,77 +44,36 @@ class HorizontalLayout extends Component {
     render() {
         // get the child view which we would like to render
         const children = this.props.children || null;
+        console.log('children => ', this.props.children);
         const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
         const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
 
         return (
             <React.Fragment>
                 <div id="wrapper">
-                    {/*
-                
-                <Suspense fallback={loading()}>
-                        <Topbar openLeftMenuCallBack={this.openMenu} {...this.props} />
-                        
-                    </Suspense>
-                */}
-                    {/* <Suspense fallback={loading()}>
-                        <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
-                    </Suspense> */}
-
-                    {/* <PageTracker /> */}
-
-                    {/* Worked yesterday! */}
-                    <div className="">
-                        <nav className="navbar fixed-top custom-top-fix">
-                            <div className="navbar-brand">
-                                <Suspense fallback={loading()}>
-                                    <Navbar isMenuOpened={this.state.isMenuOpened} {...this.props} />
-                                </Suspense>
-                            </div>
-                        </nav>
+                    <div>
+                        <NavbarNew />
                     </div>
 
-                    <div className="">
-                        <nav className="navbar fixed-top">
-                            <div className="navbar-brand">
-                                <PageTracker />
-                            </div>
-                        </nav>
+                    <div>
+                        <PageTracker />
                     </div>
 
-                    <div className="content-page">
-                        <div className="content">
-                            <Container fluid className="p-0">
-                                <Row>
-                                    <Col md={2} className="pr-0 energy-side-nav-style">
-                                        <Suspense fallback={loading()}>
-                                            <CustomSideBar
-                                                isCondensed={isCondensed}
-                                                isLight={isLight}
-                                                {...this.props}
-                                            />
-                                        </Suspense>
-                                    </Col>
-                                    <Col md={10} className="pl-0 energy-content-page-style">
-                                        <Suspense fallback={loading()}>
-                                            <Card className="pl-2 pr-2 pt-1 page-card-style">{children}</Card>
-                                        </Suspense>
-                                    </Col>
-                                </Row>
-                            </Container>
+                    <div>
+                        <div className="energy-side-nav">
+                            <SideNavbar />
                         </div>
-
-                        <Suspense fallback={loading()}>
-                            <Footer />
-                        </Suspense>
+                        <div className="energy-page-content">
+                            <Suspense fallback={loading()}>
+                                <Card className="pl-0 pr-0 pt-0">{children}</Card>
+                            </Suspense>
+                        </div>
                     </div>
-                </div>
 
-                <Suspense fallback={loading()}>
-                    <RightSidebar title="Customize" {...this.props}>
-                        <ThemeCustomizer />
-                    </RightSidebar>
-                </Suspense>
+                    {/* <Suspense fallback={loading()}>
+                        <Footer />
+                    </Suspense> */}
+                </div>
             </React.Fragment>
         );
     }
