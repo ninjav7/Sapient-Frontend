@@ -5,6 +5,8 @@ import sapientLogo from '../assets/images/Sapient_Logo.png';
 import SearchModal from './SearchModal';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../routes/index';
 import { ComponentStore } from '../store/ComponentStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCoffee } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const NavbarNew = () => {
@@ -72,6 +74,7 @@ const NavbarNew = () => {
                                 {active === 0 ? (
                                     <div key={index} className="navbar-head-container-active">
                                         <Link to={item.path}>
+                                            {/* <FontAwesomeIcon icon={faCoffee} /> */}
                                             {/* <span className="custom-icon-style">{item.icon && <Icon />}</span> */}
                                             <span
                                                 onClick={() => {

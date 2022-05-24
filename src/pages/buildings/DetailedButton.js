@@ -12,9 +12,6 @@ const DetailedButton = (props) => {
                     <UncontrolledTooltip placement="bottom" target={'tooltip-' + props.infoType}>
                         {props.infoText}
                     </UncontrolledTooltip>
-                    {/* <UncontrolledTooltip placement="bottom" target="#title">
-                        {props.infoText}
-                    </UncontrolledTooltip> */}
                 </div>
             </h5>
             <p className="card-text card-content-style">

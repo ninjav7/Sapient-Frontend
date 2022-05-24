@@ -50,7 +50,7 @@ const EndUses = () => {
             type: 'bar',
             stacked: true,
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         plotOptions: {

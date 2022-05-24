@@ -109,7 +109,7 @@ const TimeOfDay = () => {
                 enabled: false,
             },
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         colors: ['#5369f8', '#43d39e'],
@@ -185,7 +185,7 @@ const TimeOfDay = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {

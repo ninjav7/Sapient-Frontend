@@ -322,7 +322,7 @@ const Explore = () => {
             height: 230,
             toolbar: {
                 autoSelected: 'pan',
-                show: false,
+                show: true,
             },
         },
         colors: ['#546E7A'],
@@ -349,6 +349,9 @@ const Explore = () => {
         chart: {
             id: 'chart1',
             height: 130,
+            toolbar: {
+                show: false,
+            },
             type: 'area',
             brush: {
                 target: 'chart2',

@@ -471,7 +471,7 @@ const BuildingOverview = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {
@@ -554,7 +554,7 @@ const BuildingOverview = () => {
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {
@@ -842,6 +842,8 @@ const BuildingOverview = () => {
 
                         let weekDaysResData = response[0].weekdays;
                         let weekEndResData = response[0].weekend;
+
+                        console.log('weekDaysResData => ', weekDaysResData);
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
@@ -1340,6 +1342,7 @@ const BuildingOverview = () => {
                                     series={weekDaysSeries}
                                     height={weekdaysChartHeight}
                                 />
+                                <span className='m-2'></span>
                                 <HeatMapChart
                                     // options={weekDaysOptions}
                                     options={weekEndsOptions}

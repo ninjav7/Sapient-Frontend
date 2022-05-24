@@ -7,6 +7,7 @@ import ApexDonutChart from '../charts/ApexDonutChart';
 import LineChart from '../charts/LineChart';
 // import MapChart from '../charts/MapChart';
 import SimpleMaps from '../charts/SimpleMaps';
+import EnergyMap from './EnergyMap';
 import ReactGoogleMap from './ReactGoogleMap';
 import ProgressBar from './ProgressBar';
 import DetailedButton from '../buildings/DetailedButton';
@@ -86,7 +87,7 @@ const PortfolioOverview = () => {
             enabled: false,
         },
         toolbar: {
-            show: false,
+            show: true,
         },
         colors: ['#87AADE'],
         stroke: {
@@ -425,7 +426,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Sudhanshu => ', response);
+                        // console.log('Sudhanshu => ', response);
                         // response = [
                         //     {
                         //         _id: 16,
@@ -660,10 +661,6 @@ const PortfolioOverview = () => {
         portfolioEndUsesData();
     }, [window.devicePixelRatio]);
 
-    useEffect(() => {
-        console.log('window.devicePixelRatio => ', window.devicePixelRatio);
-    });
-
     return (
         <React.Fragment>
             {/* {!isLoading && (
@@ -754,7 +751,7 @@ const PortfolioOverview = () => {
                             <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                             <div className="portfolio-map-widget">
                                 <SimpleMaps markers={markers} />
-                                {/* <ReactGoogleMap /> */}
+                                {/* <EnergyMap /> */}
                             </div>
                         </div>
                     </Col>

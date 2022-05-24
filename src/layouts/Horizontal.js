@@ -65,7 +65,7 @@ class HorizontalLayout extends Component {
                         </div>
                         <div className="energy-page-content">
                             <Suspense fallback={loading()}>
-                                <Card className="pl-0 pr-0 pt-0">{children}</Card>
+                                <Card className="pl-1 pr-1 pt-0">{children}</Card>
                             </Suspense>
                         </div>
                     </div>

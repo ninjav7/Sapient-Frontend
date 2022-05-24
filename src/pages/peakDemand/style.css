@@ -82,7 +82,8 @@
     font-size: 24px;
     line-height: 125%;
     display: inline;
-    color: #1f2937;
+    color: #1d2939;
+    font-family: 'SpaceGrotesk' !important;
 }
 
 .custom-buttons {

@@ -291,7 +291,7 @@ const PeakDemand = () => {
         chart: {
             type: 'line',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         labels: [],
