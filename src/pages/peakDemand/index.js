@@ -476,13 +476,21 @@ const PeakDemand = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setTopBuildingPeaks(res.data);
-                        setSingleEquipPeakOne(res.data[0].top_contributors);
-                        setSingleEquipPeakTwo(res.data[1].top_contributors);
-                        setSingleEquipPeakThree(res.data[2].top_contributors);
-                        setEquipTypePeakOne(res.data[0].top_eq_type_contributors);
-                        setEquipTypePeakTwo(res.data[1].top_eq_type_contributors);
-                        setEquipTypePeakThree(res.data[2].top_eq_type_contributors);
+                        setTopBuildingPeaks([]);
+                        setSingleEquipPeakOne([]);
+                        setSingleEquipPeakTwo([]);
+                        setSingleEquipPeakThree([]);
+                        setEquipTypePeakOne([]);
+                        setEquipTypePeakTwo([]);
+                        setEquipTypePeakThree([]);
+                        let responseData = res.data;
+                        setTopBuildingPeaks(responseData);
+                        setSingleEquipPeakOne(responseData[0].top_contributors);
+                        setSingleEquipPeakTwo(responseData[1].top_contributors);
+                        setSingleEquipPeakThree(responseData[2].top_contributors);
+                        setEquipTypePeakOne(responseData[0].top_eq_type_contributors);
+                        setEquipTypePeakTwo(responseData[1].top_eq_type_contributors);
+                        setEquipTypePeakThree(responseData[2].top_eq_type_contributors);
                     });
             } catch (error) {
                 console.log(error);
