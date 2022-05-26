@@ -3,10 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { Settings } from 'react-feather';
 import sapientLogo from '../assets/images/Sapient_Logo.png';
 import SearchModal from './SearchModal';
+import { Row, Col, Card } from 'reactstrap';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../routes/index';
 import { ComponentStore } from '../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCoffee } from '@fortawesome/pro-regular-svg-icons';
+import { faGear, faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const NavbarNew = () => {
@@ -72,30 +73,62 @@ const NavbarNew = () => {
                         return (
                             <>
                                 {active === 0 ? (
-                                    <div key={index} className="navbar-head-container-active">
+                                    <div key={index} className="container navbar-head-container-active">
                                         <Link to={item.path}>
-                                            {/* <FontAwesomeIcon icon={faCoffee} /> */}
-                                            {/* <span className="custom-icon-style">{item.icon && <Icon />}</span> */}
-                                            <span
-                                                onClick={() => {
-                                                    setSideNavBar(item.name);
-                                                }}
-                                                className="navbar-heading-active">
-                                                {item.name}
-                                            </span>
+                                            <div class="row" style={{ width: '7vw' }}>
+                                                {item.name === 'Energy' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                                                    </div>
+                                                )}
+                                                {item.name === 'Control' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                                    </div>
+                                                )}
+                                                {item.name === 'Explore' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                                    </div>
+                                                )}
+                                                <div
+                                                    onClick={() => {
+                                                        setSideNavBar(item.name);
+                                                    }}
+                                                    className="col-9 navbar-heading-active">
+                                                    {item.name}
+                                                </div>
+                                            </div>
                                         </Link>
                                     </div>
                                 ) : (
-                                    <div key={index} className="navbar-head-container">
+                                    <div key={index} className="container navbar-head-container">
                                         <Link to={item.path}>
-                                            {/* <span className="custom-icon-style">{item.icon && <Icon />}</span> */}
-                                            <span
-                                                onClick={() => {
-                                                    setSideNavBar(item.name);
-                                                }}
-                                                className="navbar-heading">
-                                                {item.name}
-                                            </span>
+                                            <div class="row" style={{ width: '7vw' }}>
+                                                {item.name === 'Energy' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                                                    </div>
+                                                )}
+                                                {item.name === 'Control' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                                    </div>
+                                                )}
+                                                {item.name === 'Explore' && (
+                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                                    </div>
+                                                )}
+                                                {/* <span className="custom-icon-style">{item.icon && <Icon />}</span> */}
+                                                <div
+                                                    onClick={() => {
+                                                        setSideNavBar(item.name);
+                                                    }}
+                                                    className="col-9 navbar-heading">
+                                                    {item.name}
+                                                </div>
+                                            </div>
                                         </Link>
                                     </div>
                                 )}
@@ -114,7 +147,8 @@ const NavbarNew = () => {
                                 onClick={() => {
                                     setSideNavBar('building-settings');
                                 }}>
-                                <Settings className="icon-sm" />
+                                {/* <Settings className="icon-sm" /> */}
+                                <FontAwesomeIcon icon={faGear} size="lg" />
                             </button>
                         </Link>
                     ) : (
@@ -124,7 +158,8 @@ const NavbarNew = () => {
                                 onClick={() => {
                                     setSideNavBar('account');
                                 }}>
-                                <Settings className="icon-sm" />
+                                {/* <Settings className="icon-sm" /> */}
+                                <FontAwesomeIcon icon={faGear} size="lg" />
                             </button>
                         </Link>
                     )}

@@ -21,23 +21,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData }) => {
-    const records = [
-        {
-            status: 'available',
-            identifierMAC: 12345676,
-            model: 'PR55-4A',
-            location: 'Floor 1 > Electrical Closet',
-            sensors: '2/3',
-        },
-        {
-            status: 'available',
-            identifierMAC: 12342341,
-            model: 'PR55-4A',
-            location: 'Floor 1 > Electrical Closet',
-            sensors: '3/3',
-        },
-    ];
-
     return (
         <Card>
             <CardBody>

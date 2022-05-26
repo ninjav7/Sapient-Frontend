@@ -1125,75 +1125,82 @@ const BuildingOverview = () => {
                                 {energyConsumption.map((record, index) => {
                                     return (
                                         <div>
-                                            <div className="custom-bldg-table-style building-consumption-style m-2 p-1">
-                                                <div className="ml-2">
-                                                    {record.device === 'HVAC' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{
-                                                                background: '#3094B9',
-                                                            }}></div>
-                                                    )}
-                                                    {record.device === 'Lighting' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{
-                                                                background: '#2C4A5E',
-                                                            }}></div>
-                                                    )}
-                                                    {record.device === 'Plug' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{
-                                                                background: '#66D6BC',
-                                                            }}></div>
-                                                    )}
-                                                    {record.device === 'Process' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{
-                                                                background: '#3B8554',
-                                                            }}></div>
-                                                    )}
+                                            <Link
+                                                to={{
+                                                    pathname: `/energy/${record.device.toLowerCase()}/${bldgId}`,
+                                                }}>
+                                                <div className="custom-bldg-table-style building-consumption-style m-2 p-1">
+                                                    <div className="ml-2">
+                                                        {record.device === 'HVAC' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3094B9',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Lighting' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#2C4A5E',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Plug' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#66D6BC',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Process' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3B8554',
+                                                                }}></div>
+                                                        )}
+                                                    </div>
+                                                    <div className="custom-bld-equip-style record-bld-style font-weight-bold">
+                                                        {record.device}
+                                                    </div>
+                                                    <div className="custom-bld-usage-style muted table-font-style">
+                                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                                            maximumFractionDigits: 2,
+                                                        })}
+                                                        kWh
+                                                    </div>
+                                                    <div className="mr-2">
+                                                        {record.energy_consumption.now <=
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-success text-success custom-bld-style">
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {record.energy_consumption.now >
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-danger text-danger custom-bld-style">
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="custom-bld-equip-style record-bld-style font-weight-bold">
-                                                    {record.device}
-                                                </div>
-                                                <div className="custom-bld-usage-style muted table-font-style">
-                                                    {record.energy_consumption.now.toLocaleString(undefined, {
-                                                        maximumFractionDigits: 2,
-                                                    })}
-                                                    kWh
-                                                </div>
-                                                <div className="mr-2">
-                                                    {record.energy_consumption.now <= record.energy_consumption.old && (
-                                                        <button className="button-success text-success custom-bld-style">
-                                                            <i className="uil uil-chart-down">
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
-                                                            </i>
-                                                        </button>
-                                                    )}
-                                                    {record.energy_consumption.now > record.energy_consumption.old && (
-                                                        <button className="button-danger text-danger custom-bld-style">
-                                                            <i className="uil uil-arrow-growth">
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
-                                                            </i>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            </Link>
                                         </div>
                                     );
                                 })}
@@ -1342,12 +1349,10 @@ const BuildingOverview = () => {
                                     series={weekDaysSeries}
                                     height={weekdaysChartHeight}
                                 />
-                                <span className='m-2'></span>
+                                <span className="m-2"></span>
                                 <HeatMapChart
-                                    // options={weekDaysOptions}
                                     options={weekEndsOptions}
                                     series={weekEndsSeries}
-                                    // series={weekDaysSeries}
                                     height={weekendsChartHeight}
                                 />
                             </div>

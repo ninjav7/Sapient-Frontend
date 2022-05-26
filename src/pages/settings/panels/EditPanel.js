@@ -92,9 +92,9 @@ const EditPanel = () => {
                 <Col className="header-container" xl={10}>
                     <span className="heading-style">Panel 1</span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
-                            <Link to="/settings/createPanel">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="ml-2">
+                            <Link to="/settings/panels">
                                 <button type="button" className="btn btn-md btn-light font-weight-bold mr-2">
                                     Cancel
                                 </button>

@@ -19,7 +19,7 @@ import Form from 'react-bootstrap/Form';
 import { Search } from 'react-feather';
 import { allRoutes } from '../routes/index';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const SearchModal = () => {
@@ -57,13 +57,8 @@ const SearchModal = () => {
     return (
         <>
             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
-                <Search className="icon-sm" onClick={() => searchModalOpen()} />
-                {/* <FontAwesomeIcon
-                    icon={faMagnifyingGlass}
-                    className="ml-2 mt-1"
-                    size="xl"
-                    onClick={() => searchModalOpen()}
-                /> */}
+                {/* <Search className="icon-sm" onClick={() => searchModalOpen()} /> */}
+                <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" onClick={() => searchModalOpen()} />
             </button>
 
             {/* Search Modal  */}

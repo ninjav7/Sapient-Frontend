@@ -384,7 +384,7 @@ const portfolioRoutes = {
             name: 'Building Overview',
             component: Building,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'buildings',
         },
         {
@@ -392,7 +392,7 @@ const portfolioRoutes = {
             name: 'Peak Demand',
             component: PeakDemand,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'buildings',
         },
         {
@@ -400,7 +400,7 @@ const portfolioRoutes = {
             name: 'End Uses',
             component: EndUses,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'buildings',
         },
         {
@@ -408,7 +408,7 @@ const portfolioRoutes = {
             name: 'Time Of Day',
             component: TimeOfDay,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'buildings',
         },
         {
@@ -532,7 +532,7 @@ const settingsRoutes = {
         },
         {
             path: '/settings/account',
-            name: 'Account Settings',
+            name: 'General',
             component: AccountSettings,
             route: PrivateRoute,
             visibility: true,

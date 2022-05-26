@@ -15,7 +15,7 @@ const SideNavbar = () => {
     useEffect(() => {
         let activeSideRoutes = [];
         allFlattenRoutes.forEach((route) => {
-            if (route.parent === parentRoute) {
+            if (route.parent === parentRoute && route.visibility === true) {
                 activeSideRoutes.push(route);
             }
         });

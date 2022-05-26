@@ -460,24 +460,6 @@ const General = () => {
                                                 <option>Office Building</option>
                                                 <option>Residential Building</option>
                                             </Input>
-                                            {/* <Input
-                                                type="select"
-                                                name="buildingType"
-                                                id="buildingType"
-                                                className="font-weight-bold"
-                                                placeholder="Please select building type"
-                                                defaultValue={buildingData.building_type}
-                                                onChange={(e) => {
-                                                    handleChange('building_type', e.target.value);
-                                                }}>
-                                                {buildingType.map((building, index) => {
-                                                    return (
-                                                        <option value={building._id} key={building._id}>
-                                                            {building.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input> */}
                                         </div>
                                     </FormGroup>
 

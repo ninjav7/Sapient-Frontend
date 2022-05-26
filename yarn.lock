@@ -1868,7 +1868,7 @@
   "resolved" "https://registry.npmjs.org/@react-google-maps/infobox/-/infobox-2.11.8.tgz"
   "version" "2.11.8"
 
-"@react-google-maps/marker-clusterer@^2.10.1", "@react-google-maps/marker-clusterer@2.11.8":
+"@react-google-maps/marker-clusterer@^2.11.8", "@react-google-maps/marker-clusterer@2.11.8":
   "integrity" "sha512-OEcdbTXEgPwdpGvVuSrhIhjcZPhlzPz2TvaKCBLraf1PKiDyLOPhlTVRlbIziLiu0xN89pJcill1w9UVIVFF+Q=="
   "resolved" "https://registry.npmjs.org/@react-google-maps/marker-clusterer/-/marker-clusterer-2.11.8.tgz"
   "version" "2.11.8"

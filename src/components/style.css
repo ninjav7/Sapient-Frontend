@@ -446,10 +446,10 @@
     align-items: center;
 }
 
-.energy-logo-style {
-    /* width: fit-content; */
-    /* display: inline-block; */
-}
+/* .energy-logo-style {
+    width: fit-content;
+    display: inline-block;
+} */
 
 .custom-icon-style {
     height: 20% !important;
@@ -478,6 +478,8 @@
     font-weight: 600;
     font-size: 14px;
     color: #1d2939;
+    border: solid #4d53ed;
+    border-width: 0 0 0 3px;
 }
 
 .side-nav-content:hover {
@@ -493,9 +495,9 @@
 }
 
 .navbar-head-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
     height: 100%;
     border-bottom: 3px solid transparent;
 }
@@ -520,7 +522,8 @@
 }
 
 .navbar-head-container-active {
-    display: flex;
+    display: flex !important;
+    /* flex-direction: row !important; */
     justify-content: center;
     align-items: center;
     height: 100%;

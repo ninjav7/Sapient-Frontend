@@ -3,9 +3,7 @@ import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
 import ApexDonutChart from '../charts/ApexDonutChart';
-// import DoughnutChart from '../charts/DoughnutChart';
 import LineChart from '../charts/LineChart';
-// import MapChart from '../charts/MapChart';
 import SimpleMaps from '../charts/SimpleMaps';
 import EnergyMap from './EnergyMap';
 import ReactGoogleMap from './ReactGoogleMap';
@@ -110,23 +108,27 @@ const PortfolioOverview = () => {
         tooltip: {
             shared: false,
             intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
-                format: 'dd MMM',
+                format: 'dd/MMM - hh:mm TT',
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value;
+                },
             },
         },
         xaxis: {
             type: 'datetime',
-            // labels: {
-            //     formatter: function (value, timestamp, opts) {
-            //         return opts.dateFormatter(new Date(timestamp), 'MMMdd');
-            //     },
-            // },
-            // style: {
-            //     fontSize: '12px',
-            //     fontWeight: 600,
-            //     cssClass: 'apexcharts-xaxis-label',
-            // },
+            labels: {
+                format: 'dd/MMM - hh:mm TT',
+            },
         },
         yaxis: {
             labels: {
@@ -426,69 +428,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        // console.log('Sudhanshu => ', response);
-                        // response = [
-                        //     {
-                        //         _id: 16,
-                        //         x: '2022-05-16T06:51:01.209000',
-                        //         y: 404000.55,
-                        //         count_total: 3,
-                        //     },
-                        //     {
-                        //         _id: 17,
-                        //         x: '2022-05-17T04:02:43.041000',
-                        //         y: 5234.55,
-                        //         count_total: 2,
-                        //     },
-                        //     {
-                        //         _id: 18,
-                        //         x: '2022-05-18T03:02:43.041000',
-                        //         y: 63000,
-                        //         count_total: 5,
-                        //     },
-                        //     {
-                        //         _id: 19,
-                        //         x: '2022-05-19T06:51:01.209000',
-                        //         y: 6051500.55,
-                        //         count_total: 13,
-                        //     },
-                        //     {
-                        //         _id: 20,
-                        //         x: '2022-05-20T01:18:01.209000',
-                        //         y: 5766.55,
-                        //         count_total: 5,
-                        //     },
-                        //     {
-                        //         _id: 22,
-                        //         x: '2022-05-23T06:10:01.209000',
-                        //         y: 1000.55,
-                        //         count_total: 1,
-                        //     },
-                        //     {
-                        //         _id: 23,
-                        //         x: '2022-05-23T06:10:01.209000',
-                        //         y: 800.55,
-                        //         count_total: 1,
-                        //     },
-                        //     {
-                        //         _id: 24,
-                        //         x: '2022-05-23T06:10:01.209000',
-                        //         y: 1200.55,
-                        //         count_total: 1,
-                        //     },
-                        //     {
-                        //         _id: 25,
-                        //         x: '2022-05-23T06:10:01.209000',
-                        //         y: 1000.55,
-                        //         count_total: 1,
-                        //     },
-                        //     {
-                        //         _id: 26,
-                        //         x: '2022-05-23T06:10:01.209000',
-                        //         y: 1500.55,
-                        //         count_total: 1,
-                        //     },
-                        // ];
+                        console.log('Line Chart Response => ', response);
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -502,6 +442,7 @@ const PortfolioOverview = () => {
                                 y: record.y.toFixed(2),
                             });
                         });
+                        console.log('Line Chart New Array => ', newArray);
                         setEnergyConsumptionChart(newArray);
                     });
             } catch (error) {
@@ -750,8 +691,8 @@ const PortfolioOverview = () => {
                             <h6 className="custom-title">Energy Density Top Buildings</h6>
                             <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                             <div className="portfolio-map-widget">
-                                <SimpleMaps markers={markers} />
-                                {/* <EnergyMap /> */}
+                                {/* <SimpleMaps markers={markers} /> */}
+                                <EnergyMap />
                             </div>
                         </div>
                     </Col>
@@ -782,7 +723,16 @@ const PortfolioOverview = () => {
                                                     s.parent = 'buildings';
                                                 });
                                             }}>
-                                            {index === 0 && (
+                                            {index === 0 && item.density === 0 && (
+                                                <ProgressBar
+                                                    colors={`#D14065`}
+                                                    progressValue={0}
+                                                    progressTitle={item.buildingName}
+                                                    progressUnit={item.density.toFixed(2) + ' k.W /Sq. feet'}
+                                                    className="progress-bar-container custom-progress-bar"
+                                                />
+                                            )}
+                                            {index === 0 && item.density > 0 && (
                                                 <ProgressBar
                                                     colors={`#D14065`}
                                                     progressValue={100}
