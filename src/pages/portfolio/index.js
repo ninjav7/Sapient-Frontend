@@ -691,8 +691,8 @@ const PortfolioOverview = () => {
                             <h6 className="custom-title">Energy Density Top Buildings</h6>
                             <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                             <div className="portfolio-map-widget">
-                                {/* <SimpleMaps markers={markers} /> */}
-                                <EnergyMap />
+                                <SimpleMaps markers={markers} />
+                                {/* <EnergyMap /> */}
                             </div>
                         </div>
                     </Col>
