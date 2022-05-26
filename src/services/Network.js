@@ -30,6 +30,8 @@ export const endUsesUsageChart = '/api/energy/chart/usage';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details';
+export const equipmentType = '/api/config/get_equipment_type';
+export const createEquipment = '/api/config/equipments_details/create_equipment';
 // export const generalEquipments = '/api/config/equipments/equipments_details';  --- Old API
 
 // active
@@ -55,6 +57,8 @@ export const compareBuildings = '/api/energy/energy/compare_building';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
+export const createBuilding = '/api/config/create_building';
+export const createDevice = '/api/config/devices/create_device';
 
 // general settings
 export const deleteBuilding = '/api/config/general/delete_building';

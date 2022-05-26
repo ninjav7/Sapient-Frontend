@@ -14,7 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
@@ -234,8 +234,6 @@ const BuildingTable = ({ equipmentData }) => {
     const Toggle = () => setModal(!modal);
     const [equipData, setEquipData] = useState(null);
 
-    const [selected, setSelected] = useState(['papaya']);
-
     return (
         <>
             <Card>
@@ -306,11 +304,46 @@ const BuildingTable = ({ equipmentData }) => {
 };
 
 const Equipment = () => {
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const [isProcessing, setIsProcessing] = useState(false);
+
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
     const [onlineEquipData, setOnlineEquipData] = useState([]);
     const [offlineEquipData, setOfflineEquipData] = useState([]);
+    const [equipmentTypeData, setEquipmentTypeData] = useState([]);
+    const [createEqipmentData, setCreateEqipmentData] = useState({});
+    const [locationData, setLocationData] = useState([]);
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, createEqipmentData);
+        obj[key] = value;
+        setCreateEqipmentData(obj);
+    };
+
+    const saveDeviceData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // Authorization: `JWT ${_user.token}`,
+            };
+            setIsProcessing(true);
+
+            axios.post(`${BaseUrl}${createEquipment}`, createEqipmentData, { header }).then((res) => {
+                console.log(res.data);
+            });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to create Passive device data');
+        }
+    };
 
     useEffect(() => {
         const fetchEquipmentData = async () => {
@@ -328,6 +361,7 @@ const Equipment = () => {
                 console.log('Failed to fetch all Equipments Data');
             }
         };
+
         const fetchOnlineEquipData = async () => {
             try {
                 let headers = {
@@ -344,6 +378,7 @@ const Equipment = () => {
                 console.log('Failed to fetch online Equipments Data');
             }
         };
+
         const fetchOfflineEquipData = async () => {
             try {
                 let headers = {
@@ -360,9 +395,43 @@ const Equipment = () => {
                 console.log('Failed to fetch offline Equipments Data');
             }
         };
+
+        const fetchEquipTypeData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
+                    setEquipmentTypeData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Equipment Type Data');
+            }
+        };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
         fetchEquipmentData();
         fetchOnlineEquipData();
         fetchOfflineEquipData();
+        fetchEquipTypeData();
+        fetchLocationData();
     }, []);
 
     useEffect(() => {
@@ -381,6 +450,10 @@ const Equipment = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        console.log('createEqipmentData => ', createEqipmentData);
+    });
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -389,9 +462,14 @@ const Equipment = () => {
                         Equipment
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={() => {
+                                    handleShow();
+                                }}>
                                 <i className="uil uil-plus mr-1"></i>Add Equipment
                             </button>
                         </div>
@@ -483,6 +561,88 @@ const Equipment = () => {
                     {selectedTab === 2 && <BuildingTable equipmentData={offlineEquipData} />}
                 </Col>
             </Row>
+
+            <Modal show={show} onHide={handleClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Add Equipment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Identifier"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('name', e.target.value);
+                                }}
+                                autoFocus
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Identifier</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Identifier"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('identifier', e.target.value);
+                                }}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Type</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('equipment_type', e.target.value);
+                                }}>
+                                <option selected>Select Model</option>
+                                {equipmentTypeData.map((record) => {
+                                    return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Location</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('space_id', e.target.value);
+                                }}>
+                                <option selected>Select Location</option>
+                                {locationData.map((record) => {
+                                    return <option value={record.location_id}>{record.location_name}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            saveDeviceData();
+                            handleClose();
+                        }}
+                        disabled={isProcessing}>
+                        {isProcessing ? 'Adding...' : 'Add'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };

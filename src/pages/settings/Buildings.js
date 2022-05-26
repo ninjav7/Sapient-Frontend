@@ -10,6 +10,8 @@ import {
     DropdownToggle,
     DropdownItem,
     Button,
+    FormGroup,
+    Label,
     Input,
 } from 'reactstrap';
 import { Search } from 'react-feather';
@@ -18,7 +20,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, getBuildings } from '../../services/Network';
+import { BaseUrl, getBuildings, createBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
@@ -67,31 +69,47 @@ const Buildings = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [buildingId, setBuildingId] = useState(1);
-    // const [buildingData, setBuildingData] = useState([
-    //     {
-    //         name: '123 Main St. Portland, OR',
-    //         label: 'Office',
-    //         area: 46332,
-    //         devices: 1221,
-    //     },
-    //     {
-    //         name: '15 University Blvd.',
-    //         label: 'Office',
-    //         area: 31834,
-    //         devices: 852,
-    //     },
-    //     {
-    //         name: '6223 Sycamore Ave.',
-    //         label: 'Office',
-    //         area: 25613,
-    //         devices: 25,
-    //     },
-    // ]);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    // building type
+    const [buildingType, setBuildingType] = useState([
+        { value: 'Commercial Building', label: 'Commercial Building' },
+        { value: 'Residential Building', label: 'Residential Building' },
+    ]);
+    const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
+
+    const [createBuildingData, setCreateBuildingData] = useState({});
 
     const [buildingsData, setBuildingsData] = useState([]);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const bldgName = BuildingStore.useState((s) => s.BldgName);
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, createBuildingData);
+        obj[key] = value;
+        setCreateBuildingData(obj);
+    };
+
+    const saveBuilding = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // Authorization: `JWT ${_user.token}`,
+            };
+            setIsProcessing(true);
+
+            axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
+                console.log('createBuilding sending data to API => ', res.data);
+                // handleClose();
+            });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to create Building');
+        }
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -108,6 +126,10 @@ const Buildings = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        console.log('createBuildingData => ', createBuildingData);
+    });
 
     useEffect(() => {
         const fetchBuildingData = async () => {
@@ -135,15 +157,16 @@ const Buildings = () => {
                         Buildings
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
                                 onClick={() => {
                                     handleShow();
                                 }}>
-                                <i className="uil uil-plus mr-1"></i>Add Building
+                                <i className="uil uil-plus mr-1"></i>
+                                Add Building
                             </button>
                         </div>
                     </div>
@@ -168,7 +191,7 @@ const Buildings = () => {
             </Row>
 
             <Row>
-                <Col lg={5}>
+                <Col lg={6}>
                     <BuildingTable buildingsData={buildingsData} />
                 </Col>
             </Row>
@@ -185,31 +208,62 @@ const Buildings = () => {
                                 type="text"
                                 placeholder="Enter Building Name"
                                 className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('building_name', e.target.value);
+                                }}
                                 autoFocus
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <FormGroup>
+                            <Label for="userState" className="card-title">
+                                Type
+                            </Label>
+                            <div>
+                                <Input
+                                    type="select"
+                                    name="typee"
+                                    id="exampleSelect"
+                                    onChange={(e) => {
+                                        setBuildingTypeSelected(e.target.value);
+                                        handleChange('building_type', e.target.value);
+                                    }}
+                                    className="font-weight-bold">
+                                    <option>Select Building Type</option>
+                                    {buildingType.map((record) => {
+                                        return <option value={record.value}>{record.label}</option>;
+                                    })}
+                                </Input>
+                            </div>
+                        </FormGroup>
+
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Area (Sq. Ft.)</Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder="Enter Area in Sq. Ft."
                                 className="font-weight-bold"
                             />
-                        </Form.Group>
+                        </Form.Group> */}
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>No of Devices</Form.Label>
                             <Form.Control type="number" placeholder="Enter Devices" className="font-weight-bold" />
-                        </Form.Group>
+                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Add Building
+                    <Button
+                        variant="primary"
+                        disabled={isProcessing}
+                        onClick={() => {
+                            saveBuilding();
+                            // handleClose();
+                        }}>
+                        {isProcessing ? 'Adding...' : 'Add Building'}
                     </Button>
                 </Modal.Footer>
             </Modal>

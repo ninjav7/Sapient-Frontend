@@ -20,7 +20,7 @@ import { Search } from 'react-feather';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices } from '../../services/Network';
+import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import './style.css';
@@ -101,9 +101,41 @@ const ActiveDevices = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    const [isProcessing, setIsProcessing] = useState(false);
+
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
+    const [locationData, setLocationData] = useState([]);
+    const [createDeviceData, setCreateDeviceData] = useState({
+        device_type: 'active',
+    });
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, createDeviceData);
+        obj[key] = value;
+        setCreateDeviceData(obj);
+    };
+
+    const saveDeviceData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // Authorization: `JWT ${_user.token}`,
+            };
+            setIsProcessing(true);
+
+            axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
+                console.log(res.data);
+            });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to create Active device data');
+        }
+    };
 
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
@@ -121,6 +153,7 @@ const ActiveDevices = () => {
                 console.log('Failed to fetch all Active Devices');
             }
         };
+
         const fetchOnlineDeviceData = async () => {
             try {
                 let headers = {
@@ -137,6 +170,7 @@ const ActiveDevices = () => {
                 console.log('Failed to fetch all Online Devices');
             }
         };
+
         const fetchOfflineDeviceData = async () => {
             try {
                 let headers = {
@@ -153,9 +187,27 @@ const ActiveDevices = () => {
                 console.log('Failed to fetch all Offline Devices');
             }
         };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
         fetchActiveDeviceData();
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
+        fetchLocationData();
     }, []);
 
     useEffect(() => {
@@ -174,6 +226,79 @@ const ActiveDevices = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        const fetchActiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+                    setActiveDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Active Devices');
+            }
+        };
+
+        const fetchOnlineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=true`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                    setOnlineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Online Devices');
+            }
+        };
+
+        const fetchOfflineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                let params = `?stat=false`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                    setOfflineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Offline Devices');
+            }
+        };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
+        fetchActiveDeviceData();
+        fetchOnlineDeviceData();
+        fetchOfflineDeviceData();
+        fetchLocationData();
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -182,13 +307,13 @@ const ActiveDevices = () => {
                         Active Devices
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button type="button" className="btn btn-md btn-light font-weight-bold">
                                 Attach Kasa Account
                             </button>
                         </div>
-                        <div className="float-right ml-2">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
@@ -301,25 +426,44 @@ const ActiveDevices = () => {
                                 type="text"
                                 placeholder="Enter Identifier"
                                 className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('Identifier', e.target.value);
+                                }}
                                 autoFocus
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Model</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-                                <option selected>Open this select menu</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('model', e.target.value);
+                                }}>
+                                <option selected>Select Model</option>
+                                {activeDeviceData.map((record) => {
+                                    return <option value={record.model}>{record.model}</option>;
+                                })}
                             </Input>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Location</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('space_id', e.target.value);
+                                }}>
                                 <option selected>Select Location</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
+                                {locationData.map((record) => {
+                                    return <option value={record.location_id}>{record.location_name}</option>;
+                                })}
                             </Input>
                         </Form.Group>
                     </Form>
@@ -328,8 +472,14 @@ const ActiveDevices = () => {
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Save
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            saveDeviceData();
+                            handleClose();
+                        }}
+                        disabled={isProcessing}>
+                        {isProcessing ? 'Adding...' : 'Add'}
                     </Button>
                 </Modal.Footer>
             </Modal>

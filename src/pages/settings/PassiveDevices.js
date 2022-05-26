@@ -13,7 +13,7 @@ import {
     Input,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices } from '../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
@@ -70,11 +70,42 @@ const PassiveDevices = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
+    const [locationData, setLocationData] = useState([]);
+    const [createDeviceData, setCreateDeviceData] = useState({
+        device_type: 'passive',
+    });
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, createDeviceData);
+        obj[key] = value;
+        setCreateDeviceData(obj);
+    };
+
+    const saveDeviceData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // Authorization: `JWT ${_user.token}`,
+            };
+            setIsProcessing(true);
+
+            axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
+                console.log(res.data);
+            });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to create Passive device data');
+        }
+    };
 
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {
@@ -92,6 +123,7 @@ const PassiveDevices = () => {
                 console.log('Failed to fetch all Passive devices');
             }
         };
+
         const fetchOnlineDeviceData = async () => {
             try {
                 let headers = {
@@ -108,6 +140,7 @@ const PassiveDevices = () => {
                 console.log('Failed to fetch all Online devices');
             }
         };
+
         const fetchOfflineDeviceData = async () => {
             try {
                 let headers = {
@@ -124,9 +157,27 @@ const PassiveDevices = () => {
                 console.log('Failed to fetch Offline devices');
             }
         };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                };
+                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
         fetchPassiveDeviceData();
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
+        fetchLocationData();
     }, []);
 
     useEffect(() => {
@@ -153,8 +204,8 @@ const PassiveDevices = () => {
                         Passive Devices
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
@@ -268,25 +319,44 @@ const PassiveDevices = () => {
                                 type="text"
                                 placeholder="Enter Identifier"
                                 className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('Identifier', e.target.value);
+                                }}
                                 autoFocus
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Model</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-                                <option selected>Open this select menu</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('model', e.target.value);
+                                }}>
+                                <option selected>Select Model</option>
+                                {passiveDeviceData.map((record) => {
+                                    return <option value={record.model}>{record.model}</option>;
+                                })}
                             </Input>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Location</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('space_id', e.target.value);
+                                }}>
                                 <option selected>Select Location</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
+                                {locationData.map((record) => {
+                                    return <option value={record.location_id}>{record.location_name}</option>;
+                                })}
                             </Input>
                         </Form.Group>
                     </Form>
@@ -295,8 +365,14 @@ const PassiveDevices = () => {
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Save
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            saveDeviceData();
+                            handleClose();
+                        }}
+                        disabled={isProcessing}>
+                        {isProcessing ? 'Adding...' : 'Add'}
                     </Button>
                 </Modal.Footer>
             </Modal>

@@ -13,7 +13,9 @@ import {
     DropdownMenu,
     DropdownToggle,
     DropdownItem,
+    Button,
 } from 'reactstrap';
+import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -23,60 +25,23 @@ import { BaseUrl, getLocation, generalPanels, generalPassiveDevices } from '../.
 import '../style.css';
 
 const CreatePanel = () => {
+    // Breakers Modal
+    const [showBreaker, setShowBreaker] = useState(false);
+    const handleBreakerClose = () => setShowBreaker(false);
+    const handleBreakerShow = () => setShowBreaker(true);
+
+    // Hydra Modals
+    const [showHydra, setShowHydra] = useState(false);
+    const handleHydraClose = () => setShowHydra(false);
+    const handleHydraShow = () => setShowHydra(true);
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [panel, setPanel] = useState({
+        breaker_count: 48,
+    });
 
     const [breakersStruct, setBreakersStruct] = useState([]);
-
-    const sampleStructure = [
-        { serialNo: 1, name: '' },
-        { serialNo: 2, name: '' },
-        { serialNo: 3, name: '' },
-        { serialNo: 4, name: '' },
-        { serialNo: 5, name: '' },
-        { serialNo: 6, name: '' },
-        { serialNo: 7, name: '' },
-        { serialNo: 8, name: '' },
-        { serialNo: 9, name: '' },
-        { serialNo: 10, name: '' },
-        { serialNo: 11, name: '' },
-        { serialNo: 12, name: '' },
-        { serialNo: 13, name: '' },
-        { serialNo: 14, name: '' },
-        { serialNo: 15, name: '' },
-        { serialNo: 16, name: '' },
-        { serialNo: 17, name: '' },
-        { serialNo: 18, name: '' },
-        { serialNo: 19, name: '' },
-        { serialNo: 20, name: '' },
-        { serialNo: 21, name: '' },
-        { serialNo: 22, name: '' },
-        { serialNo: 23, name: '' },
-        { serialNo: 24, name: '' },
-        { serialNo: 25, name: '' },
-        { serialNo: 26, name: '' },
-        { serialNo: 27, name: '' },
-        { serialNo: 28, name: '' },
-        { serialNo: 29, name: '' },
-        { serialNo: 30, name: '' },
-        { serialNo: 31, name: '' },
-        { serialNo: 32, name: '' },
-        { serialNo: 33, name: '' },
-        { serialNo: 34, name: '' },
-        { serialNo: 35, name: '' },
-        { serialNo: 36, name: '' },
-        { serialNo: 37, name: '' },
-        { serialNo: 38, name: '' },
-        { serialNo: 39, name: '' },
-        { serialNo: 40, name: '' },
-        { serialNo: 41, name: '' },
-        { serialNo: 42, name: '' },
-        { serialNo: 43, name: '' },
-        { serialNo: 44, name: '' },
-        { serialNo: 45, name: '' },
-        { serialNo: 46, name: '' },
-        { serialNo: 47, name: '' },
-        { serialNo: 48, name: '' },
-    ];
 
     const [breakersCount, setBreakersCount] = useState(48);
     const [locationData, setLocationData] = useState([]);
@@ -87,6 +52,77 @@ const CreatePanel = () => {
         { value: 'Hydra', label: 'Hydra' },
     ]);
     const [selectedVendor, setSelectedVendor] = useState(vendor[0].label);
+
+    const [hydraData, setHydraData] = useState({});
+    const [hydraDataIndex, setHydraDataIndex] = useState(0);
+
+    const [mainBreaker, setMainBreaker] = useState({
+        breakerNo: 0,
+        name: '',
+        type: 'breaker',
+    });
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, panel);
+        if (key === 'breaker_count') {
+            value = parseInt(value);
+        }
+        obj[key] = value;
+        setPanel(obj);
+    };
+
+    const updateHydraSingleData = () => {
+        if (hydraDataIndex !== 1010) {
+            let newArray = breakersStruct;
+            newArray[hydraDataIndex] = hydraData;
+            setBreakersStruct(newArray);
+        } else {
+            let obj = hydraData;
+            setMainBreaker(obj);
+        }
+    };
+
+    const saveHydraChange = (hydraObj) => {};
+
+    const handleHydraChange = (key, value) => {
+        let obj = Object.assign({}, hydraData);
+        obj[key] = value;
+        setHydraData(obj);
+    };
+
+    const savePanelData = async () => {
+        try {
+            let i = panel;
+            console.log('Current Panel Data => ', panel);
+
+            let panelData = new FormData();
+
+            for (let index = 0; index < Object.keys(i).length; index += 1) {
+                let key = Object.keys(i)[index];
+                panelData.append(key, i[key]);
+            }
+
+            console.log('New Panel Data => ', panelData);
+
+            setIsProcessing(true);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to save Panel');
+        }
+    };
+
+    useEffect(() => {
+        let newBreakers = [];
+        for (let index = 1; index <= breakersCount; index++) {
+            let obj = {
+                breakerNo: index,
+                name: '',
+                type: 'breaker',
+            };
+            newBreakers.push(obj);
+        }
+        setBreakersStruct(newBreakers);
+    }, [breakersCount]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -158,6 +194,12 @@ const CreatePanel = () => {
         fetchPassiveDeviceData();
     }, [bldgId]);
 
+    useEffect(() => {
+        console.log('SSR hydraData => ', hydraData);
+        console.log('SSR hydraDataIndex => ', hydraDataIndex);
+        console.log('SSR breakersStruct => ', breakersStruct);
+    });
+
     return (
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>
@@ -172,8 +214,12 @@ const CreatePanel = () => {
                                 </button>
                             </Link>
                             <Link to="/settings/createPanel">
-                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                    Save
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    disabled={isProcessing}
+                                    onClick={() => savePanelData()}>
+                                    {isProcessing ? 'Saving...' : 'Save'}
                                 </button>
                             </Link>
                         </div>
@@ -188,14 +234,29 @@ const CreatePanel = () => {
                             <Label for="panelName" className="card-title">
                                 Name
                             </Label>
-                            <Input type="text" name="panelName" id="panelName" placeholder="Panel Name" />
+                            <Input
+                                type="text"
+                                name="panelName"
+                                id="panelName"
+                                placeholder="Panel Name"
+                                onChange={(e) => {
+                                    handleChange('name', e.target.value);
+                                }}
+                            />
                         </FormGroup>
 
                         <FormGroup>
                             <Label for="userState" className="card-title">
                                 Parent Panel
                             </Label>
-                            <Input type="select" name="state" id="userState" className="font-weight-bold">
+                            <Input
+                                type="select"
+                                name="state"
+                                id="userState"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('parent_panel', e.target.value);
+                                }}>
                                 <option>None</option>
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
@@ -207,10 +268,17 @@ const CreatePanel = () => {
                             <Label for="location" className="card-title">
                                 Location
                             </Label>
-                            <Input type="select" name="state" id="userState" className="font-weight-bold">
+                            <Input
+                                type="select"
+                                name="state"
+                                id="userState"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('space_id', e.target.value);
+                                }}>
                                 <option>Select Location</option>
                                 {locationData.map((record) => {
-                                    return <option value={record.id}>{record.location_name}</option>;
+                                    return <option value={record.location_id}>{record.location_name}</option>;
                                 })}
                             </Input>
                         </FormGroup>
@@ -230,7 +298,10 @@ const CreatePanel = () => {
                                     type="select"
                                     name="typee"
                                     id="exampleSelect"
-                                    onChange={(e) => setSelectedVendor(e.target.value)}
+                                    onChange={(e) => {
+                                        setSelectedVendor(e.target.value);
+                                        handleChange('vendor', e.target.value);
+                                    }}
                                     value={selectedVendor}
                                     className="font-weight-bold">
                                     {vendor.map((record) => {
@@ -245,7 +316,14 @@ const CreatePanel = () => {
                                 <Label for="userState" className="card-title">
                                     Select Device
                                 </Label>
-                                <Input type="select" name="state" id="userState" className="font-weight-bold">
+                                <Input
+                                    type="select"
+                                    name="state"
+                                    id="userState"
+                                    className="font-weight-bold"
+                                    onChange={(e) => {
+                                        handleChange('device_id', e.target.value);
+                                    }}>
                                     <option>Select Device</option>
                                     {passiveDeviceData.map((record) => {
                                         return <option value={record.equipments_id}>{record.model}</option>;
@@ -272,7 +350,10 @@ const CreatePanel = () => {
                                                 type="number"
                                                 name="breakers"
                                                 id="breakers"
-                                                defaultValue={breakersCount}
+                                                value={breakersCount}
+                                                onChange={(e) => {
+                                                    setBreakersCount(parseInt(e.target.value));
+                                                }}
                                             />
                                         </FormGroup>
                                     </div>
@@ -293,7 +374,7 @@ const CreatePanel = () => {
                                         <div className="breaker-container">
                                             <div className="breaker-style">
                                                 <div className="breaker-content-middle">
-                                                    <div className="breaker-index">1</div>
+                                                    <div className="breaker-index">M</div>
                                                 </div>
                                                 <div className="breaker-content-middle">
                                                     <div className="dot-status"></div>
@@ -304,12 +385,14 @@ const CreatePanel = () => {
                                                         <span>240V</span>
                                                     </div>
                                                 </div>
-                                                <div className="breaker-content-middle">
-                                                    <div className="edit-icon-bg-styling">
+                                                <div
+                                                    className="breaker-content-middle"
+                                                    onClick={() => {
+                                                        handleBreakerShow();
+                                                    }}>
+                                                    <div className="edit-icon-bg-styling mr-2">
                                                         <i className="uil uil-pen"></i>
                                                     </div>
-                                                </div>
-                                                <div className="breaker-content-middle">
                                                     <span className="font-weight-bold edit-btn-styling">Edit</span>
                                                 </div>
                                             </div>
@@ -323,14 +406,14 @@ const CreatePanel = () => {
                                 <Col lg={12}>
                                     <div>
                                         <div className="grid-style-6">
-                                            {sampleStructure.map((breaker, index) => {
+                                            {breakersStruct.map((element, index) => {
                                                 return (
                                                     <FormGroup className="form-group row m-2 ml-4">
                                                         <div className="breaker-container">
                                                             <div className="sub-breaker-style">
                                                                 <div className="breaker-content-middle">
                                                                     <div className="breaker-index">
-                                                                        {breaker.serialNo}
+                                                                        {element.breakerNo}
                                                                     </div>
                                                                 </div>
                                                                 <div className="breaker-content-middle">
@@ -342,16 +425,28 @@ const CreatePanel = () => {
                                                                         <span>120V</span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="breaker-content-middle">
-                                                                    <div className="edit-icon-bg-styling">
-                                                                        <i className="uil uil-pen"></i>
+                                                                {!(element.name === '') ? (
+                                                                    <div>
+                                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                            {element.name}
+                                                                        </h6>
                                                                     </div>
-                                                                </div>
-                                                                <div className="breaker-content-middle">
-                                                                    <span className="font-weight-bold edit-btn-styling">
-                                                                        Edit
-                                                                    </span>
-                                                                </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <div
+                                                                            className="breaker-content-middle"
+                                                                            onClick={() => {
+                                                                                handleBreakerShow();
+                                                                            }}>
+                                                                            <div className="edit-icon-bg-styling mr-2">
+                                                                                <i className="uil uil-pen"></i>
+                                                                            </div>
+                                                                            <span className="font-weight-bold edit-btn-styling">
+                                                                                Edit
+                                                                            </span>
+                                                                        </div>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </FormGroup>
@@ -365,6 +460,282 @@ const CreatePanel = () => {
                     </Col>
                 </Row>
             )}
+
+            {selectedVendor === 'Hydra' && (
+                <Row style={{ marginLeft: '20px' }}>
+                    <Col xl={10}>
+                        <div className="panel-container-style mt-4">
+                            <Row>
+                                <Col lg={3}>
+                                    <div>
+                                        <FormGroup className="form-group row m-4">
+                                            <Label for="panelName" className="card-title">
+                                                Number of Breakers
+                                            </Label>
+                                            <Input
+                                                type="number"
+                                                name="breakers"
+                                                id="breakers"
+                                                value={breakersCount}
+                                                onChange={(e) => {
+                                                    setBreakersCount(parseInt(e.target.value));
+                                                }}
+                                            />
+                                        </FormGroup>
+                                    </div>
+                                </Col>
+                                <Col lg={9}>
+                                    <div className="float-right m-4">
+                                        <button type="button" className="btn btn-md btn-secondary font-weight-bold ">
+                                            Done
+                                        </button>
+                                    </div>
+                                </Col>
+                            </Row>
+
+                            <Row>
+                                <Col lg={4}></Col>
+                                <Col lg={4}>
+                                    <FormGroup className="form-group row m-4">
+                                        <div className="breaker-container">
+                                            <div className="breaker-style">
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-index">M</div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="dot-status"></div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-content">
+                                                        <span>200A</span>
+                                                        <span>240V</span>
+                                                    </div>
+                                                </div>
+
+                                                {!(mainBreaker.name === '') ? (
+                                                    <div>
+                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                            {mainBreaker.name}
+                                                        </h6>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div
+                                                            className="breaker-content-middle"
+                                                            onClick={() => {
+                                                                handleHydraShow();
+                                                                setHydraData(mainBreaker);
+                                                                setHydraDataIndex(1010);
+                                                            }}>
+                                                            <div className="edit-icon-bg-styling mr-2">
+                                                                <i className="uil uil-pen"></i>
+                                                            </div>
+                                                            <span className="font-weight-bold edit-btn-styling">
+                                                                Edit
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </FormGroup>
+                                </Col>
+                                <Col lg={4}></Col>
+                            </Row>
+
+                            <Row>
+                                <Col lg={12}>
+                                    <div>
+                                        <div className="grid-style-6">
+                                            {breakersStruct.map((element, index) => {
+                                                return (
+                                                    <FormGroup className="form-group row m-2 ml-4">
+                                                        <div className="breaker-container">
+                                                            <div className="sub-breaker-style">
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="breaker-index">
+                                                                        {element.breakerNo}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="dot-status"></div>
+                                                                </div>
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="breaker-content">
+                                                                        <span>20A</span>
+                                                                        <span>120V</span>
+                                                                    </div>
+                                                                </div>
+                                                                {!(element.name === '') ? (
+                                                                    <div>
+                                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                            {element.name}
+                                                                        </h6>
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <div
+                                                                            className="breaker-content-middle"
+                                                                            onClick={() => {
+                                                                                handleHydraShow();
+                                                                                setHydraData(element);
+                                                                                setHydraDataIndex(index);
+                                                                            }}>
+                                                                            <div className="edit-icon-bg-styling mr-2">
+                                                                                <i className="uil uil-pen"></i>
+                                                                            </div>
+                                                                            <span className="font-weight-bold edit-btn-styling">
+                                                                                Edit
+                                                                            </span>
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </FormGroup>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </div>
+                    </Col>
+                </Row>
+            )}
+
+            {/* Breaker modal  */}
+            <Modal show={showBreaker} onHide={handleBreakerClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Edit Breaker</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6">
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Enter Amps"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                handleChange('Identifier', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </div>
+                                <div class="col-6">
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Volts</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Enter Volts"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                handleChange('Identifier', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-6">
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Device ID</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Enter Device ID"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                handleChange('Identifier', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </div>
+                                <div class="col-6">
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Sensors #</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            placeholder="Enter Sensors"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                handleChange('Identifier', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Equipment"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('Identifier', e.target.value);
+                                }}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleBreakerClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            // saveBreakerData();
+                            // handleClose();
+                        }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Hydra modal  */}
+            <Modal show={showHydra} onHide={handleHydraClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Edit Hydra</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Equipment Name"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleHydraChange('name', e.target.value);
+                                }}
+                                autoFocus
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleHydraClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            updateHydraSingleData();
+                            handleHydraClose();
+                        }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };
