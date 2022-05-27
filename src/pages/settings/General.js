@@ -56,6 +56,7 @@ const General = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
             };
             await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                 let response = res.data;
@@ -232,9 +233,9 @@ const General = () => {
         },
     };
 
-    useEffect(() => {
-        console.log('startDate', startDate);
-    });
+    // useEffect(() => {
+    //     console.log('startDate', startDate);
+    // });
     // update section start
     const inputsBuildingHandler = (e) => {
         console.log(e.target.name);
@@ -246,6 +247,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -262,6 +264,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingAddress}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -298,6 +301,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -312,6 +316,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalDateTime}/${bldgId}`, { time_format: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -329,6 +334,7 @@ const General = () => {
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
             };
             axios.delete(`${BaseUrl}${deleteBuilding}/${bldgId}`, { headers }).then((res) => {
                 console.log(res.data);
@@ -366,6 +372,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
             console.log(res.data);

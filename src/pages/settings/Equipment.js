@@ -351,6 +351,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalEquipments}`, { headers }).then((res) => {
                     setGeneralEquipmentData(res.data);
@@ -367,6 +368,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -384,6 +386,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -401,6 +404,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
@@ -416,6 +420,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
@@ -572,7 +577,7 @@ const Equipment = () => {
                             <Form.Label>Equipment Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Identifier"
+                                placeholder="Enter Equipment"
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('name', e.target.value);

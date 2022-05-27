@@ -91,6 +91,7 @@ const Panels = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);

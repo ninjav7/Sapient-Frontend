@@ -70,6 +70,8 @@ const PassiveDevices = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    const [pageRefresh, setPageRefresh] = useState(false);
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -96,9 +98,11 @@ const PassiveDevices = () => {
             };
             setIsProcessing(true);
 
-            axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
+            await axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
                 console.log(res.data);
             });
+
+            setPageRefresh(!pageRefresh);
 
             setIsProcessing(false);
         } catch (error) {
@@ -113,6 +117,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
                     setPassiveDeviceData(res.data);
@@ -129,6 +134,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -146,6 +152,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -163,6 +170,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
@@ -179,6 +187,83 @@ const PassiveDevices = () => {
         fetchOfflineDeviceData();
         fetchLocationData();
     }, []);
+
+    useEffect(() => {
+        const fetchPassiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                };
+                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+                    setPassiveDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Passive devices');
+            }
+        };
+
+        const fetchOnlineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?stat=true`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    setOnlineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Online devices');
+            }
+        };
+
+        const fetchOfflineDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?stat=false`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    setOfflineDeviceData(res.data);
+                    console.log(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Offline devices');
+            }
+        };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                };
+                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
+        fetchPassiveDeviceData();
+        fetchOnlineDeviceData();
+        fetchOfflineDeviceData();
+        fetchLocationData();
+    }, [pageRefresh]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -309,7 +394,7 @@ const PassiveDevices = () => {
 
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header>
-                    <Modal.Title>Edit Utility Bill</Modal.Title>
+                    <Modal.Title>Create Passive Device</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>

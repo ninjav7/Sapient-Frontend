@@ -166,6 +166,7 @@ const Layout = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
             console.log(res.data);

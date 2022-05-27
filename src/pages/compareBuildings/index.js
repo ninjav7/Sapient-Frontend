@@ -19,6 +19,7 @@ import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
 
@@ -248,6 +249,7 @@ const BuildingTable = ({ buildingsData }) => {
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
+    const daysCount = DateRangeStore.useState((s) => s.dateFilter);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -271,8 +273,11 @@ const CompareBuildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?days=30`;
+                let params;
+                let count = parseInt(localStorage.getItem('dateFilter'));
+                count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
                 await axios.post(`${BaseUrl}${compareBuildings}${params}`, { headers }).then((res) => {
                     setBuildingsData(res.data);
                     console.log('setBuildingsData => ', res.data);
@@ -283,7 +288,7 @@ const CompareBuildings = () => {
             }
         };
         compareBuildingsData();
-    }, []);
+    }, [daysCount]);
 
     return (
         <React.Fragment>

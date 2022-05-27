@@ -137,6 +137,7 @@ const Buildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                     setBuildingsData(res.data);

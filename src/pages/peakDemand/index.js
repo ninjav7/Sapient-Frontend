@@ -464,6 +464,7 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -503,6 +504,7 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -543,6 +545,7 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios

@@ -196,6 +196,7 @@ const CreatePanel = () => {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
+                        // 'user-auth': '628f3144b712934f578be895',
                     };
                     // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
@@ -213,6 +214,7 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
@@ -228,6 +230,7 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
                     setPassiveDeviceData(res.data);

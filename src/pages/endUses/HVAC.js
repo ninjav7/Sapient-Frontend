@@ -309,6 +309,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=HVAC`;
                 await axios
@@ -335,6 +336,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios
@@ -367,6 +369,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios

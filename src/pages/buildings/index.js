@@ -51,7 +51,6 @@ export function useHover() {
         },
         [ref.current] // Recall only if ref changes
     );
-
     return [ref, value];
 }
 
@@ -684,6 +683,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -710,6 +710,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -744,6 +745,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${1}`;
                 await axios
@@ -770,6 +772,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}&limit=${2}`;
                 await axios
@@ -797,6 +800,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -826,6 +830,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -922,6 +927,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?aggregate=day&building_id=${bldgId}`;
                 await axios
@@ -1388,7 +1394,10 @@ const BuildingOverview = () => {
                                     textDecoration: 'none',
                                     fontWeight: 'bold',
                                 }}></a>
-                            <span className="float-right mr-0" onClick={() => setBuildingAlerts([])}>
+                            <span
+                                className="float-right mr-0 font-weight-bold"
+                                style={{ color: 'blue' }}
+                                onClick={() => setBuildingAlerts([])}>
                                 Clear
                             </span>
 

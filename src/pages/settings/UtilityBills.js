@@ -105,6 +105,7 @@ const UtilityBills = () => {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
+                        // 'user-auth': '628f3144b712934f578be895',
                     };
                     await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
                         console.log(res);
@@ -149,9 +150,10 @@ const UtilityBills = () => {
     };
     const EditHandler = (e) => {
         e.preventDefault();
-        const headers = {
+        let headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalUtilityBills}/${billId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
