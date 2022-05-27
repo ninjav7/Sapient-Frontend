@@ -41,8 +41,10 @@ const CreatePanel = () => {
         breaker_count: 48,
     });
 
+    const [normalStruct, setNormalStruct] = useState([]);
     const [breakersStruct, setBreakersStruct] = useState([]);
 
+    const [normalCount, setNormalCount] = useState(48);
     const [breakersCount, setBreakersCount] = useState(48);
     const [locationData, setLocationData] = useState([]);
     const [generalPanelData, setGeneralPanelData] = useState([]);
@@ -52,14 +54,23 @@ const CreatePanel = () => {
         { value: 'Hydra', label: 'Hydra' },
     ]);
     const [selectedVendor, setSelectedVendor] = useState(vendor[0].label);
+    const [isEditing, setIsEditing] = useState(true);
 
     const [hydraData, setHydraData] = useState({});
+    const [normalData, setNormalData] = useState({});
     const [hydraDataIndex, setHydraDataIndex] = useState(0);
+    const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [mainBreaker, setMainBreaker] = useState({
         breakerNo: 0,
         name: '',
-        type: 'breaker',
+        type: 'main',
+    });
+
+    const [main, setMain] = useState({
+        breakerNo: 0,
+        equipment_name: '',
+        type: 'main',
     });
 
     const handleChange = (key, value) => {
@@ -72,7 +83,7 @@ const CreatePanel = () => {
     };
 
     const updateHydraSingleData = () => {
-        if (hydraDataIndex !== 1010) {
+        if (hydraDataIndex !== -1) {
             let newArray = breakersStruct;
             newArray[hydraDataIndex] = hydraData;
             setBreakersStruct(newArray);
@@ -82,7 +93,34 @@ const CreatePanel = () => {
         }
     };
 
-    const saveHydraChange = (hydraObj) => {};
+    const updateNormalSingleData = () => {
+        if (normalDataIndex !== -1) {
+            let newArray = normalStruct;
+            newArray[normalDataIndex] = normalData;
+            setNormalStruct(newArray);
+        } else {
+            let obj = normalData;
+            setMain(obj);
+        }
+    };
+
+    const saveBreakerDataToPanel = () => {
+        let obj = Object.assign({}, panel);
+        let newArray = breakersStruct;
+        newArray.push(mainBreaker);
+        obj['breakers'] = newArray;
+        obj['breaker_count'] = breakersCount;
+        setPanel(obj);
+    };
+
+    const saveNormalDataToPanel = () => {
+        let obj = Object.assign({}, panel);
+        let newArray = normalStruct;
+        newArray.push(main);
+        obj['breakers'] = newArray;
+        obj['breaker_count'] = normalCount;
+        setPanel(obj);
+    };
 
     const handleHydraChange = (key, value) => {
         let obj = Object.assign({}, hydraData);
@@ -90,21 +128,19 @@ const CreatePanel = () => {
         setHydraData(obj);
     };
 
+    const handleNormalChange = (key, value) => {
+        let obj = Object.assign({}, normalData);
+        obj[key] = value;
+        setNormalData(obj);
+    };
+
     const savePanelData = async () => {
         try {
-            let i = panel;
-            console.log('Current Panel Data => ', panel);
-
-            let panelData = new FormData();
-
-            for (let index = 0; index < Object.keys(i).length; index += 1) {
-                let key = Object.keys(i)[index];
-                panelData.append(key, i[key]);
+            if (selectedVendor === 'Hydra') {
+                saveBreakerDataToPanel();
+                console.log('Data to be send to network => ', panel);
             }
-
-            console.log('New Panel Data => ', panelData);
-
-            setIsProcessing(true);
+            setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to save Panel');
@@ -123,6 +159,19 @@ const CreatePanel = () => {
         }
         setBreakersStruct(newBreakers);
     }, [breakersCount]);
+
+    useEffect(() => {
+        let newBreakers = [];
+        for (let index = 1; index <= normalCount; index++) {
+            let obj = {
+                breakerNo: index,
+                equipment_name: '',
+                type: 'breaker',
+            };
+            newBreakers.push(obj);
+        }
+        setNormalStruct(newBreakers);
+    }, [normalCount]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -195,7 +244,7 @@ const CreatePanel = () => {
     }, [bldgId]);
 
     useEffect(() => {
-        console.log('SSR hydraData => ', hydraData);
+        console.log('SSR panel => ', panel);
         console.log('SSR hydraDataIndex => ', hydraDataIndex);
         console.log('SSR breakersStruct => ', breakersStruct);
     });
@@ -350,9 +399,9 @@ const CreatePanel = () => {
                                                 type="number"
                                                 name="breakers"
                                                 id="breakers"
-                                                value={breakersCount}
+                                                value={normalCount}
                                                 onChange={(e) => {
-                                                    setBreakersCount(parseInt(e.target.value));
+                                                    setNormalCount(parseInt(e.target.value));
                                                 }}
                                             />
                                         </FormGroup>
@@ -360,8 +409,14 @@ const CreatePanel = () => {
                                 </Col>
                                 <Col lg={9}>
                                     <div className="float-right m-4">
-                                        <button type="button" className="btn btn-md btn-secondary font-weight-bold ">
-                                            Done
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-secondary font-weight-bold"
+                                            onClick={() => {
+                                                setIsEditing(!isEditing);
+                                                saveNormalDataToPanel();
+                                            }}>
+                                            {isEditing ? 'Done' : 'Edit'}
                                         </button>
                                     </div>
                                 </Col>
@@ -385,16 +440,30 @@ const CreatePanel = () => {
                                                         <span>240V</span>
                                                     </div>
                                                 </div>
-                                                <div
-                                                    className="breaker-content-middle"
-                                                    onClick={() => {
-                                                        handleBreakerShow();
-                                                    }}>
-                                                    <div className="edit-icon-bg-styling mr-2">
-                                                        <i className="uil uil-pen"></i>
+                                                {!(main.equipment_name === '') ? (
+                                                    <div>
+                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                            {main.equipment_name}
+                                                        </h6>
                                                     </div>
-                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
+                                                ) : (
+                                                    <>
+                                                        <div
+                                                            className="breaker-content-middle"
+                                                            onClick={() => {
+                                                                handleBreakerShow();
+                                                                setNormalData(main);
+                                                                setNormalDataIndex(-1);
+                                                            }}>
+                                                            <div className="edit-icon-bg-styling mr-2">
+                                                                <i className="uil uil-pen"></i>
+                                                            </div>
+                                                            <span className="font-weight-bold edit-btn-styling">
+                                                                Edit
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </FormGroup>
@@ -406,7 +475,10 @@ const CreatePanel = () => {
                                 <Col lg={12}>
                                     <div>
                                         <div className="grid-style-6">
-                                            {breakersStruct.map((element, index) => {
+                                            {normalStruct.map((element, index) => {
+                                                if (element.type === 'main') {
+                                                    return;
+                                                }
                                                 return (
                                                     <FormGroup className="form-group row m-2 ml-4">
                                                         <div className="breaker-container">
@@ -425,10 +497,10 @@ const CreatePanel = () => {
                                                                         <span>120V</span>
                                                                     </div>
                                                                 </div>
-                                                                {!(element.name === '') ? (
+                                                                {!(element.equipment_name === '') ? (
                                                                     <div>
                                                                         <h6 className="ml-4 mb-3 breaker-equip-name">
-                                                                            {element.name}
+                                                                            {element.equipment_name}
                                                                         </h6>
                                                                     </div>
                                                                 ) : (
@@ -437,6 +509,8 @@ const CreatePanel = () => {
                                                                             className="breaker-content-middle"
                                                                             onClick={() => {
                                                                                 handleBreakerShow();
+                                                                                setNormalData(element);
+                                                                                setNormalDataIndex(index);
                                                                             }}>
                                                                             <div className="edit-icon-bg-styling mr-2">
                                                                                 <i className="uil uil-pen"></i>
@@ -486,8 +560,14 @@ const CreatePanel = () => {
                                 </Col>
                                 <Col lg={9}>
                                     <div className="float-right m-4">
-                                        <button type="button" className="btn btn-md btn-secondary font-weight-bold ">
-                                            Done
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-secondary font-weight-bold"
+                                            onClick={() => {
+                                                setIsEditing(!isEditing);
+                                                saveBreakerDataToPanel();
+                                            }}>
+                                            {isEditing ? 'Done' : 'Edit'}
                                         </button>
                                     </div>
                                 </Col>
@@ -525,7 +605,7 @@ const CreatePanel = () => {
                                                             onClick={() => {
                                                                 handleHydraShow();
                                                                 setHydraData(mainBreaker);
-                                                                setHydraDataIndex(1010);
+                                                                setHydraDataIndex(-1);
                                                             }}>
                                                             <div className="edit-icon-bg-styling mr-2">
                                                                 <i className="uil uil-pen"></i>
@@ -548,6 +628,9 @@ const CreatePanel = () => {
                                     <div>
                                         <div className="grid-style-6">
                                             {breakersStruct.map((element, index) => {
+                                                if (element.type === 'main') {
+                                                    return;
+                                                }
                                                 return (
                                                     <FormGroup className="form-group row m-2 ml-4">
                                                         <div className="breaker-container">
@@ -621,7 +704,7 @@ const CreatePanel = () => {
                                             placeholder="Enter Amps"
                                             className="font-weight-bold"
                                             onChange={(e) => {
-                                                handleChange('Identifier', e.target.value);
+                                                handleNormalChange('amps', e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -634,7 +717,7 @@ const CreatePanel = () => {
                                             placeholder="Enter Volts"
                                             className="font-weight-bold"
                                             onChange={(e) => {
-                                                handleChange('Identifier', e.target.value);
+                                                handleNormalChange('volts', e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -652,7 +735,7 @@ const CreatePanel = () => {
                                             placeholder="Enter Device ID"
                                             className="font-weight-bold"
                                             onChange={(e) => {
-                                                handleChange('Identifier', e.target.value);
+                                                handleNormalChange('device_id', e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -665,7 +748,7 @@ const CreatePanel = () => {
                                             placeholder="Enter Sensors"
                                             className="font-weight-bold"
                                             onChange={(e) => {
-                                                handleChange('Identifier', e.target.value);
+                                                handleNormalChange('sensor', e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -680,7 +763,7 @@ const CreatePanel = () => {
                                 placeholder="Enter Equipment"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('Identifier', e.target.value);
+                                    handleNormalChange('equipment_name', e.target.value);
                                 }}
                             />
                         </Form.Group>
@@ -693,8 +776,8 @@ const CreatePanel = () => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // saveBreakerData();
-                            // handleClose();
+                            updateNormalSingleData();
+                            handleBreakerClose();
                         }}>
                         Save
                     </Button>
