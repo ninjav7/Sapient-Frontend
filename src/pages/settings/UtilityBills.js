@@ -212,7 +212,6 @@ const UtilityBills = () => {
                                                         onClick={() => {
                                                             handleShow();
                                                             setBillId(record.id);
-                                                            // handleEditItem(record);
                                                         }}>
                                                         Add
                                                     </a>
@@ -242,6 +241,16 @@ const UtilityBills = () => {
                                                 ) : (
                                                     <td>{record.blended_rate} kWh</td>
                                                 )}
+                                                <td className="font-weight-bold">
+                                                    <a
+                                                        class="link-primary"
+                                                        onClick={() => {
+                                                            handleShow();
+                                                            setBillId(record.id);
+                                                        }}>
+                                                        Edit
+                                                    </a>
+                                                </td>
                                             </tr>
                                         );
                                     })}
