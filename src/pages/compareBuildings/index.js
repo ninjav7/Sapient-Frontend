@@ -275,10 +275,12 @@ const CompareBuildings = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                let params;
+
                 let count = parseInt(localStorage.getItem('dateFilter'));
-                count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
-                await axios.post(`${BaseUrl}${compareBuildings}${params}`, { headers }).then((res) => {
+                let params = `?days=${count}`;
+                // count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
+                // console.log('Sudhanshu => ', typeof count); // number
+                await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
                     setBuildingsData(res.data);
                     console.log('setBuildingsData => ', res.data);
                 });
