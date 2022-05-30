@@ -351,9 +351,10 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalEquipments}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setGeneralEquipmentData(res.data);
                     console.log(res.data);
                 });
@@ -368,9 +369,9 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?stat=true`;
+                let params = `?stat=true&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOnlineEquipData(res.data);
                     console.log(res.data);
@@ -386,9 +387,9 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?stat=false`;
+                let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOfflineEquipData(res.data);
                     console.log(res.data);
@@ -404,7 +405,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
@@ -420,10 +421,10 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -437,7 +438,7 @@ const Equipment = () => {
         fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
-    }, []);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

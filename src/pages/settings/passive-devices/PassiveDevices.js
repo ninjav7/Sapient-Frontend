@@ -18,6 +18,7 @@ import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../..
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
+import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
@@ -88,6 +89,7 @@ const PassiveDevices = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
     });
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -117,13 +119,90 @@ const PassiveDevices = () => {
         }
     };
 
+    // useEffect(() => {
+    //     const fetchPassiveDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+    //                 setPassiveDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Passive devices');
+    //         }
+    //     };
+
+    //     const fetchOnlineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=true`;
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOnlineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Online devices');
+    //         }
+    //     };
+
+    //     const fetchOfflineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=false`;
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOfflineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Offline devices');
+    //         }
+    //     };
+
+    //     const fetchLocationData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //                 setLocationData(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Location Data');
+    //         }
+    //     };
+
+    //     fetchPassiveDeviceData();
+    //     fetchOnlineDeviceData();
+    //     fetchOfflineDeviceData();
+    //     fetchLocationData();
+    // }, []);
+
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
                     setPassiveDeviceData(res.data);
@@ -140,7 +219,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -158,7 +237,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -176,10 +255,10 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -192,84 +271,7 @@ const PassiveDevices = () => {
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
         fetchLocationData();
-    }, []);
-
-    useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Offline devices');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
-        fetchPassiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
-        fetchLocationData();
-    }, [pageRefresh]);
+    }, [pageRefresh, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

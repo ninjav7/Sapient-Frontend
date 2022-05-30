@@ -155,7 +155,7 @@ const CreatePanel = () => {
                         // 'user-auth': '628f3144b712934f578be895',
                     };
                     // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                    await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                         setLocationData(res.data);
                     });
                 }

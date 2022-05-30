@@ -23,6 +23,7 @@ import axios from 'axios';
 import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
 import './style.css';
 
 const ActiveDevicesTable = ({ deviceData }) => {
@@ -116,6 +117,8 @@ const ActiveDevices = () => {
         device_type: 'active',
     });
 
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
         obj[key] = value;
@@ -148,7 +151,7 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
                     setActiveDeviceData(res.data);
@@ -165,7 +168,7 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
@@ -183,7 +186,7 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
@@ -201,10 +204,10 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -217,7 +220,7 @@ const ActiveDevices = () => {
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
         fetchLocationData();
-    }, []);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -235,82 +238,82 @@ const ActiveDevices = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-                    setActiveDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Active Devices');
-            }
-        };
+    // useEffect(() => {
+    //     const fetchActiveDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+    //                 setActiveDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Active Devices');
+    //         }
+    //     };
 
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online Devices');
-            }
-        };
+    //     const fetchOnlineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=true`;
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOnlineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Online Devices');
+    //         }
+    //     };
 
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Offline Devices');
-            }
-        };
+    //     const fetchOfflineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=false`;
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOfflineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Offline Devices');
+    //         }
+    //     };
 
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
+    //     const fetchLocationData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //                 setLocationData(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Location Data');
+    //         }
+    //     };
 
-        fetchActiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
-        fetchLocationData();
-    }, []);
+    //     fetchActiveDeviceData();
+    //     fetchOnlineDeviceData();
+    //     fetchOfflineDeviceData();
+    //     fetchLocationData();
+    // }, []);
 
     return (
         <React.Fragment>
