@@ -12,12 +12,13 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData }) => {
@@ -50,7 +51,12 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    <Link
+                                        to={{
+                                            pathname: `/settings/passive-devices/single`,
+                                        }}>
+                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    </Link>
                                     <td>{record.model}</td>
                                     <td>{record.location}</td>
                                     <td>{record.sensor_number}</td>

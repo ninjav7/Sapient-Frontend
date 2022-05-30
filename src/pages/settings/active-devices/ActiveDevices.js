@@ -16,13 +16,13 @@ import {
 } from 'reactstrap';
 
 import { Search } from 'react-feather';
-
+import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../services/Network';
+import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
 const ActiveDevicesTable = ({ deviceData }) => {
@@ -78,7 +78,12 @@ const ActiveDevicesTable = ({ deviceData }) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    <Link
+                                        to={{
+                                            pathname: `/settings/active-devices/single`,
+                                        }}>
+                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    </Link>
                                     <td>{record.model}</td>
                                     <td>{record.location}</td>
                                     <td>{record.sensor_number}</td>
