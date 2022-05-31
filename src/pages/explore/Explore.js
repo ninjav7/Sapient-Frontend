@@ -395,7 +395,7 @@ const Explore = () => {
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
-    const [filter, setFilter] = useState('hvac');
+    const [filter, setFilter] = useState('');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
