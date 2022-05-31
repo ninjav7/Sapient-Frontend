@@ -1,11 +1,8 @@
 .explorer-select-style {
-    /* width: fit-content; */
     width: 175px;
     height: 34px;
     padding: 7px 10px;
     background: #ffffff;
-    /* border: 0px solid #d9dde2; */
-    /* border: 2px solid red; */
     border-radius: 6px;
 
     font-family: 'Inter';
@@ -23,4 +20,36 @@
     box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
     border-radius: 3px;
     padding: 7px;
+}
+
+.explore-page-filter {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    align-content: stretch !important;
+}
+
+.explore-equip-filter {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: stretch;
+    gap: 13px;
+}
+
+.filter-type-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    color: #667085;
+}
+
+.endUses-select-style {
+    width: 10vw;
 }

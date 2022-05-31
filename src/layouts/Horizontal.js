@@ -7,6 +7,7 @@ import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker';
 import NavbarNew from '../components/NavbarNew';
 import SideNavbar from '../components/SideNavbar';
+import { Link, useLocation } from 'react-router-dom';
 
 // code splitting and lazy loading
 // https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
@@ -47,6 +48,7 @@ class HorizontalLayout extends Component {
         console.log('children => ', this.props.children);
         const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
         const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
+        // const location = useLocation();
 
         return (
             <React.Fragment>
@@ -59,6 +61,12 @@ class HorizontalLayout extends Component {
                         <PageTracker />
                     </div>
 
+                    {/* {!(location.pathname.split('/')[1] === 'explore') ? (
+                        
+                    ) : (
+                        
+                    )} */}
+
                     <div>
                         <div className="energy-side-nav">
                             <SideNavbar />
@@ -69,6 +77,14 @@ class HorizontalLayout extends Component {
                             </Suspense>
                         </div>
                     </div>
+
+                    {/* <div>
+                            <div className="energy-page-content-full-screen">
+                                <Suspense fallback={loading()}>
+                                    <Card className="pl-1 pr-1 pt-0">{children}</Card>
+                                </Suspense>
+                            </div>
+                        </div> */}
 
                     {/* <Suspense fallback={loading()}>
                         <Footer />

@@ -117,9 +117,13 @@ const CreatePanel = () => {
 
             setIsProcessing(true);
 
-            await axios.post(`${BaseUrl}${createPanel}`, panel, { header }).then((res) => {
-                console.log(res.data);
-            });
+            await axios
+                .post(`${BaseUrl}${createPanel}`, panel, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
 
             setIsProcessing(false);
         } catch (error) {

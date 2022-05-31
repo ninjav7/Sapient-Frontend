@@ -2,10 +2,6 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTelescope } from '@fortawesome/free-solid-svg-icons';
-import { faToggleOn } from '@fortawesome/free-solid-svg-icons';
-import { faCircleBolt } from '@fortawesome/free-solid-svg-icons';
 
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
@@ -107,6 +103,7 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
 // explore
 const Explore = React.lazy(() => import('../pages/explore/Explore'));
+const ExploreFilter = React.lazy(() => import('../pages/explore/ExploreFilter'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -609,6 +606,15 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
+// const exploreFilterRoutes = {
+//     name: 'Explore',
+//     component: ExploreFilter,
+//     route: PrivateRoute,
+//     visibility: false,
+//     roles: ['Admin'],
+//     parent: 'explore',
+// };
+
 const exploreRoutes = {
     name: 'Explore',
     path: '/explore/page',
@@ -769,6 +775,7 @@ const allRoutes = [
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    // exploreFilterRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -783,6 +790,7 @@ const authProtectedRoutes = [
     controlRoutes,
     exploreRoutes,
     chartRoutes,
+    // exploreFilterRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
 const allFlattenRoutes = flattenRoutes(allRoutes);

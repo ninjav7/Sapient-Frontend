@@ -309,10 +309,10 @@ const Explore = () => {
     ]);
 
     const [endUsesFilter, setEndUsesFilter] = useState([
-        { value: 'enduses', label: 'HVAC' },
+        { value: 'hvac', label: 'HVAC' },
         { value: 'lighting', label: 'Lighting' },
-        { value: 'equipment', label: 'Plug' },
-        { value: 'location', label: 'Process' },
+        { value: 'plug', label: 'Plug' },
+        { value: 'process', label: 'Process' },
     ]);
 
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
@@ -324,6 +324,7 @@ const Explore = () => {
     ]);
 
     const [seriesData, setSeriesData] = useState([]);
+
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -354,6 +355,7 @@ const Explore = () => {
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
+
     const [optionsLineData, setOptionsLineData] = useState({
         chart: {
             id: 'chart1',
@@ -394,8 +396,6 @@ const Explore = () => {
     });
 
     const [exploreTableData, setExploreTableData] = useState([]);
-
-    const [filter, setFilter] = useState('hvac');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -487,47 +487,27 @@ const Explore = () => {
         <React.Fragment>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
-                {filter === 'hvac' ? (
-                    <div className="explore-equip-filter">
-                        <div className="filter-tyle-style ml-4">By End Uses</div>
-                        <div>
-                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
-                        </div>
-                        <div>
-                            <Select
-                                className="react-select endUses-select-style mr-2"
-                                classNamePrefix="react-select"
-                                placeholderText="p"
-                                onChange={(e) => setActiveExploreOpt(e)}
-                                options={endUsesFilter.map((record, index) => {
-                                    return {
-                                        value: record.value,
-                                        label: record.label,
-                                    };
-                                })}
-                                defaultValue={endUsesFilter[0]}
-                            />
-                        </div>
-                        <div>Grouped by Equipment Type</div>
+                <div className="explore-equip-filter">
+                    <div className="filter-tyle-style ml-4">By End Uses</div>
+                    <div>
+                        <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
                     </div>
-                ) : (
                     <div>
                         <Select
-                            className="react-select explorer-select-style"
-                            onChange={(e) => setActiveExploreOpt(e)}
+                            className="react-select endUses-select-style mr-2"
                             classNamePrefix="react-select"
                             placeholderText="p"
-                            options={exploreOpts.map((record, index) => {
+                            options={endUsesFilter.map((record, index) => {
                                 return {
                                     value: record.value,
                                     label: record.label,
                                 };
                             })}
-                            defaultValue={exploreOpts[0]}
+                            defaultValue={endUsesFilter[0]}
                         />
                     </div>
-                )}
-
+                    <div>Grouped by Equipment Type</div>
+                </div>
                 <div className="btn-group custom-button-group header-widget-styling">
                     <div>
                         <Input
@@ -587,12 +567,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable
-                                exploreTableData={exploreTableData}
-                                activeExploreOpt={activeExploreOpt}
-                                filter={filter}
-                                setFilter={setFilter}
-                            />
+                            <ExploreTable exploreTableData={exploreTableData} activeExploreOpt={activeExploreOpt} />
                         </Col>
                     </Row>
                 </>
