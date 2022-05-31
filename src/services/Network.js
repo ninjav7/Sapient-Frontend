@@ -48,6 +48,7 @@ export const generalGateway = '/api/config/gateway';
 
 // panel
 export const generalPanels = '/api/config/panels';
+export const createPanel = '/api/config/panels/create_panel';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';

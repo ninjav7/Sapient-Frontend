@@ -463,8 +463,6 @@ const PortfolioOverview = () => {
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
-                    // console.log('Data => ', data);
-                    // let activeBldgs = data.filter((bld) => bld.active === true);
                     setBuildingRecord(data);
                 });
             } catch (error) {
@@ -502,7 +500,6 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        // console.log('markerArray => ', markerArray);
                         setMarkers(markerArray);
                     });
             } catch (error) {
@@ -512,22 +509,10 @@ const PortfolioOverview = () => {
         };
 
         const calculateDays = () => {
-            // let time_difference = endDate.getTime() - startDate.getTime();
-            // let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            // if (days_difference === 0) {
-            //     days_difference = 1;
-            // }
-            // setDaysCount(days_difference);
-            // let days_differences = moment.duration(startDate.diff(endDate)).asDays();
-
             let start = moment(startDate),
                 end = moment(endDate),
                 days = end.diff(start, 'days');
-            // days = days + 1;
-
-            if (days === 0) {
-                days = 1;
-            }
+            days = days + 1;
             setDaysCount(days);
         };
 
@@ -572,41 +557,6 @@ const PortfolioOverview = () => {
         let topVal = buildingsEnergyConsume[0].density;
         setTopEnergyDensity(topVal);
     }, [buildingsEnergyConsume]);
-
-    useEffect(() => {
-        const portfolioEndUsesData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                await axios
-                    .post(
-                        `${BaseUrl}${portfolioEndUser}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setenergyConsumption(res.data);
-                        const energyData = res.data;
-                        let newDonutData = [];
-                        energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption));
-                        });
-                        setSeries(newDonutData);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Portfolio EndUses Data');
-            }
-        };
-        portfolioEndUsesData();
-    }, [window.devicePixelRatio]);
 
     return (
         <React.Fragment>

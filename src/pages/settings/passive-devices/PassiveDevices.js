@@ -54,7 +54,7 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                     </td>
                                     <Link
                                         to={{
-                                            pathname: `/settings/passive-devices/single`,
+                                            pathname: `/settings/passive-devices/single/${record.device_id}`,
                                         }}>
                                         <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     </Link>

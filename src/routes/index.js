@@ -525,7 +525,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/passive-devices/single',
+            path: '/settings/passive-devices/single/:deviceId',
             name: 'Single Passive Devices',
             component: IndividualPassiveDevice,
             route: PrivateRoute,

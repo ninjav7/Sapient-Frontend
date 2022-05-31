@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
-import { BaseUrl, getLocation, generalPanels, generalPassiveDevices } from '../../../services/Network';
+import { BaseUrl, getLocation, generalPanels, generalPassiveDevices, createPanel } from '../../../services/Network';
 import '../style.css';
 import './panel-style.css';
 
@@ -109,6 +109,18 @@ const CreatePanel = () => {
 
     const savePanelData = async () => {
         try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+
+            setIsProcessing(true);
+
+            await axios.post(`${BaseUrl}${createPanel}`, panel, { header }).then((res) => {
+                console.log(res.data);
+            });
+
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
@@ -478,7 +490,7 @@ const CreatePanel = () => {
                                     placeholder="Enter Amps"
                                     className="font-weight-bold"
                                     onChange={(e) => {
-                                        handleNormalChange('amps', e.target.value);
+                                        handleNormalChange('related_amps', e.target.value);
                                     }}
                                 />
                             </Form.Group>
@@ -490,7 +502,7 @@ const CreatePanel = () => {
                                     placeholder="Enter Volts"
                                     className="font-weight-bold"
                                     onChange={(e) => {
-                                        handleNormalChange('volts', e.target.value);
+                                        handleNormalChange('voltage', e.target.value);
                                     }}
                                 />
                             </Form.Group>
@@ -563,9 +575,9 @@ const CreatePanel = () => {
                                     type="number"
                                     placeholder="Enter Amps"
                                     className="font-weight-bold"
-                                    defaultValue={updateData.amps}
+                                    defaultValue={updateData.related_amps}
                                     onChange={(e) => {
-                                        handleNormalChange('amps', e.target.value);
+                                        handleNormalChange('related_amps', e.target.value);
                                     }}
                                 />
                             </Form.Group>
@@ -576,9 +588,9 @@ const CreatePanel = () => {
                                     type="number"
                                     placeholder="Enter Volts"
                                     className="font-weight-bold"
-                                    defaultValue={updateData.volts}
+                                    defaultValue={updateData.voltage}
                                     onChange={(e) => {
-                                        handleNormalChange('volts', e.target.value);
+                                        handleNormalChange('voltage', e.target.value);
                                     }}
                                 />
                             </Form.Group>
