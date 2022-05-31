@@ -162,8 +162,8 @@ const NavbarNew = () => {
                                     // className="btn btn-sm float-right font-icon-style"
                                     className={`${
                                         location.pathname.split('/')[1] === 'settings'
-                                            ? 'btn btn-sm float-right font-icon-style-active'
-                                            : 'btn btn-sm float-right font-icon-style'
+                                            ? 'btn btn-sm float-right other-font-icon-style-active'
+                                            : 'btn btn-sm float-right other-font-icon-style'
                                     }`}
                                     onClick={() => {
                                         setSideNavBar('building-settings');
@@ -186,8 +186,8 @@ const NavbarNew = () => {
                                     // className="btn btn-sm float-right other-font-icon-style"
                                     className={`${
                                         location.pathname.split('/')[1] === 'settings'
-                                            ? 'btn btn-sm float-right font-icon-style-active'
-                                            : 'btn btn-sm float-right font-icon-style'
+                                            ? 'btn btn-sm float-right other-font-icon-style-active'
+                                            : 'btn btn-sm float-right other-font-icon-style'
                                     }`}
                                     onClick={() => {
                                         setSideNavBar('account');
