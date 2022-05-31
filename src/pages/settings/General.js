@@ -23,7 +23,53 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const General = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [buildingData, setBuildingData] = useState({});
+    const [buildingData, setBuildingData] = useState({
+        building_id: '628dd795f28141b8a69f38bf',
+        active: true,
+        building_name: 'NYPL Building',
+        building_type: 'Residential Building',
+        building_size: 2000,
+        street_address: 'test',
+        address_2: 'test',
+        city: 'toranto',
+        state: 'Washington',
+        zip_code: 66777,
+        timezone: 'PDT (UTC-7)',
+        time_format: false,
+        operating_hours: {
+            mon: {
+                stat: true,
+                time_range: {
+                    frm: '00:00',
+                    to: '00:00',
+                },
+            },
+            tue: {
+                stat: false,
+                time_range: '',
+            },
+            wed: {
+                stat: false,
+                time_range: '',
+            },
+            thu: {
+                stat: false,
+                time_range: '',
+            },
+            fri: {
+                stat: false,
+                time_range: '',
+            },
+            sat: {
+                stat: false,
+                time_range: '',
+            },
+            sun: {
+                stat: false,
+                time_range: '',
+            },
+        },
+    });
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
@@ -241,6 +287,7 @@ const General = () => {
         console.log(e.target.name);
         setInputField({ [e.target.name]: e.target.value });
     };
+
     const EditBuildingHandler = (e) => {
         console.log('helloo');
         e.preventDefault();
@@ -255,9 +302,11 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const inputsAddressHandler = (e) => {
         setInputField({ [e.target.name]: e.target.value });
     };
+
     const EditAddressHandler = (e) => {
         console.log('helloo');
         e.preventDefault();
@@ -310,6 +359,7 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const inputsDateHandler = (e) => {
         setTimeToggle(!timeToggle);
         console.log('helloo');
@@ -325,6 +375,7 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const deleteBuildingHandler = () => {
         var answer = window.confirm("'Are you sure wants o delete!!!'");
         if (answer) {
@@ -342,6 +393,7 @@ const General = () => {
             });
         }
     };
+
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
         // const currentDtae = dateHandler(inputField.operating_hours, day);
         // const time2 = moment(currentDtae[type2]).format('HH:MM');
@@ -356,6 +408,7 @@ const General = () => {
         };
         dateChangeHandler({ operating_hours: data });
     };
+
     const checkDateTimeHandler = (day, value) => {
         setWeekToggle({
             ...weekToggle,
@@ -368,6 +421,7 @@ const General = () => {
         };
         dateChangeHandler({ operating_hours: data });
     };
+
     const dateChangeHandler = (value) => {
         const headers = {
             'Content-Type': 'application/json',
@@ -379,6 +433,7 @@ const General = () => {
             setRender(!render);
         });
     };
+
     // update section end
     return (
         <React.Fragment>

@@ -11,16 +11,43 @@ import {
     DropdownItem,
     Button,
     Input,
+    FormGroup,
+    Label,
 } from 'reactstrap';
-import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../services/Network';
+
+import { Search } from 'react-feather';
+import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown, Search } from 'react-feather';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import axios from 'axios';
+import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
+import { ChevronDown } from 'react-feather';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData }) => {
+const ActiveDevicesTable = ({ deviceData }) => {
+    const records = [
+        {
+            status: 'available',
+            identifierMAC: 'D8:07:B6:88:D8:3B',
+            model: 'KP115',
+            location: 'Floor 1 > 252',
+            sensors: '1/1',
+            firmwareVersion: 'v1.1',
+            hardwareVersion: 'v1',
+        },
+        {
+            status: 'available',
+            identifierMAC: 'D8:07:B6:88:D9:4A',
+            model: 'HS300',
+            location: 'Floor 1 > 253',
+            sensors: '2/6',
+            firmwareVersion: 'v1.2',
+            hardwareVersion: 'v2',
+        },
+    ];
+
     return (
         <Card>
             <CardBody>
@@ -28,10 +55,12 @@ const PassiveDevicesTable = ({ deviceData }) => {
                     <thead>
                         <tr>
                             <th>Status</th>
-                            <th>Identifier</th>
+                            <th>Identifier (MAC)</th>
                             <th>Model</th>
                             <th>Location</th>
                             <th>Sensors</th>
+                            <th>Firmware Version</th>
+                            <th>Hardware Version</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,10 +79,17 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    <Link
+                                        to={{
+                                            pathname: `/settings/active-devices/single`,
+                                        }}>
+                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    </Link>
                                     <td>{record.model}</td>
                                     <td>{record.location}</td>
                                     <td>{record.sensor_number}</td>
+                                    <td>{record.firmware_version}</td>
+                                    <td>{record.hardware_version}</td>
                                 </tr>
                             );
                         })}
@@ -64,24 +100,24 @@ const PassiveDevicesTable = ({ deviceData }) => {
     );
 };
 
-const PassiveDevices = () => {
+const ActiveDevices = () => {
     // Modal states
+    const [selectedTab, setSelectedTab] = useState(0);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [pageRefresh, setPageRefresh] = useState(false);
-
     const [isProcessing, setIsProcessing] = useState(false);
-    const [selectedTab, setSelectedTab] = useState(0);
 
-    const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+    const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
-        device_type: 'passive',
+        device_type: 'active',
     });
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -98,34 +134,32 @@ const PassiveDevices = () => {
             };
             setIsProcessing(true);
 
-            await axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
+            axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
                 console.log(res.data);
             });
-
-            setPageRefresh(!pageRefresh);
 
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Passive device data');
+            alert('Failed to create Active device data');
         }
     };
 
     useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
+        const fetchActiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
+                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+                    setActiveDeviceData(res.data);
                     console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch all Passive devices');
+                console.log('Failed to fetch all Active Devices');
             }
         };
 
@@ -134,16 +168,16 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     setOnlineDeviceData(res.data);
                     console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch all Online devices');
+                console.log('Failed to fetch all Online Devices');
             }
         };
 
@@ -152,16 +186,16 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     setOfflineDeviceData(res.data);
                     console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Offline devices');
+                console.log('Failed to fetch all Offline Devices');
             }
         };
 
@@ -170,10 +204,10 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -182,96 +216,19 @@ const PassiveDevices = () => {
             }
         };
 
-        fetchPassiveDeviceData();
+        fetchActiveDeviceData();
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
         fetchLocationData();
-    }, []);
-
-    useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Offline devices');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
-        fetchPassiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
-        fetchLocationData();
-    }, [pageRefresh]);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Passive Devices',
-                        path: '/settings/passive-devices',
+                        label: 'Active Devices',
+                        path: '/settings/active-devices',
                         active: true,
                     },
                 ];
@@ -281,15 +238,97 @@ const PassiveDevices = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // useEffect(() => {
+    //     const fetchActiveDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+    //                 setActiveDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Active Devices');
+    //         }
+    //     };
+
+    //     const fetchOnlineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=true`;
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOnlineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Online Devices');
+    //         }
+    //     };
+
+    //     const fetchOfflineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=false`;
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOfflineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Offline Devices');
+    //         }
+    //     };
+
+    //     const fetchLocationData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //                 setLocationData(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Location Data');
+    //         }
+    //     };
+
+    //     fetchActiveDeviceData();
+    //     fetchOnlineDeviceData();
+    //     fetchOfflineDeviceData();
+    //     fetchLocationData();
+    // }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Passive Devices
+                        Active Devices
                     </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
+                            <button type="button" className="btn btn-md btn-light font-weight-bold">
+                                Attach Kasa Account
+                            </button>
+                        </div>
                         <div className="mr-2">
                             <button
                                 type="button"
@@ -297,7 +336,7 @@ const PassiveDevices = () => {
                                 onClick={() => {
                                     handleShow();
                                 }}>
-                                <i className="uil uil-plus mr-1"></i>Add Passive Device
+                                <i className="uil uil-plus mr-1"></i>Add Device
                             </button>
                         </div>
                     </div>
@@ -319,7 +358,6 @@ const PassiveDevices = () => {
                         </span>
                     </div>
                 </Col>
-
                 <Col xl={9}>
                     <div className="btn-group ml-2" role="group" aria-label="Basic example">
                         <div>
@@ -385,16 +423,16 @@ const PassiveDevices = () => {
             </Row>
 
             <Row>
-                <Col lg={8}>
-                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData} />}
-                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData} />}
-                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData} />}
+                <Col lg={10}>
+                    {selectedTab === 0 && <ActiveDevicesTable deviceData={activeDeviceData} />}
+                    {selectedTab === 1 && <ActiveDevicesTable deviceData={onlineDeviceData} />}
+                    {selectedTab === 2 && <ActiveDevicesTable deviceData={offlineDeviceData} />}
                 </Col>
             </Row>
 
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header>
-                    <Modal.Title>Create Passive Device</Modal.Title>
+                    <Modal.Title>Add Active Device</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -422,7 +460,7 @@ const PassiveDevices = () => {
                                     handleChange('model', e.target.value);
                                 }}>
                                 <option selected>Select Model</option>
-                                {passiveDeviceData.map((record) => {
+                                {activeDeviceData.map((record) => {
                                     return <option value={record.model}>{record.model}</option>;
                                 })}
                             </Input>
@@ -465,4 +503,4 @@ const PassiveDevices = () => {
     );
 };
 
-export default PassiveDevices;
+export default ActiveDevices;

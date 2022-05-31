@@ -814,6 +814,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data[0].top_contributors;
+                        // console.log('HeatMap Data => ', data);
                         let sortedData = data.sort((a, b) => {
                             return b.energy_consumption.now - a.energy_consumption.now;
                         });
@@ -821,7 +822,7 @@ const BuildingOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Building Equipments Data');
+                console.log('Failed to fetch Building Equipments Data');
             }
         };
 
@@ -964,9 +965,10 @@ const BuildingOverview = () => {
         const calculateDays = () => {
             let time_difference = endDate.getTime() - startDate.getTime();
             let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            if (days_difference === 0) {
-                days_difference = 1;
-            }
+            // if (days_difference === 0) {
+            //     days_difference = 1;
+            // }
+            days_difference = days_difference + 1;
             setDaysCount(days_difference);
         };
 
