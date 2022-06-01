@@ -1,5 +1,6 @@
 // export const BaseUrl = 'https://eneryg-service.ukwest.cloudapp.azure.com';
-export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net'; // DEV
+export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net'; // QA
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
