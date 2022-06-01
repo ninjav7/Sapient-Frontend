@@ -134,9 +134,13 @@ const ActiveDevices = () => {
             };
             setIsProcessing(true);
 
-            axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
-                console.log(res.data);
-            });
+            axios
+                .post(`${BaseUrl}${createDevice}`, createDeviceData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
 
             setIsProcessing(false);
         } catch (error) {

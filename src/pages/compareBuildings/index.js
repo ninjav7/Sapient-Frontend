@@ -104,7 +104,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {record.energy_density.toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             <Line
@@ -151,7 +151,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         )}
                                     </td>
                                     <td className="table-content-style">
-                                        {record.hvac_consumption.now.toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(record.hvac_consumption.now / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             <Line
@@ -198,7 +198,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         )}
                                     </td>
                                     <td className="value-style">
-                                        {record.total_consumption.toLocaleString(undefined, {
+                                        {(record.total_consumption / 1000).toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                         kWh

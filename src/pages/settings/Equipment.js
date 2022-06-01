@@ -330,13 +330,18 @@ const Equipment = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
                 // Authorization: `JWT ${_user.token}`,
             };
             setIsProcessing(true);
 
-            axios.post(`${BaseUrl}${createEquipment}`, createEqipmentData, { header }).then((res) => {
-                console.log(res.data);
-            });
+            axios
+                .post(`${BaseUrl}${createEquipment}`, createEqipmentData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
 
             setIsProcessing(false);
         } catch (error) {
@@ -456,9 +461,9 @@ const Equipment = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        console.log('createEqipmentData => ', createEqipmentData);
-    });
+    // useEffect(() => {
+    //     console.log('createEqipmentData => ', createEqipmentData);
+    // });
 
     return (
         <React.Fragment>

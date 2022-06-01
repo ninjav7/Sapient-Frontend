@@ -2,10 +2,6 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTelescope } from '@fortawesome/free-solid-svg-icons';
-import { faToggleOn } from '@fortawesome/free-solid-svg-icons';
-import { faCircleBolt } from '@fortawesome/free-solid-svg-icons';
 
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
@@ -629,9 +625,9 @@ const controlRoutes = {
             path: '/control/plug-rules',
             name: 'Plug Rules',
             component: PlugRules,
-            component: PlugRules,
             route: PrivateRoute,
             parent: 'control',
+            visibility: true,
         },
     ],
     icon: FeatherIcon.ToggleRight,

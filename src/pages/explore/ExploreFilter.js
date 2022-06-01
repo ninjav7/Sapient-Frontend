@@ -270,8 +270,6 @@ const BuildingPeakTable = () => {
 };
 
 const Explore = () => {
-    const [parentFilter, setParentFilter] = useState('');
-
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
@@ -311,10 +309,10 @@ const Explore = () => {
     ]);
 
     const [endUsesFilter, setEndUsesFilter] = useState([
-        { value: 'enduses', label: 'HVAC' },
+        { value: 'hvac', label: 'HVAC' },
         { value: 'lighting', label: 'Lighting' },
-        { value: 'equipment', label: 'Plug' },
-        { value: 'location', label: 'Process' },
+        { value: 'plug', label: 'Plug' },
+        { value: 'process', label: 'Process' },
     ]);
 
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
@@ -326,6 +324,7 @@ const Explore = () => {
     ]);
 
     const [seriesData, setSeriesData] = useState([]);
+
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -356,6 +355,7 @@ const Explore = () => {
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
+
     const [optionsLineData, setOptionsLineData] = useState({
         chart: {
             id: 'chart1',
@@ -396,11 +396,6 @@ const Explore = () => {
     });
 
     const [exploreTableData, setExploreTableData] = useState([]);
-
-    const [childFilter, setChildFilter] = useState({
-        eq_id: '',
-        eq_name: '',
-    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -470,70 +465,8 @@ const Explore = () => {
                 console.log('Failed to fetch Explore Data');
             }
         };
-
         exploreDataFetch();
     }, [activeExploreOpt, startDate, endDate]);
-
-    useEffect(() => {
-        let obj = activeExploreOpt;
-        setParentFilter(obj.value);
-    }, [activeExploreOpt]);
-
-    useEffect(() => {
-        if (startDate === null) {
-            return;
-        }
-        if (endDate === null) {
-            return;
-        }
-        const exploreDataFetch = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?filters=no-grouping`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExplore}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
-                        setExploreTableData(responseData);
-                        let data = responseData;
-                        let exploreData = [];
-                        data.forEach((record) => {
-                            if (record.eq_name !== null) {
-                                let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
-                                };
-                                exploreData.push(recordToInsert);
-                            }
-                        });
-                        console.log('SSR Customized exploreData => ', exploreData);
-                        setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-            }
-        };
-
-        exploreDataFetch();
-    }, []);
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -550,58 +483,31 @@ const Explore = () => {
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
-    useEffect(() => {
-        console.log('parentFilter => ', parentFilter);
-        console.log('childFilter => ', childFilter);
-    });
-
     return (
         <React.Fragment>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
-                {childFilter === 'hvac' ? (
-                    <div className="explore-equip-filter">
-                        <div className="filter-tyle-style ml-4">By End Uses</div>
-                        <div>
-                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
-                        </div>
-                        <div>
-                            <Select
-                                className="react-select endUses-select-style mr-2"
-                                classNamePrefix="react-select"
-                                placeholderText="p"
-                                onChange={(e) => setActiveExploreOpt(e)}
-                                options={endUsesFilter.map((record, index) => {
-                                    return {
-                                        value: record.value,
-                                        label: record.label,
-                                    };
-                                })}
-                                defaultValue={endUsesFilter[0]}
-                            />
-                        </div>
-                        <div>Grouped by Equipment Type</div>
+                <div className="explore-equip-filter">
+                    <div className="filter-tyle-style ml-4">By End Uses</div>
+                    <div>
+                        <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
                     </div>
-                ) : (
                     <div>
                         <Select
-                            className="react-select explorer-select-style"
-                            onChange={(e) => {
-                                setActiveExploreOpt(e);
-                            }}
+                            className="react-select endUses-select-style mr-2"
                             classNamePrefix="react-select"
                             placeholderText="p"
-                            options={exploreOpts.map((record, index) => {
+                            options={endUsesFilter.map((record, index) => {
                                 return {
                                     value: record.value,
                                     label: record.label,
                                 };
                             })}
-                            defaultValue={exploreOpts[0]}
+                            defaultValue={endUsesFilter[0]}
                         />
                     </div>
-                )}
-
+                    <div>Grouped by Equipment Type</div>
+                </div>
                 <div className="btn-group custom-button-group header-widget-styling">
                     <div>
                         <Input
@@ -661,14 +567,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable
-                                exploreTableData={exploreTableData}
-                                activeExploreOpt={activeExploreOpt}
-                                childFilter={childFilter}
-                                setChildFilter={setChildFilter}
-                                parentFilter={parentFilter}
-                                setParentFilter={setParentFilter}
-                            />
+                            <ExploreTable exploreTableData={exploreTableData} activeExploreOpt={activeExploreOpt} />
                         </Col>
                     </Row>
                 </>
