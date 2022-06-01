@@ -373,6 +373,9 @@ const BuildingOverview = () => {
         dataLabels: {
             enabled: false,
         },
+        toolbar: {
+            show: true,
+        },
         colors: ['#87AADE'],
         stroke: {
             curve: 'straight',
@@ -392,18 +395,28 @@ const BuildingOverview = () => {
             },
         },
         tooltip: {
-            shared: true,
+            shared: false,
             intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
+                format: 'dd/MMM - hh:mm TT',
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
             },
         },
         xaxis: {
             type: 'datetime',
             labels: {
-                formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMMdd');
-                },
+                format: 'dd/MMM - hh:mm TT',
             },
             style: {
                 fontSize: '12px',
@@ -728,7 +741,7 @@ const BuildingOverview = () => {
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
+                            let fixedConsumption = record.energy_consumption.now / 1000;
                             // newArray.push(fixedConsumption);
                             newDonutData.push(parseInt(fixedConsumption));
                         });
@@ -854,14 +867,14 @@ const BuildingOverview = () => {
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y,
+                                y: (el.y / 1000).toFixed(2),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y,
+                                y: (el.y / 1000).toFixed(2),
                             };
                         });
 
@@ -896,7 +909,7 @@ const BuildingOverview = () => {
                             let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
-                                console.log('matchedRecord => ', matchedRecord);
+                                // console.log('matchedRecord => ', matchedRecord);
                                 newWeekendsData[0].data.push(matchedRecord);
                             } else {
                                 newWeekendsData[0].data.push({
@@ -907,15 +920,15 @@ const BuildingOverview = () => {
                         }
                         console.log('newWeekendsData => ', newWeekendsData);
                         setWeekDaysSeries(newWeekdaysData);
-                        // setWeekEndsSeries(newWeekendsData);
-                        setWeekEndsSeries([
-                            {
-                                name: 'Weekends',
-                                data: [
-                                    500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-                                ],
-                            },
-                        ]);
+                        setWeekEndsSeries(newWeekendsData);
+                        // setWeekEndsSeries([
+                        //     {
+                        //         name: 'Weekends',
+                        //         data: [
+                        //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+                        //         ],
+                        //     },
+                        // ]);
                     });
             } catch (error) {
                 console.log(error);
@@ -950,7 +963,7 @@ const BuildingOverview = () => {
                         response.forEach((record) => {
                             newArray[0].data.push({
                                 x: moment(record.x).format('MMM D'),
-                                y: record.y.toFixed(2),
+                                y: (record.y / 1000).toFixed(2),
                             });
                         });
                         console.log('newArray => ', newArray);
@@ -1008,7 +1021,7 @@ const BuildingOverview = () => {
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now}
+                                description={overview.total_consumption.now / 1000}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
@@ -1033,7 +1046,7 @@ const BuildingOverview = () => {
                                 </div>
                             </h5>
                             <p className="card-text card-content-style">
-                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;10</span>
+                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;6</span>
                             </p>
                         </div>
                     </div>
@@ -1042,7 +1055,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={overview.average_energy_density.now}
+                                description={overview.average_energy_density.now / 1000}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1060,7 +1073,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description={overview.yearly_electric_eui.now}
+                                description={overview.yearly_electric_eui.now / 1000}
                                 unit="kBtu/ft/yr"
                                 value={percentageHandler(
                                     overview.yearly_electric_eui.now,
@@ -1086,7 +1099,12 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            <button id="inner-button">Add Utility Bill</button>
+                            <Link
+                                to={{
+                                    pathname: `/settings/utility-bills`,
+                                }}>
+                                <button id="inner-button">Add Utility Bill</button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -1172,9 +1190,12 @@ const BuildingOverview = () => {
                                                         {record.device}
                                                     </div>
                                                     <div className="custom-bld-usage-style muted table-font-style">
-                                                        {record.energy_consumption.now.toLocaleString(undefined, {
-                                                            maximumFractionDigits: 2,
-                                                        })}
+                                                        {(record.energy_consumption.now / 1000).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                maximumFractionDigits: 2,
+                                                            }
+                                                        )}
                                                         kWh
                                                     </div>
                                                     <div className="mr-2">
@@ -1256,10 +1277,13 @@ const BuildingOverview = () => {
                                             </h6>
                                             <h5 className="card-title ml-1">
                                                 <span style={{ color: 'black' }}>
-                                                    {item.overall_energy_consumption.toLocaleString(undefined, {
-                                                        maximumFractionDigits: 2,
-                                                    })}
-                                                </span>{' '}
+                                                    {(item.overall_energy_consumption / 1000).toLocaleString(
+                                                        undefined,
+                                                        {
+                                                            maximumFractionDigits: 2,
+                                                        }
+                                                    )}
+                                                </span>
                                                 kW
                                             </h5>
                                             <div style={{ height: '75%' }}>
@@ -1481,9 +1505,12 @@ const BuildingOverview = () => {
                                                 <div>
                                                     <div>
                                                         <span>
-                                                            {item.energy_consumption.now.toLocaleString(undefined, {
-                                                                maximumFractionDigits: 2,
-                                                            })}
+                                                            {(item.energy_consumption.now / 1000).toLocaleString(
+                                                                undefined,
+                                                                {
+                                                                    maximumFractionDigits: 2,
+                                                                }
+                                                            )}
                                                         </span>
                                                         <span className="equip-table-unit">&nbsp;kWh</span>
                                                     </div>

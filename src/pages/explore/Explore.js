@@ -270,6 +270,8 @@ const BuildingPeakTable = () => {
 };
 
 const Explore = () => {
+    const [parentFilter, setParentFilter] = useState('');
+
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
@@ -395,7 +397,10 @@ const Explore = () => {
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
-    const [filter, setFilter] = useState('');
+    const [childFilter, setChildFilter] = useState({
+        eq_id: '',
+        eq_name: '',
+    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -465,8 +470,70 @@ const Explore = () => {
                 console.log('Failed to fetch Explore Data');
             }
         };
+
         exploreDataFetch();
     }, [activeExploreOpt, startDate, endDate]);
+
+    useEffect(() => {
+        let obj = activeExploreOpt;
+        setParentFilter(obj.value);
+    }, [activeExploreOpt]);
+
+    useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+        const exploreDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?filters=no-grouping`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExplore}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        console.log('SSR API response => ', responseData);
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.eq_name !== null) {
+                                let recordToInsert = {
+                                    name: record.eq_name,
+                                    data: record.data,
+                                };
+                                exploreData.push(recordToInsert);
+                            }
+                        });
+                        console.log('SSR Customized exploreData => ', exploreData);
+                        setSeriesData(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+            }
+        };
+
+        exploreDataFetch();
+    }, []);
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -483,11 +550,16 @@ const Explore = () => {
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
+    useEffect(() => {
+        console.log('parentFilter => ', parentFilter);
+        console.log('childFilter => ', childFilter);
+    });
+
     return (
         <React.Fragment>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
-                {filter === 'hvac' ? (
+                {childFilter === 'hvac' ? (
                     <div className="explore-equip-filter">
                         <div className="filter-tyle-style ml-4">By End Uses</div>
                         <div>
@@ -514,7 +586,9 @@ const Explore = () => {
                     <div>
                         <Select
                             className="react-select explorer-select-style"
-                            onChange={(e) => setActiveExploreOpt(e)}
+                            onChange={(e) => {
+                                setActiveExploreOpt(e);
+                            }}
                             classNamePrefix="react-select"
                             placeholderText="p"
                             options={exploreOpts.map((record, index) => {
@@ -590,8 +664,10 @@ const Explore = () => {
                             <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
-                                filter={filter}
-                                setFilter={setFilter}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
                             />
                         </Col>
                     </Row>

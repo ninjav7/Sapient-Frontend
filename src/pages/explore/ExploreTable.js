@@ -4,7 +4,14 @@ import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { Line } from 'rc-progress';
 
-const ExploreTable = ({ exploreTableData, activeExploreOpt, filter, setFilter }) => {
+const ExploreTable = ({
+    exploreTableData,
+    activeExploreOpt,
+    childFilter,
+    setChildFilter,
+    parentFilter,
+    setParentFilter,
+}) => {
     const records = [
         {
             name: 'AHU1',
@@ -79,6 +86,10 @@ const ExploreTable = ({ exploreTableData, activeExploreOpt, filter, setFilter })
             peakPer: 20,
         },
     ];
+
+    useEffect(() => {
+        console.log('exploreTableData => ', exploreTableData);
+    });
 
     return (
         <>
@@ -332,26 +343,38 @@ const ExploreTable = ({ exploreTableData, activeExploreOpt, filter, setFilter })
                                 }
                                 return (
                                     <tr key={index}>
-                                        {/* {activeExploreOpt.value === 'enduses' ? (
+                                        {parentFilter === 'enduses' ? (
                                             <th scope="row">
-                                                <Link
-                                                    to={{
-                                                        pathname: `/explore/page/filter/${activeExploreOpt.value}`,
+                                                <a
+                                                    className="building-name"
+                                                    onClick={() => {
+                                                        let obj = {
+                                                            eq_id: record.eq_id,
+                                                            eq_name: record.eq_name,
+                                                        };
+                                                        setChildFilter(obj);
                                                     }}>
-                                                    <a className="building-name">{record.eq_name}</a>
-                                                </Link>
+                                                    {record.eq_name}
+                                                </a>
                                             </th>
                                         ) : (
                                             <th scope="row">
                                                 <a className="building-name">{record.eq_name}</a>
                                             </th>
-                                        )} */}
-
-                                        <th scope="row">
-                                            <a className="building-name" onClick={() => setFilter('hvac')}>
+                                        )}
+                                        {/* <th scope="row">
+                                            <a
+                                                className="building-name"
+                                                onClick={() => {
+                                                    let obj = {
+                                                        eq_id: record.eq_id,
+                                                        eq_name: record.eq_name,
+                                                    };
+                                                    setChildFilter(obj);
+                                                }}>
                                                 {record.eq_name}
                                             </a>
-                                        </th>
+                                        </th> */}
 
                                         <td className="table-content-style">
                                             {record.energy.toFixed(2)} kWh / sq. ft.sq. ft.

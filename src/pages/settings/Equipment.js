@@ -461,9 +461,9 @@ const Equipment = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        console.log('createEqipmentData => ', createEqipmentData);
-    });
+    // useEffect(() => {
+    //     console.log('createEqipmentData => ', createEqipmentData);
+    // });
 
     return (
         <React.Fragment>

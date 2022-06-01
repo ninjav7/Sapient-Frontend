@@ -271,7 +271,7 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     // const [series, setSeries] = useState([44, 55, 41, 17]);
-    const [series, setSeries] = useState([10, 10, 10, 10]);
+    const [series, setSeries] = useState([0, 0, 0, 0]);
 
     const [options, setOptions] = useState({
         chart: {
@@ -402,7 +402,7 @@ const PortfolioOverview = () => {
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption));
+                            newDonutData.push(parseInt(fixedConsumption / 1000));
                         });
                         setSeries(newDonutData);
                     });
