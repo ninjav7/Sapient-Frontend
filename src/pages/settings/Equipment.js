@@ -23,7 +23,7 @@ import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
-const ModalEquipment = ({ show, equipData, close }) => {
+const SingleEquipmentModal = ({ show, equipData, close }) => {
     return (
         <>
             {show ? (
@@ -196,7 +196,7 @@ const ModalEquipment = ({ show, equipData, close }) => {
     );
 };
 
-const BuildingTable = ({ equipmentData }) => {
+const EquipmentTable = ({ equipmentData }) => {
     const records = [
         {
             status: 'available',
@@ -297,7 +297,7 @@ const BuildingTable = ({ equipmentData }) => {
                 </CardBody>
             </Card>
             <div>
-                <ModalEquipment show={modal} equipData={equipData} close={Toggle} />
+                <SingleEquipmentModal show={modal} equipData={equipData} close={Toggle} />
             </div>
         </>
     );
@@ -330,13 +330,18 @@ const Equipment = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
                 // Authorization: `JWT ${_user.token}`,
             };
             setIsProcessing(true);
 
-            axios.post(`${BaseUrl}${createEquipment}`, createEqipmentData, { header }).then((res) => {
-                console.log(res.data);
-            });
+            axios
+                .post(`${BaseUrl}${createEquipment}`, createEqipmentData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
 
             setIsProcessing(false);
         } catch (error) {
@@ -351,9 +356,10 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalEquipments}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setGeneralEquipmentData(res.data);
                     console.log(res.data);
                 });
@@ -368,9 +374,9 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?stat=true`;
+                let params = `?stat=true&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOnlineEquipData(res.data);
                     console.log(res.data);
@@ -386,9 +392,9 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?stat=false`;
+                let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOfflineEquipData(res.data);
                     console.log(res.data);
@@ -404,7 +410,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
@@ -420,10 +426,10 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -437,7 +443,7 @@ const Equipment = () => {
         fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
-    }, []);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -561,9 +567,9 @@ const Equipment = () => {
 
             <Row>
                 <Col lg={11}>
-                    {selectedTab === 0 && <BuildingTable equipmentData={generalEquipmentData} />}
-                    {selectedTab === 1 && <BuildingTable equipmentData={onlineEquipData} />}
-                    {selectedTab === 2 && <BuildingTable equipmentData={offlineEquipData} />}
+                    {selectedTab === 0 && <EquipmentTable equipmentData={generalEquipmentData} />}
+                    {selectedTab === 1 && <EquipmentTable equipmentData={onlineEquipData} />}
+                    {selectedTab === 2 && <EquipmentTable equipmentData={offlineEquipData} />}
                 </Col>
             </Row>
 

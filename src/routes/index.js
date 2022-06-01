@@ -2,10 +2,6 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import * as FeatherIcon from 'react-feather';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTelescope } from '@fortawesome/free-solid-svg-icons';
-import { faToggleOn } from '@fortawesome/free-solid-svg-icons';
-import { faCircleBolt } from '@fortawesome/free-solid-svg-icons';
 
 import { isUserAuthenticated, getLoggedInUser } from '../helpers/authUtils';
 
@@ -17,8 +13,10 @@ import Equipment from '../pages/settings/Equipment';
 import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
 import EditPanel from '../pages/settings/panels/EditPanel';
-import ActiveDevices from '../pages/settings/ActiveDevices';
-import PassiveDevices from '../pages/settings/PassiveDevices';
+import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
+import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
+import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
@@ -507,11 +505,27 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
+            path: '/settings/active-devices/single',
+            name: 'Single Active Devices',
+            component: IndividualActiveDevice,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
             path: '/settings/active-devices',
             name: 'Active Devices',
             component: ActiveDevices,
             route: PrivateRoute,
             visibility: true,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/passive-devices/single/:deviceId',
+            name: 'Single Passive Devices',
+            component: IndividualPassiveDevice,
+            route: PrivateRoute,
+            visibility: false,
             parent: 'building-settings',
         },
         {
@@ -611,9 +625,9 @@ const controlRoutes = {
             path: '/control/plug-rules',
             name: 'Plug Rules',
             component: PlugRules,
-            component: PlugRules,
             route: PrivateRoute,
             parent: 'control',
+            visibility: true,
         },
     ],
     icon: FeatherIcon.ToggleRight,
