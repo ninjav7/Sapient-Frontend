@@ -4,7 +4,7 @@ import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { Line } from 'rc-progress';
 
-const ExploreTable = ({ exploreTableData }) => {
+const ExploreTable = ({ exploreTableData, activeExploreOpt, filter, setFilter }) => {
     const records = [
         {
             name: 'AHU1',
@@ -332,11 +332,27 @@ const ExploreTable = ({ exploreTableData }) => {
                                 }
                                 return (
                                     <tr key={index}>
-                                        <th scope="row">
-                                            <Link to="/energy/building/overview">
+                                        {/* {activeExploreOpt.value === 'enduses' ? (
+                                            <th scope="row">
+                                                <Link
+                                                    to={{
+                                                        pathname: `/explore/page/filter/${activeExploreOpt.value}`,
+                                                    }}>
+                                                    <a className="building-name">{record.eq_name}</a>
+                                                </Link>
+                                            </th>
+                                        ) : (
+                                            <th scope="row">
                                                 <a className="building-name">{record.eq_name}</a>
-                                            </Link>
+                                            </th>
+                                        )} */}
+
+                                        <th scope="row">
+                                            <a className="building-name" onClick={() => setFilter('hvac')}>
+                                                {record.eq_name}
+                                            </a>
                                         </th>
+
                                         <td className="table-content-style">
                                             {record.energy.toFixed(2)} kWh / sq. ft.sq. ft.
                                             <br />

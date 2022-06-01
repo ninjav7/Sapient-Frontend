@@ -12,12 +12,14 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData }) => {
@@ -50,7 +52,12 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    <Link
+                                        to={{
+                                            pathname: `/settings/passive-devices/single/${record.device_id}`,
+                                        }}>
+                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                    </Link>
                                     <td>{record.model}</td>
                                     <td>{record.location}</td>
                                     <td>{record.sensor_number}</td>
@@ -78,10 +85,12 @@ const PassiveDevices = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
+    const [generalGatewayData, setGeneralGatewayData] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
     });
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -94,13 +103,17 @@ const PassiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // Authorization: `JWT ${_user.token}`,
+                'user-auth': '628f3144b712934f578be895',
             };
             setIsProcessing(true);
 
-            await axios.post(`${BaseUrl}${createDevice}`, createDeviceData, { header }).then((res) => {
-                console.log(res.data);
-            });
+            await axios
+                .post(`${BaseUrl}${createDevice}`, createDeviceData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
 
             setPageRefresh(!pageRefresh);
 
@@ -111,13 +124,90 @@ const PassiveDevices = () => {
         }
     };
 
+    // useEffect(() => {
+    //     const fetchPassiveDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+    //                 setPassiveDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Passive devices');
+    //         }
+    //     };
+
+    //     const fetchOnlineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=true`;
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOnlineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Online devices');
+    //         }
+    //     };
+
+    //     const fetchOfflineDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?stat=false`;
+    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+    //                 setOfflineDeviceData(res.data);
+    //                 console.log(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Offline devices');
+    //         }
+    //     };
+
+    //     const fetchLocationData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+    //                 setLocationData(res.data);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch Location Data');
+    //         }
+    //     };
+
+    //     fetchPassiveDeviceData();
+    //     fetchOnlineDeviceData();
+    //     fetchOfflineDeviceData();
+    //     fetchLocationData();
+    // }, []);
+
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
                     setPassiveDeviceData(res.data);
@@ -134,7 +224,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -152,7 +242,7 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -170,10 +260,10 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
             } catch (error) {
@@ -182,88 +272,30 @@ const PassiveDevices = () => {
             }
         };
 
-        fetchPassiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
-        fetchLocationData();
-    }, []);
-
-    useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
+        const fetchGatewayData = async () => {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
+            };
+            await axios
+                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .then((res) => {
+                    setGeneralGatewayData(res.data);
                     console.log(res.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    console.log('Failed to fetch Gateway data');
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Offline devices');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                await axios.get(`${BaseUrl}${getLocation}/62581924c65bf3a1d702e427`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
         };
 
         fetchPassiveDeviceData();
         fetchOnlineDeviceData();
         fetchOfflineDeviceData();
         fetchLocationData();
-    }, [pageRefresh]);
+        fetchGatewayData();
+    }, [pageRefresh, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -280,6 +312,10 @@ const PassiveDevices = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        console.log('createDeviceData => ', createDeviceData);
+    });
 
     return (
         <React.Fragment>
@@ -399,13 +435,13 @@ const PassiveDevices = () => {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
+                            <Form.Label>MAC Address</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Identifier"
+                                placeholder="Enter MAC Address"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('Identifier', e.target.value);
+                                    handleChange('mac_address', e.target.value);
                                 }}
                                 autoFocus
                             />
@@ -441,6 +477,23 @@ const PassiveDevices = () => {
                                 <option selected>Select Location</option>
                                 {locationData.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Gateway</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('gateway_id', e.target.value);
+                                }}>
+                                <option selected>Select Gateway</option>
+                                {generalGatewayData.map((record) => {
+                                    return <option value={record.equipments_id}>{record.model}</option>;
                                 })}
                             </Input>
                         </Form.Group>

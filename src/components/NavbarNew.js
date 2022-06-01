@@ -7,7 +7,7 @@ import { Row, Col, Card } from 'reactstrap';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../routes/index';
 import { ComponentStore } from '../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
+import { faGear, faTelescope, faToggleOn, faCircleBolt, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const NavbarNew = () => {
@@ -51,6 +51,10 @@ const NavbarNew = () => {
         }
     };
 
+    useEffect(() => {
+        console.log('location.pathname => ', location.pathname.split('/')[1]);
+    });
+
     return (
         <>
             <div className="energy-top-nav">
@@ -77,17 +81,23 @@ const NavbarNew = () => {
                                         <Link to={item.path}>
                                             <div class="row" style={{ width: '7vw' }}>
                                                 {item.name === 'Energy' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div
+                                                        className="col-3 font-icon-style-active"
+                                                        style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Control' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div
+                                                        className="col-3 font-icon-style-active"
+                                                        style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Explore' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div
+                                                        className="col-3 font-icon-style-active"
+                                                        style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                                     </div>
                                                 )}
@@ -106,17 +116,17 @@ const NavbarNew = () => {
                                         <Link to={item.path}>
                                             <div class="row" style={{ width: '7vw' }}>
                                                 {item.name === 'Energy' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Control' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Explore' && (
-                                                    <div className="col-3" style={{ margin: '0' }}>
+                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
                                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                                     </div>
                                                 )}
@@ -138,41 +148,63 @@ const NavbarNew = () => {
                 </div>
 
                 <div style={{ width: '100%', float: 'right' }}>
-                    <SearchModal />
-
                     {currentParentRoute === 'buildings' ? (
                         <Link to="/settings/general">
-                            <button
-                                className="btn btn-sm btn-link nav-link right-bar-toggle float-right"
-                                onClick={() => {
-                                    setSideNavBar('building-settings');
-                                }}>
-                                {/* <Settings className="icon-sm" /> */}
-                                <FontAwesomeIcon icon={faGear} size="lg" />
-                            </button>
+                            {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
+                            <div
+                                className={`${
+                                    location.pathname.split('/')[1] === 'settings'
+                                        ? 'navbar-icon-container-active float-right'
+                                        : 'navbar-icon-container float-right'
+                                }`}
+                                style={{ height: '100%' }}>
+                                <button
+                                    // className="btn btn-sm float-right font-icon-style"
+                                    className={`${
+                                        location.pathname.split('/')[1] === 'settings'
+                                            ? 'btn btn-sm float-right other-font-icon-style-active'
+                                            : 'btn btn-sm float-right other-font-icon-style'
+                                    }`}
+                                    onClick={() => {
+                                        setSideNavBar('building-settings');
+                                    }}>
+                                    <FontAwesomeIcon icon={faGear} size="lg" />
+                                </button>
+                            </div>
                         </Link>
                     ) : (
                         <Link to="/settings/account">
-                            <button
-                                className="btn btn-sm btn-link nav-link right-bar-toggle float-right"
-                                onClick={() => {
-                                    setSideNavBar('account');
-                                }}>
-                                {/* <Settings className="icon-sm" /> */}
-                                <FontAwesomeIcon icon={faGear} size="lg" />
-                            </button>
+                            {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
+                            <div
+                                className={`${
+                                    location.pathname.split('/')[1] === 'settings'
+                                        ? 'navbar-icon-container-active float-right'
+                                        : 'navbar-icon-container float-right'
+                                }`}
+                                style={{ height: '100%' }}>
+                                <button
+                                    // className="btn btn-sm float-right other-font-icon-style"
+                                    className={`${
+                                        location.pathname.split('/')[1] === 'settings'
+                                            ? 'btn btn-sm float-right other-font-icon-style-active'
+                                            : 'btn btn-sm float-right other-font-icon-style'
+                                    }`}
+                                    onClick={() => {
+                                        setSideNavBar('account');
+                                    }}>
+                                    <FontAwesomeIcon icon={faGear} size="lg" />
+                                </button>
+                            </div>
                         </Link>
                     )}
 
-                    {/* <Link to="/settings/general">
-                        <button
-                            className="btn btn-sm btn-link nav-link right-bar-toggle float-right"
-                            onClick={() => {
-                                setSideNavBar('account');
-                            }}>
-                            <Settings className="icon-sm" />
+                    <SearchModal />
+
+                    <div className="navbar-icon-container float-right" style={{ height: '100%' }}>
+                        <button className="btn btn-sm float-right other-font-icon-style">
+                            <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
                         </button>
-                    </Link> */}
+                    </div>
                 </div>
             </div>
         </>
