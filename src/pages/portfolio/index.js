@@ -684,7 +684,7 @@ const PortfolioOverview = () => {
                                                     colors={`#D14065`}
                                                     progressValue={0}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container custom-progress-bar"
                                                 />
                                             )}
@@ -693,7 +693,7 @@ const PortfolioOverview = () => {
                                                     colors={`#D14065`}
                                                     progressValue={100}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container custom-progress-bar"
                                                 />
                                             )}
@@ -702,7 +702,7 @@ const PortfolioOverview = () => {
                                                     colors={`#DF5775`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -711,7 +711,7 @@ const PortfolioOverview = () => {
                                                     colors={`#EB6E87`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -720,7 +720,7 @@ const PortfolioOverview = () => {
                                                     colors={`#EB6E87`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -729,7 +729,7 @@ const PortfolioOverview = () => {
                                                     colors={`#FC9EAC`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -738,7 +738,7 @@ const PortfolioOverview = () => {
                                                     colors={`#FFCFD6`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
