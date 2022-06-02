@@ -53,3 +53,28 @@
 .endUses-select-style {
     width: 10vw;
 }
+
+.endUses-select-style-one {
+    width: 40vw !important;
+}
+
+.explore-filter-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    /* line-height: 20px; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: stretch;
+}
+
+.explore-filter-style:hover {
+    background-color: rgb(250, 245, 245);
+    border-radius: 6px;
+    height: 4vh;
+    width: 6vw;
+}

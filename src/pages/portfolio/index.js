@@ -849,7 +849,6 @@ const PortfolioOverview = () => {
                                         );
                                     })}
                                 </div>
-                                )
                             </div>
                         </div>
 
