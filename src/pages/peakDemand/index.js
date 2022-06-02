@@ -599,9 +599,9 @@ const PeakDemand = () => {
                             <div className="card-body card-box-style">
                                 <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
                                 <p className="card-text card-content-style custom-kw-style">
-                                    {yearlyPeakData.energy_consumption.now}
+                                    {yearlyPeakData.energy_consumption.now / 1000}
                                     <span className="card-unit-style">
-                                        &nbsp;&nbsp;kW&nbsp;&nbsp;&nbsp;
+                                        &nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;
                                         {yearlyPeakData.energy_consumption.now <=
                                             yearlyPeakData.energy_consumption.old && (
                                             <button

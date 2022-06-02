@@ -304,20 +304,25 @@ const Explore = () => {
     const [exploreOpts, setExploreOpts] = useState([
         { value: 'no-grouping', label: 'No Grouping' },
         { value: 'enduses', label: 'End Use' },
-        { value: 'equipment', label: 'Equipment Type' },
+        { value: 'equipment_type', label: 'Equipment Type' },
         { value: 'floor', label: 'Floor' },
         { value: 'location', label: 'Location' },
         { value: 'location-type', label: 'Location Type' },
     ]);
-
-    const [endUsesFilter, setEndUsesFilter] = useState([
-        { value: 'enduses', label: 'HVAC' },
-        { value: 'lighting', label: 'Lighting' },
-        { value: 'equipment', label: 'Plug' },
-        { value: 'location', label: 'Process' },
-    ]);
-
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
+
+    const [exploreSecondLvlOpts, setExploreSecondLvlOpts] = useState([]);
+    const [activeSecondLvlOpt, setActiveSecondLvlOpt] = useState(exploreSecondLvlOpts[0]);
+
+    const [exploreThirdLvlOpts, setExploreThirdLvlOpts] = useState([]);
+    const [activeThirdLvlOpt, setActiveThirdLvlOpt] = useState(exploreThirdLvlOpts[0]);
+
+    // const [endUsesFilter, setEndUsesFilter] = useState([
+    //     { value: 'enduses', label: 'HVAC' },
+    //     { value: 'lighting', label: 'Lighting' },
+    //     { value: 'equipment', label: 'Plug' },
+    //     { value: 'location', label: 'Process' },
+    // ]);
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -397,10 +402,7 @@ const Explore = () => {
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
-    const [childFilter, setChildFilter] = useState({
-        eq_id: '',
-        eq_name: '',
-    });
+    const [childFilter, setChildFilter] = useState({});
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -443,8 +445,22 @@ const Explore = () => {
                         { headers }
                     )
                     .then((res) => {
+                        setExploreTableData([]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
                         let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
+                        let childExploreList = [];
+                        responseData.forEach((record) => {
+                            let obj = {
+                                value: record.eq_name,
+                                label: record.eq_name,
+                                eq_id: record.eq_id,
+                            };
+                            childExploreList.push(obj);
+                        });
+                        setExploreSecondLvlOpts(childExploreList);
+                        // console.log('childExploreList => ', childExploreList);
+                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -457,7 +473,7 @@ const Explore = () => {
                                 exploreData.push(recordToInsert);
                             }
                         });
-                        console.log('SSR Customized exploreData => ', exploreData);
+                        // console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
@@ -518,7 +534,6 @@ const Explore = () => {
                                 exploreData.push(recordToInsert);
                             }
                         });
-                        console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
@@ -534,6 +549,74 @@ const Explore = () => {
 
         exploreDataFetch();
     }, []);
+
+    useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+        window.scroll(0, 0);
+
+        const exploreFilterDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?filters=${childFilter.parent}&filter_id=${childFilter.eq_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExplore}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setExploreTableData([]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                        let responseData = res.data;
+                        // console.log('SSR API response => ', responseData);
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.eq_name !== null) {
+                                let recordToInsert = {
+                                    name: record.eq_name,
+                                    data: record.data,
+                                };
+                                exploreData.push(recordToInsert);
+                            }
+                        });
+                        // console.log('SSR Customized exploreData => ', exploreData);
+                        setSeriesData(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                        let newObj = childFilter;
+                        newObj.parent = 'equipment_type';
+                        setChildFilter(newObj);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+            }
+        };
+
+        exploreFilterDataFetch();
+    }, [childFilter]);
+
+    useEffect(() => {
+        console.log('Child Filter => ', childFilter);
+    });
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -559,9 +642,9 @@ const Explore = () => {
         <React.Fragment>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
-                {childFilter === 'hvac' ? (
+                {childFilter.parent === activeExploreOpt.value ? (
                     <div className="explore-equip-filter">
-                        <div className="filter-tyle-style ml-4">By End Uses</div>
+                        <div className="explore-filter-style ml-2">By {activeExploreOpt.label}</div>
                         <div>
                             <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
                         </div>
@@ -570,14 +653,16 @@ const Explore = () => {
                                 className="react-select endUses-select-style mr-2"
                                 classNamePrefix="react-select"
                                 placeholderText="p"
-                                onChange={(e) => setActiveExploreOpt(e)}
-                                options={endUsesFilter.map((record, index) => {
+                                onChange={(e) => {
+                                    setActiveExploreOpt(e);
+                                }}
+                                options={exploreSecondLvlOpts.map((record, index) => {
                                     return {
                                         value: record.value,
                                         label: record.label,
                                     };
                                 })}
-                                defaultValue={endUsesFilter[0]}
+                                defaultValue={exploreSecondLvlOpts[0]}
                             />
                         </div>
                         <div>Grouped by Equipment Type</div>
@@ -684,7 +769,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
