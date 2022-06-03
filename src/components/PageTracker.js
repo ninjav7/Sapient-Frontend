@@ -44,6 +44,7 @@ const PageTracker = () => {
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                 let data = res.data;
+                console.log('Dropdown Buildings => ', data);
                 let activeBldgs = data.filter((bld) => bld.active === true);
                 console.log('Building List => ', activeBldgs);
                 setBuildingList(activeBldgs);

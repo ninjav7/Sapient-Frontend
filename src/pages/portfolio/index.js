@@ -489,7 +489,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        // console.log('setBuildingsEnergyConsume => ', data);
+                        console.log('setBuildingsEnergyConsume => ', data);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {

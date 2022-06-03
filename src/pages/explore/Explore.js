@@ -376,8 +376,8 @@ const Explore = () => {
             selection: {
                 enabled: true,
                 xaxis: {
-                    min: new Date('25 April 2022').getTime(),
-                    max: new Date('26 April 2022').getTime(),
+                    min: new Date('01 June 2022').getTime(),
+                    max: new Date('02 June 2022').getTime(),
                 },
             },
         },
@@ -403,6 +403,215 @@ const Explore = () => {
     const [exploreTableData, setExploreTableData] = useState([]);
 
     const [childFilter, setChildFilter] = useState({});
+
+    // New Approach
+    const [currentFilterLevel, setCurrentFilterLevel] = useState('first');
+
+    const [firstLevelExploreData, setFirstLevelExploreData] = useState();
+    const [firstLevelExploreOpts, setFirstLevelExploreOpts] = useState({
+        chart: {
+            id: 'chart2',
+            type: 'line',
+            height: 230,
+            toolbar: {
+                autoSelected: 'pan',
+                show: true,
+            },
+        },
+        colors: ['#546E7A'],
+        stroke: {
+            width: 3,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        fill: {
+            opacity: 1,
+        },
+        markers: {
+            size: 0,
+        },
+        xaxis: {
+            type: 'datetime',
+        },
+    });
+    const [secondLevelExploreData, setSecondLevelExploreData] = useState();
+    const [secondLevelExploreOpts, setSecondLevelExploreOpts] = useState({
+        chart: {
+            id: 'chart2',
+            type: 'line',
+            height: 230,
+            toolbar: {
+                autoSelected: 'pan',
+                show: true,
+            },
+        },
+        colors: ['#546E7A'],
+        stroke: {
+            width: 3,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        fill: {
+            opacity: 1,
+        },
+        markers: {
+            size: 0,
+        },
+        xaxis: {
+            type: 'datetime',
+        },
+    });
+    const [thirdLevelExploreData, setThirdLevelExploreData] = useState();
+    const [thirdLevelExploreOpts, setThirdLevelExploreOpts] = useState({
+        chart: {
+            id: 'chart2',
+            type: 'line',
+            height: 230,
+            toolbar: {
+                autoSelected: 'pan',
+                show: true,
+            },
+        },
+        colors: ['#546E7A'],
+        stroke: {
+            width: 3,
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        fill: {
+            opacity: 1,
+        },
+        markers: {
+            size: 0,
+        },
+        xaxis: {
+            type: 'datetime',
+        },
+    });
+
+    const [firstLevelLineData, setFirstLevelLineData] = useState();
+    const [firstLevelLineOpts, setFirstLevelLineOpts] = useState({
+        chart: {
+            id: 'chart1',
+            height: 130,
+            toolbar: {
+                show: false,
+            },
+            type: 'area',
+            brush: {
+                target: 'chart2',
+                enabled: true,
+            },
+            selection: {
+                enabled: true,
+                xaxis: {
+                    min: new Date('01 June 2022').getTime(),
+                    max: new Date('02 June 2022').getTime(),
+                },
+            },
+        },
+        colors: ['#008FFB'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.91,
+                opacityTo: 0.1,
+            },
+        },
+        xaxis: {
+            type: 'datetime',
+            tooltip: {
+                enabled: false,
+            },
+        },
+        yaxis: {
+            tickAmount: 2,
+        },
+    });
+    const [secondLevelLineData, setSecondLevelLineData] = useState();
+    const [secondLevelLineOpts, setSecondLevelLineOpts] = useState({
+        chart: {
+            id: 'chart1',
+            height: 130,
+            toolbar: {
+                show: false,
+            },
+            type: 'area',
+            brush: {
+                target: 'chart2',
+                enabled: true,
+            },
+            selection: {
+                enabled: true,
+                xaxis: {
+                    min: new Date('01 June 2022').getTime(),
+                    max: new Date('02 June 2022').getTime(),
+                },
+            },
+        },
+        colors: ['#008FFB'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.91,
+                opacityTo: 0.1,
+            },
+        },
+        xaxis: {
+            type: 'datetime',
+            tooltip: {
+                enabled: false,
+            },
+        },
+        yaxis: {
+            tickAmount: 2,
+        },
+    });
+    const [thirdLevelLineData, setThirdLevelLineData] = useState();
+    const [thirdLevelLineOpts, setThirdLevelLineOpts] = useState({
+        chart: {
+            id: 'chart1',
+            height: 130,
+            toolbar: {
+                show: false,
+            },
+            type: 'area',
+            brush: {
+                target: 'chart2',
+                enabled: true,
+            },
+            selection: {
+                enabled: true,
+                xaxis: {
+                    min: new Date('01 June 2022').getTime(),
+                    max: new Date('02 June 2022').getTime(),
+                },
+            },
+        },
+        colors: ['#008FFB'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.91,
+                opacityTo: 0.1,
+            },
+        },
+        xaxis: {
+            type: 'datetime',
+            tooltip: {
+                enabled: false,
+            },
+        },
+        yaxis: {
+            tickAmount: 2,
+        },
+    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -521,7 +730,7 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
+                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];

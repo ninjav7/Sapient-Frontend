@@ -20,7 +20,7 @@ import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-ic
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice } from '../../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
@@ -115,6 +115,7 @@ const SelectBreakerModel = ({
 
 const IndividualPassiveDevice = () => {
     const { deviceId } = useParams();
+    const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
@@ -124,14 +125,30 @@ const IndividualPassiveDevice = () => {
     const handleBreakerClose = () => setShowBreaker(false);
     const handleBreakerShow = () => setShowBreaker(true);
 
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
-    const [pageRefresh, setPageRefresh] = useState(false);
-
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
+
+    const [sensorCount, setSensorCount] = useState(0);
+
+    // const [passiveData, setPassiveData] = useState({
+    //     equipments_id: '6298bd48da8b46a30984dcb4',
+    //     status: 'Online',
+    //     location: 'Hall > Ground Floor',
+    //     sensor_number: '1/4',
+    //     identifier: '12:AD:23:DC:43:QQ',
+    //     model: 'HS-B300',
+    //     sensors: [
+    //         {
+    //             id: '6298be1b57476755d5a708b1',
+    //             name: 'sensor 0',
+    //             sensor_type: 'passive',
+    //             breaker_link: '',
+    //             equipment: 'AHU_NYPL',
+    //             equipment_id: '629674e71209c9a7b261620c',
+    //             sapient_id: 'test_sapient_id',
+    //         },
+    //     ],
+    // });
 
     const [passiveData, setPassiveData] = useState({});
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
@@ -145,23 +162,25 @@ const IndividualPassiveDevice = () => {
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const [sensors, setSensors] = useState([
-        {
-            breaker_name: 'Breaker 1',
-            panel_name: 'Panel 1',
-            equipment_name: 'AHU 1',
-        },
-        {
-            breaker_name: 'Breaker 2',
-            panel_name: 'Panel 2',
-            equipment_name: 'AHU 2',
-        },
-        {
-            breaker_name: '',
-            panel_name: '',
-            equipment_name: '',
-        },
-    ]);
+    // const [sensors, setSensors] = useState([
+    //     {
+    //         breaker_name: 'Breaker 1',
+    //         panel_name: 'Panel 1',
+    //         equipment_name: 'AHU 1',
+    //     },
+    //     {
+    //         breaker_name: 'Breaker 2',
+    //         panel_name: 'Panel 2',
+    //         equipment_name: 'AHU 2',
+    //     },
+    //     {
+    //         breaker_name: '',
+    //         panel_name: '',
+    //         equipment_name: '',
+    //     },
+    // ]);
+
+    const [sensors, setSensors] = useState([]);
 
     const [breakers, setBreakers] = useState([
         {
@@ -203,12 +222,23 @@ const IndividualPassiveDevice = () => {
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
                     let response = res.data;
-                    let data = response.filter((record) => record.device_id === deviceId);
-                    setPassiveData(data[0]);
+
+                    let data = response.filter((record) => record.equipments_id === deviceId);
+                    let deviceData = data[0];
+
+                    setPassiveData(deviceData);
+                    if (deviceData.sensors) {
+                        let arr = deviceData.sensors;
+                        setSensors(arr);
+                    }
+                    if (deviceData.sensor_number) {
+                        let count = parseInt(deviceData.sensor_number.split('/')[0]);
+                        setSensorCount(count);
+                    }
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch all Passive device');
+                console.log('Failed to fetch Passive device data');
             }
         };
 
@@ -219,7 +249,6 @@ const IndividualPassiveDevice = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -231,7 +260,7 @@ const IndividualPassiveDevice = () => {
 
         fetchPassiveDeviceData();
         fetchLocationData();
-    }, [pageRefresh, deviceId]);
+    }, [deviceId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -250,9 +279,29 @@ const IndividualPassiveDevice = () => {
     }, []);
 
     useEffect(() => {
-        console.log('sensors => ', sensors);
-        console.log('currentRecord => ', currentRecord);
-    });
+        const fetchSensorGraphData = async () => {
+            try {
+                let header = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?sensor_id=${sensorId}`;
+                await axios
+                    .post(`${BaseUrl}${sensorGraphData}${params}`, {
+                        headers: header,
+                    })
+                    .then((res) => {
+                        let response = res.data;
+                        console.log('Sensor Graph Data => ', response);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Sensor Graph data');
+            }
+        };
+        // fetchSensorGraphData();
+    }, [sensorId]);
 
     return (
         <>
@@ -266,7 +315,7 @@ const IndividualPassiveDevice = () => {
                                 </div>
                                 <div>
                                     <span className="passive-device-name mr-3">{passiveData.identifier}</span>
-                                    <span className="passive-sensor-count">{passiveData.sensor_number} Sensors</span>
+                                    <span className="passive-sensor-count">{sensorCount} Sensors</span>
                                 </div>
                             </div>
                             <div>
@@ -337,7 +386,7 @@ const IndividualPassiveDevice = () => {
                             </div>
                         </div>
                         <div className="col-8">
-                            <h5 className="device-title">Sensors ({passiveData.sensor_number})</h5>
+                            <h5 className="device-title">Sensors ({sensorCount})</h5>
                             <div className="mt-2">
                                 <div>
                                     <div className="search-container">
@@ -354,7 +403,7 @@ const IndividualPassiveDevice = () => {
                             {sensors.map((record, index) => {
                                 return (
                                     <>
-                                        {record.breaker_name === '' ? (
+                                        {record.equipment_id === '' ? (
                                             <div className="sensor-container-style-notAttached mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
@@ -378,15 +427,16 @@ const IndividualPassiveDevice = () => {
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
                                                     <span className="sensor-data-title">
-                                                        {record.panel_name}, {record.breaker_name}
+                                                        {/* {record.panel_name}, {record.breaker_name} */}
                                                     </span>
-                                                    <span className="sensor-data-device">{record.equipment_name}</span>
+                                                    <span className="sensor-data-device">{record.equipment}</span>
                                                 </div>
                                                 <div className="sensor-data-style-right">
                                                     <FontAwesomeIcon
                                                         icon={faChartMixed}
                                                         size="md"
                                                         onClick={() => {
+                                                            setSensorId(record.id);
                                                             handleChartShow();
                                                         }}
                                                     />
@@ -426,6 +476,7 @@ const IndividualPassiveDevice = () => {
             </div>
 
             <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} />
+
             <SelectBreakerModel
                 showBreaker={showBreaker}
                 handleBreakerClose={handleBreakerClose}

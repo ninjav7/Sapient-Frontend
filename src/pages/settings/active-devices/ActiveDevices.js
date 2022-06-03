@@ -81,7 +81,7 @@ const ActiveDevicesTable = ({ deviceData }) => {
                                     </td>
                                     <Link
                                         to={{
-                                            pathname: `/settings/active-devices/single`,
+                                            pathname: `/settings/active-devices/single/${record.equipments_id}`,
                                         }}>
                                         <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     </Link>
@@ -108,7 +108,18 @@ const ActiveDevices = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [pageRefresh, setPageRefresh] = useState(false);
 
+    const [activeDeviceModal, setActiveDeviceModal] = useState([
+        {
+            value: 'KP115',
+            label: 'KP115',
+        },
+        {
+            value: 'HS300',
+            label: 'HS300',
+        },
+    ]);
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
@@ -130,7 +141,7 @@ const ActiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // Authorization: `JWT ${_user.token}`,
+                'user-auth': '628f3144b712934f578be895',
             };
             setIsProcessing(true);
 
@@ -143,6 +154,7 @@ const ActiveDevices = () => {
                 });
 
             setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to create Active device data');
@@ -158,48 +170,22 @@ const ActiveDevices = () => {
                     'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-                    setActiveDeviceData(res.data);
-                    console.log(res.data);
+                    let data = res.data;
+                    setActiveDeviceData(data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    data.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch all Active Devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online Devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Offline Devices');
             }
         };
 
@@ -221,10 +207,8 @@ const ActiveDevices = () => {
         };
 
         fetchActiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
         fetchLocationData();
-    }, [bldgId]);
+    }, [bldgId, pageRefresh]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -447,7 +431,7 @@ const ActiveDevices = () => {
                                 placeholder="Enter Identifier"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('Identifier', e.target.value);
+                                    handleChange('mac_address', e.target.value);
                                 }}
                                 autoFocus
                             />
@@ -464,8 +448,8 @@ const ActiveDevices = () => {
                                     handleChange('model', e.target.value);
                                 }}>
                                 <option selected>Select Model</option>
-                                {activeDeviceData.map((record) => {
-                                    return <option value={record.model}>{record.model}</option>;
+                                {activeDeviceModal.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         </Form.Group>

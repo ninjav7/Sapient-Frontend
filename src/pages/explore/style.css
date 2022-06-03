@@ -73,8 +73,12 @@
 }
 
 .explore-filter-style:hover {
-    background-color: rgb(250, 245, 245);
+    /* background-color: rgb(250, 245, 245);
     border-radius: 6px;
     height: 4vh;
-    width: 6vw;
+    width: 6vw; */
+    font-family: 'Inter';
+    font-style: bold;
+    font-weight: 600;
+    font-size: 14px;
 }
