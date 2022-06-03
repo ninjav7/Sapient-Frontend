@@ -38,6 +38,7 @@ export const createEquipment = '/api/config/equipments_details/create_equipment'
 // export const generalActiveDevices = '/api/config/active/equipments_details';
 export const generalActiveDevices = '/api/config/devices/active';
 
+
 // passive
 // export const generalPassiveDevices = '/api/config/passive/equipments_details';
 export const generalPassiveDevices = '/api/config/devices/passive';
@@ -70,6 +71,7 @@ export const getLayouts = '/api/config/get_layout';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
+
 
 // charts
 export const getEnergyConsumption = '/api/energy/chart';

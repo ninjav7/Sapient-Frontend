@@ -241,6 +241,7 @@ const ActiveDevices = () => {
         }
     };
 
+    
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {

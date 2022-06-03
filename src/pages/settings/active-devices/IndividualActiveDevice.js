@@ -126,6 +126,7 @@ const IndividualActiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
+    
     useEffect(() => {
         const fetchSensorGraphData = async () => {
             try {
