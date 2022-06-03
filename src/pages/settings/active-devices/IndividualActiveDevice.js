@@ -6,9 +6,11 @@ import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-ic
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData } from '../../../services/Network';
+import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import Modal from 'react-bootstrap/Modal';
+import { Button, Input } from 'reactstrap';
 import './style.css';
 
 const IndividualActiveDevice = () => {
@@ -19,6 +21,11 @@ const IndividualActiveDevice = () => {
     const handleChartClose = () => setShowChart(false);
     const handleChartShow = () => setShowChart(true);
 
+    // Edit states
+    const [showEdit, setShowEdit] = useState(false);
+    const handleEditClose = () => setShowEdit(false);
+    const handleEditShow = () => setShowEdit(true);
+
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [locationData, setLocationData] = useState([]);
@@ -26,33 +33,59 @@ const IndividualActiveDevice = () => {
     const [sensors, setSensors] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
 
+    const [updatedSensorData, setUpdatedSensorData] = useState({});
+
+    const [breakerModal, setBreakerModal] = useState([
+        {
+            value: 'Breaker 1',
+            label: 'Breaker 1',
+        },
+        {
+            value: 'Breaker 2',
+            label: 'Breaker 2',
+        },
+    ]);
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, updatedSensorData);
+        obj[key] = value;
+        setUpdatedSensorData(obj);
+    };
+
     useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
+        const fetchSingleActiveDevice = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
+                let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
-
-                    let data = response.filter((record) => record.equipments_id === deviceId);
-                    let deviceData = data[0];
-
-                    setActiveData(deviceData);
-                    if (deviceData.sensors) {
-                        let arr = deviceData.sensors;
-                        setSensors(arr);
-                    }
-                    if (deviceData.sensor_number) {
-                        let count = parseInt(deviceData.sensor_number.split('/')[0]);
-                        setSensorCount(count);
-                    }
+                    setActiveData(response.data[0]);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Active device data');
+            }
+        };
+
+        const fetchActiveDeviceSensorData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?device_id=${deviceId}`;
+                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setSensors(response);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active device sensor data');
             }
         };
 
@@ -63,7 +96,6 @@ const IndividualActiveDevice = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -73,7 +105,8 @@ const IndividualActiveDevice = () => {
             }
         };
 
-        fetchPassiveDeviceData();
+        fetchSingleActiveDevice();
+        fetchActiveDeviceSensorData();
         fetchLocationData();
     }, [deviceId]);
 
@@ -82,7 +115,7 @@ const IndividualActiveDevice = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Passive Devices',
+                        label: 'Active Devices',
                         path: '/settings/passive-devices',
                         active: true,
                     },
@@ -111,7 +144,7 @@ const IndividualActiveDevice = () => {
                 console.log('Failed to fetch Sensor Graph data');
             }
         };
-        // fetchSensorGraphData();
+        fetchSensorGraphData();
     }, [sensorId]);
 
     return (
@@ -265,10 +298,10 @@ const IndividualActiveDevice = () => {
 
                             <div className="mt-2 socket-image-container"></div>
 
-                            {sensors.map((sensor, index) => {
+                            {sensors.map((record, index) => {
                                 return (
                                     <>
-                                        {sensor.equipment_id === '' ? (
+                                        {record.equipment_id === '' ? (
                                             <div className="sensor-container-style-notAttached mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
@@ -286,14 +319,14 @@ const IndividualActiveDevice = () => {
                                             <div className="sensor-container-style mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">{sensor.equipment}</span>
+                                                    <span className="sensor-data-title">{record.equipment}</span>
                                                 </div>
                                                 <div className="sensor-data-style-right">
                                                     <FontAwesomeIcon
                                                         icon={faChartMixed}
                                                         size="md"
                                                         onClick={() => {
-                                                            setSensorId(sensor.id);
+                                                            setSensorId(record.id);
                                                             handleChartShow();
                                                         }}
                                                     />
@@ -314,6 +347,58 @@ const IndividualActiveDevice = () => {
             </div>
 
             <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} />
+
+            <Modal show={showEdit} onHide={handleEditClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Select Breaker</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Panel</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Select Panel"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('panel', e.target.value);
+                                }}
+                                autoFocus
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Breaker</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('breaker', e.target.value);
+                                }}>
+                                <option selected>Select Breaker</option>
+                                {breakerModal.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleEditClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            // saveDeviceData();
+                            handleEditClose();
+                        }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
     );
 };
