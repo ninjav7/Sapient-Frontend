@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Row,
     Col,
@@ -11,8 +11,6 @@ import {
     DropdownItem,
     Button,
     Input,
-    FormGroup,
-    Label,
 } from 'reactstrap';
 
 import { Search } from 'react-feather';
@@ -24,30 +22,10 @@ import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import './style.css';
 
-const ActiveDevicesTable = ({ deviceData }) => {
-    const records = [
-        {
-            status: 'available',
-            identifierMAC: 'D8:07:B6:88:D8:3B',
-            model: 'KP115',
-            location: 'Floor 1 > 252',
-            sensors: '1/1',
-            firmwareVersion: 'v1.1',
-            hardwareVersion: 'v1',
-        },
-        {
-            status: 'available',
-            identifierMAC: 'D8:07:B6:88:D9:4A',
-            model: 'HS300',
-            location: 'Floor 1 > 253',
-            sensors: '2/6',
-            firmwareVersion: 'v1.2',
-            hardwareVersion: 'v2',
-        },
-    ];
-
+const ActiveDevicesTable = ({ deviceData, setPageRequest, nextPageData, previousPageData, paginationData }) => {
     return (
         <Card>
             <CardBody>
@@ -81,7 +59,7 @@ const ActiveDevicesTable = ({ deviceData }) => {
                                     </td>
                                     <Link
                                         to={{
-                                            pathname: `/settings/active-devices/single`,
+                                            pathname: `/settings/active-devices/single/${record.equipments_id}`,
                                         }}>
                                         <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     </Link>
@@ -95,6 +73,28 @@ const ActiveDevicesTable = ({ deviceData }) => {
                         })}
                     </tbody>
                 </Table>
+                {/* {!deviceData.length === 0 && (
+                    <> */}
+                <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            previousPageData(paginationData.pagination.previous);
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            nextPageData(paginationData.pagination.next);
+                        }}>
+                        Next
+                    </button>
+                </div>
+                {/* </>
+                )} */}
             </CardBody>
         </Card>
     );
@@ -108,8 +108,37 @@ const ActiveDevices = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [pageRefresh, setPageRefresh] = useState(false);
 
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNo, setPageNo] = useState(1);
+
+    const [pageRequest, setPageRequest] = useState('');
+
+    const [activeDeviceModal, setActiveDeviceModal] = useState([
+        {
+            value: 'KP115',
+            label: 'KP115',
+        },
+        {
+            value: 'HS300',
+            label: 'HS300',
+        },
+    ]);
     const [activeDeviceData, setActiveDeviceData] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    // const [activeDeviceData, setActiveDeviceData] = useState([
+    //     {
+    //         equipments_id: '629a250650044d23b0319bbd',
+    //         status: 'Online',
+    //         location: 'Hall > Ground Floor',
+    //         sensor_number: '1/6',
+    //         identifier: '10:27:F5:8F:8B:F3',
+    //         model: 'HS300',
+    //         firmware_version: null,
+    //         hardware_version: '0',
+    //     },
+    // ]);
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -130,7 +159,7 @@ const ActiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // Authorization: `JWT ${_user.token}`,
+                'user-auth': '628f3144b712934f578be895',
             };
             setIsProcessing(true);
 
@@ -143,12 +172,76 @@ const ActiveDevices = () => {
                 });
 
             setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to create Active device data');
         }
     };
 
+    const nextPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setActiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setActiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {
@@ -157,49 +250,25 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-                    setActiveDeviceData(res.data);
-                    console.log(res.data);
+                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setActiveDeviceData(response.data);
+                    setPaginationData(res.data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    response.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch all Active Devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online Devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Offline Devices');
             }
         };
 
@@ -210,7 +279,6 @@ const ActiveDevices = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -221,10 +289,8 @@ const ActiveDevices = () => {
         };
 
         fetchActiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
         fetchLocationData();
-    }, [bldgId]);
+    }, [bldgId, pageRefresh]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -241,6 +307,37 @@ const ActiveDevices = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    // useEffect(() => {
+    //     const fetchActiveDeviceData = async () => {
+    //         try {
+    //             let headers = {
+    //                 'Content-Type': 'application/json',
+    //                 accept: 'application/json',
+    //                 'user-auth': '628f3144b712934f578be895',
+    //             };
+    //             let params = `?page_size=${pageNo}&page_no=${pageSize}`;
+    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+    //                 let data = res.data;
+    //                 setActiveDeviceData(data);
+
+    //                 let onlineData = [];
+    //                 let offlineData = [];
+
+    //                 data.forEach((record) => {
+    //                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+    //                 });
+
+    //                 setOnlineDeviceData(onlineData);
+    //                 setOfflineDeviceData(offlineData);
+    //             });
+    //         } catch (error) {
+    //             console.log(error);
+    //             console.log('Failed to fetch all Active Devices');
+    //         }
+    //     };
+    //     fetchActiveDeviceData();
+    // });
 
     // useEffect(() => {
     //     const fetchActiveDeviceData = async () => {
@@ -428,9 +525,33 @@ const ActiveDevices = () => {
 
             <Row>
                 <Col lg={10}>
-                    {selectedTab === 0 && <ActiveDevicesTable deviceData={activeDeviceData} />}
-                    {selectedTab === 1 && <ActiveDevicesTable deviceData={onlineDeviceData} />}
-                    {selectedTab === 2 && <ActiveDevicesTable deviceData={offlineDeviceData} />}
+                    {selectedTab === 0 && (
+                        <ActiveDevicesTable
+                            deviceData={activeDeviceData}
+                            setPageRequest={setPageRequest}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                        />
+                    )}
+                    {selectedTab === 1 && (
+                        <ActiveDevicesTable
+                            deviceData={onlineDeviceData}
+                            setPageRequest={setPageRequest}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                        />
+                    )}
+                    {selectedTab === 2 && (
+                        <ActiveDevicesTable
+                            deviceData={offlineDeviceData}
+                            setPageRequest={setPageRequest}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                        />
+                    )}
                 </Col>
             </Row>
 
@@ -447,7 +568,7 @@ const ActiveDevices = () => {
                                 placeholder="Enter Identifier"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('Identifier', e.target.value);
+                                    handleChange('mac_address', e.target.value);
                                 }}
                                 autoFocus
                             />
@@ -464,8 +585,8 @@ const ActiveDevices = () => {
                                     handleChange('model', e.target.value);
                                 }}>
                                 <option selected>Select Model</option>
-                                {activeDeviceData.map((record) => {
-                                    return <option value={record.model}>{record.model}</option>;
+                                {activeDeviceModal.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         </Form.Group>

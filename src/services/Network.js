@@ -38,9 +38,11 @@ export const createEquipment = '/api/config/equipments_details/create_equipment'
 // export const generalActiveDevices = '/api/config/active/equipments_details';
 export const generalActiveDevices = '/api/config/devices/active';
 
+
 // passive
 // export const generalPassiveDevices = '/api/config/passive/equipments_details';
 export const generalPassiveDevices = '/api/config/devices/passive';
+export const sensorGraphData = '/api/config/sensor/graph';
 
 //gateway
 // export const generalGateway = '/api/config/gateway/equipments_details';
@@ -70,6 +72,7 @@ export const getLayouts = '/api/config/get_layout';
 // getLocation
 export const getLocation = '/api/config/get_location';
 
+
 // charts
 export const getEnergyConsumption = '/api/energy/chart';
 
@@ -81,3 +84,5 @@ export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
 
 export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
+
+export const listSensor = '/api/config/sensor/list_sensor';

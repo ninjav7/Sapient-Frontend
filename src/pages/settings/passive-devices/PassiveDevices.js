@@ -54,7 +54,7 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                     </td>
                                     <Link
                                         to={{
-                                            pathname: `/settings/passive-devices/single/${record.device_id}`,
+                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
                                         }}>
                                         <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     </Link>
@@ -83,6 +83,18 @@ const PassiveDevices = () => {
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+
+    const [passiveDeviceModel, setPassiveDeviceModel] = useState([
+        {
+            value: 'PR55-4A',
+            label: 'PR55-4A',
+        },
+        {
+            value: 'HYDRA-1',
+            label: 'HYDRA-1',
+        },
+    ]);
+
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
@@ -210,48 +222,23 @@ const PassiveDevices = () => {
                     'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
-                    console.log(res.data);
+                    let data = res.data;
+                    console.log('Rai Passive Data => ', data);
+                    setPassiveDeviceData(data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    data.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch all Passive devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Offline devices');
             }
         };
 
@@ -273,13 +260,16 @@ const PassiveDevices = () => {
         };
 
         const fetchGatewayData = async () => {
-            let headers = {
+            let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
+                'user-auth': '628f3144b712934f578be895',
             };
+            let params = `?building_id=${bldgId}`;
             await axios
-                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .get(`${BaseUrl}${generalGateway}${params}`, {
+                    headers: header,
+                })
                 .then((res) => {
                     setGeneralGatewayData(res.data);
                     console.log(res.data);
@@ -291,8 +281,6 @@ const PassiveDevices = () => {
         };
 
         fetchPassiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
         fetchLocationData();
         fetchGatewayData();
     }, [pageRefresh, bldgId]);
@@ -458,8 +446,8 @@ const PassiveDevices = () => {
                                     handleChange('model', e.target.value);
                                 }}>
                                 <option selected>Select Model</option>
-                                {passiveDeviceData.map((record) => {
-                                    return <option value={record.model}>{record.model}</option>;
+                                {passiveDeviceModel.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         </Form.Group>

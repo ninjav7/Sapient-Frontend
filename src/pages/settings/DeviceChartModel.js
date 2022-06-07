@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Row,
     Col,
@@ -20,7 +20,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
 import BrushChart from '../charts/BrushChart';
 
-const DeviceChartModel = ({ showChart, handleChartClose }) => {
+const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
@@ -100,17 +100,6 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
                 [1650955774141, 234.55],
                 [1650874722069, 240],
                 [1650874733485, 989.55],
-            ],
-        },
-        {
-            name: 'AHU 2',
-            data: [
-                [1650955798660, 361],
-                [1650874764212, 234.55],
-                [1650874786336, 227],
-                [1650874800399, 325],
-                [1650955861209, 184],
-                [1650874814741, 766.55],
             ],
         },
     ]);
@@ -267,9 +256,9 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
 
             <div>
                 <BrushChart
-                    seriesData={series}
+                    seriesData={sensorData}
                     optionsData={options}
-                    seriesLineData={seriesLine}
+                    seriesLineData={sensorLineData}
                     optionsLineData={optionsLine}
                 />
             </div>
