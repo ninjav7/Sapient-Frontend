@@ -7,6 +7,7 @@ import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../../services/Network';
+import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
@@ -19,8 +20,7 @@ const IndividualActiveDevice = () => {
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
-    const handleChartShow = () => setShowChart(true);
-
+    
     // Edit states
     const [showEdit, setShowEdit] = useState(false);
     const handleEditClose = () => setShowEdit(false);
@@ -31,6 +31,7 @@ const IndividualActiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
     const [activeData, setActiveData] = useState({});
     const [sensors, setSensors] = useState([]);
+    const [sensorData, setSensorData] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
@@ -51,7 +52,13 @@ const IndividualActiveDevice = () => {
         obj[key] = value;
         setUpdatedSensorData(obj);
     };
-
+    const handleChartShow = (id) => {
+        setSensorId(id);
+        setShowChart(true);
+        let obj = sensors.find(o => o.id === id);
+        setSensorData(obj);
+        fetchSensorGraphData(id);
+    }
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
@@ -127,16 +134,25 @@ const IndividualActiveDevice = () => {
     }, []);
 
     
-    useEffect(() => {
-        const fetchSensorGraphData = async () => {
+    // useEffect(() => {
+        const fetchSensorGraphData = async (id) => {
             try {
+                let endDate = new Date(); // today
+                let startDate = new Date();
+                startDate.setDate(startDate.getDate() - 7);
+                
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?sensor_id=${sensorId}`;
-                await axios.post(`${BaseUrl}${sensorGraphData}${params}`, { headers }).then((res) => {
+                let params = `?sensor_id=${id===sensorId?sensorId:id}`;
+                await axios.post(`${BaseUrl}${sensorGraphData}${params}`, 
+                {
+                    date_from: dateFormatHandler(startDate),
+                    date_to: dateFormatHandler(endDate),
+                }
+                ,{ headers }).then((res) => {
                     let response = res.data;
                     console.log('Sensor Graph Data => ', response);
                 });
@@ -145,8 +161,8 @@ const IndividualActiveDevice = () => {
                 console.log('Failed to fetch Sensor Graph data');
             }
         };
-        fetchSensorGraphData();
-    }, [sensorId]);
+    //     fetchSensorGraphData();
+    // }, [sensorId]);
 
     return (
         <>
@@ -231,8 +247,8 @@ const IndividualActiveDevice = () => {
                             </div>
                         </div>
                         <div className="col-8">
-                            {/* <h5 className="device-title">Sensors ({activeData.sensors.length})</h5> */}
-                            <h5 className="device-title">Sensors (1)</h5>
+                            <h5 className="device-title">Sensors ({sensors.length})</h5>
+                            {/* <h5 className="device-title">Sensors (1)</h5> */}
                             <div className="mt-2">
                                 <div className="active-sensor-header">
                                     <div className="search-container mr-2">
@@ -327,8 +343,7 @@ const IndividualActiveDevice = () => {
                                                         icon={faChartMixed}
                                                         size="md"
                                                         onClick={() => {
-                                                            setSensorId(record.id);
-                                                            handleChartShow();
+                                                            handleChartShow(record.id);
                                                         }}
                                                     />
                                                     <button
@@ -347,7 +362,7 @@ const IndividualActiveDevice = () => {
                 </div>
             </div>
 
-            <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} />
+            <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
                 <Modal.Header>
