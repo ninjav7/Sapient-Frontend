@@ -60,6 +60,7 @@ const IndividualActiveDevice = () => {
         fetchSensorGraphData(id);
     }
     useEffect(() => {
+        console.log("entered in useeffect")
         const fetchSingleActiveDevice = async () => {
             try {
                 let headers = {

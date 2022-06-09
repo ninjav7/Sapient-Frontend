@@ -22,7 +22,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData }) => {
+const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
     return (
         <Card>
             <CardBody>
@@ -66,6 +66,24 @@ const PassiveDevicesTable = ({ deviceData }) => {
                         })}
                     </tbody>
                 </Table>
+                <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            previousPageData(paginationData.pagination.previous);
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            nextPageData(paginationData.pagination.next);
+                        }}>
+                        Next
+                    </button>
+                </div>
             </CardBody>
         </Card>
     );
@@ -81,6 +99,8 @@ const PassiveDevices = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNo, setPageNo] = useState(1);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
@@ -94,7 +114,7 @@ const PassiveDevices = () => {
             label: 'HYDRA-1',
         },
     ]);
-
+    const [paginationData, setPaginationData] = useState({});
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
@@ -136,6 +156,69 @@ const PassiveDevices = () => {
         }
     };
 
+    const nextPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    
     // useEffect(() => {
     //     const fetchPassiveDeviceData = async () => {
     //         try {
@@ -221,10 +304,11 @@ const PassiveDevices = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
                     console.log('Rai Passive Data => ', data);
-                    setPassiveDeviceData(data);
+                    setPassiveDeviceData(data.data);
 
                     let onlineData = [];
                     let offlineData = [];
@@ -410,9 +494,18 @@ const PassiveDevices = () => {
 
             <Row>
                 <Col lg={8}>
-                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData} />}
-                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData} />}
-                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData} />}
+                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}/>}
+                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData} />}
+                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData} />}
                 </Col>
             </Row>
 
