@@ -9,6 +9,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import useSortableData from '../../helpers/useSortableData';
 import './style.css';
 
 const EndUses = () => {
@@ -272,7 +273,7 @@ const EndUses = () => {
             </Row>
             <Row>
                 <Col xl={12}>
-                    <StackedBarChart options={barChartOptions} series={barChartData} height={440} />
+                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
                 </Col>
             </Row>
 
