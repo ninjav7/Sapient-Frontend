@@ -209,8 +209,8 @@ const Layout = () => {
                         Layout
                     </span>
 
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mt-2 mr-2">
+                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
+                        <div className="float-right ml-2 mt-2 mr-1">
                             <span className="text-warning font-weight-bold">3 Unsaved Changes</span>
                         </div>
                         <div className="float-right ml-2">

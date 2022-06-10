@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BaseUrl, getLocation, generalPanels, generalPassiveDevices, createPanel } from '../../../services/Network';
-import { v4 as uuidv4 } from 'uuid';
 import '../style.css';
 import './panel-style.css';
 
@@ -46,33 +45,7 @@ const CreatePanel = () => {
     const [normalStruct, setNormalStruct] = useState([]);
 
     const [normalCount, setNormalCount] = useState(48);
-    const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
-    const [panelType, setPanelType] = useState([
-        {
-            name: 'Distribution',
-            value: 'distribution',
-        },
-        {
-            name: 'Disconnect',
-            value: 'disconnect',
-        },
-    ]);
-    const [disconnectBreaker, setDisconnectBreaker] = useState([
-        {
-            name: '1',
-            value: 1,
-        },
-        {
-            name: '2',
-            value: 2,
-        },
-        {
-            name: '3',
-            value: 3,
-        },
-    ]);
-    const [activePanelType, setActivePanelType] = useState('distribution');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
@@ -81,19 +54,10 @@ const CreatePanel = () => {
     const [normalData, setNormalData] = useState({});
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
-    // const getBreakerId = () => `breaker_${+new Date()}`;
-    const { v4: uuidv4 } = require('uuid');
-    const getBreakerId = () => uuidv4();
-
     const [main, setMain] = useState({
-        phase: 1,
-        voltage: '',
-        amps: '',
-        equipment_name: '',
-        uniqueId: getBreakerId(),
-        parentId: '',
         breakerNo: 0,
-        type: 'main-breaker',
+        equipment_name: '',
+        type: 'main',
     });
 
     const handleChange = (key, value) => {
@@ -112,7 +76,6 @@ const CreatePanel = () => {
             setNormalStruct(newArray);
         } else {
             let obj = normalData;
-            obj.parentId = obj.uniqueId;
             setMain(obj);
         }
     };
@@ -125,7 +88,6 @@ const CreatePanel = () => {
             setNormalStruct(newArray);
         } else {
             let obj = normalData;
-            obj.parentId = obj.uniqueId;
             setMain(obj);
         }
     };
@@ -173,16 +135,10 @@ const CreatePanel = () => {
     useEffect(() => {
         let newBreakers = [];
         for (let index = 1; index <= normalCount; index++) {
-            let newId = getBreakerId();
             let obj = {
-                phase: 1,
-                voltage: '',
-                amps: '',
-                equipment_name: '',
-                uniqueId: newId,
-                parentId: newId,
                 breakerNo: index,
-                type: 'normal-breaker',
+                equipment_name: '',
+                type: 'breaker',
             };
             newBreakers.push(obj);
         }
@@ -212,8 +168,9 @@ const CreatePanel = () => {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
-                        'user-auth': '628f3144b712934f578be895',
+                        // 'user-auth': '628f3144b712934f578be895',
                     };
+                    // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                         setLocationData(res.data);
                     });
@@ -229,7 +186,7 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
@@ -240,34 +197,15 @@ const CreatePanel = () => {
             }
         };
 
-        // const fetchPassiveDeviceData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             // 'user-auth': '628f3144b712934f578be895',
-        //         };
-        //         await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-        //             setPassiveDeviceData(res.data);
-        //         });
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch all Passive devices');
-        //     }
-        // };
-
         const fetchPassiveDeviceData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
-                // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
-                let params = `?page_size=10&page_no=1`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setPassiveDeviceData(data.data);
+                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
+                    setPassiveDeviceData(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -281,9 +219,8 @@ const CreatePanel = () => {
     }, [bldgId]);
 
     useEffect(() => {
-        // console.log('SSR panel => ', panel);
+        console.log('SSR panel => ', panel);
         console.log('SSR main => ', main);
-        console.log('SSR normalStruct => ', normalStruct);
     });
 
     return (
@@ -314,7 +251,7 @@ const CreatePanel = () => {
             </Row>
             <Row style={{ marginLeft: '20px' }}>
                 <Col xl={10}>
-                    <div className="panel-first-row-style mt-4">
+                    <div className="grid-style-5 mt-4">
                         <FormGroup>
                             <Label for="panelName" className="card-title">
                                 Name
@@ -350,29 +287,6 @@ const CreatePanel = () => {
                         </FormGroup>
 
                         <FormGroup>
-                            <Label for="userState" className="card-title">
-                                Passive Device(s)
-                            </Label>
-                            <Input
-                                type="select"
-                                name="state"
-                                id="userState"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('device_id', e.target.value);
-                                }}>
-                                <option>None</option>
-                                {passiveDeviceData.map((record) => {
-                                    return (
-                                        <option value={record.equipments_id}>
-                                            {record.identifier} ({record.model})
-                                        </option>
-                                    );
-                                })}
-                            </Input>
-                        </FormGroup>
-
-                        <FormGroup>
                             <Label for="location" className="card-title">
                                 Location
                             </Label>
@@ -396,128 +310,98 @@ const CreatePanel = () => {
             <Row style={{ marginLeft: '20px' }}>
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
-                        <Row className="panel-header-styling ml-1 mr-1">
-                            <div className="panel-header-filter">
+                        <Row>
+                            <Col lg={3}>
                                 <div>
                                     <FormGroup className="form-group row m-4">
                                         <Label for="panelName" className="card-title">
-                                            Type
-                                        </Label>
-                                        <Input
-                                            type="select"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                setActivePanelType(e.target.value);
-                                            }}>
-                                            {panelType.map((record) => {
-                                                return <option value={record.value}>{record.name}</option>;
-                                            })}
-                                        </Input>
-                                    </FormGroup>
-                                </div>
-                                <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
                                             Number of Breakers
                                         </Label>
-                                        {activePanelType === 'distribution' ? (
-                                            <Input
-                                                type="number"
-                                                name="breakers"
-                                                id="breakers"
-                                                value={normalCount}
-                                                onChange={(e) => {
-                                                    setNormalCount(parseInt(e.target.value));
-                                                }}
-                                                className="breaker-no-width"
-                                            />
-                                        ) : (
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-no-width"
-                                                defaultValue={disconnectBreakerCount}
-                                                onChange={(e) => {
-                                                    setDisconnectBreakerCount(e.target.value);
-                                                }}>
-                                                {disconnectBreaker.map((record) => {
-                                                    return <option value={record.value}>{record.name}</option>;
-                                                })}
-                                            </Input>
-                                        )}
+                                        <Input
+                                            type="number"
+                                            name="breakers"
+                                            id="breakers"
+                                            value={normalCount}
+                                            onChange={(e) => {
+                                                setNormalCount(parseInt(e.target.value));
+                                            }}
+                                        />
                                     </FormGroup>
                                 </div>
-                            </div>
-                            <div className="float-right m-4">
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-secondary font-weight-bold"
-                                    onClick={() => {
-                                        setIsEditing(!isEditing);
-                                        saveNormalDataToPanel();
-                                    }}>
-                                    {isEditing ? 'Done' : 'Edit'}
-                                </button>
-                            </div>
+                            </Col>
+                            <Col lg={9}>
+                                <div className="float-right m-4">
+                                    <button
+                                        type="button"
+                                        className="btn btn-md btn-secondary font-weight-bold"
+                                        onClick={() => {
+                                            setIsEditing(!isEditing);
+                                            saveNormalDataToPanel();
+                                        }}>
+                                        {isEditing ? 'Done' : 'Edit'}
+                                    </button>
+                                </div>
+                            </Col>
                         </Row>
 
-                        <Row className="main-breaker-styling">
-                            <FormGroup className="form-group row m-4">
-                                <div className="breaker-container">
-                                    <div className="breaker-style">
-                                        <div className="breaker-content-middle">
-                                            <div className="breaker-index">M</div>
-                                        </div>
-                                        <div className="breaker-content-middle">
-                                            <div className="dot-status"></div>
-                                        </div>
-                                        <div className="breaker-content-middle">
-                                            <div className="breaker-content">
-                                                <span>200A</span>
-                                                <span>240V</span>
+                        <Row>
+                            <Col lg={4}></Col>
+                            <Col lg={4}>
+                                <FormGroup className="form-group row m-4">
+                                    <div className="breaker-container">
+                                        <div className="breaker-style">
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-index">M</div>
                                             </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="dot-status"></div>
+                                            </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-content">
+                                                    <span>200A</span>
+                                                    <span>240V</span>
+                                                </div>
+                                            </div>
+                                            {!(main.equipment_name === '') ? (
+                                                <>
+                                                    <div>
+                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                            {main.equipment_name}
+                                                        </h6>
+                                                    </div>
+                                                    <div
+                                                        className="breaker-content-middle"
+                                                        onClick={() => {
+                                                            handleEditBreakerShow();
+                                                            setUpdateData(main);
+                                                        }}>
+                                                        <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-pen"></i>
+                                                        </div>
+                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div
+                                                        className="breaker-content-middle"
+                                                        onClick={() => {
+                                                            handleBreakerShow();
+                                                            setNormalData(main);
+                                                            setNormalDataIndex(-1);
+                                                        }}>
+                                                        <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-pen"></i>
+                                                        </div>
+                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
-                                        {!(main.equipment_name === '') ? (
-                                            <>
-                                                <div>
-                                                    <h6 className="ml-4 mb-3 breaker-equip-name">
-                                                        {main.equipment_name}
-                                                    </h6>
-                                                </div>
-                                                <div
-                                                    className="breaker-content-middle"
-                                                    onClick={() => {
-                                                        handleEditBreakerShow();
-                                                        setUpdateData(main);
-                                                    }}>
-                                                    <div className="edit-icon-bg-styling mr-2">
-                                                        <i className="uil uil-pen"></i>
-                                                    </div>
-                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div
-                                                    className="breaker-content-middle"
-                                                    onClick={() => {
-                                                        handleBreakerShow();
-                                                        setNormalData(main);
-                                                        setNormalDataIndex(-1);
-                                                    }}>
-                                                    <div className="edit-icon-bg-styling mr-2">
-                                                        <i className="uil uil-pen"></i>
-                                                    </div>
-                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
-                                            </>
-                                        )}
                                     </div>
-                                </div>
-                            </FormGroup>
+                                </FormGroup>
+                            </Col>
+                            <Col lg={4}></Col>
                         </Row>
 
                         <Row>
@@ -525,7 +409,7 @@ const CreatePanel = () => {
                                 <div>
                                     <div className="grid-style-6">
                                         {normalStruct.map((element, index) => {
-                                            if (element.type === 'main-breaker') {
+                                            if (element.type === 'main') {
                                                 return;
                                             }
                                             return (
