@@ -34,6 +34,8 @@ const HorizontalLayout = Loadable({
     loader: () => import('../layouts/Horizontal'),
     render(loaded, props) {
         let Component = loaded.default;
+        console.log('Horizontal Layout Props => ', props);
+        console.log('Horizontal Layout Loaded => ', loaded);
         return <Component {...props} />;
     },
     loading,

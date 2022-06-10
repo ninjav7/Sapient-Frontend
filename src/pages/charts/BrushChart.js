@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // stacked bar chart
-const BrushChart = () => {
+const BrushChart = ({ optionsData = {}, seriesData = [], optionsLineData = {}, seriesLineData = [] }) => {
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -43,20 +43,29 @@ const BrushChart = () => {
         max: 90,
     });
 
-    // const [series, setSeries] = useState([
-    //     {
-    //         data: data,
-    //     },
-    // ]);
-
     const [series, setSeries] = useState([
         {
-            name: 'Boiler 1',
-            data: data,
+            name: 'AHU 1',
+            data: [
+                [1650874614695, 784.55],
+                [1650874694654, 169],
+                [1650782931595, 210],
+                [1650874587699, 825],
+                [1650955774141, 234.55],
+                [1650874722069, 240],
+                [1650874733485, 989.55],
+            ],
         },
         {
-            name: 'Boiler 2',
-            data: data1,
+            name: 'AHU 2',
+            data: [
+                [1650955798660, 361],
+                [1650874764212, 234.55],
+                [1650874786336, 227],
+                [1650874800399, 325],
+                [1650955861209, 184],
+                [1650874814741, 766.55],
+            ],
         },
     ]);
 
@@ -91,7 +100,15 @@ const BrushChart = () => {
 
     const [seriesLine, setSeriesLine] = useState([
         {
-            data: data,
+            data: [
+                [1650874614695, 784.55],
+                [1650874694654, 169],
+                [1650782931595, 210],
+                [1650874587699, 825],
+                [1650955774141, 234.55],
+                [1650874722069, 240],
+                [1650874733485, 989.55],
+            ],
         },
     ]);
 
@@ -108,7 +125,7 @@ const BrushChart = () => {
                 enabled: true,
                 xaxis: {
                     min: new Date('1 May 2022').getTime(),
-                    max: new Date('1 June 2022').getTime(),
+                    max: new Date('7 May 2022').getTime(),
                 },
             },
         },
@@ -136,10 +153,12 @@ const BrushChart = () => {
             <CardBody>
                 <div id="wrapper">
                     <div id="chart-line2">
-                        <ReactApexChart options={options} series={series} type="line" height={230} />
+                        {/* <ReactApexChart options={options} series={series} type="line" height={230} /> */}
+                        <ReactApexChart options={optionsData} series={seriesData} type="line" height={230} />
                     </div>
                     <div id="chart-line">
-                        <ReactApexChart options={optionsLine} series={seriesLine} type="area" height={130} />
+                        {/* <ReactApexChart options={optionsLine} series={seriesLine} type="area" height={130} /> */}
+                        <ReactApexChart options={optionsLineData} series={seriesLineData} type="area" height={130} />
                     </div>
                 </div>
             </CardBody>

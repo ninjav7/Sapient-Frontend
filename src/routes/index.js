@@ -13,8 +13,10 @@ import Equipment from '../pages/settings/Equipment';
 import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
 import EditPanel from '../pages/settings/panels/EditPanel';
-import ActiveDevices from '../pages/settings/ActiveDevices';
-import PassiveDevices from '../pages/settings/PassiveDevices';
+import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
+import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
+import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
 import Gateways from '../pages/settings/Gateways';
 import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
@@ -34,6 +36,7 @@ const ForgetPassword = React.lazy(() => import('../pages/auth/ForgetPassword'));
 const Confirm = React.lazy(() => import('../pages/auth/Confirm'));
 // dashboard
 const Dashboard = React.lazy(() => import('../pages/dashboard'));
+const PageTracker = React.lazy(() => import('../components/PageTracker'));
 // apps
 const CalendarApp = React.lazy(() => import('../pages/apps/Calendar'));
 const EmailInbox = React.lazy(() => import('../pages/apps/Email/Inbox'));
@@ -81,9 +84,9 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 
 // endUses - Sub-pages
-const HVACUsage = React.lazy(() => import('../pages/endUses/UsagePageOne'));
-const LightningUsage = React.lazy(() => import('../pages/endUses/UsagePageTwo'));
-const PlugUsage = React.lazy(() => import('../pages/endUses/UsagePageThree'));
+const HVACUsage = React.lazy(() => import('../pages/endUses/HVAC'));
+const LightingUsage = React.lazy(() => import('../pages/endUses/Lighting'));
+const PlugUsage = React.lazy(() => import('../pages/endUses/Plug'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
@@ -104,6 +107,7 @@ const Explore = React.lazy(() => import('../pages/explore/Explore'));
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
     <Route
+        exact
         {...rest}
         render={(props) => {
             if (!isUserAuthenticated()) {
@@ -128,8 +132,10 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
 const rootRoute = {
     path: '/',
     exact: true,
-    component: () => <Redirect to="/dashboard" />,
+    // component: () => <Redirect to="/dashboard" />,
+    component: () => <Redirect to="/energy/portfolio/overview" />,
     route: PrivateRoute,
+    visibility: true,
 };
 
 // dashboards
@@ -144,6 +150,7 @@ const dashboardRoutes = {
     },
     component: Dashboard,
     roles: ['Admin'],
+    visibility: false,
     route: PrivateRoute,
 };
 
@@ -156,6 +163,7 @@ const calendarAppRoutes = {
     icon: FeatherIcon.Calendar,
     component: CalendarApp,
     route: PrivateRoute,
+    visibility: false,
     roles: ['Admin'],
 };
 
@@ -343,107 +351,91 @@ const chartRoutes = {
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
     route: PrivateRoute,
-};
-
-// builindgs
-const buildingRoutes = {
-    path: '/energy/building/overview/:bldgId',
-    name: 'Building Overview',
-    component: Building,
-    children: [
-        {
-            path: '/energy/building/overview/:bldgId',
-            name: 'Building Overview',
-            component: Building,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/peak-demand/:bldgId',
-            name: 'Peak Demand',
-            component: PeakDemand,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/end-uses/:bldgId',
-            name: 'End Uses',
-            component: EndUses,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/time-of-day/:bldgId',
-            name: 'Time Of Day',
-            component: TimeOfDay,
-            route: PrivateRoute,
-        },
-    ],
-    roles: ['Admin'],
-    route: PrivateRoute,
+    visibility: false,
 };
 
 // portfolio
 const portfolioRoutes = {
-    path: '/energy',
+    path: '/energy/portfolio/overview',
     name: 'Energy',
+    component: Portfolio,
+    visibility: true,
     children: [
         {
             path: '/energy/portfolio/overview',
             name: 'Portfolio Overview',
             component: Portfolio,
             route: PrivateRoute,
-        },
-        {
-            path: '/energy/building/overview/:bldgId',
-            name: 'Building Overview',
-            component: Building,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/peak-demand/:bldgId',
-            name: 'Peak Demand',
-            component: PeakDemand,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/end-uses/:bldgId',
-            name: 'End Uses',
-            component: EndUses,
-            route: PrivateRoute,
-        },
-        {
-            path: '/energy/time-of-day/:bldgId',
-            name: 'Time Of Day',
-            component: TimeOfDay,
-            route: PrivateRoute,
+            visibility: true,
+            parent: 'portfolio',
         },
         {
             path: '/energy/compare-buildings',
             name: 'Compare Buildings',
             component: CompareBuildings,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'portfolio',
         },
         {
-            path: '/energy/hvac',
+            path: '/energy/building/overview/:bldgId',
+            name: 'Building Overview',
+            component: Building,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/peak-demand/:bldgId',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/end-uses/:bldgId',
+            name: 'End Uses',
+            component: EndUses,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/time-of-day/:bldgId',
+            name: 'Time Of Day',
+            component: TimeOfDay,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/hvac/:bldgId',
             name: 'HVAC Usage',
             component: HVACUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
-            path: '/energy/lightning',
-            name: 'Lightning Usage',
-            component: LightningUsage,
+            path: '/energy/lighting/:bldgId',
+            name: 'Lighting Usage',
+            component: LightingUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
-            path: '/energy/plug',
+            path: '/energy/plug/:bldgId',
             name: 'Plug Usage',
             component: PlugUsage,
             route: PrivateRoute,
+            visibility: false,
         },
         {
-            path: '/energy/building-peak-explore',
+            path: '/energy/building-peak-explore/:bldgId',
             name: 'BuildingPeak Explore',
             component: ExploreBuildingPeak,
             route: PrivateRoute,
+            visibility: false,
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -454,102 +446,159 @@ const portfolioRoutes = {
 const settingsRoutes = {
     path: '/settings',
     name: 'Settings',
+    visibility: false,
     children: [
         {
             path: '/settings/general',
             name: 'General',
             component: General,
             route: PrivateRoute,
-        },
-        {
-            path: '/settings/utility-bills',
-            name: 'Utility Bills',
-            component: UtilityBills,
-            route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/layout',
             name: 'Layout',
             component: Layout,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/equipment',
             name: 'Equipment',
             component: Equipment,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/utility-bills',
+            name: 'Utility Bills',
+            component: UtilityBills,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/panels',
             name: 'Panels',
             component: Panels,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/createPanel',
             name: 'Create Panel',
             component: CreatePanel,
             route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
         },
         {
             path: '/settings/editPanel',
             name: 'Edit Panel',
             component: EditPanel,
             route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/active-devices/single/:deviceId',
+            name: 'Single Active Devices',
+            component: IndividualActiveDevice,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
         },
         {
             path: '/settings/active-devices',
             name: 'Active Devices',
             component: ActiveDevices,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/passive-devices/single/:deviceId',
+            name: 'Single Passive Devices',
+            component: IndividualPassiveDevice,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
         },
         {
             path: '/settings/passive-devices',
             name: 'Passive Devices',
             component: PassiveDevices,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/gateways',
             name: 'Gateways',
             component: Gateways,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'building-settings',
         },
         {
             path: '/settings/account',
-            name: 'Account Settings',
+            name: 'General',
             component: AccountSettings,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
         },
         {
             path: '/settings/buildings',
             name: 'Buildings',
             component: Buildings,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
         },
         {
             path: '/settings/users',
             name: 'Users',
             component: Users,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
         },
         {
             path: '/settings/roles',
             name: 'Roles',
             component: Roles,
             route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
         },
         {
             path: '/settings/user-profile',
             name: 'User Profile',
             component: UserProfile,
             route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
         },
         {
             path: '/settings/role-config',
             name: 'Single Role',
             component: SingleRole,
             route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+        {
+            path: '/settings/equipment',
+            name: 'Equipment Type',
+            component: Equipment,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
         },
     ],
     icon: FeatherIcon.PieChart,
@@ -557,46 +606,34 @@ const settingsRoutes = {
 };
 
 const exploreRoutes = {
-    path: '/explore',
     name: 'Explore',
-    children: [
-        {
-            path: '/explore/by-floor',
-            name: 'Explore',
-            component: Explore,
-            route: PrivateRoute,
-        },
-    ],
+    path: '/explore/page',
+    component: Explore,
+    route: PrivateRoute,
+    visibility: true,
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
+    parent: 'explore',
 };
 
 const controlRoutes = {
-    path: '/control',
+    path: '/control/plug-rules',
     name: 'Control',
+    visibility: true,
     children: [
         {
             path: '/control/plug-rules',
             name: 'Plug Rules',
             component: PlugRules,
-            component: PlugRules,
             route: PrivateRoute,
+            parent: 'control',
+            visibility: true,
         },
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],
 };
 
-const endUsesRoutes = {
-    path: '/endUses',
-    name: 'End Uses',
-
-    icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
-    route: PrivateRoute,
-};
-
-// forms
 const formsRoutes = {
     path: '/forms',
     name: 'Forms',
@@ -665,64 +702,66 @@ const tableRoutes = {
 const authRoutes = {
     path: '/account',
     name: 'Auth',
+    visibility: true,
     children: [
         {
             path: '/account/login',
             name: 'Login',
             component: Login,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/logout',
             name: 'Logout',
             component: Logout,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/register',
             name: 'Register',
             component: Register,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/confirm',
             name: 'Confirm',
             component: Confirm,
             route: Route,
+            visibility: true,
         },
         {
             path: '/account/forget-password',
             name: 'Forget Password',
             component: ForgetPassword,
             route: Route,
+            visibility: true,
         },
     ],
 };
 
 // flatten the list of all nested routes
 const flattenRoutes = (routes) => {
-    console.log('routes => ', routes);
     let flatRoutes = [];
-
     routes = routes || [];
     routes.forEach((item) => {
         flatRoutes.push(item);
-
         if (typeof item.children !== 'undefined') {
             flatRoutes = [...flatRoutes, ...flattenRoutes(item.children)];
         }
     });
-    console.log('routes after forEach => ', flatRoutes);
     return flatRoutes;
 };
 
 // All routes
 const allRoutes = [
     rootRoute,
+    authRoutes,
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
-    buildingRoutes,
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
@@ -731,7 +770,6 @@ const allRoutes = [
     // componentsRoutes,
     // formsRoutes,
     // tableRoutes,
-    authRoutes,
 ];
 
 const authProtectedRoutes = [

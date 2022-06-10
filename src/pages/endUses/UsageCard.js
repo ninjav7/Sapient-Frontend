@@ -4,6 +4,7 @@ import { Link, BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './style.css';
 
 const UsageCard = ({
+    bldgId,
     usage,
     button,
     lastPeriodPerTotalHrs,
@@ -25,7 +26,10 @@ const UsageCard = ({
                 {button === 'View' && (
                     <div className="float-right ml-2">
                         {usage.device === 'HVAC' && (
-                            <Link to="/energy/hvac" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/hvac/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">
@@ -34,7 +38,10 @@ const UsageCard = ({
                             </Link>
                         )}
                         {usage.device === 'Lighting' && (
-                            <Link to="/energy/lightning" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/lighting/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">
@@ -43,7 +50,10 @@ const UsageCard = ({
                             </Link>
                         )}
                         {usage.device === 'Plug' && (
-                            <Link to="/energy/plug" className="list-group-item border-0">
+                            <Link
+                                to={{
+                                    pathname: `/energy/plug/${bldgId}`,
+                                }}>
                                 <Button
                                     color="light"
                                     className="btn btn-sm btn-outline-dark font-weight-bold button-style">
@@ -56,7 +66,7 @@ const UsageCard = ({
 
                 {button === 'Explore' && (
                     <div className="float-right ml-2">
-                        <Link to="/explore/by-floor">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -69,7 +79,7 @@ const UsageCard = ({
                         Total Consumption
                     </p>
                     <p className="card-text usage-card-content-style">
-                        {usage.energy_consumption.now.toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
+                        {(usage.energy_consumption.now / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
                         <span className="card-unit-style">&nbsp;kWh</span>
                     </p>
                     {lastPeriodPerTotalHrsNormal && (
@@ -133,7 +143,7 @@ const UsageCard = ({
                         After-Hours Consumption
                     </p>
                     <p className="card-text usage-card-content-style">
-                        {usage.after_hours_energy_consumption.now.toLocaleString(undefined, {
+                        {(usage.after_hours_energy_consumption.now / 1000).toLocaleString(undefined, {
                             maximumFractionDigits: 2,
                         })}{' '}
                         <span className="card-unit-style">&nbsp;kWh</span>

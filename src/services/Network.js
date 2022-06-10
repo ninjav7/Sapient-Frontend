@@ -1,5 +1,5 @@
-// export const BaseUrl = 'https://sapient-ele.herokuapp.com';
-export const BaseUrl = 'http://127.0.0.1:8000';
+// export const BaseUrl = 'https://eneryg-service.ukwest.cloudapp.azure.com';
+export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -9,6 +9,7 @@ export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
 export const builidingHourly = '/api/energy/building/hourly';
+// export const builidingHourly = '/api/energy/chart';
 export const builidingEquipments = '/api/energy/building/equipment';
 
 // utility bills
@@ -22,24 +23,34 @@ export const generalOperatingHours = '/api/config/general/operating_hours';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
+export const endUsesChart = '/api/energy/chart/end-uses';
+export const hvacUsageChart = '/api/energy/chart/hvac';
+export const endUsesFloorChart = '/api/energy/chart/byfloor';
+export const endUsesUsageChart = '/api/energy/chart/usage';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details';
+export const equipmentType = '/api/config/get_equipment_type';
+export const createEquipment = '/api/config/equipments_details/create_equipment';
 // export const generalEquipments = '/api/config/equipments/equipments_details';  --- Old API
 
 // active
 // export const generalActiveDevices = '/api/config/active/equipments_details';
 export const generalActiveDevices = '/api/config/devices/active';
 
+
 // passive
 // export const generalPassiveDevices = '/api/config/passive/equipments_details';
 export const generalPassiveDevices = '/api/config/devices/passive';
+export const sensorGraphData = '/api/config/sensor/graph';
 
 //gateway
-export const generalGateway = '/api/config/gateway/equipments_details';
+// export const generalGateway = '/api/config/gateway/equipments_details';
+export const generalGateway = '/api/config/gateway';
 
 // panel
 export const generalPanels = '/api/config/panels';
+export const createPanel = '/api/config/panels/create_panel';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
@@ -49,6 +60,8 @@ export const compareBuildings = '/api/energy/energy/compare_building';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
+export const createBuilding = '/api/config/create_building';
+export const createDevice = '/api/config/devices/create_device';
 
 // general settings
 export const deleteBuilding = '/api/config/general/delete_building';
@@ -59,5 +72,17 @@ export const getLayouts = '/api/config/get_layout';
 // getLocation
 export const getLocation = '/api/config/get_location';
 
+
 // charts
 export const getEnergyConsumption = '/api/energy/chart';
+
+// explore
+export const getExplore = '/api/energy/explorer/chart';
+
+// peakDemand Chart
+export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
+export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
+
+export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
+
+export const listSensor = '/api/config/sensor/list_sensor';

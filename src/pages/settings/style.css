@@ -293,8 +293,8 @@
     background: #98a2b3;
     border-radius: 5px;
     height: 23px;
-    width: 23px;
-    padding: 3px;
+    width: 23px !important;
+    padding: 3px !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -393,6 +393,15 @@
     padding: 3px 8px 4px;
     background: #f2f4f7;
     border-radius: 4px;
+}
+
+.heading-style {
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 125%;
+    color: #1d2939;
+    font-family: 'SpaceGrotesk' !important;
 }
 
 .real-power-style {

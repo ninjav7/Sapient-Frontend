@@ -19,6 +19,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import './style.css';
 
 const RuleTable = ({ ruleData }) => {
@@ -101,6 +102,22 @@ const PlugRules = () => {
         },
     ]);
 
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Plug Rules',
+                        path: '/control/plug-rules',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -109,8 +126,8 @@ const PlugRules = () => {
                         Plug Rules
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"

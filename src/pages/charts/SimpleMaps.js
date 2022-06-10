@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { ComposableMap, Geographies, Graticule, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 
-const SimpleMaps = () => {
+const SimpleMaps = ({ markers }) => {
     const geoUrl =
         'https://raw.githubusercontent.com/zcreativelabs/react-simple-maps/master/topojson-maps/world-110m.json';
-    const markers = [
-        { markerOffset: -15, name: 'La Paz', coordinates: [-68.1193, -16.4897] },
-        { markerOffset: 25, name: 'Bogota', coordinates: [-74.0721, 4.711] },
-        { markerOffset: 25, name: 'Quito', coordinates: [-78.4678, -0.1807] },
-        { markerOffset: -15, name: 'Georgetown', coordinates: [-58.1551, 6.8013] },
-        { markerOffset: 25, name: 'Paramaribo', coordinates: [-55.2038, 5.852] },
-        { markerOffset: -15, name: 'Caracas', coordinates: [-66.9036, 10.4806] },
-        { markerOffset: -15, name: 'Lima', coordinates: [-77.0428, -12.0464] },
-    ];
+
+    // const markers = [
+    //     { markerOffset: -15, name: 'La Paz', coordinates: [-68.1193, -16.4897] },
+    //     { markerOffset: 25, name: 'Bogota', coordinates: [-74.0721, 4.711] },
+    //     { markerOffset: 25, name: 'Quito', coordinates: [-78.4678, -0.1807] },
+    //     { markerOffset: -15, name: 'Georgetown', coordinates: [-58.1551, 6.8013] },
+    //     { markerOffset: 25, name: 'Paramaribo', coordinates: [-55.2038, 5.852] },
+    //     { markerOffset: -15, name: 'Caracas', coordinates: [-66.9036, 10.4806] },
+    //     { markerOffset: -15, name: 'Lima', coordinates: [-77.0428, -12.0464] },
+    // ];
 
     const [position, setPosition] = useState({ coordinates: [0, 0], zoom: 1 });
 

@@ -18,7 +18,8 @@ import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings } from '../../services/Network';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
 
@@ -73,6 +74,19 @@ const BuildingTable = ({ buildingsData }) => {
         },
     ];
 
+    const [topEnergyDensity, setTopEnergyDensity] = useState(1);
+    const [topHVACConsumption, setTopHVACConsumption] = useState(1);
+
+    useEffect(() => {
+        if (!buildingsData.length > 0) {
+            return;
+        }
+        let topVal = buildingsData[0].energy_density;
+        setTopEnergyDensity(topVal);
+        let hvacVal = buildingsData[0].hvac_consumption.now;
+        setTopHVACConsumption(hvacVal);
+    }, [buildingsData]);
+
     return (
         <Card>
             <CardBody>
@@ -87,6 +101,7 @@ const BuildingTable = ({ buildingsData }) => {
                             <th className="table-heading-style">Total Consumption</th>
                             <th className="table-heading-style">% Change</th>
                             <th className="table-heading-style">Sq. Ft.</th>
+                            <th className="table-heading-style">Monitored Load</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,89 +109,94 @@ const BuildingTable = ({ buildingsData }) => {
                             return (
                                 <tr key={record.building_id}>
                                     <th scope="row">
-                                        <Link to="/energy/building/overview">
+                                        <Link
+                                            to={{
+                                                pathname: `/energy/building/overview/${record.building_id}`,
+                                            }}>
                                             <a className="building-name">{record.building_name}</a>
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {record.energy_density.toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
-                                            <Line
-                                                percent="100"
-                                                strokeWidth="7"
-                                                trailWidth="7"
-                                                strokeColor="#F0F2F5"
-                                                // strokeColor="#00FF00"
-                                                strokeLinecap="round"
-                                            />
+                                        <div style={{ width: '100%', display: 'inline-block' }}>
+                                            {index === 0 && record.energy_density === 0 && (
+                                                <Line
+                                                    percent={0}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#D14065`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 0 && record.energy_density > 0 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#D14065`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 1 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#DF5775`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 2 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#EB6E87`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 3 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#EB6E87`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 4 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#FC9EAC`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 5 && (
+                                                <Line
+                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                        2
+                                                    )}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#FFCFD6`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
                                         </div>
-                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
-                                            {record.consumtnPer >= 90 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#D23C35"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer < 90 && record.consumtnPer > 75 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#C64245"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 75 && record.consumtnPer > 50 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#B04D66"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 50 && record.consumtnPer > 40 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#9B5985"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 40 && record.consumtnPer > 30 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#935C91"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 30 && record.consumtnPer > 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#8763BF"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#766CCE"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                        </div> */}
                                     </td>
                                     <td>
                                         {record.energy_consumption.now >= record.energy_consumption.old ? (
@@ -210,83 +230,101 @@ const BuildingTable = ({ buildingsData }) => {
                                         )}
                                     </td>
                                     <td className="table-content-style">
-                                        {record.hvac_consumption.now.toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(record.hvac_consumption.now / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
-                                        <div style={{ width: '50%', display: 'inline-block' }}>
-                                            <Line
-                                                percent="100"
-                                                strokeWidth="7"
-                                                trailWidth="7"
-                                                strokeColor="#F0F2F5"
-                                                // strokeColor="#00FF00"
+                                        <div style={{ width: '100%', display: 'inline-block' }}>
+                                            {/* <Line
+                                                percent={percentageHandler(
+                                                    record.hvac_consumption.now,
+                                                    record.hvac_consumption.old
+                                                )}
+                                                strokeWidth="4"
+                                                trailWidth="4"
+                                                strokeColor="#C64245"
                                                 strokeLinecap="round"
-                                            />
+                                            /> */}
+                                            {index === 0 && record.hvac_consumption.now === 0 && (
+                                                <Line
+                                                    percent={0}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#D14065`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 0 && record.hvac_consumption.now > 0 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#D14065`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 1 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#DF5775`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 2 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#EB6E87`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 3 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#EB6E87`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 4 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#FC9EAC`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
+                                            {index === 5 && (
+                                                <Line
+                                                    percent={(
+                                                        (record.hvac_consumption.now / topHVACConsumption) *
+                                                        100
+                                                    ).toFixed(2)}
+                                                    strokeWidth="3"
+                                                    trailWidth="3"
+                                                    strokeColor={`#FFCFD6`}
+                                                    strokeLinecap="round"
+                                                />
+                                            )}
                                         </div>
-                                        {/* <div style={{ width: '50%', display: 'inline-block' }}>
-                                            {record.consumtnPer >= 90 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#D23C35"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer < 90 && record.consumtnPer > 75 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#C64245"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 75 && record.consumtnPer > 50 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#B04D66"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 50 && record.consumtnPer > 40 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#9B5985"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 40 && record.consumtnPer > 30 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#935C91"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 30 && record.consumtnPer > 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#8763BF"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                            {record.consumtnPer <= 20 && (
-                                                <Line
-                                                    percent={record.consumtnPer}
-                                                    strokeWidth="7"
-                                                    trailWidth="7"
-                                                    strokeColor="#766CCE"
-                                                    strokeLinecap="square"
-                                                />
-                                            )}
-                                        </div> */}
                                     </td>
                                     <td>
                                         {record.hvac_consumption.now >= record.hvac_consumption.old ? (
@@ -320,7 +358,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         )}
                                     </td>
                                     <td className="value-style">
-                                        {record.total_consumption.toLocaleString(undefined, {
+                                        {(record.total_consumption / 1000).toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                         kWh
@@ -371,6 +409,7 @@ const BuildingTable = ({ buildingsData }) => {
 
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
+    const daysCount = DateRangeStore.useState((s) => s.dateFilter);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -394,11 +433,16 @@ const CompareBuildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?days=30`;
-                await axios.post(`${BaseUrl}${compareBuildings}${params}`, { headers }).then((res) => {
-                    setBuildingsData(res.data);
-                    console.log('setBuildingsData => ', res.data);
+
+                let count = parseInt(localStorage.getItem('dateFilter'));
+                let params = `?days=${count}`;
+                await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
+                    let response = res.data;
+                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                    setBuildingsData(response);
+                    // console.log('setBuildingsData => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -406,7 +450,7 @@ const CompareBuildings = () => {
             }
         };
         compareBuildingsData();
-    }, []);
+    }, [daysCount]);
 
     return (
         <React.Fragment>

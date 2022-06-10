@@ -3,13 +3,14 @@ import { UncontrolledTooltip } from 'reactstrap';
 
 const DetailedButton = (props) => {
     return (
-        <>
+        <div>
             <h5 className="card-title subtitle-style">
                 {props.title}&nbsp;&nbsp;
                 <div>
-                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
-                    <UncontrolledTooltip placement="bottom" target="#title">
-                        Information ToolTips
+                    <i className="uil uil-info-circle avatar-xs rounded-circle" id={'tooltip-' + props.infoType} />
+
+                    <UncontrolledTooltip placement="bottom" target={'tooltip-' + props.infoType}>
+                        {props.infoText}
                     </UncontrolledTooltip>
                 </div>
             </h5>
@@ -33,7 +34,7 @@ const DetailedButton = (props) => {
                     )}
                 </span>
             </p>
-        </>
+        </div>
     );
 };
 

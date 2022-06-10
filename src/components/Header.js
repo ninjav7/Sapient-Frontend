@@ -2,18 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { DateRangeStore } from './DateRangeStore';
+import { DateRangeStore } from '../store/DateRangeStore';
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
-    const TABS = {
-        Tab1: '24 Hours',
-        Tab2: '7 Days',
-        Tab3: '30 Days',
-        Tab4: 'Custom',
-    };
-    const [activeTab, setActiveTab] = useState(TABS.Tab3);
-
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
@@ -22,24 +17,24 @@ const Header = (props) => {
 
     const customDaySelect = [
         {
-            label: 'Last 30 Days',
-            value: 30,
+            label: 'Today',
+            value: 0,
         },
         {
             label: 'Last 7 Days',
-            value: 7,
+            value: 6,
         },
         {
-            label: 'Last 5 Days',
-            value: 5,
+            label: 'Last 4 Weeks',
+            value: 27,
         },
         {
-            label: 'Last 3 Days',
-            value: 3,
+            label: 'Last 3 Months',
+            value: 89,
         },
         {
-            label: 'Last 1 Day',
-            value: 1,
+            label: 'Last 12 Months',
+            value: 364,
         },
     ];
 
@@ -47,8 +42,11 @@ const Header = (props) => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
+            localStorage.setItem('dateFilter', date);
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
+            // localStorage.setItem('startDate', startCustomDate);
+            // localStorage.setItem('endDate', endCustomDate);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
                 s.startDate = startCustomDate;
@@ -58,6 +56,18 @@ const Header = (props) => {
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
+    useEffect(() => {
+        const setCustomDate = (date) => {
+            let startCustomDate = date[0];
+            let endCustomDate = date[1];
+            DateRangeStore.update((s) => {
+                s.startDate = startCustomDate;
+                s.endDate = endCustomDate;
+            });
+        };
+        setCustomDate(dateRange);
+    }, [dateRange]);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -66,27 +76,6 @@ const Header = (props) => {
                         {props.title}
                     </span>
 
-                    {/* {props.title === 'Compare Buildings' && (
-                        <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                            <div>
-                                {Object.keys(TABS).map((key) => (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        className={
-                                            activeTab === TABS[key]
-                                                ? 'btn btn-sm btn-dark font-weight-bold custom-buttons active'
-                                                : 'btn btn-sm btn-light font-weight-bold custom-buttons'
-                                        }
-                                        onClick={() => setActiveTab(TABS[key])}>
-                                        {TABS[key]}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {props.title !== 'Compare Buildings' && ( */}
                     <div
                         className="btn-group custom-button-group header-widget-styling"
                         role="group"
@@ -97,7 +86,7 @@ const Header = (props) => {
                                 name="select"
                                 id="exampleSelect"
                                 style={{ color: 'black', fontWeight: 'bold' }}
-                                className="select-button form-control form-control-md"
+                                className="select-button form-control form-control-md custom-day-selection"
                                 onChange={(e) => {
                                     setDateFilter(e.target.value);
                                 }}
@@ -107,7 +96,9 @@ const Header = (props) => {
                                 })}
                             </Input>
                         </div>
-                        <div>
+
+                        <div className="select-button form-control form-control-md font-weight-bold custom-date-picker-block">
+                            <FontAwesomeIcon icon={faCalendar} style={{ fontSize: '1.3em' }} />
                             <DatePicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -115,26 +106,24 @@ const Header = (props) => {
                                 onChange={(update) => {
                                     setDateRange(update);
                                 }}
+                                maxDate={new Date()}
                                 dateFormat="MMMM d"
-                                className="select-button form-control form-control-md font-weight-bold"
+                                className="custom-date-picker-props ml-2"
                                 placeholderText="Select Date Range"
+                                // monthsShown={2}
                             />
                         </div>
-                        {/* <div>
-                                <Input
-                                    type="week"
-                                    name="week"
-                                    id="exampleWeek"
-                                    placeholder="date week"
-                                    style={{ color: 'black', fontWeight: 'bold' }}
-                                    className="select-button form-control form-control-md"
-                                />
-                            </div> */}
-                        {props.title !== 'Portfolio Overview' && (
+
+                        {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
                             <div className="float-right ml-2">
-                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                    <i className="uil uil-pen mr-1"></i>Explore
-                                </button>
+                                <Link
+                                    to={{
+                                        pathname: `/energy/building-peak-explore/${localStorage.getItem('buildingId')}`,
+                                    }}>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold">
+                                        <i className="uil uil-pen mr-1"></i>Explore
+                                    </button>
+                                </Link>
                             </div>
                         )}
                     </div>

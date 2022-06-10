@@ -18,6 +18,8 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { Search } from 'react-feather';
 import { allRoutes } from '../routes/index';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBellOn } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const SearchModal = () => {
@@ -50,13 +52,15 @@ const SearchModal = () => {
         }
     }
 
-    console.log('pageList => ', pageList);
+    // console.log('pageList => ', pageList);
 
     return (
         <>
-            <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
-                <Search className="icon-sm" onClick={() => searchModalOpen()} />
-            </button>
+            <div className="navbar-icon-container float-right">
+                <button className="btn btn-sm float-right other-font-icon-style">
+                    <FontAwesomeIcon icon={faBellOn} size="lg" onClick={() => searchModalOpen()} />
+                </button>
+            </div>
 
             {/* Search Modal  */}
             <Modal show={searchModalShow} onHide={searchModalClose} size={'lg'} className="modal-custom-container">

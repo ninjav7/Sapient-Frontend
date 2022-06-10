@@ -14,8 +14,8 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
-import { BuildingStore } from '../../../components/BuildingStore';
-import { BreadcrumbStore } from '../../../components/BreadcrumbStore';
+import { BuildingStore } from '../../../store/BuildingStore';
+import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {
@@ -91,6 +91,7 @@ const Panels = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
@@ -128,8 +129,8 @@ const Panels = () => {
                         Panels
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <Link to="/settings/createPanel">
                                 <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                     <i className="uil uil-plus mr-1"></i>Add Panel

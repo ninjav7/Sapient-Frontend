@@ -19,7 +19,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import './style.css';
 
 const RoleTable = ({ roleData }) => {
@@ -104,8 +104,8 @@ const Roles = () => {
                         Roles
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"

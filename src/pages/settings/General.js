@@ -18,12 +18,58 @@ import {
 import axios from 'axios';
 // import { useSelector } from 'react-redux';
 import moment from 'moment';
-import { BuildingStore } from '../../components/BuildingStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const General = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [buildingData, setBuildingData] = useState({});
+    const [buildingData, setBuildingData] = useState({
+        building_id: '628dd795f28141b8a69f38bf',
+        active: true,
+        building_name: 'NYPL Building',
+        building_type: 'Residential Building',
+        building_size: 2000,
+        street_address: 'test',
+        address_2: 'test',
+        city: 'toranto',
+        state: 'Washington',
+        zip_code: 66777,
+        timezone: 'PDT (UTC-7)',
+        time_format: false,
+        operating_hours: {
+            mon: {
+                stat: true,
+                time_range: {
+                    frm: '00:00',
+                    to: '00:00',
+                },
+            },
+            tue: {
+                stat: false,
+                time_range: '',
+            },
+            wed: {
+                stat: false,
+                time_range: '',
+            },
+            thu: {
+                stat: false,
+                time_range: '',
+            },
+            fri: {
+                stat: false,
+                time_range: '',
+            },
+            sat: {
+                stat: false,
+                time_range: '',
+            },
+            sun: {
+                stat: false,
+                time_range: '',
+            },
+        },
+    });
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
@@ -56,13 +102,19 @@ const General = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
             };
             await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                console.log(res.data);
+                let response = res.data;
+                console.log('Response => ', response);
                 let data = {};
+                console.log('BldgId => ', bldgId);
                 if (bldgId) {
-                    data = res.data.find((el) => el.building_id === bldgId);
-                    console.log(data);
+                    data = response.find((el) => el.building_id === bldgId);
+                    console.log('Data => ', data);
+                    if (data === undefined) {
+                        return;
+                    }
                     setInputField({
                         ...inputField,
                         active: data.active,
@@ -78,7 +130,7 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-                    console.log(typeof bldgId, bldgId);
+                    // console.log(typeof bldgId, bldgId);
                     setactiveToggle(data.active);
                     setTimeToggle(data.time_format);
                     // setOperatingHours(data.operating_hours)
@@ -227,20 +279,22 @@ const General = () => {
         },
     };
 
-    useEffect(() => {
-        console.log('startDate', startDate);
-    });
+    // useEffect(() => {
+    //     console.log('startDate', startDate);
+    // });
     // update section start
     const inputsBuildingHandler = (e) => {
         console.log(e.target.name);
         setInputField({ [e.target.name]: e.target.value });
     };
+
     const EditBuildingHandler = (e) => {
         console.log('helloo');
         e.preventDefault();
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -248,15 +302,18 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const inputsAddressHandler = (e) => {
         setInputField({ [e.target.name]: e.target.value });
     };
+
     const EditAddressHandler = (e) => {
         console.log('helloo');
         e.preventDefault();
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingAddress}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -293,6 +350,7 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -301,12 +359,14 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const inputsDateHandler = (e) => {
         setTimeToggle(!timeToggle);
         console.log('helloo');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalDateTime}/${bldgId}`, { time_format: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -315,6 +375,7 @@ const General = () => {
             setRender(!render);
         });
     };
+
     const deleteBuildingHandler = () => {
         var answer = window.confirm("'Are you sure wants o delete!!!'");
         if (answer) {
@@ -324,6 +385,7 @@ const General = () => {
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
             };
             axios.delete(`${BaseUrl}${deleteBuilding}/${bldgId}`, { headers }).then((res) => {
                 console.log(res.data);
@@ -331,6 +393,7 @@ const General = () => {
             });
         }
     };
+
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
         // const currentDtae = dateHandler(inputField.operating_hours, day);
         // const time2 = moment(currentDtae[type2]).format('HH:MM');
@@ -345,6 +408,7 @@ const General = () => {
         };
         dateChangeHandler({ operating_hours: data });
     };
+
     const checkDateTimeHandler = (day, value) => {
         setWeekToggle({
             ...weekToggle,
@@ -357,16 +421,19 @@ const General = () => {
         };
         dateChangeHandler({ operating_hours: data });
     };
+
     const dateChangeHandler = (value) => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
             console.log(res.data);
             setRender(!render);
         });
     };
+
     // update section end
     return (
         <React.Fragment>
@@ -455,24 +522,6 @@ const General = () => {
                                                 <option>Office Building</option>
                                                 <option>Residential Building</option>
                                             </Input>
-                                            {/* <Input
-                                                type="select"
-                                                name="buildingType"
-                                                id="buildingType"
-                                                className="font-weight-bold"
-                                                placeholder="Please select building type"
-                                                defaultValue={buildingData.building_type}
-                                                onChange={(e) => {
-                                                    handleChange('building_type', e.target.value);
-                                                }}>
-                                                {buildingType.map((building, index) => {
-                                                    return (
-                                                        <option value={building._id} key={building._id}>
-                                                            {building.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input> */}
                                         </div>
                                     </FormGroup>
 

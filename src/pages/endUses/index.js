@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
-import { BaseUrl, endUses } from '../../services/Network';
+import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EnergyUsageCard from './UsageCard';
 import axios from 'axios';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import useSortableData from '../../helpers/useSortableData';
 import './style.css';
 
 const EndUses = () => {
@@ -50,13 +51,13 @@ const EndUses = () => {
             type: 'bar',
             stacked: true,
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         plotOptions: {
             bar: {
                 horizontal: false,
-                columnWidth: '40%',
+                columnWidth: '20%',
             },
         },
         dataLabels: {
@@ -66,25 +67,14 @@ const EndUses = () => {
             show: false,
         },
         xaxis: {
-            categories: [
-                'Week 1',
-                'Week 2',
-                'Week 3',
-                'Week 4',
-                'Week 5',
-                'Week 6',
-                'Week 7',
-                'Week 8',
-                'Week 9',
-                'Week 10',
-            ],
+            categories: [],
         },
         yaxis: {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
                     if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
+                        val = (val / 1000).toFixed(0) + ' kWh';
                     }
                     return val;
                 },
@@ -94,7 +84,7 @@ const EndUses = () => {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + 'K';
+                    return val + 'kWh';
                 },
             },
             theme: 'dark',
@@ -113,39 +103,41 @@ const EndUses = () => {
             position: 'top',
             horizontalAlign: 'center',
         },
-
         grid: {
             borderColor: '#f1f3fa',
         },
     });
 
-    const [barChartData, setBarChartData] = useState([
-        {
-            name: 'HVAC',
-            data: [15000, 14000, 12000, 11000, 12000, 14000, 12000, 11000, 12000, 10000],
-        },
-        {
-            name: 'Lighting',
-            data: [8000, 7000, 8000, 4000, 5000, 6000, 5000, 7000, 9000, 6000],
-        },
-        {
-            name: 'Plug',
-            data: [12000, 14000, 16000, 18000, 20000, 16000, 16000, 14000, 12000, 18000],
-        },
-        {
-            name: 'Other',
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-    ]);
+    const [barChartData, setBarChartData] = useState([]);
 
     const [endUsesData, setEndUsesData] = useState([]);
 
+    const sortArrayOfObj = (arr) => {
+        let newArr = arr.sort((a, b) => a._id - b._id);
+        return newArr;
+    };
+
+    const formatData = (arr) => {
+        let newData = [];
+        sortArrayOfObj(arr).forEach((item) => {
+            newData.push(item.energy_consumption);
+        });
+        return newData;
+    };
+
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const endUsesDataFetch = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -159,7 +151,49 @@ const EndUses = () => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch EndUses Data');
+            }
+        };
+        const endUsesChartDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${endUsesChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        // console.log('EndUses Response Data => ', responseData);
+                        let newArray = [];
+                        responseData.map((element) => {
+                            let newObj = {
+                                name: element.name,
+                                data: formatData(element.data),
+                            };
+                            newArray.push(newObj);
+                        });
+                        setBarChartData(newArray);
+                        let newXaxis = {
+                            categories: [],
+                        };
+                        responseData[0].data.map((element) => {
+                            return newXaxis.categories.push(`Week ${element._id}`);
+                        });
+                        setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
                     });
             } catch (error) {
                 console.log(error);
@@ -167,7 +201,8 @@ const EndUses = () => {
             }
         };
         endUsesDataFetch();
-    }, [startDate, endDate]);
+        endUsesChartDataFetch();
+    }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -189,34 +224,34 @@ const EndUses = () => {
         <React.Fragment>
             <Header title="End Uses" />
             <Row>
-                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    {endUsesData.map((record) => {
+                <div className="card-group button-style mt-1 mb-0" style={{ marginLeft: '29px' }}>
+                    {endUsesData.map((record, index) => {
                         return (
                             <div className="card usage-card-box-style button-style">
                                 <div className="card-body">
                                     <div>
-                                        {record.device === 'HVAC' && (
+                                        {index === 0 && (
                                             <p className="dot" style={{ backgroundColor: '#3094B9' }}>
                                                 <span className="card-title card-title-style">
                                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
                                                 </span>
                                             </p>
                                         )}
-                                        {record.device === 'Lighting' && (
+                                        {index === 1 && (
                                             <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
                                                 <span className="card-title card-title-style">
                                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
                                                 </span>
                                             </p>
                                         )}
-                                        {record.device === 'Plug' && (
+                                        {index === 2 && (
                                             <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
                                                 <span className="card-title card-title-style">
                                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
                                                 </span>
                                             </p>
                                         )}
-                                        {record.device === 'Process' && (
+                                        {index === 3 && (
                                             <p className="dot" style={{ backgroundColor: '#847CB5' }}>
                                                 <span className="card-title card-title-style">
                                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
@@ -234,57 +269,11 @@ const EndUses = () => {
                             </div>
                         );
                     })}
-
-                    {/* <div className="card usage-card-box-style button-style">
-                        <div className="card-body">
-                            <div>
-                                <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
-                                    <span className="card-title card-title-style">
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lightning
-                                    </span>
-                                </p>
-                            </div>
-                            <p className="card-text card-content-style">
-                                {(7246).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div className="card usage-card-box-style button-style">
-                        <div className="card-body">
-                            <div>
-                                <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
-                                    <span className="card-title card-title-style">
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plug
-                                    </span>
-                                </p>
-                            </div>
-                            <p className="card-text card-content-style">
-                                {(3356).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div className="card usage-card-box-style button-style">
-                        <div className="card-body">
-                            <div>
-                                <p className="dot" style={{ backgroundColor: '#847CB5' }}>
-                                    <span className="card-title card-title-style">
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Other
-                                    </span>
-                                </p>
-                            </div>
-                            <p className="card-text card-content-style">
-                                {(0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                            </p>
-                        </div>
-                    </div> */}
                 </div>
             </Row>
             <Row>
                 <Col xl={12}>
-                    <StackedBarChart options={barChartOptions} series={barChartData} height={440} />
+                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
                 </Col>
             </Row>
 
@@ -302,6 +291,7 @@ const EndUses = () => {
                             return (
                                 <div className="usage-card">
                                     <EnergyUsageCard
+                                        bldgId={bldgId}
                                         usage={usage}
                                         button="View"
                                         lastPeriodPerTotalHrs={percentageHandler(

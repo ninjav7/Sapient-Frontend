@@ -3,13 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
 import { Link, useParams } from 'react-router-dom';
-import { BaseUrl, builidingPeak } from '../../services/Network';
+import { BaseUrl, builidingPeak, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {
 //     return (
@@ -47,7 +48,9 @@ const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
     return (
         <>
             {/* <h5 className="card-title card-title-style">{`March 3rd @ 3:20 PM`}&nbsp;&nbsp;</h5> */}
-            <h5 className="card-title card-title-style">{`${recordDate} @ ${recordTime}`}&nbsp;&nbsp;</h5>
+            <h5 className="card-title card-title-style">
+                {`${moment(recordDate).format('MMMM Do')} @ ${recordTime}`}&nbsp;&nbsp;
+            </h5>
             <p className="card-text card-content-style">
                 {buildingPeakData.overall_energy_consumption.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
@@ -240,6 +243,115 @@ const PeakDemand = () => {
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
 
+    const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
+        tooltip: {
+            theme: 'dark',
+            x: { show: false },
+        },
+        annotations: {
+            yaxis: [
+                {
+                    y: 8200,
+                    borderColor: '#0acf97',
+                    label: {
+                        borderColor: '#0acf97',
+                        style: {
+                            color: '#fff',
+                            background: '#0acf97',
+                        },
+                    },
+                },
+            ],
+            xaxis: [
+                {
+                    x: new Date('23 Nov 2017').getTime(),
+                    borderColor: '#775DD0',
+                    label: {
+                        borderColor: '#775DD0',
+                        style: {
+                            color: '#fff',
+                            background: '#775DD0',
+                        },
+                    },
+                },
+                {
+                    x: new Date('03 Dec 2017').getTime(),
+                    borderColor: '#ffbc00',
+                    label: {
+                        borderColor: '#ffbc00',
+                        style: {
+                            color: '#fff',
+                            background: '#ffbc00',
+                        },
+                        orientation: 'horizontal',
+                    },
+                },
+            ],
+        },
+        chart: {
+            type: 'line',
+            toolbar: {
+                show: true,
+            },
+        },
+        labels: [],
+        colors: ['#39afd1'],
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: [3, 3],
+            curve: 'smooth',
+        },
+        xaxis: {
+            // type: 'datetime',
+            labels: {
+                labels: {
+                    format: 'ddd',
+                },
+            },
+            // categories: ['Week 1', 'Week 3', 'Week 5'],
+        },
+        yaxis: {
+            labels: {
+                formatter: function (val) {
+                    return val + 'K';
+                },
+            },
+        },
+        grid: {
+            row: {
+                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
+                opacity: 0.2,
+            },
+            borderColor: '#e9ecef',
+        },
+        responsive: [
+            {
+                breakpoint: 600,
+                options: {
+                    chart: {
+                        toolbar: {
+                            show: false,
+                        },
+                    },
+                    legend: {
+                        show: false,
+                    },
+                },
+            },
+        ],
+    });
+
+    const [peakDemandTrendData, setPeakDemandTrendData] = useState([
+        {
+            name: 'Peak for Time Period',
+            data: [],
+        },
+    ]);
+
+    const [yearlyPeakData, setYearlyPeakData] = useState(null);
+
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([
         {
             equipment: 'AHU 1',
@@ -340,11 +452,19 @@ const PeakDemand = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+
         const buildingPeaksData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -357,21 +477,100 @@ const PeakDemand = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setTopBuildingPeaks(res.data);
-                        setSingleEquipPeakOne(res.data[0].top_contributors);
-                        setSingleEquipPeakTwo(res.data[1].top_contributors);
-                        setSingleEquipPeakThree(res.data[2].top_contributors);
-                        setEquipTypePeakOne(res.data[0].top_eq_type_contributors);
-                        setEquipTypePeakTwo(res.data[1].top_eq_type_contributors);
-                        setEquipTypePeakThree(res.data[2].top_eq_type_contributors);
+                        setTopBuildingPeaks([]);
+                        setSingleEquipPeakOne([]);
+                        setSingleEquipPeakTwo([]);
+                        setSingleEquipPeakThree([]);
+                        setEquipTypePeakOne([]);
+                        setEquipTypePeakTwo([]);
+                        setEquipTypePeakThree([]);
+                        let responseData = res.data;
+                        setTopBuildingPeaks(responseData);
+                        setSingleEquipPeakOne(responseData[0].top_contributors);
+                        setSingleEquipPeakTwo(responseData[1].top_contributors);
+                        setSingleEquipPeakThree(responseData[2].top_contributors);
+                        setEquipTypePeakOne(responseData[0].top_eq_type_contributors);
+                        setEquipTypePeakTwo(responseData[1].top_eq_type_contributors);
+                        setEquipTypePeakThree(responseData[2].top_eq_type_contributors);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Peak Data');
             }
         };
+
+        const peakDemandTrendFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${peakDemandTrendChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        let newPeakData = [
+                            {
+                                name: 'Peak for Time Period',
+                                data: [],
+                            },
+                        ];
+                        let newData = [];
+                        let newDateLabels = [];
+                        responseData.map((record) => {
+                            newData.push(record.energy_consumption);
+                            newDateLabels.push(moment(record.date).format('LL'));
+                        });
+                        newPeakData[0].data = newData;
+                        setPeakDemandTrendData(newPeakData);
+                        setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Peak-Demand Trend Data');
+            }
+        };
+
+        const peakDemandYearlyData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${peakDemandYearlyPeak}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        setYearlyPeakData(responseData);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Peak-Demand Yearly Peak Data');
+            }
+        };
+
         buildingPeaksData();
-    }, [startDate, endDate]);
+        peakDemandTrendFetch();
+        peakDemandYearlyData();
+    }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -396,29 +595,62 @@ const PeakDemand = () => {
             <Row>
                 <div className="card-group button-style" style={{ marginLeft: '29px' }}>
                     <div className="card card-box-style button-style">
-                        <div className="card-body card-box-style">
-                            <h5 className="card-title card-title-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
-                            <p className="card-text card-content-style">
-                                261
-                                <span className="card-unit-style">
-                                    &nbsp;&nbsp;kW&nbsp;&nbsp;&nbsp;
-                                    <button
-                                        className="button-success text-success font-weight-bold font-size-5"
-                                        style={{ width: '100%' }}>
-                                        <i className="uil uil-chart-down">
-                                            <strong>5 %</strong>
-                                        </i>
-                                    </button>
-                                </span>
-                            </p>
-                        </div>
+                        {yearlyPeakData && (
+                            <div className="card-body card-box-style">
+                                <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
+                                <p className="card-text card-content-style custom-kw-style">
+                                    {yearlyPeakData.energy_consumption.now / 1000}
+                                    <span className="card-unit-style">
+                                        &nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;
+                                        {yearlyPeakData.energy_consumption.now <=
+                                            yearlyPeakData.energy_consumption.old && (
+                                            <button
+                                                className="button-success text-success font-weight-bold font-size-5"
+                                                style={{ width: '100px' }}>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            yearlyPeakData.energy_consumption.now,
+                                                            yearlyPeakData.energy_consumption.old
+                                                        )}{' '}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        )}
+                                        {yearlyPeakData.energy_consumption.now >
+                                            yearlyPeakData.energy_consumption.old && (
+                                            <button
+                                                className="button-danger text-danger font-weight-bold font-size-5"
+                                                style={{ width: '100px' }}>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            yearlyPeakData.energy_consumption.now,
+                                                            yearlyPeakData.energy_consumption.old
+                                                        )}{' '}
+                                                        %
+                                                    </strong>
+                                                </i>
+                                            </button>
+                                        )}
+                                    </span>
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="card card-box-style button-style">
-                        <div className="card-body" style={{ marginTop: '4px' }}>
-                            <h5 className="card-title card-title-style">July 9, 4:30 PM&nbsp;&nbsp;</h5>
-                            <p className="card-text bold">4:30 PM</p>
-                        </div>
+                        {yearlyPeakData && (
+                            <div className="card-body" style={{ marginTop: '6px' }}>
+                                <h5 className="card-title custom-date-time-style">
+                                    {moment(yearlyPeakData.timestamp).format('MMMM D , h:mm A')}&nbsp;&nbsp;
+                                </h5>
+                                <p className="card-text custom-time-style">
+                                    {moment(yearlyPeakData.timestamp).format('h:mm A')}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Row>
@@ -585,7 +817,12 @@ const PeakDemand = () => {
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                 Max power draw (15 minute period)
                             </h6>
-                            <LineAnnotationChart title="" height={350} />
+                            <LineAnnotationChart
+                                title=""
+                                height={350}
+                                peakDemandTrendOptions={peakDemandTrendOptions}
+                                peakDemandTrendData={peakDemandTrendData}
+                            />
                         </CardBody>
                     </Card>
                 </Col>

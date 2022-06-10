@@ -10,7 +10,7 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalGateway } from '../../services/Network';
@@ -102,21 +102,27 @@ const GatewaysTable = ({ generalGatewayData }) => {
 };
 
 const Gateways = () => {
-    const [buildingId, setBuildingId] = useState(1);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
 
     useEffect(() => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
+        const fetchGatewayData = async () => {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
+            };
+            await axios
+                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .then((res) => {
+                    setGeneralGatewayData(res.data);
+                    console.log(res.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    console.log('Failed to fetch Gateway data');
+                });
         };
-        axios
-            .post(`${BaseUrl}${generalGateway}/${buildingId}`, {}, { headers })
-            .then((res) => {
-                setGeneralGatewayData(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {});
+        fetchGatewayData();
     }, []);
 
     return (
@@ -127,8 +133,8 @@ const Gateways = () => {
                         Gateways
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                 <i className="uil uil-plus mr-1"></i>Add Gateway
                             </button>

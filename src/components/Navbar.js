@@ -8,6 +8,8 @@ import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings, User, Search } from 'react-feather';
 import SearchModal from './SearchModal';
 import '../pages/portfolio/style.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import './style.css';
 
 const Navbar = (props) => {
@@ -19,15 +21,10 @@ const Navbar = (props) => {
 
             <div className="topnav shadow energy-topnav-custom">
                 <div className="container-fluid navbar navbar-expand-lg topbar-nav custom-navbar">
-                    {/* <nav className="navbar navbar-expand-lg topbar-nav custom-navbar custom-navbar-fonts"> */}
                     <Link to="/" className="navbar-brand mr-0 mr-md-2 logo">
                         <span className="logo-lg">
                             <img src={sapientLogo} alt="" height="30" className="ml-4 mr-4" />
-                            {/* <span className="d-inline h5 ml-4 mr-5 text-logo">Sapient</span> */}
                         </span>
-                        {/* <span className="logo-sm">
-                                <img src={logo} alt="" height="24" />
-                            </span> */}
                     </Link>
                     <Collapse
                         isOpen={props.isMenuOpened}
@@ -37,12 +34,15 @@ const Navbar = (props) => {
                         <AppMenu mode={'vertical'} />
                     </Collapse>
 
+                    <AppMenu mode={'vertical'} />
+
                     <div className="nav-right-icon-style">
                         <SearchModal />
 
                         <Link to="/settings/general">
                             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">
                                 <Settings className="icon-sm" />
+                                {/* <FontAwesomeIcon icon={faGear} className="mt-1" size="xl" /> */}
                             </button>
                         </Link>
                     </div>

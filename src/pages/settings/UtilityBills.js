@@ -6,8 +6,8 @@ import './style.css';
 import axios from 'axios';
 import { BaseUrl, generalUtilityBills } from '../../services/Network';
 import moment from 'moment';
-import { BuildingStore } from '../../components/BuildingStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UtilityBills = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -105,6 +105,7 @@ const UtilityBills = () => {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
+                        // 'user-auth': '628f3144b712934f578be895',
                     };
                     await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
                         console.log(res);
@@ -149,9 +150,10 @@ const UtilityBills = () => {
     };
     const EditHandler = (e) => {
         e.preventDefault();
-        const headers = {
+        let headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.patch(`${BaseUrl}${generalUtilityBills}/${billId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -210,7 +212,6 @@ const UtilityBills = () => {
                                                         onClick={() => {
                                                             handleShow();
                                                             setBillId(record.id);
-                                                            // handleEditItem(record);
                                                         }}>
                                                         Add
                                                     </a>
@@ -240,6 +241,16 @@ const UtilityBills = () => {
                                                 ) : (
                                                     <td>{record.blended_rate} kWh</td>
                                                 )}
+                                                <td className="font-weight-bold">
+                                                    <a
+                                                        class="link-primary"
+                                                        onClick={() => {
+                                                            handleShow();
+                                                            setBillId(record.id);
+                                                        }}>
+                                                        Edit
+                                                    </a>
+                                                </td>
                                             </tr>
                                         );
                                     })}

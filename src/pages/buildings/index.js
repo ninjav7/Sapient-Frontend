@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Row, Col, Card, CardBody, Table, UncontrolledTooltip } from 'reactstrap';
 import DonutChart from '../charts/DonutChart';
 import Header from '../../components/Header';
@@ -15,19 +15,48 @@ import {
     builidingAlerts,
     builidingEquipments,
     builidingHourly,
-    builidingOverview,
+    getEnergyConsumption,
     builidingPeak,
     portfolioEndUser,
     portfolioOverall,
 } from '../../services/Network';
+import moment from 'moment';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
-import { DateRangeStore } from '../../components/DateRangeStore';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
+
+export function useHover() {
+    const [value, setValue] = useState(false);
+
+    const ref = useRef(null);
+
+    const handleMouseOver = () => setValue(true);
+    const handleMouseOut = () => setValue(false);
+
+    useEffect(
+        () => {
+            const node = ref.current;
+            if (node) {
+                node.addEventListener('mouseover', handleMouseOver);
+                node.addEventListener('mouseout', handleMouseOut);
+
+                return () => {
+                    node.removeEventListener('mouseover', handleMouseOver);
+                    node.removeEventListener('mouseout', handleMouseOut);
+                };
+            }
+        },
+        [ref.current] // Recall only if ref changes
+    );
+    return [ref, value];
+}
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
+
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -44,6 +73,9 @@ const BuildingOverview = () => {
             old: 0,
         },
     });
+
+    const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
+
     // const [buildingAlert, setBuildingAlerts] = useState([
     //     {
     //         type: 'string',
@@ -341,6 +373,9 @@ const BuildingOverview = () => {
         dataLabels: {
             enabled: false,
         },
+        toolbar: {
+            show: true,
+        },
         colors: ['#87AADE'],
         stroke: {
             curve: 'straight',
@@ -360,18 +395,33 @@ const BuildingOverview = () => {
             },
         },
         tooltip: {
-            shared: true,
+            shared: false,
             intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
+                format: 'dd/MMM - hh:mm TT',
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
             },
         },
         xaxis: {
             type: 'datetime',
             labels: {
-                formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMM-dd');
-                },
+                format: 'dd/MMM - hh:mm TT',
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
@@ -383,6 +433,11 @@ const BuildingOverview = () => {
                     }
                     return val;
                 },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
         },
     });
@@ -420,67 +475,15 @@ const BuildingOverview = () => {
 
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
-    // const [topEnergyConsumption, setTopEnergyConsumption] = useState([
-    //     {
-    //         equipment_id: 0,
-    //         equipment_name: 'AHU 1',
-    //         energy_consumption: {
-    //             now: 25.3,
-    //             old: 20,
-    //         },
-    //     },
-    //     {
-    //         equipment_id: 1,
-    //         equipment_name: 'AHU 2',
-    //         energy_consumption: {
-    //             now: 75.3,
-    //             old: 20,
-    //         },
-    //     },
-    //     {
-    //         equipment_id: 2,
-    //         equipment_name: 'AHU 3',
-    //         energy_consumption: {
-    //             now: 89.3,
-    //             old: 20,
-    //         },
-    //     },
-    //     {
-    //         equipment_id: 3,
-    //         equipment_name: 'AHU 4',
-    //         energy_consumption: {
-    //             now: 100.3,
-    //             old: 20,
-    //         },
-    //     },
-    // ]);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([]);
 
-    const [topContributors, setTopContributors] = useState([
-        {
-            timeRange: {
-                frm: 'yyy-mm-dd',
-                to: 'yyy-mm-dd',
-            },
-            overall_energy_consumption: 0,
-            top_contributors: [
-                {
-                    equipment_id: 0,
-                    equipment_name: 'string',
-                    energy_consumption: {
-                        now: 0,
-                        ol: 0,
-                    },
-                },
-            ],
-        },
-    ]);
+    const [topContributors, setTopContributors] = useState([]);
 
-    const weekDaysOptions = {
+    const [weekDaysOptions, setWeekDaysOptions] = useState({
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {
@@ -503,40 +506,14 @@ const BuildingOverview = () => {
         stroke: {
             width: 0.7,
         },
+        colors: ['#87AADE', '#F87171'],
         plotOptions: {
             heatmap: {
-                // shadeIntensity: 0.5,
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 25,
-                            color: '#9bb4da',
-                        },
-                        {
-                            from: 26,
-                            to: 50,
-                            color: '#819dc9',
-                        },
-                        {
-                            from: 51,
-                            to: 100,
-                            color: '#128FD9',
-                        },
-                        {
-                            from: 101,
-                            to: 150,
-                            color: '#F87171',
-                        },
-                        {
-                            from: 151,
-                            to: 200,
-                            color: '#FF0000',
-                        },
-                    ],
-                },
             },
         },
         yaxis: {
@@ -544,117 +521,29 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        // xaxis: {
+        //     labels: {
+        //         show: true,
+        //         datetimeFormatter: {
+        //             hour: 'HH',
+        //         },
+        //     },
+        //     type: 'category',
+        //     categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
+        // },
         xaxis: {
-            labels: {
+            axisTicks: {
                 show: true,
             },
-            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
+            tickAmount: 12,
+            range: 24,
+            labels: {
+                show: true,
+                type: 'category',
+                categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
+            },
         },
-    };
-
-    // const weekdaysSeries = [
-    //     {
-    //         name: 'Weekdays',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    // ];
+    });
 
     const [weekDaysSeries, setWeekDaysSeries] = useState([
         {
@@ -663,14 +552,21 @@ const BuildingOverview = () => {
         },
     ]);
 
+    const [weekEndsSeries, setWeekEndsSeries] = useState([
+        {
+            name: 'Weekends',
+            data: [],
+        },
+    ]);
+
     const weekdaysChartHeight = 125;
     const weekendsChartHeight = 125;
 
-    const weekendsOptions = {
+    const [weekEndsOptions, setWeekEndsOptions] = useState({
         chart: {
             type: 'heatmap',
             toolbar: {
-                show: false,
+                show: true,
             },
         },
         dataLabels: {
@@ -701,28 +597,28 @@ const BuildingOverview = () => {
                 colorScale: {
                     ranges: [
                         {
-                            from: 1000,
-                            to: 1999,
+                            from: 0,
+                            to: 1500,
                             color: '#9bb4da',
                         },
                         {
-                            from: 2000,
-                            to: 2999,
+                            from: 1501,
+                            to: 3000,
                             color: '#819dc9',
                         },
                         {
-                            from: 3000,
-                            to: 3999,
+                            from: 3001,
+                            to: 4500,
                             color: '#128FD9',
                         },
                         {
-                            from: 4000,
-                            to: 4999,
+                            from: 4501,
+                            to: 6000,
                             color: '#F87171',
                         },
                         {
-                            from: 5000,
-                            to: 5999,
+                            from: 6001,
+                            to: 7500,
                             color: '#FF0000',
                         },
                     ],
@@ -734,127 +630,73 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        // xaxis: {
+        //     labels: {
+        //         show: true,
+        //         datetimeFormatter: {
+        //             hour: 'HH',
+        //         },
+        //     },
+        // },
         xaxis: {
+            axisTicks: {
+                show: true,
+            },
+            tickAmount: 6,
+            // range: 23,
+            type: 'category',
+            // categories: [
+            //     '12AM',
+            //     '1AM',
+            //     '2AM',
+            //     '3AM',
+            //     '4AM',
+            //     '5AM',
+            //     '6AM',
+            //     '7AM',
+            //     '8AM',
+            //     '9AM',
+            //     '10AM',
+            //     '11AM',
+            //     '12PM',
+            //     '1PM',
+            //     '2PM',
+            //     '3PM',
+            //     '4PM',
+            //     '5PM',
+            //     '6PM',
+            //     '7PM',
+            //     '8PM',
+            //     '9PM',
+            //     '10PM',
+            //     '11PM',
+            // ],
             labels: {
                 show: true,
             },
-            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
         },
-    };
-
-    const weekendsSeries = [
-        {
-            name: 'Weekends',
-            data: [
-                {
-                    x: '1AM',
-                    y: 1000,
-                },
-                {
-                    x: '2AM',
-                    y: 1000,
-                },
-                {
-                    x: '3AM',
-                    y: 2000,
-                },
-                {
-                    x: '4AM',
-                    y: 2000,
-                },
-                {
-                    x: '5AM',
-                    y: 4000,
-                },
-                {
-                    x: '6AM',
-                    y: 3000,
-                },
-                {
-                    x: '7AM',
-                    y: 3000,
-                },
-                {
-                    x: '8AM',
-                    y: 1000,
-                },
-                {
-                    x: '9AM',
-                    y: 2000,
-                },
-                {
-                    x: '10AM',
-                    y: 2000,
-                },
-                {
-                    x: '11AM',
-                    y: 1000,
-                },
-                {
-                    x: '12PM',
-                    y: 1000,
-                },
-                {
-                    x: '1PM',
-                    y: 2000,
-                },
-                {
-                    x: '2PM',
-                    y: 2000,
-                },
-                {
-                    x: '3PM',
-                    y: 3000,
-                },
-                {
-                    x: '4PM',
-                    y: 4000,
-                },
-                {
-                    x: '5PM',
-                    y: 4000,
-                },
-                {
-                    x: '6PM',
-                    y: 5000,
-                },
-                {
-                    x: '7PM',
-                    y: 5000,
-                },
-                {
-                    x: '8PM',
-                    y: 4000,
-                },
-                {
-                    x: '9PM',
-                    y: 4000,
-                },
-                {
-                    x: '10PM',
-                    y: 3000,
-                },
-                {
-                    x: '11PM',
-                    y: 2500,
-                },
-                {
-                    x: '12AM',
-                    y: 2000,
-                },
-            ],
-        },
-    ];
+    });
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
+    const [daysCount, setDaysCount] = useState(1);
+
+    const [hoverRef, isHovered] = useHover();
+
     useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
         const buildingOverallData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -881,6 +723,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -898,7 +741,7 @@ const BuildingOverview = () => {
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
+                            let fixedConsumption = record.energy_consumption.now / 1000;
                             // newArray.push(fixedConsumption);
                             newDonutData.push(parseInt(fixedConsumption));
                         });
@@ -915,6 +758,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${1}`;
                 await axios
@@ -941,6 +785,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}&limit=${2}`;
                 await axios
@@ -954,6 +799,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setTopContributors(res.data);
+                        console.log('setTopContributors => ', res.data);
                         console.log(res.data);
                     });
             } catch (error) {
@@ -967,6 +813,7 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -979,8 +826,12 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setTopEnergyConsumption(res.data[0].top_contributors);
-                        console.log(res.data);
+                        let data = res.data[0].top_contributors;
+                        // console.log('HeatMap Data => ', data);
+                        let sortedData = data.sort((a, b) => {
+                            return b.energy_consumption.now - a.energy_consumption.now;
+                        });
+                        setTopEnergyConsumption(sortedData);
                     });
             } catch (error) {
                 console.log(error);
@@ -993,8 +844,9 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?building_id=${bldgId}&aggregate=${'hi'}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
@@ -1005,37 +857,78 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        const data = res.data.map((el) => {
+                        let response = res.data;
+
+                        let weekDaysResData = response[0].weekdays;
+                        let weekEndResData = response[0].weekend;
+
+                        console.log('weekDaysResData => ', weekDaysResData);
+
+                        const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(el.timestamp),
-                                y: el.energy_consumption,
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: (el.y / 1000).toFixed(2),
                             };
                         });
 
-                        const newHeatMapData = [
+                        const weekendsData = weekEndResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: (el.y / 1000).toFixed(2),
+                            };
+                        });
+
+                        const newWeekdaysData = [
                             {
                                 name: 'Weekdays',
                                 data: [],
                             },
                         ];
 
-                        console.log('data => ', data);
+                        const newWeekendsData = [
+                            {
+                                name: 'Weekends',
+                                data: [],
+                            },
+                        ];
 
                         for (let i = 1; i <= 24; i++) {
-                            let matchedRecord = data.find((record) => record.x === i);
-
-                            console.log('matchedRecord => ', matchedRecord);
+                            let matchedRecord = weekDaysData.find((record) => record.x === i);
 
                             if (matchedRecord) {
-                                newHeatMapData[0].data.push(matchedRecord);
+                                newWeekdaysData[0].data.push(matchedRecord);
                             } else {
-                                newHeatMapData[0].data.push({
+                                newWeekdaysData[0].data.push({
                                     x: i,
                                     y: 0,
                                 });
                             }
                         }
-                        setWeekDaysSeries(newHeatMapData);
+
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            if (matchedRecord) {
+                                matchedRecord.x = i;
+                                // console.log('matchedRecord => ', matchedRecord);
+                                newWeekendsData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekendsData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
+                        console.log('newWeekendsData => ', newWeekendsData);
+                        setWeekDaysSeries(newWeekdaysData);
+                        setWeekEndsSeries(newWeekendsData);
+                        // setWeekEndsSeries([
+                        //     {
+                        //         name: 'Weekends',
+                        //         data: [
+                        //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+                        //         ],
+                        //     },
+                        // ]);
                     });
             } catch (error) {
                 console.log(error);
@@ -1043,12 +936,63 @@ const BuildingOverview = () => {
             }
         };
 
+        const buildingConsumptionChart = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?aggregate=day&building_id=${bldgId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getEnergyConsumption}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        let newArray = [
+                            {
+                                data: [],
+                            },
+                        ];
+                        response.forEach((record) => {
+                            newArray[0].data.push({
+                                x: moment(record.x).format('MMM D'),
+                                y: (record.y / 1000).toFixed(2),
+                            });
+                        });
+                        console.log('newArray => ', newArray);
+                        setBuildingConsumptionChart(newArray);
+                    });
+            } catch (error) {
+                console.log(error);
+                alert('Failed to fetch Building Consumption Chart');
+            }
+        };
+
+        const calculateDays = () => {
+            let time_difference = endDate.getTime() - startDate.getTime();
+            let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            // if (days_difference === 0) {
+            //     days_difference = 1;
+            // }
+            days_difference = days_difference + 1;
+            setDaysCount(days_difference);
+        };
+
+        calculateDays();
         buildingOverallData();
         buildingEndUserData();
         buildingAlertsData();
         buildingPeaksData();
         builidingEquipmentsData();
         builidingHourlyData();
+        buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -1067,58 +1011,51 @@ const BuildingOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        console.log('startDate => ', dateFormatHandler(startDate));
-        console.log('endDate => ', dateFormatHandler(endDate));
-    });
-
     return (
         <React.Fragment>
             <Header title="Building Overview" />
             {/* <h3>ID : {bldgId}</h3> */}
-            <Row xl={12}>
-                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    <div className="card card-box-style button-style">
+            <Row xl={12} className="mt-2">
+                <div className="energy-summary-alignment">
+                    <div className="card-box-style button-style">
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now}
+                                description={overview.total_consumption.now / 1000}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
                                     overview.total_consumption.old
                                 )}
                                 consumptionNormal={overview.total_consumption.now >= overview.total_consumption.old}
+                                infoText={`Total energy consumption accross all your buildings for the past ${daysCount} days.`}
+                                infoType={`total-bld-cnsmp`}
                             />
                         </div>
                     </div>
-                    {/* <div className="card card-box-style button-style">
-                            <div className="card-body">
-                                <h5 className="card-title subtitle-style">
-                                    Portfolio Rank&nbsp;&nbsp;
-                                    <div>
-                                        <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
-                                        <UncontrolledTooltip placement="bottom" target="#title">
-                                            Information ToolTips
-                                        </UncontrolledTooltip>
-                                    </div>
-                                </h5>
-                                <p className="card-text card-content-style">
-                                    {overview.portfolio_rank.split('of')[0]}{' '}
-                                    <span className="card-unit-style">
-                                        &nbsp;&nbsp;of{' '}
-                                        {overview.portfolio_rank
-                                            ? overview.portfolio_rank.split('of')[1]
-                                            : overview.portfolio_rank.split('of')[1]}
-                                    </span>
-                                </p>
-                            </div>
-                        </div> */}
-                    <div className="card card-box-style button-style">
+
+                    <div className="card-box-style button-style">
+                        <div className="card-body">
+                            <h5 className="card-title subtitle-style">
+                                Portfolio Rank&nbsp;&nbsp;
+                                <div>
+                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
+                                    <UncontrolledTooltip placement="bottom" target="#title">
+                                        Portfolio Rank
+                                    </UncontrolledTooltip>
+                                </div>
+                            </h5>
+                            <p className="card-text card-content-style">
+                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;6</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={overview.average_energy_density.now}
+                                description={overview.average_energy_density.now / 1000}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1127,289 +1064,307 @@ const BuildingOverview = () => {
                                 consumptionNormal={
                                     overview.average_energy_density.now >= overview.average_energy_density.old
                                 }
+                                infoText={`Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} days.`}
+                                infoType={`avg-bld-dnty`}
                             />
                         </div>
                     </div>
-                    <div className="card card-box-style button-style">
+                    <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description={overview.yearly_electric_eui.now}
+                                description={overview.yearly_electric_eui.now / 1000}
                                 unit="kBtu/ft/yr"
                                 value={percentageHandler(
                                     overview.yearly_electric_eui.now,
                                     overview.yearly_electric_eui.old
                                 )}
                                 consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
+                                infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                infoType={`total-bld-eui`}
                             />
                         </div>
                     </div>
-                    <div className="card card-box-style button-style">
+                    <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
-                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
-                                    <UncontrolledTooltip placement="bottom" target="#title">
-                                        Information ToolTips
+                                    <i
+                                        className="uil uil-info-circle avatar-xs rounded-circle"
+                                        id="tooltip-monitored-load"
+                                    />
+                                    <UncontrolledTooltip placement="bottom" target="tooltip-monitored-load">
+                                        Add Monitored Load Data
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            <button id="inner-button">Add Utility Bill</button>
+                            <Link
+                                to={{
+                                    pathname: `/settings/utility-bills`,
+                                }}>
+                                <button id="inner-button">Add Utility Bill</button>
+                            </Link>
                         </div>
                     </div>
                 </div>
             </Row>
 
-            <div className="energy-blg-container mt-3">
-                <div className="energy-blg-container-one">
-                    {/* Heading  */}
-                    <div className="card-body">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                            Energy Consumption by End Use
-                        </h6>
-                        <Link
-                            to={{
-                                pathname: `/energy/end-uses/${bldgId}`,
-                            }}>
-                            <div
-                                rel="noopener noreferrer"
-                                className="link-primary mr-4"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}>
-                                More Details
-                            </div>
-                        </Link>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                    </div>
-                    <div className="energy-blg-container-one-content mr-2">
-                        <div className="energy-chart-style">
-                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={180} />
-                        </div>
-
+            {/* <Row> */}
+            <div className="bldg-page-grid-style">
+                {/* <Col md={8} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
+                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    {/* Energy Consumption by End Use  */}
+                    <div>
                         <div>
-                            <Table className="mb-0 building-table-font-style" borderless>
-                                <tbody>
-                                    {energyConsumption.map((record, index) => {
-                                        return (
-                                            <tr key={index} className="building-consumption-style">
-                                                <td>
-                                                    {record.device === 'HVAC' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{ backgroundColor: '#3094B9' }}></div>
-                                                    )}
-                                                    {record.device === 'Lighting' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{ backgroundColor: '#2C4A5E' }}></div>
-                                                    )}
-                                                    {record.device === 'Plug' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{ backgroundColor: '#66D6BC' }}></div>
-                                                    )}
-                                                    {record.device === 'Process' && (
-                                                        <div
-                                                            className="dot"
-                                                            style={{ backgroundColor: '#3B8554' }}></div>
-                                                    )}
-                                                </td>
-                                                <td className="building-table-font-style">{record.device}</td>
-                                                <td className="custom-usage-style muted table-font-style">
-                                                    {record.energy_consumption.now.toLocaleString(undefined, {
-                                                        maximumFractionDigits: 2,
-                                                    })}
-                                                    kWh
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </Table>
+                            <div style={{ display: 'inline-block' }}>
+                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
+                            </div>
+                            <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
+                                <Link
+                                    to={{
+                                        pathname: `/energy/end-uses/${bldgId}`,
+                                    }}>
+                                    <div
+                                        rel="noopener noreferrer"
+                                        className="link-primary mr-3"
+                                        style={{
+                                            textDecoration: 'none',
+                                            fontWeight: 'bold',
+                                        }}>
+                                        More Details
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="custom-bld-enduse-style">
+                            <div>
+                                <DonutChart
+                                    donutChartOpts={donutChartOpts}
+                                    donutChartData={donutChartData}
+                                    height={185}
+                                    id={Date.now()}
+                                />
+                            </div>
+                            <div className="mt-3">
+                                {energyConsumption.map((record, index) => {
+                                    return (
+                                        <div>
+                                            <Link
+                                                to={{
+                                                    pathname: `/energy/${record.device.toLowerCase()}/${bldgId}`,
+                                                }}>
+                                                <div className="custom-bldg-table-style building-consumption-style m-2 p-1">
+                                                    <div className="ml-2">
+                                                        {record.device === 'HVAC' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3094B9',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Lighting' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#2C4A5E',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Plug' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#66D6BC',
+                                                                }}></div>
+                                                        )}
+                                                        {record.device === 'Process' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3B8554',
+                                                                }}></div>
+                                                        )}
+                                                    </div>
+                                                    <div className="custom-bld-equip-style record-bld-style font-weight-bold">
+                                                        {record.device}
+                                                    </div>
+                                                    <div className="custom-bld-usage-style muted table-font-style">
+                                                        {(record.energy_consumption.now / 1000).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                maximumFractionDigits: 2,
+                                                            }
+                                                        )}
+                                                        kWh
+                                                    </div>
+                                                    <div className="mr-2">
+                                                        {record.energy_consumption.now <=
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-success text-success custom-bld-style">
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {record.energy_consumption.now >
+                                                            record.energy_consumption.old && (
+                                                            <button className="button-danger text-danger custom-bld-style">
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="energy-blg-container-two mr-4">
-                    {/* Equipment Alert */}
-                    <h6 className="card-title custom-title mt-4" style={{ display: 'inline-block' }}>
-                        Top Equipment Consumption
-                    </h6>
-                    <div className="equip-table-container">
-                        <table className="table table-borderless">
-                            <thead>
-                                <tr className="equip-table-heading">
-                                    <th>Equipment</th>
-                                    <th>Power</th>
-                                    <th>Change</th>
-                                </tr>
-                            </thead>
-                            <tbody style={{ fontSize: '12px' }}>
-                                {topEnergyConsumption.map((item, index) => (
-                                    <tr key={index}>
-                                        <td className="equip-table-content">
-                                            <div>
-                                                <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                    {item.equipment_name}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="equip-table-content">
-                                            <div>
-                                                <div>
-                                                    <span>
-                                                        {item.energy_consumption.now.toLocaleString(undefined, {
+                    {/* Top 3 Peak Demand Periods  */}
+                    <Row>
+                        <div className="card-body">
+                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                                Top 3 Peak Demand Periods
+                            </h6>
+                            <Link
+                                to={{
+                                    pathname: `/energy/peak-demand/${bldgId}`,
+                                }}>
+                                <a
+                                    rel="noopener noreferrer"
+                                    className="link-primary font-weight-bold mr-3"
+                                    style={{
+                                        display: 'inline-block',
+                                        float: 'right',
+                                        textDecoration: 'none',
+                                    }}>
+                                    More Details
+                                </a>
+                            </Link>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                Max power draw (15 minutes period)
+                            </h6>
+                            <div className="card-group mt-2 top-peak-demand-style">
+                                {topContributors.slice(0, 3).map((item, index) => (
+                                    <div className="card peak-demand-container mt-3" ref={hoverRef}>
+                                        <div className="card-body">
+                                            <h6
+                                                className="card-title text-muted peak-demand-card-style"
+                                                style={{ margin: '2px', marginLeft: '5px', fontSize: 14 }}>
+                                                {moment(item.timeRange.frm.slice(0, 10)).format('MMMM Do')} @{' '}
+                                                {new Date(item.timeRange.frm).toLocaleTimeString('en', {
+                                                    timeStyle: 'short',
+                                                    hour12: true,
+                                                    timeZone: 'UTC',
+                                                })}
+                                            </h6>
+                                            <h5 className="card-title ml-1">
+                                                <span style={{ color: 'black' }}>
+                                                    {(item.overall_energy_consumption / 1000).toLocaleString(
+                                                        undefined,
+                                                        {
                                                             maximumFractionDigits: 2,
-                                                        })}
-                                                    </span>
-                                                    <span className="equip-table-unit">&nbsp;kWh</span>
-                                                </div>
+                                                        }
+                                                    )}
+                                                </span>
+                                                kW
+                                            </h5>
+                                            <div style={{ height: '75%' }}>
+                                                {isHovered ? (
+                                                    <div
+                                                        style={{ display: 'flex', justifyContent: 'center' }}
+                                                        className="m-4">
+                                                        <Link
+                                                            to={{
+                                                                pathname: `/energy/building-peak-explore/${localStorage.getItem(
+                                                                    'buildingId'
+                                                                )}`,
+                                                            }}>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
+                                                                <i className="uil uil-pen mr-1"></i>Explore
+                                                            </button>
+                                                        </Link>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <p className="card-text peak-card-label">Top Contributors</p>
+                                                        <table className="table table-borderless small peak-table-font">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="peak-table-content">
+                                                                        {item.top_contributors.slice(0, 3).map((el) => (
+                                                                            <tr>
+                                                                                <div className="font-weight-bold text-dark">
+                                                                                    {el.equipment_name}
+                                                                                </div>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </td>
+                                                                    <td className="peak-table-content-two">
+                                                                        {item.top_contributors.map((el2) => (
+                                                                            <tr
+                                                                                style={{
+                                                                                    fontSize: 12,
+                                                                                }}>
+                                                                                <div style={{ marginTop: '0.3vh' }}>
+                                                                                    {el2.energy_consumption.now.toLocaleString(
+                                                                                        undefined,
+                                                                                        {
+                                                                                            maximumFractionDigits: 2,
+                                                                                        }
+                                                                                    )}{' '}
+                                                                                    kW
+                                                                                </div>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </>
+                                                )}
                                             </div>
-                                        </td>
-                                        <td>
-                                            <div>
-                                                <div>
-                                                    {item.energy_consumption.now < item.energy_consumption.old && (
-                                                        <button
-                                                            className="button-success text-success equip-table-button"
-                                                            style={{ width: 'auto' }}>
-                                                            <i className="uil uil-chart-down">
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
-                                                            </i>
-                                                        </button>
-                                                    )}
-                                                    {item.energy_consumption.now > item.energy_consumption.old && (
-                                                        <button
-                                                            className="button-danger text-danger equip-table-button"
-                                                            style={{ width: 'auto' }}>
-                                                            <i className="uil uil-arrow-growth">
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
-                                                            </i>
-                                                        </button>
-                                                    )}
-                                                    {item.energy_consumption.now === item.energy_consumption.old && (
-                                                        <button
-                                                            className="button text-muted equip-table-button"
-                                                            style={{ width: 'auto', border: 'none' }}>
-                                                            <i className="uil uil-arrow-growth">
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
-                                                            </i>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                    </Row>
 
-                <div className="energy-blg-container-three mt-4">
-                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                        Building Alerts
-                    </h6>
-                    <a
-                        rel="noopener noreferrer"
-                        className="link-primary mr-2"
-                        style={{
-                            display: 'inline-block',
-                            float: 'right',
-                            textDecoration: 'none',
-                            fontWeight: 'bold',
-                        }}></a>
-                    <span className="float-right" onClick={() => setBuildingAlerts([])}>
-                        Clear
-                    </span>
-                    {/* </Link> */}
-
-                    <div className="mt-2 alert-container">
-                        {buildingAlert.map((record) => {
-                            return (
-                                <>
-                                    {record.type === 'building-add' && (
-                                        <div className="alert-card mb-2">
-                                            <div>
-                                                <i className="uil uil-triangle" />
-                                            </div>
-                                            <div>
-                                                <span className="alert-heading">New Building Peak</span>
-                                                <br />
-                                                <span className="alert-content">225.3 kW &nbsp; 3/3/22 @ 3:20 PM</span>
-                                            </div>
-                                            <div className="float-right ml-4 alert-weekday">Today</div>
-                                        </div>
-                                    )}
-                                    {record.type === 'energy-trend' && (
-                                        <div className="alert-card mb-2">
-                                            <div>
-                                                <i className="uil uil-arrow-growth" />
-                                            </div>
-                                            <div>
-                                                <span className="alert-heading">Energy Trend Upward</span>
-                                                <br />
-                                                <span className="alert-content">+25% from last 30 days</span>
-                                            </div>
-                                            <div className="float-right ml-4 alert-weekday">Yesterday</div>
-                                        </div>
-                                    )}
-                                    {record.type === 'notification' && (
-                                        <div className="alert-card">
-                                            <div>
-                                                <i className="uil uil-exclamation-triangle" />
-                                            </div>
-                                            <div>
-                                                <span className="alert-heading">Service Due Soon (AHU 1)</span>
-                                                <br />
-                                                <span className="alert-content">40 Run Hours &nbsp; in 25 Days</span>
-                                            </div>
-                                            <div className="float-right ml-4 alert-weekday">Tuesday</div>
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-
-            {/* <Row xl={12} className="mt-3">
-                <Col xl={5} style={{ marginLeft: '23px' }}>
-                    <Row xl={8}>
+                    {/* Hourly Average Consumption */}
+                    <Row>
                         <div className="card-body">
                             <h6
                                 className="card-title custom-title"
                                 style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Energy Consumption by End Use
+                                Hourly Average Consumption
                             </h6>
-                            <Link to="/energy/end-uses">
+                            <Link
+                                to={{
+                                    pathname: `/energy/time-of-day/${bldgId}`,
+                                }}>
                                 <a
                                     rel="noopener noreferrer"
-                                    className="link-primary mr-4"
+                                    className="link-primary mr-3"
                                     style={{
                                         display: 'inline-block',
                                         float: 'right',
@@ -1419,185 +1374,58 @@ const BuildingOverview = () => {
                                     More Details
                                 </a>
                             </Link>
-                            <h6 className="card-subtitle mb-2 text-muted">Energy Totals</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
+                            <div className="hour-avg-consumtn p-1">
+                                <HeatMapChart
+                                    options={weekDaysOptions}
+                                    series={weekDaysSeries}
+                                    height={weekdaysChartHeight}
+                                />
+                                <span className="m-2"></span>
+                                <HeatMapChart
+                                    options={weekEndsOptions}
+                                    series={weekEndsSeries}
+                                    height={weekendsChartHeight}
+                                />
+                            </div>
                         </div>
                     </Row>
 
-                    <Row xl={4}>
-                        <Col xl={6}>
-                            <div className="card-body">
-                                <DonutChart options={donutChartOpts} series={donutChartData} height={170} />
+                    {/* Total Energy Consumption  */}
+                    <Row>
+                        <div className="card-body">
+                            <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
+                            <div className="total-eng-consumtn">
+                                <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
                             </div>
-                        </Col>
-                        <Col xl={6}>
-                            <Card>
-                                <CardBody>
-                                    <Table className="mb-0 building-table-font-style" borderless>
-                                        <tbody>
-                                            {energyConsumption.map((record, index) => {
-                                                return (
-                                                    <tr key={index} className="building-consumption-style">
-                                                        <td>
-                                                            {record.device === 'HVAC' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#3094B9' }}></div>
-                                                            )}
-                                                            {record.device === 'Lightning' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#2C4A5E' }}></div>
-                                                            )}
-                                                            {record.device === 'Plug' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#66D6BC' }}></div>
-                                                            )}
-                                                            {record.device === 'Process' && (
-                                                                <div
-                                                                    className="dot"
-                                                                    style={{ backgroundColor: '#3B8554' }}></div>
-                                                            )}
-                                                        </td>
-                                                        <td className="building-table-font-style font-weight-bold">
-                                                            {record.device}
-                                                        </td>
-                                                        <td className="custom-usage-style muted table-font-style">
-                                                            {record.energy_consumption.now.toLocaleString(undefined, {
-                                                                maximumFractionDigits: 2,
-                                                            })}
-                                                            kWh
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </Table>
-                                </CardBody>
-                            </Card>
-                        </Col>
+                        </div>
                     </Row>
-                </Col>
+                </div>
+                {/* </Col> */}
 
-                <Col xl={3}>
-                    <div>
-                        <Col>
-                            <h6
-                                className="card-title custom-title mt-4"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Top Equipment Consumption
-                            </h6>
-                            <div className="equip-table-container">
-                                <table className="table table-borderless">
-                                    <thead>
-                                        <tr className="equip-table-heading">
-                                            <th>Equipment</th>
-                                            <th>Power</th>
-                                            <th>Change</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style={{ fontSize: '12px' }}>
-                                        {topEnergyConsumption.map((item, index) => (
-                                            <tr key={index}>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                            {item.equipment_name}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="equip-table-content">
-                                                    <div>
-                                                        <div>
-                                                            <span>{item.energy_consumption.now}</span>
-                                                            <span className="equip-table-unit">&nbsp;kW</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div>
-                                                        <div>
-                                                            {item.energy_consumption.now <
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-danger text-danger equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-chart-down">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now >
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button-success text-success equip-table-button"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                            {item.energy_consumption.now ===
-                                                                item.energy_consumption.old && (
-                                                                <button
-                                                                    className="button text-muted equip-table-button"
-                                                                    style={{ width: 'auto', border: 'none' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                item.energy_consumption.now,
-                                                                                item.energy_consumption.old
-                                                                            )}{' '}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Col>
-                    </div>
-                </Col>
-
-                <Col xl={3}>
-                    <div>
-                        <Col className="mt-4">
-                            <h6
-                                className="card-title custom-title"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
+                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
+                    <Row>
+                        <div>
+                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                                 Building Alerts
                             </h6>
-                            <Link to="/energy/end-uses">
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary mr-2"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
-                                    }}>
-                                    Clear
-                                </a>
-                            </Link>
+                            <a
+                                rel="noopener noreferrer"
+                                className="link-primary mr-2"
+                                style={{
+                                    display: 'inline-block',
+                                    float: 'right',
+                                    textDecoration: 'none',
+                                    fontWeight: 'bold',
+                                }}></a>
+                            <span
+                                className="float-right mr-0 font-weight-bold"
+                                style={{ color: 'blue' }}
+                                onClick={() => setBuildingAlerts([])}>
+                                Clear
+                            </span>
 
                             <div className="mt-2 alert-container">
                                 {buildingAlert.map((record) => {
@@ -1650,147 +1478,106 @@ const BuildingOverview = () => {
                                     );
                                 })}
                             </div>
-                        </Col>
-                    </div>
-                </Col>
-            </Row> */}
-
-            {/* Hourly Average Consumption */}
-            <Row>
-                <Col lg={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                            Hourly Average Consumption
-                        </h6>
-                        <Link
-                            to={{
-                                pathname: `/energy/time-of-day/${bldgId}`,
-                            }}>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                    fontWeight: 'bold',
-                                }}>
-                                More Details
-                            </a>
-                        </Link>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                        <div className="hour-avg-consumtn p-1">
-                            <HeatMapChart
-                                options={weekDaysOptions}
-                                series={weekDaysSeries}
-                                height={weekdaysChartHeight}
-                            />
-                            <HeatMapChart
-                                options={weekDaysOptions}
-                                // options={weekendsOptions}
-                                // series={weekendsSeries}
-                                series={weekDaysSeries}
-                                height={weekendsChartHeight}
-                            />
                         </div>
-                    </div>
-                </Col>
-            </Row>
-            {/* Top 3 Peak Demand Periods  */}
-            <Row>
-                <Col lg={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Top 3 Peak Demand Periods
-                        </h6>
-                        <Link
-                            to={{
-                                pathname: `/energy/peak-demand/${bldgId}`,
-                            }}>
-                            <a
-                                rel="noopener noreferrer"
-                                className="link-primary font-weight-bold"
-                                style={{
-                                    display: 'inline-block',
-                                    float: 'right',
-                                    textDecoration: 'none',
-                                }}>
-                                More Details
-                            </a>
-                        </Link>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Max power draw (15 minutes period)</h6>
-                        <div className="card-group mt-2 top-peak-demand-style">
-                            {topContributors.map((item, index) => (
-                                <div className="card peak-demand-container mt-3">
-                                    <div className="card-body">
-                                        <h6
-                                            className="card-title text-muted peak-demand-card-style"
-                                            style={{ margin: '2px', marginLeft: '5px' }}>
-                                            {item.timeRange.frm.slice(0, 10)} @{' '}
-                                            {new Date(item.timeRange.frm).toLocaleTimeString('en', {
-                                                timeStyle: 'short',
-                                                hour12: true,
-                                                timeZone: 'UTC',
-                                            })}
-                                        </h6>
-                                        <h5 className="card-title ml-1">
-                                            <span style={{ color: 'black' }}>
-                                                {item.overall_energy_consumption.toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
-                                                })}
-                                            </span>{' '}
-                                            kW
-                                        </h5>
-                                        <p className="card-text peak-card-label">Top Contributors</p>
-                                        <table className="table table-borderless small peak-table-font">
-                                            <tbody>
-                                                <tr>
-                                                    <td className="peak-table-content">
-                                                        {item.top_contributors.map((el) => (
-                                                            <tr>
-                                                                <div className="font-weight-bold text-dark">
-                                                                    {el.equipment_name}
-                                                                </div>
-                                                            </tr>
-                                                        ))}
-                                                    </td>
-                                                    <td className="peak-table-content-two">
-                                                        {item.top_contributors.map((el2) => (
-                                                            <tr>
-                                                                <div className="">
-                                                                    {el2.energy_consumption.now.toLocaleString(
-                                                                        undefined,
-                                                                        {
-                                                                            maximumFractionDigits: 2,
-                                                                        }
-                                                                    )}{' '}
-                                                                    kW
-                                                                </div>
-                                                            </tr>
-                                                        ))}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            ))}
+                    </Row>
+                    <Row style={{ marginTop: '2rem' }}>
+                        <div className="equip-table-container mt-1">
+                            <h6 className="top-equip-title">Top Equipment Consumption</h6>
+                            <table className="table table-borderless">
+                                <thead>
+                                    <tr className="equip-table-heading">
+                                        <th>Equipment</th>
+                                        <th>Energy</th>
+                                        <th>Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody style={{ fontSize: '12px' }}>
+                                    {topEnergyConsumption.map((item, index) => (
+                                        <tr key={index}>
+                                            <td className="equip-table-content">
+                                                <div>
+                                                    <div className="font-weight-bold" style={{ color: 'black' }}>
+                                                        {item.equipment_name}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="equip-table-content">
+                                                <div>
+                                                    <div>
+                                                        <span>
+                                                            {(item.energy_consumption.now / 1000).toLocaleString(
+                                                                undefined,
+                                                                {
+                                                                    maximumFractionDigits: 2,
+                                                                }
+                                                            )}
+                                                        </span>
+                                                        <span className="equip-table-unit">&nbsp;kWh</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <div>
+                                                        {item.energy_consumption.now < item.energy_consumption.old && (
+                                                            <button
+                                                                className="button-success text-success equip-table-button"
+                                                                style={{ width: 'auto' }}>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {item.energy_consumption.now > item.energy_consumption.old && (
+                                                            <button
+                                                                className="button-danger text-danger equip-table-button"
+                                                                style={{ width: 'auto' }}>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {item.energy_consumption.now ===
+                                                            item.energy_consumption.old && (
+                                                            <button
+                                                                className="button text-muted equip-table-button"
+                                                                style={{ width: 'auto', border: 'none' }}>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                </Col>
-            </Row>
-            {/* Total Energy Consumption  */}
-            <Row>
-                <Col xl={8}>
-                    <div className="card-body">
-                        <h6 className="card-title custom-title">Total Energy Consumption</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                        <div className="total-eng-consumtn">
-                            <LineChart options={lineChartOptions} series={lineChartSeries} />
-                        </div>
-                    </div>
-                </Col>
-            </Row>
+                    </Row>
+                </div>
+                {/* </Col> */}
+            </div>
+            {/* </Row> */}
         </React.Fragment>
     );
 };

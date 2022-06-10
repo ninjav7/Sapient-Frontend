@@ -16,8 +16,8 @@ import './style.css';
 // import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
-import { BuildingStore } from '../../components/BuildingStore';
-import { BreadcrumbStore } from '../../components/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const Layout = () => {
     // const store = useSelector((state) => state.counterState);
@@ -166,6 +166,7 @@ const Layout = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
+            // 'user-auth': '628f3144b712934f578be895',
         };
         axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
             console.log(res.data);
@@ -208,8 +209,8 @@ const Layout = () => {
                         Layout
                     </span>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2 mt-2 mr-1">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mt-2 mr-2">
                             <span className="text-warning font-weight-bold">3 Unsaved Changes</span>
                         </div>
                         <div className="float-right ml-2">

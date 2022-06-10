@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -9,6 +9,11 @@ import Select from 'react-select';
 
 const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activatedMenuItemIds }) => {
     const Icon = item.icon || null;
+
+    // console.log('AppMenu activatedMenuItemIds => ', activatedMenuItemIds);
+    // console.log('AppMenu subMenuClassNames => ', subMenuClassNames);
+    // console.log('AppMenu item => ', item);
+
     return (
         <li className={classNames('side-nav-item', { 'mm-active': activatedMenuItemIds.indexOf(item.id) >= 0 })}>
             <ul
@@ -44,13 +49,14 @@ const MenuItemWithChildren = ({ item, linkClassNames, subMenuClassNames, activat
 const MenuItem = ({ item, className, linkClassName }) => {
     return (
         <li className={classNames('side-nav-item', className)}>
-            <MenuItemLink item={item} className={linkClassName} />
+            {item.visibility && <MenuItemLink item={item} className={linkClassName} />}
         </li>
     );
 };
-
+// Top & Side Nav Bar
 const MenuItemLink = ({ item, className }) => {
     const Icon = item.icon || null;
+
     return (
         <Link to={item.path} className={classNames('side-nav-link-ref', 'side-sub-nav-link', className)}>
             {item.icon && <Icon />}

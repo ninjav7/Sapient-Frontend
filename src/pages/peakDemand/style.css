@@ -82,7 +82,8 @@
     font-size: 24px;
     line-height: 125%;
     display: inline;
-    color: #1f2937;
+    color: #1d2939;
+    font-family: 'SpaceGrotesk' !important;
 }
 
 .custom-buttons {
@@ -407,4 +408,66 @@
 
 .text-center-content {
     margin-top: 4px;
+}
+
+.custom-date-time-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 15px;
+    color: #475467;
+}
+
+.custom-time-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 15px;
+    color: #1d2939;
+}
+
+.custom-kw-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 24px;
+    color: #1d2939;
+}
+
+.peak-name-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 22px;
+    color: #3c6df5;
+}
+
+.equipment-alert-container {
+    padding: 16px;
+    gap: 16px;
+    width: 291px;
+    height: 267px;
+    background: #ffffff;
+    border: 1px solid #eaecf0;
+    border-radius: 8px;
+}
+
+.total-usage-container {
+    padding: 16px;
+    gap: 18px;
+    width: 291px;
+    height: 266px;
+    background: #f2f4f7;
+    border: 1px solid #f2f4f7;
+    border-radius: 10px;
+}
+
+.modal-side-container {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
 }
