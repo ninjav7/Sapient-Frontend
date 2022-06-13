@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Row,
     Col,
@@ -20,7 +20,10 @@ import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import BootstrapTable from 'react-bootstrap-table-next';
 import './style.css';
+
+
 
 const UserTable = ({ userData }) => {
     useEffect(() => {
@@ -38,36 +41,31 @@ const UserTable = ({ userData }) => {
         };
         updateBreadcrumbStore();
     }, []);
-
+    const columns = [{
+        dataField: 'name',
+        text: 'Name',
+        sort: true,
+        style: { color: 'blue' }
+      }, {
+        dataField: 'emailId',
+        text: 'Email',
+        sort: true
+      }, {
+        dataField: 'lastActive',
+        text: 'Last Active',
+        sort:true
+      },{
+        dataField: 'buildingAccess',
+        text: 'Building Access',
+        sort:true
+      },
+    ];
+      
+    
     return (
         <Card>
             <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Building Access</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {userData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <th scope="row">
-                                        <Link to="/settings/user-profile">
-                                            <a className="buildings-name">{record.name}</a>
-                                        </Link>
-                                    </th>
-                                    <td className="font-weight-bold">{record.emailId}</td>
-                                    <td className="font-weight-bold">{record.lastActive}</td>
-                                    <td className="font-weight-bold">{record.buildingAccess}</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </Table>
+            <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } />
             </CardBody>
         </Card>
     );
