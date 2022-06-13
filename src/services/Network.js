@@ -37,6 +37,7 @@ export const generalActiveDevices = '/api/config/devices/active';
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
+export const equipmentGraphData = '/api/explorer/equipment_chart';
 
 //gateway
 export const generalGateway = '/api/config/gateway';

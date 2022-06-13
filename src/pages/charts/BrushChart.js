@@ -149,7 +149,7 @@ const BrushChart = ({ optionsData = {}, seriesData = [], optionsLineData = {}, s
     });
 
     return (
-        <Card>
+        <Card style={{width:"95%"}}>
             <CardBody>
                 <div id="wrapper">
                     <div id="chart-line2">
