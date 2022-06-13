@@ -210,9 +210,16 @@ const BuildingOverview = () => {
                     chart: {
                         width: 300,
                     },
-                    legend: {
-                        show: false,
-                    },
+                    // legend: {
+                    //     show: true,
+                    //     showForSingleSeries:true,
+                    //     onItemHover: {
+                    //         highlightDataSeries: true
+                    //     },
+                    //     onItemClick: {
+                    //         toggleDataSeries: true
+                    //     },
+                    // },
                 },
             },
         ],
@@ -224,7 +231,7 @@ const BuildingOverview = () => {
             x: { show: false },
         },
         legend: {
-            show: false,
+            show: true,
         },
         stroke: {
             width: 0,
@@ -961,12 +968,13 @@ const BuildingOverview = () => {
                         let response = res.data;
                         let newArray = [
                             {
+                                name:'Energy',
                                 data: [],
                             },
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: moment(record.x).format('MMM D'),
+                                x: record.x,
                                 y: (record.y / 1000).toFixed(2),
                             });
                         });
