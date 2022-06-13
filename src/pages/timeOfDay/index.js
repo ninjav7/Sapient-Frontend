@@ -12,6 +12,7 @@ import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Ne
 import { dateFormatHandler } from '../../utils/helper';
 import moment from 'moment';
 import './style.css';
+import { ConsoleView } from 'react-device-detect';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
@@ -144,6 +145,7 @@ const TimeOfDay = () => {
         // },
         xaxis: {
             categories: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+           
         },
         yaxis: {
             // min: 5,
@@ -248,13 +250,15 @@ const TimeOfDay = () => {
                 minWidth: 40,
                 maxWidth: 160,
             },
+            categories:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
         },
         xaxis: {
             labels: {
                 show: true,
                 align: 'top',
             },
-            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12PM'],
+            categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
+            position:'top',
         },
     };
 
@@ -1049,7 +1053,14 @@ const TimeOfDay = () => {
                         width: 300,
                     },
                     legend: {
-                        show: false,
+                        show: true,
+                        showForSingleSeries:true,
+                        onItemHover: {
+                            highlightDataSeries: true
+                        },
+                        onItemClick: {
+                            toggleDataSeries: true
+                        },
                     },
                 },
             },
@@ -1200,10 +1211,6 @@ const TimeOfDay = () => {
                         // default chart structure
                         let heatMapData = [
                             {
-                                name: 'Sunday',
-                                data: [],
-                            },
-                            {
                                 name: 'Monday',
                                 data: [],
                             },
@@ -1227,116 +1234,121 @@ const TimeOfDay = () => {
                                 name: 'Saturday',
                                 data: [],
                             },
+                            {
+                                name: 'Sunday',
+                                data: [],
+                            },
                         ];
 
                         // length === 0  then below data
                         let defaultList = [
                             {
-                                x: 1,
+                                x: 1+"AM",
                                 y: 0,
                             },
                             {
-                                x: 2,
+                                x: 2+"AM",
                                 y: 0,
                             },
                             {
-                                x: 3,
+                                x: 3+"AM",
                                 y: 0,
                             },
                             {
-                                x: 4,
+                                x: 4+"AM",
                                 y: 0,
                             },
                             {
-                                x: 5,
+                                x: 5+"AM",
                                 y: 0,
                             },
                             {
-                                x: 6,
+                                x: 6+"AM",
                                 y: 0,
                             },
                             {
-                                x: 7,
+                                x: 7+"AM",
                                 y: 0,
                             },
                             {
-                                x: 8,
+                                x: 8+"AM",
                                 y: 0,
                             },
                             {
-                                x: 9,
+                                x: 9+"AM",
                                 y: 0,
                             },
                             {
-                                x: 10,
+                                x: 10+"AM",
                                 y: 0,
                             },
                             {
-                                x: 11,
+                                x: 11+"AM",
                                 y: 0,
                             },
                             {
-                                x: 12,
+                                x: 12+"PM",
                                 y: 0,
                             },
                             {
-                                x: 13,
+                                x: 1+"PM",
                                 y: 0,
                             },
                             {
-                                x: 14,
+                                x: 2+"PM",
                                 y: 0,
                             },
                             {
-                                x: 15,
+                                x: 3+"PM",
                                 y: 0,
                             },
                             {
-                                x: 16,
+                                x: 4+"PM",
                                 y: 0,
                             },
                             {
-                                x: 17,
+                                x: 5+"PM",
                                 y: 0,
                             },
                             {
-                                x: 18,
+                                x: 6+"PM",
                                 y: 0,
                             },
                             {
-                                x: 19,
+                                x: 7+"PM",
                                 y: 0,
                             },
                             {
-                                x: 20,
+                                x: 8+"PM",
                                 y: 0,
                             },
                             {
-                                x: 21,
+                                x: 9+"PM",
                                 y: 0,
                             },
                             {
-                                x: 22,
+                                x: 10+"PM",
                                 y: 0,
                             },
                             {
-                                x: 23,
+                                x: 11+"PM",
                                 y: 0,
                             },
                             {
-                                x: 24,
+                                x: 0+"AM",
                                 y: 0,
                             },
                         ];
 
-                        let sun = [];
+                        
                         let mon = [];
                         let tue = [];
                         let wed = [];
                         let thu = [];
                         let fri = [];
                         let sat = [];
-
+                        let sun = [];
+                        console.log(response);
                         // Seperate record based on days
                         response.map((record) => {
                             if (record.timeline.weekday === 0) {
@@ -1368,17 +1380,32 @@ const TimeOfDay = () => {
                                 if (sun.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = sun.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i==12){
+                                                xval=1+"PM"
+                                            }
+                                            else if(i==24){
+                                                xval="0AM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1394,17 +1421,31 @@ const TimeOfDay = () => {
                                 if (mon.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = mon.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1420,17 +1461,31 @@ const TimeOfDay = () => {
                                 if (tue.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = tue.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1446,17 +1501,31 @@ const TimeOfDay = () => {
                                 if (wed.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = wed.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1472,17 +1541,31 @@ const TimeOfDay = () => {
                                 if (thu.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = thu.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1498,17 +1581,31 @@ const TimeOfDay = () => {
                                 if (fri.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = fri.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1524,17 +1621,31 @@ const TimeOfDay = () => {
                                 if (sat.length !== 0) {
                                     for (let i = 1; i <= 24; i++) {
                                         let found = sat.find((x) => x.timeline.hour === i);
-
+                                        let xval= "";
+                                        if(i<12){
+                                            xval=i+"AM"
+                                        }
+                                        else{
+                                            if(i===12){
+                                                xval=1+"PM"
+                                            }
+                                            else{
+                                               var val=i%12
+                                               if(val===0)
+                                                xval=val+"AM"
+                                               xval=val+"PM"
+                                            }
+                                        }
                                         if (found !== undefined) {
                                             console.log('Inside if block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: found.energy_consuption,
                                             });
                                         } else {
                                             console.log('Inside else block');
                                             newData.push({
-                                                x: i,
+                                                x: xval,
                                                 y: 0,
                                             });
                                         }
@@ -1547,7 +1658,7 @@ const TimeOfDay = () => {
                         });
 
                         console.log('heatMapData => ', heatMapData);
-                        setWeekdaysSeries(heatMapData);
+                        setWeekdaysSeries(heatMapData.reverse());
                     });
             } catch (error) {
                 console.log(error);
@@ -1592,7 +1703,7 @@ const TimeOfDay = () => {
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
                         <div className="mt-2">
                             {/* <LineChart title="" /> */}
-                            <LineChart title="" options={lineChartOptions} series={lineChartData} height={400} />
+                            <LineChart title="" options={lineChartOptions} series={lineChartData} height={400}/>
                         </div>
                     </div>
                 </Col>

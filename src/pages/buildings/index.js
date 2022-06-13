@@ -10,6 +10,9 @@ import upGraph from '../../assets/icon/buildings/up-graph.svg';
 import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
+import { faMountain } from '@fortawesome/pro-solid-svg-icons';
+import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
+import {faTriangleExclamation} from '@fortawesome/pro-solid-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -21,6 +24,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -206,9 +210,16 @@ const BuildingOverview = () => {
                     chart: {
                         width: 300,
                     },
-                    legend: {
-                        show: false,
-                    },
+                    // legend: {
+                    //     show: true,
+                    //     showForSingleSeries:true,
+                    //     onItemHover: {
+                    //         highlightDataSeries: true
+                    //     },
+                    //     onItemClick: {
+                    //         toggleDataSeries: true
+                    //     },
+                    // },
                 },
             },
         ],
@@ -220,7 +231,7 @@ const BuildingOverview = () => {
             x: { show: false },
         },
         legend: {
-            show: false,
+            show: true,
         },
         stroke: {
             width: 0,
@@ -957,12 +968,13 @@ const BuildingOverview = () => {
                         let response = res.data;
                         let newArray = [
                             {
+                                name:'Energy',
                                 data: [],
                             },
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: moment(record.x).format('MMM D'),
+                                x: record.x,
                                 y: (record.y / 1000).toFixed(2),
                             });
                         });
@@ -1434,10 +1446,10 @@ const BuildingOverview = () => {
                                             {record.type === 'building-add' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                        <i className="uil uil-triangle" />
+                                                    <FontAwesomeIcon icon={faMountain} size="lg" className="ml-2" color="blue"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">New Building Peak</span>
+                                                        <span className="alert-heading"><b>New Building Peak</b></span>
                                                         <br />
                                                         <span className="alert-content">
                                                             225.3 kW &nbsp; 3/3/22 @ 3:20 PM
@@ -1449,10 +1461,10 @@ const BuildingOverview = () => {
                                             {record.type === 'energy-trend' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                        <i className="uil uil-arrow-growth" />
+                                                    <FontAwesomeIcon icon={faArrowTrendUp} size="lg" className="ml-2" color="orange"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">Energy Trend Upward</span>
+                                                        <span className="alert-heading"><b>Energy Trend Upward</b></span>
                                                         <br />
                                                         <span className="alert-content">+25% from last 30 days</span>
                                                     </div>
@@ -1462,10 +1474,10 @@ const BuildingOverview = () => {
                                             {record.type === 'notification' && (
                                                 <div className="alert-card">
                                                     <div>
-                                                        <i className="uil uil-exclamation-triangle" />
+                                                    <FontAwesomeIcon icon={faTriangleExclamation} size="lg" className="ml-2" color="orange"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">Service Due Soon (AHU 1)</span>
+                                                        <span className="alert-heading"><b>Service Due Soon (AHU 1)</b></span>
                                                         <br />
                                                         <span className="alert-content">
                                                             40 Run Hours &nbsp; in 25 Days

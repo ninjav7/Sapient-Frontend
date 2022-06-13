@@ -3,6 +3,7 @@ import { List } from 'react-feather';
 import { Link } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
+import EquipmentChartModel from '../settings/EquipmentChartModel';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -316,6 +317,9 @@ const Explore = () => {
 
     const [exploreThirdLvlOpts, setExploreThirdLvlOpts] = useState([]);
     const [activeThirdLvlOpt, setActiveThirdLvlOpt] = useState(exploreThirdLvlOpts[0]);
+    const [counter,setCounter]=useState(0);
+    const [showChart, setShowChart] = useState(false);
+    const handleChartClose = () => setShowEquipmentChart(false);
 
     // const [endUsesFilter, setEndUsesFilter] = useState([
     //     { value: 'enduses', label: 'HVAC' },
@@ -329,7 +333,7 @@ const Explore = () => {
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
-
+    const [equipmentData, setEquipmentData]=useState([]);
     const [seriesData, setSeriesData] = useState([]);
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -494,7 +498,7 @@ const Explore = () => {
             type: 'datetime',
         },
     });
-
+    const [showEquipmentChart,setShowEquipmentChart]=useState(false);
     const [firstLevelLineData, setFirstLevelLineData] = useState();
     const [firstLevelLineOpts, setFirstLevelLineOpts] = useState({
         chart: {
@@ -670,6 +674,8 @@ const Explore = () => {
                         setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
                         // console.log('SSR API response => ', responseData);
+                        // setCounter(counter+1);
+                        // console.log(counter+1);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -769,6 +775,12 @@ const Explore = () => {
         window.scroll(0, 0);
 
         const exploreFilterDataFetch = async () => {
+            if(counter===2){
+                setShowEquipmentChart(true);
+                console.log(childFilter);
+                setEquipmentData(childFilter);
+
+            }else{
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -804,6 +816,8 @@ const Explore = () => {
                             }
                         });
                         // console.log('SSR Customized exploreData => ', exploreData);
+                        setCounter(counter+1);
+                        console.log("Counter ",counter+1);
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
@@ -813,11 +827,13 @@ const Explore = () => {
                         let newObj = childFilter;
                         newObj.parent = 'equipment_type';
                         setChildFilter(newObj);
+                        setParentFilter(newObj.parent)
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
             }
+        }
         };
 
         exploreFilterDataFetch();
@@ -848,7 +864,7 @@ const Explore = () => {
     });
 
     return (
-        <React.Fragment>
+        <>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
                 {childFilter.parent === activeExploreOpt.value ? (
@@ -943,7 +959,7 @@ const Explore = () => {
                     </div>
                 </div>
             </Row>
-
+            <EquipmentChartModel showChart={showEquipmentChart} handleChartClose={handleChartClose} sensorData={equipmentData}/>
             {/* Explore Body  */}
             {activeExploreOpt.value === 'no-grouping' && (
                 <>
@@ -991,7 +1007,7 @@ const Explore = () => {
                 </>
             )}
 
-            {activeExploreOpt.value === 'equipment' && (
+            {activeExploreOpt.value === 'equipment_type' && (
                 <>
                     <BrushChart
                         seriesData={seriesData}
@@ -1054,7 +1070,8 @@ const Explore = () => {
                     </Row>
                 </>
             )}
-        </React.Fragment>
+                        
+        </>
     );
 };
 
