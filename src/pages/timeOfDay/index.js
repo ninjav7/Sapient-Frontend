@@ -152,10 +152,24 @@ const TimeOfDay = () => {
             // max: 40,
         },
         legend: {
+            show:true,
+            showForNullSeries: true,
+            showForZeroSeries: true,
+            showForSingleSeries: true,
             position: 'top',
             horizontalAlign: 'center',
             floating: true,
+            onItemClick: {
+                toggleDataSeries: false
+            },
+            onItemHover: {
+                highlightDataSeries: true
+            },
+            markers:{ 
+            onClick:{toggleDataSeries: false}
+          },
         },
+        
         responsive: [
             {
                 breakpoint: 600,
@@ -1163,21 +1177,24 @@ const TimeOfDay = () => {
                         for (let i = 1; i <= 24; i++) {
                             let matchedRecord = weekDaysData.find((record) => record.x === i);
                             if (matchedRecord) {
-                                newWeekdaysData.data.push(parseInt(matchedRecord.y));
+                                newWeekdaysData.data.push(parseFloat(matchedRecord.y));
                             } else {
                                 newWeekdaysData.data.push(0);
                             }
                         }
 
+                        console.log("weedays data",newWeekdaysData);
+
                         for (let i = 1; i <= 24; i++) {
                             let matchedRecord = weekendsData.find((record) => record.x === i);
 
                             if (matchedRecord) {
-                                newWeekendsData.data.push(parseInt(matchedRecord.y));
+                                newWeekendsData.data.push(parseFloat(matchedRecord.y));
                             } else {
                                 newWeekendsData.data.push(0);
                             }
                         }
+                        console.log("weekends data",newWeekendsData)
                         chartData.push(newWeekdaysData);
                         chartData.push(newWeekendsData);
                         setLineChartData(chartData);
@@ -1242,6 +1259,10 @@ const TimeOfDay = () => {
 
                         // length === 0  then below data
                         let defaultList = [
+                            {
+                                x: 0+"AM",
+                                y: 0,
+                            },
                             {
                                 x: 1+"AM",
                                 y: 0,
@@ -1334,10 +1355,7 @@ const TimeOfDay = () => {
                                 x: 11+"PM",
                                 y: 0,
                             },
-                            {
-                                x: 0+"AM",
-                                y: 0,
-                            },
+                           
                         ];
 
                         
@@ -1348,28 +1366,28 @@ const TimeOfDay = () => {
                         let fri = [];
                         let sat = [];
                         let sun = [];
-                        console.log(response);
+                        console.log("heat map raw ",response);
                         // Seperate record based on days
                         response.map((record) => {
-                            if (record.timeline.weekday === 0) {
+                            if (record.timeline.weekday === 1) {
                                 sun.push(record);
                             }
-                            if (record.timeline.weekday === 1) {
+                            if (record.timeline.weekday === 2) {
                                 mon.push(record);
                             }
-                            if (record.timeline.weekday === 2) {
+                            if (record.timeline.weekday === 3) {
                                 tue.push(record);
                             }
-                            if (record.timeline.weekday === 3) {
+                            if (record.timeline.weekday === 4) {
                                 wed.push(record);
                             }
-                            if (record.timeline.weekday === 4) {
+                            if (record.timeline.weekday === 5) {
                                 thu.push(record);
                             }
-                            if (record.timeline.weekday === 5) {
+                            if (record.timeline.weekday === 6) {
                                 fri.push(record);
                             }
-                            if (record.timeline.weekday === 6) {
+                            if (record.timeline.weekday === 7) {
                                 sat.push(record);
                             }
                         });

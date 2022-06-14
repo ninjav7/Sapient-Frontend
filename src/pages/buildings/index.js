@@ -439,10 +439,10 @@ const BuildingOverview = () => {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                    // if (val >= 1000) {
+                    //     val = (val / 1000).toFixed(0) + ' K';
+                    // }
+                    return val+' K';
                 },
             },
             style: {
@@ -1446,7 +1446,8 @@ const BuildingOverview = () => {
                                             {record.type === 'building-add' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faMountain} size="lg" className="ml-2" color="blue"/>
+                                                    <FontAwesomeIcon icon={faMountain} size="lg" className="ml-2" color="#B42318
+"/>
                                                     </div>
                                                     <div>
                                                         <span className="alert-heading"><b>New Building Peak</b></span>
@@ -1461,7 +1462,7 @@ const BuildingOverview = () => {
                                             {record.type === 'energy-trend' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faArrowTrendUp} size="lg" className="ml-2" color="orange"/>
+                                                    <FontAwesomeIcon icon={faArrowTrendUp} size="lg" className="ml-2" color="#DC6803"/>
                                                     </div>
                                                     <div>
                                                         <span className="alert-heading"><b>Energy Trend Upward</b></span>
@@ -1474,7 +1475,7 @@ const BuildingOverview = () => {
                                             {record.type === 'notification' && (
                                                 <div className="alert-card">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faTriangleExclamation} size="lg" className="ml-2" color="orange"/>
+                                                    <FontAwesomeIcon icon={faTriangleExclamation} size="lg" className="ml-2" color="#DC6803"/>
                                                     </div>
                                                     <div>
                                                         <span className="alert-heading"><b>Service Due Soon (AHU 1)</b></span>
