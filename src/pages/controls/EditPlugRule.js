@@ -16,6 +16,12 @@ import {
 } from 'reactstrap';
 import Switch from 'react-switch';
 import LineChart from '../charts/LineChart';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import './style.css';
 
 const EditPlugRule = ({
@@ -26,6 +32,10 @@ const EditPlugRule = ({
     handleCurrentDataChange,
     updatePlugRuleData,
 }) => {
+    const { v4: uuidv4 } = require('uuid');
+    const getConditionId = () => uuidv4();
+
+    const [defaultDate, setDefaultDate] = useState(new Date());
     const [selectedTab, setSelectedTab] = useState(0);
 
     const socketData = [
@@ -187,6 +197,87 @@ const EditPlugRule = ({
         handleCurrentDataChange('is_active', obj.is_active);
     };
 
+    const createScheduleCondition = () => {
+        let currentObj = currentData;
+        let obj = {
+            action_type: false,
+            action_time: '08:00 AM',
+            action_day: [],
+            condition_id: getConditionId(),
+            is_deleted: false,
+        };
+        currentObj.action.push(obj);
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const showOptionToDelete = (condition_id) => {
+        let currentObj = currentData;
+        currentData.action.forEach((record) => {
+            if (record.condition_id === condition_id) {
+                record.is_deleted = !record.is_deleted;
+            }
+        });
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const deleteScheduleCondition = (condition_id) => {
+        let currentObj = currentData;
+        let newArray = [];
+        currentObj.action.forEach((record) => {
+            if (record.condition_id !== condition_id) {
+                newArray.push(record);
+            }
+        });
+        currentObj.action = newArray;
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const handleSchedularConditionChange = (key, value, condition_id) => {
+        let currentObj = currentData;
+        currentObj.action.forEach((record) => {
+            if (record.condition_id === condition_id) {
+                record[key] = value === 'true' ? true : false;
+            }
+        });
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const handleSchedularTimeChange = (key, value, condition_id) => {
+        let currentObj = currentData;
+        currentObj.action.forEach((record) => {
+            if (record.condition_id === condition_id) {
+                record[key] = value;
+            }
+        });
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const handleActionDayChange = (day, condition_id) => {
+        let currentObj = currentData;
+
+        currentObj.action.forEach((record) => {
+            if (record.condition_id === condition_id) {
+                let newArray = [];
+                if (record.action_day.includes(day)) {
+                    newArray = record.action_day.filter((el) => el !== day);
+                } else {
+                    record.action_day.push(day);
+                    newArray = record.action_day;
+                }
+                record.action_day = newArray;
+            }
+        });
+        handleCurrentDataChange('action', currentObj.action);
+    };
+
+    const timeChangeHandler = (date) => {
+        console.log('date => ', date);
+    };
+
+    useEffect(() => {
+        console.log('currentData => ', currentData);
+    });
+
     return (
         <>
             <Modal
@@ -312,7 +403,273 @@ const EditPlugRule = ({
                                             Choose actions and times for this rule.
                                         </span>
 
-                                        <div className="plugrule-schedule-container mt-2"></div>
+                                        <div className="plugrule-schedule-container p-3">
+                                            <div className="plugrule-schedule-heading ml-1 mb-1">
+                                                <div>Action</div>
+                                                <div>Time</div>
+                                                <div>Days</div>
+                                            </div>
+
+                                            <hr className="plugrule-schedule-breaker" />
+
+                                            {/* All Schedular UI  */}
+                                            {/* <div className="plugrule-schedule-row mb-1">
+                                                <div className="schedule-left-flex">
+                                                    <div>
+                                                        <Input
+                                                            type="select"
+                                                            name="state"
+                                                            id="userState"
+                                                            className="font-weight-bold"
+                                                            size="sm">
+                                                            <option>Turn On</option>
+                                                            <option>Turn Off</option>
+                                                        </Input>
+                                                    </div>
+                                                    <div>at</div>
+                                                    <div>
+                                                        <DatePicker
+                                                            selected={defaultDate}
+                                                            showTimeSelect
+                                                            showTimeSelectOnly
+                                                            timeIntervals={15}
+                                                            timeCaption="Time"
+                                                            dateFormat="h:mm aa"
+                                                            className="time-picker-style"
+                                                        />
+                                                    </div>
+                                                    <div>on</div>
+                                                    <div className="schedular-weekday-group">
+                                                        <div className="schedular-weekday-active">Mo</div>
+                                                        <div className="schedular-weekday">Tu</div>
+                                                        <div className="schedular-weekday">We</div>
+                                                        <div className="schedular-weekday">Th</div>
+                                                        <div className="schedular-weekday">Fr</div>
+                                                        <div className="schedular-weekday">Sa</div>
+                                                        <div className="schedular-weekday">Su</div>
+                                                    </div>
+                                                </div>
+                                                <div className="schedule-delete-group">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-default schedule-cancel-style">
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-default schedule-delete-style">
+                                                        Delete?
+                                                    </button>
+                                                </div>
+                                            </div> */}
+
+                                            {/* <hr className="plugrule-schedule-breaker" /> */}
+
+                                            {currentData.action &&
+                                                currentData.action.map((record, index) => {
+                                                    return (
+                                                        <>
+                                                            <div className="plugrule-schedule-row mb-1">
+                                                                <div className="schedule-left-flex">
+                                                                    <div>
+                                                                        <Input
+                                                                            type="select"
+                                                                            name="state"
+                                                                            id="userState"
+                                                                            className="font-weight-bold"
+                                                                            size="sm"
+                                                                            onChange={(e) => {
+                                                                                handleSchedularConditionChange(
+                                                                                    'action_type',
+                                                                                    e.target.value,
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}
+                                                                            defaultValue={
+                                                                                record.action_type
+                                                                                    ? 'Turn On'
+                                                                                    : 'Turn Off'
+                                                                            }>
+                                                                            <option value={false}>Turn Off</option>
+                                                                            <option value={true}>Turn On</option>
+                                                                        </Input>
+                                                                    </div>
+                                                                    <div>at</div>
+                                                                    <div>
+                                                                        <DatePicker
+                                                                            value={record.action_time}
+                                                                            showTimeSelect
+                                                                            showTimeSelectOnly
+                                                                            timeIntervals={15}
+                                                                            timeCaption="Time"
+                                                                            dateFormat="h:mm aa"
+                                                                            className="time-picker-style"
+                                                                            // onChange={(date) => {
+                                                                            //     timeChangeHandler(
+                                                                            //         moment(date).format('hh:mm A')
+                                                                            //     );
+                                                                            // }}
+                                                                            onChange={(date) => {
+                                                                                handleSchedularTimeChange(
+                                                                                    'action_time',
+                                                                                    moment(date).format('hh:mm A'),
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    <div>on</div>
+                                                                    <div className="schedular-weekday-group">
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('mon')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'mon',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Mo
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('tue')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'tue',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Tu
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('wed')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'wed',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            We
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('thr')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'thr',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Th
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('fri')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'fri',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Fr
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('sat')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'sat',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Sa
+                                                                        </div>
+                                                                        <div
+                                                                            className={
+                                                                                record.action_day.includes('sun')
+                                                                                    ? 'schedular-weekday-active'
+                                                                                    : 'schedular-weekday'
+                                                                            }
+                                                                            onClick={() => {
+                                                                                handleActionDayChange(
+                                                                                    'sun',
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Su
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {record.is_deleted ? (
+                                                                    <div className="schedule-delete-group">
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-default schedule-cancel-style"
+                                                                            onClick={() => {
+                                                                                showOptionToDelete(record.condition_id);
+                                                                            }}>
+                                                                            Cancel
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-default schedule-delete-style"
+                                                                            onClick={() => {
+                                                                                deleteScheduleCondition(
+                                                                                    record.condition_id
+                                                                                );
+                                                                            }}>
+                                                                            Delete?
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faTrashCan}
+                                                                            size="md"
+                                                                            onClick={() => {
+                                                                                showOptionToDelete(record.condition_id);
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            <hr className="plugrule-schedule-breaker" />
+                                                        </>
+                                                    );
+                                                })}
+
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-default add-condition-style"
+                                                    onClick={() => {
+                                                        createScheduleCondition();
+                                                    }}>
+                                                    Add Condition
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -334,6 +691,7 @@ const EditPlugRule = ({
                             </div>
                         </div>
                     )}
+
                     {selectedTab === 1 && (
                         <div>
                             <div className="container plug-rule-body-style">

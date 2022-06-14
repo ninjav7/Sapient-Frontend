@@ -120,6 +120,7 @@ const PlugRules = () => {
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const [createRuleData, setCreateRuleData] = useState({
+        building_id: '62966c902f9fa606bbcd6084',
         action: [],
     });
     const [currentData, setCurrentData] = useState({});
@@ -216,7 +217,8 @@ const PlugRules = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${listPlugRules}`, { headers }).then((res) => {
+                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPlugRuleData(response.data);
                     let onlineData = [];
@@ -243,7 +245,8 @@ const PlugRules = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${listPlugRules}`, { headers }).then((res) => {
+                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPlugRuleData(response.data);
                     let onlineData = [];
