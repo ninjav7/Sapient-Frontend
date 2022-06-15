@@ -231,7 +231,7 @@ const BuildingOverview = () => {
             x: { show: false },
         },
         legend: {
-            show: true,
+            show: false,
         },
         stroke: {
             width: 0,
