@@ -19,6 +19,8 @@ import LineChart from '../charts/LineChart';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { BaseUrl, linkSocketRules, unLinkSocketRules } from '../../services/Network';
+import axios from 'axios';
 import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
@@ -31,12 +33,27 @@ const EditPlugRule = ({
     setCurrentData,
     handleCurrentDataChange,
     updatePlugRuleData,
+    updateSocketLink,
+    updateSocketUnlink,
+    modelRefresh,
+    setModelRefresh,
+    rulesToLink,
+    rulesToUnLink,
+    setRulesToLink,
+    setRulesToUnLink,
 }) => {
     const { v4: uuidv4 } = require('uuid');
     const getConditionId = () => uuidv4();
 
-    const [defaultDate, setDefaultDate] = useState(new Date());
+    const [activeRuleId, setActiveRuleId] = useState(null);
+
     const [selectedTab, setSelectedTab] = useState(0);
+
+    const [selectedRuleFilter, setSelectedRuleFilter] = useState(0);
+
+    const [linkedRuleData, setLinkedRuleData] = useState([]);
+    const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
+    const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
 
     const socketData = [
         {
@@ -270,13 +287,117 @@ const EditPlugRule = ({
         handleCurrentDataChange('action', currentObj.action);
     };
 
-    const timeChangeHandler = (date) => {
-        console.log('date => ', date);
+    const handleRuleStateChange = (value, rule) => {
+        if (value === 'true') {
+            let linkedData = linkedRuleData;
+            let unLinkedData = unLinkedRuleData;
+            let newLinkedData = linkedData.filter((el) => el.id !== rule.id);
+            rule.linked_rule = false;
+            unLinkedData.push(rule);
+            setLinkedRuleData(newLinkedData);
+            setUnLinkedRuleData(unLinkedData);
+
+            let recordToUnLink = rulesToUnLink;
+            recordToUnLink.rule_id = currentData.id;
+            recordToUnLink.sensor_id.push(rule.id);
+            setRulesToUnLink(recordToUnLink);
+
+            let recordToLink = rulesToLink;
+            let newRecordToLink = recordToLink.sensor_id.filter((el) => el !== rule.id);
+            recordToLink.sensor_id = newRecordToLink;
+            setRulesToLink(recordToLink);
+        }
+
+        if (value === 'false') {
+            let linkedData = linkedRuleData;
+            let unLinkedData = unLinkedRuleData;
+            let newUnLinkedData = unLinkedData.filter((el) => el.id !== rule.id);
+            rule.linked_rule = true;
+            linkedData.push(rule);
+            setLinkedRuleData(linkedData);
+            setUnLinkedRuleData(newUnLinkedData);
+
+            let recordToLink = rulesToLink;
+            recordToLink.rule_id = currentData.id;
+            recordToLink.sensor_id.push(rule.id);
+            setRulesToLink(recordToLink);
+
+            let recordToUnLink = rulesToUnLink;
+            let newRecordToUnLink = recordToUnLink.sensor_id.filter((el) => el !== rule.id);
+            recordToUnLink.sensor_id = newRecordToUnLink;
+            setRulesToUnLink(recordToUnLink);
+        }
     };
 
     useEffect(() => {
-        console.log('currentData => ', currentData);
-    });
+        if (activeRuleId === null) {
+            return;
+        }
+        const fetchLinkedSocketRules = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?rule_id=62a862c6371cd03f0df93365&building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    let linkedData = [];
+                    response.data.sensor_id.forEach((record) => {
+                        record.linked_rule = true;
+                        linkedData.push(record);
+                    });
+                    setLinkedRuleData(linkedData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Linked Rules data');
+            }
+        };
+
+        const fetchUnLinkedSocketRules = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?page_size=10&page_no=1&rule_id=62a862c6371cd03f0df93365&building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    let unLinkedData = [];
+                    response.data.forEach((record) => {
+                        record.linked_rule = false;
+                        unLinkedData.push(record);
+                    });
+                    setUnLinkedRuleData(unLinkedData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Unlinked Rules data');
+            }
+        };
+
+        fetchLinkedSocketRules();
+        fetchUnLinkedSocketRules();
+    }, [activeRuleId]);
+
+    useEffect(() => {
+        let arr1 = [];
+        let arr2 = [];
+
+        arr1 = linkedRuleData;
+        arr2 = unLinkedRuleData;
+
+        const allRuleData = arr1.concat(arr2);
+        setAllLinkedRuleData(allRuleData);
+    }, [linkedRuleData, unLinkedRuleData]);
+
+    useEffect(() => {
+        let id = currentData.id ? currentData.id : null;
+        setActiveRuleId(id);
+    }, [currentData]);
 
     return (
         <>
@@ -318,7 +439,10 @@ const EditPlugRule = ({
                                         <button
                                             type="button"
                                             className="btn btn-default plugrule-cancel-style"
-                                            onClick={handleEditRuleClose}>
+                                            onClick={() => {
+                                                handleEditRuleClose();
+                                                setActiveRuleId(null);
+                                            }}>
                                             Cancel
                                         </button>
                                         <button
@@ -326,6 +450,9 @@ const EditPlugRule = ({
                                             className="btn btn-primary plugrule-save-style ml-2"
                                             onClick={() => {
                                                 updatePlugRuleData();
+                                                updateSocketLink();
+                                                updateSocketUnlink();
+                                                setActiveRuleId(null);
                                                 handleEditRuleClose();
                                             }}>
                                             Save
@@ -350,7 +477,7 @@ const EditPlugRule = ({
                                             : 'mr-3 single-plugrule-tab'
                                     }
                                     onClick={() => setSelectedTab(1)}>
-                                    Sockets (4)
+                                    Sockets ({allLinkedRuleData.length})
                                 </span>
                             </div>
                         </div>
@@ -412,59 +539,6 @@ const EditPlugRule = ({
 
                                             <hr className="plugrule-schedule-breaker" />
 
-                                            {/* All Schedular UI  */}
-                                            {/* <div className="plugrule-schedule-row mb-1">
-                                                <div className="schedule-left-flex">
-                                                    <div>
-                                                        <Input
-                                                            type="select"
-                                                            name="state"
-                                                            id="userState"
-                                                            className="font-weight-bold"
-                                                            size="sm">
-                                                            <option>Turn On</option>
-                                                            <option>Turn Off</option>
-                                                        </Input>
-                                                    </div>
-                                                    <div>at</div>
-                                                    <div>
-                                                        <DatePicker
-                                                            selected={defaultDate}
-                                                            showTimeSelect
-                                                            showTimeSelectOnly
-                                                            timeIntervals={15}
-                                                            timeCaption="Time"
-                                                            dateFormat="h:mm aa"
-                                                            className="time-picker-style"
-                                                        />
-                                                    </div>
-                                                    <div>on</div>
-                                                    <div className="schedular-weekday-group">
-                                                        <div className="schedular-weekday-active">Mo</div>
-                                                        <div className="schedular-weekday">Tu</div>
-                                                        <div className="schedular-weekday">We</div>
-                                                        <div className="schedular-weekday">Th</div>
-                                                        <div className="schedular-weekday">Fr</div>
-                                                        <div className="schedular-weekday">Sa</div>
-                                                        <div className="schedular-weekday">Su</div>
-                                                    </div>
-                                                </div>
-                                                <div className="schedule-delete-group">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-default schedule-cancel-style">
-                                                        Cancel
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-default schedule-delete-style">
-                                                        Delete?
-                                                    </button>
-                                                </div>
-                                            </div> */}
-
-                                            {/* <hr className="plugrule-schedule-breaker" /> */}
-
                                             {currentData.action &&
                                                 currentData.action.map((record, index) => {
                                                     return (
@@ -504,11 +578,6 @@ const EditPlugRule = ({
                                                                             timeCaption="Time"
                                                                             dateFormat="h:mm aa"
                                                                             className="time-picker-style"
-                                                                            // onChange={(date) => {
-                                                                            //     timeChangeHandler(
-                                                                            //         moment(date).format('hh:mm A')
-                                                                            //     );
-                                                                            // }}
                                                                             onChange={(date) => {
                                                                                 handleSchedularTimeChange(
                                                                                     'action_time',
@@ -707,28 +776,43 @@ const EditPlugRule = ({
                                                     <div>
                                                         <button
                                                             type="button"
-                                                            className="btn btn-light d-offline custom-active-btn"
+                                                            className={
+                                                                selectedRuleFilter === 0
+                                                                    ? 'btn btn-light d-offline custom-active-btn'
+                                                                    : 'btn btn-white d-inline custom-inactive-btn'
+                                                            }
                                                             style={{
                                                                 borderTopRightRadius: '0px',
                                                                 borderBottomRightRadius: '0px',
-                                                            }}>
+                                                            }}
+                                                            onClick={() => setSelectedRuleFilter(0)}>
                                                             All
                                                         </button>
 
                                                         <button
                                                             type="button"
-                                                            className="btn btn-white d-inline custom-inactive-btn"
-                                                            style={{ borderRadius: '0px' }}>
+                                                            className={
+                                                                selectedRuleFilter === 1
+                                                                    ? 'btn btn-light d-offline custom-active-btn'
+                                                                    : 'btn btn-white d-inline custom-inactive-btn'
+                                                            }
+                                                            style={{ borderRadius: '0px' }}
+                                                            onClick={() => setSelectedRuleFilter(1)}>
                                                             Selected
                                                         </button>
 
                                                         <button
                                                             type="button"
-                                                            className="btn btn-white d-inline custom-inactive-btn"
+                                                            className={
+                                                                selectedRuleFilter === 2
+                                                                    ? 'btn btn-light d-offline custom-active-btn'
+                                                                    : 'btn btn-white d-inline custom-inactive-btn'
+                                                            }
                                                             style={{
                                                                 borderTopLeftRadius: '0px',
                                                                 borderBottomLeftRadius: '0px',
-                                                            }}>
+                                                            }}
+                                                            onClick={() => setSelectedRuleFilter(2)}>
                                                             Unselected
                                                         </button>
                                                     </div>
@@ -746,8 +830,8 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
-                                                    <option>All</option>
-                                                    <option>Option 1</option>
+                                                    <option>AHUs</option>
+                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -762,8 +846,9 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
-                                                    <option>Filtered</option>
-                                                    <option>Option 1</option>
+                                                    <option>Ground Floor</option>
+                                                    {/* <option>Filtered</option> */}
+                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -779,7 +864,7 @@ const EditPlugRule = ({
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
                                                     <option>All</option>
-                                                    <option>Option 1</option>
+                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -794,8 +879,8 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
-                                                    <option>All</option>
-                                                    <option>Option 1</option>
+                                                    <option>None</option>
+                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -806,6 +891,15 @@ const EditPlugRule = ({
                                     <Table className="mb-0 bordered table-hover">
                                         <thead>
                                             <tr>
+                                                <th>
+                                                    <input
+                                                        type="checkbox"
+                                                        id="vehicle1"
+                                                        name="vehicle1"
+                                                        checked={false}
+                                                        disabled
+                                                    />
+                                                </th>
                                                 <th>Equipment Type</th>
                                                 <th>Location</th>
                                                 <th>Assigned Rule</th>
@@ -813,24 +907,126 @@ const EditPlugRule = ({
                                                 <th>Last Data</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            {socketData.map((record, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <td className="font-weight-bold panel-name">
-                                                            <div className="plug-equip-container">
-                                                                {record.equip_type}
-                                                            </div>
-                                                        </td>
 
-                                                        <td className="font-weight-bold">{record.location}</td>
-                                                        <td className="font-weight-bold">{record.assigned_rule}</td>
-                                                        <td className="font-weight-bold">{record.tags}</td>
-                                                        <td className="font-weight-bold">{record.last_date}</td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
+                                        {selectedRuleFilter === 0 && (
+                                            <tbody>
+                                                {allLinkedRuleData.map((record, index) => {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id="socket_rule"
+                                                                    name="socket_rule"
+                                                                    checked={record.linked_rule}
+                                                                    value={record.linked_rule ? true : false}
+                                                                    onChange={(e) => {
+                                                                        handleRuleStateChange(e.target.value, record);
+                                                                    }}
+                                                                />
+                                                            </td>
+
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                </div>
+                                                            </td>
+
+                                                            <td className="font-weight-bold">
+                                                                {record.equipment_link_location}
+                                                            </td>
+                                                            <td className="font-weight-bold">
+                                                                {record.assigned_rules.length === 0
+                                                                    ? 'None'
+                                                                    : record.assigned_rules}
+                                                            </td>
+                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        )}
+
+                                        {selectedRuleFilter === 1 && (
+                                            <tbody>
+                                                {linkedRuleData.map((record, index) => {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id="socket_rule"
+                                                                    name="socket_rule"
+                                                                    checked={record.linked_rule}
+                                                                    value={record.linked_rule ? true : false}
+                                                                    onChange={(e) => {
+                                                                        handleRuleStateChange(e.target.value, record);
+                                                                    }}
+                                                                />
+                                                            </td>
+
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                </div>
+                                                            </td>
+
+                                                            <td className="font-weight-bold">
+                                                                {record.equipment_link_location}
+                                                            </td>
+                                                            <td className="font-weight-bold">
+                                                                {record.assigned_rules.length === 0
+                                                                    ? 'None'
+                                                                    : record.assigned_rules}
+                                                            </td>
+                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        )}
+
+                                        {selectedRuleFilter === 2 && (
+                                            <tbody>
+                                                {unLinkedRuleData.map((record, index) => {
+                                                    return (
+                                                        <tr key={index}>
+                                                            <td>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    id="socket_rule"
+                                                                    name="socket_rule"
+                                                                    checked={record.linked_rule}
+                                                                    value={record.linked_rule ? true : false}
+                                                                    onChange={(e) => {
+                                                                        handleRuleStateChange(e.target.value, record);
+                                                                    }}
+                                                                />
+                                                            </td>
+
+                                                            <td className="font-weight-bold panel-name">
+                                                                <div className="plug-equip-container">
+                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                </div>
+                                                            </td>
+
+                                                            <td className="font-weight-bold">
+                                                                {record.equipment_link_location}
+                                                            </td>
+                                                            <td className="font-weight-bold">
+                                                                {record.assigned_rules.length === 0
+                                                                    ? 'None'
+                                                                    : record.assigned_rules}
+                                                            </td>
+                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        )}
                                     </Table>
                                 </div>
                             </div>

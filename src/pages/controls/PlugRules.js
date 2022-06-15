@@ -19,13 +19,28 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listPlugRules, createPlugRule, updatePlugRule } from '../../services/Network';
+import {
+    BaseUrl,
+    listPlugRules,
+    createPlugRule,
+    updatePlugRule,
+    linkSocket,
+    unLinkSocket,
+} from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import EditPlugRule from './EditPlugRule';
 import './style.css';
 
-const PlugRuleTable = ({ plugRuleData, handleEditRuleShow, currentData, setCurrentData, handleCurrentDataChange }) => {
+const PlugRuleTable = ({
+    plugRuleData,
+    handleEditRuleShow,
+    currentData,
+    setCurrentData,
+    handleCurrentDataChange,
+    modelRefresh,
+    setModelRefresh,
+}) => {
     return (
         <Card>
             <CardBody>
@@ -45,12 +60,12 @@ const PlugRuleTable = ({ plugRuleData, handleEditRuleShow, currentData, setCurre
                                     <td
                                         className="font-weight-bold panel-name"
                                         onClick={() => {
+                                            setModelRefresh(!modelRefresh);
                                             setCurrentData(record);
                                             handleEditRuleShow();
                                         }}>
                                         {record.name}
                                     </td>
-                                    {/* <td>{record.name}</td> */}
                                     <td className="font-weight-bold">
                                         {record.description === '' ? '-' : record.description}
                                     </td>
@@ -125,9 +140,21 @@ const PlugRules = () => {
     });
     const [currentData, setCurrentData] = useState({});
 
+    const [modelRefresh, setModelRefresh] = useState(false);
+
     const [plugRuleData, setPlugRuleData] = useState([]);
     const [onlinePlugRuleData, setOnlinePlugRuleData] = useState([]);
     const [offlinePlugRuleData, setOfflinePlugRuleData] = useState([]);
+
+    const [rulesToLink, setRulesToLink] = useState({
+        rule_id: '',
+        sensor_id: [],
+    });
+
+    const [rulesToUnLink, setRulesToUnLink] = useState({
+        rule_id: '',
+        sensor_id: [],
+    });
 
     const handleCreatePlugRuleChange = (key, value) => {
         let obj = Object.assign({}, createRuleData);
@@ -190,6 +217,64 @@ const PlugRules = () => {
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to update requested Plug Rule');
+        }
+    };
+
+    const updateSocketLink = async () => {
+        if (rulesToLink.sensor_id.length === 0) {
+            return;
+        }
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+
+            setIsProcessing(true);
+
+            await axios
+                .post(`${BaseUrl}${linkSocket}`, rulesToLink, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to update requested Socket Linking!');
+        }
+    };
+
+    const updateSocketUnlink = async () => {
+        if (rulesToUnLink.sensor_id.length === 0) {
+            return;
+        }
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+
+            setIsProcessing(true);
+
+            await axios
+                .post(`${BaseUrl}${unLinkSocket}`, rulesToUnLink, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to update requested Socket Unlinking!');
         }
     };
 
@@ -265,9 +350,9 @@ const PlugRules = () => {
         fetchPlugRuleData();
     }, [pageRefresh]);
 
-    useEffect(() => {
-        console.log('currentData => ', currentData);
-    });
+    // useEffect(() => {
+    //     console.log('currentData => ', currentData);
+    // });
 
     return (
         <React.Fragment>
@@ -367,6 +452,12 @@ const PlugRules = () => {
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
+                            modelRefresh={modelRefresh}
+                            setModelRefresh={setModelRefresh}
+                            rulesToLink={rulesToLink}
+                            rulesToUnLink={rulesToUnLink}
+                            setRulesToLink={setRulesToLink}
+                            setRulesToUnLink={setRulesToUnLink}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -376,6 +467,12 @@ const PlugRules = () => {
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
+                            modelRefresh={modelRefresh}
+                            setModelRefresh={setModelRefresh}
+                            rulesToLink={rulesToLink}
+                            rulesToUnLink={rulesToUnLink}
+                            setRulesToLink={setRulesToLink}
+                            setRulesToUnLink={setRulesToUnLink}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -385,6 +482,12 @@ const PlugRules = () => {
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
+                            modelRefresh={modelRefresh}
+                            setModelRefresh={setModelRefresh}
+                            rulesToLink={rulesToLink}
+                            rulesToUnLink={rulesToUnLink}
+                            setRulesToLink={setRulesToLink}
+                            setRulesToUnLink={setRulesToUnLink}
                         />
                     )}
                 </Col>
@@ -459,6 +562,14 @@ const PlugRules = () => {
                 setCurrentData={setCurrentData}
                 handleCurrentDataChange={handleCurrentDataChange}
                 updatePlugRuleData={updatePlugRuleData}
+                modelRefresh={modelRefresh}
+                setModelRefresh={setModelRefresh}
+                rulesToLink={rulesToLink}
+                rulesToUnLink={rulesToUnLink}
+                setRulesToLink={setRulesToLink}
+                setRulesToUnLink={setRulesToUnLink}
+                updateSocketLink={updateSocketLink}
+                updateSocketUnlink={updateSocketUnlink}
             />
         </React.Fragment>
     );
