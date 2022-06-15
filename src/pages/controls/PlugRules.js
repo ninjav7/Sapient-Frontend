@@ -12,17 +12,20 @@ import {
     Button,
     Input,
 } from 'reactstrap';
-import { Search } from 'react-feather';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices } from '../../services/Network';
+import { BaseUrl, listPlugRules, createPlugRule, updatePlugRule } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import EditPlugRule from './EditPlugRule';
 import './style.css';
 
-const RuleTable = ({ ruleData }) => {
+const PlugRuleTable = ({ plugRuleData, handleEditRuleShow, currentData, setCurrentData, handleCurrentDataChange }) => {
     return (
         <Card>
             <CardBody>
@@ -36,16 +39,23 @@ const RuleTable = ({ ruleData }) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {ruleData.map((record, index) => {
+                        {plugRuleData.map((record, index) => {
                             return (
                                 <tr key={index}>
-                                    <td className="font-weight-bold panel-name">
-                                        <a href="#">{record.name}</a>
+                                    <td
+                                        className="font-weight-bold panel-name"
+                                        onClick={() => {
+                                            setCurrentData(record);
+                                            handleEditRuleShow();
+                                        }}>
+                                        {record.name}
                                     </td>
                                     {/* <td>{record.name}</td> */}
-                                    <td className="font-weight-bold">{record.description}</td>
-                                    <td className="font-weight-bold">{record.days}</td>
-                                    <td className="font-weight-bold">{record.socketCount}</td>
+                                    <td className="font-weight-bold">
+                                        {record.description === '' ? '-' : record.description}
+                                    </td>
+                                    <td className="font-weight-bold">{record.days ? record.days : '-'}</td>
+                                    <td className="font-weight-bold">{record.socketCount ? record.socketCount : 0}</td>
                                 </tr>
                             );
                         })}
@@ -57,10 +67,15 @@ const RuleTable = ({ ruleData }) => {
 };
 
 const PlugRules = () => {
-    // Modal states
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    // Add Rule Model
+    const [showAddRule, setShowAddRule] = useState(false);
+    const handleAddRuleClose = () => setShowAddRule(false);
+    const handleAddRuleShow = () => setShowAddRule(true);
+
+    // Edit Rule Model
+    const [showEditRule, setShowEditRule] = useState(false);
+    const handleEditRuleClose = () => setShowEditRule(false);
+    const handleEditRuleShow = () => setShowEditRule(true);
 
     const [buildingId, setBuildingId] = useState(1);
     const [ruleData, setRuleData] = useState([
@@ -101,6 +116,82 @@ const PlugRules = () => {
             socketCount: 25,
         },
     ]);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [pageRefresh, setPageRefresh] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(0);
+    const [createRuleData, setCreateRuleData] = useState({
+        building_id: '62966c902f9fa606bbcd6084',
+        action: [],
+    });
+    const [currentData, setCurrentData] = useState({});
+
+    const [plugRuleData, setPlugRuleData] = useState([]);
+    const [onlinePlugRuleData, setOnlinePlugRuleData] = useState([]);
+    const [offlinePlugRuleData, setOfflinePlugRuleData] = useState([]);
+
+    const handleCreatePlugRuleChange = (key, value) => {
+        let obj = Object.assign({}, createRuleData);
+        obj[key] = value;
+        setCreateRuleData(obj);
+    };
+
+    const handleCurrentDataChange = (key, value) => {
+        let obj = Object.assign({}, currentData);
+        obj[key] = value;
+        setCurrentData(obj);
+    };
+
+    const savePlugRuleData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            setIsProcessing(true);
+
+            await axios
+                .post(`${BaseUrl}${createPlugRule}`, createRuleData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to create Plug Rule');
+        }
+    };
+
+    const updatePlugRuleData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+
+            setIsProcessing(true);
+
+            let params = `?role_id=${currentData.id}`;
+            await axios
+                .patch(`${BaseUrl}${updatePlugRule}${params}`, currentData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+            setPageRefresh(!pageRefresh);
+        } catch (error) {
+            setIsProcessing(false);
+            alert('Failed to update requested Plug Rule');
+        }
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -118,68 +209,137 @@ const PlugRules = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        const fetchPlugRuleData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPlugRuleData(response.data);
+                    let onlineData = [];
+                    let offlineData = [];
+                    response.data.forEach((record) => {
+                        record.is_active ? onlineData.push(record) : offlineData.push(record);
+                    });
+                    setOnlinePlugRuleData(onlineData);
+                    setOfflinePlugRuleData(offlineData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Plug Rules data');
+            }
+        };
+        fetchPlugRuleData();
+    }, []);
+
+    useEffect(() => {
+        const fetchPlugRuleData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    'user-auth': '628f3144b712934f578be895',
+                };
+                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPlugRuleData(response.data);
+                    let onlineData = [];
+                    let offlineData = [];
+                    response.data.forEach((record) => {
+                        record.is_active ? onlineData.push(record) : offlineData.push(record);
+                    });
+                    setOnlinePlugRuleData(onlineData);
+                    setOfflinePlugRuleData(offlineData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Plug Rules data');
+            }
+        };
+        fetchPlugRuleData();
+    }, [pageRefresh]);
+
+    useEffect(() => {
+        console.log('currentData => ', currentData);
+    });
+
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Plug Rules
-                    </span>
-
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Rule
-                            </button>
-                        </div>
+            <div className="plug-rules-header-style mt-4 ml-4 mr-3">
+                <div className="plug-left-header">
+                    <div className="plug-blg-name">NYPL</div>
+                    <div className="plug-heading-style">Plug Rules</div>
+                </div>
+                <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
+                    <div className="mr-2">
+                        <button
+                            type="button"
+                            className="btn btn-md btn-primary font-weight-bold"
+                            onClick={() => {
+                                handleAddRuleShow();
+                            }}>
+                            <FontAwesomeIcon icon={faPlus} size="md" className="mr-2" />
+                            Add Rule
+                        </button>
                     </div>
-                </Col>
-            </Row>
+                </div>
+            </div>
 
-            <Row className="mt-2">
-                <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                        />
-                        <span class="input-group-text border-0" id="search-addon">
-                            <Search className="icon-sm" />
-                        </span>
+            <div className="plug-rules-header-style mt-4 ml-4 mr-4">
+                <div className="plug-search-tabs-style">
+                    <div className="search-container mr-2">
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                        <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
                     </div>
-                </Col>
-                <Col xl={9}>
+
                     <div className="btn-group ml-2" role="group" aria-label="Basic example">
                         <div>
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}>
+                                className={
+                                    selectedTab === 0
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
+                                onClick={() => setSelectedTab(0)}>
                                 All Statuses
                             </button>
 
-                            <button type="button" className="btn btn-white d-inline" style={{ borderRadius: '0px' }}>
+                            <button
+                                type="button"
+                                className={
+                                    selectedTab === 1
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderRadius: '0px' }}
+                                onClick={() => setSelectedTab(1)}>
                                 <i className="uil uil-wifi mr-1"></i>Online
                             </button>
 
                             <button
                                 type="button"
-                                className="btn btn-white d-inline"
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}>
+                                className={
+                                    selectedTab === 2
+                                        ? 'btn btn-light d-offline custom-active-btn'
+                                        : 'btn btn-white d-inline custom-inactive-btn'
+                                }
+                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
+                                onClick={() => setSelectedTab(2)}>
                                 <i className="uil uil-wifi-slash mr-1"></i>Offline
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    {/* ---------------------------------------------------------------------- */}
+                <div>
                     <UncontrolledDropdown className="d-inline float-right">
                         <DropdownToggle color="white">
                             Columns
@@ -195,59 +355,111 @@ const PlugRules = () => {
                             <DropdownItem>Lana Steiner</DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
-                </Col>
-            </Row>
+                </div>
+            </div>
 
             <Row>
                 <Col lg={8}>
-                    <RuleTable ruleData={ruleData} />
+                    {selectedTab === 0 && (
+                        <PlugRuleTable
+                            plugRuleData={plugRuleData}
+                            handleEditRuleShow={handleEditRuleShow}
+                            currentData={currentData}
+                            setCurrentData={setCurrentData}
+                            handleCurrentDataChange={handleCurrentDataChange}
+                        />
+                    )}
+                    {selectedTab === 1 && (
+                        <PlugRuleTable
+                            plugRuleData={onlinePlugRuleData}
+                            handleEditRuleShow={handleEditRuleShow}
+                            currentData={currentData}
+                            setCurrentData={setCurrentData}
+                            handleCurrentDataChange={handleCurrentDataChange}
+                        />
+                    )}
+                    {selectedTab === 2 && (
+                        <PlugRuleTable
+                            plugRuleData={offlinePlugRuleData}
+                            handleEditRuleShow={handleEditRuleShow}
+                            currentData={currentData}
+                            setCurrentData={setCurrentData}
+                            handleCurrentDataChange={handleCurrentDataChange}
+                        />
+                    )}
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Add Rule</Modal.Title>
-                </Modal.Header>
+            {/* Add Rule Model  */}
+            <Modal show={showAddRule} onHide={handleAddRuleClose} centered>
+                <div className="mt-3 ml-3">
+                    <Modal.Title>Add Plug Rule</Modal.Title>
+                </div>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
+                            <Form.Label>Name</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter Identifier"
+                                placeholder="Enter Name"
                                 className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleCreatePlugRuleChange('name', e.target.value);
+                                }}
                                 autoFocus
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Model</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-                                <option selected>Open this select menu</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
-                            </Input>
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Description"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleCreatePlugRuleChange('description', e.target.value);
+                                }}
+                            />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Location</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-                                <option selected>Select Location</option>
-                                <option>Office Building</option>
-                                <option>Residential Building</option>
-                            </Input>
-                        </Form.Group>
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Socket Count</Form.Label>
+                            <Form.Control
+                                type="number"
+                                placeholder="Enter Socket Count"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleCreatePlugRuleChange('name', e.target.value);
+                                }}
+                            />
+                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
+                    <Button variant="light" onClick={handleAddRuleClose}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            savePlugRuleData();
+                            handleAddRuleClose();
+                        }}
+                        disabled={isProcessing}>
                         Save
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Edit Rule Model  */}
+            <EditPlugRule
+                showEditRule={showEditRule}
+                handleEditRuleClose={handleEditRuleClose}
+                currentData={currentData}
+                setCurrentData={setCurrentData}
+                handleCurrentDataChange={handleCurrentDataChange}
+                updatePlugRuleData={updatePlugRuleData}
+            />
         </React.Fragment>
     );
 };
