@@ -120,7 +120,7 @@ const PortfolioOverview = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
+                    return value +' K';
                 },
             },
         },
@@ -134,10 +134,10 @@ const PortfolioOverview = () => {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                    // if (val >= 1000) {
+                    //     val = (val / 1000).toFixed(0) + ' K';
+                    // }
+                    return val+' K';
                 },
             },
             style: {
