@@ -340,7 +340,7 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?rule_id=62a862c6371cd03f0df93365&building_id=62966c902f9fa606bbcd6084`;
+                let params = `?rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let linkedData = [];
@@ -363,7 +363,7 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                let params = `?page_size=10&page_no=1&rule_id=62a862c6371cd03f0df93365&building_id=62966c902f9fa606bbcd6084`;
+                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let unLinkedData = [];
