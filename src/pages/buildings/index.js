@@ -1023,6 +1023,10 @@ const BuildingOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        console.log('buildingConsumptionChart => ', buildingConsumptionChart);
+    });
+
     return (
         <React.Fragment>
             <Header title="Building Overview" />

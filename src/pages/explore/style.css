@@ -1,9 +1,16 @@
 .react-select > div {
-    width:max-content;
+    width: max-content;
 }
-.explorer-select-style{
-    width: auto !important;
+.explorer-select-style {
+    width: 100% !important;
     /* position: fixed !important; */
+}
 
-
+.explore-page-filter {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    align-content: stretch !important;
 }

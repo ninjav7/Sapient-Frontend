@@ -57,8 +57,8 @@ const UserProfile = () => {
                         </p>
                     </div>
 
-                    <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
-                        <div className="float-right ml-2">
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                        <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold cancel-btn-style"
