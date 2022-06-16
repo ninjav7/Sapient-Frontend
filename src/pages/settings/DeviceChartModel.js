@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Row,
     Col,
@@ -18,15 +18,23 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
+import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
+import axios from 'axios';
+import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 
-const DeviceChartModel = ({ showChart, handleChartClose }) => {
+const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
+    console.log(sensorData.name);
+    console.log(sensorData.id);
+    
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
+    const [ deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
+    const [seriesData,setSeriesData]=useState([]);
     const [startDate, endDate] = dateRange;
 
     const customDaySelect = [
@@ -51,6 +59,73 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
 
+    useEffect(() => {
+        const setCustomDate = (date) => {
+            let endCustomDate = new Date(); // today
+            let startCustomDate = new Date();
+            startCustomDate.setDate(startCustomDate.getDate() - date);
+            setDateRange([startCustomDate, endCustomDate]);
+            DateRangeStore.update((s) => {
+                s.dateFilter = date;
+                s.startDate = startCustomDate;
+                s.endDate = endCustomDate;
+            });
+        };
+        setCustomDate(dateFilter);
+    }, [dateFilter]);
+
+    useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+    const exploreDataFetch = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            // let params = `?sensor_id=629f436216701186eff7b79b`;
+            let params = `?sensor_id=${sensorData.id}`;
+            await axios.post(`${BaseUrl}${sensorGraphData}${params}`, 
+            {
+                date_from: dateFormatHandler(startDate),
+                date_to: dateFormatHandler(endDate),
+            }
+            ,{ headers }).then((res) => {
+                let response = res.data;
+                console.log('Sensor Graph Data => ', response); 
+                let data=response;
+                let exploreData = [];
+                                let recordToInsert = {
+                                    data: data,
+                                    name:"AHUs"
+                                };
+                                exploreData.push(recordToInsert);
+                        console.log('SSR Customized exploreData => ', exploreData);
+                        setDeviceData(exploreData);
+                        setSeriesData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Sensor Graph data');
+        }
+    };
+
+    exploreDataFetch();
+}, [startDate, endDate]);
+
+
+    useEffect(() => {
+        console.log(sensorData)
+    },[])
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -65,6 +140,15 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
         return series;
     };
 
+    const handleRefresh=()=>{
+        setDateFilter(dateValue);
+        let endDate = new Date(); // today
+        let startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        setDateRange([startDate,endDate]);
+        setDeviceData([]);
+        setSeriesData([]);
+    }
     const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -100,17 +184,6 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
                 [1650955774141, 234.55],
                 [1650874722069, 240],
                 [1650874733485, 989.55],
-            ],
-        },
-        {
-            name: 'AHU 2',
-            data: [
-                [1650955798660, 361],
-                [1650874764212, 234.55],
-                [1650874786336, 227],
-                [1650874800399, 325],
-                [1650955861209, 184],
-                [1650874814741, 766.55],
             ],
         },
     ]);
@@ -170,8 +243,8 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
             selection: {
                 enabled: true,
                 xaxis: {
-                    min: new Date('1 May 2022').getTime(),
-                    max: new Date('7 May 2022').getTime(),
+                    min: new Date('24 May 2022').getTime(),
+                    max: new Date('31 May 2022').getTime(),
                 },
             },
         },
@@ -200,8 +273,8 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
                 <div>
                     <div className="model-sensor-date-time">00-08-20-83-53-D1</div>
                     <div>
-                        <span className="model-sensor-name mr-2">Sensor 1</span>
-                        <span className="model-equip-name">AHU 1</span>
+                        <span className="model-sensor-name mr-2">{sensorData.name}</span>
+                        <span className="model-equip-name">{sensorData.equipment}</span>
                     </div>
                 </div>
                 <div>
@@ -210,6 +283,7 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
                         size="lg"
                         onClick={() => {
                             handleChartClose();
+                            handleRefresh();
                         }}
                     />
                 </div>
@@ -267,9 +341,9 @@ const DeviceChartModel = ({ showChart, handleChartClose }) => {
 
             <div>
                 <BrushChart
-                    seriesData={series}
+                    seriesData={deviceData}
                     optionsData={options}
-                    seriesLineData={seriesLine}
+                    seriesLineData={seriesData}
                     optionsLineData={optionsLine}
                 />
             </div>

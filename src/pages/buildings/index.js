@@ -10,6 +10,9 @@ import upGraph from '../../assets/icon/buildings/up-graph.svg';
 import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
+import { faMountain } from '@fortawesome/pro-solid-svg-icons';
+import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
+import {faTriangleExclamation} from '@fortawesome/pro-solid-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -21,6 +24,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -206,9 +210,16 @@ const BuildingOverview = () => {
                     chart: {
                         width: 300,
                     },
-                    legend: {
-                        show: false,
-                    },
+                    // legend: {
+                    //     show: true,
+                    //     showForSingleSeries:true,
+                    //     onItemHover: {
+                    //         highlightDataSeries: true
+                    //     },
+                    //     onItemClick: {
+                    //         toggleDataSeries: true
+                    //     },
+                    // },
                 },
             },
         ],
@@ -373,6 +384,9 @@ const BuildingOverview = () => {
         dataLabels: {
             enabled: false,
         },
+        toolbar: {
+            show: true,
+        },
         colors: ['#87AADE'],
         stroke: {
             curve: 'straight',
@@ -392,18 +406,28 @@ const BuildingOverview = () => {
             },
         },
         tooltip: {
-            shared: true,
+            shared: false,
             intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
+                format: 'dd/MMM - hh:mm TT',
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
             },
         },
         xaxis: {
             type: 'datetime',
             labels: {
-                formatter: function (value, timestamp, opts) {
-                    return opts.dateFormatter(new Date(timestamp), 'MMMdd');
-                },
+                format: 'dd/MMM - hh:mm TT',
             },
             style: {
                 fontSize: '12px',
@@ -415,10 +439,10 @@ const BuildingOverview = () => {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                    // if (val >= 1000) {
+                    //     val = (val / 1000).toFixed(0) + ' K';
+                    // }
+                    return val+' K';
                 },
             },
             style: {
@@ -728,7 +752,7 @@ const BuildingOverview = () => {
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
-                            let fixedConsumption = record.energy_consumption.now;
+                            let fixedConsumption = record.energy_consumption.now / 1000;
                             // newArray.push(fixedConsumption);
                             newDonutData.push(parseInt(fixedConsumption));
                         });
@@ -854,14 +878,14 @@ const BuildingOverview = () => {
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y,
+                                y: (el.y / 1000).toFixed(2),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y,
+                                y: (el.y / 1000).toFixed(2),
                             };
                         });
 
@@ -896,7 +920,7 @@ const BuildingOverview = () => {
                             let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
-                                console.log('matchedRecord => ', matchedRecord);
+                                // console.log('matchedRecord => ', matchedRecord);
                                 newWeekendsData[0].data.push(matchedRecord);
                             } else {
                                 newWeekendsData[0].data.push({
@@ -907,15 +931,15 @@ const BuildingOverview = () => {
                         }
                         console.log('newWeekendsData => ', newWeekendsData);
                         setWeekDaysSeries(newWeekdaysData);
-                        // setWeekEndsSeries(newWeekendsData);
-                        setWeekEndsSeries([
-                            {
-                                name: 'Weekends',
-                                data: [
-                                    500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-                                ],
-                            },
-                        ]);
+                        setWeekEndsSeries(newWeekendsData);
+                        // setWeekEndsSeries([
+                        //     {
+                        //         name: 'Weekends',
+                        //         data: [
+                        //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+                        //         ],
+                        //     },
+                        // ]);
                     });
             } catch (error) {
                 console.log(error);
@@ -944,13 +968,14 @@ const BuildingOverview = () => {
                         let response = res.data;
                         let newArray = [
                             {
+                                name:'Energy',
                                 data: [],
                             },
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: moment(record.x).format('MMM D'),
-                                y: record.y.toFixed(2),
+                                x: record.x,
+                                y: (record.y / 1000).toFixed(2),
                             });
                         });
                         console.log('newArray => ', newArray);
@@ -998,6 +1023,10 @@ const BuildingOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        console.log('buildingConsumptionChart => ', buildingConsumptionChart);
+    });
+
     return (
         <React.Fragment>
             <Header title="Building Overview" />
@@ -1008,7 +1037,7 @@ const BuildingOverview = () => {
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now}
+                                description={overview.total_consumption.now / 1000}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
@@ -1033,7 +1062,7 @@ const BuildingOverview = () => {
                                 </div>
                             </h5>
                             <p className="card-text card-content-style">
-                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;10</span>
+                                1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;6</span>
                             </p>
                         </div>
                     </div>
@@ -1042,7 +1071,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={overview.average_energy_density.now}
+                                description={overview.average_energy_density.now / 1000}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1060,7 +1089,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
-                                description={overview.yearly_electric_eui.now}
+                                description={overview.yearly_electric_eui.now / 1000}
                                 unit="kBtu/ft/yr"
                                 value={percentageHandler(
                                     overview.yearly_electric_eui.now,
@@ -1086,7 +1115,12 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            <button id="inner-button">Add Utility Bill</button>
+                            <Link
+                                to={{
+                                    pathname: `/settings/utility-bills`,
+                                }}>
+                                <button id="inner-button">Add Utility Bill</button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -1172,9 +1206,12 @@ const BuildingOverview = () => {
                                                         {record.device}
                                                     </div>
                                                     <div className="custom-bld-usage-style muted table-font-style">
-                                                        {record.energy_consumption.now.toLocaleString(undefined, {
-                                                            maximumFractionDigits: 2,
-                                                        })}
+                                                        {(record.energy_consumption.now / 1000).toLocaleString(
+                                                            undefined,
+                                                            {
+                                                                maximumFractionDigits: 2,
+                                                            }
+                                                        )}
                                                         kWh
                                                     </div>
                                                     <div className="mr-2">
@@ -1256,10 +1293,13 @@ const BuildingOverview = () => {
                                             </h6>
                                             <h5 className="card-title ml-1">
                                                 <span style={{ color: 'black' }}>
-                                                    {item.overall_energy_consumption.toLocaleString(undefined, {
-                                                        maximumFractionDigits: 2,
-                                                    })}
-                                                </span>{' '}
+                                                    {(item.overall_energy_consumption / 1000).toLocaleString(
+                                                        undefined,
+                                                        {
+                                                            maximumFractionDigits: 2,
+                                                        }
+                                                    )}
+                                                </span>
                                                 kW
                                             </h5>
                                             <div style={{ height: '75%' }}>
@@ -1410,10 +1450,11 @@ const BuildingOverview = () => {
                                             {record.type === 'building-add' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                        <i className="uil uil-triangle" />
+                                                    <FontAwesomeIcon icon={faMountain} size="lg" className="ml-2" color="#B42318
+"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">New Building Peak</span>
+                                                        <span className="alert-heading"><b>New Building Peak</b></span>
                                                         <br />
                                                         <span className="alert-content">
                                                             225.3 kW &nbsp; 3/3/22 @ 3:20 PM
@@ -1425,10 +1466,10 @@ const BuildingOverview = () => {
                                             {record.type === 'energy-trend' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                        <i className="uil uil-arrow-growth" />
+                                                    <FontAwesomeIcon icon={faArrowTrendUp} size="lg" className="ml-2" color="#DC6803"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">Energy Trend Upward</span>
+                                                        <span className="alert-heading"><b>Energy Trend Upward</b></span>
                                                         <br />
                                                         <span className="alert-content">+25% from last 30 days</span>
                                                     </div>
@@ -1438,10 +1479,10 @@ const BuildingOverview = () => {
                                             {record.type === 'notification' && (
                                                 <div className="alert-card">
                                                     <div>
-                                                        <i className="uil uil-exclamation-triangle" />
+                                                    <FontAwesomeIcon icon={faTriangleExclamation} size="lg" className="ml-2" color="#DC6803"/>
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading">Service Due Soon (AHU 1)</span>
+                                                        <span className="alert-heading"><b>Service Due Soon (AHU 1)</b></span>
                                                         <br />
                                                         <span className="alert-content">
                                                             40 Run Hours &nbsp; in 25 Days
@@ -1481,9 +1522,12 @@ const BuildingOverview = () => {
                                                 <div>
                                                     <div>
                                                         <span>
-                                                            {item.energy_consumption.now.toLocaleString(undefined, {
-                                                                maximumFractionDigits: 2,
-                                                            })}
+                                                            {(item.energy_consumption.now / 1000).toLocaleString(
+                                                                undefined,
+                                                                {
+                                                                    maximumFractionDigits: 2,
+                                                                }
+                                                            )}
                                                         </span>
                                                         <span className="equip-table-unit">&nbsp;kWh</span>
                                                     </div>

@@ -120,7 +120,7 @@ const PortfolioOverview = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
+                    return value +' K';
                 },
             },
         },
@@ -134,10 +134,10 @@ const PortfolioOverview = () => {
             labels: {
                 formatter: function (value) {
                     var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                    // if (val >= 1000) {
+                    //     val = (val / 1000).toFixed(0) + ' K';
+                    // }
+                    return val+' K';
                 },
             },
             style: {
@@ -271,7 +271,7 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     // const [series, setSeries] = useState([44, 55, 41, 17]);
-    const [series, setSeries] = useState([10, 10, 10, 10]);
+    const [series, setSeries] = useState([0, 0, 0, 0]);
 
     const [options, setOptions] = useState({
         chart: {
@@ -402,7 +402,7 @@ const PortfolioOverview = () => {
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption));
+                            newDonutData.push(parseInt(fixedConsumption / 1000));
                         });
                         setSeries(newDonutData);
                     });
@@ -489,7 +489,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        // console.log('setBuildingsEnergyConsume => ', data);
+                        console.log('setBuildingsEnergyConsume => ', data);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {
@@ -684,7 +684,7 @@ const PortfolioOverview = () => {
                                                     colors={`#D14065`}
                                                     progressValue={0}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container custom-progress-bar"
                                                 />
                                             )}
@@ -693,7 +693,7 @@ const PortfolioOverview = () => {
                                                     colors={`#D14065`}
                                                     progressValue={100}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container custom-progress-bar"
                                                 />
                                             )}
@@ -702,7 +702,7 @@ const PortfolioOverview = () => {
                                                     colors={`#DF5775`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -711,7 +711,7 @@ const PortfolioOverview = () => {
                                                     colors={`#EB6E87`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -720,7 +720,7 @@ const PortfolioOverview = () => {
                                                     colors={`#EB6E87`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -729,7 +729,7 @@ const PortfolioOverview = () => {
                                                     colors={`#FC9EAC`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -738,7 +738,7 @@ const PortfolioOverview = () => {
                                                     colors={`#FFCFD6`}
                                                     progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
                                                     progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' k.W /Sq. feet'}
+                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
                                                     className="progress-bar-container"
                                                 />
                                             )}
@@ -849,7 +849,6 @@ const PortfolioOverview = () => {
                                         );
                                     })}
                                 </div>
-                                )
                             </div>
                         </div>
 

@@ -505,7 +505,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/active-devices/single',
+            path: '/settings/active-devices/single/:deviceId',
             name: 'Single Active Devices',
             component: IndividualActiveDevice,
             route: PrivateRoute,

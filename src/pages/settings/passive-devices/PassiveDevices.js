@@ -22,7 +22,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData }) => {
+const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
     return (
         <Card>
             <CardBody>
@@ -54,7 +54,7 @@ const PassiveDevicesTable = ({ deviceData }) => {
                                     </td>
                                     <Link
                                         to={{
-                                            pathname: `/settings/passive-devices/single/${record.device_id}`,
+                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
                                         }}>
                                         <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     </Link>
@@ -66,6 +66,24 @@ const PassiveDevicesTable = ({ deviceData }) => {
                         })}
                     </tbody>
                 </Table>
+                <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            previousPageData(paginationData.pagination.previous);
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            nextPageData(paginationData.pagination.next);
+                        }}>
+                        Next
+                    </button>
+                </div>
             </CardBody>
         </Card>
     );
@@ -81,8 +99,22 @@ const PassiveDevices = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNo, setPageNo] = useState(1);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+
+    const [passiveDeviceModel, setPassiveDeviceModel] = useState([
+        {
+            value: 'PR55-4A',
+            label: 'PR55-4A',
+        },
+        {
+            value: 'HYDRA-1',
+            label: 'HYDRA-1',
+        },
+    ]);
+    const [paginationData, setPaginationData] = useState({});
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
@@ -124,6 +156,69 @@ const PassiveDevices = () => {
         }
     };
 
+    const nextPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                'user-auth': '628f3144b712934f578be895',
+            };
+            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    
     // useEffect(() => {
     //     const fetchPassiveDeviceData = async () => {
     //         try {
@@ -209,49 +304,25 @@ const PassiveDevices = () => {
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
                 };
-                await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-                    setPassiveDeviceData(res.data);
-                    console.log(res.data);
+                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    let data = res.data;
+                    console.log('Rai Passive Data => ', data);
+                    setPassiveDeviceData(data.data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    data.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
                 });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch all Passive devices');
-            }
-        };
-
-        const fetchOnlineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=true`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOnlineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Online devices');
-            }
-        };
-
-        const fetchOfflineDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?stat=false`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    setOfflineDeviceData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Offline devices');
             }
         };
 
@@ -273,13 +344,16 @@ const PassiveDevices = () => {
         };
 
         const fetchGatewayData = async () => {
-            let headers = {
+            let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
+                'user-auth': '628f3144b712934f578be895',
             };
+            let params = `?building_id=${bldgId}`;
             await axios
-                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .get(`${BaseUrl}${generalGateway}${params}`, {
+                    headers: header,
+                })
                 .then((res) => {
                     setGeneralGatewayData(res.data);
                     console.log(res.data);
@@ -291,8 +365,6 @@ const PassiveDevices = () => {
         };
 
         fetchPassiveDeviceData();
-        fetchOnlineDeviceData();
-        fetchOfflineDeviceData();
         fetchLocationData();
         fetchGatewayData();
     }, [pageRefresh, bldgId]);
@@ -422,9 +494,18 @@ const PassiveDevices = () => {
 
             <Row>
                 <Col lg={8}>
-                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData} />}
-                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData} />}
-                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData} />}
+                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}/>}
+                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData} />}
+                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData} />}
                 </Col>
             </Row>
 
@@ -458,8 +539,8 @@ const PassiveDevices = () => {
                                     handleChange('model', e.target.value);
                                 }}>
                                 <option selected>Select Model</option>
-                                {passiveDeviceData.map((record) => {
-                                    return <option value={record.model}>{record.model}</option>;
+                                {passiveDeviceModel.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
                                 })}
                             </Input>
                         </Form.Group>

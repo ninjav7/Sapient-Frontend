@@ -1,25 +1,9 @@
-.explorer-select-style {
-    width: 175px;
-    height: 34px;
-    padding: 7px 10px;
-    background: #ffffff;
-    border-radius: 6px;
-
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 20px;
-    color: #1d2939;
+.react-select > div {
+    width: max-content;
 }
-
-.explore-three-dot {
-    background: #ffffff;
-    border: 1px solid #d9dde2;
-    box-sizing: border-box;
-    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
-    border-radius: 3px;
-    padding: 7px;
+.explorer-select-style {
+    width: 100% !important;
+    /* position: fixed !important; */
 }
 
 .explore-page-filter {
@@ -27,29 +11,6 @@
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     justify-content: space-between !important;
-    align-items: center !important;
+    align-items: stretch !important;
     align-content: stretch !important;
-}
-
-.explore-equip-filter {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    align-content: stretch;
-    gap: 13px;
-}
-
-.filter-type-style {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    color: #667085;
-}
-
-.endUses-select-style {
-    width: 10vw;
 }

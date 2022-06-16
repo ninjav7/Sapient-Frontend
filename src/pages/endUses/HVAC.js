@@ -575,9 +575,12 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                                             After-Hours Consumption
                                         </p>
                                         <p className="card-text usage-card-content-style">
-                                            {record.after_hours_energy_consumption.now.toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                                            {(record.after_hours_energy_consumption.now / 1000).toLocaleString(
+                                                undefined,
+                                                {
+                                                    maximumFractionDigits: 2,
+                                                }
+                                            )}
                                             <span className="card-unit-style">&nbsp;kWh</span>
                                         </p>
                                         {record.after_hours_energy_consumption.now >=

@@ -420,7 +420,7 @@ const UsagePageThree = () => {
                                             Total Consumption
                                         </p>
                                         <p className="card-text usage-card-content-style">
-                                            {record.energy_consumption.now.toLocaleString(undefined, {
+                                            {(record.energy_consumption.now / 1000).toLocaleString(undefined, {
                                                 maximumFractionDigits: 2,
                                             })}
                                             <span className="card-unit-style">&nbsp;kWh</span>
@@ -497,9 +497,12 @@ const UsagePageThree = () => {
                                             After-Hours Consumption
                                         </p>
                                         <p className="card-text usage-card-content-style">
-                                            {record.after_hours_energy_consumption.now.toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                                            {(record.after_hours_energy_consumption.now / 1000).toLocaleString(
+                                                undefined,
+                                                {
+                                                    maximumFractionDigits: 2,
+                                                }
+                                            )}
                                             <span className="card-unit-style">&nbsp;kWh</span>
                                         </p>
                                         {record.after_hours_energy_consumption.now >=
@@ -510,8 +513,8 @@ const UsagePageThree = () => {
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
+                                                            record.after_hours_energy_consumption.now / 1000,
+                                                            record.after_hours_energy_consumption.old / 1000
                                                         )}
                                                         %
                                                     </strong>
@@ -524,8 +527,8 @@ const UsagePageThree = () => {
                                                 <i className="uil uil-chart-down">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
+                                                            record.after_hours_energy_consumption.now / 1000,
+                                                            record.after_hours_energy_consumption.old / 1000
                                                         )}
                                                         %
                                                     </strong>
@@ -543,8 +546,8 @@ const UsagePageThree = () => {
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.yearly
+                                                            record.after_hours_energy_consumption.now / 1000,
+                                                            record.after_hours_energy_consumption.yearly / 1000
                                                         )}
                                                         %
                                                     </strong>
@@ -557,8 +560,8 @@ const UsagePageThree = () => {
                                                 <i className="uil uil-chart-down">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.yearly
+                                                            record.after_hours_energy_consumption.now / 1000,
+                                                            record.after_hours_energy_consumption.yearly / 1000
                                                         )}
                                                         %
                                                     </strong>
