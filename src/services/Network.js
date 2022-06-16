@@ -1,4 +1,4 @@
-export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
+export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
