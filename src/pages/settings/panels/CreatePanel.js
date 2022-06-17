@@ -8,6 +8,9 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BaseUrl, getLocation, generalPanels, generalPassiveDevices, createPanel } from '../../../services/Network';
 import { v4 as uuidv4 } from 'uuid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkHorizontalSlash } from '@fortawesome/pro-regular-svg-icons';
+
 import '../style.css';
 import './panel-style.css';
 
@@ -24,6 +27,83 @@ import './panel-style.css';
 //     );
 // };
 
+// const BreakerComponent = ({ data, id }) => {
+//     return (
+//         <Card className="p-4" stretch={true}>
+//             <CardActions>
+//                 <Handle
+//                     type="target"
+//                     onConnect={(params) => console.log('handle onConnect', params)}
+//                     id="3"
+//                     isConnectable={true}
+//                     position="top"
+//                     style={{ background: 'var(--bs-secondary)', width: '10px', height: '10px' }}
+//                 />
+//                 <Handle
+//                     type="source"
+//                     onConnect={(params) => console.log('handle onConnect', params)}
+//                     id="1"
+//                     isConnectable={true}
+//                     position="bottom"
+//                     style={{ background: 'var(--bs-primary)', width: '10px', height: '10px' }}
+//                 />
+
+//                 <FormGroup className="form-group row m-2 ml-4">
+//                     <div className="breaker-container">
+//                         <div className="sub-breaker-style">
+//                             <div className="breaker-content-middle">
+//                                 <div className="breaker-index">{element.breakerNo}</div>
+//                             </div>
+//                             <div className="breaker-content-middle">
+//                                 <div className="dot-status"></div>
+//                             </div>
+//                             <div className="breaker-content-middle">
+//                                 <div className="breaker-content">
+//                                     <span>20A</span>
+//                                     <span>120V</span>
+//                                 </div>
+//                             </div>
+//                             {!(element.equipment_name === '') ? (
+//                                 <>
+//                                     <div>
+//                                         <h6 className="ml-4 mb-3 breaker-equip-name">{element.equipment_name}</h6>
+//                                     </div>
+//                                     <div
+//                                         className="breaker-content-middle"
+//                                         onClick={() => {
+//                                             handleEditBreakerShow();
+//                                             setUpdateData(element);
+//                                         }}>
+//                                         <div className="edit-icon-bg-styling mr-2">
+//                                             <i className="uil uil-pen"></i>
+//                                         </div>
+//                                         <span className="font-weight-bold edit-btn-styling">Edit</span>
+//                                     </div>
+//                                 </>
+//                             ) : (
+//                                 <>
+//                                     <div
+//                                         className="breaker-content-middle"
+//                                         onClick={() => {
+//                                             handleBreakerShow();
+//                                             setNormalData(element);
+//                                             setNormalDataIndex(index);
+//                                         }}>
+//                                         <div className="edit-icon-bg-styling mr-2">
+//                                             <i className="uil uil-pen"></i>
+//                                         </div>
+//                                         <span className="font-weight-bold edit-btn-styling">Edit</span>
+//                                     </div>
+//                                 </>
+//                             )}
+//                         </div>
+//                     </div>
+//                 </FormGroup>
+//             </CardActions>
+//         </Card>
+//     );
+// };
+
 const CreatePanel = () => {
     // Create Modal
     const [showBreaker, setShowBreaker] = useState(false);
@@ -35,17 +115,29 @@ const CreatePanel = () => {
     const handleEditBreakerClose = () => setShowEditBreaker(false);
     const handleEditBreakerShow = () => setShowEditBreaker(true);
 
+    // Main Breaker Modal
+    const [showMain, setShowMain] = useState(false);
+    const handleMainClose = () => setShowMain(false);
+    const handleMainShow = () => setShowMain(true);
+
     const [updateData, setUpdateData] = useState({});
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isProcessing, setIsProcessing] = useState(false);
     const [panel, setPanel] = useState({
+        name: 'Panel Name',
+        parent_panel: '',
+        device_id: '',
+        space_id: '',
+        voltage: '',
+        phase_config: 1,
+        rated_amps: 200,
         breaker_count: 48,
     });
 
     const [normalStruct, setNormalStruct] = useState([]);
 
-    const [normalCount, setNormalCount] = useState(48);
+    const [normalCount, setNormalCount] = useState(4);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
     const [panelType, setPanelType] = useState([
@@ -78,7 +170,9 @@ const CreatePanel = () => {
 
     const [isEditing, setIsEditing] = useState(true);
 
-    const [normalData, setNormalData] = useState({});
+    const [normalData, setNormalData] = useState({
+        related_amps: 200,
+    });
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     // const getBreakerId = () => `breaker_${+new Date()}`;
@@ -88,7 +182,7 @@ const CreatePanel = () => {
     const [main, setMain] = useState({
         phase: 1,
         voltage: '',
-        amps: '',
+        amps: '200',
         equipment_name: '',
         uniqueId: getBreakerId(),
         parentId: '',
@@ -99,6 +193,9 @@ const CreatePanel = () => {
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
         if (key === 'breaker_count') {
+            value = parseInt(value);
+        }
+        if (key === 'rated_amps') {
             value = parseInt(value);
         }
         obj[key] = value;
@@ -140,6 +237,9 @@ const CreatePanel = () => {
     };
 
     const handleNormalChange = (key, value) => {
+        if (value === 'Select Volts') {
+            value = '';
+        }
         let obj = Object.assign({}, normalData);
         obj[key] = value;
         setNormalData(obj);
@@ -168,6 +268,20 @@ const CreatePanel = () => {
             setIsProcessing(false);
             alert('Failed to save Panel');
         }
+    };
+
+    const mainVoltageChange = (voltageValue) => {
+        let newArray = normalStruct;
+        if (voltageValue === '120/240') {
+            newArray.forEach((obj) => {
+                obj.voltage = '120';
+            });
+        } else {
+            newArray.forEach((obj) => {
+                obj.voltage = voltageValue;
+            });
+        }
+        setNormalStruct(newArray);
     };
 
     useEffect(() => {
@@ -240,22 +354,6 @@ const CreatePanel = () => {
             }
         };
 
-        // const fetchPassiveDeviceData = async () => {
-        //     try {
-        //         let headers = {
-        //             'Content-Type': 'application/json',
-        //             accept: 'application/json',
-        //             // 'user-auth': '628f3144b712934f578be895',
-        //         };
-        //         await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-        //             setPassiveDeviceData(res.data);
-        //         });
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch all Passive devices');
-        //     }
-        // };
-
         const fetchPassiveDeviceData = async () => {
             try {
                 let headers = {
@@ -281,9 +379,9 @@ const CreatePanel = () => {
     }, [bldgId]);
 
     useEffect(() => {
-        // console.log('SSR panel => ', panel);
-        console.log('SSR main => ', main);
-        console.log('SSR normalStruct => ', normalStruct);
+        console.log('SSR panel => ', panel);
+        // console.log('SSR main => ', main);
+        // console.log('SSR normalStruct => ', normalStruct);
     });
 
     return (
@@ -303,7 +401,8 @@ const CreatePanel = () => {
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
-                                    disabled={isProcessing}
+                                    // disabled={isProcessing}
+                                    disabled={panel.voltage === '' ? true : false}
                                     onClick={() => savePanelData()}>
                                     {isProcessing ? 'Saving...' : 'Save'}
                                 </button>
@@ -327,6 +426,7 @@ const CreatePanel = () => {
                                 onChange={(e) => {
                                     handleChange('name', e.target.value);
                                 }}
+                                className="font-weight-bold"
                             />
                         </FormGroup>
 
@@ -349,7 +449,7 @@ const CreatePanel = () => {
                             </Input>
                         </FormGroup>
 
-                        <FormGroup>
+                        {/* <FormGroup>
                             <Label for="userState" className="card-title">
                                 Passive Device(s)
                             </Label>
@@ -370,7 +470,7 @@ const CreatePanel = () => {
                                     );
                                 })}
                             </Input>
-                        </FormGroup>
+                        </FormGroup> */}
 
                         <FormGroup>
                             <Label for="location" className="card-title">
@@ -393,6 +493,25 @@ const CreatePanel = () => {
                     </div>
                 </Col>
             </Row>
+
+            {/* <Row>
+                <div style={{ width: '400px', height: '400px', marginLeft: '10vw' }}>
+                    <div className="left-link-container">
+                        <div className="left-link-container-icon">
+                            <FontAwesomeIcon icon={faLinkHorizontalSlash} size="sm" />
+                        </div>
+                    </div>
+
+                    <br />
+
+                    <div className="right-link-container">
+                        <div className="right-link-container-icon">
+                            <FontAwesomeIcon icon={faLinkHorizontalSlash} size="sm" />
+                        </div>
+                    </div>
+                </div>
+            </Row> */}
+
             <Row style={{ marginLeft: '20px' }}>
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
@@ -464,139 +583,351 @@ const CreatePanel = () => {
                             </div>
                         </Row>
 
-                        <Row className="main-breaker-styling">
-                            <FormGroup className="form-group row m-4">
-                                <div className="breaker-container">
-                                    <div className="breaker-style">
-                                        <div className="breaker-content-middle">
-                                            <div className="breaker-index">M</div>
-                                        </div>
-                                        <div className="breaker-content-middle">
-                                            <div className="dot-status"></div>
-                                        </div>
-                                        <div className="breaker-content-middle">
-                                            <div className="breaker-content">
-                                                <span>200A</span>
-                                                <span>240V</span>
+                        {activePanelType === 'distribution' && (
+                            <>
+                                <Row className="main-breaker-styling">
+                                    <FormGroup className="form-group row m-4">
+                                        <div className="breaker-container">
+                                            <div className="breaker-style">
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-index font-weight-bold">M</div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="dot-status"></div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-content">
+                                                        <span>
+                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
+                                                        </span>
+                                                        <span>
+                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}V`}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div
+                                                    className="breaker-content-middle"
+                                                    onClick={() => {
+                                                        handleMainShow();
+                                                    }}>
+                                                    <div className="edit-icon-bg-styling mr-2">
+                                                        <i className="uil uil-pen"></i>
+                                                    </div>
+                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        {!(main.equipment_name === '') ? (
-                                            <>
-                                                <div>
-                                                    <h6 className="ml-4 mb-3 breaker-equip-name">
-                                                        {main.equipment_name}
-                                                    </h6>
-                                                </div>
-                                                <div
-                                                    className="breaker-content-middle"
-                                                    onClick={() => {
-                                                        handleEditBreakerShow();
-                                                        setUpdateData(main);
-                                                    }}>
-                                                    <div className="edit-icon-bg-styling mr-2">
-                                                        <i className="uil uil-pen"></i>
-                                                    </div>
-                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div
-                                                    className="breaker-content-middle"
-                                                    onClick={() => {
-                                                        handleBreakerShow();
-                                                        setNormalData(main);
-                                                        setNormalDataIndex(-1);
-                                                    }}>
-                                                    <div className="edit-icon-bg-styling mr-2">
-                                                        <i className="uil uil-pen"></i>
-                                                    </div>
-                                                    <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </FormGroup>
-                        </Row>
+                                    </FormGroup>
+                                </Row>
 
-                        <Row>
-                            <Col lg={12}>
-                                <div>
-                                    <div className="grid-style-6">
-                                        {normalStruct.map((element, index) => {
-                                            if (element.type === 'main-breaker') {
-                                                return;
-                                            }
-                                            return (
-                                                <FormGroup className="form-group row m-2 ml-4">
-                                                    <div className="breaker-container">
-                                                        <div className="sub-breaker-style">
-                                                            <div className="breaker-content-middle">
-                                                                <div className="breaker-index">{element.breakerNo}</div>
-                                                            </div>
-                                                            <div className="breaker-content-middle">
-                                                                <div className="dot-status"></div>
-                                                            </div>
-                                                            <div className="breaker-content-middle">
-                                                                <div className="breaker-content">
-                                                                    <span>20A</span>
-                                                                    <span>120V</span>
+                                <Row>
+                                    <Col lg={12}>
+                                        <div>
+                                            <div className="grid-style-6">
+                                                {normalStruct.map((element, index) => {
+                                                    if (element.type === 'main-breaker') {
+                                                        return;
+                                                    }
+                                                    return (
+                                                        <>
+                                                            <FormGroup className="form-group row m-2 ml-4">
+                                                                <div className="breaker-container">
+                                                                    <div className="sub-breaker-style">
+                                                                        <div className="breaker-content-middle">
+                                                                            <div className="breaker-index">
+                                                                                {element.breakerNo}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="breaker-content-middle">
+                                                                            <div className="dot-status"></div>
+                                                                        </div>
+                                                                        <div className="breaker-content-middle">
+                                                                            <div className="breaker-content">
+                                                                                {/* <span>20A</span> */}
+                                                                                <span>{element.voltage}</span>
+                                                                                <span>
+                                                                                    {element.amps === ''
+                                                                                        ? ''
+                                                                                        : `${element.amps}V`}
+                                                                                </span>
+                                                                                {/* <span>120V</span> */}
+                                                                            </div>
+                                                                        </div>
+                                                                        {!(element.equipment_name === '') ? (
+                                                                            <>
+                                                                                <div>
+                                                                                    <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                                        {element.equipment_name}
+                                                                                    </h6>
+                                                                                </div>
+                                                                                <div
+                                                                                    className="breaker-content-middle"
+                                                                                    onClick={() => {
+                                                                                        handleEditBreakerShow();
+                                                                                        setUpdateData(element);
+                                                                                    }}>
+                                                                                    <div className="edit-icon-bg-styling mr-2">
+                                                                                        <i className="uil uil-pen"></i>
+                                                                                    </div>
+                                                                                    <span className="font-weight-bold edit-btn-styling">
+                                                                                        Edit
+                                                                                    </span>
+                                                                                </div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <div
+                                                                                    className="breaker-content-middle"
+                                                                                    onClick={() => {
+                                                                                        handleBreakerShow();
+                                                                                        setNormalData(element);
+                                                                                        setNormalDataIndex(index);
+                                                                                    }}>
+                                                                                    <div className="edit-icon-bg-styling mr-2">
+                                                                                        <i className="uil uil-pen"></i>
+                                                                                    </div>
+                                                                                    <span className="font-weight-bold edit-btn-styling">
+                                                                                        Edit
+                                                                                    </span>
+                                                                                </div>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            {!(element.equipment_name === '') ? (
-                                                                <>
-                                                                    <div>
-                                                                        <h6 className="ml-4 mb-3 breaker-equip-name">
-                                                                            {element.equipment_name}
-                                                                        </h6>
-                                                                    </div>
-                                                                    <div
-                                                                        className="breaker-content-middle"
-                                                                        onClick={() => {
-                                                                            handleEditBreakerShow();
-                                                                            setUpdateData(element);
-                                                                        }}>
-                                                                        <div className="edit-icon-bg-styling mr-2">
-                                                                            <i className="uil uil-pen"></i>
-                                                                        </div>
-                                                                        <span className="font-weight-bold edit-btn-styling">
-                                                                            Edit
-                                                                        </span>
-                                                                    </div>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <div
-                                                                        className="breaker-content-middle"
-                                                                        onClick={() => {
-                                                                            handleBreakerShow();
-                                                                            setNormalData(element);
-                                                                            setNormalDataIndex(index);
-                                                                        }}>
-                                                                        <div className="edit-icon-bg-styling mr-2">
-                                                                            <i className="uil uil-pen"></i>
-                                                                        </div>
-                                                                        <span className="font-weight-bold edit-btn-styling">
-                                                                            Edit
-                                                                        </span>
-                                                                    </div>
-                                                                </>
-                                                            )}
+                                                            </FormGroup>
+                                                        </>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </>
+                        )}
+
+                        {activePanelType === 'disconnect' && (
+                            <Row>
+                                <Col lg={12}>
+                                    <div>
+                                        <FormGroup className="form-group row m-2 ml-4">
+                                            <div className="disconnect-breaker-container">
+                                                {/* Breaker 1 */}
+                                                <div className="sub-breaker-style">
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-index">1</div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="dot-status"></div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-content">
+                                                            <span>80A</span>
+                                                            <span>240V</span>
                                                         </div>
                                                     </div>
-                                                </FormGroup>
-                                            );
-                                        })}
+                                                    <div
+                                                        className="breaker-content-middle"
+                                                        onClick={() => {
+                                                            handleBreakerShow();
+                                                            // setNormalData(element);
+                                                            // setNormalDataIndex(index);
+                                                        }}>
+                                                        <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-pen"></i>
+                                                        </div>
+                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                    </div>
+                                                    {/* {!(element.equipment_name === '') ? (
+                                                        <>
+                                                            <div>
+                                                                <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                    {element.equipment_name}
+                                                                </h6>
+                                                            </div>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleEditBreakerShow();
+                                                                    setUpdateData(element);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setNormalData(element);
+                                                                    setNormalDataIndex(index);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    )} */}
+                                                </div>
+
+                                                {/* <div className="left-link-container">
+                                                    <div className="left-link-container-icon">
+                                                        <FontAwesomeIcon icon={faLinkHorizontalSlash} size="sm" />
+                                                    </div>
+                                                </div> */}
+
+                                                {/* Breaker 2 */}
+                                                <div className="sub-breaker-style">
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-index">2</div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="dot-status"></div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-content">
+                                                            <span>80A</span>
+                                                            <span>240V</span>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className="breaker-content-middle"
+                                                        onClick={() => {
+                                                            handleBreakerShow();
+                                                            // setNormalData(element);
+                                                            // setNormalDataIndex(index);
+                                                        }}>
+                                                        <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-pen"></i>
+                                                        </div>
+                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                    </div>
+                                                    {/* {!(element.equipment_name === '') ? (
+                                                        <>
+                                                            <div>
+                                                                <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                    {element.equipment_name}
+                                                                </h6>
+                                                            </div>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleEditBreakerShow();
+                                                                    setUpdateData(element);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setNormalData(element);
+                                                                    setNormalDataIndex(index);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    )} */}
+                                                </div>
+
+                                                {/* Breaker 3 */}
+                                                <div className="sub-breaker-style">
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-index">3</div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="dot-status"></div>
+                                                    </div>
+                                                    <div className="breaker-content-middle">
+                                                        <div className="breaker-content">
+                                                            <span>80A</span>
+                                                            <span>240V</span>
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className="breaker-content-middle"
+                                                        onClick={() => {
+                                                            handleBreakerShow();
+                                                            // setNormalData(element);
+                                                            // setNormalDataIndex(index);
+                                                        }}>
+                                                        <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-pen"></i>
+                                                        </div>
+                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                                    </div>
+                                                    {/* {!(element.equipment_name === '') ? (
+                                                        <>
+                                                            <div>
+                                                                <h6 className="ml-4 mb-3 breaker-equip-name">
+                                                                    {element.equipment_name}
+                                                                </h6>
+                                                            </div>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleEditBreakerShow();
+                                                                    setUpdateData(element);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div
+                                                                className="breaker-content-middle"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setNormalData(element);
+                                                                    setNormalDataIndex(index);
+                                                                }}>
+                                                                <div className="edit-icon-bg-styling mr-2">
+                                                                    <i className="uil uil-pen"></i>
+                                                                </div>
+                                                                <span className="font-weight-bold edit-btn-styling">
+                                                                    Edit
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    )} */}
+                                                </div>
+                                            </div>
+                                        </FormGroup>
                                     </div>
-                                </div>
-                            </Col>
-                        </Row>
+                                </Col>
+                            </Row>
+                        )}
                     </div>
                 </Col>
             </Row>
 
-            <Modal show={showBreaker} onHide={handleBreakerClose} centered>
+            {/* <Modal show={showBreaker} onHide={handleBreakerClose} centered>
                 <Modal.Header>
                     <Modal.Title>Create Breaker</Modal.Title>
                 </Modal.Header>
@@ -676,6 +1007,65 @@ const CreatePanel = () => {
                         onClick={() => {
                             addNormalSingleData();
                             handleBreakerClose();
+                        }}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal> */}
+
+            <Modal show={showMain} onHide={handleMainClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="edit-panel-title ml-2 mb-0">Edit Panel Input</h5>
+                        <p className="edit-panel-subtitle ml-2">{panel.name}</p>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2">
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label className="font-weight-bold">Rated Apms</Form.Label>
+                            <Form.Control
+                                type="number"
+                                placeholder="Enter Amps"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('rated_amps', e.target.value);
+                                }}
+                                defaultValue={panel.rated_amps === null ? 200 : panel.rated_amps}
+                                value={panel.rated_amps === null ? 200 : panel.rated_amps}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label className="font-weight-bold">Volts</Form.Label>
+                            <Input
+                                type="select"
+                                name="state"
+                                id="userState"
+                                className="font-weight-bold selection-volts-style"
+                                placeholder="Select Volts"
+                                onChange={(e) => {
+                                    handleChange('voltage', e.target.value);
+                                    mainVoltageChange(e.target.value === 'Select Volts' ? '' : e.target.value);
+                                }}
+                                value={panel.voltage}
+                                // defaultValue={normalData.voltage ? normalData.voltage : ''}
+                            >
+                                <option>Select Volts</option>
+                                <option value="120/240">120/240</option>
+                                <option value="208">208</option>
+                                <option value="480">480</option>
+                                <option value="600">600</option>
+                            </Input>
+                        </Form.Group>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleMainClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            handleMainClose();
                         }}>
                         Save
                     </Button>
