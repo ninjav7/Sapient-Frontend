@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Cookies } from 'react-cookie';
 import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
@@ -116,7 +117,7 @@ const PortfolioOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM - hh:mm TT',
+                format: 'dd/MMM-hh:mm TT',
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -345,7 +346,9 @@ const PortfolioOverview = () => {
             },
         ],
     });
-
+    let cookies = new Cookies();
+    let userdata=cookies.get('user');
+   
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -472,11 +475,13 @@ const PortfolioOverview = () => {
         };
 
         const portfolioBuilidingsData = async () => {
+
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
+                    "Authorization" : `Bearer ${userdata.token}`
                 };
                 await axios
                     .post(
@@ -512,7 +517,7 @@ const PortfolioOverview = () => {
             let start = moment(startDate),
                 end = moment(endDate),
                 days = end.diff(start, 'days');
-            days = days + 1;
+            days = days + 2;
             setDaysCount(days);
         };
 
@@ -633,7 +638,8 @@ const PortfolioOverview = () => {
                                     consumptionNormal={
                                         overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
                                     }
-                                    infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                    // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
                                     infoType={`total-eui`}
                                 />
                             </div>

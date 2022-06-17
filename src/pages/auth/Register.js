@@ -10,6 +10,7 @@ import { registerUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
 import logo from '../../assets/images/logo.png';
+import './auth.css';
 
 class Register extends Component {
     _isMounted = false;
@@ -34,7 +35,12 @@ class Register extends Component {
      * Handles the submit
      */
     handleValidSubmit = (event, values) => {
-        this.props.registerUser(values.fullname, values.email, values.password);
+        console.log(values.fullname);
+        console.log(values.email);
+        console.log(values.password);
+        console.log(values.user_id);
+        console.log(values.vendor);
+        this.props.registerUser(values.fullname, values.email, values.password, values.user_id, values.vendor);
     }
 
     /**
@@ -55,7 +61,21 @@ class Register extends Component {
     }
 
     render() {
+        let error=false;
+        let success=false;
+        let message="";
         const isAuthTokenValid = isUserAuthenticated();
+        if(localStorage.getItem('signup_success')==="false"){
+            error=true;
+            message=localStorage.getItem('failed_message');
+            localStorage.removeItem('signup_success');
+            localStorage.removeItem('failed_message');
+        }
+        else if(localStorage.getItem('signup_success')==="true"){
+            success=true;
+            message="User Registered Sucessfully";
+            localStorage.removeItem('signup_success');
+        }
         return (
             <React.Fragment>
 
@@ -64,7 +84,7 @@ class Register extends Component {
                 {Object.keys(this.props.user || {}).length > 0 && this.renderRedirectToConfirm()}
 
                 {(this._isMounted || !isAuthTokenValid) && <div className="account-pages mt-5 mb-5">
-                    <Container>
+                    <Container className='auth-container'>
                         <Row className="justify-content-center">
                             <Col xl={10}>
                                 <Card className="">
@@ -82,17 +102,19 @@ class Register extends Component {
                                                     </a>
                                                 </div>
 
-                                                <h6 className="h5 mb-0 mt-4">Welcome back!</h6>
-                                                <p className="text-muted mt-1 mb-4">Enter your email address and password to access admin panel.</p>
-
-
                                                 {this.props.error && <Alert color="danger" isOpen={this.props.error ? true : false}>
                                                     <div>{this.props.error}</div>
+                                                </Alert>}
+                                                {error && <Alert color="danger" isOpen={error ? true : false}>
+                                                    <div>{message}</div>
+                                                </Alert>}
+                                                {success && <Alert color="success" isOpen={success ? true : false}>
+                                                    <div>{message}</div>
                                                 </Alert>}
 
                                                 <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form">
                                                     <AvGroup className="">
-                                                        <Label for="fullname">Username</Label>
+                                                        <Label for="fullname">Full Name</Label>
                                                         <InputGroup>
                                                             <InputGroupAddon addonType="prepend">
                                                                 <span className="input-group-text">
@@ -118,6 +140,20 @@ class Register extends Component {
                                                         <AvFeedback>This field is invalid</AvFeedback>
                                                     </AvGroup>
 
+                                                    <AvGroup className="">
+                                                        <Label for="fullname">Username</Label>
+                                                        <InputGroup>
+                                                            <InputGroupAddon addonType="prepend">
+                                                                <span className="input-group-text">
+                                                                    <User className="icon-dual" />
+                                                                </span>
+                                                            </InputGroupAddon>
+                                                            <AvInput type="text" name="user_id" id="user_id" placeholder="Sapient N" required />
+                                                        </InputGroup>
+
+                                                        <AvFeedback>This field is invalid</AvFeedback>
+                                                    </AvGroup>
+
 
                                                     <AvGroup className="mb-3">
                                                         <Label for="password">Password</Label>
@@ -129,6 +165,21 @@ class Register extends Component {
                                                             </InputGroupAddon>
                                                             <AvInput type="password" name="password" id="password" placeholder="Enter your password" required />
                                                         </InputGroup>
+                                                        <AvFeedback>This field is invalid</AvFeedback>
+                                                    </AvGroup>
+
+
+                                                    <AvGroup className="">
+                                                        <Label for="fullname">Vendor</Label>
+                                                        <InputGroup>
+                                                            <InputGroupAddon addonType="prepend">
+                                                                <span className="input-group-text">
+                                                                    <User className="icon-dual" />
+                                                                </span>
+                                                            </InputGroupAddon>
+                                                            <AvInput type="text" name="vendor" id="vendor" placeholder="Sapient N" required />
+                                                        </InputGroup>
+
                                                         <AvFeedback>This field is invalid</AvFeedback>
                                                     </AvGroup>
 
