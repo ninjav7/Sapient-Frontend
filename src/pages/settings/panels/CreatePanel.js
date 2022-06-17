@@ -124,6 +124,7 @@ const CreatePanel = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isProcessing, setIsProcessing] = useState(false);
+
     const [panel, setPanel] = useState({
         name: 'Panel Name',
         parent_panel: '',
@@ -131,13 +132,19 @@ const CreatePanel = () => {
         space_id: '',
         voltage: '',
         phase_config: 1,
-        rated_amps: 200,
+        rated_amps: 0,
         breaker_count: 48,
+    });
+
+    const [panelConfig, setPanelConfig] = useState({
+        voltage: '',
+        phase_config: 1,
+        rated_amps: 0,
     });
 
     const [normalStruct, setNormalStruct] = useState([]);
 
-    const [normalCount, setNormalCount] = useState(4);
+    const [normalCount, setNormalCount] = useState(6);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
     const [panelType, setPanelType] = useState([
@@ -202,6 +209,18 @@ const CreatePanel = () => {
         setPanel(obj);
     };
 
+    const handlePanelConfigChange = (key, value) => {
+        let obj = Object.assign({}, panelConfig);
+        if (key === 'rated_amps') {
+            value = parseInt(value);
+        }
+        if (value === 'Select Volts') {
+            value = '';
+        }
+        obj[key] = value;
+        setPanelConfig(obj);
+    };
+
     const addNormalSingleData = () => {
         if (normalDataIndex !== -1) {
             let newArray = normalStruct;
@@ -245,6 +264,15 @@ const CreatePanel = () => {
         setNormalData(obj);
     };
 
+    const updateChangesToPanel = () => {
+        let obj = {
+            ...panel,
+            ...panelConfig,
+        };
+        mainVoltageChange(obj.voltage === 'Select Volts' ? '' : obj.voltage);
+        setPanel(obj);
+    };
+
     const savePanelData = async () => {
         try {
             let header = {
@@ -272,15 +300,29 @@ const CreatePanel = () => {
 
     const mainVoltageChange = (voltageValue) => {
         let newArray = normalStruct;
-        if (voltageValue === '120/240') {
-            newArray.forEach((obj) => {
+
+        newArray.forEach((obj) => {
+            if (voltageValue === '120/240') {
                 obj.voltage = '120';
-            });
-        } else {
-            newArray.forEach((obj) => {
-                obj.voltage = voltageValue;
-            });
-        }
+                obj.phase = 1;
+            }
+            if (voltageValue === '208/120') {
+                obj.voltage = '120';
+                obj.phase = 3;
+            }
+            if (voltageValue === '480') {
+                obj.voltage = '277';
+                obj.phase = 3;
+            }
+            if (voltageValue === '600') {
+                obj.voltage = '347';
+                obj.phase = 3;
+            }
+            if (voltageValue === 'Select Volts') {
+                obj.voltage = '';
+                obj.phase = 1;
+            }
+        });
         setNormalStruct(newArray);
     };
 
@@ -291,7 +333,7 @@ const CreatePanel = () => {
             let obj = {
                 phase: 1,
                 voltage: '',
-                amps: '',
+                amps: 0,
                 equipment_name: '',
                 uniqueId: newId,
                 parentId: newId,
@@ -380,8 +422,9 @@ const CreatePanel = () => {
 
     useEffect(() => {
         console.log('SSR panel => ', panel);
+        console.log('SSR panelConfig => ', panelConfig);
         // console.log('SSR main => ', main);
-        // console.log('SSR normalStruct => ', normalStruct);
+        console.log('SSR normalStruct => ', normalStruct);
     });
 
     return (
@@ -601,7 +644,11 @@ const CreatePanel = () => {
                                                             {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
                                                         </span>
                                                         <span>
-                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}V`}
+                                                            {panel.voltage === '' && ''}
+                                                            {panel.voltage === '120/240' && '240V'}
+                                                            {panel.voltage === '208/120' && '120V'}
+                                                            {panel.voltage === '480' && '480V'}
+                                                            {panel.voltage === '600' && '600V'}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -643,14 +690,16 @@ const CreatePanel = () => {
                                                                         </div>
                                                                         <div className="breaker-content-middle">
                                                                             <div className="breaker-content">
-                                                                                {/* <span>20A</span> */}
-                                                                                <span>{element.voltage}</span>
                                                                                 <span>
-                                                                                    {element.amps === ''
+                                                                                    {element.amps === 0
                                                                                         ? ''
-                                                                                        : `${element.amps}V`}
+                                                                                        : `${element.amps}A`}
                                                                                 </span>
-                                                                                {/* <span>120V</span> */}
+                                                                                <span>
+                                                                                    {element.voltage === ''
+                                                                                        ? ''
+                                                                                        : `${element.voltage}V`}
+                                                                                </span>
                                                                             </div>
                                                                         </div>
                                                                         {!(element.equipment_name === '') ? (
@@ -1027,10 +1076,10 @@ const CreatePanel = () => {
                                 placeholder="Enter Amps"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('rated_amps', e.target.value);
+                                    handlePanelConfigChange('rated_amps', e.target.value);
                                 }}
-                                defaultValue={panel.rated_amps === null ? 200 : panel.rated_amps}
-                                value={panel.rated_amps === null ? 200 : panel.rated_amps}
+                                defaultValue={panelConfig.rated_amps === null ? 200 : panelConfig.rated_amps}
+                                value={panelConfig.rated_amps === null ? 200 : panelConfig.rated_amps}
                             />
                         </Form.Group>
 
@@ -1043,15 +1092,12 @@ const CreatePanel = () => {
                                 className="font-weight-bold selection-volts-style"
                                 placeholder="Select Volts"
                                 onChange={(e) => {
-                                    handleChange('voltage', e.target.value);
-                                    mainVoltageChange(e.target.value === 'Select Volts' ? '' : e.target.value);
+                                    handlePanelConfigChange('voltage', e.target.value);
                                 }}
-                                value={panel.voltage}
-                                // defaultValue={normalData.voltage ? normalData.voltage : ''}
-                            >
+                                value={panelConfig.voltage}>
                                 <option>Select Volts</option>
                                 <option value="120/240">120/240</option>
-                                <option value="208">208</option>
+                                <option value="208/120">208/120</option>
                                 <option value="480">480</option>
                                 <option value="600">600</option>
                             </Input>
@@ -1065,6 +1111,7 @@ const CreatePanel = () => {
                     <Button
                         variant="primary"
                         onClick={() => {
+                            updateChangesToPanel();
                             handleMainClose();
                         }}>
                         Save

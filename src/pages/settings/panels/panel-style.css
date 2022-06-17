@@ -55,43 +55,93 @@
     gap: 10px;
 }
 
-/* Edge styling */
-.edgebutton {
-    width: 20px;
-    height: 20px;
-    background: #eee;
-    border: 1px solid #fff;
-    cursor: pointer;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 1;
+.left-link-container {
+    border: 1px solid black;
+    border-right: 0px;
+    width: 12px;
+    height: 54px;
 }
 
-.edgebutton:hover {
-    box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.08);
-}
-
-.edgebutton-foreignobject body {
-    background: transparent;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 40px;
-}
-
-.breaker-link-container-style {
+.left-link-container-icon {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     padding: 3px;
-    gap: 10px;
-
+    position: relative;
+    right: 10px;
+    top: 17px;
     width: 21px;
     height: 17px;
     background: #f9fafb;
     border: 1px solid #eaecf0;
     border-radius: 3px;
+}
+
+.right-link-container {
+    border: 1px solid black;
+    border-left: 0px;
+    width: 12px;
+    height: 54px;
+}
+
+.right-link-container-icon {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    position: relative;
+    left: 1px;
+    top: 17px;
+    width: 21px;
+    height: 17px;
+    background: #f9fafb;
+    border: 1px solid #eaecf0;
+    border-radius: 3px;
+}
+
+.edit-panel-title {
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
+    line-height: 28px !important;
+    color: #101828 !important;
+}
+
+.edit-panel-subtitle {
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    color: #667085 !important;
+}
+
+.selection-volts-style {
+    display: block;
+    width: 15vw !important;
+    height: calc(1.5em + 1rem + 2px);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #4b4b5a;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #e2e7f1;
+    border-radius: 0.3rem;
+}
+
+.disconnect-breaker-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: stretch;
+    margin-left: 25%;
+    margin-top: 2vh;
+    gap: 15px;
 }
