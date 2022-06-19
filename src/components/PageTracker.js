@@ -26,8 +26,25 @@ const PageTracker = () => {
     const [buildingData, setBuildingData] = useState({});
     const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
     const items = breadcrumList || [];
+    console.log(items);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const setSideNavBar = (componentName) => {
+        if (componentName === 'account') {
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
+        }
+        if (componentName === 'building-settings') {
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+        } else {
+            return;
+        }
+    };
+
 
     useEffect(() => {
         // if (startDate === null) {
@@ -73,6 +90,8 @@ const PageTracker = () => {
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
+                {breadcrumList[0].label!=="Account Settings" && breadcrumList[0].label!=="General"?
+                <>
                 <div className="tracker-dropdown">
                     {bldStoreName === 'Portfolio' ? (
                         <FontAwesomeIcon icon={faBuildings} size="lg" className="ml-2" />
@@ -141,6 +160,21 @@ const PageTracker = () => {
                     <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                 </div>
                 <div className="vl"></div>
+                </>:breadcrumList[0].label==="Account Settings"?
+                <div className='account-setting-options'>
+                    <div className='account-option'>Account</div>
+                    <div className='general-option'>General</div>                    
+                </div>:
+                <div className='account-setting-options'>
+                <Link to="/settings/account">
+                <div className='account-option' onClick={() => {
+                                    setSideNavBar('account');
+                                }}>Account</div></Link>
+                
+                <div className='general-option'>General</div>                    
+            </div>
+                }
+                
                 <div className="route-tracker">
                     <Breadcrumb className="custom-breadcrumb-style">
                         {items.map((item, index) => {

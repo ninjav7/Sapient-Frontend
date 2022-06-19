@@ -786,6 +786,7 @@ const CreatePanel = () => {
                                                         </div>
                                                         <span className="font-weight-bold edit-btn-styling">Edit</span>
                                                     </div>
+                                                    
                                                     {/* {!(element.equipment_name === '') ? (
                                                         <>
                                                             <div>
@@ -826,7 +827,11 @@ const CreatePanel = () => {
                                                         </>
                                                     )} */}
                                                 </div>
-
+                                                </div>
+                                                <div className="edit-icon-bg-styling mr-2">
+                                                            <i className="uil uil-link"></i>
+                                                        </div>
+                                                    
                                                 {/* <div className="left-link-container">
                                                     <div className="left-link-container-icon">
                                                         <FontAwesomeIcon icon={faLinkHorizontalSlash} size="sm" />
@@ -965,7 +970,7 @@ const CreatePanel = () => {
                                                             </div>
                                                         </>
                                                     )} */}
-                                                </div>
+                                                {/* </div> */}
                                             </div>
                                         </FormGroup>
                                     </div>

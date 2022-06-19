@@ -22,20 +22,32 @@ const Header = (props) => {
         },
         {
             label: 'Last 7 Days',
-            value: 6,
+            value: 7,
         },
         {
             label: 'Last 4 Weeks',
-            value: 27,
+            value: 28,
         },
         {
             label: 'Last 3 Months',
-            value: 89,
+            value: 90,
         },
         {
             label: 'Last 12 Months',
-            value: 364,
+            value: 365,
         },
+        {
+            label:'Month to Date',
+            value:30,
+        },
+        {
+            label:'Quarter to Date',
+            value:120,
+        },
+        {
+            label:'Year to Date',
+            value:365,
+        }
     ];
 
     useEffect(() => {
@@ -61,6 +73,7 @@ const Header = (props) => {
         const setCustomDate = (date) => {
             let startCustomDate = date[0];
             let endCustomDate = date[1];
+            let dt=new Date();
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;

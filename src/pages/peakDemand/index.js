@@ -676,9 +676,9 @@ const PeakDemand = () => {
                                                     <BuildingPeakButton
                                                         buildingPeakData={record}
                                                         recordDate={record.timeRange.to.split(' ')[0]}
-                                                        recordTime={convert24hourTo12HourFormat(
-                                                            record.timeRange.to.split(' ')[1].split('.')[0]
-                                                        )}
+                                                        // recordTime={convert24hourTo12HourFormat(
+                                                        //     record.timeRange.to.split(' ')[1].split('.')[0]
+                                                        // )}
                                                     />
                                                 </div>
                                             </div>

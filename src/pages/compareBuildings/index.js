@@ -118,7 +118,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {index === 0 && record.energy_density === 0 && (
@@ -132,7 +132,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 0 && record.energy_density > 0 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -143,7 +143,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 1 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -154,7 +154,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 2 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -165,7 +165,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 3 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -176,7 +176,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 4 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -187,7 +187,7 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 5 && (
                                                 <Line
-                                                    percent={((record.energy_density / topEnergyDensity) * 100).toFixed(
+                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
                                                         2
                                                     )}
                                                     strokeWidth="3"
@@ -230,7 +230,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         )}
                                     </td>
                                     <td className="table-content-style">
-                                        {(record.hvac_consumption.now / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {parseFloat(record.hvac_consumption.now).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {/* <Line
