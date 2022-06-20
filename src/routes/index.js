@@ -739,6 +739,12 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
+        {
+            path: '/*',
+            name: 'Error 404',
+            component: Error404,
+            route: Route,
+        },
     ],
 };
 
@@ -758,13 +764,13 @@ const flattenRoutes = (routes) => {
 // All routes
 const allRoutes = [
     rootRoute,
-    authRoutes,
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    authRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
