@@ -15,6 +15,7 @@ import './style.css';
 
 const NavbarNew = () => {
     const location = useLocation();
+    console.log(location);
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
     const activeSideRoutes = [];
     let history=useHistory();
@@ -71,11 +72,7 @@ const NavbarNew = () => {
     };
 
     useEffect(() => {
-        if(localStorage.getItem('login_success')==="true"){
-        console.log("toast message");
-        //   toast.info("Login Successfully");
-          localStorage.removeItem('login_success');   
-        }
+       
         console.log('location.pathname => ', location.pathname.split('/')[1]);
     });
 

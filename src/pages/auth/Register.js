@@ -112,7 +112,7 @@ class Register extends Component {
                                                     <div>{message}</div>
                                                 </Alert>}
 
-                                                <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form">
+                                                <AvForm onValidSubmit={this.handleValidSubmit} autoComplete="off" className="authentication-form">
                                                     <AvGroup className="">
                                                         <Label for="fullname">Full Name</Label>
                                                         <InputGroup>

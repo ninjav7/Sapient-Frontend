@@ -517,7 +517,7 @@ const PortfolioOverview = () => {
             let start = moment(startDate),
                 end = moment(endDate),
                 days = end.diff(start, 'days');
-            days = days + 2;
+            days = days + 1;
             setDaysCount(days);
         };
 
