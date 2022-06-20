@@ -20,6 +20,7 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
@@ -90,6 +91,9 @@ const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, pagin
 };
 
 const PassiveDevices = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -135,7 +139,8 @@ const PassiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
 
@@ -164,7 +169,8 @@ const PassiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
@@ -195,7 +201,8 @@ const PassiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
@@ -218,7 +225,6 @@ const PassiveDevices = () => {
         }
     };
 
-    
     // useEffect(() => {
     //     const fetchPassiveDeviceData = async () => {
     //         try {
@@ -302,7 +308,8 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?page_size=${pageSize}&page_no=${pageNo}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
@@ -331,7 +338,8 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
@@ -347,7 +355,8 @@ const PassiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}`;
             await axios
@@ -494,18 +503,30 @@ const PassiveDevices = () => {
 
             <Row>
                 <Col lg={8}>
-                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData}
+                    {selectedTab === 0 && (
+                        <PassiveDevicesTable
+                            deviceData={passiveDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData}/>}
-                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData}
+                            paginationData={paginationData}
+                        />
+                    )}
+                    {selectedTab === 1 && (
+                        <PassiveDevicesTable
+                            deviceData={onlineDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData} />}
-                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData}
+                            paginationData={paginationData}
+                        />
+                    )}
+                    {selectedTab === 2 && (
+                        <PassiveDevicesTable
+                            deviceData={offlineDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData} />}
+                            paginationData={paginationData}
+                        />
+                    )}
                 </Col>
             </Row>
 

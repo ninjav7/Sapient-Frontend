@@ -23,6 +23,7 @@ import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const ActiveDevicesTable = ({ deviceData, setPageRequest, nextPageData, previousPageData, paginationData }) => {
@@ -101,6 +102,9 @@ const ActiveDevicesTable = ({ deviceData, setPageRequest, nextPageData, previous
 };
 
 const ActiveDevices = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     // Modal states
     const [selectedTab, setSelectedTab] = useState(0);
     const [show, setShow] = useState(false);
@@ -159,7 +163,8 @@ const ActiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
 
@@ -187,7 +192,8 @@ const ActiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
@@ -218,7 +224,8 @@ const ActiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
                 let response = res.data;
@@ -247,7 +254,8 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?page_size=${pageSize}&page_no=${pageNo}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
@@ -276,7 +284,8 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);

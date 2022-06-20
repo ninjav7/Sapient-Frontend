@@ -22,19 +22,23 @@ import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor
 import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
+import { Cookies } from 'react-cookie';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
-    console.log(sensorData.name);
-    console.log(sensorData.id);
-    
+    // console.log(sensorData.name);
+    // console.log(sensorData.id);
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
-    const [ deviceData, setDeviceData] = useState([]);
+    const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
-    const [seriesData,setSeriesData]=useState([]);
+    const [seriesData, setSeriesData] = useState([]);
     const [startDate, endDate] = dateRange;
 
     const customDaySelect = [
@@ -81,30 +85,35 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         if (endDate === null) {
             return;
         }
-    const exploreDataFetch = async () => {
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
-            };
-            // let params = `?sensor_id=629f436216701186eff7b79b`;
-            let params = `?sensor_id=${sensorData.id}`;
-            await axios.post(`${BaseUrl}${sensorGraphData}${params}`, 
-            {
-                date_from: dateFormatHandler(startDate),
-                date_to: dateFormatHandler(endDate),
-            }
-            ,{ headers }).then((res) => {
-                let response = res.data;
-                console.log('Sensor Graph Data => ', response); 
-                let data=response;
-                let exploreData = [];
-                                let recordToInsert = {
-                                    data: data,
-                                    name:"AHUs"
-                                };
-                                exploreData.push(recordToInsert);
+        const exploreDataFetch = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                // let params = `?sensor_id=629f436216701186eff7b79b`;
+                let params = `?sensor_id=${sensorData.id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${sensorGraphData}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        console.log('Sensor Graph Data => ', response);
+                        let data = response;
+                        let exploreData = [];
+                        let recordToInsert = {
+                            data: data,
+                            name: 'AHUs',
+                        };
+                        exploreData.push(recordToInsert);
                         console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
                         setSeriesData([
@@ -112,20 +121,19 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                                 data: exploreData[0].data,
                             },
                         ]);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Graph data');
-        }
-    };
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Sensor Graph data');
+            }
+        };
 
-    exploreDataFetch();
-}, [startDate, endDate]);
-
+        exploreDataFetch();
+    }, [startDate, endDate]);
 
     useEffect(() => {
-        console.log(sensorData)
-    },[])
+        console.log(sensorData);
+    }, []);
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -140,15 +148,15 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         return series;
     };
 
-    const handleRefresh=()=>{
+    const handleRefresh = () => {
         setDateFilter(dateValue);
         let endDate = new Date(); // today
         let startDate = new Date();
         startDate.setDate(startDate.getDate() - 7);
-        setDateRange([startDate,endDate]);
+        setDateRange([startDate, endDate]);
         setDeviceData([]);
         setSeriesData([]);
-    }
+    };
     const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
         var i = 0;
         var series = [];

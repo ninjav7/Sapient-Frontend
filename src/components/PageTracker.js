@@ -15,9 +15,12 @@ import { BreadcrumbStore } from '../store/BreadcrumbStore';
 import { BuildingStore } from '../store/BuildingStore';
 import { DateRangeStore } from '../store/DateRangeStore';
 import { ComponentStore } from '../store/ComponentStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const PageTracker = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
@@ -45,7 +48,6 @@ const PageTracker = () => {
         }
     };
 
-
     useEffect(() => {
         // if (startDate === null) {
         //     return;
@@ -57,7 +59,8 @@ const PageTracker = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                 let data = res.data;
@@ -90,91 +93,98 @@ const PageTracker = () => {
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
-                {breadcrumList[0].label!=="Account Settings" && breadcrumList[0].label!=="General"?
-                <>
-                <div className="tracker-dropdown">
-                    {bldStoreName === 'Portfolio' ? (
-                        <FontAwesomeIcon icon={faBuildings} size="lg" className="ml-2" />
-                    ) : (
-                        <FontAwesomeIcon icon={faBuilding} size="lg" className="ml-2" />
-                    )}
-                    <DropdownButton
-                        id="bts-button-styling"
-                        title={bldStoreName}
-                        className="bts-btn-style"
-                        variant="secondary">
-                        <div className="content-font-style">
-                            <div>
-                                <FormControl
-                                    className="mx-3 my-2 w-auto"
-                                    placeholder="Filter Buildings"
-                                    onChange={(e) => setValue(e.target.value)}
-                                    value={value}
-                                />
-                            </div>
+                {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
+                    <>
+                        <div className="tracker-dropdown">
+                            {bldStoreName === 'Portfolio' ? (
+                                <FontAwesomeIcon icon={faBuildings} size="lg" className="ml-2" />
+                            ) : (
+                                <FontAwesomeIcon icon={faBuilding} size="lg" className="ml-2" />
+                            )}
+                            <DropdownButton
+                                id="bts-button-styling"
+                                title={bldStoreName}
+                                className="bts-btn-style"
+                                variant="secondary">
+                                <div className="content-font-style">
+                                    <div>
+                                        <FormControl
+                                            className="mx-3 my-2 w-auto"
+                                            placeholder="Filter Buildings"
+                                            onChange={(e) => setValue(e.target.value)}
+                                            value={value}
+                                        />
+                                    </div>
 
-                            <div>
-                                <Dropdown.Item style={{ display: 'inline-block' }}>
-                                    <FontAwesomeIcon
-                                        icon={faBuildings}
-                                        size="lg"
-                                        className="mr-2"
-                                        style={{ display: 'inline-block' }}
-                                    />
-                                    <Link to="/energy/portfolio/overview">
-                                        <span
-                                            className="portfolio-txt-style"
-                                            onClick={() => {
-                                                setPortfolioName('Portfolio');
-                                            }}>
-                                            Portfolio
-                                        </span>
-                                    </Link>
-                                </Dropdown.Item>
-                            </div>
+                                    <div>
+                                        <Dropdown.Item style={{ display: 'inline-block' }}>
+                                            <FontAwesomeIcon
+                                                icon={faBuildings}
+                                                size="lg"
+                                                className="mr-2"
+                                                style={{ display: 'inline-block' }}
+                                            />
+                                            <Link to="/energy/portfolio/overview">
+                                                <span
+                                                    className="portfolio-txt-style"
+                                                    onClick={() => {
+                                                        setPortfolioName('Portfolio');
+                                                    }}>
+                                                    Portfolio
+                                                </span>
+                                            </Link>
+                                        </Dropdown.Item>
+                                    </div>
 
-                            <div>
-                                <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
-                                {buildingList.map((record, index) => (
-                                    <Dropdown.Item
-                                        onClick={() => {
-                                            // setActiveBuildingName(building.building_name);
-                                            BuildingStore.update((s) => {
-                                                s.BldgId = record.building_id;
-                                                s.BldgName = record.building_name;
-                                            });
-                                            // setBuildingData(record);
-                                        }}>
-                                        {/* <Link
+                                    <div>
+                                        <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
+                                        {buildingList.map((record, index) => (
+                                            <Dropdown.Item
+                                                onClick={() => {
+                                                    // setActiveBuildingName(building.building_name);
+                                                    BuildingStore.update((s) => {
+                                                        s.BldgId = record.building_id;
+                                                        s.BldgName = record.building_name;
+                                                    });
+                                                    // setBuildingData(record);
+                                                }}>
+                                                {/* <Link
                                             to={{
                                                 pathname: `/energy/building/overview/${record.building_id}`,
                                             }}> */}
-                                        <span className="portfolio-txt-style">{record.building_name}</span>
-                                        {/* </Link> */}
-                                    </Dropdown.Item>
-                                ))}
-                            </div>
+                                                <span className="portfolio-txt-style">{record.building_name}</span>
+                                                {/* </Link> */}
+                                            </Dropdown.Item>
+                                        ))}
+                                    </div>
+                                </div>
+                            </DropdownButton>
+                            <FontAwesomeIcon icon={faGear} />
+                            <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                         </div>
-                    </DropdownButton>
-                    <FontAwesomeIcon icon={faGear} />
-                    <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
-                </div>
-                <div className="vl"></div>
-                </>:breadcrumList[0].label==="Account Settings"?
-                <div className='account-setting-options'>
-                    <div className='account-option'>Account</div>
-                    <div className='general-option'>General</div>                    
-                </div>:
-                <div className='account-setting-options'>
-                <Link to="/settings/account">
-                <div className='account-option' onClick={() => {
+                        <div className="vl"></div>
+                    </>
+                ) : breadcrumList[0].label === 'Account Settings' ? (
+                    <div className="account-setting-options">
+                        <div className="account-option">Account</div>
+                        <div className="general-option">General</div>
+                    </div>
+                ) : (
+                    <div className="account-setting-options">
+                        <Link to="/settings/account">
+                            <div
+                                className="account-option"
+                                onClick={() => {
                                     setSideNavBar('account');
-                                }}>Account</div></Link>
-                
-                <div className='general-option'>General</div>                    
-            </div>
-                }
-                
+                                }}>
+                                Account
+                            </div>
+                        </Link>
+
+                        <div className="general-option">General</div>
+                    </div>
+                )}
+
                 <div className="route-tracker">
                     <Breadcrumb className="custom-breadcrumb-style">
                         {items.map((item, index) => {

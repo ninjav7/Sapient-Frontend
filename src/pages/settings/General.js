@@ -20,8 +20,12 @@ import axios from 'axios';
 import moment from 'moment';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 
 const General = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [buildingData, setBuildingData] = useState({
         building_id: '628dd795f28141b8a69f38bf',
@@ -102,7 +106,8 @@ const General = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                 let response = res.data;
@@ -167,7 +172,6 @@ const General = () => {
                         path: '/settings/general',
                         active: true,
                     },
-                    
                 ];
                 bs.items = newList;
             });
@@ -301,6 +305,7 @@ const General = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -320,6 +325,7 @@ const General = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingAddress}/${bldgId}`, inputField, { headers }).then((res) => {
             console.log(res.data);
@@ -357,6 +363,7 @@ const General = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -373,6 +380,7 @@ const General = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalDateTime}/${bldgId}`, { time_format: e }, { headers }).then((res) => {
             console.log(res.data);
@@ -392,6 +400,7 @@ const General = () => {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             axios.delete(`${BaseUrl}${deleteBuilding}/${bldgId}`, { headers }).then((res) => {
                 console.log(res.data);
@@ -433,6 +442,7 @@ const General = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
             console.log(res.data);

@@ -14,6 +14,7 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -284,6 +285,9 @@ const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAler
 };
 
 const SelectPeakTable = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -378,7 +382,8 @@ const SelectPeakTable = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${1}`;
                 await axios
@@ -539,6 +544,9 @@ const SelectPeakTable = () => {
 const ExploreBuildingPeak = (props) => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     // Column Chart Data
     const [columnChartSeries, setColumnChartSeries] = useState([
