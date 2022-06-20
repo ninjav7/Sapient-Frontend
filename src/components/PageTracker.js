@@ -185,6 +185,7 @@ const PageTracker = () => {
                     </div>
                 )}
 
+            {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
                 <div className="route-tracker">
                     <Breadcrumb className="custom-breadcrumb-style">
                         {items.map((item, index) => {
@@ -200,6 +201,7 @@ const PageTracker = () => {
                         })}
                     </Breadcrumb>
                 </div>
+            ):""}
             </div>
         </React.Fragment>
     );

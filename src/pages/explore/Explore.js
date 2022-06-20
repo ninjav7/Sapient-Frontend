@@ -1027,7 +1027,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                             />
                         </Col>
                     </Row>
                 </>
@@ -1043,7 +1050,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1059,7 +1073,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1075,7 +1096,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>

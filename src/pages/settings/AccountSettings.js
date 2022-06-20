@@ -40,7 +40,7 @@ const AccountSettings = () => {
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        General Building Settings
+                        General Account Settings
                     </span>
                 </Col>
             </Row>
