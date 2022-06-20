@@ -157,11 +157,17 @@ const General = () => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
+                    // {
+                    //     label:'Account Settings',
+                    //     path:'/settings/account',
+                    //     active:false,
+                    // },
                     {
                         label: 'General',
                         path: '/settings/general',
                         active: true,
                     },
+                    
                 ];
                 bs.items = newList;
             });

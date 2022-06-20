@@ -115,12 +115,12 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
                 return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
             }
 
-            const loggedInUser = getLoggedInUser();
-            // check if route is restricted by role
-            if (roles && roles.indexOf(loggedInUser.role) === -1) {
-                // role not authorised so redirect to home page
-                return <Redirect to={{ pathname: '/' }} />;
-            }
+            // const loggedInUser = getLoggedInUser();
+            // // check if route is restricted by role
+            // if (roles && (roles.indexOf(loggedInUser.role) === -1)) {
+            //     // role not authorised so redirect to home page
+            //     return <Redirect to={{ pathname: '/' }} />;
+            // }
 
             // authorised so return component
             return <Component {...props} />;
@@ -612,8 +612,8 @@ const exploreRoutes = {
     route: PrivateRoute,
     visibility: true,
     icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
     parent: 'explore',
+    roles: ['Admin'],
 };
 
 const controlRoutes = {
