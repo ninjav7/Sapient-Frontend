@@ -33,6 +33,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const PortfolioOverview = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
     // const isLoading = ProcessingStore.useState((s) => s.isLoading);
     // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
@@ -121,7 +123,7 @@ const PortfolioOverview = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value +' K';
+                    return value + ' K';
                 },
             },
         },
@@ -138,7 +140,7 @@ const PortfolioOverview = () => {
                     // if (val >= 1000) {
                     //     val = (val / 1000).toFixed(0) + ' K';
                     // }
-                    return val+' K';
+                    return val + ' K';
                 },
             },
             style: {
@@ -346,9 +348,7 @@ const PortfolioOverview = () => {
             },
         ],
     });
-    let cookies = new Cookies();
-    let userdata=cookies.get('user');
-   
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -362,7 +362,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -388,7 +389,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -421,6 +423,7 @@ const PortfolioOverview = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
+                    // Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = '?aggregate=day';
                 await axios
@@ -463,6 +466,7 @@ const PortfolioOverview = () => {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     'user-auth': '628f3144b712934f578be895',
+                    // Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
@@ -475,13 +479,12 @@ const PortfolioOverview = () => {
         };
 
         const portfolioBuilidingsData = async () => {
-
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                    "Authorization" : `Bearer ${userdata.token}`
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -639,7 +642,7 @@ const PortfolioOverview = () => {
                                         overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
                                     }
                                     // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
-                                infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
+                                    infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
                                     infoType={`total-eui`}
                                 />
                             </div>

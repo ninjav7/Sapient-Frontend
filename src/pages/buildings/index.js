@@ -10,9 +10,11 @@ import upGraph from '../../assets/icon/buildings/up-graph.svg';
 import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
-import {faTriangleExclamation} from '@fortawesome/pro-solid-svg-icons';
+import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -24,7 +26,6 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -442,7 +443,7 @@ const BuildingOverview = () => {
                     // if (val >= 1000) {
                     //     val = (val / 1000).toFixed(0) + ' K';
                     // }
-                    return val+' K';
+                    return val + ' K';
                 },
             },
             style: {
@@ -968,7 +969,7 @@ const BuildingOverview = () => {
                         let response = res.data;
                         let newArray = [
                             {
-                                name:'Energy',
+                                name: 'Energy',
                                 data: [],
                             },
                         ];
@@ -1055,7 +1056,8 @@ const BuildingOverview = () => {
                             <h5 className="card-title subtitle-style">
                                 Portfolio Rank&nbsp;&nbsp;
                                 <div>
-                                    <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" />
+                                    {/* <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" /> */}
+                                    <FontAwesomeIcon icon={faCircleInfo} size="md" color="#D0D5DD" id="title" />
                                     <UncontrolledTooltip placement="bottom" target="#title">
                                         Portfolio Rank
                                     </UncontrolledTooltip>
@@ -1107,8 +1109,14 @@ const BuildingOverview = () => {
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
-                                    <i
+                                    {/* <i
                                         className="uil uil-info-circle avatar-xs rounded-circle"
+                                        id="tooltip-monitored-load"
+                                    /> */}
+                                    <FontAwesomeIcon
+                                        icon={faCircleInfo}
+                                        size="md"
+                                        color="#D0D5DD"
                                         id="tooltip-monitored-load"
                                     />
                                     <UncontrolledTooltip placement="bottom" target="tooltip-monitored-load">
@@ -1451,11 +1459,18 @@ const BuildingOverview = () => {
                                             {record.type === 'building-add' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faMountain} size="lg" className="ml-2" color="#B42318
-"/>
+                                                        <FontAwesomeIcon
+                                                            icon={faMountain}
+                                                            size="lg"
+                                                            className="ml-2"
+                                                            color="#B42318
+"
+                                                        />
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading"><b>New Building Peak</b></span>
+                                                        <span className="alert-heading">
+                                                            <b>New Building Peak</b>
+                                                        </span>
                                                         <br />
                                                         <span className="alert-content">
                                                             225.3 kW &nbsp; 3/3/22 @ 3:20 PM
@@ -1467,10 +1482,17 @@ const BuildingOverview = () => {
                                             {record.type === 'energy-trend' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faArrowTrendUp} size="lg" className="ml-2" color="#DC6803"/>
+                                                        <FontAwesomeIcon
+                                                            icon={faArrowTrendUp}
+                                                            size="lg"
+                                                            className="ml-2"
+                                                            color="#DC6803"
+                                                        />
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading"><b>Energy Trend Upward</b></span>
+                                                        <span className="alert-heading">
+                                                            <b>Energy Trend Upward</b>
+                                                        </span>
                                                         <br />
                                                         <span className="alert-content">+25% from last 30 days</span>
                                                     </div>
@@ -1480,10 +1502,17 @@ const BuildingOverview = () => {
                                             {record.type === 'notification' && (
                                                 <div className="alert-card">
                                                     <div>
-                                                    <FontAwesomeIcon icon={faTriangleExclamation} size="lg" className="ml-2" color="#DC6803"/>
+                                                        <FontAwesomeIcon
+                                                            icon={faTriangleExclamation}
+                                                            size="lg"
+                                                            className="ml-2"
+                                                            color="#DC6803"
+                                                        />
                                                     </div>
                                                     <div>
-                                                        <span className="alert-heading"><b>Service Due Soon (AHU 1)</b></span>
+                                                        <span className="alert-heading">
+                                                            <b>Service Due Soon (AHU 1)</b>
+                                                        </span>
                                                         <br />
                                                         <span className="alert-content">
                                                             40 Run Hours &nbsp; in 25 Days
