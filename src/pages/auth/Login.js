@@ -109,7 +109,7 @@ class Login extends Component {
                                                 {error && <Alert color="danger" isOpen={error ? true : false}>
                                                     <div>{message}</div>
                                                 </Alert>}
-                                                <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form">
+                                                <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form" autoComplete="off">
                                                     <AvGroup className="">
                                                         <Label for="username">Username</Label>
                                                         <InputGroup>
