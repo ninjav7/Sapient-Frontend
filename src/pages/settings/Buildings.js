@@ -23,6 +23,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BaseUrl, getBuildings, createBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const BuildingTable = ({ buildingsData }) => {
@@ -64,6 +65,9 @@ const BuildingTable = ({ buildingsData }) => {
 };
 
 const Buildings = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -95,7 +99,8 @@ const Buildings = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
 
@@ -137,7 +142,8 @@ const Buildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                     setBuildingsData(res.data);

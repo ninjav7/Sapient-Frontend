@@ -24,6 +24,7 @@ import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData } from '..
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const SelectBreakerModel = ({
@@ -114,8 +115,11 @@ const SelectBreakerModel = ({
 };
 
 const IndividualPassiveDevice = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const { deviceId } = useParams();
-    console.log(deviceId)
+    console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);
@@ -159,7 +163,7 @@ const IndividualPassiveDevice = () => {
         device_type: 'passive',
     });
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    console.log("BldgId",(s)=>s.BldgId);
+    console.log('BldgId', (s) => s.BldgId);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -212,27 +216,28 @@ const IndividualPassiveDevice = () => {
             panel_id: 'Panel 3',
         },
     ]);
- console.log("panel",panels)
+    console.log('panel', panels);
     useEffect(() => {
-        console.log("entered in useeffect");
+        console.log('entered in useeffect');
         const fetchPassiveDeviceData = async () => {
             try {
-                console.log("entered passive devices");
+                console.log('entered passive devices');
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log(response)
+                    console.log(response);
 
                     // let data = response.filter((record) => record.equipments_id === deviceId);
                     // let deviceData = data[0];
 
                     setPassiveData(response.data[0]);
-                    console.log(response.data[0])
+                    console.log(response.data[0]);
                     // if (deviceData.sensors) {
                     //     let arr = deviceData.sensors;
                     //     setSensors(arr);
@@ -253,7 +258,8 @@ const IndividualPassiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
@@ -269,7 +275,7 @@ const IndividualPassiveDevice = () => {
     }, [deviceId]);
 
     useEffect(() => {
-        console.log("entered in useeffect");
+        console.log('entered in useeffect');
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
@@ -291,7 +297,8 @@ const IndividualPassiveDevice = () => {
                 let header = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?sensor_id=${sensorId}`;
                 await axios
