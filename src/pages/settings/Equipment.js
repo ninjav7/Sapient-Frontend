@@ -307,7 +307,7 @@ const EquipmentTable = ({ equipmentData }) => {
 const Equipment = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -365,8 +365,20 @@ const Equipment = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    setGeneralEquipmentData(res.data);
-                    console.log(res.data);
+                    let responseData = res.data;
+                    setGeneralEquipmentData(responseData);
+                    let onlineEquip = [];
+                    let offlineEquip = [];
+                    responseData.forEach((record) => {
+                        if (record.status === 'Online') {
+                            onlineEquip.push(record);
+                        }
+                        if (record.status === 'Offline') {
+                            offlineEquip.push(record);
+                        }
+                    });
+                    setOnlineEquipData(onlineEquip);
+                    setOfflineEquipData(offlineEquip);
                 });
             } catch (error) {
                 console.log(error);
@@ -448,8 +460,8 @@ const Equipment = () => {
         };
 
         fetchEquipmentData();
-        fetchOnlineEquipData();
-        fetchOfflineEquipData();
+        // fetchOnlineEquipData();
+        // fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
     }, [bldgId]);

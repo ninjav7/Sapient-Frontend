@@ -85,20 +85,20 @@ const PanelsTable = ({ generalPanelData }) => {
 const Panels = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // const [buildingId, setBuildingId] = useState(1);
     const [generalPanelData, setGeneralPanelData] = useState([]);
 
     useEffect(() => {
         const fetchPanelsData = async () => {
             try {
-                let headers = {
+                let header = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${generalPanels}`, { headers: header }).then((res) => {
                     setGeneralPanelData(res.data);
                     console.log(res.data);
                 });

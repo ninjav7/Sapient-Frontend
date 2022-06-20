@@ -27,9 +27,9 @@ export const endUsesFloorChart = '/api/energy/chart/byfloor';
 export const endUsesUsageChart = '/api/energy/chart/usage';
 
 // equipments
-export const generalEquipments = '/api/config/equipments_details';
-export const equipmentType = '/api/config/get_equipment_type';
-export const createEquipment = '/api/config/equipments_details/create_equipment';
+export const generalEquipments = '/api/config/equipments_details/';
+export const equipmentType = '/api/config/get_equipment_type/';
+export const createEquipment = '/api/config/equipments_details/create_equipment/';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -43,7 +43,7 @@ export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const generalGateway = '/api/config/gateway';
 
 // panel
-export const generalPanels = '/api/config/panels';
+export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 
 // getBuilding
