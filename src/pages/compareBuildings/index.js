@@ -118,7 +118,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {index === 0 && record.energy_density === 0 && (
