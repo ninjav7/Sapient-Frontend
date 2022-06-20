@@ -22,7 +22,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
-
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const BuildingTable = ({ buildingsData }) => {
@@ -132,9 +132,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 0 && record.energy_density > 0 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#D14065`}
@@ -143,9 +143,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 1 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#DF5775`}
@@ -154,9 +154,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 2 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#EB6E87`}
@@ -165,9 +165,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 3 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#EB6E87`}
@@ -176,9 +176,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 4 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#FC9EAC`}
@@ -187,9 +187,9 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                             {index === 5 && (
                                                 <Line
-                                                    percent={parseFloat((record.energy_density / topEnergyDensity) * 100).toFixed(
-                                                        2
-                                                    )}
+                                                    percent={parseFloat(
+                                                        (record.energy_density / topEnergyDensity) * 100
+                                                    ).toFixed(2)}
                                                     strokeWidth="3"
                                                     trailWidth="3"
                                                     strokeColor={`#FFCFD6`}
@@ -410,6 +410,8 @@ const BuildingTable = ({ buildingsData }) => {
 const CompareBuildings = () => {
     const [buildingsData, setBuildingsData] = useState([]);
     const daysCount = DateRangeStore.useState((s) => s.dateFilter);
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -433,7 +435,8 @@ const CompareBuildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
 
                 let count = parseInt(localStorage.getItem('dateFilter'));

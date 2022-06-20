@@ -8,8 +8,12 @@ import { BaseUrl, generalUtilityBills } from '../../services/Network';
 import moment from 'moment';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 
 const UtilityBills = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [avgRate, setAvgRate] = useState(0.6);
     const [inputField, setInputField] = useState({
@@ -106,6 +110,7 @@ const UtilityBills = () => {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
                         // 'user-auth': '628f3144b712934f578be895',
+                        Authorization: `Bearer ${userdata.token}`,
                     };
                     await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
                         console.log(res);
@@ -154,6 +159,7 @@ const UtilityBills = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalUtilityBills}/${billId}`, inputField, { headers }).then((res) => {
             console.log(res.data);

@@ -17,6 +17,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -273,6 +274,9 @@ const BuildingPeakTable = () => {
 const Explore = () => {
     const [parentFilter, setParentFilter] = useState('');
 
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
@@ -317,7 +321,7 @@ const Explore = () => {
 
     const [exploreThirdLvlOpts, setExploreThirdLvlOpts] = useState([]);
     const [activeThirdLvlOpt, setActiveThirdLvlOpt] = useState(exploreThirdLvlOpts[0]);
-    const [counter,setCounter]=useState(0);
+    const [counter, setCounter] = useState(0);
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowEquipmentChart(false);
 
@@ -333,7 +337,7 @@ const Explore = () => {
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
-    const [equipmentData, setEquipmentData]=useState([]);
+    const [equipmentData, setEquipmentData] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -498,7 +502,7 @@ const Explore = () => {
             type: 'datetime',
         },
     });
-    const [showEquipmentChart,setShowEquipmentChart]=useState(false);
+    const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const [firstLevelLineData, setFirstLevelLineData] = useState();
     const [firstLevelLineOpts, setFirstLevelLineOpts] = useState({
         chart: {
@@ -645,7 +649,8 @@ const Explore = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?filters=${activeExploreOpt.value}`;
                 await axios
@@ -722,7 +727,8 @@ const Explore = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?filters=no-grouping`;
                 await axios
@@ -775,65 +781,65 @@ const Explore = () => {
         window.scroll(0, 0);
 
         const exploreFilterDataFetch = async () => {
-            if(counter===2){
+            if (counter === 2) {
                 setShowEquipmentChart(true);
                 console.log(childFilter);
                 setEquipmentData(childFilter);
-
-            }else{
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?filters=${childFilter.parent}&filter_id=${childFilter.eq_id}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExplore}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setExploreTableData([]);
-                        setSeriesData([]);
-                        setSeriesLineData([]);
-                        let responseData = res.data;
-                        // console.log('SSR API response => ', responseData);
-                        setExploreTableData(responseData);
-                        let data = responseData;
-                        let exploreData = [];
-                        data.forEach((record) => {
-                            if (record.eq_name !== null) {
-                                let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
-                                };
-                                exploreData.push(recordToInsert);
-                            }
-                        });
-                        // console.log('SSR Customized exploreData => ', exploreData);
-                        setCounter(counter+1);
-                        console.log("Counter ",counter+1);
-                        setSeriesData(exploreData);
-                        setSeriesLineData([
+            } else {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        // 'user-auth': '628f3144b712934f578be895',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    let params = `?filters=${childFilter.parent}&filter_id=${childFilter.eq_id}`;
+                    await axios
+                        .post(
+                            `${BaseUrl}${getExplore}${params}`,
                             {
-                                data: exploreData[0].data,
+                                date_from: dateFormatHandler(startDate),
+                                date_to: dateFormatHandler(endDate),
                             },
-                        ]);
-                        let newObj = childFilter;
-                        newObj.parent = 'equipment_type';
-                        setChildFilter(newObj);
-                        setParentFilter(newObj.parent)
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
+                            { headers }
+                        )
+                        .then((res) => {
+                            setExploreTableData([]);
+                            setSeriesData([]);
+                            setSeriesLineData([]);
+                            let responseData = res.data;
+                            // console.log('SSR API response => ', responseData);
+                            setExploreTableData(responseData);
+                            let data = responseData;
+                            let exploreData = [];
+                            data.forEach((record) => {
+                                if (record.eq_name !== null) {
+                                    let recordToInsert = {
+                                        name: record.eq_name,
+                                        data: record.data,
+                                    };
+                                    exploreData.push(recordToInsert);
+                                }
+                            });
+                            // console.log('SSR Customized exploreData => ', exploreData);
+                            setCounter(counter + 1);
+                            console.log('Counter ', counter + 1);
+                            setSeriesData(exploreData);
+                            setSeriesLineData([
+                                {
+                                    data: exploreData[0].data,
+                                },
+                            ]);
+                            let newObj = childFilter;
+                            newObj.parent = 'equipment_type';
+                            setChildFilter(newObj);
+                            setParentFilter(newObj.parent);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Failed to fetch Explore Data');
+                }
             }
-        }
         };
 
         exploreFilterDataFetch();
@@ -959,7 +965,11 @@ const Explore = () => {
                     </div>
                 </div>
             </Row>
-            <EquipmentChartModel showChart={showEquipmentChart} handleChartClose={handleChartClose} sensorData={equipmentData}/>
+            <EquipmentChartModel
+                showChart={showEquipmentChart}
+                handleChartClose={handleChartClose}
+                sensorData={equipmentData}
+            />
             {/* Explore Body  */}
             {activeExploreOpt.value === 'no-grouping' && (
                 <>
@@ -1017,7 +1027,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                             />
                         </Col>
                     </Row>
                 </>
@@ -1033,7 +1050,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1049,7 +1073,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1065,12 +1096,18 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable exploreTableData={exploreTableData} />
+                            <ExploreTable 
+                                exploreTableData={exploreTableData}
+                                activeExploreOpt={activeExploreOpt}
+                                childFilter={childFilter}
+                                setChildFilter={setChildFilter}
+                                parentFilter={parentFilter}
+                                setParentFilter={setParentFilter}
+                            />
                         </Col>
                     </Row>
                 </>
             )}
-                        
         </>
     );
 };

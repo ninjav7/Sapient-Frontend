@@ -10,10 +10,14 @@ import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../se
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageThree = () => {
     const { bldgId } = useParams();
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -222,7 +226,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=Plug`;
                 await axios
@@ -249,7 +254,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=plug`;
                 await axios
@@ -299,7 +305,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=plug`;
                 await axios

@@ -16,6 +16,7 @@ import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {
@@ -82,6 +83,9 @@ const PanelsTable = ({ generalPanelData }) => {
 };
 
 const Panels = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     // const [buildingId, setBuildingId] = useState(1);
     const [generalPanelData, setGeneralPanelData] = useState([]);
 
@@ -91,7 +95,8 @@ const Panels = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);

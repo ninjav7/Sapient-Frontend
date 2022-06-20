@@ -10,9 +10,13 @@ import axios from 'axios';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const { bldgId } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -309,7 +313,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=HVAC`;
                 await axios
@@ -336,7 +341,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios
@@ -369,7 +375,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios

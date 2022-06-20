@@ -10,6 +10,7 @@ import { BaseUrl, getLocation, generalPanels, generalPassiveDevices, createPanel
 import { v4 as uuidv4 } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash } from '@fortawesome/pro-regular-svg-icons';
+import { Cookies } from 'react-cookie';
 
 import '../style.css';
 import './panel-style.css';
@@ -105,6 +106,9 @@ import './panel-style.css';
 // };
 
 const CreatePanel = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     // Create Modal
     const [showBreaker, setShowBreaker] = useState(false);
     const handleBreakerClose = () => setShowBreaker(false);
@@ -278,7 +282,8 @@ const CreatePanel = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
 
             setIsProcessing(true);
@@ -368,7 +373,8 @@ const CreatePanel = () => {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
-                        'user-auth': '628f3144b712934f578be895',
+                        // 'user-auth': '628f3144b712934f578be895',
+                        Authorization: `Bearer ${userdata.token}`,
                     };
                     await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                         setLocationData(res.data);
@@ -385,7 +391,8 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
@@ -401,7 +408,8 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
                 let params = `?page_size=10&page_no=1`;
@@ -786,7 +794,6 @@ const CreatePanel = () => {
                                                         </div>
                                                         <span className="font-weight-bold edit-btn-styling">Edit</span>
                                                     </div>
-                                                    
                                                     {/* {!(element.equipment_name === '') ? (
                                                         <>
                                                             <div>
@@ -827,11 +834,6 @@ const CreatePanel = () => {
                                                         </>
                                                     )} */}
                                                 </div>
-                                                </div>
-                                                <div className="edit-icon-bg-styling mr-2">
-                                                            <i className="uil uil-link"></i>
-                                                        </div>
-                                                    
                                                 {/* <div className="left-link-container">
                                                     <div className="left-link-container-icon">
                                                         <FontAwesomeIcon icon={faLinkHorizontalSlash} size="sm" />
@@ -970,7 +972,7 @@ const CreatePanel = () => {
                                                             </div>
                                                         </>
                                                     )} */}
-                                                {/* </div> */}
+                                                </div>
                                             </div>
                                         </FormGroup>
                                     </div>
