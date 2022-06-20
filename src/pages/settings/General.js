@@ -172,6 +172,7 @@ const General = () => {
                         path: '/settings/general',
                         active: true,
                     },
+                    
                 ];
                 bs.items = newList;
             });
