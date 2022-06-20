@@ -91,7 +91,7 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/energy/building-peak-explore">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -169,7 +169,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/energy/building-peak-explore">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -241,7 +241,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 const PeakDemand = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { bldgId } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
 

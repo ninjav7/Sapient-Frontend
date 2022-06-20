@@ -1327,9 +1327,7 @@ const BuildingOverview = () => {
                                                         className="m-4">
                                                         <Link
                                                             to={{
-                                                                pathname: `/energy/building-peak-explore/${localStorage.getItem(
-                                                                    'buildingId'
-                                                                )}`,
+                                                                pathname: `/explore/page`,
                                                             }}>
                                                             <button
                                                                 type="button"
