@@ -37,17 +37,17 @@ const Header = (props) => {
             value: 365,
         },
         {
-            label:'Month to Date',
-            value:30,
+            label: 'Month to Date',
+            value: 30,
         },
         {
-            label:'Quarter to Date',
-            value:120,
+            label: 'Quarter to Date',
+            value: 120,
         },
         {
-            label:'Year to Date',
-            value:365,
-        }
+            label: 'Year to Date',
+            value: 365,
+        },
     ];
 
     useEffect(() => {
@@ -73,7 +73,7 @@ const Header = (props) => {
         const setCustomDate = (date) => {
             let startCustomDate = date[0];
             let endCustomDate = date[1];
-            let dt=new Date();
+            let dt = new Date();
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
@@ -132,7 +132,7 @@ const Header = (props) => {
                             <div className="float-right ml-2">
                                 <Link
                                     to={{
-                                        pathname: `/energy/building-peak-explore/${localStorage.getItem('buildingId')}`,
+                                        pathname: `/explore/page`,
                                     }}>
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                         <i className="uil uil-pen mr-1"></i>Explore

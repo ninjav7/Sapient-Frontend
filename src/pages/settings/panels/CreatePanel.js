@@ -108,7 +108,7 @@ import './panel-style.css';
 const CreatePanel = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // Create Modal
     const [showBreaker, setShowBreaker] = useState(false);
     const handleBreakerClose = () => setShowBreaker(false);

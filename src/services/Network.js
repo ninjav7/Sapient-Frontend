@@ -88,7 +88,7 @@ export const updatePlugRule = '/api/user_role/plug_rule/update';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
-export const signup ='/api/user_role/user/signup';
+export const signup = '/api/user_role/user/signup';
 
 export const linkSocketRules = '/api/user_role/plug_rule/list_link_socket';
 export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildingID';
