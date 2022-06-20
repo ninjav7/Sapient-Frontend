@@ -422,8 +422,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                    // Authorization: `Bearer ${userdata.token}`,
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = '?aggregate=day';
                 await axios
@@ -465,8 +465,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                    // Authorization: `Bearer ${userdata.token}`,
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;

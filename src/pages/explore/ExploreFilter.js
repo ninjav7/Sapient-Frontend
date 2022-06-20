@@ -16,6 +16,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -273,6 +274,9 @@ const Explore = () => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const customDaySelect = [
         {
             label: 'Today',
@@ -425,7 +429,8 @@ const Explore = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?filters=${activeExploreOpt.value}`;
                 await axios

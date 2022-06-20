@@ -31,6 +31,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 export function useHover() {
@@ -61,7 +62,8 @@ export function useHover() {
 
 const BuildingOverview = () => {
     const { bldgId } = useParams();
-
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -708,7 +710,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -735,7 +738,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -770,7 +774,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${1}`;
                 await axios
@@ -797,7 +802,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&limit=${2}`;
                 await axios
@@ -825,7 +831,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -856,7 +863,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -953,7 +961,8 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?aggregate=day&building_id=${bldgId}`;
                 await axios

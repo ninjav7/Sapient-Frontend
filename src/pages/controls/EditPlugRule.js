@@ -24,6 +24,7 @@ import axios from 'axios';
 import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const EditPlugRule = ({
@@ -42,6 +43,9 @@ const EditPlugRule = ({
     setRulesToLink,
     setRulesToUnLink,
 }) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const { v4: uuidv4 } = require('uuid');
     const getConditionId = () => uuidv4();
 
@@ -338,7 +342,8 @@ const EditPlugRule = ({
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
@@ -361,7 +366,8 @@ const EditPlugRule = ({
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {

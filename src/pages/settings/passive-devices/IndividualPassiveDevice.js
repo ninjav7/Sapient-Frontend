@@ -12,6 +12,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const SelectBreakerModel = ({
@@ -101,16 +102,17 @@ const SelectBreakerModel = ({
     );
 };
 
-
-
 const IndividualPassiveDevice = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const { deviceId } = useParams();
-    console.log(deviceId)
+    console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
-   
+
     // Select Breaker states
     const [showBreaker, setShowBreaker] = useState(false);
     const handleBreakerClose = () => setShowBreaker(false);
@@ -121,7 +123,6 @@ const IndividualPassiveDevice = () => {
 
     const [sensorCount, setSensorCount] = useState(0);
 
-   
     const [passiveData, setPassiveData] = useState({});
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
@@ -130,11 +131,11 @@ const IndividualPassiveDevice = () => {
         device_type: 'passive',
     });
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    console.log("BldgId",(s)=>s.BldgId);
+    console.log('BldgId', (s) => s.BldgId);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sensors, setSensors] = useState([]);
-    const [sensorData,setSensordata]=useState([]);
+    const [sensorData, setSensordata] = useState([]);
 
     const [breakers, setBreakers] = useState([
         {
@@ -165,30 +166,31 @@ const IndividualPassiveDevice = () => {
             panel_id: 'Panel 3',
         },
     ]);
- 
+
     const handleChartShow = (id) => {
         setSensorId(id);
         setShowChart(true);
-        let obj = sensors.find(o => o.id === id);
+        let obj = sensors.find((o) => o.id === id);
         setSensordata(obj);
         fetchSensorGraphData(id);
-    }
-    console.log("panel",panels)
+    };
+    console.log('panel', panels);
 
- useEffect(() => {
-        console.log("entered in useeffect")
+    useEffect(() => {
+        console.log('entered in useeffect');
         const fetchSinglePassiveDevice = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     console.log(response);
-                    console.log(response.data[0])
+                    console.log(response.data[0]);
                     setPassiveData(response.data[0]);
                 });
             } catch (error) {
@@ -202,7 +204,8 @@ const IndividualPassiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
@@ -220,7 +223,8 @@ const IndividualPassiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
@@ -252,34 +256,38 @@ const IndividualPassiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
-    
     // useEffect(() => {
-        const fetchSensorGraphData = async (id) => {
-            try {
-                let endDate = new Date(); // today
-                let startDate = new Date();
-                startDate.setDate(startDate.getDate() - 7);
-                
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?sensor_id=${id===sensorId?sensorId:id}`;
-                await axios.post(`${BaseUrl}${sensorGraphData}${params}`, 
-                {
-                    date_from: dateFormatHandler(startDate),
-                    date_to: dateFormatHandler(endDate),
-                }
-                ,{ headers }).then((res) => {
+    const fetchSensorGraphData = async (id) => {
+        try {
+            let endDate = new Date(); // today
+            let startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
+            await axios
+                .post(
+                    `${BaseUrl}${sensorGraphData}${params}`,
+                    {
+                        date_from: dateFormatHandler(startDate),
+                        date_to: dateFormatHandler(endDate),
+                    },
+                    { headers }
+                )
+                .then((res) => {
                     let response = res.data;
                     console.log('Sensor Graph Data => ', response);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Sensor Graph data');
-            }
-        };
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Sensor Graph data');
+        }
+    };
     //     fetchSensorGraphData();
     // }, [sensorId]);
 
@@ -379,7 +387,6 @@ const IndividualPassiveDevice = () => {
                                             placeholder="Search..."
                                         />
                                     </div>
-  
                                 </div>
                             </div>
 
@@ -447,7 +454,6 @@ const IndividualPassiveDevice = () => {
 
             <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} />
 
-
             <SelectBreakerModel
                 showBreaker={showBreaker}
                 handleBreakerClose={handleBreakerClose}
@@ -459,7 +465,6 @@ const IndividualPassiveDevice = () => {
                 setCurrentRecord={setCurrentRecord}
                 currentIndex={currentIndex}
             />
-
         </>
     );
 };

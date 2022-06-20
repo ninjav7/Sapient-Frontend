@@ -10,6 +10,7 @@ import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { Cookies } from 'react-cookie';
 import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {
@@ -238,6 +239,9 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     const { bldgId } = useParams();
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -464,7 +468,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -506,7 +511,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -547,7 +553,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios

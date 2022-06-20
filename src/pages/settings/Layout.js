@@ -18,8 +18,12 @@ import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 
 const Layout = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    
     // const store = useSelector((state) => state.counterState);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [floorsData, setfloorsData] = useState([]);
@@ -167,6 +171,7 @@ const Layout = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
             console.log(res.data);
