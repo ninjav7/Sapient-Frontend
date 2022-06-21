@@ -11,11 +11,14 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const UsagePageTwo = ({ title = 'Lighting' }) => {
     const { bldgId } = useParams();
-    
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -366,9 +369,13 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                 <button
                                     className="button-success text-success btn-font-style"
                                     style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>0 %</strong>
-                                    </i>
+                                    <FontAwesomeIcon
+                                        icon={faArrowTrendDown}
+                                        size="md"
+                                        color="#43d39e"
+                                        className="mr-1"
+                                    />
+                                    <strong>0 %</strong>
                                 </button>
                                 &nbsp;&nbsp;
                                 <span className="light-content-style">since last period</span>
@@ -376,9 +383,13 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                 <button
                                     className="button-success text-success btn-font-style"
                                     style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>0 %</strong>
-                                    </i>
+                                    <FontAwesomeIcon
+                                        icon={faArrowTrendDown}
+                                        size="md"
+                                        color="#43d39e"
+                                        className="mr-1"
+                                    />
+                                    <strong>0 %</strong>
                                 </button>
                                 &nbsp;&nbsp;
                                 <span className="light-content-style">from same period last year</span>
@@ -396,9 +407,13 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                 <button
                                     className="button-success text-success btn-font-style"
                                     style={{ width: 'auto', marginBottom: '4px' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>0 %</strong>
-                                    </i>
+                                    <FontAwesomeIcon
+                                        icon={faArrowTrendDown}
+                                        size="md"
+                                        color="#43d39e"
+                                        className="mr-1"
+                                    />
+                                    <strong>0 %</strong>
                                 </button>
                                 &nbsp;&nbsp;
                                 <span className="light-content-style">since last period</span>
@@ -406,9 +421,13 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                 <button
                                     className="button-success text-success btn-font-style"
                                     style={{ width: 'auto' }}>
-                                    <i className="uil uil-chart-down">
-                                        <strong>0 %</strong>
-                                    </i>
+                                    <FontAwesomeIcon
+                                        icon={faArrowTrendDown}
+                                        size="md"
+                                        color="#43d39e"
+                                        className="mr-1"
+                                    />
+                                    <strong>0 %</strong>
                                 </button>
                                 &nbsp;&nbsp;
                                 <span className="light-content-style">from same period last year</span>
@@ -436,29 +455,37 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                         &nbsp;&nbsp;
@@ -468,29 +495,37 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.yearly
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.yearly
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                         &nbsp;&nbsp;
@@ -517,29 +552,37 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                         &nbsp;&nbsp;
@@ -550,29 +593,37 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.yearly
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.yearly
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.after_hours_energy_consumption.now,
+                                                        record.after_hours_energy_consumption.yearly
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                         &nbsp;&nbsp;
