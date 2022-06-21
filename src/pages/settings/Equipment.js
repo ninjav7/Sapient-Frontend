@@ -22,7 +22,6 @@ import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { Cookies } from 'react-cookie';
 
 const SingleEquipmentModal = ({ show, equipData, close }) => {
     return (
@@ -305,9 +304,6 @@ const EquipmentTable = ({ equipmentData }) => {
 };
 
 const Equipment = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -334,8 +330,8 @@ const Equipment = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
-                Authorization: `Bearer ${userdata.token}`,
+                'user-auth': '628f3144b712934f578be895',
+                // Authorization: `JWT ${_user.token}`,
             };
             setIsProcessing(true);
 
@@ -354,33 +350,18 @@ const Equipment = () => {
         }
     };
 
-    // console.log('Merge Issue Fix');
-
     useEffect(() => {
         const fetchEquipmentData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
-                    setGeneralEquipmentData(responseData);
-                    let onlineEquip = [];
-                    let offlineEquip = [];
-                    responseData.forEach((record) => {
-                        if (record.status === 'Online') {
-                            onlineEquip.push(record);
-                        }
-                        if (record.status === 'Offline') {
-                            offlineEquip.push(record);
-                        }
-                    });
-                    setOnlineEquipData(onlineEquip);
-                    setOfflineEquipData(offlineEquip);
+                    setGeneralEquipmentData(res.data);
+                    console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -393,8 +374,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=true&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -412,8 +392,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -431,8 +410,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
@@ -448,8 +426,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
+                    'user-auth': '628f3144b712934f578be895',
                 };
                 // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
@@ -462,8 +439,8 @@ const Equipment = () => {
         };
 
         fetchEquipmentData();
-        // fetchOnlineEquipData();
-        // fetchOfflineEquipData();
+        fetchOnlineEquipData();
+        fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
     }, [bldgId]);
