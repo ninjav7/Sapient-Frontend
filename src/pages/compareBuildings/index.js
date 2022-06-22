@@ -17,6 +17,8 @@ import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -118,7 +120,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {index === 0 && record.energy_density === 0 && (
@@ -203,29 +205,37 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.energy_consumption.now,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                     </td>
@@ -331,29 +341,37 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.hvac_consumption.now,
-                                                            record.hvac_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.hvac_consumption.now,
+                                                        record.hvac_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.hvac_consumption.now,
-                                                            record.hvac_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.hvac_consumption.now,
+                                                        record.hvac_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                     </td>
@@ -368,29 +386,37 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <i className="uil uil-arrow-growth">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.total_consumption,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendUp}
+                                                    size="md"
+                                                    color="#ff5c75"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.total_consumption,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <i className="uil uil-chart-down">
-                                                    <strong>
-                                                        {percentageHandler(
-                                                            record.total_consumption,
-                                                            record.energy_consumption.old
-                                                        )}
-                                                        %
-                                                    </strong>
-                                                </i>
+                                                <FontAwesomeIcon
+                                                    icon={faArrowTrendDown}
+                                                    size="md"
+                                                    color="#43d39e"
+                                                    className="mr-1"
+                                                />
+                                                <strong>
+                                                    {percentageHandler(
+                                                        record.total_consumption,
+                                                        record.energy_consumption.old
+                                                    )}
+                                                    %
+                                                </strong>
                                             </button>
                                         )}
                                     </td>

@@ -23,7 +23,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
+const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData, pageSize, setPageSize }) => {
     return (
         <Card>
             <CardBody>
@@ -68,22 +68,40 @@ const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, pagin
                     </tbody>
                 </Table>
                 <div className="page-button-style">
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        onClick={() => {
-                            previousPageData(paginationData.pagination.previous);
-                        }}>
-                        Previous
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        onClick={() => {
-                            nextPageData(paginationData.pagination.next);
-                        }}>
-                        Next
-                    </button>
+                    <div>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                    </div>
+                    <div>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[10, 25, 50].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </CardBody>
         </Card>
@@ -379,6 +397,40 @@ const PassiveDevices = () => {
     }, [pageRefresh, bldgId]);
 
     useEffect(() => {
+        const fetchPassiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    let data = res.data;
+                    console.log('Rai Passive Data => ', data);
+                    setPassiveDeviceData(data.data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    data.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Passive devices');
+            }
+        };
+
+        fetchPassiveDeviceData();
+    }, [pageSize]);
+
+    useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
@@ -394,9 +446,9 @@ const PassiveDevices = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        console.log('createDeviceData => ', createDeviceData);
-    });
+    // useEffect(() => {
+    //     console.log('createDeviceData => ', createDeviceData);
+    // });
 
     return (
         <React.Fragment>
@@ -509,6 +561,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -517,6 +571,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -525,6 +581,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                 </Col>

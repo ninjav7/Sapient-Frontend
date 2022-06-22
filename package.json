@@ -63,6 +63,7 @@
         "react-loader-spinner": "^5.1.5-0",
         "react-loading-skeleton": "^3.1.0",
         "react-multi-date-picker": "^3.3.0",
+        "react-multi-select-component": "^4.2.9",
         "react-perfect-scrollbar": "^1.5.3",
         "react-redux": "^7.1.1",
         "react-router-auth": "^1.0.1",
