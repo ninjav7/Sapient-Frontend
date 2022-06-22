@@ -1,5 +1,5 @@
 import { Store } from 'pullstate';
 
 export const LoadingStore = new Store({
-    isLoading: true,
+    isLoading: false,
 });

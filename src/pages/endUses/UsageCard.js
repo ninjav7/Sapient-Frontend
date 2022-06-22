@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card, CardBody, Button } from 'reactstrap';
 import { Link, BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const UsageCard = ({
@@ -86,18 +89,16 @@ const UsageCard = ({
                         <button
                             className="button-danger text-danger btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-arrow-growth">
-                                <strong>{lastPeriodPerTotalHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendUp} size="md" color="#ff5c75" className="mr-1" />
+                            <strong>{lastPeriodPerTotalHrs} %</strong>
                         </button>
                     )}
                     {!lastPeriodPerTotalHrsNormal && (
                         <button
                             className="button-success text-success btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-chart-down">
-                                <strong>{lastPeriodPerTotalHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
+                            <strong>{lastPeriodPerTotalHrs} %</strong>
                         </button>
                     )}
                     {/* <button
@@ -114,18 +115,16 @@ const UsageCard = ({
                         <button
                             className="button-danger text-danger btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-arrow-growth">
-                                <strong>{lastPeriodPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendUp} size="md" color="#ff5c75" className="mr-1" />
+                            <strong>{lastPeriodPerAfterHrs} %</strong>
                         </button>
                     )}
                     {!lastPeriodPerAfterHrsNormal && (
                         <button
                             className="button-success text-success btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-chart-down">
-                                <strong>{lastPeriodPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
+                            <strong>{lastPeriodPerAfterHrs} %</strong>
                         </button>
                     )}
                     {/* <button
@@ -152,18 +151,16 @@ const UsageCard = ({
                         <button
                             className="button-danger text-danger btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-arrow-growth">
-                                <strong>{lastPeriodPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendUp} size="md" color="#ff5c75" className="mr-1" />
+                            <strong>{lastPeriodPerAfterHrs} %</strong>
                         </button>
                     )}
                     {!lastPeriodPerAfterHrsNormal && (
                         <button
                             className="button-success text-success btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-chart-down">
-                                <strong>{lastPeriodPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
+                            <strong>{lastPeriodPerAfterHrs} %</strong>
                         </button>
                     )}
                     {/* <button
@@ -180,18 +177,16 @@ const UsageCard = ({
                         <button
                             className="button-danger text-danger btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-arrow-growth">
-                                <strong>{lastYearPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendUp} size="md" color="#ff5c75" className="mr-1" />
+                            <strong>{lastYearPerAfterHrs} %</strong>
                         </button>
                     )}
                     {!lastYearPerAfterHrsNormal && (
                         <button
                             className="button-success text-success btn-font-style"
                             style={{ width: 'auto', marginBottom: '4px' }}>
-                            <i className="uil uil-chart-down">
-                                <strong>{lastYearPerAfterHrs} %</strong>
-                            </i>
+                            <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
+                            <strong>{lastYearPerAfterHrs} %</strong>
                         </button>
                     )}
                     {/* <button className="button-danger text-danger btn-font-style" style={{ width: 'auto' }}>

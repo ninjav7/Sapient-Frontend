@@ -27,6 +27,9 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -827,29 +830,37 @@ const PortfolioOverview = () => {
                                                         {record.energy_consumption.now <=
                                                             record.energy_consumption.old && (
                                                             <button className="button-success text-success custom-btn-style">
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
+                                                                <FontAwesomeIcon
+                                                                    icon={faArrowTrendDown}
+                                                                    size="md"
+                                                                    color="#43d39e"
+                                                                    className="mr-1"
+                                                                />
+                                                                <strong>
+                                                                    {percentageHandler(
+                                                                        record.energy_consumption.now,
+                                                                        record.energy_consumption.old
+                                                                    )}{' '}
+                                                                    %
+                                                                </strong>
                                                             </button>
                                                         )}
                                                         {record.energy_consumption.now >
                                                             record.energy_consumption.old && (
                                                             <button className="button-danger text-danger custom-btn-style">
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
+                                                                <FontAwesomeIcon
+                                                                    icon={faArrowTrendUp}
+                                                                    size="md"
+                                                                    color="#ff5c75"
+                                                                    className="mr-1"
+                                                                />
+                                                                <strong>
+                                                                    {percentageHandler(
+                                                                        record.energy_consumption.now,
+                                                                        record.energy_consumption.old
+                                                                    )}{' '}
+                                                                    %
+                                                                </strong>
                                                             </button>
                                                         )}
                                                     </div>
