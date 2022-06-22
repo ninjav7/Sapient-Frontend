@@ -1162,7 +1162,7 @@ const CreatePanel = () => {
 
                         <div className="panel-model-row-style ml-2 mr-2">
                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Device ID</Form.Label>
+                             <Form.Label>Device ID</Form.Label>
                                 <Form.Control
                                     type="text"
                                     placeholder="Enter Device ID"
