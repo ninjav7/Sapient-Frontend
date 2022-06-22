@@ -13,6 +13,7 @@ import {
     generalPassiveDevices,
     createPanel,
     generalEquipments,
+    listSensor,
 } from '../../../services/Network';
 import { v4 as uuidv4 } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,6 +39,7 @@ const CreatePanel = () => {
 
     const [updateData, setUpdateData] = useState({});
     const [equipmentData, setEquipmentData] = useState([]);
+    const [sensorData, setSensorData] = useState([]);
 
     const [currentBreakerObj, setCurrentBreakerObj] = useState({});
     const [currentBreakerIndex, setCurrentBreakerIndex] = useState(0);
@@ -91,6 +93,24 @@ const CreatePanel = () => {
             value: 3,
         },
     ]);
+
+    const [breakerLevel, setBreakerLevel] = useState([
+        {
+            name: 'Single-Breaker',
+            value: 'single-breaker',
+        },
+        {
+            name: 'Double-Breaker',
+            value: 'double-breaker',
+        },
+        {
+            name: 'Triple-Breaker',
+            value: 'triple-breaker',
+        },
+    ]);
+
+    const [currentBreakerLevel, setCurrentBreakerLevel] = useState('single-breaker');
+
     const [activePanelType, setActivePanelType] = useState('distribution');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
@@ -238,15 +258,15 @@ const CreatePanel = () => {
             }
             if (voltageValue === '208/120') {
                 obj.voltage = '120';
-                obj.phase_configuration = 3;
+                obj.phase_configuration = 1;
             }
             if (voltageValue === '480') {
                 obj.voltage = '277';
-                obj.phase_configuration = 3;
+                obj.phase_configuration = 1;
             }
             if (voltageValue === '600') {
                 obj.voltage = '347';
-                obj.phase_configuration = 3;
+                obj.phase_configuration = 1;
             }
             if (voltageValue === 'Select Volts') {
                 obj.voltage = '';
@@ -254,6 +274,28 @@ const CreatePanel = () => {
             }
         });
         setNormalStruct(newArray);
+    };
+
+    const fetchDeviceSensorData = async (deviceId) => {
+        try {
+            if (deviceId === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                console.log('Sensor Data Response => ', response);
+                setSensorData(response);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Sensor Data');
+        }
     };
 
     useEffect(() => {
@@ -375,7 +417,7 @@ const CreatePanel = () => {
 
     useEffect(() => {
         console.log('SSR panel => ', panel);
-        console.log('SSR equipmentData => ', equipmentData);
+        console.log('SSR passiveDeviceData => ', passiveDeviceData);
         // console.log('SSR panelConfig => ', panelConfig);
         // console.log('SSR main => ', main);
         // console.log('SSR normalStruct => ', normalStruct);
@@ -523,6 +565,27 @@ const CreatePanel = () => {
                                                 })}
                                             </Input>
                                         )}
+                                    </FormGroup>
+                                </div>
+                                <div>
+                                    <FormGroup className="form-group row m-4 width-custom-style">
+                                        <Label for="panelName" className="card-title">
+                                            Breaker Level
+                                        </Label>
+
+                                        <Input
+                                            type="select"
+                                            name="state"
+                                            id="userState"
+                                            className="font-weight-bold breaker-lvl-width"
+                                            value={currentBreakerLevel}
+                                            onChange={(e) => {
+                                                setCurrentBreakerLevel(e.target.value);
+                                            }}>
+                                            {breakerLevel.map((record) => {
+                                                return <option value={record.value}>{record.name}</option>;
+                                            })}
+                                        </Input>
                                     </FormGroup>
                                 </div>
                             </div>
@@ -897,7 +960,8 @@ const CreatePanel = () => {
                                         handleBreakerConfigChange('phase_configuration', e.target.value);
                                     }}
                                     value={currentBreakerObj.phase_configuration}
-                                    disabled={panel.voltage === '120/240'}>
+                                    // disabled={panel.voltage === '120/240'}
+                                    disabled={currentBreakerLevel === 'single-breaker'}>
                                     <option>Select Phase</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
@@ -930,10 +994,13 @@ const CreatePanel = () => {
                                         handleBreakerConfigChange('voltage', e.target.value);
                                     }}
                                     value={currentBreakerObj.voltage}
-                                    disabled={panel.voltage === '120/240'}>
+                                    // disabled={panel.voltage === '120/240'}
+                                    disabled={currentBreakerLevel === 'single-breaker'}>
                                     <option>Select Volts</option>
                                     <option value="120">120</option>
                                     <option value="208">208</option>
+                                    <option value="277">277</option>
+                                    <option value="347">347</option>
                                 </Input>
                             </Form.Group>
                         </div>
@@ -957,12 +1024,14 @@ const CreatePanel = () => {
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Device"
                                         onChange={(e) => {
-                                            handleBreakerConfigChange('voltage', e.target.value);
+                                            fetchDeviceSensorData(e.target.value);
+                                            // handleBreakerConfigChange('voltage', e.target.value);
                                         }}
                                         value={currentBreakerObj.sensor_id}>
                                         <option>Select Device</option>
-                                        <option value="AA:AA:AA:AA:AA">AA:AA:AA:AA:AA</option>
-                                        <option value="BB:BB:BB:BB:BB">BB:BB:BB:BB:BB</option>
+                                        {passiveDeviceData.map((record) => {
+                                            return <option value={record.equipments_id}>{record.identifier}</option>;
+                                        })}
                                     </Input>
                                 </Form.Group>
 
@@ -975,14 +1044,13 @@ const CreatePanel = () => {
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Sensor"
                                         onChange={(e) => {
-                                            handleBreakerConfigChange('voltage', e.target.value);
+                                            // handleBreakerConfigChange('voltage', e.target.value);
                                         }}
                                         value={currentBreakerObj.sensor_id}>
                                         <option>Select Sensor</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
+                                        {sensorData.map((record) => {
+                                            return <option value={record.id}>{record.name}</option>;
+                                        })}
                                     </Input>
                                 </Form.Group>
                             </div>

@@ -196,3 +196,7 @@
     border: 1px solid #e2e7f1;
     border-radius: 0.3rem;
 }
+
+.breaker-lvl-width {
+    width: auto !important;
+}
