@@ -44,6 +44,7 @@ const HorizontalLayout = Loadable({
 class Routes extends Component {
     // returns the layout
     getLayout = () => {
+        console.log(isUserAuthenticated())
         if (!isUserAuthenticated()) return AuthLayout;
 
         let layoutCls = VerticalLayout;

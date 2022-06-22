@@ -10,6 +10,11 @@ import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
 import logo from '../../assets/images/logo.png';
+import {
+    BaseUrl,
+    login
+} from '../../services/Network';
+import './auth.css';
 
 class Login extends Component {
     _isMounted = false;
@@ -19,14 +24,16 @@ class Login extends Component {
 
         this.handleValidSubmit = this.handleValidSubmit.bind(this);
         this.state = {
-            username: 'test',
-            password: 'test'
+            username: '',
+            password: '',
+            error:false,
+            message:''
         }
     }
 
     componentDidMount() {
         this._isMounted = true;
-
+        
         document.body.classList.add('authentication-bg');
     }
 
@@ -39,7 +46,12 @@ class Login extends Component {
      * Handles the submit
      */
     handleValidSubmit = (event, values) => {
+        console.log(this.props.history);
         this.props.loginUser(values.username, values.password, this.props.history);
+        if(values.username==="" || values.password===""){
+            
+        }
+        
     }
 
 
@@ -47,6 +59,7 @@ class Login extends Component {
      * Redirect to root
      */
     renderRedirectToRoot = () => {
+
         const isAuthTokenValid = isUserAuthenticated();
         if (isAuthTokenValid) {
             return <Redirect to='/' />
@@ -54,14 +67,22 @@ class Login extends Component {
     }
 
     render() {
+        let error=false;
+        let message="";
         const isAuthTokenValid = isUserAuthenticated();
+        if(localStorage.getItem('login_success')==="false"){
+            error=true;
+            message=localStorage.getItem('failed_message');
+            localStorage.removeItem('login_success');
+            localStorage.removeItem('failed_message');
+        }
         return (
             <React.Fragment>
 
                 {this.renderRedirectToRoot()}
 
                 {(this._isMounted || !isAuthTokenValid) && <div className="account-pages my-5">
-                    <Container>
+                    <Container className='auth-container'>
                         <Row className="justify-content-center">
                             <Col xl={10}>
                                 <Card className="">
@@ -85,7 +106,9 @@ class Login extends Component {
                                                 {this.props.error && <Alert color="danger" isOpen={this.props.error ? true : false}>
                                                     <div>{this.props.error}</div>
                                                 </Alert>}
-
+                                                {error && <Alert color="danger" isOpen={error ? true : false}>
+                                                    <div>{message}</div>
+                                                </Alert>}
                                                 <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form">
                                                     <AvGroup className="">
                                                         <Label for="username">Username</Label>
@@ -120,7 +143,7 @@ class Login extends Component {
                                                         <Button color="primary" className="btn-block">Log In</Button>
                                                     </FormGroup>
 
-                                                    <p className="mt-3"><strong>Username:</strong> test &nbsp;&nbsp; <strong>Password:</strong> test</p>
+                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <strong>Password:</strong> Test@123</p>
                                                 </AvForm>
                                             </Col>
 

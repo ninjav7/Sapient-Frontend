@@ -1096,7 +1096,8 @@ const BuildingOverview = () => {
                                     overview.yearly_electric_eui.old
                                 )}
                                 consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
-                                infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
                                 infoType={`total-bld-eui`}
                             />
                         </div>
