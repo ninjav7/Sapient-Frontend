@@ -348,6 +348,10 @@ const Explore = () => {
                 autoSelected: 'pan',
                 show: true,
             },
+            animations: {
+                enabled: false,
+            },
+
         },
         colors: ['#546E7A'],
         stroke: {
@@ -667,6 +671,7 @@ const Explore = () => {
                         setSeriesData([]);
                         setSeriesLineData([]);
                         let responseData = res.data;
+
                         let childExploreList = [];
                         responseData.forEach((record) => {
                             let obj = {
@@ -678,7 +683,7 @@ const Explore = () => {
                         });
                         setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
-                        // console.log('SSR API response => ', responseData);
+                         console.log('SSR API response => ', responseData);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -724,6 +729,7 @@ const Explore = () => {
         }
         const exploreDataFetch = async () => {
             try {
+                const start = performance.now();
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -742,7 +748,7 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -762,6 +768,8 @@ const Explore = () => {
                             },
                         ]);
                     });
+                    const duration = performance.now() - start;
+                    console.log("fetching time ", duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
@@ -787,6 +795,7 @@ const Explore = () => {
                 setEquipmentData(childFilter);
             } else {
                 try {
+                    const start = performance.now();
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
@@ -808,7 +817,7 @@ const Explore = () => {
                             setSeriesData([]);
                             setSeriesLineData([]);
                             let responseData = res.data;
-                            // console.log('SSR API response => ', responseData);
+                            console.log('SSR API response => ', responseData);
                             setExploreTableData(responseData);
                             let data = responseData;
                             let exploreData = [];
@@ -834,6 +843,8 @@ const Explore = () => {
                             newObj.parent = 'equipment_type';
                             setChildFilter(newObj);
                             setParentFilter(newObj.parent);
+                            const duration = performance.now() - start;
+                            console.log("fetching time ", duration);
                         });
                 } catch (error) {
                     console.log(error);
