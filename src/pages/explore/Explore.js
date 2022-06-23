@@ -287,19 +287,19 @@ const Explore = () => {
         },
         {
             label: 'Last 7 Days',
-            value: 6,
+            value: 7,
         },
         {
             label: 'Last 4 Weeks',
-            value: 27,
+            value: 28,
         },
         {
             label: 'Last 3 Months',
-            value: 89,
+            value: 90,
         },
         {
             label: 'Last 12 Months',
-            value: 364,
+            value: 365,
         },
     ];
 
@@ -413,8 +413,10 @@ const Explore = () => {
     });
 
     const [exploreTableData, setExploreTableData] = useState([]);
-
+    const [mainParent,setMainParent] = useState([]);
     const [childFilter, setChildFilter] = useState({});
+    const [secActive,setSecActive] = useState('');
+    const [thirdActive,setThirdActive]=useState('');
 
     // New Approach
     const [currentFilterLevel, setCurrentFilterLevel] = useState('first');
@@ -682,7 +684,7 @@ const Explore = () => {
                             childExploreList.push(obj);
                         });
                         setExploreSecondLvlOpts(childExploreList);
-                        // console.log('childExploreList => ', childExploreList);
+                        console.log('childExploreList => ', childExploreList);
                          console.log('SSR API response => ', responseData);
                         // setCounter(counter+1);
                         // console.log(counter+1);
@@ -839,6 +841,12 @@ const Explore = () => {
                                     data: exploreData[0].data,
                                 },
                             ]);
+                            if(counter+1===1){
+                            setSecActive(childFilter);
+                            }
+                            if(counter+1===2){
+                                setThirdActive(childFilter);
+                            }
                             let newObj = childFilter;
                             newObj.parent = 'equipment_type';
                             setChildFilter(newObj);
@@ -865,6 +873,7 @@ const Explore = () => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             startCustomDate.setDate(startCustomDate.getDate() - date);
+            endCustomDate.setDate(endCustomDate.getDate() - 1);
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
@@ -876,21 +885,31 @@ const Explore = () => {
     }, [dateFilter]);
 
     useEffect(() => {
+        console.log('set active => ',secActive.eq_name)
         console.log('parentFilter => ', parentFilter);
         console.log('childFilter => ', childFilter);
+        console.log('childFilter Parent => ', mainParent);
+        console.log('activeExploreOpt => ', activeExploreOpt.value);
     });
 
     return (
         <>
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
-                {childFilter.parent === activeExploreOpt.value ? (
-                    <div className="explore-equip-filter">
+                {mainParent.value === activeExploreOpt.value ? (
+                    <div className="explore-equip-filter" style={{display:"flex"}}>
                         <div className="explore-filter-style ml-2">By {activeExploreOpt.label}</div>
                         <div>
                             <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
                         </div>
+                        {counter===1?<>
+                        <div className="explore-filter-style ml-2">
+                         {secActive.eq_name}
+                        </div>
                         <div>
+                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                        </div>
+                        {/* <div>
                             <Select
                                 className="react-select endUses-select-style mr-2"
                                 classNamePrefix="react-select"
@@ -906,8 +925,24 @@ const Explore = () => {
                                 })}
                                 defaultValue={exploreSecondLvlOpts[0]}
                             />
+                        </div> */}
+                        <div>Grouped by Equipment Type</div></>:
+                        counter===2 ?
+                        <>
+                         <div className="explore-filter-style ml-2">
+                         {secActive.eq_name}
                         </div>
-                        <div>Grouped by Equipment Type</div>
+                        <div>
+                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                        </div>
+                        <div className="explore-filter-style ml-2">
+                         {thirdActive.eq_name}
+                        </div>
+                        <div>
+                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                        </div>
+                        </>:""}
+
                     </div>
                 ) : (
                     <div>
@@ -915,6 +950,7 @@ const Explore = () => {
                             className="react-select explorer-select-style"
                             onChange={(e) => {
                                 setActiveExploreOpt(e);
+                                setMainParent(e);
                             }}
                             classNamePrefix="react-select"
                             placeholderText="p"
