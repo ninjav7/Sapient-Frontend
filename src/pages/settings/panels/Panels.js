@@ -60,8 +60,11 @@ const PanelsTable = ({ generalPanelData }) => {
                             return (
                                 <tr key={record.panel_id}>
                                     <td className="font-weight-bold panel-name">
-                                        <Link to="/settings/editPanel">
-                                            <a href="#">{record.panel_name}</a>
+                                        <Link
+                                            to={{
+                                                pathname: `/settings/panels/editPanel/${record.panel_id}`,
+                                            }}>
+                                            <a>{record.panel_name}</a>
                                         </Link>
                                     </td>
 
@@ -138,7 +141,7 @@ const Panels = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <Link to="/settings/createPanel">
+                            <Link to="/settings/panels/createPanel">
                                 <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                     <i className="uil uil-plus mr-1"></i>Add Panel
                                 </button>
