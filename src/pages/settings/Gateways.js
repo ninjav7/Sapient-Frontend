@@ -196,9 +196,9 @@ const Gateways = () => {
                 </Col>
             </Row>
 
-            <Row>
+            {/* <Row>
                 <span className="gateway-content-style">What about a KPI about unique devices</span>
-            </Row>
+            </Row> */}
         </React.Fragment>
     );
 };
