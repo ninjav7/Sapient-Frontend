@@ -13,12 +13,28 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import {
+    BaseUrl,
+    getLocation,
+    generalPanels,
+    generalPassiveDevices,
+    generalEquipments,
+    listSensor,
+} from '../../../services/Network';
+import axios from 'axios';
+import { Link, useParams } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { Cookies } from 'react-cookie';
 import '../style.css';
 
 const EditPanel = () => {
+    const { panelId } = useParams();
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [breakersCount, setBreakersCount] = useState([
         { serialNo: 1, name: 'AHU 1' },
         { serialNo: 2, name: 'CRAC 1' },
@@ -70,13 +86,18 @@ const EditPanel = () => {
         { serialNo: 48, name: '' },
     ]);
 
+    const [generalPanelData, setGeneralPanelData] = useState([]);
+    const [passiveDeviceData, setPassiveDeviceData] = useState([]);
+    const [equipmentData, setEquipmentData] = useState([]);
+    const [locationData, setLocationData] = useState([]);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
                         label: 'Edit Panel',
-                        path: '/settings/editPanel',
+                        path: '/settings/panels/editPanel',
                         active: true,
                     },
                 ];
@@ -85,6 +106,84 @@ const EditPanel = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        const fetchEquipmentData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    let responseData = res.data;
+                    setEquipmentData(responseData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Equipments Data');
+            }
+        };
+
+        const fetchLocationData = async () => {
+            try {
+                if (bldgId) {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                        setLocationData(res.data);
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
+        const fetchPanelsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                    setGeneralPanelData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Panels Data List');
+            }
+        };
+
+        const fetchPassiveDeviceData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                let params = `?page_size=10&page_no=1`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    let data = res.data;
+                    setPassiveDeviceData(data.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Passive devices');
+            }
+        };
+
+        fetchLocationData();
+        fetchPanelsData();
+        fetchPassiveDeviceData();
+        fetchEquipmentData();
+    }, [panelId]);
 
     return (
         <React.Fragment>
@@ -99,7 +198,7 @@ const EditPanel = () => {
                                     Cancel
                                 </button>
                             </Link>
-                            <Link to="/settings/createPanel">
+                            <Link to="/settings/panels/createPanel">
                                 <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                     Save
                                 </button>

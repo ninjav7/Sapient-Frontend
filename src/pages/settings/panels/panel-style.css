@@ -200,3 +200,7 @@
 .breaker-lvl-width {
     width: auto !important;
 }
+
+.dropdown-container {
+    width: 100% ;
+}
