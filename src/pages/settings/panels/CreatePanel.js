@@ -279,7 +279,7 @@ const CreatePanel = () => {
 
         secondBreakerObj.sensor_id = firstBreakerObj.sensor_id1;
         secondBreakerObj.device_id = firstBreakerObj.device_id1;
-        thirdBreakerObj.sensor_id = firstBreakerObj.sensor_id1;
+        thirdBreakerObj.sensor_id = firstBreakerObj.sensor_id2;
         thirdBreakerObj.device_id = firstBreakerObj.device_id2;
 
         firstBreakerObj.link_type = 'linked';
@@ -794,7 +794,7 @@ const CreatePanel = () => {
                                                 onChange={(e) => {
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
-                                                className="breaker-no-width"
+                                                className="breaker-no-width font-weight-bold"
                                             />
                                         ) : (
                                             <Input
