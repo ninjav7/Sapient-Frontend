@@ -74,6 +74,7 @@ const CreatePanel = () => {
     const [normalCount, setNormalCount] = useState(10);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
+
     const [panelType, setPanelType] = useState([
         {
             name: 'Distribution',
@@ -84,6 +85,7 @@ const CreatePanel = () => {
             value: 'disconnect',
         },
     ]);
+
     const [disconnectBreaker, setDisconnectBreaker] = useState([
         {
             name: '1',
@@ -138,7 +140,6 @@ const CreatePanel = () => {
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
 
-    // const getBreakerId = () => `breaker_${+new Date()}`;
     const getBreakerId = () => uuidv4();
 
     const [main, setMain] = useState({
@@ -285,6 +286,10 @@ const CreatePanel = () => {
         secondBreakerObj.link_type = 'linked';
         thirdBreakerObj.link_type = 'linked';
 
+        firstBreakerObj.phase_configuration = 3;
+        secondBreakerObj.phase_configuration = 3;
+        thirdBreakerObj.phase_configuration = 3;
+
         delete firstBreakerObj.sensor_id1;
         delete firstBreakerObj.device_id1;
         delete secondBreakerObj.device_id1;
@@ -345,10 +350,13 @@ const CreatePanel = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
+            let newPanel = Object.assign({}, panel);
+            newPanel.breaker_count = normalCount;
+
             setIsProcessing(true);
 
             await axios
-                .post(`${BaseUrl}${createPanel}`, panel, {
+                .post(`${BaseUrl}${createPanel}`, newPanel, {
                     headers: header,
                 })
                 .then((res) => {
@@ -483,10 +491,17 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+
+                let newBreakerArray = [];
+                normalStruct.forEach((breaker) => {
+                    breaker.voltage = parseInt(breaker.voltage);
+                    newBreakerArray.push(breaker);
+                });
+
                 // setIsProcessing(true);
                 let params = `?panel_id=${panelID}`;
                 await axios
-                    .post(`${BaseUrl}${createBreaker}${params}`, normalStruct, {
+                    .post(`${BaseUrl}${createBreaker}${params}`, newBreakerArray, {
                         headers: header,
                     })
                     .then((res) => {
@@ -529,7 +544,7 @@ const CreatePanel = () => {
                 let newList = [
                     {
                         label: 'Create Panel',
-                        path: '/settings/createPanel',
+                        path: '/settings/panels/createPanel',
                         active: true,
                     },
                 ];
@@ -665,17 +680,17 @@ const CreatePanel = () => {
                                 </button>
                             </Link>
                             {/* <Link to="/settings/panels"> */}
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
-                                    // disabled={isProcessing}
-                                    disabled={panel.voltage === '' ? true : false}
-                                    onClick={() => {
-                                        savePanelData();
-                                        // saveBreakersData();
-                                    }}>
-                                    {isProcessing ? 'Saving...' : 'Save'}
-                                </button>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                // disabled={isProcessing}
+                                disabled={panel.voltage === '' ? true : false}
+                                onClick={() => {
+                                    savePanelData();
+                                    // saveBreakersData();
+                                }}>
+                                {isProcessing ? 'Saving...' : 'Save'}
+                            </button>
                             {/* </Link> */}
                         </div>
                     </div>
@@ -895,7 +910,7 @@ const CreatePanel = () => {
                                                                         <div className="breaker-content-middle">
                                                                             <div className="breaker-content">
                                                                                 <span>
-                                                                                    {element.amps === 0
+                                                                                    {element.rated_amps === 0
                                                                                         ? ''
                                                                                         : `${element.rated_amps}A`}
                                                                                 </span>
@@ -1399,8 +1414,7 @@ const CreatePanel = () => {
                                 <div className="panel-model-row-style ml-2 mr-2">
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Phase</Form.Label>
-
-                                        <Input
+                                        {/* <Input
                                             type="select"
                                             name="state"
                                             id="userState"
@@ -1414,7 +1428,18 @@ const CreatePanel = () => {
                                             <option>Select Phase</option>
                                             <option value="3">3</option>
                                             <option value="1">1</option>
-                                        </Input>
+                                        </Input> */}
+                                        <Input
+                                            type="number"
+                                            name="state"
+                                            id="userState"
+                                            className="font-weight-bold breaker-phase-selection"
+                                            placeholder="Select Phase"
+                                            onChange={(e) => {
+                                                handleBreakerConfigChange('phase_configuration', e.target.value);
+                                            }}
+                                            value={3}
+                                            disabled={true}></Input>
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
