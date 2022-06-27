@@ -471,3 +471,8 @@
     grid-template-rows: 1fr 1fr;
     gap: 10px;
 }
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
+}

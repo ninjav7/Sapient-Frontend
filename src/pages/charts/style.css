@@ -52,3 +52,8 @@ color-style {
     font-family: sans-serif;
     text-align: center;
 }
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
+}
