@@ -21,6 +21,7 @@ import { faLinkHorizontalSlash } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
+import { ComponentStore } from '../../../store/ComponentStore';
 import '../style.css';
 import './panel-style.css';
 
@@ -550,6 +551,12 @@ const CreatePanel = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -813,7 +820,7 @@ const CreatePanel = () => {
                                         )}
                                     </FormGroup>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <FormGroup className="form-group row m-4 width-custom-style">
                                         <Label for="panelName" className="card-title">
                                             Breaker Level
@@ -833,7 +840,7 @@ const CreatePanel = () => {
                                             })}
                                         </Input>
                                     </FormGroup>
-                                </div>
+                                </div> */}
                             </div>
                             <div className="float-right m-4">
                                 <button

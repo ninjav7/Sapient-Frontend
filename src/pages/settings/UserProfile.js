@@ -16,6 +16,7 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
 
 const UserProfile = () => {
     const [buildingId, setBuildingId] = useState(1);
@@ -39,6 +40,9 @@ const UserProfile = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();

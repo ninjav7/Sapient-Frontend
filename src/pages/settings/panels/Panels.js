@@ -17,6 +17,7 @@ import { BaseUrl, generalPanels } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../../store/ComponentStore';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {
@@ -126,6 +127,9 @@ const Panels = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

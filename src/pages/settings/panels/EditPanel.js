@@ -26,6 +26,7 @@ import { Link, useParams } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../../store/ComponentStore';
 import '../style.css';
 
 const EditPanel = () => {
@@ -102,6 +103,9 @@ const EditPanel = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

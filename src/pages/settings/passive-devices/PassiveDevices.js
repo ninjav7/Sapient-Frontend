@@ -21,6 +21,7 @@ import { ChevronDown, Search } from 'react-feather';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../../store/ComponentStore';
 import './style.css';
 
 const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData, pageSize, setPageSize }) => {
@@ -441,6 +442,9 @@ const PassiveDevices = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

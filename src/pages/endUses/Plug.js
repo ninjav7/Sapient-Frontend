@@ -14,6 +14,7 @@ import { Cookies } from 'react-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const UsagePageThree = () => {
@@ -208,6 +209,9 @@ const UsagePageThree = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

@@ -18,6 +18,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -351,7 +352,6 @@ const Explore = () => {
             animations: {
                 enabled: false,
             },
-
         },
         colors: ['#546E7A'],
         stroke: {
@@ -637,6 +637,9 @@ const Explore = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -683,7 +686,7 @@ const Explore = () => {
                         });
                         setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
-                         console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -768,8 +771,8 @@ const Explore = () => {
                             },
                         ]);
                     });
-                    const duration = performance.now() - start;
-                    console.log("fetching time ", duration);
+                const duration = performance.now() - start;
+                console.log('fetching time ', duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
@@ -844,7 +847,7 @@ const Explore = () => {
                             setChildFilter(newObj);
                             setParentFilter(newObj.parent);
                             const duration = performance.now() - start;
-                            console.log("fetching time ", duration);
+                            console.log('fetching time ', duration);
                         });
                 } catch (error) {
                     console.log(error);
@@ -1038,14 +1041,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
-                             />
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1061,7 +1064,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
@@ -1084,7 +1087,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
@@ -1107,7 +1110,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}

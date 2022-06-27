@@ -17,6 +17,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-solid-svg-icons';
 import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
+import { ComponentStore } from '../../store/ComponentStore';
 import {
     BaseUrl,
     builidingAlerts,
@@ -1030,6 +1031,9 @@ const BuildingOverview = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

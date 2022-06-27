@@ -15,6 +15,7 @@ import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {
@@ -612,6 +613,9 @@ const PeakDemand = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

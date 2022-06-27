@@ -11,12 +11,13 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import useSortableData from '../../helpers/useSortableData';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const EndUses = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { bldgId } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -221,6 +222,9 @@ const EndUses = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();
