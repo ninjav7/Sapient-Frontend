@@ -481,11 +481,11 @@ const CompareBuildings = () => {
 
                 let count = parseInt(localStorage.getItem('dateFilter'));
                 let params = `?days=${count}`;
+                // count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
+                // console.log('Sudhanshu => ', typeof count); // number
                 await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                    setBuildingsData(response);
-                    // console.log('setBuildingsData => ', res.data);
+                    setBuildingsData(res.data);
+                    console.log('setBuildingsData => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
