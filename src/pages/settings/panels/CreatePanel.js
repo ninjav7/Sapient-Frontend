@@ -560,6 +560,18 @@ const CreatePanel = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // useEffect(() => {
+    //     let obj = Object.assign({}, currentBreakerObj);
+
+    //     let arr = [];
+    //     selectedEquipOptions.forEach((option) => {
+    //         arr.push(option.value);
+    //     });
+
+    //     obj['equipment_link'] = arr;
+    //     setCurrentBreakerObj(obj);
+    // }, [selectedEquipOptions]);
+
     useEffect(() => {
         const fetchEquipmentData = async () => {
             try {

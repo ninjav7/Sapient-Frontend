@@ -46,7 +46,8 @@ export const generalGateway = '/api/config/gateway';
 export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
-export const getBreakers = '/api/config/panels/breakers';
+export const getBreaker = '/api/config/panels/create_breaker';
+export const getPanel = '/api/config/panels/create_';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
