@@ -122,6 +122,8 @@ const BuildingTable = ({ buildingsData }) => {
                                                     ComponentStore.update((s) => {
                                                         s.parent = 'buildings';
                                                     });
+                                                    localStorage.setItem('buildingId', record.building_id);
+                                                    localStorage.setItem('buildingName', record.building_name);
                                                 }}>
                                                 {record.building_name}
                                             </a>

@@ -72,7 +72,7 @@ const CreatePanel = () => {
 
     const [normalStruct, setNormalStruct] = useState([]);
 
-    const [normalCount, setNormalCount] = useState(10);
+    const [normalCount, setNormalCount] = useState(5);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
 
@@ -119,11 +119,13 @@ const CreatePanel = () => {
 
     const [currentBreakerLevel, setCurrentBreakerLevel] = useState('single-breaker');
 
-    const [activeLinkedBreakers, setActiveLinkedBreakers] = useState([
-        [1, 3],
-        [2, 4, 6],
-        [5, 7, 9],
-    ]);
+    // const [activeLinkedBreakers, setActiveLinkedBreakers] = useState([
+    //     [1, 3],
+    //     [2, 4, 6],
+    //     [5, 7, 9],
+    // ]);
+
+    const [activeLinkedBreakers, setActiveLinkedBreakers] = useState([]);
     const [doubleLinkedBreaker, setDoubleLinkedBreaker] = useState([]);
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
@@ -554,24 +556,9 @@ const CreatePanel = () => {
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
-            ComponentStore.update((s) => {
-                s.parent = 'building-settings';
-            });
         };
         updateBreadcrumbStore();
     }, []);
-
-    // useEffect(() => {
-    //     let obj = Object.assign({}, currentBreakerObj);
-
-    //     let arr = [];
-    //     selectedEquipOptions.forEach((option) => {
-    //         arr.push(option.value);
-    //     });
-
-    //     obj['equipment_link'] = arr;
-    //     setCurrentBreakerObj(obj);
-    // }, [selectedEquipOptions]);
 
     useEffect(() => {
         const fetchEquipmentData = async () => {
@@ -581,7 +568,13 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?building_id=${requestedBldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
                     // let equipArray = [];
@@ -603,17 +596,20 @@ const CreatePanel = () => {
 
         const fetchLocationData = async () => {
             try {
-                if (bldgId) {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        // 'user-auth': '628f3144b712934f578be895',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                    await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                        setLocationData(res.data);
-                    });
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
                 }
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Location Data');
@@ -625,7 +621,6 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
@@ -663,15 +658,10 @@ const CreatePanel = () => {
         fetchEquipmentData();
     }, [bldgId]);
 
-    useEffect(() => {
-        // console.log('Troubleshoot activeLinkedBreakers => ', activeLinkedBreakers);
-        // console.log('Troubleshoot currentBreakerLevel => ', currentBreakerLevel);
-        // console.log('Troubleshoot doubleLinkedBreaker => ', doubleLinkedBreaker);
-        // console.log('Troubleshoot tripleLinkedBreaker => ', tripleLinkedBreaker);
-        console.log('Troubleshoot normalStruct => ', normalStruct);
-        console.log('Troubleshoot panel => ', panel);
-        // console.log('Troubleshoot currentBreakerObj => ', currentBreakerObj);
-    });
+    // useEffect(() => {
+    //     console.log('Troubleshoot normalStruct => ', normalStruct);
+    //     console.log('Troubleshoot panel => ', panel);
+    // });
 
     return (
         <React.Fragment>
@@ -763,7 +753,7 @@ const CreatePanel = () => {
                 </Col>
             </Row>
 
-            <Row style={{ marginLeft: '20px' }}>
+            <Row style={{ marginLeft: '20px', marginBottom: '15vh' }}>
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
                         <Row className="panel-header-styling ml-1 mr-1">
@@ -903,7 +893,7 @@ const CreatePanel = () => {
                                                 {normalStruct.map((element, index) => {
                                                     return (
                                                         <>
-                                                            <FormGroup className="form-group row m-2 ml-4">
+                                                            <FormGroup className="form-group row m-2 ml-4 mb-4">
                                                                 <div className="breaker-container">
                                                                     <div className="sub-breaker-style">
                                                                         <div className="breaker-content-middle">

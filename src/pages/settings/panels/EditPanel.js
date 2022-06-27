@@ -17,6 +17,7 @@ import {
     BaseUrl,
     getLocation,
     generalPanels,
+    getBreakers,
     generalPassiveDevices,
     generalEquipments,
     listSensor,
@@ -87,10 +88,13 @@ const EditPanel = () => {
         { serialNo: 48, name: '' },
     ]);
 
-    const [generalPanelData, setGeneralPanelData] = useState([]);
+    const [currentPanelData, setCurrentPanelData] = useState({});
+    const [currentBreakerData, setCurrentBreakerData] = useState([]);
+
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [equipmentData, setEquipmentData] = useState([]);
     const [locationData, setLocationData] = useState([]);
+    const [generalPanelData, setGeneralPanelData] = useState([]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -119,7 +123,13 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
+                let requestedBldgId;
+                if (bldgId === null) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?building_id=${requestedBldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
                     setEquipmentData(responseData);
@@ -132,16 +142,20 @@ const EditPanel = () => {
 
         const fetchLocationData = async () => {
             try {
-                if (bldgId) {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                    await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                        setLocationData(res.data);
-                    });
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let requestedBldgId;
+                if (bldgId === null) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
                 }
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Location Data');
@@ -156,11 +170,32 @@ const EditPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
-                    setGeneralPanelData(res.data);
+                    let response = res.data;
+                    setGeneralPanelData(response);
+                    let singlePanel = response.filter((record) => record.panel_id === panelId);
+                    setCurrentPanelData(singlePanel[0]);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Panels Data List');
+                console.log('Failed to fetch single Panel!');
+            }
+        };
+
+        const fetchPanelBreakerData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?panel_id=${panelId}`;
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setCurrentBreakerData(response.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch single Panel!');
             }
         };
 
@@ -183,17 +218,18 @@ const EditPanel = () => {
             }
         };
 
-        fetchLocationData();
-        fetchPanelsData();
-        fetchPassiveDeviceData();
-        fetchEquipmentData();
+        fetchLocationData(); // For showing Building Locations in Dropdown
+        fetchPanelsData(); // Currently fetching all Panels data
+        fetchPanelBreakerData();
+        fetchPassiveDeviceData(); // For Showing Passive Devices to link sensor in Breaker
+        fetchEquipmentData(); // For seleting Equipments
     }, [panelId]);
 
     return (
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>
                 <Col className="header-container" xl={10}>
-                    <span className="heading-style">Panel 1</span>
+                    <span className="heading-style">{currentPanelData.panel_name}</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="ml-2">
@@ -224,7 +260,7 @@ const EditPanel = () => {
                                 name="panelName"
                                 id="panelName"
                                 placeholder="Panel Name"
-                                defaultValue={'Panel 1'}
+                                value={currentPanelData.panel_name}
                             />
                         </FormGroup>
 
@@ -232,10 +268,22 @@ const EditPanel = () => {
                             <Label for="userState" className="card-title">
                                 Parent Panel
                             </Label>
-                            <Input type="select" name="state" id="userState" className="font-weight-bold">
-                                <option>None</option>
-                                <option>Olivia Rhye</option>
-                                <option>Drew Cano</option>
+                            <Input
+                                type="select"
+                                name="state"
+                                id="userState"
+                                className="font-weight-bold"
+                                // onChange={(e) => {
+                                //     handleChange('parent_panel', e.target.value);
+                                // }}
+                                defaultValue={currentPanelData.parent_panel}
+                                value={currentPanelData.parent_panel}>
+                                <option value={currentPanelData.parent_panel}>
+                                    {currentPanelData.parent_panel_name}
+                                </option>
+                                {generalPanelData.map((record) => {
+                                    return <option value={record.panel_id}>{record.panel_name}</option>;
+                                })}
                             </Input>
                         </FormGroup>
 
