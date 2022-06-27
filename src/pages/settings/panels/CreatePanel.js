@@ -1,3 +1,5 @@
+// Sensor selected List
+
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
@@ -52,6 +54,8 @@ const CreatePanel = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isProcessing, setIsProcessing] = useState(false);
     const [generatedPanelId, setGeneratedPanelId] = useState('');
+
+    const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [panel, setPanel] = useState({
         name: 'Panel Name',
@@ -134,7 +138,7 @@ const CreatePanel = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const [isEditing, setIsEditing] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
 
     const [normalData, setNormalData] = useState({
         related_amps: 200,
@@ -228,6 +232,23 @@ const CreatePanel = () => {
         }
         obj[key] = value;
         setCurrentBreakerObj(obj);
+    };
+
+    const handleLinkedSensor = (previousSensorId, newSensorId) => {
+        if (previousSensorId === '') {
+            let newSensorList = linkedSensors;
+            newSensorList.push(newSensorId);
+            setLinkedSensors(newSensorList);
+        } else {
+            let newSensorList = linkedSensors;
+
+            let filteredList = newSensorList.filter((record) => {
+                return record !== previousSensorId;
+            });
+
+            filteredList.push(newSensorId);
+            setLinkedSensors(filteredList);
+        }
     };
 
     const addNormalSingleData = () => {
@@ -649,7 +670,6 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
@@ -1364,11 +1384,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1528,11 +1555,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1576,11 +1610,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id1', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id1}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1624,11 +1665,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id2', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id2}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
