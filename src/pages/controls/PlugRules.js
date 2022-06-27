@@ -30,6 +30,7 @@ import {
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import EditPlugRule from './EditPlugRule';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const PlugRuleTable = ({
@@ -84,7 +85,7 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
@@ -296,6 +297,9 @@ const PlugRules = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'control';
             });
         };
         updateBreadcrumbStore();

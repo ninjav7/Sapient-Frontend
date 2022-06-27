@@ -25,6 +25,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../../store/ComponentStore';
 import './style.css';
 
 const SelectBreakerModel = ({
@@ -286,6 +287,9 @@ const IndividualPassiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

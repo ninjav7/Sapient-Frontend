@@ -14,6 +14,7 @@ import {
 import { Filter } from 'react-feather';
 import './style.css';
 // import { useSelector } from 'react-redux';
+import { ComponentStore } from '../../store/ComponentStore';
 import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -23,7 +24,7 @@ import { Cookies } from 'react-cookie';
 const Layout = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // const store = useSelector((state) => state.counterState);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [floorsData, setfloorsData] = useState([]);
@@ -201,6 +202,9 @@ const Layout = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

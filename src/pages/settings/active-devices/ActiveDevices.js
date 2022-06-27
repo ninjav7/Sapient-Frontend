@@ -24,6 +24,7 @@ import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import Pagination from 'react-bootstrap/Pagination';
+import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -928,6 +929,9 @@ const ActiveDevices = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

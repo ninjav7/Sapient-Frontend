@@ -557,6 +557,9 @@ const PortfolioOverview = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
+            });
         };
         updateBreadcrumbStore();
     }, []);

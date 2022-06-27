@@ -14,3 +14,8 @@
     align-items: stretch !important;
     align-content: stretch !important;
 }
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
+}

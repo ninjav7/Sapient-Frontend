@@ -16,6 +16,7 @@ import axios from 'axios';
 import { BaseUrl, generalGateway } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const GatewaysTable = ({ generalGatewayData }) => {
@@ -49,6 +50,9 @@ const GatewaysTable = ({ generalGatewayData }) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();
