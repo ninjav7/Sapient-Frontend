@@ -11,13 +11,14 @@ import axios from 'axios';
 import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Network';
 import { dateFormatHandler } from '../../utils/helper';
 import moment from 'moment';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 import { ConsoleView } from 'react-device-detect';
 import { Cookies } from 'react-cookie';
 
 const TimeOfDay = () => {
     const { bldgId } = useParams();
-    
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -1142,6 +1143,9 @@ const TimeOfDay = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

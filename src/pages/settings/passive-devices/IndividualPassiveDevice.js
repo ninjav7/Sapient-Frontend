@@ -12,6 +12,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
+import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -105,7 +106,7 @@ const SelectBreakerModel = ({
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { deviceId } = useParams();
     console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
@@ -251,6 +252,9 @@ const IndividualPassiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

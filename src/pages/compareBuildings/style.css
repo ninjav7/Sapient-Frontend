@@ -71,3 +71,8 @@
 .custom-progress {
     color: #c64245;
 }
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
+}

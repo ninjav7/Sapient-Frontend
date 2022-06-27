@@ -459,3 +459,8 @@
     margin-top: 3vh;
     gap: 2vw;
 }
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
+}
