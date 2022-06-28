@@ -10,6 +10,7 @@ import {
     BaseUrl,
     getLocation,
     generalPanels,
+    getBreakers,
     generalPassiveDevices,
     createPanel,
     createBreaker,
