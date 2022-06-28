@@ -334,7 +334,7 @@ const IndividualActiveDevice = () => {
                             {sensors.map((record, index) => {
                                 return (
                                     <>
-                                        {record.equipment_id === '' ? (
+                                        {/* {record.equipment_id === '' ? (
                                             <div className="sensor-container-style-notAttached mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
@@ -348,28 +348,28 @@ const IndividualActiveDevice = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <div className="sensor-container-style mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">{record.equipment}</span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <FontAwesomeIcon
-                                                        icon={faChartMixed}
-                                                        size="md"
-                                                        onClick={() => {
-                                                            handleChartShow(record.id);
-                                                        }}
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-default passive-edit-style">
-                                                        Edit
-                                                    </button>
-                                                </div>
+                                        ) : ( */}
+                                        <div className="sensor-container-style mt-3">
+                                            <div className="sensor-data-style">
+                                                <span className="sensor-data-no">{index + 1}</span>
+                                                <span className="sensor-data-title">
+                                                    {record.equipment_id === '' ? 'No Equipment' : record.equipment}
+                                                </span>
                                             </div>
-                                        )}
+                                            <div className="sensor-data-style-right">
+                                                <FontAwesomeIcon
+                                                    icon={faChartMixed}
+                                                    size="md"
+                                                    onClick={() => {
+                                                        handleChartShow(record.id);
+                                                    }}
+                                                />
+                                                <button type="button" className="btn btn-default passive-edit-style">
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* )} */}
                                     </>
                                 );
                             })}
