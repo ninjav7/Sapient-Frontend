@@ -1,5 +1,3 @@
-// Sensor selected List
-
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
@@ -377,6 +375,7 @@ const CreatePanel = () => {
 
             let newPanel = Object.assign({}, panel);
             newPanel.breaker_count = normalCount;
+            newPanel.panel_type = activePanelType;
 
             setIsProcessing(true);
 
@@ -388,8 +387,6 @@ const CreatePanel = () => {
                     let response = res.data;
                     setGeneratedPanelId(response.id);
                 });
-
-            // setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to save Panel');
@@ -564,6 +561,9 @@ const CreatePanel = () => {
 
                 let newBreakerArray = [];
                 normalStruct.forEach((breaker) => {
+                    if (breaker.link_type === 'unlinked') {
+                        breaker.link_id = generateBreakerLinkId();
+                    }
                     breaker.voltage = parseInt(breaker.voltage);
                     newBreakerArray.push(breaker);
                 });
@@ -724,10 +724,10 @@ const CreatePanel = () => {
         fetchEquipmentData();
     }, [bldgId]);
 
-    useEffect(() => {
-        console.log('Troubleshoot normalStruct => ', normalStruct);
-        console.log('Troubleshoot panel => ', panel);
-    });
+    // useEffect(() => {
+    //     console.log('Troubleshoot normalStruct => ', normalStruct);
+    //     console.log('Troubleshoot panel => ', panel);
+    // });
 
     return (
         <React.Fragment>
@@ -746,11 +746,9 @@ const CreatePanel = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
-                                // disabled={isProcessing}
                                 disabled={panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
-                                    // saveBreakersData();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
