@@ -74,7 +74,7 @@ const CreatePanel = () => {
 
     const [normalStruct, setNormalStruct] = useState([]);
 
-    const [normalCount, setNormalCount] = useState(5);
+    const [normalCount, setNormalCount] = useState(6);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
 
