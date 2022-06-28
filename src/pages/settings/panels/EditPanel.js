@@ -612,12 +612,11 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                let params = `?panel_id=${panelId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    setGeneralPanelData(response);
-                    let singlePanel = response.filter((record) => record.panel_id === panelId);
-                    setCurrentPanelData(singlePanel[0]);
-                    setNormalCount(singlePanel[0].breakers);
+                    setCurrentPanelData(response);
+                    setNormalCount(response.breakers);
                 });
             } catch (error) {
                 console.log(error);
