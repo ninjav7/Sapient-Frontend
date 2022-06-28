@@ -505,6 +505,51 @@ const CreatePanel = () => {
         setCurrentEquipIds(newArray);
     };
 
+    const addBreakersToList = (newBreakerIndex) => {
+        let newBreakerList = normalStruct;
+        let obj = {
+            name: '',
+            breaker_number: parseInt(newBreakerIndex),
+            phase_configuration: 0,
+            rated_amps: 0,
+            voltage: '',
+            link_type: 'unlinked',
+            link_id: '',
+            equipment_link: [],
+            sensor_id: '',
+            device_id: '',
+        };
+
+        if (panel.voltage === '120/240') {
+            obj.voltage = '120';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '208/120') {
+            obj.voltage = '120';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '480') {
+            obj.voltage = '277';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '600') {
+            obj.voltage = '347';
+            obj.phase_configuration = 1;
+        }
+
+        newBreakerList.push(obj);
+        setNormalStruct(newBreakerList);
+    };
+
+    const removeBreakersFromList = () => {
+        let currentBreakerList = normalStruct;
+        currentBreakerList.splice(-1);
+        setNormalStruct(currentBreakerList);
+    };
+
     useEffect(() => {
         if (generatedPanelId === '') {
             return;
@@ -561,7 +606,7 @@ const CreatePanel = () => {
             newBreakers.push(obj);
         }
         setNormalStruct(newBreakers);
-    }, [normalCount]);
+    }, []);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -581,18 +626,6 @@ const CreatePanel = () => {
         };
         updateBreadcrumbStore();
     }, []);
-
-    // useEffect(() => {
-    //     let obj = Object.assign({}, currentBreakerObj);
-
-    //     let arr = [];
-    //     selectedEquipOptions.forEach((option) => {
-    //         arr.push(option.value);
-    //     });
-
-    //     obj['equipment_link'] = arr;
-    //     setCurrentBreakerObj(obj);
-    // }, [selectedEquipOptions]);
 
     useEffect(() => {
         const fetchEquipmentData = async () => {
@@ -693,7 +726,7 @@ const CreatePanel = () => {
 
     useEffect(() => {
         console.log('Troubleshoot normalStruct => ', normalStruct);
-        // console.log('Troubleshoot panel => ', panel);
+        console.log('Troubleshoot panel => ', panel);
     });
 
     return (
@@ -822,6 +855,12 @@ const CreatePanel = () => {
                                                 id="breakers"
                                                 value={normalCount}
                                                 onChange={(e) => {
+                                                    if (normalCount > parseInt(e.target.value)) {
+                                                        removeBreakersFromList();
+                                                    }
+                                                    if (normalCount < parseInt(e.target.value)) {
+                                                        addBreakersToList(e.target.value);
+                                                    }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
                                                 className="breaker-no-width font-weight-bold"
