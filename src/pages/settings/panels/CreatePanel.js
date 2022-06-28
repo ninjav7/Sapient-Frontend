@@ -53,6 +53,8 @@ const CreatePanel = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [generatedPanelId, setGeneratedPanelId] = useState('');
 
+    const [linkedSensors, setLinkedSensors] = useState([]);
+
     const [panel, setPanel] = useState({
         name: 'Panel Name',
         parent_panel: '',
@@ -72,7 +74,7 @@ const CreatePanel = () => {
 
     const [normalStruct, setNormalStruct] = useState([]);
 
-    const [normalCount, setNormalCount] = useState(5);
+    const [normalCount, setNormalCount] = useState(6);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
 
@@ -134,11 +136,12 @@ const CreatePanel = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const [isEditing, setIsEditing] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
 
     const [normalData, setNormalData] = useState({
         related_amps: 200,
     });
+
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
@@ -228,6 +231,23 @@ const CreatePanel = () => {
         }
         obj[key] = value;
         setCurrentBreakerObj(obj);
+    };
+
+    const handleLinkedSensor = (previousSensorId, newSensorId) => {
+        if (previousSensorId === '') {
+            let newSensorList = linkedSensors;
+            newSensorList.push(newSensorId);
+            setLinkedSensors(newSensorList);
+        } else {
+            let newSensorList = linkedSensors;
+
+            let filteredList = newSensorList.filter((record) => {
+                return record !== previousSensorId;
+            });
+
+            filteredList.push(newSensorId);
+            setLinkedSensors(filteredList);
+        }
     };
 
     const addNormalSingleData = () => {
@@ -355,6 +375,7 @@ const CreatePanel = () => {
 
             let newPanel = Object.assign({}, panel);
             newPanel.breaker_count = normalCount;
+            newPanel.panel_type = activePanelType;
 
             setIsProcessing(true);
 
@@ -366,8 +387,6 @@ const CreatePanel = () => {
                     let response = res.data;
                     setGeneratedPanelId(response.id);
                 });
-
-            // setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
             alert('Failed to save Panel');
@@ -483,6 +502,51 @@ const CreatePanel = () => {
         setCurrentEquipIds(newArray);
     };
 
+    const addBreakersToList = (newBreakerIndex) => {
+        let newBreakerList = normalStruct;
+        let obj = {
+            name: '',
+            breaker_number: parseInt(newBreakerIndex),
+            phase_configuration: 0,
+            rated_amps: 0,
+            voltage: '',
+            link_type: 'unlinked',
+            link_id: '',
+            equipment_link: [],
+            sensor_id: '',
+            device_id: '',
+        };
+
+        if (panel.voltage === '120/240') {
+            obj.voltage = '120';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '208/120') {
+            obj.voltage = '120';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '480') {
+            obj.voltage = '277';
+            obj.phase_configuration = 1;
+        }
+
+        if (panel.voltage === '600') {
+            obj.voltage = '347';
+            obj.phase_configuration = 1;
+        }
+
+        newBreakerList.push(obj);
+        setNormalStruct(newBreakerList);
+    };
+
+    const removeBreakersFromList = () => {
+        let currentBreakerList = normalStruct;
+        currentBreakerList.splice(-1);
+        setNormalStruct(currentBreakerList);
+    };
+
     useEffect(() => {
         if (generatedPanelId === '') {
             return;
@@ -497,6 +561,9 @@ const CreatePanel = () => {
 
                 let newBreakerArray = [];
                 normalStruct.forEach((breaker) => {
+                    if (breaker.link_type === 'unlinked') {
+                        breaker.link_id = generateBreakerLinkId();
+                    }
                     breaker.voltage = parseInt(breaker.voltage);
                     newBreakerArray.push(breaker);
                 });
@@ -539,7 +606,7 @@ const CreatePanel = () => {
             newBreakers.push(obj);
         }
         setNormalStruct(newBreakers);
-    }, [normalCount]);
+    }, []);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -559,18 +626,6 @@ const CreatePanel = () => {
         };
         updateBreadcrumbStore();
     }, []);
-
-    // useEffect(() => {
-    //     let obj = Object.assign({}, currentBreakerObj);
-
-    //     let arr = [];
-    //     selectedEquipOptions.forEach((option) => {
-    //         arr.push(option.value);
-    //     });
-
-    //     obj['equipment_link'] = arr;
-    //     setCurrentBreakerObj(obj);
-    // }, [selectedEquipOptions]);
 
     useEffect(() => {
         const fetchEquipmentData = async () => {
@@ -649,7 +704,6 @@ const CreatePanel = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
@@ -692,11 +746,9 @@ const CreatePanel = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
-                                // disabled={isProcessing}
                                 disabled={panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
-                                    // saveBreakersData();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
@@ -801,6 +853,12 @@ const CreatePanel = () => {
                                                 id="breakers"
                                                 value={normalCount}
                                                 onChange={(e) => {
+                                                    if (normalCount > parseInt(e.target.value)) {
+                                                        removeBreakersFromList();
+                                                    }
+                                                    if (normalCount < parseInt(e.target.value)) {
+                                                        addBreakersToList(e.target.value);
+                                                    }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
                                                 className="breaker-no-width font-weight-bold"
@@ -901,7 +959,7 @@ const CreatePanel = () => {
                                 <Row>
                                     <Col lg={12}>
                                         <div>
-                                            <div className="grid-style-6">
+                                            <div className="breakers-list-style">
                                                 {normalStruct.map((element, index) => {
                                                     return (
                                                         <>
@@ -960,20 +1018,14 @@ const CreatePanel = () => {
                                                                                             handleCurrentLinkedBreaker(
                                                                                                 index
                                                                                             );
-                                                                                            // if (
-                                                                                            //     !(
-                                                                                            //         currentBreakerLevel ===
-                                                                                            //             'triple-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '120/240'
-                                                                                            //     ) ||
-                                                                                            //     (currentBreakerLevel ===
-                                                                                            //         'double-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '600')
-                                                                                            // ) {
+                                                                                            if (
+                                                                                                element.device_id !== ''
+                                                                                            ) {
+                                                                                                fetchDeviceSensorData(
+                                                                                                    element.device_id
+                                                                                                );
+                                                                                            }
                                                                                             handleEditBreakerShow();
-                                                                                            // }
                                                                                         }}>
                                                                                         <div className="edit-icon-bg-styling mr-2">
                                                                                             <i className="uil uil-pen"></i>
@@ -1009,20 +1061,14 @@ const CreatePanel = () => {
                                                                                             handleCurrentLinkedBreaker(
                                                                                                 index
                                                                                             );
-                                                                                            // if (
-                                                                                            //     !(
-                                                                                            //         currentBreakerLevel ===
-                                                                                            //             'triple-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '120/240'
-                                                                                            //     ) ||
-                                                                                            //     (currentBreakerLevel ===
-                                                                                            //         'double-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '600')
-                                                                                            // ) {
+                                                                                            if (
+                                                                                                element.device_id !== ''
+                                                                                            ) {
+                                                                                                fetchDeviceSensorData(
+                                                                                                    element.device_id
+                                                                                                );
+                                                                                            }
                                                                                             handleEditBreakerShow();
-                                                                                            // }
                                                                                         }}>
                                                                                         <div className="edit-icon-bg-styling mr-2">
                                                                                             <i className="uil uil-pen"></i>
@@ -1364,11 +1410,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1528,11 +1581,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1576,11 +1636,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id1', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id1}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1624,11 +1691,18 @@ const CreatePanel = () => {
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
                                                     handleBreakerConfigChange('sensor_id2', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
                                                 }}
                                                 value={currentBreakerObj.sensor_id2}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
-                                                    return <option value={record.id}>{record.name}</option>;
+                                                    return (
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
+                                                            {record.name}
+                                                        </option>
+                                                    );
                                                 })}
                                             </Input>
                                         </Form.Group>

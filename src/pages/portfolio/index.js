@@ -500,7 +500,8 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('setBuildingsEnergyConsume => ', data);
+                        localStorage.setItem('buildingId', data[0].buildingID);
+                        localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {

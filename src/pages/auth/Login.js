@@ -143,7 +143,7 @@ class Login extends Component {
                                                         <Button color="primary" className="btn-block">Log In</Button>
                                                     </FormGroup>
 
-                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <strong>Password:</strong> Test@123</p>
+                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <br /> <strong>Password:</strong> Test@123</p>
                                                 </AvForm>
                                             </Col>
 
