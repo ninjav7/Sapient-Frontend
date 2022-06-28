@@ -143,6 +143,7 @@ const CreatePanel = () => {
     const [normalData, setNormalData] = useState({
         related_amps: 200,
     });
+
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
@@ -690,10 +691,10 @@ const CreatePanel = () => {
         fetchEquipmentData();
     }, [bldgId]);
 
-    // useEffect(() => {
-    //     console.log('Troubleshoot normalStruct => ', normalStruct);
-    //     console.log('Troubleshoot panel => ', panel);
-    // });
+    useEffect(() => {
+        console.log('Troubleshoot normalStruct => ', normalStruct);
+        // console.log('Troubleshoot panel => ', panel);
+    });
 
     return (
         <React.Fragment>
@@ -921,7 +922,7 @@ const CreatePanel = () => {
                                 <Row>
                                     <Col lg={12}>
                                         <div>
-                                            <div className="grid-style-6">
+                                            <div className="breakers-list-style">
                                                 {normalStruct.map((element, index) => {
                                                     return (
                                                         <>
@@ -980,20 +981,14 @@ const CreatePanel = () => {
                                                                                             handleCurrentLinkedBreaker(
                                                                                                 index
                                                                                             );
-                                                                                            // if (
-                                                                                            //     !(
-                                                                                            //         currentBreakerLevel ===
-                                                                                            //             'triple-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '120/240'
-                                                                                            //     ) ||
-                                                                                            //     (currentBreakerLevel ===
-                                                                                            //         'double-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '600')
-                                                                                            // ) {
+                                                                                            if (
+                                                                                                element.device_id !== ''
+                                                                                            ) {
+                                                                                                fetchDeviceSensorData(
+                                                                                                    element.device_id
+                                                                                                );
+                                                                                            }
                                                                                             handleEditBreakerShow();
-                                                                                            // }
                                                                                         }}>
                                                                                         <div className="edit-icon-bg-styling mr-2">
                                                                                             <i className="uil uil-pen"></i>
@@ -1029,20 +1024,14 @@ const CreatePanel = () => {
                                                                                             handleCurrentLinkedBreaker(
                                                                                                 index
                                                                                             );
-                                                                                            // if (
-                                                                                            //     !(
-                                                                                            //         currentBreakerLevel ===
-                                                                                            //             'triple-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '120/240'
-                                                                                            //     ) ||
-                                                                                            //     (currentBreakerLevel ===
-                                                                                            //         'double-breaker' &&
-                                                                                            //         panel.voltage ===
-                                                                                            //             '600')
-                                                                                            // ) {
+                                                                                            if (
+                                                                                                element.device_id !== ''
+                                                                                            ) {
+                                                                                                fetchDeviceSensorData(
+                                                                                                    element.device_id
+                                                                                                );
+                                                                                            }
                                                                                             handleEditBreakerShow();
-                                                                                            // }
                                                                                         }}>
                                                                                         <div className="edit-icon-bg-styling mr-2">
                                                                                             <i className="uil uil-pen"></i>
