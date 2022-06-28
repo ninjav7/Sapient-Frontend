@@ -202,5 +202,11 @@
 }
 
 .dropdown-container {
-    width: 100% ;
+    width: 100%;
 }
+
+.breakers-list-style {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+

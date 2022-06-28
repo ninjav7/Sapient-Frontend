@@ -565,11 +565,7 @@ const EditPlugRule = ({
                                                                                     record.condition_id
                                                                                 );
                                                                             }}
-                                                                            defaultValue={
-                                                                                record.action_type
-                                                                                    ? 'Turn On'
-                                                                                    : 'Turn Off'
-                                                                            }>
+                                                                            value={record.action_type}>
                                                                             <option value={false}>Turn Off</option>
                                                                             <option value={true}>Turn On</option>
                                                                         </Input>

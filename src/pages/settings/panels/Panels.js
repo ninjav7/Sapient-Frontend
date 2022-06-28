@@ -18,6 +18,8 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import '../style.css';
 
 const PanelsTable = ({ generalPanelData }) => {
@@ -99,7 +101,6 @@ const Panels = () => {
                 let header = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${generalPanels}`, { headers: header }).then((res) => {
@@ -147,7 +148,8 @@ const Panels = () => {
                         <div className="mr-2">
                             <Link to="/settings/panels/createPanel">
                                 <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                    <i className="uil uil-plus mr-1"></i>Add Panel
+                                    <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
+                                    Add Panel
                                 </button>
                             </Link>
                         </div>
@@ -172,7 +174,8 @@ const Panels = () => {
                 </Col>
                 <Col xl={9}>
                     <button type="button" className="btn btn-white d-inline ml-2">
-                        <i className="uil uil-plus mr-1"></i>Add Filter
+                        <FontAwesomeIcon icon={faPlus} size="md" color="#344054" className="mr-1" />
+                        Add Filter
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
