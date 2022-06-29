@@ -14,15 +14,17 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalPanels } from '../../../services/Network';
+import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { MultiSelect } from 'react-multi-select-component';
 import '../style.css';
 
-const PanelsTable = ({ generalPanelData }) => {
+const PanelsTable = ({ generalPanelData, selectedOptions }) => {
     const records = [
         {
             name: 'Panel 1',
@@ -44,10 +46,10 @@ const PanelsTable = ({ generalPanelData }) => {
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Location</th>
-                            <th>Breakers</th>
-                            <th>Parent</th>
+                            {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
+                            {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
+                            {selectedOptions.some((record) => record.value === 'breakers') && <th>Breakers</th>}
+                            {selectedOptions.some((record) => record.value === 'parent') && <th>Parent</th>}
                             <th></th>
                             <th></th>
                             <th></th>
@@ -62,21 +64,31 @@ const PanelsTable = ({ generalPanelData }) => {
                         {generalPanelData.map((record, index) => {
                             return (
                                 <tr key={record.panel_id}>
-                                    <td className="font-weight-bold panel-name">
-                                        <Link
-                                            to={{
-                                                pathname: `/settings/panels/editPanel/${record.panel_id}`,
-                                            }}>
-                                            <a>{record.panel_name}</a>
-                                        </Link>
-                                    </td>
+                                    {selectedOptions.some((record) => record.value === 'name') && (
+                                        <td className="font-weight-bold panel-name">
+                                            <Link
+                                                to={{
+                                                    pathname: `/settings/panels/editPanel/${record.panel_id}`,
+                                                }}>
+                                                <a>{record.panel_name}</a>
+                                            </Link>
+                                        </td>
+                                    )}
 
-                                    <td className="">{record.location}</td>
-                                    <td className="font-weight-bold">{record.breakers}</td>
-                                    {record.parent === null ? (
-                                        <td className="font-weight-bold">-</td>
-                                    ) : (
-                                        <td className="font-weight-bold">{record.parent}</td>
+                                    {selectedOptions.some((record) => record.value === 'location') && (
+                                        <td className="">{record.location}</td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'breakers') && (
+                                        <td className="font-weight-bold">{record.breakers}</td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'parent') && (
+                                        <>
+                                            {record.parent === null ? (
+                                                <td className="font-weight-bold">-</td>
+                                            ) : (
+                                                <td className="font-weight-bold">{record.parent}</td>
+                                            )}
+                                        </>
                                     )}
                                 </tr>
                             );
@@ -91,6 +103,14 @@ const PanelsTable = ({ generalPanelData }) => {
 const Panels = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const tableColumnOptions = [
+        { label: 'Name', value: 'name' },
+        { label: 'Location', value: 'location' },
+        { label: 'Breakers', value: 'breakers' },
+        { label: 'Parent', value: 'parent' },
+    ];
+    const [selectedOptions, setSelectedOptions] = useState([]);
 
     // const [buildingId, setBuildingId] = useState(1);
     const [generalPanelData, setGeneralPanelData] = useState([]);
@@ -115,8 +135,6 @@ const Panels = () => {
         fetchPanelsData();
     }, []);
 
-    // console.log('Merge Issue Fix');
-
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -134,6 +152,14 @@ const Panels = () => {
             });
         };
         updateBreadcrumbStore();
+
+        let arr = [
+            { label: 'Name', value: 'name' },
+            { label: 'Location', value: 'location' },
+            { label: 'Breakers', value: 'breakers' },
+            { label: 'Parent', value: 'parent' },
+        ];
+        setSelectedOptions(arr);
     }, []);
 
     return (
@@ -171,6 +197,10 @@ const Panels = () => {
                             <Search className="icon-sm" />
                         </span>
                     </div>
+                    {/* <div className="search-container mr-2">
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                        <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
+                    </div> */}
                 </Col>
                 <Col xl={9}>
                     <button type="button" className="btn btn-white d-inline ml-2">
@@ -179,25 +209,25 @@ const Panels = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem>Olivia Rhye</DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={12}>
-                    <PanelsTable generalPanelData={generalPanelData} />
+                    <PanelsTable generalPanelData={generalPanelData} selectedOptions={selectedOptions} />
                 </Col>
             </Row>
         </React.Fragment>

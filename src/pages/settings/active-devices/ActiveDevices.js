@@ -1160,23 +1160,9 @@ const ActiveDevices = () => {
                             valueRenderer={() => {
                                 return 'Columns';
                             }}
+                            ClearSelectedIcon={null}
                         />
                     </div>
-                    {/* <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown> */}
                 </Col>
             </Row>
 
