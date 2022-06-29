@@ -22,6 +22,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
+import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -76,6 +77,46 @@ const BuildingTable = ({ buildingsData }) => {
 
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
+    const columns = [{
+        dataField: 'building_name',
+        text: 'Name',
+        sort: true,
+        style: { color: 'blue' }
+      }, {
+        dataField: 'energy_density',
+        text: 'Energy Density',
+        sort: true
+      }, {
+        dataField: 'energy_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'hvac_consumption',
+        text: 'HVAC Consumption',
+        sort:true
+      },{
+        dataField: 'hvac_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'total_consumption',
+        text: 'Total Consumption',
+        sort:true
+      },{
+        dataField: 'total_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'sq_ft',
+        text: 'Sq. Ft.',
+        sort:true
+      },{
+        dataField: 'buildingAccess',
+        text: 'Monitored Load',
+        sort:true
+      },
+
+    ];
 
     useEffect(() => {
         if (!buildingsData.length > 0) {
@@ -90,6 +131,7 @@ const BuildingTable = ({ buildingsData }) => {
     return (
         <Card>
             <CardBody>
+            {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>

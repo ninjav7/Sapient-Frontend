@@ -119,7 +119,7 @@ const PortfolioOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM-hh:mm TT',
+    
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -129,9 +129,14 @@ const PortfolioOverview = () => {
         },
         xaxis: {
             type: 'datetime',
-            labels: {
-                format: 'dd/MMM - hh:mm TT',
-            },
+            // labels: {
+            //     format: 'dd/MMM - hh:mm TT',
+            // },
+      labels: {
+        formatter: function(val, timestamp) {
+          return moment(timestamp).format("DD/MMM - hh:mm");
+        },
+      },
         },
         yaxis: {
             labels: {
@@ -445,10 +450,12 @@ const PortfolioOverview = () => {
                             },
                         ];
                         response.forEach((record) => {
+                            const d = new Date(record.x);
+                            const milliseconds = d.getTime();
                             newArray[0].data.push({
                                 // x: moment(record.x).format('MMM D'),
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(2),
+                                x: milliseconds,
+                                y: (record.y / 1000).toFixed(4),
                             });
                         });
                         console.log('Line Chart New Array => ', newArray);
@@ -497,7 +504,8 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('setBuildingsEnergyConsume => ', data);
+                        localStorage.setItem('buildingId', data[0].buildingID);
+                        localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {
@@ -508,7 +516,12 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        setMarkers(markerArray);
+                        const markerArr=[
+                        {markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128]},
+                        {markerOffset: 25, name: 'Justin', coordinates: [90.56,76.76]},
+                        ]
+                        console.log("markers ",markerArray )
+                        setMarkers(markerArr);
                     });
             } catch (error) {
                 console.log(error);

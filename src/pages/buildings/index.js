@@ -419,7 +419,7 @@ const BuildingOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM - hh:mm TT',
+                // format: 'dd/MMM - hh:mm TT',
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -430,8 +430,10 @@ const BuildingOverview = () => {
         xaxis: {
             type: 'datetime',
             labels: {
-                format: 'dd/MMM - hh:mm TT',
-            },
+                formatter: function(val, timestamp) {
+                  return moment(timestamp).format("DD/MMM - hh:mm");
+                },
+              },
             style: {
                 fontSize: '12px',
                 fontWeight: 600,
@@ -845,10 +847,17 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("result top ",res)
                         let data = res.data[0].top_contributors;
                         // console.log('HeatMap Data => ', data);
+                        // const dataset=[
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1216, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1561676, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 34561656, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 566167654, old: 0}},
+                        // ]
                         let sortedData = data.sort((a, b) => {
-                            return b.energy_consumption.now - a.energy_consumption.now;
+                            return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
                         });
                         setTopEnergyConsumption(sortedData);
                     });

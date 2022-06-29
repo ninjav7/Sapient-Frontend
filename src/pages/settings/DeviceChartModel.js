@@ -205,6 +205,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 autoSelected: 'pan',
                 show: false,
             },
+            animations: {
+                enabled: false,
+            },
         },
         colors: ['#546E7A'],
         stroke: {
