@@ -210,3 +210,8 @@
     grid-template-columns: 1fr 1fr;
 }
 
+.breaker-equipName-style {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
