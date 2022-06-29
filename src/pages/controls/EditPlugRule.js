@@ -405,6 +405,10 @@ const EditPlugRule = ({
         setActiveRuleId(id);
     }, [currentData]);
 
+    useEffect(() => {
+        console.log('allLinkedRuleData => ', allLinkedRuleData);
+    });
+
     return (
         <>
             <Modal
@@ -902,6 +906,7 @@ const EditPlugRule = ({
                                                         disabled
                                                     />
                                                 </th>
+                                                <th>MAC Address</th>
                                                 <th>Equipment Type</th>
                                                 <th>Location</th>
                                                 <th>Assigned Rule</th>
@@ -928,21 +933,31 @@ const EditPlugRule = ({
                                                                 />
                                                             </td>
 
-                                                            <td className="font-weight-bold panel-name">
-                                                                <div className="plug-equip-container">
-                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
-                                                                </div>
-                                                            </td>
+                                                            {/* Just added */}
+                                                            <td className="font-weight-bold">{record.name}</td>
+
+                                                            {record.equipment_link_type === '' ? (
+                                                                <td className="font-weight-bold panel-name">-</td>
+                                                            ) : (
+                                                                <td className="font-weight-bold panel-name">
+                                                                    <div className="plug-equip-container">
+                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                    </div>
+                                                                </td>
+                                                            )}
 
                                                             <td className="font-weight-bold">
                                                                 {record.equipment_link_location}
                                                             </td>
+
                                                             <td className="font-weight-bold">
                                                                 {record.assigned_rules.length === 0
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
+
                                                             <td className="font-weight-bold">{record.tag}</td>
+
                                                             <td className="font-weight-bold">{record.last_data}</td>
                                                         </tr>
                                                     );
