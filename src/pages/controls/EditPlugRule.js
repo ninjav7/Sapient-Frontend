@@ -25,6 +25,7 @@ import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { Cookies } from 'react-cookie';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 
 const EditPlugRule = ({
@@ -58,6 +59,8 @@ const EditPlugRule = ({
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const socketData = [
         {
@@ -345,7 +348,14 @@ const EditPlugRule = ({
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?rule_id=${activeRuleId}&building_id=${requestedBldgId}`;
+                // let params = `?rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let linkedData = [];
@@ -369,7 +379,14 @@ const EditPlugRule = ({
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=${requestedBldgId}`;
+                //let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let unLinkedData = [];
