@@ -40,7 +40,6 @@ const PortfolioOverview = () => {
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -475,6 +474,9 @@ const PortfolioOverview = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                console.log("Get Building");
+                console.log(startDate);
+                console.log(endDate);
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
                     setBuildingRecord(data);
@@ -504,6 +506,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
+                        console.log("building data",data)
                         localStorage.setItem('buildingId', data[0].buildingID);
                         localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
@@ -553,7 +556,7 @@ const PortfolioOverview = () => {
         calculateDays();
         // setLoading();
         // setIsProcessing(false);
-    }, [startDate, endDate]);
+    }, [startDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
