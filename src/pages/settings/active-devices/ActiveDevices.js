@@ -761,7 +761,7 @@ const ActiveDevices = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Active device data');
+            console.log('Failed to create Active device data');
         }
     };
 

@@ -98,7 +98,7 @@ const UtilityBills = () => {
     //             console.log('Response => ', response);
     //         } catch (error) {
     //             console.log(error);
-    //             alert('Failed to fetch utility bills data!');
+    //             console.log('Failed to fetch utility bills data!');
     //         }
     //     }
     //     getUtilityBillsData();

@@ -459,7 +459,7 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Energy Consumption Data');
+                console.log('Failed to fetch Energy Consumption Data');
             }
         };
 
@@ -477,7 +477,7 @@ const PortfolioOverview = () => {
                 });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Building Data');
+                console.log('Failed to fetch Building Data');
             }
         };
 
@@ -516,7 +516,7 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Portfolio Buildings Data');
+                console.log('Failed to fetch Portfolio Buildings Data');
             }
         };
 

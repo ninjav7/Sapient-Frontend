@@ -200,7 +200,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Plug Rule');
+            console.log('Failed to create Plug Rule');
         }
     };
 
@@ -228,7 +228,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Plug Rule');
+            console.log('Failed to update requested Plug Rule');
         }
     };
 
@@ -258,7 +258,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Socket Linking!');
+            console.log('Failed to update requested Socket Linking!');
         }
     };
 
@@ -288,7 +288,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Socket Unlinking!');
+            console.log('Failed to update requested Socket Unlinking!');
         }
     };
 

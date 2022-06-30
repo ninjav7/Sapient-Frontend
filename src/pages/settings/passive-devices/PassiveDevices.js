@@ -176,7 +176,7 @@ const PassiveDevices = () => {
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Passive device data');
+            console.log('Failed to create Passive device data');
         }
     };
 

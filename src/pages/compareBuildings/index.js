@@ -489,7 +489,7 @@ const CompareBuildings = () => {
                 });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Buildings Data');
+                console.log('Failed to fetch Buildings Data');
             }
         };
         compareBuildingsData();
