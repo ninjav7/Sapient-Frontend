@@ -55,18 +55,7 @@ const EditPanel = () => {
 
     const [linkedSensors, setLinkedSensors] = useState([]);
 
-    const [panel, setPanel] = useState({
-        name: 'Panel Name',
-        parent_panel: '',
-        device_id: '',
-        space_id: '',
-        voltage: '',
-        phase_config: 1,
-        rated_amps: 0,
-        breaker_count: 48,
-    });
-
-    const [currentPanelData, setCurrentPanelData] = useState({});
+    const [panel, setPanel] = useState({});
     const [currentBreakerData, setCurrentBreakerData] = useState([]);
 
     const [panelConfig, setPanelConfig] = useState({
@@ -80,17 +69,6 @@ const EditPanel = () => {
     const [normalCount, setNormalCount] = useState(5);
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [locationData, setLocationData] = useState([]);
-
-    const [panelType, setPanelType] = useState([
-        {
-            name: 'Distribution',
-            value: 'distribution',
-        },
-        {
-            name: 'Disconnect',
-            value: 'disconnect',
-        },
-    ]);
 
     const [disconnectBreaker, setDisconnectBreaker] = useState([
         {
@@ -134,7 +112,6 @@ const EditPanel = () => {
     const [doubleLinkedBreaker, setDoubleLinkedBreaker] = useState([]);
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
-    const [activePanelType, setActivePanelType] = useState('distribution');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
@@ -391,7 +368,7 @@ const EditPanel = () => {
             // setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to save Panel');
+            console.log('Failed to save Panel');
         }
     };
 
@@ -579,7 +556,7 @@ const EditPanel = () => {
                 setIsProcessing(false);
             } catch (error) {
                 setIsProcessing(false);
-                alert('Failed to save Breakers');
+                console.log('Failed to save Breakers');
             }
         };
         saveBreakersData(generatedPanelId);
@@ -597,6 +574,9 @@ const EditPanel = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -612,7 +592,7 @@ const EditPanel = () => {
                 let params = `?panel_id=${panelId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    setCurrentPanelData(response);
+                    setPanel(response);
                     setNormalCount(response.breakers);
                 });
             } catch (error) {
@@ -721,7 +701,7 @@ const EditPanel = () => {
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>
                 <Col className="header-container" xl={10}>
-                    <span className="heading-style">Edit Panel</span>
+                    <span className="heading-style">{panel.panel_name}</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="ml-2">
@@ -763,7 +743,7 @@ const EditPanel = () => {
                                     handleChange('name', e.target.value);
                                 }}
                                 className="font-weight-bold"
-                                value={currentPanelData.panel_name}
+                                value={panel.panel_name}
                             />
                         </FormGroup>
 
@@ -779,8 +759,8 @@ const EditPanel = () => {
                                 onChange={(e) => {
                                     handleChange('parent_panel', e.target.value);
                                 }}>
-                                {currentPanelData.parent_id !== null ? (
-                                    <option value={currentPanelData.parent_id}>{currentPanelData.parent}</option>
+                                {panel.parent_id !== null ? (
+                                    <option value={panel.parent_id}>{panel.parent}</option>
                                 ) : (
                                     <option>None</option>
                                 )}
@@ -802,7 +782,7 @@ const EditPanel = () => {
                                 onChange={(e) => {
                                     handleChange('space_id', e.target.value);
                                 }}>
-                                <option>{currentPanelData.location}</option>
+                                <option>{panel.location}</option>
                                 {/* <option>Select Location</option> */}
                                 {locationData.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
@@ -819,35 +799,11 @@ const EditPanel = () => {
                         <Row className="panel-header-styling ml-1 mr-1">
                             <div className="panel-header-filter">
                                 <div>
-                                    <FormGroup className="form-group row m-4">
-                                        <Label for="panelName" className="card-title">
-                                            Type
-                                        </Label>
-                                        <Input
-                                            type="select"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                setActivePanelType(e.target.value);
-                                            }}>
-                                            <option value={currentPanelData.panel_type}>
-                                                {currentPanelData.panel_type === 'distribution'
-                                                    ? 'Distribution'
-                                                    : 'Disconnect'}
-                                            </option>
-                                            {panelType.map((record) => {
-                                                return <option value={record.value}>{record.name}</option>;
-                                            })}
-                                        </Input>
-                                    </FormGroup>
-                                </div>
-                                <div>
                                     <FormGroup className="form-group row m-4 width-custom-style">
                                         <Label for="panelName" className="card-title">
                                             Number of Breakers
                                         </Label>
-                                        {activePanelType === 'distribution' ? (
+                                        {panel.panel_type === 'distribution' ? (
                                             <Input
                                                 type="number"
                                                 name="breakers"
@@ -861,7 +817,7 @@ const EditPanel = () => {
                                                     }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
-                                                value={currentPanelData.breakers}
+                                                value={panel.breakers}
                                                 className="breaker-no-width font-weight-bold"
                                             />
                                         ) : (
@@ -916,7 +872,7 @@ const EditPanel = () => {
                             </div>
                         </Row>
 
-                        {activePanelType === 'distribution' && (
+                        {panel.panel_type === 'distribution' && (
                             <>
                                 <Row className="main-breaker-styling">
                                     <FormGroup className="form-group row m-4">
@@ -1094,7 +1050,7 @@ const EditPanel = () => {
                             </>
                         )}
 
-                        {activePanelType === 'disconnect' && (
+                        {panel.panel_type === 'disconnect' && (
                             <Row>
                                 <Col lg={12}>
                                     <div>
@@ -1246,7 +1202,7 @@ const EditPanel = () => {
                 <Modal.Body>
                     <div className="mb-4">
                         <h5 className="edit-panel-title ml-2 mb-0">Edit Panel Input</h5>
-                        <p className="edit-panel-subtitle ml-2">{currentPanelData.panel_name}</p>
+                        <p className="edit-panel-subtitle ml-2">{panel.panel_name}</p>
                     </div>
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1258,8 +1214,8 @@ const EditPanel = () => {
                                 onChange={(e) => {
                                     handlePanelConfigChange('rated_amps', e.target.value);
                                 }}
-                                defaultValue={currentPanelData.rated_amps === null ? 200 : currentPanelData.rated_amps}
-                                value={currentPanelData.rated_amps === null ? 200 : currentPanelData.rated_amps}
+                                defaultValue={panel.rated_amps === null ? 200 : panel.rated_amps}
+                                value={panel.rated_amps === null ? 200 : panel.rated_amps}
                             />
                         </Form.Group>
 
@@ -1275,10 +1231,10 @@ const EditPanel = () => {
                                     handlePanelConfigChange('voltage', e.target.value);
                                 }}
                                 value={panelConfig.voltage}>
-                                {currentPanelData.voltage === '' ? (
+                                {panel.voltage === '' ? (
                                     <option>Select Volts</option>
                                 ) : (
-                                    <option value={currentPanelData.voltage}>{currentPanelData.voltage}</option>
+                                    <option value={panel.voltage}>{panel.voltage}</option>
                                 )}
                                 <option value="120/240">120/240</option>
                                 <option value="208/120">208/120</option>
