@@ -197,15 +197,9 @@ class Register extends Component {
                                                 <div className="auth-page-sidebar">
                                                     <div className="overlay"></div>
                                                     <div className="auth-user-testimonial">
-<<<<<<< HEAD
-                                                        {/* <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p>
-                                                        <p className="lead">"It's a elegent templete. I love it very much!"</p>
-                                                        <p>- Admin User</p> */}
-=======
                                                         {/* <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p> */}
                                                         {/* <p className="lead">"It's a elegent templete. I love it very much!"</p> */}
                                                         {/* <p>- Admin User</p> */}
->>>>>>> e689aa20982523275c63c91005a4c53ddbe18044
                                                     </div>
                                                 </div>
                                             </Col>
