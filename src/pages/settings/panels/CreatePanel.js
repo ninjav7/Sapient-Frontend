@@ -134,13 +134,11 @@ const CreatePanel = () => {
 
     });
 
-
+    const [normalCount, setNormalCount] = useState(6);
     const [normalStruct, setNormalStruct] = useState([]);
 
-
-    const [normalCount, setNormalCount] = useState(6);
-
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
+    const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
     const [locationData, setLocationData] = useState([]);
 
@@ -371,6 +369,10 @@ const CreatePanel = () => {
 
     };
 
+    const findEquipmentName = (equipId) => {
+        let equip = equipmentData.find((record) => record.equipments_id === equipId);
+        return equip.equipments_name;
+    };
 
     const handlePanelConfigChange = (key, value) => {
 
@@ -489,13 +491,16 @@ const CreatePanel = () => {
 
 
     const updateSingleBreakerData = () => {
-
-        let newArray = normalStruct;
-
-        newArray[currentBreakerIndex] = currentBreakerObj;
-
-        setNormalStruct(newArray);
-
+        if (activePanelType === 'distribution') {
+            let newArray = normalStruct;
+            newArray[currentBreakerIndex] = currentBreakerObj;
+            setNormalStruct(newArray);
+        }
+        if (activePanelType === 'disconnect') {
+            let newArray = disconnectBreakerConfig;
+            newArray[currentBreakerIndex] = currentBreakerObj;
+            setDisconnectBreakerConfig(newArray);
+        }
     };
 
 
@@ -1019,6 +1024,65 @@ const CreatePanel = () => {
 
     };
 
+    const handleDisconnectBreakers = (previousBreakerCount, newBreakerCount) => {
+        let newBreakersArray = disconnectBreakerConfig;
+        if (newBreakerCount === 1) {
+            let arr = [];
+            arr.push(newBreakersArray[0]);
+            setDisconnectBreakerConfig(arr);
+        }
+        if (newBreakerCount === 2) {
+            let obj = {
+                name: '',
+                breaker_number: 2,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 3) {
+                newBreakersArray.splice(-1);
+                console.log('SSR 3-2 condition executed');
+                console.log('SSR newBreakersArray => ', newBreakersArray);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
+        if (newBreakerCount === 3) {
+            let obj = {
+                name: '',
+                breaker_number: 3,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                let obj1 = obj;
+                let obj2 = obj;
+                obj1.breaker_number = 2;
+                obj2.breaker_number = 3;
+                newBreakersArray.push(obj1);
+                newBreakersArray.push(obj2);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 2) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
+    };
 
     useEffect(() => {
 
@@ -1045,22 +1109,25 @@ const CreatePanel = () => {
 
                 let newBreakerArray = [];
 
-                normalStruct.forEach((breaker) => {
+                if (activePanelType === 'distribution') {
+                    normalStruct.forEach((breaker) => {
+                        if (breaker.link_type === 'unlinked') {
+                            breaker.link_id = generateBreakerLinkId();
+                        }
+                        breaker.voltage = parseInt(breaker.voltage);
+                        newBreakerArray.push(breaker);
+                    });
+                }
 
-                    if (breaker.link_type === 'unlinked') {
-
-                        breaker.link_id = generateBreakerLinkId();
-
-                    }
-
-                    breaker.voltage = parseInt(breaker.voltage);
-
-                    newBreakerArray.push(breaker);
-
-                });
-
-
-                // setIsProcessing(true);
+                if (activePanelType === 'disconnect') {
+                    disconnectBreakerConfig.forEach((breaker) => {
+                        if (breaker.link_type === 'unlinked') {
+                            breaker.link_id = generateBreakerLinkId();
+                        }
+                        breaker.voltage = parseInt(breaker.voltage);
+                        newBreakerArray.push(breaker);
+                    });
+                }
 
                 let params = `?panel_id=${panelID}`;
 
@@ -1099,7 +1166,26 @@ const CreatePanel = () => {
     useEffect(() => {
 
         let newBreakers = [];
+        for (let index = 1; index <= disconnectBreakerCount; index++) {
+            let obj = {
+                name: '',
+                breaker_number: index,
+                phase_configuration: 1,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            newBreakers.push(obj);
+        }
+        setDisconnectBreakerConfig(newBreakers);
+    }, []);
 
+    useEffect(() => {
+        let newBreakers = [];
         for (let index = 1; index <= normalCount; index++) {
 
             // let newId = getBreakerId();
@@ -1362,14 +1448,11 @@ const CreatePanel = () => {
 
     }, [bldgId]);
 
-
-    // useEffect(() => {
-
-    //     console.log('Troubleshoot normalStruct => ', normalStruct);
-
-    //     console.log('Troubleshoot panel => ', panel);
-
-    // });
+    useEffect(() => {
+        console.log('Troubleshoot normalStruct => ', normalStruct);
+        console.log('Troubleshoot disconnectBreakerConfig => ', disconnectBreakerConfig);
+        // console.log('Troubleshoot panel => ', panel);
+    });
 
 
     return (
@@ -1404,9 +1487,7 @@ const CreatePanel = () => {
                                 type="button"
 
                                 className="btn btn-md btn-primary font-weight-bold"
-
-                                disabled={panel.voltage === '' ? true : false}
-
+                                disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
 
                                     savePanelData();
@@ -1561,7 +1642,68 @@ const CreatePanel = () => {
                                         <Label for="panelName" className="card-title">
 
                                             Type
-
+                                        </Label>
+                                        <Input
+                                            type="select"
+                                            name="state"
+                                            id="userState"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                setActivePanelType(e.target.value);
+                                            }}>
+                                            {panelType.map((record) => {
+                                                return <option value={record.value}>{record.name}</option>;
+                                            })}
+                                        </Input>
+                                    </FormGroup>
+                                </div>
+                                <div>
+                                    <FormGroup className="form-group row m-4 width-custom-style">
+                                        <Label for="panelName" className="card-title">
+                                            Number of Breakers
+                                        </Label>
+                                        {activePanelType === 'distribution' ? (
+                                            <Input
+                                                type="number"
+                                                name="breakers"
+                                                id="breakers"
+                                                value={normalCount}
+                                                onChange={(e) => {
+                                                    if (normalCount > parseInt(e.target.value)) {
+                                                        removeBreakersFromList();
+                                                    }
+                                                    if (normalCount < parseInt(e.target.value)) {
+                                                        addBreakersToList(e.target.value);
+                                                    }
+                                                    setNormalCount(parseInt(e.target.value));
+                                                }}
+                                                className="breaker-no-width font-weight-bold"
+                                            />
+                                        ) : (
+                                            <Input
+                                                type="select"
+                                                name="state"
+                                                id="userState"
+                                                className="font-weight-bold breaker-no-width"
+                                                defaultValue={disconnectBreakerCount}
+                                                onChange={(e) => {
+                                                    handleDisconnectBreakers(
+                                                        disconnectBreakerCount,
+                                                        parseInt(e.target.value)
+                                                    );
+                                                    setDisconnectBreakerCount(parseInt(e.target.value));
+                                                }}>
+                                                {disconnectBreaker.map((record) => {
+                                                    return <option value={record.value}>{record.name}</option>;
+                                                })}
+                                            </Input>
+                                        )}
+                                    </FormGroup>
+                                </div>
+                                {/* <div>
+                                    <FormGroup className="form-group row m-4 width-custom-style">
+                                        <Label for="panelName" className="card-title">
+                                            Breaker Level
                                         </Label>
 
                                         <Input
@@ -1725,13 +1867,9 @@ const CreatePanel = () => {
                                     onClick={() => {
 
                                         setIsEditing(!isEditing);
-
-                                        saveNormalDataToPanel();
-
+                                        // saveNormalDataToPanel();
                                     }}>
-
-                                    {isEditing ? 'Done' : 'Edit'}
-
+                                    {isEditing ? 'Done Editing' : 'Edit Layout'}
                                 </button>
 
                             </div>
@@ -1887,17 +2025,14 @@ const CreatePanel = () => {
                                                                         {!(element.equipment_link.length === 0) ? (
 
                                                                             <>
-
-                                                                                {/* <div> */}
-
-                                                                                {/* <h6 className="ml-4 mb-3 breaker-equip-name">
-
-                                                                                        {element.equipment_link[0]}
-
-                                                                                    </h6> */}
-
-                                                                                {/* </div> */}
-
+                                                                                <div className="breaker-equipName-style">
+                                                                                    <h6 className=" ml-3 breaker-equip-name">
+                                                                                        {/* {element.equipment_link[0]} */}
+                                                                                        {findEquipmentName(
+                                                                                            element.equipment_link[0]
+                                                                                        )}
+                                                                                    </h6>
+                                                                                </div>
                                                                                 {!(
 
                                                                                     (currentBreakerLevel ===
@@ -2106,265 +2241,141 @@ const CreatePanel = () => {
                                             <div className="disconnect-breaker-container">
 
                                                 {/* Breaker Online & Single Breaker */}
-
-                                                <div className="sub-breaker-style-no-device">
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-index">1</div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="dot-status"></div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-content">
-
-                                                            <span>80A</span>
-
-                                                            <span>240V</span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div
-
-                                                        className="breaker-content-middle"
-
-                                                        // onClick={() => {
-
-                                                        //     handleBreakerShow();
-
-                                                        // }}
-
-                                                    >
-
-                                                        <div className="edit-icon-bg-styling mr-2">
-
-                                                            <i className="uil uil-pen"></i>
-
-                                                        </div>
-
-                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-
-                                                    </div>
-
-                                                </div>
-
-
-                                                {/* Breaker Online & Double Breaker */}
-
-                                                {/* <div className="sub-breaker-style-double-breaker">
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-index">1</div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="dot-status"></div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-content">
-
-                                                            <span>80A</span>
-
-                                                            <span>240V</span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div
-
-                                                        className="breaker-content-middle"
-
-                                                        // onClick={() => {
-
-                                                        //     handleBreakerShow();
-
-                                                        // }}
-
-                                                    >
-
-                                                        <div className="edit-icon-bg-styling mr-2">
-
-                                                            <i className="uil uil-pen"></i>
-
-                                                        </div>
-
-                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-
-                                                    </div>
-
-                                                </div> */}
-
-
-                                                {/* Breaker Online & Triple Breaker */}
-
-                                                <div className="sub-breaker-style-no-device">
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-index">1</div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="dot-status"></div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-content">
-
-                                                            <span>80A</span>
-
-                                                            <span>240V</span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div
-
-                                                        className="breaker-content-middle"
-
-                                                        // onClick={() => {
-
-                                                        //     handleBreakerShow();
-
-                                                        // }}
-
-                                                    >
-
-                                                        <div className="edit-icon-bg-styling mr-2">
-
-                                                            <i className="uil uil-pen"></i>
-
-                                                        </div>
-
-                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-
-                                                    </div>
-
-                                                </div>
-
-
-                                                {/* Breaker Partial */}
-
-                                                {/* <div className="sub-breaker-style-partial">
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-index">1</div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="dot-status"></div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-content">
-
-                                                            <span>80A</span>
-
-                                                            <span>240V</span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div
-
-                                                        className="breaker-content-middle"
-
-                                                        onClick={() => {
-
-                                                            handleBreakerShow();
-
-                                                        }}>
-
-                                                        <div className="edit-icon-bg-styling mr-2">
-
-                                                            <i className="uil uil-pen"></i>
-
-                                                        </div>
-
-                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-
-                                                    </div>
-
-                                                </div> */}
-
-
-                                                {/* Offline 1 */}
-
-                                                {/* <div className="sub-breaker-style-offline">
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-index">1</div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="dot-status"></div>
-
-                                                    </div>
-
-                                                    <div className="breaker-content-middle">
-
-                                                        <div className="breaker-content">
-
-                                                            <span>80A</span>
-
-                                                            <span>240V</span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div
-
-                                                        className="breaker-content-middle"
-
-                                                        onClick={() => {
-
-                                                            handleBreakerShow();
-
-                                                        }}>
-
-                                                        <div className="edit-icon-bg-styling mr-2">
-
-                                                            <i className="uil uil-pen"></i>
-
-                                                        </div>
-
-                                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-
-                                                    </div>
-
-                                                </div> */}
-
+                                                {disconnectBreakerConfig.map((element, index) => {
+                                                    return (
+                                                        <>
+                                                            <div className="breaker-container">
+                                                                <div className="sub-breaker-style">
+                                                                    <div className="breaker-content-middle">
+                                                                        <div className="breaker-index">
+                                                                            {element.breaker_number}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="breaker-content-middle">
+                                                                        <div className="dot-status"></div>
+                                                                    </div>
+                                                                    <div className="breaker-content-middle">
+                                                                        <div className="breaker-content">
+                                                                            <span>{`${element.rated_amps}A`}</span>
+                                                                            <span>{`${element.voltage}V`}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    {!(element.equipment_link.length === 0) ? (
+                                                                        <>
+                                                                            <div className="breaker-equipName-style">
+                                                                                <h6 className="ml-3 breaker-equip-name">
+                                                                                    {/* {element.equipment_link[0]} */}
+                                                                                    {findEquipmentName(
+                                                                                        element.equipment_link[0]
+                                                                                    )}
+                                                                                </h6>
+                                                                            </div>
+                                                                            {!(
+                                                                                (currentBreakerLevel ===
+                                                                                    'triple-breaker' &&
+                                                                                    panel.voltage === '120/240') ||
+                                                                                (currentBreakerLevel ===
+                                                                                    'double-breaker' &&
+                                                                                    panel.voltage === '600')
+                                                                            ) && (
+                                                                                <div
+                                                                                    className="breaker-content-middle"
+                                                                                    onClick={() => {
+                                                                                        setCurrentBreakerObj(element);
+                                                                                        setCurrentBreakerIndex(index);
+                                                                                        setCurrentEquipIds(
+                                                                                            element.equipment_link
+                                                                                        );
+                                                                                        handleCurrentLinkedBreaker(
+                                                                                            index
+                                                                                        );
+                                                                                        if (element.device_id !== '') {
+                                                                                            fetchDeviceSensorData(
+                                                                                                element.device_id
+                                                                                            );
+                                                                                        }
+                                                                                        handleEditBreakerShow();
+                                                                                    }}>
+                                                                                    <div className="edit-icon-bg-styling mr-2">
+                                                                                        <i className="uil uil-pen"></i>
+                                                                                    </div>
+                                                                                    <span className="font-weight-bold edit-btn-styling">
+                                                                                        Edit
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            {!(
+                                                                                (currentBreakerLevel ===
+                                                                                    'triple-breaker' &&
+                                                                                    panel.voltage === '120/240') ||
+                                                                                (currentBreakerLevel ===
+                                                                                    'double-breaker' &&
+                                                                                    panel.voltage === '600')
+                                                                            ) && (
+                                                                                <div
+                                                                                    className="breaker-content-middle"
+                                                                                    onClick={() => {
+                                                                                        setCurrentBreakerObj(element);
+                                                                                        setCurrentBreakerIndex(index);
+                                                                                        setCurrentEquipIds(
+                                                                                            element.equipment_link
+                                                                                        );
+                                                                                        handleCurrentLinkedBreaker(
+                                                                                            index
+                                                                                        );
+                                                                                        if (element.device_id !== '') {
+                                                                                            fetchDeviceSensorData(
+                                                                                                element.device_id
+                                                                                            );
+                                                                                        }
+                                                                                        handleEditBreakerShow();
+                                                                                    }}>
+                                                                                    <div className="edit-icon-bg-styling mr-2">
+                                                                                        <i className="uil uil-pen"></i>
+                                                                                    </div>
+                                                                                    <span className="font-weight-bold edit-btn-styling">
+                                                                                        Edit
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* <div className="sub-breaker-style-no-device">
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="breaker-index">1</div>
+                                                                </div>
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="dot-status"></div>
+                                                                </div>
+                                                                <div className="breaker-content-middle">
+                                                                    <div className="breaker-content">
+                                                                        <span>80A</span>
+                                                                        <span>240V</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    className="breaker-content-middle"
+                                                                    // onClick={() => {
+                                                                    //     handleBreakerShow();
+                                                                    // }}
+                                                                >
+                                                                    <div className="edit-icon-bg-styling mr-2">
+                                                                        <i className="uil uil-pen"></i>
+                                                                    </div>
+                                                                    <span className="font-weight-bold edit-btn-styling">
+                                                                        Edit
+                                                                    </span>
+                                                                </div>
+                                                            </div> */}
+                                                        </>
+                                                    );
+                                                })}
                                             </div>
 
                                         </FormGroup>

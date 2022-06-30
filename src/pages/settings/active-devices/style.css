@@ -433,3 +433,23 @@
     align-items: center;
     align-content: stretch;
 }
+
+.align-options-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.column-filter-styling {
+    width: 100% !important;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    color: #475467;
+    margin-right: 2vw;
+}
+
+/* .dropdown-search-clear-icon {
+    opacity: -1 !important;
+} */

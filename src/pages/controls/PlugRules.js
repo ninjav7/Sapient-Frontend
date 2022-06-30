@@ -382,6 +382,7 @@ const PlugRules = () => {
         <React.Fragment>
             <div className="plug-rules-header-style mt-4 ml-4 mr-3">
                 <div className="plug-left-header">
+                    {/* <div className="plug-blg-name">NYPL</div> */}
                     <div className="plug-blg-name">
                         {localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName')}
                     </div>

@@ -513,21 +513,20 @@ const ActiveDevices = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
 
