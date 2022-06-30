@@ -481,15 +481,15 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/panels',
-            name: 'Panels',
-            component: Panels,
+            path: '/settings/panels/editPanel/:panelId',
+            name: 'Edit Panel',
+            component: EditPanel,
             route: PrivateRoute,
-            visibility: true,
+            visibility: false,
             parent: 'building-settings',
         },
         {
-            path: '/settings/createPanel',
+            path: '/settings/panels/createPanel',
             name: 'Create Panel',
             component: CreatePanel,
             route: PrivateRoute,
@@ -497,11 +497,11 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/editPanel',
-            name: 'Edit Panel',
-            component: EditPanel,
+            path: '/settings/panels',
+            name: 'Panels',
+            component: Panels,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'building-settings',
         },
         {
@@ -592,14 +592,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-        {
-            path: '/settings/equipment',
-            name: 'Equipment Type',
-            component: Equipment,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
+        // {
+        //     path: '/settings/equipment',
+        //     name: 'Equipment Type',
+        //     component: Equipment,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
@@ -787,5 +787,6 @@ const authProtectedRoutes = [
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
+
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };
