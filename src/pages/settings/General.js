@@ -17,6 +17,7 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 // import { useSelector } from 'react-redux';
+import { ComponentStore } from '../../store/ComponentStore';
 import moment from 'moment';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -25,7 +26,7 @@ import { Cookies } from 'react-cookie';
 const General = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [buildingData, setBuildingData] = useState({
         building_id: '628dd795f28141b8a69f38bf',
@@ -172,9 +173,11 @@ const General = () => {
                         path: '/settings/general',
                         active: true,
                     },
-                    
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

@@ -16,6 +16,7 @@ import {
 import axios from 'axios';
 import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
+import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
@@ -477,6 +478,9 @@ const Equipment = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

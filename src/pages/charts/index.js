@@ -14,6 +14,7 @@ import DonutChart from './DonutChart';
 import PieChart from './PieChart';
 import MixedChart from './MixedChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
 
 const ApexChart = () => {
     const apexLineChartWithLables = {

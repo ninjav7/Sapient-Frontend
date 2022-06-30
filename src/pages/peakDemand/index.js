@@ -13,7 +13,9 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
+import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import moment from 'moment';
 
 // const BuildingPeakButton = (props) => {
@@ -95,7 +97,8 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                     <div className="float-right ml-2">
                         <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
+                                <FontAwesomeIcon icon={faTelescope} size="md" color="#FFFFFF" className="mr-2" />
+                                Explore
                             </button>
                         </Link>
                     </div>
@@ -611,6 +614,9 @@ const PeakDemand = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -844,7 +850,12 @@ const PeakDemand = () => {
                                 className="button-success text-success font-weight-bold font-size-5 float-right"
                                 size={'sm'}
                                 color="primary"
-                                style={{ width: 'auto' }}>
+                                style={{
+                                    width: 'auto',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
                                 <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
                                 <strong>5 %</strong>
                             </Button>

@@ -18,6 +18,7 @@ import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
+import { ComponentStore } from '../../store/ComponentStore';
 import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -115,7 +116,17 @@ const BuildingTable = ({ buildingsData }) => {
                                             to={{
                                                 pathname: `/energy/building/overview/${record.building_id}`,
                                             }}>
-                                            <a className="building-name">{record.building_name}</a>
+                                            <a
+                                                className="building-name"
+                                                onClick={() => {
+                                                    ComponentStore.update((s) => {
+                                                        s.parent = 'buildings';
+                                                    });
+                                                    localStorage.setItem('buildingId', record.building_id);
+                                                    localStorage.setItem('buildingName', record.building_name);
+                                                }}>
+                                                {record.building_name}
+                                            </a>
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
@@ -451,6 +462,9 @@ const CompareBuildings = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -467,11 +481,11 @@ const CompareBuildings = () => {
 
                 let count = parseInt(localStorage.getItem('dateFilter'));
                 let params = `?days=${count}`;
+                // count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
+                // console.log('Sudhanshu => ', typeof count); // number
                 await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                    setBuildingsData(response);
-                    // console.log('setBuildingsData => ', res.data);
+                    setBuildingsData(res.data);
+                    console.log('setBuildingsData => ', res.data);
                 });
             } catch (error) {
                 console.log(error);

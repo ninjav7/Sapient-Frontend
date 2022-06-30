@@ -21,9 +21,8 @@ import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import BootstrapTable from 'react-bootstrap-table-next';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
-
-
 
 const UserTable = ({ userData }) => {
     useEffect(() => {
@@ -38,34 +37,46 @@ const UserTable = ({ userData }) => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
         };
         updateBreadcrumbStore();
     }, []);
-    const columns = [{
-        dataField: 'name',
-        text: 'Name',
-        sort: true,
-        style: { color: 'blue' }
-      }, {
-        dataField: 'emailId',
-        text: 'Email',
-        sort: true
-      }, {
-        dataField: 'lastActive',
-        text: 'Last Active',
-        sort:true
-      },{
-        dataField: 'buildingAccess',
-        text: 'Building Access',
-        sort:true
-      },
+    const columns = [
+        {
+            dataField: 'name',
+            text: 'Name',
+            sort: true,
+            style: { color: 'blue' },
+        },
+        {
+            dataField: 'emailId',
+            text: 'Email',
+            sort: true,
+        },
+        {
+            dataField: 'lastActive',
+            text: 'Last Active',
+            sort: true,
+        },
+        {
+            dataField: 'buildingAccess',
+            text: 'Building Access',
+            sort: true,
+        },
     ];
-      
-    
+
     return (
         <Card>
             <CardBody>
-            <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } />
+                <BootstrapTable
+                    keyField="id"
+                    data={userData}
+                    columns={columns}
+                    bordered={false}
+                    sort={{ dataField: 'name', order: 'asc' }}
+                />
             </CardBody>
         </Card>
     );

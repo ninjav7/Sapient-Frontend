@@ -16,6 +16,8 @@ import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-solid-svg-icons';
+import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
+import { ComponentStore } from '../../store/ComponentStore';
 import {
     BaseUrl,
     builidingAlerts,
@@ -1030,6 +1032,9 @@ const BuildingOverview = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -1341,7 +1346,13 @@ const BuildingOverview = () => {
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
-                                                                <i className="uil uil-pen mr-1"></i>Explore
+                                                                <FontAwesomeIcon
+                                                                    icon={faTelescope}
+                                                                    size="md"
+                                                                    color="#FFFFFF"
+                                                                    className="mr-2"
+                                                                />
+                                                                Explore
                                                             </button>
                                                         </Link>
                                                     </div>

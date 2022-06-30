@@ -30,6 +30,8 @@ import {
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import EditPlugRule from './EditPlugRule';
+import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 
 const PlugRuleTable = ({
@@ -84,7 +86,7 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
@@ -138,9 +140,15 @@ const PlugRules = () => {
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const [createRuleData, setCreateRuleData] = useState({
-        building_id: '62966c902f9fa606bbcd6084',
+        building_id:
+            localStorage.getItem('buildingId') === 'null'
+                ? '62966c902f9fa606bbcd6084'
+                : localStorage.getItem('buildingId'),
         action: [],
     });
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     const [currentData, setCurrentData] = useState({});
 
     const [modelRefresh, setModelRefresh] = useState(false);
@@ -176,7 +184,6 @@ const PlugRules = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
@@ -297,6 +304,9 @@ const PlugRules = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'control';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -307,10 +317,16 @@ const PlugRules = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?building_id=${requestedBldgId}`;
+                // let params = `?building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPlugRuleData(response.data);
@@ -336,10 +352,16 @@ const PlugRules = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=62966c902f9fa606bbcd6084`;
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                let params = `?building_id=${requestedBldgId}`;
+                // let params = `?building_id=62966c902f9fa606bbcd6084`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPlugRuleData(response.data);
@@ -359,15 +381,14 @@ const PlugRules = () => {
         fetchPlugRuleData();
     }, [pageRefresh]);
 
-    // useEffect(() => {
-    //     console.log('currentData => ', currentData);
-    // });
-
     return (
         <React.Fragment>
             <div className="plug-rules-header-style mt-4 ml-4 mr-3">
                 <div className="plug-left-header">
-                    <div className="plug-blg-name">NYPL</div>
+                    {/* <div className="plug-blg-name">NYPL</div> */}
+                    <div className="plug-blg-name">
+                        {localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName')}
+                    </div>
                     <div className="plug-heading-style">Plug Rules</div>
                 </div>
                 <div className="btn-group custom-button-group" role="group" aria-label="Basic example">

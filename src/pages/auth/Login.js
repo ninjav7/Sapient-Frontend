@@ -143,7 +143,7 @@ class Login extends Component {
                                                         <Button color="primary" className="btn-block">Log In</Button>
                                                     </FormGroup>
 
-                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <strong>Password:</strong> Test@123</p>
+                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <br /> <strong>Password:</strong> Test@123</p>
                                                 </AvForm>
                                             </Col>
 
@@ -151,9 +151,9 @@ class Login extends Component {
                                                 <div className="auth-page-sidebar">
                                                     <div className="overlay"></div>
                                                     <div className="auth-user-testimonial">
-                                                        <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p>
-                                                        <p className="lead">"It's a elegent templete. I love it very much!"</p>
-                                                        <p>- Admin User</p>
+                                                        {/* <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p> */}
+                                                        {/* <p className="lead">"It's a elegent templete. I love it very much!"</p> */}
+                                                        {/* <p>- Admin User</p> */}
                                                     </div>
                                                 </div>
                                             </Col>

@@ -539,6 +539,10 @@
     border: 1px solid #d9dde2;
     box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
     border-radius: 6px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .plug-search-tabs-style {
@@ -953,4 +957,9 @@
     align-items: center;
     align-content: stretch;
     gap: 5px;
+}
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
 }

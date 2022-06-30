@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
 import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
@@ -295,6 +296,9 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

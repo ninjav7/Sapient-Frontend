@@ -12,13 +12,14 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
+import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
     // Chart states
@@ -136,6 +137,9 @@ const IndividualActiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();
@@ -330,7 +334,7 @@ const IndividualActiveDevice = () => {
                             {sensors.map((record, index) => {
                                 return (
                                     <>
-                                        {record.equipment_id === '' ? (
+                                        {/* {record.equipment_id === '' ? (
                                             <div className="sensor-container-style-notAttached mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
@@ -344,28 +348,28 @@ const IndividualActiveDevice = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <div className="sensor-container-style mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">{record.equipment}</span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <FontAwesomeIcon
-                                                        icon={faChartMixed}
-                                                        size="md"
-                                                        onClick={() => {
-                                                            handleChartShow(record.id);
-                                                        }}
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-default passive-edit-style">
-                                                        Edit
-                                                    </button>
-                                                </div>
+                                        ) : ( */}
+                                        <div className="sensor-container-style mt-3">
+                                            <div className="sensor-data-style">
+                                                <span className="sensor-data-no">{index + 1}</span>
+                                                <span className="sensor-data-title">
+                                                    {record.equipment_id === '' ? 'No Equipment' : record.equipment}
+                                                </span>
                                             </div>
-                                        )}
+                                            <div className="sensor-data-style-right">
+                                                <FontAwesomeIcon
+                                                    icon={faChartMixed}
+                                                    size="md"
+                                                    onClick={() => {
+                                                        handleChartShow(record.id);
+                                                    }}
+                                                />
+                                                <button type="button" className="btn btn-default passive-edit-style">
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* )} */}
                                     </>
                                 );
                             })}
