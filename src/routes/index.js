@@ -787,5 +787,6 @@ const authProtectedRoutes = [
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
+
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

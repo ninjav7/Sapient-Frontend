@@ -20,7 +20,6 @@ import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const RoleTable = ({ roleData }) => {
@@ -35,9 +34,6 @@ const RoleTable = ({ roleData }) => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();

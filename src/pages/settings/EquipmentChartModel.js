@@ -16,8 +16,6 @@ import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
-import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, builidingAlerts, equipmentGraphData } from '../../services/Network';
@@ -454,12 +452,7 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                                             {record.type === 'energy-trend' && (
                                                 <div className="alert-card mb-2">
                                                     <div>
-                                                        <FontAwesomeIcon
-                                                            icon={faArrowTrendUp}
-                                                            size="md"
-                                                            color="#ff5c75"
-                                                            className="mr-1"
-                                                        />
+                                                        <i className="uil uil-arrow-growth" />
                                                         <span className="alert-heading">
                                                             <b> Energy Trend</b>
                                                         </span>

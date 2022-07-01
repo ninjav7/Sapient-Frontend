@@ -86,7 +86,7 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
+    
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
@@ -303,9 +303,6 @@ const PlugRules = () => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'control';
             });
         };
         updateBreadcrumbStore();
