@@ -3,7 +3,7 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import FormControl from 'react-bootstrap/FormControl';
 import { BaseUrl, getBuilding } from '../services/Network';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { Breadcrumb, BreadcrumbItem } from 'reactstrap';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,6 +21,12 @@ import './style.css';
 const PageTracker = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const location = useLocation();
+
+    // const [currentURLPath, setCurrentURLPath] = useState(location.pathname);
+    // const [currentPath, setCurrentPath] = useState('');
+
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
@@ -49,17 +55,10 @@ const PageTracker = () => {
     };
 
     useEffect(() => {
-        // if (startDate === null) {
-        //     return;
-        // }
-        // if (endDate === null) {
-        //     return;
-        // }
         const getBuildingList = async () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
@@ -83,12 +82,15 @@ const PageTracker = () => {
         });
     }, [portfolioName]);
 
-    useEffect(() => {
-        // BuildingStore.update((s) => {
-        //     s.BldgId = 1;
-        //     s.BldgName = 'Portfolio';
-        // });
-    }, [buildingData]);
+    // useEffect(() => {
+    //     console.log('SSR location.pathname => ', location.pathname);
+    //     let url = location.pathname;
+    //     let splitUrl = url.split('/');
+    //     splitUrl.pop();
+    //     let joinedUrl = splitUrl.join('/');
+    //     console.log('SSR joinedUrl => ', joinedUrl);
+    //     setCurrentPath(joinedUrl);
+    // }, [location.pathname]);
 
     return (
         <React.Fragment>
@@ -103,7 +105,8 @@ const PageTracker = () => {
                             )}
                             <DropdownButton
                                 id="bts-button-styling"
-                                title={bldStoreName}
+                                // title={bldStoreName}
+                                title={location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName}
                                 className="bts-btn-style"
                                 variant="secondary">
                                 <div className="content-font-style">
@@ -141,17 +144,17 @@ const PageTracker = () => {
                                         {buildingList.map((record, index) => (
                                             <Dropdown.Item
                                                 onClick={() => {
-                                                    // setActiveBuildingName(building.building_name);
                                                     BuildingStore.update((s) => {
                                                         s.BldgId = record.building_id;
                                                         s.BldgName = record.building_name;
                                                     });
-                                                    // setBuildingData(record);
+                                                    localStorage.setItem('buildingId', record.building_id);
+                                                    localStorage.setItem('buildingName', record.building_name);
                                                 }}>
                                                 {/* <Link
-                                            to={{
-                                                pathname: `/energy/building/overview/${record.building_id}`,
-                                            }}> */}
+                                                    to={{
+                                                        pathname: `${currentPath}/${record.building_id}`,
+                                                    }}> */}
                                                 <span className="portfolio-txt-style">{record.building_name}</span>
                                                 {/* </Link> */}
                                             </Dropdown.Item>
@@ -185,23 +188,25 @@ const PageTracker = () => {
                     </div>
                 )}
 
-            {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
-                <div className="route-tracker">
-                    <Breadcrumb className="custom-breadcrumb-style">
-                        {items.map((item, index) => {
-                            return item.active ? (
-                                <BreadcrumbItem active key={index}>
-                                    {item.label}
-                                </BreadcrumbItem>
-                            ) : (
-                                <BreadcrumbItem key={index}>
-                                    <Link to={item.path}>{item.label}</Link>
-                                </BreadcrumbItem>
-                            );
-                        })}
-                    </Breadcrumb>
-                </div>
-            ):""}
+                {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
+                    <div className="route-tracker">
+                        <Breadcrumb className="custom-breadcrumb-style">
+                            {items.map((item, index) => {
+                                return item.active ? (
+                                    <BreadcrumbItem active key={index}>
+                                        {item.label}
+                                    </BreadcrumbItem>
+                                ) : (
+                                    <BreadcrumbItem key={index}>
+                                        <Link to={item.path}>{item.label}</Link>
+                                    </BreadcrumbItem>
+                                );
+                            })}
+                        </Breadcrumb>
+                    </div>
+                ) : (
+                    ''
+                )}
             </div>
         </React.Fragment>
     );

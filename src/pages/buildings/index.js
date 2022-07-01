@@ -1002,7 +1002,7 @@ const BuildingOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Building Consumption Chart');
+                console.log('Failed to fetch Building Consumption Chart');
             }
         };
 

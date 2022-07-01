@@ -97,6 +97,8 @@ const PlugRules = () => {
     const handleEditRuleClose = () => setShowEditRule(false);
     const handleEditRuleShow = () => setShowEditRule(true);
 
+    const activeBuildingId = localStorage.getItem('buildingId');
+
     const [buildingId, setBuildingId] = useState(1);
     const [ruleData, setRuleData] = useState([
         {
@@ -140,10 +142,7 @@ const PlugRules = () => {
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
     const [createRuleData, setCreateRuleData] = useState({
-        building_id:
-            localStorage.getItem('buildingId') === 'null'
-                ? '62966c902f9fa606bbcd6084'
-                : localStorage.getItem('buildingId'),
+        building_id: '',
         action: [],
     });
 
@@ -186,10 +185,14 @@ const PlugRules = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+
+            let newRuleData = Object.assign({}, createRuleData);
+            newRuleData.building_id = localStorage.getItem('buildingId');
+
             setIsProcessing(true);
 
             await axios
-                .post(`${BaseUrl}${createPlugRule}`, createRuleData, {
+                .post(`${BaseUrl}${createPlugRule}`, newRuleData, {
                     headers: header,
                 })
                 .then((res) => {
@@ -200,7 +203,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Plug Rule');
+            console.log('Failed to create Plug Rule');
         }
     };
 
@@ -209,7 +212,6 @@ const PlugRules = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
 
@@ -228,7 +230,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Plug Rule');
+            console.log('Failed to update requested Plug Rule');
         }
     };
 
@@ -240,7 +242,6 @@ const PlugRules = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
 
@@ -258,7 +259,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Socket Linking!');
+            console.log('Failed to update requested Socket Linking!');
         }
     };
 
@@ -270,7 +271,6 @@ const PlugRules = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
 
@@ -288,7 +288,7 @@ const PlugRules = () => {
             setPageRefresh(!pageRefresh);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to update requested Socket Unlinking!');
+            console.log('Failed to update requested Socket Unlinking!');
         }
     };
 
@@ -316,49 +316,7 @@ const PlugRules = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                let params = `?building_id=${requestedBldgId}`;
-                // let params = `?building_id=62966c902f9fa606bbcd6084`;
-                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPlugRuleData(response.data);
-                    let onlineData = [];
-                    let offlineData = [];
-                    response.data.forEach((record) => {
-                        record.is_active ? onlineData.push(record) : offlineData.push(record);
-                    });
-                    setOnlinePlugRuleData(onlineData);
-                    setOfflinePlugRuleData(offlineData);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch list of Plug Rules data');
-            }
-        };
-        fetchPlugRuleData();
-    }, []);
-
-    useEffect(() => {
-        const fetchPlugRuleData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                let params = `?building_id=${requestedBldgId}`;
-                // let params = `?building_id=62966c902f9fa606bbcd6084`;
+                let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPlugRuleData(response.data);
@@ -377,6 +335,34 @@ const PlugRules = () => {
         };
         fetchPlugRuleData();
     }, [pageRefresh]);
+
+    useEffect(() => {
+        const fetchPlugRuleData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${activeBuildingId}`;
+                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPlugRuleData(response.data);
+                    let onlineData = [];
+                    let offlineData = [];
+                    response.data.forEach((record) => {
+                        record.is_active ? onlineData.push(record) : offlineData.push(record);
+                    });
+                    setOnlinePlugRuleData(onlineData);
+                    setOfflinePlugRuleData(offlineData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Plug Rules data');
+            }
+        };
+        fetchPlugRuleData();
+    }, [activeBuildingId]);
 
     return (
         <React.Fragment>
