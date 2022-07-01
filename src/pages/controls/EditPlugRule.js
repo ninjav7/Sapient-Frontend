@@ -47,6 +47,8 @@ const EditPlugRule = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const activeBuildingId = localStorage.getItem('buildingId');
+
     const { v4: uuidv4 } = require('uuid');
     const getConditionId = () => uuidv4();
 
@@ -345,17 +347,9 @@ const EditPlugRule = ({
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                let params = `?rule_id=${activeRuleId}&building_id=${requestedBldgId}`;
-                // let params = `?rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
+                let params = `?rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let linkedData = [];
@@ -376,17 +370,9 @@ const EditPlugRule = ({
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=${requestedBldgId}`;
-                //let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=62966c902f9fa606bbcd6084`;
+                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     let unLinkedData = [];
@@ -597,7 +583,7 @@ const EditPlugRule = ({
                                                                             value={record.action_time}
                                                                             showTimeSelect
                                                                             showTimeSelectOnly
-                                                                            timeIntervals={1}
+                                                                            timeIntervals={15}
                                                                             timeCaption="Time"
                                                                             dateFormat="h:mm aa"
                                                                             className="time-picker-style"

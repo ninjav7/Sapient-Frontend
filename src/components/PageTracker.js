@@ -55,12 +55,6 @@ const PageTracker = () => {
     };
 
     useEffect(() => {
-        // if (startDate === null) {
-        //     return;
-        // }
-        // if (endDate === null) {
-        //     return;
-        // }
         const getBuildingList = async () => {
             let headers = {
                 'Content-Type': 'application/json',
@@ -150,18 +144,18 @@ const PageTracker = () => {
                                         {buildingList.map((record, index) => (
                                             <Dropdown.Item
                                                 onClick={() => {
-                                                    // setActiveBuildingName(building.building_name);
                                                     BuildingStore.update((s) => {
                                                         s.BldgId = record.building_id;
                                                         s.BldgName = record.building_name;
                                                     });
-                                                    // setBuildingData(record);
+                                                    localStorage.setItem('buildingId', record.building_id);
+                                                    localStorage.setItem('buildingName', record.building_name);
                                                 }}>
                                                 {/* <Link
                                                     to={{
                                                         pathname: `${currentPath}/${record.building_id}`,
                                                     }}> */}
-                                                    <span className="portfolio-txt-style">{record.building_name}</span>
+                                                <span className="portfolio-txt-style">{record.building_name}</span>
                                                 {/* </Link> */}
                                             </Dropdown.Item>
                                         ))}
