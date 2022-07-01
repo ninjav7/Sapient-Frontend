@@ -162,8 +162,3 @@
     border-radius: 20px;
     /* margin-top: 6px; */
 }
-
-.button-danger,
-.button-success {
-    width: fit-content !important;
-}

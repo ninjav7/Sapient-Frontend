@@ -6,7 +6,6 @@ import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/free-solid-svg-icons';
-import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
 import '../pages/portfolio/style.css';
 
 const Header = (props) => {
@@ -136,13 +135,7 @@ const Header = (props) => {
                                         pathname: `/explore/page`,
                                     }}>
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                        <FontAwesomeIcon
-                                            icon={faTelescope}
-                                            size="md"
-                                            color="#FFFFFF"
-                                            className="mr-2"
-                                        />
-                                        Explore
+                                        <i className="uil uil-pen mr-1"></i>Explore
                                     </button>
                                 </Link>
                             </div>
