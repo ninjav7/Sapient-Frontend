@@ -597,7 +597,7 @@ const EditPlugRule = ({
                                                                             value={record.action_time}
                                                                             showTimeSelect
                                                                             showTimeSelectOnly
-                                                                            timeIntervals={15}
+                                                                            timeIntervals={1}
                                                                             timeCaption="Time"
                                                                             dateFormat="h:mm aa"
                                                                             className="time-picker-style"
