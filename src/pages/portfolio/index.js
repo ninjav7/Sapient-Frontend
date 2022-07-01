@@ -27,9 +27,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
-import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -43,7 +40,6 @@ const PortfolioOverview = () => {
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [buildingRecord, setBuildingRecord] = useState([]);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -122,7 +118,7 @@ const PortfolioOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM-hh:mm TT',
+    
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -132,9 +128,14 @@ const PortfolioOverview = () => {
         },
         xaxis: {
             type: 'datetime',
-            labels: {
-                format: 'dd/MMM - hh:mm TT',
-            },
+            // labels: {
+            //     format: 'dd/MMM - hh:mm TT',
+            // },
+      labels: {
+        formatter: function(val, timestamp) {
+          return moment(timestamp).format("DD/MMM - hh:mm");
+        },
+      },
         },
         yaxis: {
             labels: {
@@ -448,10 +449,12 @@ const PortfolioOverview = () => {
                             },
                         ];
                         response.forEach((record) => {
+                            const d = new Date(record.x);
+                            const milliseconds = d.getTime();
                             newArray[0].data.push({
                                 // x: moment(record.x).format('MMM D'),
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(2),
+                                x: milliseconds,
+                                y: (record.y / 1000).toFixed(4),
                             });
                         });
                         console.log('Line Chart New Array => ', newArray);
@@ -459,7 +462,7 @@ const PortfolioOverview = () => {
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Energy Consumption Data');
+                console.log('Failed to fetch Energy Consumption Data');
             }
         };
 
@@ -471,13 +474,16 @@ const PortfolioOverview = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                console.log("Get Building");
+                console.log(startDate);
+                console.log(endDate);
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
                     setBuildingRecord(data);
                 });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Building Data');
+                console.log('Failed to fetch Building Data');
             }
         };
 
@@ -500,6 +506,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
+                        console.log("building data",data)
                         localStorage.setItem('buildingId', data[0].buildingID);
                         localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
@@ -512,11 +519,16 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        setMarkers(markerArray);
+                        const markerArr=[
+                        {markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128]},
+                        {markerOffset: 25, name: 'Justin', coordinates: [90.56,76.76]},
+                        ]
+                        console.log("markers ",markerArray )
+                        setMarkers(markerArr);
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Portfolio Buildings Data');
+                console.log('Failed to fetch Portfolio Buildings Data');
             }
         };
 
@@ -544,7 +556,7 @@ const PortfolioOverview = () => {
         calculateDays();
         // setLoading();
         // setIsProcessing(false);
-    }, [startDate, endDate]);
+    }, [startDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -557,9 +569,6 @@ const PortfolioOverview = () => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'portfolio';
             });
         };
         updateBreadcrumbStore();
@@ -834,37 +843,29 @@ const PortfolioOverview = () => {
                                                         {record.energy_consumption.now <=
                                                             record.energy_consumption.old && (
                                                             <button className="button-success text-success custom-btn-style">
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendDown}
-                                                                    size="md"
-                                                                    color="#43d39e"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                         {record.energy_consumption.now >
                                                             record.energy_consumption.old && (
                                                             <button className="button-danger text-danger custom-btn-style">
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendUp}
-                                                                    size="md"
-                                                                    color="#ff5c75"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                     </div>

@@ -17,14 +17,12 @@ import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
-import { ComponentStore } from '../../store/ComponentStore';
-import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, compareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
+import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -79,6 +77,46 @@ const BuildingTable = ({ buildingsData }) => {
 
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
+    const columns = [{
+        dataField: 'building_name',
+        text: 'Name',
+        sort: true,
+        style: { color: 'blue' }
+      }, {
+        dataField: 'energy_density',
+        text: 'Energy Density',
+        sort: true
+      }, {
+        dataField: 'energy_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'hvac_consumption',
+        text: 'HVAC Consumption',
+        sort:true
+      },{
+        dataField: 'hvac_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'total_consumption',
+        text: 'Total Consumption',
+        sort:true
+      },{
+        dataField: 'total_per',
+        text: '% Change',
+        sort:true
+      },{
+        dataField: 'sq_ft',
+        text: 'Sq. Ft.',
+        sort:true
+      },{
+        dataField: 'buildingAccess',
+        text: 'Monitored Load',
+        sort:true
+      },
+
+    ];
 
     useEffect(() => {
         if (!buildingsData.length > 0) {
@@ -93,6 +131,7 @@ const BuildingTable = ({ buildingsData }) => {
     return (
         <Card>
             <CardBody>
+            {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>
@@ -116,22 +155,12 @@ const BuildingTable = ({ buildingsData }) => {
                                             to={{
                                                 pathname: `/energy/building/overview/${record.building_id}`,
                                             }}>
-                                            <a
-                                                className="building-name"
-                                                onClick={() => {
-                                                    ComponentStore.update((s) => {
-                                                        s.parent = 'buildings';
-                                                    });
-                                                    localStorage.setItem('buildingId', record.building_id);
-                                                    localStorage.setItem('buildingName', record.building_name);
-                                                }}>
-                                                {record.building_name}
-                                            </a>
+                                            <a className="building-name">{record.building_name}</a>
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {index === 0 && record.energy_density === 0 && (
@@ -216,37 +245,29 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendUp}
-                                                    size="md"
-                                                    color="#ff5c75"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.energy_consumption.now,
-                                                        record.energy_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendDown}
-                                                    size="md"
-                                                    color="#43d39e"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.energy_consumption.now,
-                                                        record.energy_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.energy_consumption.now,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         )}
                                     </td>
@@ -352,37 +373,29 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendUp}
-                                                    size="md"
-                                                    color="#ff5c75"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.hvac_consumption.now,
-                                                        record.hvac_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.hvac_consumption.now,
+                                                            record.hvac_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendDown}
-                                                    size="md"
-                                                    color="#43d39e"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.hvac_consumption.now,
-                                                        record.hvac_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.hvac_consumption.now,
+                                                            record.hvac_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         )}
                                     </td>
@@ -397,37 +410,29 @@ const BuildingTable = ({ buildingsData }) => {
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendUp}
-                                                    size="md"
-                                                    color="#ff5c75"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.total_consumption,
-                                                        record.energy_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-arrow-growth">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.total_consumption,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         ) : (
                                             <button
                                                 className="button-success text-success btn-font-style"
                                                 style={{ width: 'auto' }}>
-                                                <FontAwesomeIcon
-                                                    icon={faArrowTrendDown}
-                                                    size="md"
-                                                    color="#43d39e"
-                                                    className="mr-1"
-                                                />
-                                                <strong>
-                                                    {percentageHandler(
-                                                        record.total_consumption,
-                                                        record.energy_consumption.old
-                                                    )}
-                                                    %
-                                                </strong>
+                                                <i className="uil uil-chart-down">
+                                                    <strong>
+                                                        {percentageHandler(
+                                                            record.total_consumption,
+                                                            record.energy_consumption.old
+                                                        )}
+                                                        %
+                                                    </strong>
+                                                </i>
                                             </button>
                                         )}
                                     </td>
@@ -462,9 +467,6 @@ const CompareBuildings = () => {
                 ];
                 bs.items = newList;
             });
-            ComponentStore.update((s) => {
-                s.parent = 'portfolio';
-            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -481,15 +483,15 @@ const CompareBuildings = () => {
 
                 let count = parseInt(localStorage.getItem('dateFilter'));
                 let params = `?days=${count}`;
-                // count === 0 ? (params = `?days=1`) : (params = `?days=${count}`);
-                // console.log('Sudhanshu => ', typeof count); // number
                 await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
-                    setBuildingsData(res.data);
-                    console.log('setBuildingsData => ', res.data);
+                    let response = res.data;
+                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                    setBuildingsData(response);
+                    // console.log('setBuildingsData => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Buildings Data');
+                console.log('Failed to fetch Buildings Data');
             }
         };
         compareBuildingsData();

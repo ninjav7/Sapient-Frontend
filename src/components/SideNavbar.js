@@ -22,15 +22,6 @@ const SideNavbar = () => {
         setActiveRoute(activeSideRoutes);
     }, [parentRoute]);
 
-    // useEffect(() => {
-    //     let newBldStoreId = bldStoreId;
-    //     setBldgId(newBldStoreId);
-    // }, [BuildingStore]);
-
-    useEffect(() => {
-        console.log('localStorage.getItem => ', localStorage.getItem('buildingId'));
-    });
-
     return (
         <>
             <div className="mt-3">

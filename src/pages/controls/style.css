@@ -958,8 +958,3 @@
     align-content: stretch;
     gap: 5px;
 }
-
-.button-danger,
-.button-success {
-    width: fit-content !important;
-}

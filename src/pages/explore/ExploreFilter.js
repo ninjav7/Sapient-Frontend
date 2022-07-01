@@ -17,7 +17,6 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
-import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -285,19 +284,19 @@ const Explore = () => {
         },
         {
             label: 'Last 7 Days',
-            value: 6,
+            value: 7,
         },
         {
             label: 'Last 4 Weeks',
-            value: 27,
+            value: 28,
         },
         {
             label: 'Last 3 Months',
-            value: 89,
+            value: 90,
         },
         {
             label: 'Last 12 Months',
-            value: 364,
+            value: 365,
         },
     ];
 
@@ -413,9 +412,6 @@ const Explore = () => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'explore';
             });
         };
         updateBreadcrumbStore();

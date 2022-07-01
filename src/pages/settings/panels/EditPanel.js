@@ -368,7 +368,7 @@ const EditPanel = () => {
             // setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to save Panel');
+            console.log('Failed to save Panel');
         }
     };
 
@@ -556,7 +556,7 @@ const EditPanel = () => {
                 setIsProcessing(false);
             } catch (error) {
                 setIsProcessing(false);
-                alert('Failed to save Breakers');
+                console.log('Failed to save Breakers');
             }
         };
         saveBreakersData(generatedPanelId);

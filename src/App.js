@@ -3,6 +3,7 @@ import Routes from './routes/Routes';
 
 // setup fake backend
 import { configureFakeBackend } from './helpers';
+import SetupInterceptors from './middleware/SetupInterceptors';
 
 // Themes
 
@@ -24,7 +25,7 @@ configureFakeBackend();
  */
 class App extends Component {
   render() {
-    return <Routes></Routes>;
+    return <Routes><SetupInterceptors/></Routes>;
   }
 }
 

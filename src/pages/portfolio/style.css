@@ -466,12 +466,6 @@
     grid-template-columns: 0.7fr 1.5fr 2fr 2fr;
 }
 
-.button-danger,
-.button-success {
-    width: fit-content !important;
-}
-
-
 * {
     font-family: 'Inter', sans-serif !important;
 }
