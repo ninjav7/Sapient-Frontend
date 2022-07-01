@@ -15,10 +15,6 @@ import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
 import { Cookies } from 'react-cookie';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowTrendUp } from '@fortawesome/pro-regular-svg-icons';
-import { faArrowTrendDown } from '@fortawesome/pro-regular-svg-icons';
-import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -237,12 +233,7 @@ const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAler
                                                         {record.type === 'energy-trend' && (
                                                             <div className="alert-card mb-2">
                                                                 <div>
-                                                                    <FontAwesomeIcon
-                                                                        icon={faArrowTrendUp}
-                                                                        size="md"
-                                                                        color="#ff5c75"
-                                                                        className="mr-1"
-                                                                    />
+                                                                    <i className="uil uil-arrow-growth" />
                                                                 </div>
                                                                 <div>
                                                                     <span className="alert-heading">
@@ -296,7 +287,7 @@ const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAler
 const SelectPeakTable = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
+    
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -617,9 +608,6 @@ const ExploreBuildingPeak = (props) => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

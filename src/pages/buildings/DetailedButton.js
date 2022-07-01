@@ -2,8 +2,6 @@ import React from 'react';
 import { UncontrolledTooltip } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
-import { faArrowTrendDown } from '@fortawesome/pro-solid-svg-icons';
 
 const DetailedButton = (props) => {
     return (
@@ -25,14 +23,16 @@ const DetailedButton = (props) => {
                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
                     {!props.consumptionNormal && (
                         <button className="button-success text-success btn-font-style" style={{ width: '100%' }}>
-                            <FontAwesomeIcon icon={faArrowTrendDown} size="md" color="#43d39e" className="mr-1" />
-                            <strong>{props.value} %</strong>
+                            <i className="uil uil-chart-down">
+                                <strong>{props.value} %</strong>
+                            </i>
                         </button>
                     )}
                     {props.consumptionNormal && (
                         <button className="button-danger text-danger btn-font-style" style={{ width: '100%' }}>
-                            <FontAwesomeIcon icon={faArrowTrendUp} size="md" color="#ff5c75" className="mr-1" />
-                            <strong>{props.value} %</strong>
+                            <i className="uil uil-arrow-growth">
+                                <strong>{props.value} %</strong>
+                            </i>
                         </button>
                     )}
                 </span>

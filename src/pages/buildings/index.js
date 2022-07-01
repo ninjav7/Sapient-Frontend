@@ -15,9 +15,6 @@ import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import { faArrowTrendDown } from '@fortawesome/pro-solid-svg-icons';
-import { faTelescope } from '@fortawesome/pro-regular-svg-icons';
-import { ComponentStore } from '../../store/ComponentStore';
 import {
     BaseUrl,
     builidingAlerts,
@@ -422,7 +419,7 @@ const BuildingOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM - hh:mm TT',
+                // format: 'dd/MMM - hh:mm TT',
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -433,8 +430,10 @@ const BuildingOverview = () => {
         xaxis: {
             type: 'datetime',
             labels: {
-                format: 'dd/MMM - hh:mm TT',
-            },
+                formatter: function(val, timestamp) {
+                  return moment(timestamp).format("DD/MMM - hh:mm");
+                },
+              },
             style: {
                 fontSize: '12px',
                 fontWeight: 600,
@@ -848,10 +847,17 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("result top ",res)
                         let data = res.data[0].top_contributors;
                         // console.log('HeatMap Data => ', data);
+                        // const dataset=[
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1216, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 1561676, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 34561656, old: 0}},
+                        //     {equipment_id: '629674e71209c9a7b261620c', equipment_name: 'AHU_NYPL', energy_consumption: {now: 566167654, old: 0}},
+                        // ]
                         let sortedData = data.sort((a, b) => {
-                            return b.energy_consumption.now - a.energy_consumption.now;
+                            return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
                         });
                         setTopEnergyConsumption(sortedData);
                     });
@@ -1031,9 +1037,6 @@ const BuildingOverview = () => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();
@@ -1242,37 +1245,29 @@ const BuildingOverview = () => {
                                                         {record.energy_consumption.now <=
                                                             record.energy_consumption.old && (
                                                             <button className="button-success text-success custom-bld-style">
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendDown}
-                                                                    size="md"
-                                                                    color="#43d39e"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                         {record.energy_consumption.now >
                                                             record.energy_consumption.old && (
                                                             <button className="button-danger text-danger custom-bld-style">
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendUp}
-                                                                    size="md"
-                                                                    color="#ff5c75"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record.energy_consumption.now,
+                                                                            record.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                     </div>
@@ -1346,13 +1341,7 @@ const BuildingOverview = () => {
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-sm btn-light font-weight-bold custom-hover-btn-style">
-                                                                <FontAwesomeIcon
-                                                                    icon={faTelescope}
-                                                                    size="md"
-                                                                    color="#FFFFFF"
-                                                                    className="mr-2"
-                                                                />
-                                                                Explore
+                                                                <i className="uil uil-pen mr-1"></i>Explore
                                                             </button>
                                                         </Link>
                                                     </div>
@@ -1597,38 +1586,30 @@ const BuildingOverview = () => {
                                                             <button
                                                                 className="button-success text-success equip-table-button"
                                                                 style={{ width: 'auto' }}>
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendDown}
-                                                                    size="md"
-                                                                    color="#43d39e"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                         {item.energy_consumption.now > item.energy_consumption.old && (
                                                             <button
                                                                 className="button-danger text-danger equip-table-button"
                                                                 style={{ width: 'auto' }}>
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendUp}
-                                                                    size="md"
-                                                                    color="#ff5c75"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                         {item.energy_consumption.now ===
@@ -1636,19 +1617,15 @@ const BuildingOverview = () => {
                                                             <button
                                                                 className="button text-muted equip-table-button"
                                                                 style={{ width: 'auto', border: 'none' }}>
-                                                                <FontAwesomeIcon
-                                                                    icon={faArrowTrendUp}
-                                                                    size="md"
-                                                                    color="#ff5c75"
-                                                                    className="mr-1"
-                                                                />
-                                                                <strong>
-                                                                    {percentageHandler(
-                                                                        item.energy_consumption.now,
-                                                                        item.energy_consumption.old
-                                                                    )}{' '}
-                                                                    %
-                                                                </strong>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            item.energy_consumption.now,
+                                                                            item.energy_consumption.old
+                                                                        )}{' '}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
                                                             </button>
                                                         )}
                                                     </div>

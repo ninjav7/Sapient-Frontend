@@ -20,7 +20,6 @@ import Form from 'react-bootstrap/Form';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
-import { ComponentStore } from '../../store/ComponentStore';
 import 'react-time-picker/dist/TimePicker.css';
 import './style.css';
 import {
@@ -68,9 +67,6 @@ const SingleRole = () => {
                     },
                 ];
                 bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();
