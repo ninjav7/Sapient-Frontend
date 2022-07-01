@@ -112,7 +112,7 @@ const Buildings = () => {
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Building');
+            console.log('Failed to create Building');
         }
     };
 
