@@ -68,6 +68,7 @@ class Routes extends Component {
             <BrowserRouter>
                 <Layout {...this.props}>
                     <Switch>
+                        
                         {routes.map((route, index) => {
                             return !route.children ? (
                                 <route.route

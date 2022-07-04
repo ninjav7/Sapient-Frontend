@@ -13,6 +13,7 @@ import {
     DropdownItem,
     Progress,
 } from 'reactstrap';
+import { MultiSelect } from 'react-multi-select-component';
 import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
@@ -26,7 +27,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
-const BuildingTable = ({ buildingsData }) => {
+const BuildingTable = ({ buildingsData, selectedOptions}) => {
     const records = [
         {
             name: '123 Main St. Portland OR',
@@ -135,21 +136,24 @@ const BuildingTable = ({ buildingsData }) => {
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>
-                            <th className="table-heading-style">Name</th>
-                            <th className="table-heading-style">Energy Density</th>
-                            <th className="table-heading-style">% Change</th>
-                            <th className="table-heading-style">HVAC Consumption</th>
-                            <th className="table-heading-style">% Change</th>
-                            <th className="table-heading-style">Total Consumption</th>
-                            <th className="table-heading-style">% Change</th>
-                            <th className="table-heading-style">Sq. Ft.</th>
-                            <th className="table-heading-style">Monitored Load</th>
+                        {selectedOptions.some((record) => record.value === 'name') && <th className="table-heading-style">Name</th>}
+                        {selectedOptions.some((record) => record.value === 'density') && (<th className="table-heading-style">Energy Density</th>
+                        )}
+                        {selectedOptions.some((record) => record.value === 'per_change') && <th className="table-heading-style">% Change</th>}
+                        {selectedOptions.some((record) => record.value === 'hvac') &&<th className="table-heading-style">HVAC Consumption</th>}
+                        {selectedOptions.some((record) => record.value === 'hvac_per') && <th className="table-heading-style">% Change</th>}
+                        {selectedOptions.some((record) => record.value === 'total') && (<th className="table-heading-style">Total Consumption</th>
+                        )}
+                        {selectedOptions.some((record) => record.value === 'total_per') && (<th className="table-heading-style">% Change</th>)}
+                        {selectedOptions.some((record) => record.value === 'sq_ft') && (<th className="table-heading-style">Sq. Ft.</th>)}
+                        {selectedOptions.some((record) => record.value === 'load') && (<th className="table-heading-style">Monitored Load</th>)}
                         </tr>
                     </thead>
                     <tbody>
                         {buildingsData.map((record, index) => {
                             return (
                                 <tr key={record.building_id}>
+                                     {selectedOptions.some((record) => record.value === 'name') && (
                                     <th scope="row">
                                         <Link
                                             to={{
@@ -159,6 +163,8 @@ const BuildingTable = ({ buildingsData }) => {
                                         </Link>
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
+                                      )}
+                                     {selectedOptions.some((record) => record.value === 'density') && (
                                     <td className="table-content-style">
                                         {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
@@ -240,6 +246,8 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                         </div>
                                     </td>
+                                     )}
+                                    {selectedOptions.some((record) => record.value === 'per_change') && (
                                     <td>
                                         {record.energy_consumption.now >= record.energy_consumption.old ? (
                                             <button
@@ -271,6 +279,8 @@ const BuildingTable = ({ buildingsData }) => {
                                             </button>
                                         )}
                                     </td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'hvac') && (
                                     <td className="table-content-style">
                                         {parseFloat(record.hvac_consumption.now).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
@@ -368,6 +378,8 @@ const BuildingTable = ({ buildingsData }) => {
                                             )}
                                         </div>
                                     </td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'hvac_per') && (
                                     <td>
                                         {record.hvac_consumption.now >= record.hvac_consumption.old ? (
                                             <button
@@ -399,12 +411,16 @@ const BuildingTable = ({ buildingsData }) => {
                                             </button>
                                         )}
                                     </td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'total') && (
                                     <td className="value-style">
                                         {(record.total_consumption / 1000).toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                         kWh
                                     </td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'total_per') && (
                                     <td>
                                         {record.total_consumption >= record.energy_consumption.old ? (
                                             <button
@@ -436,9 +452,12 @@ const BuildingTable = ({ buildingsData }) => {
                                             </button>
                                         )}
                                     </td>
+                                    )}
+                                    {selectedOptions.some((record) => record.value === 'sq_ft') && (
                                     <td className="value-style">
                                         {record.sq_ft.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                     </td>
+                                    )}
                                 </tr>
                             );
                         })}
@@ -454,6 +473,19 @@ const CompareBuildings = () => {
     const daysCount = DateRangeStore.useState((s) => s.dateFilter);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const tableColumnOptions = [
+        { label: 'Name', value: 'name' },
+        { label: 'Energy Density', value: 'density' },
+        { label: '% Change', value: 'per_change' },
+        { label: 'HVAC Consumption', value: 'hvac' },
+        { label: 'HVAC % change', value: 'hvac_per' },
+        { label: 'Total Consumption', value: 'total' },
+        { label: 'Total % change', value: 'total_per' },
+        { label: 'Sq. ft.', value: 'sq_ft' },
+        { label: 'Monitored Load', value: 'load' },
+    ];
+
+    const [selectedOptions, setSelectedOptions] = useState([]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -469,6 +501,18 @@ const CompareBuildings = () => {
             });
         };
         updateBreadcrumbStore();
+        let arr = [
+            { label: 'Name', value: 'name' },
+        { label: 'Energy Density', value: 'density' },
+        { label: '% Change', value: 'per_change' },
+        // { label: 'HVAC Consumption', value: 'hvac' },
+        // { label: 'HVAC % change', value: 'hvac_per' },
+        { label: 'Total Consumption', value: 'total' },
+        { label: 'Total % change', value: 'total_per' },
+        { label: 'Sq. ft.', value: 'sq_ft' },
+        { label: 'Monitored Load', value: 'load' },
+        ];
+        setSelectedOptions(arr);
     }, []);
 
     useEffect(() => {
@@ -528,23 +572,24 @@ const CompareBuildings = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Dropdown 1</DropdownItem>
-                            <DropdownItem>Dropdown 2</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
             <Row>
                 <Col xl={12}>
-                    <BuildingTable buildingsData={buildingsData} />
+                    <BuildingTable buildingsData={buildingsData} selectedOptions={selectedOptions}/>
                 </Col>
             </Row>
         </React.Fragment>
