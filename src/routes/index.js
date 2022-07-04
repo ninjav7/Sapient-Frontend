@@ -14,6 +14,7 @@ import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
 import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
@@ -518,6 +519,14 @@ const settingsRoutes = {
             component: ActiveDevices,
             route: PrivateRoute,
             visibility: true,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/active-devices/provision',
+            name: 'Provision Devices',
+            component: Provision,
+            route: PrivateRoute,
+            visibility: false,
             parent: 'building-settings',
         },
         {
