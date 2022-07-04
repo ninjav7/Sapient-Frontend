@@ -26,6 +26,7 @@ import {
     updatePlugRule,
     linkSocket,
     unLinkSocket,
+    getBuilding,
 } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -145,6 +146,7 @@ const PlugRules = () => {
         building_id: '',
         action: [],
     });
+    const [buildingRecord, setBuildingRecord] = useState([]);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -305,6 +307,33 @@ const PlugRules = () => {
                 bs.items = newList;
             });
         };
+        const getBuildingData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                console.log("Get Building");
+                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
+                    let data = res.data;
+                    setBuildingRecord(data);
+                    console.log("Get Building",data);
+                    data.map((record, index) => {
+                        if(record.building_id===activeBuildingId){
+                            localStorage.setItem("timeZone",record.timezone);
+                            console.log("timezone",record.timezone);
+                        }
+                    })
+                });
+                
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Data');
+            }
+        };
+        getBuildingData();
         updateBreadcrumbStore();
     }, []);
 
@@ -319,6 +348,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
+                    console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];
@@ -347,6 +377,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
+                    console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];
@@ -538,17 +569,17 @@ const PlugRules = () => {
                             />
                         </Form.Group>
 
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Socket Count</Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder="Enter Socket Count"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleCreatePlugRuleChange('name', e.target.value);
+                                    handleCreatePlugRuleChange('socketCount', e.target.value);
                                 }}
                             />
-                        </Form.Group> */}
+                        </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

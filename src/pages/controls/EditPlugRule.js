@@ -357,6 +357,7 @@ const EditPlugRule = ({
                         record.linked_rule = true;
                         linkedData.push(record);
                     });
+                    console.log(response.data);
                     setLinkedRuleData(linkedData);
                 });
             } catch (error) {
@@ -404,11 +405,13 @@ const EditPlugRule = ({
     }, [linkedRuleData, unLinkedRuleData]);
 
     useEffect(() => {
+        console.log("currentData",currentData)
         let id = currentData.id ? currentData.id : null;
         setActiveRuleId(id);
     }, [currentData]);
 
     useEffect(() => {
+        console.log("currentData",currentData)
         console.log('allLinkedRuleData => ', allLinkedRuleData);
     });
 
@@ -430,6 +433,7 @@ const EditPlugRule = ({
                                     </div>
                                     <div>
                                         <span className="plugrule-device-name">{currentData.name}</span>
+                                        <span className="plugrule-device-timezone"> TimeZone- {localStorage.getItem('timeZone')}</span>
                                     </div>
                                 </div>
                                 <div className="plug-rule-right-flex">
@@ -909,12 +913,12 @@ const EditPlugRule = ({
                                                         disabled
                                                     />
                                                 </th>
-                                                <th>MAC Address</th>
+                                                {/* <th>MAC Address</th> */}
                                                 <th>Equipment Type</th>
                                                 <th>Location</th>
                                                 <th>Assigned Rule</th>
-                                                <th>Tags</th>
-                                                <th>Last Data</th>
+                                                {/* <th>Tags</th>
+                                                <th>Last Data</th> */}
                                             </tr>
                                         </thead>
 
@@ -937,10 +941,10 @@ const EditPlugRule = ({
                                                             </td>
 
                                                             {/* Just added */}
-                                                            <td className="font-weight-bold">{record.name}</td>
+                                                            {/* <td className="font-weight-bold">{record.name}</td> */}
 
                                                             {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">-</td>
+                                                                <td className="font-weight-bold panel-name">{record.name}</td>
                                                             ) : (
                                                                 <td className="font-weight-bold panel-name">
                                                                     <div className="plug-equip-container">
@@ -959,9 +963,9 @@ const EditPlugRule = ({
                                                                     : record.assigned_rules}
                                                             </td>
 
-                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                            {/* <td className="font-weight-bold">{record.tag}</td>
 
-                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td> */}
                                                         </tr>
                                                     );
                                                 })}
@@ -1000,8 +1004,8 @@ const EditPlugRule = ({
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
-                                                            <td className="font-weight-bold">{record.tag}</td>
-                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                            {/* <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td> */}
                                                         </tr>
                                                     );
                                                 })}
@@ -1040,8 +1044,8 @@ const EditPlugRule = ({
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
-                                                            <td className="font-weight-bold">{record.tag}</td>
-                                                            <td className="font-weight-bold">{record.last_data}</td>
+                                                            {/* <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.last_data}</td> */}
                                                         </tr>
                                                     );
                                                 })}
