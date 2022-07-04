@@ -423,7 +423,7 @@ const IndividualPassiveDevice = () => {
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
                                                     <span className="sensor-data-title">
-                                                        {record.panel_name}, {record.breaker_name}
+                                                        {record.breaker_link}
                                                     </span>
                                                     <span className="sensor-data-device">{record.equipment}</span>
                                                 </div>
