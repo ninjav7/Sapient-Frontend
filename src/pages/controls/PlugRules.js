@@ -569,17 +569,17 @@ const PlugRules = () => {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Socket Count</Form.Label>
-                            <Form.Control
-                                type="number"
-                                placeholder="Enter Socket Count"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleCreatePlugRuleChange('socketCount', e.target.value);
-                                }}
-                            />
-                        </Form.Group>
+                        // <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        //     <Form.Label>Socket Count</Form.Label>
+                        //     <Form.Control
+                        //         type="number"
+                        //         placeholder="Enter Socket Count"
+                        //         className="font-weight-bold"
+                        //         onChange={(e) => {
+                        //             handleCreatePlugRuleChange('socketCount', e.target.value);
+                        //         }}
+                        //     />
+                        // </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
