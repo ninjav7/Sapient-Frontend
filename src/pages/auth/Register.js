@@ -40,7 +40,7 @@ class Register extends Component {
         console.log(values.password);
         console.log(values.user_id);
         console.log(values.vendor);
-        this.props.registerUser(values.fullname, values.email, values.password, values.user_id, values.vendor);
+        this.props.registerUser(values.fullname.trim(), values.email.trim(), values.password.trim(), values.user_id.trim(), values.vendor.trim());
     }
 
     /**
