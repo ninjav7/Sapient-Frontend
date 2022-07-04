@@ -15,6 +15,7 @@ import {
 } from 'reactstrap';
 import { ChevronDown, Search } from 'react-feather';
 import { Line } from 'rc-progress';
+import { ComponentStore } from '../../store/ComponentStore';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings } from '../../services/Network';
@@ -77,45 +78,53 @@ const BuildingTable = ({ buildingsData }) => {
 
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
-    const columns = [{
-        dataField: 'building_name',
-        text: 'Name',
-        sort: true,
-        style: { color: 'blue' }
-      }, {
-        dataField: 'energy_density',
-        text: 'Energy Density',
-        sort: true
-      }, {
-        dataField: 'energy_per',
-        text: '% Change',
-        sort:true
-      },{
-        dataField: 'hvac_consumption',
-        text: 'HVAC Consumption',
-        sort:true
-      },{
-        dataField: 'hvac_per',
-        text: '% Change',
-        sort:true
-      },{
-        dataField: 'total_consumption',
-        text: 'Total Consumption',
-        sort:true
-      },{
-        dataField: 'total_per',
-        text: '% Change',
-        sort:true
-      },{
-        dataField: 'sq_ft',
-        text: 'Sq. Ft.',
-        sort:true
-      },{
-        dataField: 'buildingAccess',
-        text: 'Monitored Load',
-        sort:true
-      },
-
+    const columns = [
+        {
+            dataField: 'building_name',
+            text: 'Name',
+            sort: true,
+            style: { color: 'blue' },
+        },
+        {
+            dataField: 'energy_density',
+            text: 'Energy Density',
+            sort: true,
+        },
+        {
+            dataField: 'energy_per',
+            text: '% Change',
+            sort: true,
+        },
+        {
+            dataField: 'hvac_consumption',
+            text: 'HVAC Consumption',
+            sort: true,
+        },
+        {
+            dataField: 'hvac_per',
+            text: '% Change',
+            sort: true,
+        },
+        {
+            dataField: 'total_consumption',
+            text: 'Total Consumption',
+            sort: true,
+        },
+        {
+            dataField: 'total_per',
+            text: '% Change',
+            sort: true,
+        },
+        {
+            dataField: 'sq_ft',
+            text: 'Sq. Ft.',
+            sort: true,
+        },
+        {
+            dataField: 'buildingAccess',
+            text: 'Monitored Load',
+            sort: true,
+        },
     ];
 
     useEffect(() => {
@@ -131,7 +140,7 @@ const BuildingTable = ({ buildingsData }) => {
     return (
         <Card>
             <CardBody>
-            {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
+                {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>
@@ -160,7 +169,7 @@ const BuildingTable = ({ buildingsData }) => {
                                         <span className="badge badge-soft-secondary mr-2">Office</span>
                                     </th>
                                     <td className="table-content-style">
-                                        {(parseFloat(record.energy_density/1000)).toFixed(2)} kWh / sq. ft.sq. ft.
+                                        {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
                                         <br />
                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                             {index === 0 && record.energy_density === 0 && (
@@ -468,6 +477,9 @@ const CompareBuildings = () => {
                 bs.items = newList;
             });
         };
+        ComponentStore.update((s) => {
+            s.parent = 'portfolio';
+        });
         updateBreadcrumbStore();
     }, []);
 

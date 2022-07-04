@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
+import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import {
     BaseUrl,
@@ -430,10 +431,10 @@ const BuildingOverview = () => {
         xaxis: {
             type: 'datetime',
             labels: {
-                formatter: function(val, timestamp) {
-                  return moment(timestamp).format("DD/MMM - hh:mm");
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - hh:mm');
                 },
-              },
+            },
             style: {
                 fontSize: '12px',
                 fontWeight: 600,
@@ -847,7 +848,7 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log("result top ",res)
+                        console.log('result top ', res);
                         let data = res.data[0].top_contributors;
                         // console.log('HeatMap Data => ', data);
                         // const dataset=[
@@ -1038,13 +1039,12 @@ const BuildingOverview = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
-
-    useEffect(() => {
-        console.log('buildingConsumptionChart => ', buildingConsumptionChart);
-    });
 
     return (
         <React.Fragment>

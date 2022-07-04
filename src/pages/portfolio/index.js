@@ -118,7 +118,6 @@ const PortfolioOverview = () => {
             },
             x: {
                 show: true,
-    
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -131,11 +130,11 @@ const PortfolioOverview = () => {
             // labels: {
             //     format: 'dd/MMM - hh:mm TT',
             // },
-      labels: {
-        formatter: function(val, timestamp) {
-          return moment(timestamp).format("DD/MMM - hh:mm");
-        },
-      },
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - hh:mm');
+                },
+            },
         },
         yaxis: {
             labels: {
@@ -474,7 +473,7 @@ const PortfolioOverview = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                console.log("Get Building");
+                console.log('Get Building');
                 console.log(startDate);
                 console.log(endDate);
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
@@ -506,7 +505,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log("building data",data)
+                        console.log('building data', data);
                         localStorage.setItem('buildingId', data[0].buildingID);
                         localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
@@ -519,11 +518,11 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        const markerArr=[
-                        {markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128]},
-                        {markerOffset: 25, name: 'Justin', coordinates: [90.56,76.76]},
-                        ]
-                        console.log("markers ",markerArray )
+                        const markerArr = [
+                            { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
+                            { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
+                        ];
+                        console.log('markers ', markerArray);
                         setMarkers(markerArr);
                     });
             } catch (error) {
@@ -569,6 +568,9 @@ const PortfolioOverview = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
             });
         };
         updateBreadcrumbStore();

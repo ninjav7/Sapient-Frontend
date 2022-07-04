@@ -11,6 +11,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
@@ -287,7 +288,7 @@ const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAler
 const SelectPeakTable = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -608,6 +609,9 @@ const ExploreBuildingPeak = (props) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
             });
         };
         updateBreadcrumbStore();

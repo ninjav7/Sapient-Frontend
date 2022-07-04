@@ -10,12 +10,13 @@ import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../se
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageTwo = ({ title = 'Lighting' }) => {
     const { bldgId } = useParams();
-    
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -204,6 +205,9 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();
