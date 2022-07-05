@@ -22,6 +22,7 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
+import BreakersLink from './BreakersLink';
 import '../style.css';
 import './panel-style.css';
 
