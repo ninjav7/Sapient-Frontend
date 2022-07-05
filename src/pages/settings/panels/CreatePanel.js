@@ -22,6 +22,7 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
+import BreakersLink from './BreakersLink';
 import '../style.css';
 import './panel-style.css';
 
@@ -519,7 +520,7 @@ const CreatePanel = () => {
     const addBreakersToList = (newBreakerIndex) => {
         let newBreakerList = normalStruct;
         let obj = {
-            name: '',
+            name: `Breaker ${newBreakerIndex}`,
             breaker_number: parseInt(newBreakerIndex),
             phase_configuration: 0,
             rated_amps: 0,
@@ -570,7 +571,7 @@ const CreatePanel = () => {
         }
         if (newBreakerCount === 2) {
             let obj = {
-                name: '',
+                name: 'Breaker 2',
                 breaker_number: 2,
                 phase_configuration: 2,
                 rated_amps: 0,
@@ -587,14 +588,12 @@ const CreatePanel = () => {
             }
             if (previousBreakerCount === 3) {
                 newBreakersArray.splice(-1);
-                console.log('SSR 3-2 condition executed');
-                console.log('SSR newBreakersArray => ', newBreakersArray);
                 setDisconnectBreakerConfig(newBreakersArray);
             }
         }
         if (newBreakerCount === 3) {
             let obj = {
-                name: '',
+                name: 'Breaker 2',
                 breaker_number: 3,
                 phase_configuration: 2,
                 rated_amps: 0,
@@ -608,6 +607,8 @@ const CreatePanel = () => {
             if (previousBreakerCount === 1) {
                 let obj1 = obj;
                 let obj2 = obj;
+                obj1.name = 'Breaker 2';
+                obj2.name = 'Breaker 3';
                 obj1.breaker_number = 2;
                 obj2.breaker_number = 3;
                 newBreakersArray.push(obj1);
@@ -677,7 +678,7 @@ const CreatePanel = () => {
         let newBreakers = [];
         for (let index = 1; index <= disconnectBreakerCount; index++) {
             let obj = {
-                name: '',
+                name: `Breaker ${index}`,
                 breaker_number: index,
                 phase_configuration: 1,
                 rated_amps: 0,
@@ -698,7 +699,7 @@ const CreatePanel = () => {
         for (let index = 1; index <= normalCount; index++) {
             // let newId = getBreakerId();
             let obj = {
-                name: '',
+                name: `Breaker ${index}`,
                 breaker_number: index,
                 phase_configuration: 0,
                 rated_amps: 0,
@@ -832,7 +833,7 @@ const CreatePanel = () => {
 
     useEffect(() => {
         console.log('Troubleshoot normalStruct => ', normalStruct);
-        console.log('Troubleshoot disconnectBreakerConfig => ', disconnectBreakerConfig);
+        // console.log('Troubleshoot disconnectBreakerConfig => ', disconnectBreakerConfig);
         // console.log('Troubleshoot panel => ', panel);
     });
 
@@ -895,7 +896,11 @@ const CreatePanel = () => {
                                 onChange={(e) => {
                                     handleChange('parent_panel', e.target.value);
                                 }}>
-                                <option>None</option>
+                                {panel.parent_id !== null ? (
+                                    <option value={panel.parent_id}>{panel.parent}</option>
+                                ) : (
+                                    <option>None</option>
+                                )}
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
@@ -1066,6 +1071,10 @@ const CreatePanel = () => {
                                         </div>
                                     </FormGroup>
                                 </Row>
+
+                                {/* <Row>
+                                    <BreakersLink />
+                                </Row> */}
 
                                 <Row>
                                     <Col lg={12}>

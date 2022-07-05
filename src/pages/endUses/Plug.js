@@ -11,6 +11,7 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const UsagePageThree = () => {
@@ -205,6 +206,9 @@ const UsagePageThree = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

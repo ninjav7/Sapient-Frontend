@@ -23,6 +23,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BaseUrl, getBuildings, createBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -67,7 +68,7 @@ const BuildingTable = ({ buildingsData }) => {
 const Buildings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -127,6 +128,9 @@ const Buildings = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();

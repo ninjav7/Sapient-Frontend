@@ -9,6 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import { ComponentStore } from '../../store/ComponentStore';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
 import { BaseUrl, getExplore } from '../../services/Network';
@@ -412,6 +413,9 @@ const Explore = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
             });
         };
         updateBreadcrumbStore();
