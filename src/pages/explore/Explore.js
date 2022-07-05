@@ -18,6 +18,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -351,7 +352,6 @@ const Explore = () => {
             animations: {
                 enabled: false,
             },
-
         },
         colors: ['#546E7A'],
         stroke: {
@@ -413,10 +413,10 @@ const Explore = () => {
     });
 
     const [exploreTableData, setExploreTableData] = useState([]);
-    const [mainParent,setMainParent] = useState([]);
+    const [mainParent, setMainParent] = useState([]);
     const [childFilter, setChildFilter] = useState({});
-    const [secActive,setSecActive] = useState('');
-    const [thirdActive,setThirdActive]=useState('');
+    const [secActive, setSecActive] = useState('');
+    const [thirdActive, setThirdActive] = useState('');
 
     // New Approach
     const [currentFilterLevel, setCurrentFilterLevel] = useState('first');
@@ -639,6 +639,9 @@ const Explore = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -685,7 +688,7 @@ const Explore = () => {
                         });
                         setExploreSecondLvlOpts(childExploreList);
                         console.log('childExploreList => ', childExploreList);
-                         console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -770,8 +773,8 @@ const Explore = () => {
                             },
                         ]);
                     });
-                    const duration = performance.now() - start;
-                    console.log("fetching time ", duration);
+                const duration = performance.now() - start;
+                console.log('fetching time ', duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
@@ -841,10 +844,10 @@ const Explore = () => {
                                     data: exploreData[0].data,
                                 },
                             ]);
-                            if(counter+1===1){
-                            setSecActive(childFilter);
+                            if (counter + 1 === 1) {
+                                setSecActive(childFilter);
                             }
-                            if(counter+1===2){
+                            if (counter + 1 === 2) {
                                 setThirdActive(childFilter);
                             }
                             let newObj = childFilter;
@@ -852,7 +855,7 @@ const Explore = () => {
                             setChildFilter(newObj);
                             setParentFilter(newObj.parent);
                             const duration = performance.now() - start;
-                            console.log("fetching time ", duration);
+                            console.log('fetching time ', duration);
                         });
                 } catch (error) {
                     console.log(error);
@@ -885,7 +888,7 @@ const Explore = () => {
     }, [dateFilter]);
 
     useEffect(() => {
-        console.log('set active => ',secActive.eq_name)
+        console.log('set active => ', secActive.eq_name);
         console.log('parentFilter => ', parentFilter);
         console.log('childFilter => ', childFilter);
         console.log('childFilter Parent => ', mainParent);
@@ -897,19 +900,18 @@ const Explore = () => {
             {/* Explore Header  */}
             <Row className="page-title ml-2 mr-2 explore-page-filter">
                 {mainParent.value === activeExploreOpt.value ? (
-                    <div className="explore-equip-filter" style={{display:"flex"}}>
+                    <div className="explore-equip-filter" style={{ display: 'flex' }}>
                         <div className="explore-filter-style ml-2">By {activeExploreOpt.label}</div>
                         <div>
                             <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
                         </div>
-                        {counter===1?<>
-                        <div className="explore-filter-style ml-2">
-                         {secActive.eq_name}
-                        </div>
-                        <div>
-                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
-                        </div>
-                        {/* <div>
+                        {counter === 1 ? (
+                            <>
+                                <div className="explore-filter-style ml-2">{secActive.eq_name}</div>
+                                <div>
+                                    <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                                </div>
+                                {/* <div>
                             <Select
                                 className="react-select endUses-select-style mr-2"
                                 classNamePrefix="react-select"
@@ -926,28 +928,27 @@ const Explore = () => {
                                 defaultValue={exploreSecondLvlOpts[0]}
                             />
                         </div> */}
-                        <div>Grouped by Equipment Type</div></>:
-                        counter===2 ?
-                        <>
-                         <div className="explore-filter-style ml-2">
-                         {secActive.eq_name}
-                        </div>
-                        <div>
-                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
-                        </div>
-                        <div className="explore-filter-style ml-2">
-                         {thirdActive.eq_name}
-                        </div>
-                        <div>
-                            <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
-                        </div>
-                        </>:""}
-
+                                <div>Grouped by Equipment Type</div>
+                            </>
+                        ) : counter === 2 ? (
+                            <>
+                                <div className="explore-filter-style ml-2">{secActive.eq_name}</div>
+                                <div>
+                                    <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                                </div>
+                                <div className="explore-filter-style ml-2">{thirdActive.eq_name}</div>
+                                <div>
+                                    <FontAwesomeIcon icon={faAngleRight} size="lg" className="ml-2" />
+                                </div>
+                            </>
+                        ) : (
+                            ''
+                        )}
                     </div>
                 ) : (
                     <div>
                         <Select
-                            className="react-select explorer-select-style"
+                            className="react-select explorer-select-style ml-4"
                             onChange={(e) => {
                                 setActiveExploreOpt(e);
                                 setMainParent(e);
@@ -1074,14 +1075,14 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
-                             />
+                            />
                         </Col>
                     </Row>
                 </>
@@ -1097,7 +1098,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
@@ -1120,7 +1121,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}
@@ -1143,7 +1144,7 @@ const Explore = () => {
                     />
                     <Row>
                         <Col lg={12} className="ml-2">
-                            <ExploreTable 
+                            <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
                                 childFilter={childFilter}

@@ -10,6 +10,7 @@ import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData, listSenso
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
@@ -105,7 +106,7 @@ const SelectBreakerModel = ({
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { deviceId } = useParams();
     console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
@@ -251,6 +252,9 @@ const IndividualPassiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();
@@ -419,7 +423,7 @@ const IndividualPassiveDevice = () => {
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
                                                     <span className="sensor-data-title">
-                                                        {record.panel_name}, {record.breaker_name}
+                                                        {record.breaker_link}
                                                     </span>
                                                     <span className="sensor-data-device">{record.equipment}</span>
                                                 </div>

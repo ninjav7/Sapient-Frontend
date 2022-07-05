@@ -10,13 +10,14 @@ import axios from 'axios';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { bldgId } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -292,6 +293,9 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

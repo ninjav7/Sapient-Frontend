@@ -23,6 +23,7 @@ import axios from 'axios';
 import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Cookies } from 'react-cookie';
 import './style.css';
@@ -286,6 +287,9 @@ const IndividualPassiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

@@ -15,6 +15,7 @@ import {
     generalOperatingHours,
 } from '../../services/Network';
 import axios from 'axios';
+import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UserProfile = () => {
@@ -39,6 +40,9 @@ const UserProfile = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();

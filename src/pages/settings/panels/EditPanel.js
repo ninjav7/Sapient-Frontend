@@ -125,6 +125,7 @@ const EditPanel = () => {
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
+    const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
     const getBreakerId = () => uuidv4();
 
@@ -278,10 +279,10 @@ const EditPanel = () => {
         secondBreakerObj.breaker_number = secondBreakerIndex;
         thirdBreakerObj.breaker_number = thirdBreakerIndex;
 
-        secondBreakerObj.sensor_id = firstBreakerObj.sensor_id1;
-        secondBreakerObj.device_id = firstBreakerObj.device_id1;
-        thirdBreakerObj.sensor_id = firstBreakerObj.sensor_id2;
-        thirdBreakerObj.device_id = firstBreakerObj.device_id2;
+        secondBreakerObj.sensor_link = firstBreakerObj.sensor_link1;
+        secondBreakerObj.device_link = firstBreakerObj.device_link1;
+        thirdBreakerObj.sensor_link = firstBreakerObj.sensor_link2;
+        thirdBreakerObj.device_link = firstBreakerObj.device_link2;
 
         firstBreakerObj.link_type = 'linked';
         secondBreakerObj.link_type = 'linked';
@@ -291,19 +292,19 @@ const EditPanel = () => {
         secondBreakerObj.phase_configuration = 3;
         thirdBreakerObj.phase_configuration = 3;
 
-        delete firstBreakerObj.sensor_id1;
-        delete firstBreakerObj.device_id1;
-        delete secondBreakerObj.device_id1;
-        delete secondBreakerObj.device_id1;
-        delete thirdBreakerObj.device_id1;
-        delete thirdBreakerObj.device_id1;
+        delete firstBreakerObj.sensor_link1;
+        delete firstBreakerObj.device_link1;
+        delete secondBreakerObj.device_link1;
+        delete secondBreakerObj.device_link1;
+        delete thirdBreakerObj.device_link1;
+        delete thirdBreakerObj.device_link1;
 
-        delete firstBreakerObj.sensor_id2;
-        delete firstBreakerObj.device_id2;
-        delete secondBreakerObj.device_id2;
-        delete secondBreakerObj.device_id2;
-        delete thirdBreakerObj.device_id2;
-        delete thirdBreakerObj.device_id2;
+        delete firstBreakerObj.sensor_link2;
+        delete firstBreakerObj.device_link2;
+        delete secondBreakerObj.device_link2;
+        delete secondBreakerObj.device_link2;
+        delete thirdBreakerObj.device_link2;
+        delete thirdBreakerObj.device_link2;
 
         let linkId = generateBreakerLinkId();
         firstBreakerObj.link_id = linkId;
@@ -483,7 +484,7 @@ const EditPanel = () => {
     const addBreakersToList = (newBreakerIndex) => {
         let newBreakerList = normalStruct;
         let obj = {
-            name: '',
+            name: `Breaker ${newBreakerIndex}`,
             breaker_number: parseInt(newBreakerIndex),
             phase_configuration: 0,
             rated_amps: 0,
@@ -523,6 +524,66 @@ const EditPanel = () => {
         let currentBreakerList = normalStruct;
         currentBreakerList.splice(-1);
         setNormalStruct(currentBreakerList);
+    };
+
+    const handleDisconnectBreakers = (previousBreakerCount, newBreakerCount) => {
+        let newBreakersArray = disconnectBreakerConfig;
+        if (newBreakerCount === 1) {
+            let arr = [];
+            arr.push(newBreakersArray[0]);
+            setDisconnectBreakerConfig(arr);
+        }
+        if (newBreakerCount === 2) {
+            let obj = {
+                name: 'Breaker 2',
+                breaker_number: 2,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 3) {
+                newBreakersArray.splice(-1);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
+        if (newBreakerCount === 3) {
+            let obj = {
+                name: 'Breaker 2',
+                breaker_number: 3,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                let obj1 = obj;
+                let obj2 = obj;
+                obj1.name = 'Breaker 2';
+                obj2.name = 'Breaker 3';
+                obj1.breaker_number = 2;
+                obj2.breaker_number = 3;
+                newBreakersArray.push(obj1);
+                newBreakersArray.push(obj2);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 2) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
     };
 
     useEffect(() => {
@@ -582,7 +643,7 @@ const EditPanel = () => {
     }, []);
 
     useEffect(() => {
-        const fetchPanelsData = async () => {
+        const fetchSinglePanelData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -598,6 +659,22 @@ const EditPanel = () => {
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch single Panel!');
+            }
+        };
+
+        const fetchPanelsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                    setGeneralPanelData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Panels Data List');
             }
         };
 
@@ -685,17 +762,17 @@ const EditPanel = () => {
             }
         };
 
-        fetchLocationData(); // For showing Building Locations in Dropdown
-        fetchPanelsData(); // Currently fetching all Panels data
+        fetchLocationData();
+        fetchSinglePanelData();
+        fetchPanelsData();
         fetchPanelBreakerData();
-        fetchPassiveDeviceData(); // For Showing Passive Devices to link sensor in Breaker
-        fetchEquipmentData(); // For seleting Equipments
+        fetchPassiveDeviceData();
+        fetchEquipmentData();
     }, [panelId]);
 
-    // useEffect(() => {
-    //     console.log('Troubleshoot normalStruct => ', normalStruct);
-    //     console.log('Troubleshoot panel => ', panel);
-    // });
+    useEffect(() => {
+        console.log('Troubleshoot normalStruct => ', normalStruct);
+    });
 
     return (
         <React.Fragment>
@@ -808,6 +885,7 @@ const EditPanel = () => {
                                                 type="number"
                                                 name="breakers"
                                                 id="breakers"
+                                                value={normalCount}
                                                 onChange={(e) => {
                                                     if (normalCount > parseInt(e.target.value)) {
                                                         removeBreakersFromList();
@@ -817,7 +895,6 @@ const EditPanel = () => {
                                                     }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
-                                                value={panel.breakers}
                                                 className="breaker-no-width font-weight-bold"
                                             />
                                         ) : (
@@ -976,10 +1053,11 @@ const EditPanel = () => {
                                                                                                 index
                                                                                             );
                                                                                             if (
-                                                                                                element.device_id !== ''
+                                                                                                element.device_link !==
+                                                                                                ''
                                                                                             ) {
                                                                                                 fetchDeviceSensorData(
-                                                                                                    element.device_id
+                                                                                                    element.device_link
                                                                                                 );
                                                                                             }
                                                                                             handleEditBreakerShow();
@@ -1019,10 +1097,11 @@ const EditPanel = () => {
                                                                                                 index
                                                                                             );
                                                                                             if (
-                                                                                                element.device_id !== ''
+                                                                                                element.device_link !==
+                                                                                                ''
                                                                                             ) {
                                                                                                 fetchDeviceSensorData(
-                                                                                                    element.device_id
+                                                                                                    element.device_link
                                                                                                 );
                                                                                             }
                                                                                             handleEditBreakerShow();
@@ -1347,9 +1426,9 @@ const EditPanel = () => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id', e.target.value);
+                                                    handleBreakerConfigChange('device_link', e.target.value);
                                                 }}
-                                                value={currentBreakerObj.device_id}>
+                                                value={currentBreakerObj.device_link}>
                                                 <option>Select Device</option>
                                                 {passiveDeviceData.map((record) => {
                                                     return (
@@ -1370,10 +1449,10 @@ const EditPanel = () => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id', e.target.value);
-                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
+                                                    handleBreakerConfigChange('sensor_link', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_link, e.target.value);
                                                 }}
-                                                value={currentBreakerObj.sensor_id}>
+                                                value={currentBreakerObj.sensor_link}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
@@ -1518,9 +1597,9 @@ const EditPanel = () => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id', e.target.value);
+                                                    handleBreakerConfigChange('device_link', e.target.value);
                                                 }}
-                                                value={currentBreakerObj.device_id}>
+                                                value={currentBreakerObj.device_link}>
                                                 <option>Select Device</option>
                                                 {passiveDeviceData.map((record) => {
                                                     return (
@@ -1541,10 +1620,10 @@ const EditPanel = () => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id', e.target.value);
-                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
+                                                    handleBreakerConfigChange('sensor_link', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_link, e.target.value);
                                                 }}
-                                                value={currentBreakerObj.sensor_id}>
+                                                value={currentBreakerObj.sensor_link}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
@@ -1573,9 +1652,9 @@ const EditPanel = () => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id1', e.target.value);
+                                                    handleBreakerConfigChange('device_link1', e.target.value);
                                                 }}
-                                                value={currentBreakerObj.device_id1}>
+                                                value={currentBreakerObj.device_link1}>
                                                 <option>Select Device</option>
                                                 {passiveDeviceData.map((record) => {
                                                     return (
@@ -1596,10 +1675,10 @@ const EditPanel = () => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id1', e.target.value);
-                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
+                                                    handleBreakerConfigChange('sensor_link1', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_link, e.target.value);
                                                 }}
-                                                value={currentBreakerObj.sensor_id1}>
+                                                value={currentBreakerObj.sensor_link1}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
@@ -1628,9 +1707,9 @@ const EditPanel = () => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id2', e.target.value);
+                                                    handleBreakerConfigChange('device_link2', e.target.value);
                                                 }}
-                                                value={currentBreakerObj.device_id2}>
+                                                value={currentBreakerObj.device_link2}>
                                                 <option>Select Device</option>
                                                 {passiveDeviceData.map((record) => {
                                                     return (
@@ -1651,10 +1730,10 @@ const EditPanel = () => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id2', e.target.value);
-                                                    handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
+                                                    handleBreakerConfigChange('sensor_link2', e.target.value);
+                                                    handleLinkedSensor(currentBreakerObj.sensor_link, e.target.value);
                                                 }}
-                                                value={currentBreakerObj.sensor_id2}>
+                                                value={currentBreakerObj.sensor_link2}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
