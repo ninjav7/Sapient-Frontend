@@ -569,7 +569,7 @@ const PlugRules = () => {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Socket Count</Form.Label>
                             <Form.Control
                                 type="number"
@@ -579,7 +579,7 @@ const PlugRules = () => {
                                     handleCreatePlugRuleChange('socketCount', e.target.value);
                                 }}
                             />
-                        </Form.Group>
+                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
