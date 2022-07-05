@@ -79,7 +79,7 @@ const EndUses = () => {
                 formatter: function (value) {
                     var val = Math.abs(value);
                     if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' kWh';
+                        val = (val / 1000).toFixed(0) + ' K';
                     }
                     return val;
                 },
@@ -169,7 +169,6 @@ const EndUses = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -184,7 +183,6 @@ const EndUses = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log('EndUses Response Data => ', responseData);
                         let newArray = [];
                         responseData.map((element) => {
                             let newObj = {
@@ -197,8 +195,19 @@ const EndUses = () => {
                         let newXaxis = {
                             categories: [],
                         };
-                        responseData[0].data.map((element) => {
-                            return newXaxis.categories.push(`Week ${element._id}`);
+                        let weeksArray = [];
+                        responseData.forEach((enduse) => {
+                            enduse.data.forEach((element) => {
+                                weeksArray.push(element._id);
+                            });
+                        });
+                        let uniqueSet = new Set(weeksArray);
+                        let newList = Array.from(uniqueSet);
+                        newList.sort(function (a, b) {
+                            return a - b;
+                        });
+                        newList.map((num) => {
+                            return newXaxis.categories.push(`Week ${num}`);
                         });
                         setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
                     });

@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import './style.css';
 import axios from 'axios';
-import { BaseUrl, generalUtilityBills } from '../../services/Network';
+import { BaseUrl, generalUtilityBills, updateUtilityBill } from '../../services/Network';
 import moment from 'moment';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -15,12 +15,10 @@ const UtilityBills = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const activeBuildingId = localStorage.getItem('buildingId');
+
     const [avgRate, setAvgRate] = useState(0.6);
-    const [inputField, setInputField] = useState({
-        kWh: 0,
-        total_paid: 0,
-    });
+
     // Table data
     const [records, setRecords] = useState([
         {
@@ -63,6 +61,10 @@ const UtilityBills = () => {
     const [utilityData, setUtilityData] = useState([]);
     const [buildingId, setBuildingId] = useState(1);
     const [billId, setBillId] = useState('');
+
+    const [pageRefresh, setPageRefresh] = useState(false);
+    const [activeBillObj, setActiveBillObj] = useState({});
+
     const [render, setRender] = useState(false);
 
     // Modal states
@@ -70,56 +72,27 @@ const UtilityBills = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    // const handleEditItem = (selectedRecord) => {
-    //     // e.preventDefault();
-    //     console.log(selectedRecord);
-    // };
+    const handleUtilityBillChange = (key, value) => {
+        let obj = Object.assign({}, activeBillObj);
+        obj[key] = parseInt(value);
+        setActiveBillObj(obj);
+    };
 
-    // handleEditItem(selectedItem) {
-    //     return e => {
-    //       e.preventDefault()
-    //       let { items } = this.state
-    //       items = items.map(item => ({
-    //         ...item,
-    //         showModal: selectedItem.id === item.id,
-    //       }))
-    //       this.setState({ items })
-    //     }
-    //   }
-
-    // useEffect(() => {
-    //     async function getUtilityBillsData() {
-    //         try {
-    //             let req = {};
-    //             let response = await serviceGet(`/api/config/utility_bills/${buildingId}`, req);
-    //             console.log('Response fetched');
-    //             // setUtilityData(response);
-    //             console.log('Response Set');
-    //             console.log('Response => ', response);
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch utility bills data!');
-    //         }
-    //     }
-    //     getUtilityBillsData();
-    // }, []);
     useEffect(() => {
         const fetchUtilityBillsData = async () => {
             try {
-                if (bldgId) {
+                if (activeBuildingId) {
                     let headers = {
                         'Content-Type': 'application/json',
                         accept: 'application/json',
-                        // 'user-auth': '628f3144b712934f578be895',
                         Authorization: `Bearer ${userdata.token}`,
                     };
-                    await axios.get(`${BaseUrl}${generalUtilityBills}/${bldgId}`, { headers }).then((res) => {
+                    await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
                         console.log(res);
                         let responseData = res.data;
                         responseData.sort(
                             (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
                         );
-                        console.log('responseData => ', responseData);
                         setUtilityData(responseData);
                     });
                 }
@@ -129,7 +102,7 @@ const UtilityBills = () => {
             }
         };
         fetchUtilityBillsData();
-    }, [bldgId]);
+    }, [activeBuildingId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -150,27 +123,63 @@ const UtilityBills = () => {
         updateBreadcrumbStore();
     }, []);
 
+    const fetchUtilityBillsData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
+                console.log(res);
+                let responseData = res.data;
+                responseData.sort(
+                    (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
+                );
+                setUtilityData(responseData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch UtilityBills Data');
+        }
+    };
+
     const dateFormater = (date) => {
         return moment(date).format('MMM YYYY');
     };
 
-    const inputsHandler = (e) => {
-        setInputField({ ...inputField, [e.target.name]: e.target.value });
+    const updateUtilityBillData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let billObj = {
+                kWh: activeBillObj.kWh,
+                total_paid: activeBillObj.total_paid,
+            };
+
+            let params = `/${activeBillObj.id}`;
+
+            await axios
+                .patch(`${BaseUrl}${updateUtilityBill}${params}`, billObj, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                });
+            fetchUtilityBillsData();
+        } catch (error) {
+            console.log('Failed to update Uility Bill Data');
+        }
     };
-    const EditHandler = (e) => {
-        e.preventDefault();
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.patch(`${BaseUrl}${generalUtilityBills}/${billId}`, inputField, { headers }).then((res) => {
-            console.log(res.data);
-            handleClose();
-            setRender(!render);
-        });
-    };
+
+    useEffect(() => {
+        console.log('activeBuildingId => ', activeBuildingId);
+    });
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -256,6 +265,7 @@ const UtilityBills = () => {
                                                         class="link-primary"
                                                         onClick={() => {
                                                             handleShow();
+                                                            setActiveBillObj(record);
                                                             setBillId(record.id);
                                                         }}>
                                                         Edit
@@ -271,29 +281,37 @@ const UtilityBills = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
+            <Modal show={show} onHide={handleClose} centered backdrop="static" keyboard={false}>
                 <Modal.Header>
                     <Modal.Title>Edit Utility Bill</Modal.Title>
                 </Modal.Header>
-                <Form onSubmit={EditHandler}>
+                <Form>
                     <Modal.Body>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>kWh</Form.Label>
+                            <Form.Label className="font-weight-bold">kWh</Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder="Enter kWh"
                                 autoFocus
-                                onChange={inputsHandler}
+                                onChange={(e) => {
+                                    handleUtilityBillChange('kWh', e.target.value);
+                                }}
                                 name="kWh"
+                                className="font-weight-bold"
+                                value={activeBillObj.kWh}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Total Paid</Form.Label>
                             <Form.Control
                                 type="number"
-                                placeholder="Enter total paid on bill"
-                                onChange={inputsHandler}
+                                placeholder="Enter Total paid on bill"
+                                onChange={(e) => {
+                                    handleUtilityBillChange('total_paid', e.target.value);
+                                }}
                                 name="total_paid"
+                                className="font-weight-bold"
+                                value={activeBillObj.total_paid}
                             />
                         </Form.Group>
                     </Modal.Body>
@@ -301,8 +319,14 @@ const UtilityBills = () => {
                         <Button variant="light" onClick={handleClose}>
                             Cancel
                         </Button>
-                        <Button variant="primary" type="submit">
-                            Save
+                        <Button
+                            variant="primary"
+                            type="submit"
+                            onClick={() => {
+                                updateUtilityBillData();
+                                handleClose();
+                            }}>
+                            Update
                         </Button>
                     </Modal.Footer>
                 </Form>
