@@ -125,6 +125,7 @@ const EditPanel = () => {
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
+    const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
     const getBreakerId = () => uuidv4();
 
@@ -483,7 +484,7 @@ const EditPanel = () => {
     const addBreakersToList = (newBreakerIndex) => {
         let newBreakerList = normalStruct;
         let obj = {
-            name: '',
+            name: `Breaker ${newBreakerIndex}`,
             breaker_number: parseInt(newBreakerIndex),
             phase_configuration: 0,
             rated_amps: 0,
@@ -491,8 +492,8 @@ const EditPanel = () => {
             link_type: 'unlinked',
             link_id: '',
             equipment_link: [],
-            sensor_link: '',
-            device_link: '',
+            sensor_id: '',
+            device_id: '',
         };
 
         if (panel.voltage === '120/240') {
@@ -523,6 +524,66 @@ const EditPanel = () => {
         let currentBreakerList = normalStruct;
         currentBreakerList.splice(-1);
         setNormalStruct(currentBreakerList);
+    };
+
+    const handleDisconnectBreakers = (previousBreakerCount, newBreakerCount) => {
+        let newBreakersArray = disconnectBreakerConfig;
+        if (newBreakerCount === 1) {
+            let arr = [];
+            arr.push(newBreakersArray[0]);
+            setDisconnectBreakerConfig(arr);
+        }
+        if (newBreakerCount === 2) {
+            let obj = {
+                name: 'Breaker 2',
+                breaker_number: 2,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 3) {
+                newBreakersArray.splice(-1);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
+        if (newBreakerCount === 3) {
+            let obj = {
+                name: 'Breaker 2',
+                breaker_number: 3,
+                phase_configuration: 2,
+                rated_amps: 0,
+                voltage: '120',
+                link_type: 'unlinked',
+                link_id: '',
+                equipment_link: [],
+                sensor_id: '',
+                device_id: '',
+            };
+            if (previousBreakerCount === 1) {
+                let obj1 = obj;
+                let obj2 = obj;
+                obj1.name = 'Breaker 2';
+                obj2.name = 'Breaker 3';
+                obj1.breaker_number = 2;
+                obj2.breaker_number = 3;
+                newBreakersArray.push(obj1);
+                newBreakersArray.push(obj2);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+            if (previousBreakerCount === 2) {
+                newBreakersArray.push(obj);
+                setDisconnectBreakerConfig(newBreakersArray);
+            }
+        }
     };
 
     useEffect(() => {
@@ -824,6 +885,7 @@ const EditPanel = () => {
                                                 type="number"
                                                 name="breakers"
                                                 id="breakers"
+                                                value={normalCount}
                                                 onChange={(e) => {
                                                     if (normalCount > parseInt(e.target.value)) {
                                                         removeBreakersFromList();
@@ -833,7 +895,6 @@ const EditPanel = () => {
                                                     }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
-                                                value={panel.breakers}
                                                 className="breaker-no-width font-weight-bold"
                                             />
                                         ) : (
@@ -1036,7 +1097,8 @@ const EditPanel = () => {
                                                                                                 index
                                                                                             );
                                                                                             if (
-                                                                                                element.device_link !== ''
+                                                                                                element.device_link !==
+                                                                                                ''
                                                                                             ) {
                                                                                                 fetchDeviceSensorData(
                                                                                                     element.device_link
