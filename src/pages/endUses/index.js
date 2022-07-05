@@ -89,7 +89,7 @@ const EndUses = () => {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + 'kWh';
+                    return val + 'k';
                 },
             },
             theme: 'dark',
