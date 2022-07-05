@@ -509,6 +509,7 @@ const PortfolioOverview = () => {
                         localStorage.setItem('buildingId', data[0].buildingID);
                         localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
+                        console.log("building data",data);
                         let markerArray = [];
                         data.map((record) => {
                             let markerObj = {
@@ -701,6 +702,7 @@ const PortfolioOverview = () => {
                                                 BuildingStore.update((s) => {
                                                     s.BldgId = item.buildingID;
                                                     s.BldgName = item.buildingName;
+                                                    s.timeZone = item.timeZone;
                                                 });
                                                 ComponentStore.update((s) => {
                                                     s.parent = 'buildings';
