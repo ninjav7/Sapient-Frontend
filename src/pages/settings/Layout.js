@@ -18,12 +18,13 @@ import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 
 const Layout = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // const store = useSelector((state) => state.counterState);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [floorsData, setfloorsData] = useState([]);
@@ -201,6 +202,9 @@ const Layout = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

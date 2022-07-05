@@ -10,6 +10,7 @@ import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
@@ -18,7 +19,7 @@ import './style.css';
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
     // Chart states
@@ -136,6 +137,9 @@ const IndividualActiveDevice = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

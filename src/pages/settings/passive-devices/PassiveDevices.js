@@ -20,6 +20,7 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
 
@@ -389,6 +390,9 @@ const PassiveDevices = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();
