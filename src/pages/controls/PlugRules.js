@@ -87,7 +87,7 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
+    
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
@@ -318,18 +318,18 @@ const PlugRules = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                console.log('Get Building');
+                console.log("Get Building");
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
                     setBuildingRecord(data);
-                    console.log('Get Building', data);
+                    console.log("Get Building",data);
                     data.map((record, index) => {
-                        if (record.building_id === activeBuildingId) {
-                            localStorage.setItem('timeZone', record.timezone);
-                            console.log('timezone', record.timezone);
+                        if(record.building_id===activeBuildingId){
+                            localStorage.setItem("timeZone",record.timezone);
+                            console.log("timezone",record.timezone);
                         }
-                    });
-                });
+                    })
+                });   
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Data');
@@ -350,7 +350,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log('Plug Rule Data', response.data);
+                    console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];
@@ -379,7 +379,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log('Plug Rule Data', response.data);
+                    console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];
