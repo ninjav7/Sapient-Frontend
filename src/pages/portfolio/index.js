@@ -40,7 +40,6 @@ const PortfolioOverview = () => {
     // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
-    const [buildingRecord, setBuildingRecord] = useState([]);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -409,7 +408,6 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         setOveralldata(res.data);
-                        console.log('setOveralldata => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -470,7 +468,6 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Line Chart Response => ', response);
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -486,7 +483,6 @@ const PortfolioOverview = () => {
                                 y: (record.y / 1000).toFixed(4),
                             });
                         });
-                        console.log('Line Chart New Array => ', newArray);
                         setEnergyConsumptionChart(newArray);
                     });
             } catch (error) {
@@ -495,33 +491,11 @@ const PortfolioOverview = () => {
             }
         };
 
-        const getBuildingData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                console.log('Get Building');
-                console.log(startDate);
-                console.log(endDate);
-                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setBuildingRecord(data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Data');
-            }
-        };
-
         const portfolioBuilidingsData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
@@ -535,11 +509,7 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('building data', data);
-                        localStorage.setItem('buildingId', data[0].buildingID);
-                        localStorage.setItem('buildingName', data[0].buildingName);
                         setBuildingsEnergyConsume(data);
-                        console.log("building data",data);
                         let markerArray = [];
                         data.map((record) => {
                             let markerObj = {
@@ -553,7 +523,6 @@ const PortfolioOverview = () => {
                             { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
                             { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
                         ];
-                        console.log('markers ', markerArray);
                         setMarkers(markerArr);
                     });
             } catch (error) {
@@ -578,7 +547,6 @@ const PortfolioOverview = () => {
 
         // setIsProcessing(true);
         // setLoading();
-        getBuildingData();
         portfolioBuilidingsData();
         portfolioOverallData();
         portfolioEndUsesData();
@@ -635,7 +603,7 @@ const PortfolioOverview = () => {
                         <div className="card-box-style button-style">
                             <div className="card-body">
                                 <h5 className="card-title subtitle-style">Total Buildings</h5>
-                                <p className="card-text card-content-style">{buildingRecord.length}</p>
+                                <p className="card-text card-content-style">{buildingsEnergyConsume.length}</p>
                             </div>
                         </div>
 

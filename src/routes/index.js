@@ -12,6 +12,8 @@ import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
 import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
+// import PanelBreakers from '../pages/settings/panels/panel-breaker-flow/PanelBreakers';
+import PanelBreakers from '../pages/settings/panels/panel-breaker-flow/App';
 import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
 import Provision from '../pages/settings/active-devices/Provision';
@@ -493,6 +495,14 @@ const settingsRoutes = {
             path: '/settings/panels/createPanel',
             name: 'Create Panel',
             component: CreatePanel,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/panels/panelBreakersFlow',
+            name: 'Panel Breakers',
+            component: PanelBreakers,
             route: PrivateRoute,
             visibility: false,
             parent: 'building-settings',

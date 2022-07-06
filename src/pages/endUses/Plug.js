@@ -277,7 +277,7 @@ const UsagePageThree = () => {
                         let floorConsumption = [];
                         data.map((record, index) => {
                             floorName.push(record.floor);
-                            floorConsumption.push(parseInt(record.energy_consumption.toFixed(2)));
+                            floorConsumption.push(parseInt((record.energy_consumption / 1000).toFixed(2)));
                         });
                         let floorConsumptionData = [
                             {
@@ -508,12 +508,14 @@ const UsagePageThree = () => {
                                             After-Hours Consumption
                                         </p>
                                         <p className="card-text usage-card-content-style">
-                                            {(record.after_hours_energy_consumption.now / 1000).toLocaleString(
-                                                undefined,
-                                                {
-                                                    maximumFractionDigits: 2,
-                                                }
-                                            )}
+                                            {record.after_hours_energy_consumption.now
+                                                ? (record.after_hours_energy_consumption.now / 1000).toLocaleString(
+                                                      undefined,
+                                                      {
+                                                          maximumFractionDigits: 2,
+                                                      }
+                                                  )
+                                                : 0}
                                             <span className="card-unit-style">&nbsp;kWh</span>
                                         </p>
                                         {record.after_hours_energy_consumption.now >=
@@ -523,10 +525,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.old / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -537,10 +541,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.old / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -556,10 +562,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.yearly / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -570,10 +578,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.yearly / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -639,14 +649,16 @@ const UsagePageThree = () => {
                     />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
-                    <h6 className="card-title custom-title">Usage by Floor</h6>
-                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
-                    <div className="card-body">
-                        <div>
-                            <UsageBarChart
-                                floorUsageChartOptions={floorUsageChartOptions}
-                                floorUsageChartData={floorUsageChartData}
-                            />
+                    <div className="usage-floor-styling">
+                        <h6 className="card-title custom-title">Usage by Floor</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
+                        <div className="card-body">
+                            <div>
+                                <UsageBarChart
+                                    floorUsageChartOptions={floorUsageChartOptions}
+                                    floorUsageChartData={floorUsageChartData}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>
