@@ -4,6 +4,7 @@ import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
 import ApexDonutChart from '../charts/ApexDonutChart';
+import ApexCharts from 'apexcharts';
 import LineChart from '../charts/LineChart';
 import SimpleMaps from '../charts/SimpleMaps';
 import EnergyMap from './EnergyMap';
@@ -276,12 +277,41 @@ const PortfolioOverview = () => {
 
     let [color, setColor] = useState('#ffffff');
 
+    const handleChange=(e,value)=>{
+        console.log("Selected Item ",value);
+        if(value==="HVAC"){
+            const seriesIndex = 0;
+            const dataPointIndex = 0;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Lighting"){
+            const seriesIndex = 0;
+            const dataPointIndex = 1;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Process"){
+            const seriesIndex = 0;
+            const dataPointIndex = 2;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Plug"){
+            const seriesIndex = 0;
+            const dataPointIndex = 3;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+    }
     // const [series, setSeries] = useState([44, 55, 41, 17]);
     const [series, setSeries] = useState([0, 0, 0, 0]);
 
     const [options, setOptions] = useState({
         chart: {
             type: 'donut',
+            id: 'genderplot',
+            events: {
+                mounted: function(chartContext, config) {
+                   chartContext.toggleDataPointSelection(0,0)
+                 },
+              }
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -800,7 +830,7 @@ const PortfolioOverview = () => {
                                     {energyConsumption.map((record, index) => {
                                         return (
                                             <div>
-                                                <div className="custom-enduse-table-style consumption-style m-2 p-1">
+                                                <div className="custom-enduse-table-style consumption-style m-2 p-1" onMouseOver={(e)=>handleChange(e,record.device)}>
                                                     <div className="ml-2">
                                                         {record.device === 'HVAC' && (
                                                             <div

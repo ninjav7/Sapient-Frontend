@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
 import {
@@ -27,6 +27,42 @@ import axios from 'axios';
 import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import './style.css';
+
+const useSortableData = (items, config = null) => {
+    const [sortConfig, setSortConfig] = useState(config);
+    console.log(items);
+    console.log(config);
+    const sortedItems = useMemo(() => {
+      let sortableItems = [...items];
+      if (sortConfig !== null) {
+        sortableItems.sort((a, b) => {
+          if (a[sortConfig.key] < b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? -1 : 1;
+          }
+          if (a[sortConfig.key] > b[sortConfig.key]) {
+            return sortConfig.direction === 'ascending' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+      return sortableItems;
+    }, [items, sortConfig]);
+  
+    const requestSort = (key) => {
+      let direction = 'ascending';
+      if (
+        sortConfig &&
+        sortConfig.key === key &&
+        sortConfig.direction === 'ascending'
+      ) {
+        direction = 'descending';
+      }
+      setSortConfig({ key, direction });
+    };
+  
+    return { items: sortedItems, requestSort, sortConfig };
+  };
+  
 
 const BuildingTable = ({ buildingsData, selectedOptions}) => {
     const records = [
@@ -79,6 +115,13 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
 
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
+    const { items, requestSort, sortConfig } = useSortableData(buildingsData);
+  const getClassNamesFor = (name) => {
+    if (!sortConfig) {
+      return;
+    }
+    return sortConfig.key === name ? sortConfig.direction : undefined;
+  };
     const columns = [
         {
             dataField: 'building_name',
@@ -145,21 +188,108 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
                 <Table className="mb-0 bordered">
                     <thead>
                         <tr>
-                        {selectedOptions.some((record) => record.value === 'name') && <th className="table-heading-style">Name</th>}
-                        {selectedOptions.some((record) => record.value === 'density') && (<th className="table-heading-style">Energy Density</th>
+                        {selectedOptions.some((record) => record.value === 'name') && 
+                        <th className="table-heading-style"> 
+                            <button
+                                type="button"
+                                onClick={() => requestSort('building_name')}
+                                className={getClassNamesFor('building_name')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >Name</button></th>}
+                        {selectedOptions.some((record) => record.value === 'density') && 
+                        (<th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('energy_density')}
+                                className={getClassNamesFor('energy_density')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                                Energy Density
+                            </button>
+                        </th>
                         )}
-                        {selectedOptions.some((record) => record.value === 'per_change') && <th className="table-heading-style">% Change</th>}
-                        {selectedOptions.some((record) => record.value === 'hvac') &&<th className="table-heading-style">HVAC Consumption</th>}
-                        {selectedOptions.some((record) => record.value === 'hvac_per') && <th className="table-heading-style">% Change</th>}
-                        {selectedOptions.some((record) => record.value === 'total') && (<th className="table-heading-style">Total Consumption</th>
+                        {selectedOptions.some((record) => record.value === 'per_change') && 
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('change')}
+                                className={getClassNamesFor('change')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            % Change
+                            </button>
+                        </th>}
+                        {selectedOptions.some((record) => record.value === 'hvac') &&
+                        <th className="table-heading-style">
+                                <button
+                                type="button"
+                                onClick={() => requestSort('hvac_consumption')}
+                                className={getClassNamesFor('hvac_consumption')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            HVAC Consumption
+                            </button>
+                        </th>}
+                        {selectedOptions.some((record) => record.value === 'hvac_per') && 
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('hvac_per')}
+                                className={getClassNamesFor('hvac_per')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            % Change
+                            </button>
+                        </th>}
+                        {selectedOptions.some((record) => record.value === 'total') && (
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('total_consumption')}
+                                className={getClassNamesFor('total_consumption')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            Total Consumption
+                            </button>
+                        </th>
                         )}
-                        {selectedOptions.some((record) => record.value === 'total_per') && (<th className="table-heading-style">% Change</th>)}
-                        {selectedOptions.some((record) => record.value === 'sq_ft') && (<th className="table-heading-style">Sq. Ft.</th>)}
-                        {selectedOptions.some((record) => record.value === 'load') && (<th className="table-heading-style">Monitored Load</th>)}
+                        {selectedOptions.some((record) => record.value === 'total_per') && (
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('total_per')}
+                                className={getClassNamesFor('total_per')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            % Change
+                            </button>
+                        </th>)}
+                        {selectedOptions.some((record) => record.value === 'sq_ft') && (
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('sq_ft')}
+                                className={getClassNamesFor('sq_ft')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            Sq. Ft.
+                            </button>
+                        </th>)}
+                        {selectedOptions.some((record) => record.value === 'load') && (
+                        <th className="table-heading-style">
+                            <button
+                                type="button"
+                                onClick={() => requestSort('')}
+                                className={getClassNamesFor('')}
+                                style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
+                                >
+                            Monitored Load
+                            </button>
+                        </th>)}
                         </tr>
                     </thead>
                     <tbody>
-                        {buildingsData.map((record, index) => {
+                        {items.map((record, index) => {
                             return (
                                 <tr key={record.building_id}>
                                      {selectedOptions.some((record) => record.value === 'name') && (
