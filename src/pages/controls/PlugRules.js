@@ -306,6 +306,9 @@ const PlugRules = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'control';
+            });
         };
         const getBuildingData = async () => {
             try {
