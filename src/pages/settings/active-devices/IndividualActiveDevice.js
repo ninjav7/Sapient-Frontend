@@ -65,16 +65,14 @@ const IndividualActiveDevice = () => {
         fetchSensorGraphData(id);
     };
     useEffect(() => {
-        console.log('entered in useeffect');
         const fetchSingleActiveDevice = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
+                let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveData(response.data[0]);
@@ -90,7 +88,6 @@ const IndividualActiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}`;
@@ -109,7 +106,6 @@ const IndividualActiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {

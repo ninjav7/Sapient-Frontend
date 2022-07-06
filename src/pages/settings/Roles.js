@@ -81,7 +81,6 @@ const Roles = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [buildingId, setBuildingId] = useState(1);
     const [roleData, setRoleData] = useState([
         {
             name: 'Account Administrator',

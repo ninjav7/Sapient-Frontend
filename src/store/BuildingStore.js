@@ -1,6 +1,6 @@
 import { Store } from 'pullstate';
 
 export const BuildingStore = new Store({
-    BldgId: null,
-    BldgName: 'Portfolio',
+    BldgId: localStorage.getItem('buildingId'),
+    BldgName: localStorage.getItem('buildingName'),
 });

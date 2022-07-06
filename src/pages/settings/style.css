@@ -88,10 +88,25 @@
 }
 
 .week-day-style {
-    background: #f2f4f7;
     border-radius: 4px;
     width: 50px;
     height: 22px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px 8px 4px;
+    gap: 10px;
+    background: #f2f4f7;
+    border-radius: 4px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: #000000;
 }
 
 .spacing {
@@ -516,4 +531,68 @@
     border: 1px solid #d0d5dd;
     border-radius: 0px 6px 6px 0px;
     margin: 0px 0px;
+}
+
+.building-heading-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}
+
+.buildings-cancel-style {
+    background: #ffffff !important;
+    border: 1px solid #d9dde2 !important;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05) !important;
+    border-radius: 6px !important;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: black !important;
+}
+
+.buildings-save-style {
+    background: #2955e7 !important;
+    border: 1px solid #2142d4 !important;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05) !important;
+    border-radius: 6px !important;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #ffffff !important;
+}
+
+.building-section-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    display: flex;
+    align-items: center;
+    color: #475467;
+}
+
+.building-content-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    color: #1d2939;
+}
+
+.building-content-subtitle {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    color: #475467;
 }

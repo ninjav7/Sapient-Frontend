@@ -171,6 +171,8 @@ const ActiveDevices = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     const tableColumnOptions = [
         { label: 'Status', value: 'status' },
         { label: 'Identifier (MAC)', value: 'identifier' },
@@ -227,8 +229,6 @@ const ActiveDevices = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'active',
     });
-
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const sampleData = [
         {
@@ -744,7 +744,6 @@ const ActiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
@@ -773,7 +772,6 @@ const ActiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
@@ -805,7 +803,6 @@ const ActiveDevices = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
@@ -835,10 +832,9 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
@@ -889,10 +885,9 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
