@@ -523,10 +523,12 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -537,10 +539,12 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -639,14 +643,16 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
-                    <h6 className="card-title custom-title">Usage by Floor</h6>
-                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
-                    <div className="card-body">
-                        <div>
-                            <UsageBarChart
-                                floorUsageChartOptions={floorUsageChartOptions}
-                                floorUsageChartData={floorUsageChartData}
-                            />
+                    <div className="usage-floor-styling">
+                        <h6 className="card-title custom-title">Usage by Floor</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
+                        <div className="card-body">
+                            <div>
+                                <UsageBarChart
+                                    floorUsageChartOptions={floorUsageChartOptions}
+                                    floorUsageChartData={floorUsageChartData}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>

@@ -13,6 +13,7 @@ export const builidingEquipments = '/api/energy/building/equipment';
 
 // utility bills
 export const generalUtilityBills = '/api/config/utility_bills';
+export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
