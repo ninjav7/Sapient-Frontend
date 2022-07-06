@@ -59,7 +59,6 @@ const UtilityBills = () => {
     ]);
 
     const [utilityData, setUtilityData] = useState([]);
-    const [buildingId, setBuildingId] = useState(1);
     const [billId, setBillId] = useState('');
 
     const [pageRefresh, setPageRefresh] = useState(false);

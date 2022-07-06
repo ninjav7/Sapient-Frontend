@@ -16,7 +16,6 @@ import {
     deleteBuilding,
 } from '../../services/Network';
 import axios from 'axios';
-// import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -28,6 +27,8 @@ const General = () => {
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const [isEditing, setIsEditing] = useState(false);
     const [buildingData, setBuildingData] = useState({
         building_id: '628dd795f28141b8a69f38bf',
         active: true,
@@ -101,23 +102,19 @@ const General = () => {
         kWh: 0,
         total_paid: 0,
     });
-    // const store = useSelector((state) => state.counterState);
+
     useEffect(() => {
         const fetchBuildingData = async () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
                 let response = res.data;
-                console.log('Response => ', response);
                 let data = {};
-                console.log('BldgId => ', bldgId);
                 if (bldgId) {
                     data = response.find((el) => el.building_id === bldgId);
-                    console.log('Data => ', data);
                     if (data === undefined) {
                         return;
                     }
@@ -136,10 +133,8 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-                    // console.log(typeof bldgId, bldgId);
                     setactiveToggle(data.active);
                     setTimeToggle(data.time_format);
-                    // setOperatingHours(data.operating_hours)
                     console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
@@ -157,7 +152,58 @@ const General = () => {
             });
         };
         fetchBuildingData();
-    }, [render, bldgId]);
+    }, [bldgId]);
+
+    useEffect(() => {
+        const fetchBuildingData = async () => {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                let response = res.data;
+                let data = {};
+                if (bldgId) {
+                    data = response.find((el) => el.building_id === bldgId);
+                    if (data === undefined) {
+                        return;
+                    }
+                    setInputField({
+                        ...inputField,
+                        active: data.active,
+                        name: data.building_name,
+                        square_footage: data.building_size,
+                        typee: data.building_type,
+                        street_address: data.street_address,
+                        address_2: data.address_2,
+                        city: data.city,
+                        state: data.state,
+                        zip_code: data.zip_code,
+                        timezone: data.timezone,
+                        time_format: data.time_format,
+                        operating_hours: data.operating_hours,
+                    });
+                    setactiveToggle(data.active);
+                    setTimeToggle(data.time_format);
+                    console.log(buildingData);
+                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+
+                    setWeekToggle({
+                        mon: mon['stat'],
+                        tue: tue['stat'],
+                        wed: wed['stat'],
+                        thu: thu['stat'],
+                        fri: fri['stat'],
+                        sat: sat['stat'],
+                        sun: sun['stat'],
+                    });
+                }
+                setBuildingData(data);
+            });
+        };
+        fetchBuildingData();
+    }, [render]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -182,64 +228,6 @@ const General = () => {
         };
         updateBreadcrumbStore();
     }, []);
-
-    // Building Details
-    // useEffect(() => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //     };
-    //     axios.post(`${BaseUrl}${generalBuildingDetail}/${buildingId}`, {}, { headers }).then((res) => {
-    //         setBuildingData(res.data);
-    //         setChecked(res.data.active);
-    //         console.log(res.data);
-    //     });
-    // }, []);
-
-    // Building Address
-    // useEffect(() => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //     };
-    //     axios
-    //         .post(`${BaseUrl}${generalBuildingAddress}/${store.ID}`, {}, { headers })
-    //         .then((res) => {
-    //             setBuildingAddress(res.data);
-    //             console.log(res.data);
-    //         })
-    //         .catch((err) => { });
-    // }, [store.ID]);
-
-    // General Date & Time
-    // useEffect(() => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //     };
-    //     axios
-    //         .post(`${BaseUrl}${generalDateTime}/${store.ID}`, {}, { headers })
-    //         .then((res) => {
-    //             setGeneralDateTimeData(res.data);
-    //             console.log(res.data);
-    //         })
-    //         .catch((err) => { });
-    // }, [store.ID]);
-
-    // General Operating Hours
-    // useEffect(() => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //     };
-    //     axios
-    //         .post(`${BaseUrl}${generalOperatingHours}/${store.ID}`, {}, { headers })
-    //         .then((res) => {
-    //             setGeneralOperatingData(res.data);
-    //             console.log(res.data);
-    //         })
-    //         .catch((err) => { });
-    // }, [store.ID]);
 
     const sampleOperatingHour = {
         mon: {
@@ -293,10 +281,6 @@ const General = () => {
         },
     };
 
-    // useEffect(() => {
-    //     console.log('startDate', startDate);
-    // });
-    // update section start
     const inputsBuildingHandler = (e) => {
         console.log(e.target.name);
         setInputField({ [e.target.name]: e.target.value });
@@ -308,7 +292,6 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
@@ -328,7 +311,6 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingAddress}/${bldgId}`, inputField, { headers }).then((res) => {
@@ -366,7 +348,6 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
@@ -383,7 +364,6 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalDateTime}/${bldgId}`, { time_format: e }, { headers }).then((res) => {
@@ -403,7 +383,6 @@ const General = () => {
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             axios.delete(`${BaseUrl}${deleteBuilding}/${bldgId}`, { headers }).then((res) => {
@@ -445,7 +424,6 @@ const General = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
@@ -458,10 +436,30 @@ const General = () => {
     return (
         <React.Fragment>
             <Row className="page-title">
-                <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        General Building Settings
-                    </span>
+                <Col lg={8}>
+                    <div className="building-heading-container">
+                        <div className="heading-style" style={{ marginLeft: '20px' }}>
+                            General Building Settings
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                className="btn btn-default buildings-cancel-style"
+                                onClick={() => {
+                                    setIsEditing(false);
+                                }}>
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-primary buildings-save-style ml-3"
+                                onClick={() => {
+                                    setIsEditing(false);
+                                }}>
+                                Save
+                            </button>
+                        </div>
+                    </div>
                 </Col>
             </Row>
 
@@ -469,7 +467,7 @@ const General = () => {
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
+                            <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Building Details
                             </h5>
                         </CardHeader>
@@ -478,8 +476,8 @@ const General = () => {
                                 <div className="grid-style-3">
                                     <FormGroup>
                                         <div className="single-line-style">
-                                            <h6 className="card-title">Active</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                            <h6 className="building-content-title">Active</h6>
+                                            <h6 className="building-content-subtitle mb-2" htmlFor="customSwitches">
                                                 Non-admin users can only view active buildings.
                                             </h6>
                                         </div>
@@ -498,8 +496,8 @@ const General = () => {
 
                                     <FormGroup>
                                         <div className="single-line-style">
-                                            <h6 className="card-title">Building Name</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted">
+                                            <h6 className="building-content-title">Building Name</h6>
+                                            <h6 className="building-content-subtitle mb-2">
                                                 A human-friendly display name for this building
                                             </h6>
                                         </div>
@@ -522,8 +520,8 @@ const General = () => {
 
                                     <FormGroup>
                                         <div className="single-line-style">
-                                            <h6 className="card-title">Type</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted">
+                                            <h6 className="building-content-title">Type</h6>
+                                            <h6 className="building-content-subtitle mb-2">
                                                 The primary use/type of this building
                                             </h6>
                                         </div>
@@ -547,8 +545,8 @@ const General = () => {
 
                                     <FormGroup>
                                         <div className="single-line-style">
-                                            <h6 className="card-title">Square Footage</h6>
-                                            <h6 className="card-subtitle mb-2 text-muted">
+                                            <h6 className="building-content-title">Square Footage</h6>
+                                            <h6 className="building-content-subtitle mb-2">
                                                 The total square footage of this building
                                             </h6>
                                         </div>
@@ -583,7 +581,7 @@ const General = () => {
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
+                            <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Address
                             </h5>
                         </CardHeader>
@@ -591,7 +589,7 @@ const General = () => {
                             <Form>
                                 <div className="grid-style-1">
                                     <FormGroup>
-                                        <Label for="userAddress1" className="card-title">
+                                        <Label for="userAddress1" className="building-content-title">
                                             Street Address
                                         </Label>
                                         <Input
@@ -607,7 +605,7 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label for="userAddress2" className="card-title">
+                                        <Label for="userAddress2" className="building-content-title">
                                             Address 2 (optional)
                                         </Label>
                                         <Input
@@ -625,7 +623,7 @@ const General = () => {
 
                                 <div className="grid-style-2">
                                     <FormGroup>
-                                        <Label for="userCity" className="card-title">
+                                        <Label for="userCity" className="building-content-title">
                                             City
                                         </Label>
                                         <Input
@@ -641,7 +639,7 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label for="userState" className="card-title">
+                                        <Label for="userState" className="building-content-title">
                                             State
                                         </Label>
                                         <Input
@@ -658,7 +656,7 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Label for="useZipCode" className="card-title">
+                                        <Label for="useZipCode" className="building-content-title">
                                             Zip
                                         </Label>
                                         <Input
@@ -683,7 +681,7 @@ const General = () => {
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
+                            <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Date & Time
                             </h5>
                         </CardHeader>
@@ -691,13 +689,13 @@ const General = () => {
                             <Form>
                                 <div className="grid-style-4">
                                     <div className="single-line-style">
-                                        <h6 className="card-title">Timezone</h6>
+                                        <h6 className="building-content-title">Timezone</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="card-title">{inputField.timezone}</h6>
+                                        <h6 className="building-content-title">{inputField.timezone}</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="card-title">Use 24-hour Clock</h6>
+                                        <h6 className="building-content-title">Use 24-hour Clock</h6>
                                     </div>
                                     <div>
                                         {/* <div className="custom-control custom-switch switch-style">
@@ -730,7 +728,7 @@ const General = () => {
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
+                            <h5 className="building-section-title" style={{ margin: '2px' }}>
                                 Operating Hours
                             </h5>
                         </CardHeader>
@@ -760,13 +758,6 @@ const General = () => {
                                             dateFormat="h:mm aa"
                                             className="time-picker-style"
                                         />
-                                        {/* <TimePicker
-                                            onChange={onChange}
-                                            value={value}
-                                            clearIcon={false}
-                                            className="time-picker-style"
-                                            clockIcon={false}
-                                        /> */}
                                         <div className="spacing"> to </div>
                                         <DatePicker
                                             selected={dateHandler(inputField.operating_hours, 'mon').to}

@@ -650,7 +650,7 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPanel(response);
@@ -669,7 +669,8 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
                 });
             } catch (error) {
@@ -750,8 +751,7 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
-                let params = `?page_size=10&page_no=1`;
+                let params = `?page_size=10&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
                     setPassiveDeviceData(data.data);
