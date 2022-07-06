@@ -63,9 +63,7 @@ const PageTracker = () => {
             };
             await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                 let data = res.data;
-                console.log('Dropdown Buildings => ', data);
                 let activeBldgs = data.filter((bld) => bld.active === true);
-                console.log('Building List => ', activeBldgs);
                 setBuildingList(activeBldgs);
             });
         };
@@ -88,86 +86,103 @@ const PageTracker = () => {
     //     let splitUrl = url.split('/');
     //     splitUrl.pop();
     //     let joinedUrl = splitUrl.join('/');
-    //     console.log('SSR joinedUrl => ', joinedUrl);
+    //     console.log('joinedUrl => ', joinedUrl);
     //     setCurrentPath(joinedUrl);
     // }, [location.pathname]);
 
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
-                {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
-                    <>
-                        <div className="tracker-dropdown">
-                            {bldStoreName === 'Portfolio' ? (
-                                <FontAwesomeIcon icon={faBuildings} size="lg" className="ml-2" />
-                            ) : (
-                                <FontAwesomeIcon icon={faBuilding} size="lg" className="ml-2" />
-                            )}
-                            <DropdownButton
-                                id="bts-button-styling"
-                                // title={bldStoreName}
-                                title={location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName}
-                                className="bts-btn-style"
-                                variant="secondary">
-                                <div className="content-font-style">
-                                    <div>
-                                        <FormControl
-                                            className="mx-3 my-2 w-auto"
-                                            placeholder="Filter Buildings"
-                                            onChange={(e) => setValue(e.target.value)}
-                                            value={value}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Dropdown.Item style={{ display: 'inline-block' }}>
-                                            <FontAwesomeIcon
-                                                icon={faBuildings}
-                                                size="lg"
-                                                className="mr-2"
-                                                style={{ display: 'inline-block' }}
-                                            />
-                                            <Link to="/energy/portfolio/overview">
-                                                <span
-                                                    className="portfolio-txt-style"
-                                                    onClick={() => {
-                                                        setPortfolioName('Portfolio');
-                                                    }}>
-                                                    Portfolio
-                                                </span>
-                                            </Link>
-                                        </Dropdown.Item>
-                                    </div>
-
-                                    <div>
-                                        <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
-                                        {buildingList.map((record, index) => (
-                                            <Dropdown.Item
-                                                onClick={() => {
-                                                    BuildingStore.update((s) => {
-                                                        s.BldgId = record.building_id;
-                                                        s.BldgName = record.building_name;
-                                                    });
-                                                    localStorage.setItem('buildingId', record.building_id);
-                                                    localStorage.setItem('buildingName', record.building_name);
-                                                }}>
-                                                {/* <Link
-                                                    to={{
-                                                        pathname: `${currentPath}/${record.building_id}`,
-                                                    }}> */}
-                                                <span className="portfolio-txt-style">{record.building_name}</span>
-                                                {/* </Link> */}
-                                            </Dropdown.Item>
-                                        ))}
-                                    </div>
+                {/* {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? ( */}
+                <>
+                    <div className="tracker-dropdown">
+                        {bldStoreName === 'Portfolio' ? (
+                            <FontAwesomeIcon icon={faBuildings} size="lg" className="ml-2" />
+                        ) : (
+                            <FontAwesomeIcon icon={faBuilding} size="lg" className="ml-2" />
+                        )}
+                        <DropdownButton
+                            id="bts-button-styling"
+                            title={location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName}
+                            className="bts-btn-style"
+                            variant="secondary">
+                            <div className="content-font-style">
+                                <div>
+                                    <FormControl
+                                        className="mx-3 my-2 w-auto"
+                                        placeholder="Filter Buildings"
+                                        onChange={(e) => setValue(e.target.value)}
+                                        value={value}
+                                    />
                                 </div>
-                            </DropdownButton>
-                            <FontAwesomeIcon icon={faGear} />
-                            <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
-                        </div>
-                        <div className="vl"></div>
-                    </>
-                ) : breadcrumList[0].label === 'Account Settings' ? (
+
+                                <div>
+                                    <Dropdown.Item style={{ display: 'inline-block' }}>
+                                        <FontAwesomeIcon
+                                            icon={faBuildings}
+                                            size="lg"
+                                            className="mr-2"
+                                            style={{ display: 'inline-block' }}
+                                        />
+                                        <Link to="/energy/portfolio/overview">
+                                            <span
+                                                className="portfolio-txt-style"
+                                                onClick={() => {
+                                                    setPortfolioName('Portfolio');
+                                                }}>
+                                                Portfolio
+                                            </span>
+                                        </Link>
+                                    </Dropdown.Item>
+                                </div>
+
+                                <div>
+                                    <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
+                                    {buildingList.map((record, index) => (
+                                        <>
+                                            {location.pathname === '/energy/portfolio/overview' ? (
+                                                <Link
+                                                    to={{
+                                                        pathname: `/energy/building/overview/${record.building_id}`,
+                                                    }}>
+                                                    <Dropdown.Item
+                                                        onClick={() => {
+                                                            BuildingStore.update((s) => {
+                                                                s.BldgId = record.building_id;
+                                                                s.BldgName = record.building_name;
+                                                            });
+                                                            localStorage.setItem('buildingId', record.building_id);
+                                                            localStorage.setItem('buildingName', record.building_name);
+                                                        }}>
+                                                        <span className="portfolio-txt-style">
+                                                            {record.building_name}
+                                                        </span>
+                                                    </Dropdown.Item>
+                                                </Link>
+                                            ) : (
+                                                <Dropdown.Item
+                                                    onClick={() => {
+                                                        BuildingStore.update((s) => {
+                                                            s.BldgId = record.building_id;
+                                                            s.BldgName = record.building_name;
+                                                        });
+                                                        localStorage.setItem('buildingId', record.building_id);
+                                                        localStorage.setItem('buildingName', record.building_name);
+                                                    }}>
+                                                    <span className="portfolio-txt-style">{record.building_name}</span>
+                                                </Dropdown.Item>
+                                            )}
+                                        </>
+                                    ))}
+                                </div>
+                            </div>
+                        </DropdownButton>
+                        <FontAwesomeIcon icon={faGear} />
+                        <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
+                    </div>
+                    <div className="vl"></div>
+                </>
+                {/* ) : breadcrumList[0].label === 'Account Settings' ? (
                     <div className="account-setting-options">
                         <div className="account-option">Account</div>
                         <div className="general-option">General</div>
@@ -186,9 +201,9 @@ const PageTracker = () => {
 
                         <div className="general-option">General</div>
                     </div>
-                )}
+                )} */}
 
-                {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? (
+                {/* {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? ( */}
                     <div className="route-tracker">
                         <Breadcrumb className="custom-breadcrumb-style">
                             {items.map((item, index) => {
@@ -204,9 +219,9 @@ const PageTracker = () => {
                             })}
                         </Breadcrumb>
                     </div>
-                ) : (
-                    ''
-                )}
+                {/* ) : ( */}
+                    {/* '' */}
+                {/* )} */}
             </div>
         </React.Fragment>
     );
