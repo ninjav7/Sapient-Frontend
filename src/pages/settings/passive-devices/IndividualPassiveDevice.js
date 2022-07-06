@@ -132,7 +132,6 @@ const IndividualPassiveDevice = () => {
         device_type: 'passive',
     });
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    console.log('BldgId', (s) => s.BldgId);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sensors, setSensors] = useState([]);
@@ -178,16 +177,14 @@ const IndividualPassiveDevice = () => {
     console.log('panel', panels);
 
     useEffect(() => {
-        console.log('entered in useeffect');
         const fetchSinglePassiveDevice = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
+                let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     console.log(response);

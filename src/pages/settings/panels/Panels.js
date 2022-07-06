@@ -104,6 +104,8 @@ const Panels = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     const tableColumnOptions = [
         { label: 'Name', value: 'name' },
         { label: 'Location', value: 'location' },
@@ -112,7 +114,6 @@ const Panels = () => {
     ];
     const [selectedOptions, setSelectedOptions] = useState([]);
 
-    // const [buildingId, setBuildingId] = useState(1);
     const [generalPanelData, setGeneralPanelData] = useState([]);
 
     useEffect(() => {
@@ -123,7 +124,9 @@ const Panels = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${generalPanels}`, { headers: header }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
+                    console.log('setGeneralPanelData => ', res.data);
                     setGeneralPanelData(res.data);
                     console.log(res.data);
                 });
@@ -133,7 +136,7 @@ const Panels = () => {
             }
         };
         fetchPanelsData();
-    }, []);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

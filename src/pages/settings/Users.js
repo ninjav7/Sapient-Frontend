@@ -88,7 +88,6 @@ const Users = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [buildingId, setBuildingId] = useState(1);
     const [userData, setUserData] = useState([
         {
             name: 'Michael Scott',

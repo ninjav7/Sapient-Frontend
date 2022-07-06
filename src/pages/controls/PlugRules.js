@@ -100,7 +100,6 @@ const PlugRules = () => {
 
     const activeBuildingId = localStorage.getItem('buildingId');
 
-    const [buildingId, setBuildingId] = useState(1);
     const [ruleData, setRuleData] = useState([
         {
             name: '8am-6pm M-F',

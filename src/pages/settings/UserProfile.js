@@ -19,7 +19,6 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UserProfile = () => {
-    const [buildingId, setBuildingId] = useState(1);
     const [buildingData, setBuildingData] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});

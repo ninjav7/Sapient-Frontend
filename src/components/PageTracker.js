@@ -9,6 +9,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
+import { faCheck } from '@fortawesome/pro-regular-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/pro-solid-svg-icons';
 import { BreadcrumbStore } from '../store/BreadcrumbStore';
@@ -71,10 +72,6 @@ const PageTracker = () => {
     }, []);
 
     useEffect(() => {
-        BuildingStore.update((s) => {
-            s.BldgId = 1;
-            s.BldgName = 'Portfolio';
-        });
         ComponentStore.update((s) => {
             s.parent = 'portfolio';
         });
@@ -204,23 +201,23 @@ const PageTracker = () => {
                 )} */}
 
                 {/* {breadcrumList[0].label !== 'Account Settings' && breadcrumList[0].label !== 'General' ? ( */}
-                    <div className="route-tracker">
-                        <Breadcrumb className="custom-breadcrumb-style">
-                            {items.map((item, index) => {
-                                return item.active ? (
-                                    <BreadcrumbItem active key={index}>
-                                        {item.label}
-                                    </BreadcrumbItem>
-                                ) : (
-                                    <BreadcrumbItem key={index}>
-                                        <Link to={item.path}>{item.label}</Link>
-                                    </BreadcrumbItem>
-                                );
-                            })}
-                        </Breadcrumb>
-                    </div>
+                <div className="route-tracker">
+                    <Breadcrumb className="custom-breadcrumb-style">
+                        {items.map((item, index) => {
+                            return item.active ? (
+                                <BreadcrumbItem active key={index}>
+                                    {item.label}
+                                </BreadcrumbItem>
+                            ) : (
+                                <BreadcrumbItem key={index}>
+                                    <Link to={item.path}>{item.label}</Link>
+                                </BreadcrumbItem>
+                            );
+                        })}
+                    </Breadcrumb>
+                </div>
                 {/* ) : ( */}
-                    {/* '' */}
+                {/* '' */}
                 {/* )} */}
             </div>
         </React.Fragment>
