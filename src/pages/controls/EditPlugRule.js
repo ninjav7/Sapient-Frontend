@@ -843,7 +843,7 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
-                                                    <option>AHUs</option>
+                                                    <option>ALL</option>
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
@@ -859,7 +859,7 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
-                                                    <option>Ground Floor</option>
+                                                    <option>Filtered</option>
                                                     {/* <option>Filtered</option> */}
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
