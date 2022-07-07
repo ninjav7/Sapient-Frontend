@@ -12,6 +12,17 @@
     width: 10px;
 }
 
+.equip-type-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    color: #3c6df5;
+}
+
 .singleline-box-style {
     /* float: right; */
     background: #ffffff;

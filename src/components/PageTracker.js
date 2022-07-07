@@ -9,7 +9,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
-import { faCheck } from '@fortawesome/pro-regular-svg-icons';
+import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/pro-solid-svg-icons';
 import { BreadcrumbStore } from '../store/BreadcrumbStore';
@@ -114,61 +114,83 @@ const PageTracker = () => {
                                 </div>
 
                                 <div>
-                                    <Dropdown.Item style={{ display: 'inline-block' }}>
-                                        <FontAwesomeIcon
-                                            icon={faBuildings}
-                                            size="lg"
-                                            className="mr-2"
-                                            style={{ display: 'inline-block' }}
-                                        />
-                                        <Link to="/energy/portfolio/overview">
-                                            <span
-                                                className="portfolio-txt-style"
-                                                onClick={() => {
-                                                    setPortfolioName('Portfolio');
-                                                }}>
-                                                Portfolio
-                                            </span>
-                                        </Link>
-                                    </Dropdown.Item>
+                                    {location.pathname === '/energy/portfolio/overview' ? (
+                                        <Dropdown.Item>
+                                            <div className="filter-bld-style">
+                                                <div className="filter-name-style">
+                                                    <FontAwesomeIcon
+                                                        icon={faBuildings}
+                                                        size="lg"
+                                                        className="mr-2"
+                                                        style={{ display: 'inline-block' }}
+                                                    />
+
+                                                    <Link to="/energy/portfolio/overview">
+                                                        <span
+                                                            className="portfolio-txt-style"
+                                                            onClick={() => {
+                                                                setPortfolioName('Portfolio');
+                                                            }}>
+                                                            Portfolio
+                                                        </span>
+                                                    </Link>
+                                                </div>
+                                                <div>
+                                                    <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                                                </div>
+                                            </div>
+                                        </Dropdown.Item>
+                                    ) : (
+                                        <Dropdown.Item style={{ display: 'inline-block' }}>
+                                            <FontAwesomeIcon
+                                                icon={faBuildings}
+                                                size="lg"
+                                                className="mr-2"
+                                                style={{ display: 'inline-block' }}
+                                            />
+                                            <Link to="/energy/portfolio/overview">
+                                                <span
+                                                    className="portfolio-txt-style"
+                                                    onClick={() => {
+                                                        setPortfolioName('Portfolio');
+                                                    }}>
+                                                    Portfolio
+                                                </span>
+                                            </Link>
+                                        </Dropdown.Item>
+                                    )}
                                 </div>
 
                                 <div>
                                     <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                                     {buildingList.map((record, index) => (
                                         <>
-                                            {location.pathname === '/energy/portfolio/overview' ? (
+                                            <Dropdown.Item
+                                                onClick={() => {
+                                                    BuildingStore.update((s) => {
+                                                        s.BldgId = record.building_id;
+                                                        s.BldgName = record.building_name;
+                                                    });
+                                                    localStorage.setItem('buildingId', record.building_id);
+                                                    localStorage.setItem('buildingName', record.building_name);
+                                                }}>
                                                 <Link
                                                     to={{
                                                         pathname: `/energy/building/overview/${record.building_id}`,
                                                     }}>
-                                                    <Dropdown.Item
-                                                        onClick={() => {
-                                                            BuildingStore.update((s) => {
-                                                                s.BldgId = record.building_id;
-                                                                s.BldgName = record.building_name;
-                                                            });
-                                                            localStorage.setItem('buildingId', record.building_id);
-                                                            localStorage.setItem('buildingName', record.building_name);
-                                                        }}>
-                                                        <span className="portfolio-txt-style">
+                                                    <div className="filter-bld-style">
+                                                        <div className="portfolio-txt-style">
                                                             {record.building_name}
-                                                        </span>
-                                                    </Dropdown.Item>
+                                                        </div>
+                                                        {location.pathname !== '/energy/portfolio/overview' &&
+                                                            record.building_id === bldStoreId && (
+                                                                <div>
+                                                                    <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                                                                </div>
+                                                            )}
+                                                    </div>
                                                 </Link>
-                                            ) : (
-                                                <Dropdown.Item
-                                                    onClick={() => {
-                                                        BuildingStore.update((s) => {
-                                                            s.BldgId = record.building_id;
-                                                            s.BldgName = record.building_name;
-                                                        });
-                                                        localStorage.setItem('buildingId', record.building_id);
-                                                        localStorage.setItem('buildingName', record.building_name);
-                                                    }}>
-                                                    <span className="portfolio-txt-style">{record.building_name}</span>
-                                                </Dropdown.Item>
-                                            )}
+                                            </Dropdown.Item>
                                         </>
                                     ))}
                                 </div>

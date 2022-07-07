@@ -1,9 +1,7 @@
 import React from 'react';
 import { useCallback, useState } from 'react';
 import ReactFlowRenderer, { addEdge, applyEdgeChanges, applyNodeChanges } from 'react-flow-renderer';
-
 import TextUpdaterNode from './TextUpdaterNode.js';
-
 import './text-updater-node.css';
 
 const rfStyle = {
@@ -24,16 +22,21 @@ function Flow() {
     const onConnect = useCallback((connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
 
     return (
-        <ReactFlowRenderer
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            fitView
-            style={rfStyle}
-        />
+        <>
+            <div>Panel Breaker Page</div>
+            <div style={{ height: 550 }}>
+                <ReactFlowRenderer
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    style={rfStyle}
+                />
+            </div>
+        </>
     );
 }
 

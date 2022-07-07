@@ -10,6 +10,7 @@ import General from '../pages/settings/General';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
+import EquipmentTypes from '../pages/settings/EquipmentTypes';
 import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
 // import PanelBreakers from '../pages/settings/panels/panel-breaker-flow/PanelBreakers';
@@ -611,14 +612,14 @@ const settingsRoutes = {
             visibility: false,
             parent: 'account',
         },
-        // {
-        //     path: '/settings/equipment',
-        //     name: 'Equipment Type',
-        //     component: Equipment,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
+        {
+            path: '/settings/equipment-types',
+            name: 'Equipment Types',
+            component: EquipmentTypes,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
+        },
     ],
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
