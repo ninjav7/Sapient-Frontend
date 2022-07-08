@@ -191,7 +191,6 @@ const IndividualActiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -201,10 +200,9 @@ const IndividualActiveDevice = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -223,8 +221,6 @@ const IndividualActiveDevice = () => {
             console.log('Failed to fetch Sensor Graph data');
         }
     };
-    //     fetchSensorGraphData();
-    // }, [sensorId]);
 
     return (
         <>

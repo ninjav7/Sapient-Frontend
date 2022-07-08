@@ -18,9 +18,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'peak-power', label: 'Peak Power (kW)' },
-        { value: 'carbon-emissions', label: 'Carbon Emissions' },
+        { value: 'power', label: 'Peak Power (kW)' },
     ]);
+    const [activeFilter, setActiveFilter] = useState('energy');
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
@@ -77,7 +77,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${sensorData.id}`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${activeFilter}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
@@ -89,7 +89,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Sensor Graph Data => ', response);
                         let data = response;
                         let exploreData = [];
                         let recordToInsert = {
@@ -97,7 +96,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                             name: 'AHUs',
                         };
                         exploreData.push(recordToInsert);
-                        console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
                         setSeriesData([
                             {
@@ -112,7 +110,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         };
 
         exploreDataFetch();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, activeFilter]);
 
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
@@ -288,7 +286,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         name="select"
                         id="exampleSelect"
                         className="font-weight-bold model-sensor-energy-filter mr-2"
-                        style={{ display: 'inline-block', width: 'fit-content' }}>
+                        style={{ display: 'inline-block', width: 'fit-content' }}
+                        defaultValue={activeFilter}
+                        onClick={(e) => setActiveFilter(e.target.value)}>
                         {metric.map((record, index) => {
                             return <option value={record.value}>{record.label}</option>;
                         })}
