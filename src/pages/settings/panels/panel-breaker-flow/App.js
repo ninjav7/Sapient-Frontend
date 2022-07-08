@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCallback, useState } from 'react';
-import ReactFlowRenderer, { addEdge, applyEdgeChanges, applyNodeChanges } from 'react-flow-renderer';
+import ReactFlowRenderer from 'react-flow-renderer';
 import TextUpdaterNode from './TextUpdaterNode.js';
 import './text-updater-node.css';
 
@@ -17,14 +17,14 @@ function Flow() {
     const [nodes, setNodes] = useState(initialNodes);
     const [edges, setEdges] = useState([]);
 
-    const onNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), [setNodes]);
-    const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges]);
-    const onConnect = useCallback((connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
+    // const onNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), [setNodes]);
+    // const onEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges]);
+    // const onConnect = useCallback((connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
 
     return (
         <>
             <div>Panel Breaker Page</div>
-            <div style={{ height: 550 }}>
+            {/* <div style={{ height: 550 }}>
                 <ReactFlowRenderer
                     nodes={nodes}
                     edges={edges}
@@ -35,7 +35,7 @@ function Flow() {
                     fitView
                     style={rfStyle}
                 />
-            </div>
+            </div> */}
         </>
     );
 }
