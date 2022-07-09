@@ -33,9 +33,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'peak-power', label: 'Peak Power (kW)' },
-        { value: 'carbon-emissions', label: 'Carbon Emissions' },
+        { value: 'power', label: 'Power' },
+        { value: 'mAh', label: 'Current (mAh)' },
+        { value: 'mV', label: 'Voltage (mV)' },
     ]);
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
@@ -91,10 +93,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     // 'user-auth': '628f3144b712934f578be895',
+                    
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?sensor_id=629f436216701186eff7b79b`;
-                let params = `?sensor_id=${sensorData.id}`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
@@ -129,7 +132,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         };
 
         exploreDataFetch();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
         console.log(sensorData);
@@ -306,8 +309,13 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         type="select"
                         name="select"
                         id="exampleSelect"
+                        onChange={e=>{
+                            
+                            setConsumption(e.target.value)
+                        }}
                         className="font-weight-bold model-sensor-energy-filter mr-2"
-                        style={{ display: 'inline-block', width: 'fit-content' }}>
+                        style={{ display: 'inline-block', width: 'fit-content' }}
+                        defaultValue={selectedConsumption}>
                         {metric.map((record, index) => {
                             return <option value={record.value}>{record.label}</option>;
                         })}
