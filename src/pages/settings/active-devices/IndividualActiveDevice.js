@@ -96,54 +96,55 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    // let sampleSensors = [
-                    //     {
-                    //         id: '',
-                    //         name: 'Stream sensor 0',
-                    //         device_linked: 'Stream Device 0',
-                    //         device_linked_id: '62c54bad97c7cbb9c480fe97',
-                    //         sensor_type: 'passive',
-                    //         breaker_link: '',
-                    //         equipment: 'Stream Equipment',
-                    //         equipment_id: '',
-                    //         sapient_id: '',
-                    //     },
-                    //     {
-                    //         id: '',
-                    //         name: 'Stream sensor 616',
-                    //         device_linked: 'Stream Device 0',
-                    //         device_linked_id: '62c54bad97c7cbb9c480fe97',
-                    //         sensor_type: 'active',
-                    //         breaker_link: '',
-                    //         equipment: 'Stream Equipment',
-                    //         equipment_id: '',
-                    //         sapient_id: '',
-                    //     },
-                    //     {
-                    //         id: '62c54c9a97c7cbb9c481363b',
-                    //         name: 'Stream sensor 631',
-                    //         device_linked: 'Stream Device 0',
-                    //         device_linked_id: '62c54bad97c7cbb9c480fe97',
-                    //         sensor_type: 'passive',
-                    //         breaker_link: '',
-                    //         equipment: 'Stream Equipment',
-                    //         equipment_id: '62c43bf46118a73d53623c55',
-                    //         sapient_id: '',
-                    //     },
-                    //     {
-                    //         id: '62c779ba7722ef492975bc92',
-                    //         name: 'Stream sensor 0',
-                    //         device_linked: 'Stream Device 0',
-                    //         device_linked_id: '62c54bad97c7cbb9c480fe97',
-                    //         sensor_type: 'active',
-                    //         breaker_link: '',
-                    //         equipment: 'Stream Equipment',
-                    //         equipment_id: '62c43bf46118a73d53623c55',
-                    //         sapient_id: '',
-                    //     },
-                    // ];
+                    let sampleSensors = [
+                        {
+                            id: '',
+                            name: 'Stream sensor 0',
+                            device_linked: 'Stream Device 0',
+                            device_linked_id: '62c54bad97c7cbb9c480fe97',
+                            sensor_type: 'passive',
+                            breaker_link: '',
+                            equipment: 'Stream Equipment',
+                            equipment_id: '',
+                            sapient_id: '',
+                        },
+                        {
+                            id: '',
+                            name: 'Stream sensor 616',
+                            device_linked: 'Stream Device 0',
+                            device_linked_id: '62c54bad97c7cbb9c480fe97',
+                            sensor_type: 'active',
+                            breaker_link: '',
+                            equipment: 'Stream Equipment',
+                            equipment_id: '',
+                            sapient_id: '',
+                        },
+                        {
+                            id: '62c54c9a97c7cbb9c481363b',
+                            name: 'Stream sensor 631',
+                            device_linked: 'Stream Device 0',
+                            device_linked_id: '62c54bad97c7cbb9c480fe97',
+                            sensor_type: 'passive',
+                            breaker_link: '',
+                            equipment: 'Stream Equipment',
+                            equipment_id: '62c43bf46118a73d53623c55',
+                            sapient_id: '',
+                        },
+                        {
+                            id: '62c779ba7722ef492975bc92',
+                            name: 'Stream sensor 0',
+                            device_linked: 'Stream Device 0',
+                            device_linked_id: '62c54bad97c7cbb9c480fe97',
+                            sensor_type: 'active',
+                            breaker_link: '',
+                            equipment: 'Stream Equipment',
+                            equipment_id: '62c43bf46118a73d53623c55',
+                            sapient_id: '',
+                        },
+                    ];
                     // setSensors(sampleSensors);
-                    setSensors(response);
+                    // setSensors(response);
+                    setSensors(sampleSensors);
                 });
             } catch (error) {
                 console.log(error);

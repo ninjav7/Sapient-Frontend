@@ -19,6 +19,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'power', label: 'Peak Power (kW)' },
+        { value: 'mAh', label: 'Amps (mAh)' },
+        { value: 'mV', label: 'Volts (mV)' },
     ]);
     const [activeFilter, setActiveFilter] = useState('energy');
     const [deviceData, setDeviceData] = useState([]);
