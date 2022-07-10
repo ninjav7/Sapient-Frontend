@@ -349,7 +349,7 @@ const IndividualActiveDevice = () => {
                                             <div className="sensor-data-style">
                                                 <span className="sensor-data-no">{index + 1}</span>
                                                 <span className="sensor-data-title">
-                                                    {record.equipment_id === '' ? 'No Equipment' : record.equipment}
+                                                    {record.name} {record.equipment_id === '' ? '' : <div className='ml-2 badge badge-soft-primary'>{record.equipment}</div>}
                                                 </span>
                                             </div>
                                             <div className="sensor-data-style-right">
