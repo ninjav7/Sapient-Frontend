@@ -187,7 +187,7 @@ const IndividualActiveDevice = () => {
                                     <span className="passive-device-style">Active Device</span>
                                 </div>
                                 <div>
-                                    <span className="passive-device-name mr-3">Power Strip</span>
+                                    <span className="passive-device-name mr-3">{activeData.description}</span>
                                     <span className="passive-sensor-count">{activeData.identifier}</span>
                                 </div>
                             </div>
