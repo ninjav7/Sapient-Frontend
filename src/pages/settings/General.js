@@ -103,9 +103,6 @@ const General = () => {
         total_paid: 0,
     });
 
-    const [savedBuildingData, setSavedBuildingData] = useState({});
-    const [currentBuildingData, setCurrentBuildingData] = useState({});
-
     useEffect(() => {
         const fetchBuildingData = async () => {
             let headers = {
@@ -121,9 +118,6 @@ const General = () => {
                     if (data === undefined) {
                         return;
                     }
-                    
-                    setSavedBuildingData(data);
-                    
                     setInputField({
                         ...inputField,
                         active: data.active,
@@ -139,10 +133,9 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-
                     setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
-
+                    console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
                     setWeekToggle({

@@ -237,7 +237,7 @@ const IndividualActiveDevice = () => {
                                     <span className="passive-device-style">Active Device</span>
                                 </div>
                                 <div>
-                                    <span className="passive-device-name mr-3">Power Strip</span>
+                                    <span className="passive-device-name mr-3">{activeData.description}</span>
                                     <span className="passive-sensor-count">{activeData.identifier}</span>
                                 </div>
                             </div>
@@ -444,7 +444,7 @@ const IndividualActiveDevice = () => {
                                             <div className="sensor-data-style">
                                                 <span className="sensor-data-no">{index + 1}</span>
                                                 <span className="sensor-data-title">
-                                                    {record.equipment_id === '' ? 'No Equipment' : record.equipment}
+                                                    {record.name} {record.equipment_id === '' ? '' : <div className='ml-2 badge badge-soft-primary'>{record.equipment}</div>}
                                                 </span>
                                             </div>
                                             <div className="sensor-data-style-right">

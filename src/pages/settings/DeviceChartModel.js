@@ -16,13 +16,15 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power']
+    const UNIT_DIVIDER = 1000
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'power', label: 'Peak Power (kW)' },
-        { value: 'mAh', label: 'Amps (mAh)' },
-        { value: 'mV', label: 'Volts (mV)' },
+        { value: 'energy', label: 'consumedEnergy (Wh)' },
+        { value: 'mV', label: 'voltage (V)' },
+        { value: 'mAh', label: 'amperage (A)' },
+        { value: 'power', label: 'realPower (W)' },
     ]);
-    const [activeFilter, setActiveFilter] = useState('energy');
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
@@ -77,9 +79,12 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
+                    // 'user-auth': '628f3144b712934f578be895',
+
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${sensorData.id}&consumption=${activeFilter}`;
+                // let params = `?sensor_id=629f436216701186eff7b79b`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
@@ -91,14 +96,29 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     )
                     .then((res) => {
                         let response = res.data;
+                        
                         let data = response;
                         let exploreData = [];
+                        
                         let recordToInsert = {
                             data: data,
-                            name: 'AHUs',
+                            name: selectedConsumption,
                         };
+                        
+                        try {
+                            recordToInsert.data = recordToInsert.data.map((_data) => {
+                                if(CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1){
+                                    _data[1] = _data[1]/ UNIT_DIVIDER
+                                }
+
+                                return _data
+                            })    
+                        } catch (error) {
+                            
+                        }
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
+                        console.log("THIS IS SERIES", exploreData)
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
@@ -112,21 +132,12 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         };
 
         exploreDataFetch();
-    }, [startDate, endDate, activeFilter]);
+    }, [startDate, endDate, selectedConsumption]);
 
-    const generateDayWiseTimeSeries = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+    useEffect(() => {
+        console.log(sensorData);
+    }, []);
 
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
 
     const handleRefresh = () => {
         setDateFilter(dateValue);
@@ -137,45 +148,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         setDeviceData([]);
         setSeriesData([]);
     };
-
-    const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
-
-    const data = generateDayWiseTimeSeries(new Date('11 Feb 2022').getTime(), 185, {
-        min: 30,
-        max: 90,
-    });
-
-    const data1 = generateDayWiseTimeSeries1(new Date('11 Feb 2022').getTime(), 190, {
-        min: 30,
-        max: 90,
-    });
-
-    const [series, setSeries] = useState([
-        {
-            name: 'AHU 1',
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
 
     const [options, setOptions] = useState({
         chart: {
@@ -207,21 +179,16 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         xaxis: {
             type: 'datetime',
         },
+        yaxis : {
+            labels: {
+                "formatter": function (val) {
+                    return val.toFixed(2)
+                }
+            }
+        }
     });
 
-    const [seriesLine, setSeriesLine] = useState([
-        {
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
+
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -256,6 +223,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         },
         yaxis: {
             tickAmount: 2,
+            labels: {
+                "formatter": function (val) {
+                    return val.toFixed(2)
+                }
+            }
         },
     });
 
@@ -287,10 +259,13 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         type="select"
                         name="select"
                         id="exampleSelect"
+                        onChange={e => {
+
+                            setConsumption(e.target.value)
+                        }}
                         className="font-weight-bold model-sensor-energy-filter mr-2"
                         style={{ display: 'inline-block', width: 'fit-content' }}
-                        defaultValue={activeFilter}
-                        onClick={(e) => setActiveFilter(e.target.value)}>
+                        defaultValue={selectedConsumption}>
                         {metric.map((record, index) => {
                             return <option value={record.value}>{record.label}</option>;
                         })}
