@@ -60,6 +60,7 @@ const IndividualActiveDevice = () => {
         obj[key] = value;
         setUpdatedSensorData(obj);
     };
+    
     const handleChartShow = (id) => {
         setSensorId(id);
         setShowChart(true);
@@ -67,6 +68,7 @@ const IndividualActiveDevice = () => {
         setSensorData(obj);
         fetchSensorGraphData(id);
     };
+
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
@@ -194,7 +196,8 @@ const IndividualActiveDevice = () => {
 
     const fetchSensorGraphData = async (id) => {
         try {
-            let endDate = new Date(); // today
+            console.log('fetchSensorGraphData function execution started!');
+            let endDate = new Date();
             let startDate = new Date();
             startDate.setDate(startDate.getDate() - 7);
 
