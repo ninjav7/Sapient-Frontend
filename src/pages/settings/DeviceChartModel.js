@@ -35,8 +35,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const UNIT_DIVIDER = 1000
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'consumedEnergy (Wh)' },
-        { value: 'mV', label: 'voltage (mV)' },
-        { value: 'mAh', label: 'amperage (mA)' },
+        { value: 'mV', label: 'voltage (V)' },
+        { value: 'mAh', label: 'amperage (A)' },
         { value: 'power', label: 'realPower (W)' },
     ]);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
