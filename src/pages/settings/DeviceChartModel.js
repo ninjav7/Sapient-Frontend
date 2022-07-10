@@ -31,11 +31,13 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power']
+    const UNIT_DIVIDER = 1000
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'power', label: 'Power' },
-        { value: 'mAh', label: 'Current (mAh)' },
-        { value: 'mV', label: 'Voltage (mV)' },
+        { value: 'energy', label: 'consumedEnergy (Wh)' },
+        { value: 'mV', label: 'voltage (mV)' },
+        { value: 'mAh', label: 'amperage (mA)' },
+        { value: 'power', label: 'realPower (W)' },
     ]);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [deviceData, setDeviceData] = useState([]);
@@ -93,7 +95,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     // 'user-auth': '628f3144b712934f578be895',
-                    
+
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?sensor_id=629f436216701186eff7b79b`;
@@ -109,16 +111,29 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Sensor Graph Data => ', response);
+                        
                         let data = response;
                         let exploreData = [];
+                        
                         let recordToInsert = {
                             data: data,
-                            name: 'AHUs',
+                            name: selectedConsumption,
                         };
+                        
+                        try {
+                            recordToInsert.data = recordToInsert.data.map((_data) => {
+                                if(CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1){
+                                    _data[1] = _data[1]/ UNIT_DIVIDER
+                                }
+
+                                return _data
+                            })    
+                        } catch (error) {
+                            
+                        }
                         exploreData.push(recordToInsert);
-                        console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
+                        console.log("THIS IS SERIES", exploreData)
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
@@ -137,19 +152,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     useEffect(() => {
         console.log(sensorData);
     }, []);
-    const generateDayWiseTimeSeries = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
 
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
 
     const handleRefresh = () => {
         setDateFilter(dateValue);
@@ -160,44 +163,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         setDeviceData([]);
         setSeriesData([]);
     };
-    const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
-        var i = 0;
-        var series = [];
-        while (i < count) {
-            var x = baseval;
-            var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    };
-
-    const data = generateDayWiseTimeSeries(new Date('11 Feb 2022').getTime(), 185, {
-        min: 30,
-        max: 90,
-    });
-
-    const data1 = generateDayWiseTimeSeries1(new Date('11 Feb 2022').getTime(), 190, {
-        min: 30,
-        max: 90,
-    });
-
-    const [series, setSeries] = useState([
-        {
-            name: 'AHU 1',
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
 
     const [options, setOptions] = useState({
         chart: {
@@ -229,21 +194,16 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         xaxis: {
             type: 'datetime',
         },
+        yaxis : {
+            labels: {
+                "formatter": function (val) {
+                    return val.toFixed(2)
+                }
+            }
+        }
     });
 
-    const [seriesLine, setSeriesLine] = useState([
-        {
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
+
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -278,6 +238,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         },
         yaxis: {
             tickAmount: 2,
+            labels: {
+                "formatter": function (val) {
+                    return val.toFixed(2)
+                }
+            }
         },
     });
 
@@ -309,8 +274,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         type="select"
                         name="select"
                         id="exampleSelect"
-                        onChange={e=>{
-                            
+                        onChange={e => {
+
                             setConsumption(e.target.value)
                         }}
                         className="font-weight-bold model-sensor-energy-filter mr-2"
