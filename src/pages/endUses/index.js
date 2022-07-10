@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import useSortableData from '../../helpers/useSortableData';
+import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
@@ -18,7 +19,8 @@ const EndUses = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const { bldgId } = useParams();
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const [endUsage, seteEndUsage] = useState([
