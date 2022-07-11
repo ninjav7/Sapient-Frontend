@@ -155,7 +155,6 @@ const IndividualActiveDevice = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
@@ -264,7 +263,6 @@ const IndividualActiveDevice = () => {
                         </div>
                         <div className="col-8">
                             <h5 className="device-title">Sensors ({sensors.length})</h5>
-                            {/* <h5 className="device-title">Sensors (1)</h5> */}
                             <div className="mt-2">
                                 <div className="active-sensor-header">
                                     <div className="search-container mr-2">
