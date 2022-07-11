@@ -261,7 +261,7 @@ const PassiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 

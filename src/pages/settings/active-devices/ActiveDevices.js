@@ -414,7 +414,7 @@ const ActiveDevices = () => {
                     let onlineData = [];
                     let offlineData = [];
 
-                    response.forEach((record) => {
+                    response.data.forEach((record) => {
                         record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                     });
 
@@ -460,118 +460,6 @@ const ActiveDevices = () => {
         ];
         setSelectedOptions(arr);
     }, []);
-
-    useEffect(() => {
-        console.log('selectedOptions => ', selectedOptions);
-    });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?page_size=${pageNo}&page_no=${pageSize}`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 let data = res.data;
-    //                 setActiveDeviceData(data);
-
-    //                 let onlineData = [];
-    //                 let offlineData = [];
-
-    //                 data.forEach((record) => {
-    //                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-    //                 });
-
-    //                 setOnlineDeviceData(onlineData);
-    //                 setOfflineDeviceData(offlineData);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-    //     fetchActiveDeviceData();
-    // });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-    //                 setActiveDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-
-    //     const fetchOnlineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=true`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOnlineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Online Devices');
-    //         }
-    //     };
-
-    //     const fetchOfflineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=false`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOfflineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Offline Devices');
-    //         }
-    //     };
-
-    //     const fetchLocationData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //                 setLocationData(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch Location Data');
-    //         }
-    //     };
-
-    //     fetchActiveDeviceData();
-    //     fetchOnlineDeviceData();
-    //     fetchOfflineDeviceData();
-    //     fetchLocationData();
-    // }, []);
 
     return (
         <React.Fragment>
