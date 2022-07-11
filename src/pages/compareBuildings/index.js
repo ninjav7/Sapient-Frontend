@@ -212,8 +212,8 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
                         <th className="table-heading-style">
                             <button
                                 type="button"
-                                onClick={() => requestSort('energy_density')}
-                                className={getClassNamesFor('energy_density')}
+                                onClick={() => requestSort('change')}
+                                className={getClassNamesFor('change')}
                                 style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
                                 >
                             % Change
@@ -223,8 +223,8 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
                         <th className="table-heading-style">
                                 <button
                                 type="button"
-                                onClick={() => requestSort('hvac_density')}
-                                className={getClassNamesFor('hvac_density')}
+                                onClick={() => requestSort('hvac_consumption')}
+                                className={getClassNamesFor('hvac_consumption')}
                                 style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
                                 >
                             HVAC Consumption
@@ -234,8 +234,8 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
                         <th className="table-heading-style">
                             <button
                                 type="button"
-                                onClick={() => requestSort('hvac_density')}
-                                className={getClassNamesFor('hvac_density')}
+                                onClick={() => requestSort('hvac_per')}
+                                className={getClassNamesFor('hvac_per')}
                                 style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
                                 >
                             % Change
@@ -257,8 +257,8 @@ const BuildingTable = ({ buildingsData, selectedOptions}) => {
                         <th className="table-heading-style">
                             <button
                                 type="button"
-                                onClick={() => requestSort('total_consumption')}
-                                className={getClassNamesFor('total_consumption')}
+                                onClick={() => requestSort('total_per')}
+                                className={getClassNamesFor('total_per')}
                                 style={{border:"none",backgroundColor: "white",fontWeight: "bolder",fontSize: "16px"}} 
                                 >
                             % Change
