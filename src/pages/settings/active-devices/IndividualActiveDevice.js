@@ -61,12 +61,14 @@ const IndividualActiveDevice = () => {
         setUpdatedSensorData(obj);
     };
     const handleChartShow = (id) => {
+        console.log('handleChartShow id => ', id);
         setSensorId(id);
         setShowChart(true);
         let obj = sensors.find((o) => o.id === id);
         setSensorData(obj);
         fetchSensorGraphData(id);
     };
+    
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
@@ -79,7 +81,7 @@ const IndividualActiveDevice = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveData(response.data[0]);
-                    localStorage.setItem("identifier", response.data[0].identifier);
+                    localStorage.setItem('identifier', response.data[0].identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -145,7 +147,6 @@ const IndividualActiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -157,7 +158,7 @@ const IndividualActiveDevice = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -176,8 +177,6 @@ const IndividualActiveDevice = () => {
             console.log('Failed to fetch Sensor Graph data');
         }
     };
-    //     fetchSensorGraphData();
-    // }, [sensorId]);
 
     return (
         <>
