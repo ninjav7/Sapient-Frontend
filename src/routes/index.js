@@ -524,6 +524,14 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
+            path: '/settings/active-devices/provision',
+            name: 'Provision Devices',
+            component: Provision,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
             path: '/settings/active-devices',
             name: 'Active Devices',
             component: ActiveDevices,

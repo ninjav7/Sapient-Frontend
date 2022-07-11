@@ -6,7 +6,25 @@
     background: #f9fafb;
     border-bottom: 1px solid #eaecf0;
 }
-
+.sub-heading{
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    color:#000;
+}
+.email-head{
+    color:blue;
+    font-weight:600;
+}
+.button-hide{
+    background-color: white;
+    border: none;
+}
+.my-modal{
+    width:300px !important;
+    max-width:300px !important;
+}
 .passive-device-style {
     width: 88px;
     height: 18px;
