@@ -12,13 +12,14 @@ import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Ne
 import { dateFormatHandler } from '../../utils/helper';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import { ConsoleView } from 'react-device-detect';
 import { Cookies } from 'react-cookie';
 
 const TimeOfDay = () => {
-    const { bldgId } = useParams();
-
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 

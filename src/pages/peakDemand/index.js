@@ -10,41 +10,10 @@ import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
 import moment from 'moment';
-
-// const BuildingPeakButton = (props) => {
-//     return (
-//         <>
-//             <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
-//             <p className="card-text card-content-style">
-//                 {props.description}
-//                 <span className="card-unit-style">
-//                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
-//                     {props.consumptionNormal && (
-//                         <button
-//                             className="button-success text-success font-weight-bold font-size-5"
-//                             style={{ width: '100%' }}>
-//                             <i className="uil uil-chart-down">
-//                                 <strong>{props.value} %</strong>
-//                             </i>
-//                         </button>
-//                     )}
-//                     {!props.consumptionNormal && (
-//                         <button
-//                             className="button-danger text-danger font-weight-bold font-size-5"
-//                             style={{ width: '100%' }}>
-//                             <i className="uil uil-arrow-growth">
-//                                 <strong>{props.value} %</strong>
-//                             </i>
-//                         </button>
-//                     )}
-//                 </span>
-//             </p>
-//         </>
-//     );
-// };
 
 const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
     return (
@@ -243,7 +212,8 @@ const PeakDemand = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const { bldgId } = useParams();
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
