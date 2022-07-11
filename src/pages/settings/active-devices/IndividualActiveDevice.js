@@ -3,7 +3,6 @@ import { FormGroup } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
-import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -15,8 +14,6 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
-import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
-import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import './style.css';
 
 const IndividualActiveDevice = () => {
@@ -60,7 +57,6 @@ const IndividualActiveDevice = () => {
         obj[key] = value;
         setUpdatedSensorData(obj);
     };
-    
     const handleChartShow = (id) => {
         setSensorId(id);
         setShowChart(true);
@@ -68,7 +64,6 @@ const IndividualActiveDevice = () => {
         setSensorData(obj);
         fetchSensorGraphData(id);
     };
-
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
@@ -98,55 +93,7 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    let sampleSensors = [
-                        {
-                            id: '',
-                            name: 'Stream sensor 0',
-                            device_linked: 'Stream Device 0',
-                            device_linked_id: '62c54bad97c7cbb9c480fe97',
-                            sensor_type: 'passive',
-                            breaker_link: '',
-                            equipment: 'Stream Equipment',
-                            equipment_id: '',
-                            sapient_id: '',
-                        },
-                        {
-                            id: '',
-                            name: 'Stream sensor 616',
-                            device_linked: 'Stream Device 0',
-                            device_linked_id: '62c54bad97c7cbb9c480fe97',
-                            sensor_type: 'active',
-                            breaker_link: '',
-                            equipment: 'Stream Equipment',
-                            equipment_id: '',
-                            sapient_id: '',
-                        },
-                        {
-                            id: '62c54c9a97c7cbb9c481363b',
-                            name: 'Stream sensor 631',
-                            device_linked: 'Stream Device 0',
-                            device_linked_id: '62c54bad97c7cbb9c480fe97',
-                            sensor_type: 'passive',
-                            breaker_link: '',
-                            equipment: 'Stream Equipment',
-                            equipment_id: '62c43bf46118a73d53623c55',
-                            sapient_id: '',
-                        },
-                        {
-                            id: '62c779ba7722ef492975bc92',
-                            name: 'Stream sensor 0',
-                            device_linked: 'Stream Device 0',
-                            device_linked_id: '62c54bad97c7cbb9c480fe97',
-                            sensor_type: 'active',
-                            breaker_link: '',
-                            equipment: 'Stream Equipment',
-                            equipment_id: '62c43bf46118a73d53623c55',
-                            sapient_id: '',
-                        },
-                    ];
-                    // setSensors(sampleSensors);
-                    // setSensors(response);
-                    setSensors(sampleSensors);
+                    setSensors(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -194,19 +141,20 @@ const IndividualActiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // useEffect(() => {
     const fetchSensorGraphData = async (id) => {
         try {
-            console.log('fetchSensorGraphData function execution started!');
-            let endDate = new Date();
+            let endDate = new Date(); // today
             let startDate = new Date();
             startDate.setDate(startDate.getDate() - 7);
 
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
+                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -225,6 +173,8 @@ const IndividualActiveDevice = () => {
             console.log('Failed to fetch Sensor Graph data');
         }
     };
+    //     fetchSensorGraphData();
+    // }, [sensorId]);
 
     return (
         <>
@@ -375,71 +325,26 @@ const IndividualActiveDevice = () => {
                                 </div>
                             </div>
 
-                            <div className="socket-container">
-                                <div className="mt-2 sockets-slots-container">
-                                    {sensors.map((record, index) => {
-                                        return (
-                                            <>
-                                                {record.sensor_type === 'active' && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#3C6DF5"
-                                                            />
-                                                        </div>
-                                                        {record.equipment_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                {record.sensor_type === 'passive' && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#EAECF0"
-                                                            />
-                                                        </div>
-                                                        {record.equipment_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                            <div className="mt-2 socket-image-container"></div>
 
                             {sensors.map((record, index) => {
                                 return (
                                     <>
+                                        {/* {record.equipment_id === '' ? (
+                                            <div className="sensor-container-style-notAttached mt-3">
+                                                <div className="sensor-data-style">
+                                                    <span className="sensor-data-no">{index + 1}</span>
+                                                    <span className="sensor-data-title">No Equipment</span>
+                                                </div>
+                                                <div className="sensor-data-style-right">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-default passive-edit-style">
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : ( */}
                                         <div className="sensor-container-style mt-3">
                                             <div className="sensor-data-style">
                                                 <span className="sensor-data-no">{index + 1}</span>
@@ -460,6 +365,7 @@ const IndividualActiveDevice = () => {
                                                 </button>
                                             </div>
                                         </div>
+                                        {/* )} */}
                                     </>
                                 );
                             })}

@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Input } from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Table,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownToggle,
+    DropdownItem,
+    Button,
+    Input,
+} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
@@ -13,6 +25,9 @@ import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
+    // console.log(sensorData.name);
+    // console.log(sensorData.id);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
