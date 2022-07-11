@@ -1,19 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    FormGroup,
-    Label,
-    Input,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button, FormGroup, Label, Input } from 'reactstrap';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
@@ -25,9 +11,11 @@ import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
-const BuildingTable = ({ buildingsData }) => {
+const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
         <Card>
             <CardBody>
@@ -39,26 +27,59 @@ const BuildingTable = ({ buildingsData }) => {
                             <th>Devices</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {buildingsData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <th scope="row">
-                                        <Link to="#">
-                                            <a className="buildings-name">{record.building_name}</a>
-                                        </Link>
-                                        <span className="badge badge-soft-secondary label-styling mr-2">
-                                            {record.building_type}
-                                        </span>
-                                    </th>
-                                    <td className="font-weight-bold">
-                                        {record.building_size.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    {isDataProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
-                                    <td className="font-weight-bold">{0}</td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {buildingsData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <th scope="row">
+                                            <Link to="/settings/general">
+                                                <div
+                                                    className="buildings-name"
+                                                    onClick={() => {
+                                                        localStorage.setItem('buildingId', record.building_id);
+                                                        localStorage.setItem('buildingName', record.building_name);
+                                                        BuildingStore.update((s) => {
+                                                            s.BldgId = record.building_id;
+                                                            s.BldgName = record.building_name;
+                                                        });
+                                                    }}>
+                                                    {record.building_name}
+                                                </div>
+                                            </Link>
+                                            <span className="badge badge-soft-secondary label-styling mr-2">
+                                                {record.building_type}
+                                            </span>
+                                        </th>
+                                        <td className="font-weight-bold">
+                                            {record.building_size.toLocaleString(undefined, {
+                                                maximumFractionDigits: 2,
+                                            })}
+                                        </td>
+                                        <td className="font-weight-bold">{0}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -75,6 +96,7 @@ const Buildings = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isDataProcessing, setIsDataProcessing] = useState(true);
 
     // building type
     const [buildingType, setBuildingType] = useState([
@@ -100,7 +122,6 @@ const Buildings = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
@@ -137,23 +158,27 @@ const Buildings = () => {
     }, []);
 
     useEffect(() => {
-        console.log('createBuildingData => ', createBuildingData);
-    });
-
-    useEffect(() => {
         const fetchBuildingData = async () => {
             try {
+                setIsDataProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    setBuildingsData(res.data);
+                    let activeBuildings = [];
+                    res.data.forEach((bldg) => {
+                        if (bldg.active) {
+                            activeBuildings.push(bldg);
+                        }
+                    });
+                    setBuildingsData(activeBuildings);
+                    setIsDataProcessing(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsDataProcessing(false);
                 console.log('Failed to fetch Building Data List');
             }
         };
@@ -203,7 +228,11 @@ const Buildings = () => {
 
             <Row>
                 <Col lg={6}>
-                    <BuildingTable buildingsData={buildingsData} />
+                    <BuildingTable
+                        buildingsData={buildingsData}
+                        isDataProcessing={isDataProcessing}
+                        setIsDataProcessing={setIsDataProcessing}
+                    />
                 </Col>
             </Row>
 
