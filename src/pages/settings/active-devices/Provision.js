@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button, Input} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Alert, Input} from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
+import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -51,7 +51,11 @@ const Provision = () => {
     const [showlink, setShowLink] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
+    const [linkedAccount, setLinkedAccount]=useState([]);
+    const [provisioningData, setProvisioningData]=useState([]);
+    const [total, setTotal]=useState([]);
+    const [email,setEmail]=useState("");
+    const [password,setPassword]=useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
 
@@ -75,6 +79,7 @@ const Provision = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'active',
     });
+    const [auth,setAuth]=useState("");
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -83,7 +88,41 @@ const Provision = () => {
         obj[key] = value;
         setCreateDeviceData(obj);
     };
+    const [error, setError]=useState(false);
+    const [message,setMessage]=useState("");
+    
+    const handleAuthorize =()=>{
+        let authData={
+            username:email,
+            password:password
+        }
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?username=${email}&password=${password}`;
 
+            axios
+                .get(`${BaseUrl}${kasaAuthenticate}${params}`, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                    if(res.status===200){
+                        setShowLink(false);
+                        console.log(res.data.id);
+                        localStorage.setItem("kasa_id",res.data.id)
+                        setAuth(res.data.id);
+                    }
+                });
+
+        } catch (error) {
+            setError(true);
+            console.log('Failed to Authenticate');
+        }
+    }  
    
     useEffect(() => {
         setShow(false);
@@ -123,6 +162,74 @@ const Provision = () => {
         // setSelectedOptions(arr);
     }, []);
 
+    useEffect(()=>{
+        console.log(auth);
+
+            const getKasaAccount = () => {
+                try {
+                    let header = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    axios
+                    .get(`${BaseUrl}${get_kasa_account}`, {
+                        headers: header,
+                    })
+                    .then((res) => {
+                        console.log(res.data.data);
+                        setLinkedAccount(res.data.data);
+                        let Hs=0;
+                        let kp=0;
+                        let Hs1=0;
+                        let socket=0;
+                        let capy=0;
+                        res.data.data.forEach(ele => {
+                            Hs=Hs+ele.HS110s;
+                            kp=kp+ele.KP115s;
+                            Hs1=Hs1+ele.HS300s;
+                            socket=socket+ele.Socket;
+                            capy=capy+ele.Remaining_Capacity;
+                        });
+                        let arr={
+                            HS110s:Hs,
+                            KP115s:kp,
+                            HS300s:Hs1,
+                            Socket:socket,
+                            Remaining_Capacity:capy
+                        }
+                        setTotal(arr);
+                        console.log(arr)
+                    });
+                } catch (error) {
+                    console.log('Failed to fetch kasa account');
+                }
+      }
+      const getKasaDevices=()=>{
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            // let params = `?kasa_account_id=${auth}`;
+            axios
+            .get(`${BaseUrl}${get_kasa_devices}`, {
+                headers: header,
+            })
+            .then((res) => {
+                console.log(res.data.data);
+                setProvisioningData(res.data.data);
+            });
+        } catch (error) {
+            console.log('Failed to fetch kasa account');
+        }
+
+      }
+      getKasaAccount();
+      getKasaDevices();
+
+    },[])
     useEffect(() => {
         console.log('selectedOptions => ', selectedOptions);
     });
@@ -165,38 +272,36 @@ const Provision = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {deviceData.map((record, index) => {
-                            return ( */}
+                                                
+                        {linkedAccount.length!==0?
+                            <>
+                                {linkedAccount.map((record, index) => {
+                                return ( 
                                 <tr >
                                         <td scope="row" className="email-head">
-                                            kasa+sapientlab01@sapient.industries
+                                            {record.email}
                                         </td>
-                                        <td>0</td>
-                                        <td>19</td>
-                                        <td>10</td>
-                                        <td>31</td>
-                                        <td>255</td>
-                                </tr>
-                                <tr>
-                                        <td scope="row" className="email-head">
-                                            kasa+sapientlab02@sapient.industries
-                                        </td>
-                                        <td>0</td>
-                                        <td>19</td>
-                                        <td>10</td>
-                                        <td>31</td>
-                                        <td>255</td>
-                                </tr>
+                                        <td>{record.HS110s}</td>
+                                        <td>{record.KP115s}</td>
+                                        <td>{record.HS300s}</td>
+                                        <td>{record.Socket}</td>
+                                        <td>{record.Remaining_Capacity}</td>
+                                </tr>)})}
                                 <tr>
                                         <td scope="row" className="email-head">
                                             Totals
                                         </td>
-                                        <td>0</td>
-                                        <td>19</td>
-                                        <td>10</td>
-                                        <td>31</td>
-                                        <td>255</td>
+                                        <td>{total.HS110s}</td>
+                                        <td>{total.KP115s}</td>
+                                        <td>{total.HS300s}</td>
+                                        <td>{total.Socket}</td>
+                                        <td>{total.Remaining_Capacity}</td>
                                 </tr>
+                        </>:
+                        <tr>
+                            <td colSpan={5}>No Account linked</td>
+                        </tr>
+                        }
                     </tbody>
                 </Table>
 
@@ -279,8 +384,8 @@ const Provision = () => {
                 <div className="nav-header-container" style={{ marginLeft: '20px' }}>
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
-                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress(6)</span></button>
-                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed(5)</span></button>
+                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({provisioningData.length})</span></button>
+                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed({provisioningData.length})</span></button>
                     </div>
                 </div>
             </div>
@@ -297,80 +402,27 @@ const Provision = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {deviceData.map((record, index) => {
-                            return ( */}
+                    {provisioningData.map((record, index) => {
+                            return (
+                         
                                 <tr >
                                         <td scope="row" >
                                         <FontAwesomeIcon icon={faGlobe} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Ready
                                         </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Pending</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Retry
-                          </button></td>
+                                        <td>{record.device_mac}</td>
+                                        <td>{record.vendor}</td>
+                                        <td>{record.model}</td>
+                                        <td>{record.assigned}</td>
+                                        <td>{record.action===true?
+                                            <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
+                                             Already Added
+                              </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
+                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Add
+                          </button>   
+                                    }</td>
                                 </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faClock} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Queued
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Provisionor 9</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg" /> Retry
-                          </button></td>
-                                </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Provisionor 10</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg" /> Retry
-                          </button></td>
-                                </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faCloudArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Awaiting Sync
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Provisionor 11</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Retry
-                          </button></td>
-                                </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faGlobe} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Ready
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Pending</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg" /> Retry
-                          </button></td>
-                                </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faGlobe} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Ready
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>Pending</td>
-                                        <td><button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                        <FontAwesomeIcon icon={faRefresh} size="lg"/>  Retry
-                          </button></td>
-                                </tr>
+                            )})}
+              
                     </tbody>
                 </Table>:""}
                 {selected ===1?
@@ -385,9 +437,7 @@ const Provision = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {deviceData.map((record, index) => {
-                            return ( */}
-                                <tr >
+                                {/* <tr >
                                         <td scope="row" >
                                         <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
                                         </td>
@@ -395,43 +445,20 @@ const Provision = () => {
                                         <td>TP-Link</td>
                                         <td>KP115s</td>
                                         <td>kasa+sapientlab01@sapient.industries</td>
-                                </tr>
+                                </tr> */}
+                                {provisioningData.map((record, index) => {
+                            return (
+                         
                                 <tr >
                                         <td scope="row" >
                                         <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
                                         </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>kasa+sapientlab01@sapient.industries</td>
+                                        <td>{record.device_mac}</td>
+                                        <td>{record.vendor}</td>
+                                        <td>{record.model}</td>
+                                        <td>{record.email}</td>
                                 </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>kasa+sapientlab01@sapient.industries</td>
-                                </tr>
-                                <tr >
-                                        <td scope="row">
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
-                                         </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>kasa+sapientlab01@sapient.industries</td>
-                                </tr>
-                                <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>kasa+sapientlab01@sapient.industries</td>
-                                </tr>
+                            )})}
                     </tbody>
                 </Table>:""}
 
@@ -509,6 +536,9 @@ const Provision = () => {
                 <Modal.Body>
                     <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
                     <Form>
+                    {error && <Alert color="danger" isOpen={error ? true : false}>
+                                                    <div>{message}</div>
+                                                </Alert>}
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                            
                             <Form.Control
@@ -516,15 +546,18 @@ const Provision = () => {
                                 placeholder="Email"
                                 className="font-weight-bold"
                                 autoFocus
+                                onChange={(e)=>{setEmail(e.target.value)}}
                             />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             
                             <Input
-                                type="text"
+                                type="password"
                                 placeholder="Password"
-                                className="font-weight-bold">
+                                className="font-weight-bold"
+                                onChange={(e)=>{setPassword(e.target.value)}}
+                                >
                                 {/* <option selected>Enter Password</option> */}
                                 {/* {activeDeviceModal.map((record) => {
                                     return <option value={record.value}>{record.label}</option>;
@@ -538,9 +571,7 @@ const Provision = () => {
                 <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
                     <button
                         className='btn btn-primary'
-                        onClick={() => {
-                            setShowLink(false);
-                        }}
+                        onClick={handleAuthorize}
                         style={{width:"100%"}}
                         >Authorize
                     </button>
