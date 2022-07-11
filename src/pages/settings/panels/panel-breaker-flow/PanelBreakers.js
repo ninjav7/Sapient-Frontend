@@ -214,7 +214,7 @@ const PanelBreakers = () => {
     });
 
     return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div style={{ width: '100%', height: '90vh', position: 'relative' }}>
             {permission && (
                 <>
                     <Button
@@ -235,10 +235,10 @@ const PanelBreakers = () => {
             )}
             <ReactFlow
                 elements={elements}
-                onElementClick={onElementClick}
-                onElementsRemove={onElementsRemove}
+                // onElementClick={onElementClick}
+                // onElementsRemove={onElementsRemove}
                 onConnect={onConnect}
-                onNodeDragStop={onNodeDragStop}
+                // onNodeDragStop={onNodeDragStop}
                 style={{ background: bgColor }}
                 onLoad={onLoad}
                 nodeTypes={nodeTypes}
@@ -251,7 +251,7 @@ const PanelBreakers = () => {
                 onNodeMouseEnter={handleMouseEnter}
                 // edgeTypes={edgeTypes}
                 edges={initialEdges}>
-                <ContextMenu
+                {/* <ContextMenu
                     isOpen={isOpen}
                     position={position}
                     onMouseLeave={() => setIsOpen(false)}
@@ -267,7 +267,7 @@ const PanelBreakers = () => {
                         if (n.type === 'selectorNode') return bgColor;
                         return '#fff';
                     }}
-                />
+                /> */}
             </ReactFlow>
         </div>
     );
