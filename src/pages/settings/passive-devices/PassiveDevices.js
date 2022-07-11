@@ -22,9 +22,18 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
+const PassiveDevicesTable = ({
+    deviceData,
+    nextPageData,
+    previousPageData,
+    paginationData,
+    isDeviceProcessing,
+    setIsDeviceProcessing,
+}) => {
     return (
         <Card>
             <CardBody>
@@ -38,35 +47,71 @@ const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, pagin
                             <th>Sensors</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {deviceData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <td scope="row" className="text-center">
-                                        {record.status === 'Online' && (
-                                            <div className="icon-bg-styling">
-                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                            </div>
-                                        )}
-                                        {record.status === 'Offline' && (
-                                            <div className="icon-bg-styling-slash">
-                                                <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                            </div>
-                                        )}
+                    {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
-                                    <Link
-                                        to={{
-                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
-                                        }}>
-                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                    </Link>
-                                    <td>{record.model}</td>
-                                    <td>{record.location}</td>
-                                    <td>{record.sensor_number}</td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {deviceData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <td scope="row" className="text-center">
+                                            {record.status === 'Online' && (
+                                                <div className="icon-bg-styling">
+                                                    <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                </div>
+                                            )}
+                                            {record.status === 'Offline' && (
+                                                <div className="icon-bg-styling-slash">
+                                                    <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <Link
+                                            to={{
+                                                pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                            }}>
+                                            <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                        </Link>
+                                        <td>{record.model}</td>
+                                        <td>{record.location}</td>
+                                        <td>{record.sensor_number}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
                 <div className="page-button-style">
                     <button
@@ -129,6 +174,7 @@ const PassiveDevices = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
     });
+    const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -167,6 +213,7 @@ const PassiveDevices = () => {
             if (path === null) {
                 return;
             }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -186,9 +233,11 @@ const PassiveDevices = () => {
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
@@ -198,6 +247,7 @@ const PassiveDevices = () => {
             if (path === null) {
                 return;
             }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -217,9 +267,11 @@ const PassiveDevices = () => {
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
@@ -227,6 +279,7 @@ const PassiveDevices = () => {
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
+                setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -247,9 +300,11 @@ const PassiveDevices = () => {
 
                     setOnlineDeviceData(onlineData);
                     setOfflineDeviceData(offlineData);
+                    setIsDeviceProcessing(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsDeviceProcessing(false);
                 console.log('Failed to fetch all Passive devices');
             }
         };
@@ -314,10 +369,6 @@ const PassiveDevices = () => {
         };
         updateBreadcrumbStore();
     }, []);
-
-    useEffect(() => {
-        console.log('createDeviceData => ', createDeviceData);
-    });
 
     return (
         <React.Fragment>
@@ -430,6 +481,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -438,6 +491,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -446,6 +501,8 @@ const PassiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                 </Col>

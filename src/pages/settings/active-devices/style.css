@@ -540,13 +540,14 @@
 }
 
 .page-button-style {
-    width: 40vw;
+    /* background-color: red; */
+    width: 100%;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    align-items: center;
     align-content: stretch;
+    padding-bottom: 10px;
 }
 
 .align-options-center {
