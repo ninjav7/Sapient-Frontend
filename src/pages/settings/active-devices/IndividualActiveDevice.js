@@ -68,7 +68,7 @@ const IndividualActiveDevice = () => {
         setSensorData(obj);
         fetchSensorGraphData(id);
     };
-    
+
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
