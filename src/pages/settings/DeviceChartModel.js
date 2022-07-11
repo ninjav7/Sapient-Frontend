@@ -250,7 +250,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
             <div className="chart-model-header">
                 <div>
-                    <div className="model-sensor-date-time">00-08-20-83-53-D1</div>
+                    <div className="model-sensor-date-time">{localStorage.getItem("identifier")}</div>
                     <div>
                         <span className="model-sensor-name mr-2">{sensorData.name}</span>
                         <span className="model-equip-name">{sensorData.equipment}</span>

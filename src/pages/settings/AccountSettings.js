@@ -89,7 +89,7 @@ const AccountSettings = () => {
                 </Col>
             </Row>
 
-            <Row>
+            {/* <Row>
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
@@ -123,7 +123,7 @@ const AccountSettings = () => {
                         </CardBody>
                     </Card>
                 </Col>
-            </Row>
+            </Row> */}
         </React.Fragment>
     );
 };
