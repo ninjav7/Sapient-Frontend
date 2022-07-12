@@ -147,6 +147,20 @@
     gap: 15px;
 }
 
+.breaker-link-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    gap: 10px;
+    width: 25px;
+    height: 25px;
+    background: #dbe8fe;
+    border: 1px solid #bed5fe;
+    border-radius: 3px;
+}
+
 .edit-breaker-no {
     font-family: 'Inter' !important;
     font-style: normal !important;

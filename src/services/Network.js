@@ -21,6 +21,7 @@ export const generalBuildingDetail = '/api/config/general/building_details';
 export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
+export const generalBldgDelete = '/api/config/general/delete_building';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
@@ -62,9 +63,6 @@ export const compareBuildings = '/api/energy/energy/compare_building';
 export const getBuildings = '/api/config/get_buildings';
 export const createBuilding = '/api/config/create_building';
 export const createDevice = '/api/config/devices/create_device';
-
-// general settings
-export const deleteBuilding = '/api/config/general/delete_building';
 
 // layout
 export const getLayouts = '/api/config/get_layout';

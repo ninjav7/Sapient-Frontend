@@ -1,24 +1,60 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button } from 'reactstrap';
-// import Button from '@material-ui/core/Button';
-import elementsArr from './elements';
+import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import { ContextMenu } from './contextMenu';
 import './styles.css';
-/**
- *    imported these two component ***********************
- */
 import CustomEdge from './CustomEdge';
 import CustomNodeSelector from './CustomNodeSelector';
-/***************************************************** */
-
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
+import { ComponentStore } from '../../../../store/ComponentStore';
+import { BreadcrumbStore } from '../../../../store/BreadcrumbStore';
 import './index.css';
 
-const initBgColor = '#1A192B';
-
+const initBgColor = 'grey';
 const connectionLineStyle = { stroke: '#fff' };
 const snapGrid = [20, 20];
+
+const BreakersComponent = () => {
+    return (
+        <FormGroup className="form-group row m-2 ml-4 mb-4">
+            <div className="breaker-container">
+                <div className="sub-breaker-style">
+                    <div className="breaker-content-middle">
+                        <div className="breaker-index">1</div>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="dot-status"></div>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="breaker-content">
+                            <span>100A</span>
+                            <span>200V</span>
+                        </div>
+                    </div>
+                    <div className="breaker-equipName-style">
+                        <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="edit-icon-bg-styling mr-2">
+                            <i className="uil uil-pen"></i>
+                        </div>
+                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                    </div>
+                </div>
+            </div>
+        </FormGroup>
+    );
+};
+
+const BreakersLink = () => {
+    return (
+        <div className="breaker-link-container">
+            {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
+        </div>
+    );
+};
 
 //added new onload function
 const onLoad = (reactFlowInstance) => {
@@ -52,12 +88,135 @@ const initialEdges = [
 
 const nodeTypes = {
     customnode: CustomNodeSelector,
+    breakerContainer: BreakersComponent,
+    breakerLink: BreakersLink,
 };
-// **************************************
+
 const PanelBreakers = () => {
     const [open, setOpen] = useState(false);
     const [reactflowInstance, setReactflowInstance] = useState(null);
-    const [elements, setElements] = useState([]); // main data elements for save
+    const [elements, setElements] = useState([
+        {
+            id: 'horizontal-1',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 1' },
+            position: { x: 250, y: 60 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-3',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 3' },
+            position: { x: 250, y: 140 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-5',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 5' },
+            position: { x: 250, y: 220 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-7',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 7' },
+            position: { x: 250, y: 300 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-2',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 2' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 60 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-4',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 4' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 140 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-6',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 6' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 220 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-8',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 8' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 300 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-24',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 120 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-46',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 200 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-68',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 280 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-13',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 120 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-35',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 200 },
+            draggable: false,
+        },
+        {
+            id: 'horizontal-57',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 280 },
+            draggable: false,
+        },
+    ]);
     const [bgColor, setBgColor] = useState(initBgColor);
     const [nodeData, setnodeData] = useState(null);
     const [inputChange, setinputChange] = useState('');
@@ -92,10 +251,6 @@ const PanelBreakers = () => {
         }
     };
 
-    useEffect(() => {
-        setElements(elementsArr);
-    }, []);
-
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -117,7 +272,7 @@ const PanelBreakers = () => {
         []
     );
 
-    // chnaged label in data
+    // changed label in data
     const onConnect = useCallback(
         (params) =>
             setElements((els) =>
@@ -194,6 +349,25 @@ const PanelBreakers = () => {
         }
     }, [inputChange]);
 
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Panel-Breakers',
+                        path: '/settings/panels/panelBreakersFlow',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
+
     const onContextMenu = (e) => {
         e.preventDefault();
         setIsOpen(true);
@@ -235,39 +409,28 @@ const PanelBreakers = () => {
             )}
             <ReactFlow
                 elements={elements}
-                // onElementClick={onElementClick}
-                // onElementsRemove={onElementsRemove}
                 onConnect={onConnect}
-                // onNodeDragStop={onNodeDragStop}
                 style={{ background: bgColor }}
                 onLoad={onLoad}
                 nodeTypes={nodeTypes}
                 onNodeContextMenu={onContextMenu}
                 connectionLineStyle={connectionLineStyle}
-                snapToGrid={true}
+                snapToGrid={false}
                 snapGrid={snapGrid}
-                maxZoom={2}
-                defaultZoom={1.5}
+                // maxZoom={2}
+                // defaultZoom={2.5}
                 onNodeMouseEnter={handleMouseEnter}
                 // edgeTypes={edgeTypes}
-                edges={initialEdges}>
+                edges={initialEdges}
+                zoomOnScroll={false}
+                panOnDrag={false}
+                zoomOnDoubleClick={false}>
                 {/* <ContextMenu
                     isOpen={isOpen}
                     position={position}
                     onMouseLeave={() => setIsOpen(false)}
                     actions={[{ label: 'Delete', effect: deleteNode }]}
-                />
-                <MiniMap
-                    nodeStrokeColor={(n) => {
-                        if (n.type === 'input') return '#0041d0';
-                        if (n.type === 'selectorNode') return bgColor;
-                        if (n.type === 'output') return '#ff0072';
-                    }}
-                    nodeColor={(n) => {
-                        if (n.type === 'selectorNode') return bgColor;
-                        return '#fff';
-                    }}
-                /> */}
+                />*/}
             </ReactFlow>
         </div>
     );

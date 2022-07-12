@@ -13,7 +13,7 @@ import {
     generalDateTime,
     generalOperatingHours,
     getBuildings,
-    deleteBuilding,
+    generalBldgDelete,
 } from '../../services/Network';
 import axios from 'axios';
 import moment from 'moment';
@@ -27,7 +27,7 @@ const General = () => {
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
+    const _ = require('lodash');
     const [isEditing, setIsEditing] = useState(false);
     const [buildingData, setBuildingData] = useState({
         building_id: '628dd795f28141b8a69f38bf',
@@ -102,6 +102,8 @@ const General = () => {
         kWh: 0,
         total_paid: 0,
     });
+    const [previousBldgData, setPreviousBldgData] = useState({});
+    const [bldgData, setBldgData] = useState({});
 
     useEffect(() => {
         const fetchBuildingData = async () => {
@@ -118,6 +120,8 @@ const General = () => {
                     if (data === undefined) {
                         return;
                     }
+                    setPreviousBldgData(data);
+                    setBldgData(data);
                     setInputField({
                         ...inputField,
                         active: data.active,
@@ -135,7 +139,6 @@ const General = () => {
                     });
                     setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
-                    console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
                     setWeekToggle({
@@ -209,11 +212,6 @@ const General = () => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
-                    // {
-                    //     label:'Account Settings',
-                    //     path:'/settings/account',
-                    //     active:false,
-                    // },
                     {
                         label: 'General',
                         path: '/settings/general',
@@ -358,6 +356,22 @@ const General = () => {
         });
     };
 
+    const handleSwitchChange = () => {
+        let obj = bldgData;
+        obj.active = !bldgData.active;
+        handleBldgSettingChanges('active', obj.active);
+    };
+
+    const handleBldgSettingChanges = (key, value) => {
+        if (key === 'active') {
+            let obj = Object.assign({}, bldgData);
+            obj[key] = value;
+            setBldgData(obj);
+        }
+        // let results = _.isEqual(bldgData, previousBldgData);
+        // console.log('SSR Compare Results => ', JSON.stringify(bldgData) === JSON.stringify(previousBldgData));
+    };
+
     const inputsDateHandler = (e) => {
         setTimeToggle(!timeToggle);
         console.log('helloo');
@@ -385,7 +399,7 @@ const General = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            axios.delete(`${BaseUrl}${deleteBuilding}/${bldgId}`, { headers }).then((res) => {
+            axios.delete(`${BaseUrl}${generalBldgDelete}/${bldgId}`, { headers }).then((res) => {
                 console.log(res.data);
                 setRender(!render);
             });
@@ -485,8 +499,11 @@ const General = () => {
 
                                     <FormGroup>
                                         <Switch
-                                            onChange={inputsActiveToggleHandler}
-                                            checked={activeToggle}
+                                            onChange={() => {
+                                                handleSwitchChange();
+                                                // handleBldgSettingChanges('active', e.target.value);
+                                            }}
+                                            checked={bldgData.active}
                                             onColor={'#2955E7'}
                                             uncheckedIcon={false}
                                             checkedIcon={false}
@@ -509,11 +526,11 @@ const General = () => {
                                                 type="text"
                                                 name="name"
                                                 id="buildingName"
-                                                onChange={inputsBuildingHandler}
+                                                // onChange={inputsBuildingHandler}
                                                 onBlur={EditBuildingHandler}
                                                 placeholder="Enter Building Name"
                                                 className="single-line-style font-weight-bold"
-                                                value={inputField.name}
+                                                value={bldgData.building_name}
                                             />
                                         </div>
                                     </FormGroup>
@@ -533,9 +550,9 @@ const General = () => {
                                                 type="select"
                                                 name="typee"
                                                 id="exampleSelect"
-                                                onChange={inputsBuildingHandler}
+                                                // onChange={inputsBuildingHandler}
                                                 onBlur={EditBuildingHandler}
-                                                value={inputField.typee}
+                                                value={bldgData.building_type}
                                                 className="font-weight-bold">
                                                 <option>Office Building</option>
                                                 <option>Residential Building</option>
@@ -559,13 +576,9 @@ const General = () => {
                                                 name="square_footage"
                                                 id="exampleNumber"
                                                 placeholder="Enter value"
-                                                onChange={inputsBuildingHandler}
-                                                // defaultValue={(24253).toLocaleString(undefined, {
-                                                //     maximumFractionDigits: 2,
-                                                // })}
+                                                // onChange={inputsBuildingHandler}
                                                 onBlur={EditBuildingHandler}
-                                                value={inputField.square_footage}
-                                                defaultValue={buildingData.building_size}
+                                                value={bldgData.building_size}
                                                 className="font-weight-bold"
                                             />
                                         </div>
@@ -597,10 +610,10 @@ const General = () => {
                                             name="street_address"
                                             id="userAddress1"
                                             placeholder="Address 1"
-                                            onChange={inputsAddressHandler}
+                                            // onChange={inputsAddressHandler}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold"
-                                            value={inputField.street_address}
+                                            value={bldgData.street_address}
                                         />
                                     </FormGroup>
 
@@ -614,9 +627,9 @@ const General = () => {
                                             id="userAddress2"
                                             placeholder="Address 2"
                                             className="font-weight-bold"
-                                            onChange={inputsAddressHandler}
+                                            // onChange={inputsAddressHandler}
                                             onBlur={EditAddressHandler}
-                                            value={inputField.address_2}
+                                            value={bldgData.address_2}
                                         />
                                     </FormGroup>
                                 </div>
@@ -632,9 +645,9 @@ const General = () => {
                                             id="userCity"
                                             placeholder="Enter your city"
                                             className="font-weight-bold"
-                                            onChange={inputsAddressHandler}
+                                            // onChange={inputsAddressHandler}
                                             onBlur={EditAddressHandler}
-                                            value={inputField.city}
+                                            value={bldgData.city}
                                         />
                                     </FormGroup>
 
@@ -646,7 +659,7 @@ const General = () => {
                                             type="select"
                                             name="state"
                                             id="userState"
-                                            defaultChecked={buildingData.state}
+                                            defaultChecked={bldgData.state}
                                             onChange={inputsAddressHandler}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold">
@@ -664,8 +677,8 @@ const General = () => {
                                             name="zip_code"
                                             id="useZipCode"
                                             placeholder="Enter zip code"
-                                            value={inputField.zip_code}
-                                            onChange={inputsAddressHandler}
+                                            value={bldgData.zip_code}
+                                            // onChange={inputsAddressHandler}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold"
                                         />
@@ -692,24 +705,15 @@ const General = () => {
                                         <h6 className="building-content-title">Timezone</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="building-content-title">{inputField.timezone}</h6>
+                                        <h6 className="building-content-title">{bldgData.timezone}</h6>
                                     </div>
                                     <div className="single-line-style">
                                         <h6 className="building-content-title">Use 24-hour Clock</h6>
                                     </div>
                                     <div>
-                                        {/* <div className="custom-control custom-switch switch-style">
-                                            <input
-                                                type="checkbox"
-                                                className="custom-control-input"
-                                                id="24HourClock"
-                                                readOnly
-                                            />
-                                            <label className="custom-control-label" htmlFor="24HourClock" />
-                                        </div> */}
                                         <Switch
-                                            onChange={inputsDateHandler}
-                                            checked={timeToggle}
+                                            // onChange={inputsDateHandler}
+                                            checked={bldgData.time_format}
                                             onColor={'#2955E7'}
                                             name="time_format"
                                             uncheckedIcon={false}
