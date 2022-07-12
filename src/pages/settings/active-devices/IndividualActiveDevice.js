@@ -25,6 +25,8 @@ import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const IndividualActiveDevice = () => {
@@ -53,6 +55,7 @@ const IndividualActiveDevice = () => {
     const [activeData, setActiveData] = useState({});
     const [sensors, setSensors] = useState([]);
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
+    const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentTypeDevices, setEquipmentTypeDevices] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
@@ -119,6 +122,7 @@ const IndividualActiveDevice = () => {
                     let response = res.data;
                     console.log('Sensor Data => ', response);
                     setSensors(response);
+                    setIsFetchingSensorData(false);
                 });
             } catch (error) {
                 console.log(error);
@@ -178,6 +182,7 @@ const IndividualActiveDevice = () => {
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setSensors(response);
+                    setIsFetchingSensorData(false);
                 });
             } catch (error) {
                 console.log(error);
@@ -248,6 +253,7 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setSensors([]);
+            setIsFetchingSensorData(true);
             let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
             await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
@@ -469,50 +475,56 @@ const IndividualActiveDevice = () => {
                                 </div>
                             </div> */}
 
-                            {sensors.map((record, index) => {
-                                return (
-                                    <>
-                                        <div className="sensor-container-style mt-3">
-                                            <div className="sensor-data-style">
-                                                <span className="sensor-data-no">{index + 1}</span>
-                                                <span className="sensor-data-title">
-                                                    {record.equipment_type_name
-                                                        ? record.equipment_type_name
-                                                        : 'No Equipment'}
-                                                    {record.equipment_id === '' ? (
-                                                        ''
-                                                    ) : (
-                                                        <div className="ml-2 badge badge-soft-primary">
-                                                            {record.equipment}
-                                                        </div>
-                                                    )}
-                                                </span>
+                            {isFetchingSensorData ? (
+                                <div className="mt-4">
+                                    <Skeleton count={8} height={40} />
+                                </div>
+                            ) : (
+                                <>
+                                    {sensors.map((record, index) => {
+                                        return (
+                                            <div className="sensor-container-style mt-3">
+                                                <div className="sensor-data-style">
+                                                    <span className="sensor-data-no">{index + 1}</span>
+                                                    <span className="sensor-data-title">
+                                                        {record.equipment_type_name
+                                                            ? record.equipment_type_name
+                                                            : 'No Equipment'}
+                                                        {record.equipment_id === '' ? (
+                                                            ''
+                                                        ) : (
+                                                            <div className="ml-2 badge badge-soft-primary">
+                                                                {record.equipment}
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="sensor-data-style-right">
+                                                    <FontAwesomeIcon
+                                                        icon={faChartMixed}
+                                                        size="md"
+                                                        onClick={() => {
+                                                            handleChartShow(record.id);
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-default passive-edit-style"
+                                                        onClick={() => {
+                                                            fetchEquipmentTypeData();
+                                                            setSelectedEquipTypeId(record.equipment_type_id);
+                                                            setNewEquipTypeID(record.equipment_type_id);
+                                                            setSelectedSensorId(record.id);
+                                                            handleEquipmentShow();
+                                                        }}>
+                                                        Edit
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="sensor-data-style-right">
-                                                <FontAwesomeIcon
-                                                    icon={faChartMixed}
-                                                    size="md"
-                                                    onClick={() => {
-                                                        handleChartShow(record.id);
-                                                    }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-default passive-edit-style"
-                                                    onClick={() => {
-                                                        fetchEquipmentTypeData();
-                                                        setSelectedEquipTypeId(record.equipment_type_id);
-                                                        setNewEquipTypeID(record.equipment_type_id);
-                                                        setSelectedSensorId(record.id);
-                                                        handleEquipmentShow();
-                                                    }}>
-                                                    Edit
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
