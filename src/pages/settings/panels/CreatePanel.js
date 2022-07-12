@@ -22,7 +22,7 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
-import ReactFlow, { isEdge, addEdge, MiniMap, Controls } from 'react-flow-renderer';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
 import CustomEdge from './panel-breaker-flow/CustomEdge';
 import CustomNodeSelector from './panel-breaker-flow/CustomNodeSelector';
 import '../style.css';
@@ -249,10 +249,10 @@ const CreatePanel = () => {
         setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
     };
 
-    // const onElementsRemove = useCallback(
-    //     (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els)),
-    //     []
-    // );
+    const onElementsRemove = useCallback(
+        (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els)),
+        []
+    );
 
     const onElementClick = (event, node) => {
         handleClickOpen();
