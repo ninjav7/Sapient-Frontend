@@ -51,7 +51,7 @@ const Provision = () => {
     const [tabclass,setTabclass]=useState('');
     const [show, setShow] = useState(false);
     const [showlink, setShowLink] = useState(false);
-    const handleClose = () => setShow(false);
+    const handleClose = () => setShowLink(false);
     const handleShow = () => setShow(true);
     const [linkedAccount, setLinkedAccount]=useState([]);
     const [provisioningData, setProvisioningData]=useState([]);
@@ -668,7 +668,7 @@ useEffect(()=>{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showlink} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal" >
+            <Modal show={showlink} onHide={handleClose} centered>
                 <Modal.Header style={{margin:"0 auto"}}>
                     <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
                 </Modal.Header>
