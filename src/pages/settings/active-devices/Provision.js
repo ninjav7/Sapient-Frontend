@@ -672,8 +672,8 @@ useEffect(()=>{
                 <Modal.Header style={{margin:"0 auto"}}>
                     <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
+                <Modal.Body>                    
+
                     <Form>
                     {error && <Alert color="danger" isOpen={error ? true : false}>
                                                     <div>{message}</div>
@@ -684,7 +684,6 @@ useEffect(()=>{
                                 type="text"
                                 placeholder="Email"
                                 className="font-weight-bold"
-                                autoFocus
                                 onChange={(e)=>{setEmail(e.target.value)}}
                             />
                         </Form.Group>
@@ -697,10 +696,7 @@ useEffect(()=>{
                                 className="font-weight-bold"
                                 onChange={(e)=>{setPassword(e.target.value)}}
                                 >
-                                {/* <option selected>Enter Password</option> */}
-                                {/* {activeDeviceModal.map((record) => {
-                                    return <option value={record.value}>{record.label}</option>;
-                                })} */}
+                                
                             </Input>
                         </Form.Group>
                         <div style={{color:"blue",textAlign:"right",fontWeight:"bold"}}>Forgot Password?</div>
