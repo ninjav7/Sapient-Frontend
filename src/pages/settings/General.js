@@ -29,56 +29,9 @@ const General = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const _ = require('lodash');
     const [isEditing, setIsEditing] = useState(false);
-    const [buildingData, setBuildingData] = useState({
-        building_id: '628dd795f28141b8a69f38bf',
-        active: true,
-        building_name: 'NYPL Building',
-        building_type: 'Residential Building',
-        building_size: 2000,
-        street_address: 'test',
-        address_2: 'test',
-        city: 'toranto',
-        state: 'Washington',
-        zip_code: 66777,
-        timezone: 'PDT (UTC-7)',
-        time_format: false,
-        operating_hours: {
-            mon: {
-                stat: true,
-                time_range: {
-                    frm: '00:00',
-                    to: '00:00',
-                },
-            },
-            tue: {
-                stat: false,
-                time_range: '',
-            },
-            wed: {
-                stat: false,
-                time_range: '',
-            },
-            thu: {
-                stat: false,
-                time_range: '',
-            },
-            fri: {
-                stat: false,
-                time_range: '',
-            },
-            sat: {
-                stat: false,
-                time_range: '',
-            },
-            sun: {
-                stat: false,
-                time_range: '',
-            },
-        },
-    });
+    const [buildingData, setBuildingData] = useState({});
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
-    const [buildingAddress, setBuildingAddress] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
     const [checked, setChecked] = useState(generalDateTimeData.time_format);
     const [generalOperatingData, setGeneralOperatingData] = useState({});
@@ -87,23 +40,60 @@ const General = () => {
     const [value, onChange] = useState('10:00');
     const [render, setRender] = useState(false);
     const [activeToggle, setActiveToggle] = useState(false);
-    const [weekToggle, setWeekToggle] = useState({
-        mon: false,
-        tue: false,
-        wed: false,
-        thu: false,
-        fri: false,
-        sat: false,
-        sun: false,
-    });
+    const [weekToggle, setWeekToggle] = useState({});
     const [timeToggle, setTimeToggle] = useState(false);
 
     const [inputField, setInputField] = useState({
         kWh: 0,
         total_paid: 0,
     });
-    const [previousBldgData, setPreviousBldgData] = useState({});
+
     const [bldgData, setBldgData] = useState({});
+
+    const [buildingDetails, setBuildingDetails] = useState({});
+    const [buildingAddress, setBuildingAddress] = useState({});
+    const [buildingDateTime, setBuildingDateTime] = useState({});
+    const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
+
+    const [responseBuildingDetails, setResponseBuildingDetails] = useState({});
+    const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
+    const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
+    const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
+
+    const saveBuildingSettings = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            // let params = `?building_id=${bldgId}`;
+            let params = `/${bldgId}`;
+
+            await axios
+                .all([
+                    axios.patch(`${BaseUrl}${generalBuildingDetail}${params}`, buildingDetails, {
+                        headers: header,
+                    }),
+                    axios.patch(`${BaseUrl}${generalBuildingAddress}${params}`, buildingAddress, {
+                        headers: header,
+                    }),
+                    axios.patch(`${BaseUrl}${generalDateTime}${params}`, buildingDateTime, {
+                        headers: header,
+                    }),
+                ])
+                .then(
+                    axios.spread((data1, data2, data3) => {
+                        console.log('Data1 => ', data1);
+                        console.log('Data2 => ', data2);
+                        console.log('Data3 => ', data3);
+                    })
+                );
+        } catch (error) {
+            console.log('Failed to save General Building Data');
+        }
+    };
 
     useEffect(() => {
         const fetchBuildingData = async () => {
@@ -120,27 +110,41 @@ const General = () => {
                     if (data === undefined) {
                         return;
                     }
-                    setPreviousBldgData(data);
                     setBldgData(data);
-                    setInputField({
-                        ...inputField,
-                        active: data.active,
+
+                    let buildingDetailsObj = {
                         name: data.building_name,
-                        square_footage: data.building_size,
                         typee: data.building_type,
+                        square_footage: data.building_size,
+                        active: data.active,
+                    };
+                    setBuildingDetails(buildingDetailsObj);
+                    setResponseBuildingDetails(buildingDetailsObj);
+
+                    let buildingAddressObj = {
                         street_address: data.street_address,
                         address_2: data.address_2,
                         city: data.city,
                         state: data.state,
                         zip_code: data.zip_code,
+                    };
+                    setBuildingAddress(buildingAddressObj);
+                    setResponseBuildingAddress(buildingAddressObj);
+
+                    let buildingDateTimeObj = {
                         timezone: data.timezone,
                         time_format: data.time_format,
-                        operating_hours: data.operating_hours,
-                    });
-                    setActiveToggle(data.active);
-                    setTimeToggle(data.time_format);
-                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+                    };
+                    setBuildingDateTime(buildingDateTimeObj);
+                    setResponseBuildingDateTime(buildingDateTimeObj);
 
+                    let buildingOperatingHours = {
+                        operating_hours: data.operating_hours,
+                    };
+                    setBuildingOperatingHours(buildingOperatingHours);
+                    setResponseBuildingOperatingHours(buildingOperatingHours);
+
+                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
                     setWeekToggle({
                         mon: mon['stat'],
                         tue: tue['stat'],
@@ -357,19 +361,68 @@ const General = () => {
     };
 
     const handleSwitchChange = () => {
-        let obj = bldgData;
-        obj.active = !bldgData.active;
+        let obj = buildingDetails;
+        obj.active = !buildingDetails.active;
         handleBldgSettingChanges('active', obj.active);
+    };
+
+    const handleDateTimeSwitch = () => {
+        let obj = buildingDateTime;
+        obj.active = !buildingDateTime.active;
+        handleBldgSettingChanges('time_format', obj.active);
     };
 
     const handleBldgSettingChanges = (key, value) => {
         if (key === 'active') {
-            let obj = Object.assign({}, bldgData);
+            let obj = Object.assign({}, buildingDetails);
             obj[key] = value;
-            setBldgData(obj);
+            setBuildingDetails(obj);
         }
-        // let results = _.isEqual(bldgData, previousBldgData);
-        // console.log('SSR Compare Results => ', JSON.stringify(bldgData) === JSON.stringify(previousBldgData));
+        if (key === 'name') {
+            let obj = Object.assign({}, buildingDetails);
+            obj[key] = value;
+            setBuildingDetails(obj);
+        }
+        if (key === 'typee') {
+            let obj = Object.assign({}, buildingDetails);
+            obj[key] = value;
+            setBuildingDetails(obj);
+        }
+        if (key === 'square_footage') {
+            let obj = Object.assign({}, buildingDetails);
+            obj[key] = value;
+            setBuildingDetails(obj);
+        }
+        if (key === 'street_address') {
+            let obj = Object.assign({}, buildingAddress);
+            obj[key] = value;
+            setBuildingAddress(obj);
+        }
+        if (key === 'address_2') {
+            let obj = Object.assign({}, buildingAddress);
+            obj[key] = value;
+            setBuildingAddress(obj);
+        }
+        if (key === 'city') {
+            let obj = Object.assign({}, buildingAddress);
+            obj[key] = value;
+            setBuildingAddress(obj);
+        }
+        if (key === 'state') {
+            let obj = Object.assign({}, buildingAddress);
+            obj[key] = value;
+            setBuildingAddress(obj);
+        }
+        if (key === 'zip_code') {
+            let obj = Object.assign({}, buildingAddress);
+            obj[key] = value;
+            setBuildingAddress(obj);
+        }
+        if (key === 'time_format') {
+            let obj = Object.assign({}, buildingDateTime);
+            obj[key] = value;
+            setBuildingDateTime(obj);
+        }
     };
 
     const inputsDateHandler = (e) => {
@@ -468,7 +521,7 @@ const General = () => {
                                 type="button"
                                 className="btn btn-primary buildings-save-style ml-3"
                                 onClick={() => {
-                                    setIsEditing(false);
+                                    saveBuildingSettings();
                                 }}>
                                 Save
                             </button>
@@ -503,7 +556,7 @@ const General = () => {
                                                 handleSwitchChange();
                                                 // handleBldgSettingChanges('active', e.target.value);
                                             }}
-                                            checked={bldgData.active}
+                                            checked={buildingDetails.active}
                                             onColor={'#2955E7'}
                                             uncheckedIcon={false}
                                             checkedIcon={false}
@@ -526,11 +579,13 @@ const General = () => {
                                                 type="text"
                                                 name="name"
                                                 id="buildingName"
-                                                // onChange={inputsBuildingHandler}
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('name', e.target.value);
+                                                }}
                                                 onBlur={EditBuildingHandler}
                                                 placeholder="Enter Building Name"
                                                 className="single-line-style font-weight-bold"
-                                                value={bldgData.building_name}
+                                                value={buildingDetails.name}
                                             />
                                         </div>
                                     </FormGroup>
@@ -550,9 +605,11 @@ const General = () => {
                                                 type="select"
                                                 name="typee"
                                                 id="exampleSelect"
-                                                // onChange={inputsBuildingHandler}
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('typee', e.target.value);
+                                                }}
                                                 onBlur={EditBuildingHandler}
-                                                value={bldgData.building_type}
+                                                value={buildingDetails.typee}
                                                 className="font-weight-bold">
                                                 <option>Office Building</option>
                                                 <option>Residential Building</option>
@@ -576,9 +633,11 @@ const General = () => {
                                                 name="square_footage"
                                                 id="exampleNumber"
                                                 placeholder="Enter value"
-                                                // onChange={inputsBuildingHandler}
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('square_footage', +e.target.value);
+                                                }}
                                                 onBlur={EditBuildingHandler}
-                                                value={bldgData.building_size}
+                                                value={buildingDetails.square_footage}
                                                 className="font-weight-bold"
                                             />
                                         </div>
@@ -610,10 +669,12 @@ const General = () => {
                                             name="street_address"
                                             id="userAddress1"
                                             placeholder="Address 1"
-                                            // onChange={inputsAddressHandler}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('street_address', e.target.value);
+                                            }}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold"
-                                            value={bldgData.street_address}
+                                            value={buildingAddress.street_address}
                                         />
                                     </FormGroup>
 
@@ -627,9 +688,11 @@ const General = () => {
                                             id="userAddress2"
                                             placeholder="Address 2"
                                             className="font-weight-bold"
-                                            // onChange={inputsAddressHandler}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('address_2', e.target.value);
+                                            }}
                                             onBlur={EditAddressHandler}
-                                            value={bldgData.address_2}
+                                            value={buildingAddress.address_2}
                                         />
                                     </FormGroup>
                                 </div>
@@ -645,9 +708,11 @@ const General = () => {
                                             id="userCity"
                                             placeholder="Enter your city"
                                             className="font-weight-bold"
-                                            // onChange={inputsAddressHandler}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('city', e.target.value);
+                                            }}
                                             onBlur={EditAddressHandler}
-                                            value={bldgData.city}
+                                            value={buildingAddress.city}
                                         />
                                     </FormGroup>
 
@@ -659,8 +724,10 @@ const General = () => {
                                             type="select"
                                             name="state"
                                             id="userState"
-                                            defaultChecked={bldgData.state}
-                                            onChange={inputsAddressHandler}
+                                            defaultChecked={buildingAddress.state}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('state', e.target.value);
+                                            }}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold">
                                             <option>Oregon</option>
@@ -677,8 +744,10 @@ const General = () => {
                                             name="zip_code"
                                             id="useZipCode"
                                             placeholder="Enter zip code"
-                                            value={bldgData.zip_code}
-                                            // onChange={inputsAddressHandler}
+                                            value={buildingAddress.zip_code}
+                                            onChange={(e) => {
+                                                handleBldgSettingChanges('zip_code', +e.target.value);
+                                            }}
                                             onBlur={EditAddressHandler}
                                             className="font-weight-bold"
                                         />
@@ -705,15 +774,15 @@ const General = () => {
                                         <h6 className="building-content-title">Timezone</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="building-content-title">{bldgData.timezone}</h6>
+                                        <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
                                     </div>
                                     <div className="single-line-style">
                                         <h6 className="building-content-title">Use 24-hour Clock</h6>
                                     </div>
                                     <div>
                                         <Switch
-                                            // onChange={inputsDateHandler}
-                                            checked={bldgData.time_format}
+                                            onChange={handleDateTimeSwitch}
+                                            checked={buildingDateTime.time_format}
                                             onColor={'#2955E7'}
                                             name="time_format"
                                             uncheckedIcon={false}

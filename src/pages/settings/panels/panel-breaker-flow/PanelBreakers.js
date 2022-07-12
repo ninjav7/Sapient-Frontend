@@ -15,6 +15,148 @@ const initBgColor = 'grey';
 const connectionLineStyle = { stroke: '#fff' };
 const snapGrid = [20, 20];
 
+// ************* initial elements & edges ********************
+const initialElements = [
+    {
+        id: 'breaker-1',
+        targetPosition: 'left',
+        sourcePosition: 'right',
+        type: 'breakerContainer',
+        data: { label: 'Breaker 1' },
+        position: { x: 250, y: 60 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-3',
+        targetPosition: 'left',
+        sourcePosition: 'right',
+        type: 'breakerContainer',
+        data: { label: 'Breaker 3' },
+        position: { x: 250, y: 140 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-5',
+        targetPosition: 'left',
+        sourcePosition: 'right',
+        type: 'breakerContainer',
+        data: { label: 'Breaker 5' },
+        position: { x: 250, y: 220 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-7',
+        targetPosition: 'left',
+        sourcePosition: 'right',
+        type: 'breakerContainer',
+        data: { label: 'Breaker 7' },
+        position: { x: 250, y: 300 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-2',
+        targetPosition: 'right',
+        sourcePosition: 'left',
+        data: { label: 'Breaker 2' },
+        type: 'breakerContainer',
+        position: { x: 700, y: 60 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-4',
+        targetPosition: 'right',
+        sourcePosition: 'left',
+        data: { label: 'Breaker 4' },
+        type: 'breakerContainer',
+        position: { x: 700, y: 140 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-6',
+        targetPosition: 'right',
+        sourcePosition: 'left',
+        data: { label: 'Breaker 6' },
+        type: 'breakerContainer',
+        position: { x: 700, y: 220 },
+        draggable: false,
+    },
+    {
+        id: 'breaker-8',
+        targetPosition: 'right',
+        sourcePosition: 'left',
+        data: { label: 'Breaker 8' },
+        type: 'breakerContainer',
+        position: { x: 700, y: 300 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-24',
+        sourcePosition: 'left',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 1180, y: 120 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-46',
+        sourcePosition: 'left',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 1180, y: 200 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-68',
+        sourcePosition: 'left',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 1180, y: 280 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-13',
+        sourcePosition: 'right',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 200, y: 120 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-35',
+        sourcePosition: 'right',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 200, y: 200 },
+        draggable: false,
+    },
+    {
+        id: 'breakerslink-57',
+        sourcePosition: 'right',
+        type: 'breakerLink',
+        data: { label: 'Link' },
+        position: { x: 200, y: 280 },
+        draggable: false,
+    },
+];
+
+const initialEdges = [
+    {
+        id: 'link-e1-1',
+        source: 'breakerslink-13',
+        type: 'smoothstep',
+        target: 'breaker-1',
+        animated: false,
+    },
+    {
+        id: 'link-e1-3',
+        source: 'breakerslink-13',
+        type: 'smoothstep',
+        target: 'breaker-3',
+        animated: false,
+    },
+];
+
+// ************* breakers and link components ********************
 const BreakersComponent = () => {
     return (
         <FormGroup className="form-group row m-2 ml-4 mb-4">
@@ -62,161 +204,23 @@ const onLoad = (reactFlowInstance) => {
     console.log(reactFlowInstance.getElements());
 };
 
-// ************* added node types ********************
-const edgeTypes = {
-    customedge: CustomEdge,
-};
-
-const initialEdges = [
-    {
-        id: 'horizontal-e1-12',
-        source: 'horizontal-1',
-        type: 'smoothstep',
-        target: 'horizontal-2',
-        animated: false,
-        label: 'Label 1',
-    },
-    {
-        id: 'horizontal-e1-13',
-        source: 'horizontal-1',
-        type: 'smoothstep',
-        target: 'horizontal-3',
-        animated: false,
-        label: 'Label 2',
-    },
-];
-
+// ************* added node and egde types ********************
 const nodeTypes = {
     customnode: CustomNodeSelector,
     breakerContainer: BreakersComponent,
     breakerLink: BreakersLink,
 };
 
+const edgeTypes = {
+    customedge: CustomEdge,
+};
+
+// ************* Main Panel-Breaker Component ********************
 const PanelBreakers = () => {
     const [open, setOpen] = useState(false);
     const [reactflowInstance, setReactflowInstance] = useState(null);
-    const [elements, setElements] = useState([
-        {
-            id: 'horizontal-1',
-            targetPosition: 'left',
-            sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 1' },
-            position: { x: 250, y: 60 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-3',
-            targetPosition: 'left',
-            sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 3' },
-            position: { x: 250, y: 140 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-5',
-            targetPosition: 'left',
-            sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 5' },
-            position: { x: 250, y: 220 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-7',
-            targetPosition: 'left',
-            sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 7' },
-            position: { x: 250, y: 300 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-2',
-            targetPosition: 'right',
-            sourcePosition: 'left',
-            data: { label: 'Breaker 2' },
-            type: 'breakerContainer',
-            position: { x: 700, y: 60 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-4',
-            targetPosition: 'right',
-            sourcePosition: 'left',
-            data: { label: 'Breaker 4' },
-            type: 'breakerContainer',
-            position: { x: 700, y: 140 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-6',
-            targetPosition: 'right',
-            sourcePosition: 'left',
-            data: { label: 'Breaker 6' },
-            type: 'breakerContainer',
-            position: { x: 700, y: 220 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-8',
-            targetPosition: 'right',
-            sourcePosition: 'left',
-            data: { label: 'Breaker 8' },
-            type: 'breakerContainer',
-            position: { x: 700, y: 300 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-24',
-            sourcePosition: 'left',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 1180, y: 120 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-46',
-            sourcePosition: 'left',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 1180, y: 200 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-68',
-            sourcePosition: 'left',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 1180, y: 280 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-13',
-            sourcePosition: 'right',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 200, y: 120 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-35',
-            sourcePosition: 'right',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 200, y: 200 },
-            draggable: false,
-        },
-        {
-            id: 'horizontal-57',
-            sourcePosition: 'right',
-            type: 'breakerLink',
-            data: { label: 'Link' },
-            position: { x: 200, y: 280 },
-            draggable: false,
-        },
-    ]);
+    const [elements, setElements] = useState(initialElements);
+    const [edges, setEdges] = useState(initialEdges);
     const [bgColor, setBgColor] = useState(initBgColor);
     const [nodeData, setnodeData] = useState(null);
     const [inputChange, setinputChange] = useState('');
@@ -409,6 +413,7 @@ const PanelBreakers = () => {
             )}
             <ReactFlow
                 elements={elements}
+                edges={edges}
                 onConnect={onConnect}
                 style={{ background: bgColor }}
                 onLoad={onLoad}
@@ -421,7 +426,6 @@ const PanelBreakers = () => {
                 // defaultZoom={2.5}
                 onNodeMouseEnter={handleMouseEnter}
                 // edgeTypes={edgeTypes}
-                edges={initialEdges}
                 zoomOnScroll={false}
                 panOnDrag={false}
                 zoomOnDoubleClick={false}>
