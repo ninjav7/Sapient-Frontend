@@ -281,7 +281,6 @@ useEffect(()=>{
       getKasaAccount();
       getKasaDevices();
 
-
     },[])
     useEffect(() => {
         console.log('selectedOptions => ', selectedOptions);
