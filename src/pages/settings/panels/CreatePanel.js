@@ -17,14 +17,12 @@ import {
     listSensor,
 } from '../../../services/Network';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLinkHorizontalSlash } from '@fortawesome/pro-regular-svg-icons';
+import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
-import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
-import CustomEdge from './panel-breaker-flow/CustomEdge';
-import CustomNodeSelector from './panel-breaker-flow/CustomNodeSelector';
+import ReactFlow from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
 
@@ -163,113 +161,6 @@ const CreatePanel = () => {
         breakerNo: 0,
         type: 'main-breaker',
     });
-
-    // ReactFlow
-    const [open, setOpen] = useState(false);
-    const [reactflowInstance, setReactflowInstance] = useState(null);
-    const [elements, setElements] = useState([]);
-    const [bgColor, setBgColor] = useState(initBgColor);
-    const [nodeData, setnodeData] = useState(null);
-    const [inputChange, setinputChange] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-
-    const initBgColor = '#1A192B';
-
-    const connectionLineStyle = { stroke: '#fff' };
-    const snapGrid = [20, 20];
-
-    //added new onload function
-    const onLoad = (reactFlowInstance) => {
-        reactFlowInstance.fitView();
-        console.log(reactFlowInstance.getElements());
-    };
-
-    // ************* added node types ********************
-    const edgeTypes = {
-        customedge: CustomEdge,
-    };
-
-    const handleMouseEnter = (e, node) => {
-        console.log(node);
-        setnodeData(node);
-    };
-
-    const initialEdges = [
-        {
-            id: 'horizontal-e1-12',
-            source: 'horizontal-1',
-            type: 'smoothstep',
-            target: 'horizontal-2',
-            animated: false,
-            label: 'Label 1',
-        },
-        {
-            id: 'horizontal-e1-13',
-            source: 'horizontal-1',
-            type: 'smoothstep',
-            target: 'horizontal-3',
-            animated: false,
-            label: 'Label 2',
-        },
-    ];
-
-    // chnaged label in data
-    const onConnect = useCallback(
-        (params) =>
-            setElements((els) =>
-                addEdge(
-                    {
-                        ...params,
-                        id: `edge_${elements.length + 1}`,
-                        animated: false,
-                        type: 'customedge',
-                        style: { stroke: '#fff' },
-                        data: { type: 'edge', label: 'dhvsdhvd' },
-                        arrowHeadType: 'arrowclosed',
-                    },
-                    els
-                )
-            ),
-        []
-    );
-
-    const onNodeDragStop = (event, node) => {
-        const findElementindex = elements.findIndex((items) => items.id === node.id);
-        if (findElementindex > -1) {
-            elements[findElementindex] = node;
-            setElements([...elements]);
-        }
-        console.log(node, elements);
-    };
-
-    const onContextMenu = (e) => {
-        e.preventDefault();
-        setIsOpen(true);
-        setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
-    };
-
-    const onElementsRemove = useCallback(
-        (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els)),
-        []
-    );
-
-    const onElementClick = (event, node) => {
-        handleClickOpen();
-        setnodeData(node);
-        const findElement = elements.find((items) => items.id === node.id);
-        if (findElement) {
-            setinputChange(findElement?.data?.label || findElement?.label);
-        }
-    };
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const nodeTypes = {
-        customnode: CustomNodeSelector,
-    };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
@@ -730,6 +621,36 @@ const CreatePanel = () => {
             }
         }
     };
+
+    const initialNodes = [
+        {
+            id: '1',
+            type: 'input',
+            data: { label: 'Input Node' },
+            position: { x: 250, y: 25 },
+        },
+
+        {
+            id: '2',
+            // you can also pass a React component as a label
+            data: { label: <div>Default Node</div> },
+            position: { x: 100, y: 125 },
+        },
+        {
+            id: '3',
+            type: 'output',
+            data: { label: 'Output Node' },
+            position: { x: 250, y: 250 },
+        },
+    ];
+
+    const initialEdges = [
+        { id: 'e1-2', source: '1', target: '2' },
+        { id: 'e2-3', source: '2', target: '3', animated: true },
+    ];
+
+    const [nodes, setNodes] = useState(initialNodes);
+    const [edges, setEdges] = useState(initialEdges);
 
     useEffect(() => {
         if (generatedPanelId === '') {
@@ -1315,26 +1236,18 @@ const CreatePanel = () => {
 
                                 {/* <Row>
                                     <Col lg={12}>
-                                        <div style={{ width: '100%', height: '90vh' }}>
-                                            <ReactFlow
-                                                elements={elements}
-                                                onElementClick={onElementClick}
-                                                onElementsRemove={onElementsRemove}
-                                                onConnect={onConnect}
-                                                onNodeDragStop={onNodeDragStop}
-                                                style={{ background: bgColor }}
-                                                onLoad={onLoad}
-                                                nodeTypes={nodeTypes}
-                                                onNodeContextMenu={onContextMenu}
-                                                connectionLineStyle={connectionLineStyle}
-                                                snapToGrid={true}
-                                                snapGrid={snapGrid}
-                                                maxZoom={2}
-                                                defaultZoom={1.5}
-                                                onNodeMouseEnter={handleMouseEnter}
-                                                edges={initialEdges}></ReactFlow>
+                                        <div style={{ width: '100%', height: '90vh', backgroundColor: 'red', position: 'relative' }}>
+                                            <ReactFlow nodes={nodes} edges={edges} fitView />
                                         </div>
-                                    </Col> 
+                                    </Col>
+                                </Row> */}
+
+                                {/* <Row>
+                                    <Col lg={12}>
+                                        <div className="breaker-link-container">
+                                            <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="lg" />
+                                        </div>
+                                    </Col>
                                 </Row> */}
                             </>
                         )}
@@ -1487,6 +1400,14 @@ const CreatePanel = () => {
                                 </Col>
                             </Row>
                         )}
+                    </div>
+                </Col>
+            </Row>
+
+            <Row>
+                <Col lg={12}>
+                    <div style={{ width: '100%', height: '90vh' }}>
+                        <ReactFlow nodes={nodes} edges={edges} fitView />
                     </div>
                 </Col>
             </Row>
