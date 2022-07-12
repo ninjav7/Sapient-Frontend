@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button, Input} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Alert, Input} from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
+import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate, insert_kasa_devices } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -15,168 +15,49 @@ import Pagination from 'react-bootstrap/Pagination';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
+import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown } from '@fortawesome/pro-thin-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import tplink from "../../../assets/images/tplink.png";
 
-const ActiveDevicesTable = ({
-    deviceData,
-    setPageRequest,
-    nextPageData,
-    previousPageData,
-    paginationData,
-    sampleData,
-    pageSize,
-    setPageSize,
-    selectedOptions,
-}) => {
-    return (
-        <Card>
-            <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr>
-                            {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
-                            {selectedOptions.some((record) => record.value === 'identifier') && (
-                                <th>Device ID</th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'model') && <th>Vendor</th>}
-                            {selectedOptions.some((record) => record.value === 'location') && <th>Model</th>}
-                            {selectedOptions.some((record) => record.value === 'sensors') && <th>Assigned AD</th>}
-                            {selectedOptions.some((record) => record.value === 'firmware-version') && (
-                                <th>Actions</th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                <th>Hardware Version</th>
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {deviceData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    {selectedOptions.some((record) => record.value === 'status') && (
-                                        <td scope="row" className="text-center">
-                                            {record.status === 'Online' && (
-                                                <div className="icon-bg-styling">
-                                                    <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                            {record.status === 'Offline' && (
-                                                <div className="icon-bg-styling-slash">
-                                                    <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                        </td>
-                                    )}
-
-                                    <Link
-                                        to={{
-                                            pathname: `/settings/active-devices/single/${record.equipments_id}`,
-                                        }}>
-                                        {selectedOptions.some((record) => record.value === 'identifier') && (
-                                            <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                        )}
-                                    </Link>
-                                    {selectedOptions.some((record) => record.value === 'model') && (
-                                        <td>{record.model}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'location') && (
-                                        <td>{record.location}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'sensors') && (
-                                        <td>{record.sensor_number}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'firmware-version') && (
-                                        <td>{record.firmware_version === null ? '-' : record.firmware_version}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                        <td>{record.hardware_version === null ? '-' : record.hardware_version}</td>
-                                    )}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </Table>
-
-                <div className="mt-4">
-                    {/* <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'<<'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'<'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'>'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'>>'}
-                    </button> */}
-
-                    {/* <span className="react-bootstrap-table-pagination-total ml-4 mt-4">Page 2 of 5000</span> */}
-                    {/* <span className="mt-4 ml-2">
-                        | Go to page: <input type="number" style={{ width: '100px' }} />
-                    </span> */}
-                </div>
-
-                <div className="page-button-style ml-2">
-                    <div>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
-                            onClick={() => {
-                                previousPageData(paginationData.pagination.previous);
-                            }}>
-                            Previous
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            onClick={() => {
-                                nextPageData(paginationData.pagination.next);
-                            }}>
-                            Next
-                        </button>
-                    </div>
-                    <div>
-                        <select
-                            value={pageSize}
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            onChange={(e) => {
-                                setPageSize(parseInt(e.target.value));
-                            }}>
-                            {[10, 25, 50].map((pageSize) => (
-                                <option key={pageSize} value={pageSize} className="align-options-center">
-                                    Show {pageSize} devices
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </CardBody>
-        </Card>
-    );
-};
 
 const Provision = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const tableColumnOptions = [
-        { label: 'Status', value: 'status' },
-        { label: 'Identifier (MAC)', value: 'identifier' },
-        { label: 'Model', value: 'model' },
-        { label: 'Location', value: 'location' },
-        { label: 'Sensors', value: 'sensors' },
-        { label: 'Firmware Version', value: 'firmware-version' },
-        { label: 'Hardware Version', value: 'hardware-version' },
+        { label: 'Provisioner 1', value: 'Pro1'},
+        { label: 'Provisioner 2', value: 'Pro2'},
+        { label: 'Provisioner 3', value: 'Pro3'},
+        { label: 'Provisioner 4', value: 'Pro4'},
+        { label: 'Provisioner 5', value: 'Pro5'},
+        { label: 'Provisioner 6', value: 'Pro6'},
+        { label: 'Provisioner 7', value: 'Pro7'},
+        { label: 'Provisioner 8', value: 'Pro8'},
+        { label: 'NZ Provisioner 1', value: 'Pro9'},
+        { label: 'NZ Provisioner 2', value: 'Pro10'},
+        { label: 'NZ Provisioner 3', value: 'Pro11'},
+        { label: 'STARTLABSPRSVN-01', value: 'Pro12'}
+    ];
+
+    const tableColumnOptions1 = [
     ];
 
     const [selectedOptions, setSelectedOptions] = useState([]);
 
     // Modal states
-    const [selectedTab, setSelectedTab] = useState(0);
+    const [selected, setSelected] = useState(0);
+    const [tabclass,setTabclass]=useState('');
     const [show, setShow] = useState(false);
+    const [showlink, setShowLink] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-
+    const [linkedAccount, setLinkedAccount]=useState([]);
+    const [provisioningData, setProvisioningData]=useState([]);
+    const [readyCount, setReadyCount]=useState(0);
+    const [progressCount,setProgressCount]=useState(0);
+    const [total, setTotal]=useState([]);
+    const [email,setEmail]=useState("");
+    const [password,setPassword]=useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
 
@@ -196,855 +77,209 @@ const Provision = () => {
         },
     ]);
     const [activeDeviceData, setActiveDeviceData] = useState([]);
-    const [paginationData, setPaginationData] = useState({});
-    // const [activeDeviceData, setActiveDeviceData] = useState([
-    //     {
-    //         equipments_id: '629a250650044d23b0319bbd',
-    //         status: 'Online',
-    //         location: 'Hall > Ground Floor',
-    //         sensor_number: '1/6',
-    //         identifier: '10:27:F5:8F:8B:F3',
-    //         model: 'HS300',
-    //         firmware_version: null,
-    //         hardware_version: '0',
-    //     },
-    // ]);
-    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
-    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'active',
     });
+    const [auth,setAuth]=useState("");
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
-    const sampleData = [
-        {
-            equipments_id: '629f4a90cd75760615566d9c',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '6',
-            identifier: '10:27:F5:8F:8B:F3',
-            model: 'HS300',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d295d6dded1b23e61fc',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC',
-            model: 'H Test 1',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-    ];
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
         obj[key] = value;
         setCreateDeviceData(obj);
     };
-
-    const saveDeviceData = async () => {
+    const [error, setError]=useState(false);
+    const [message,setMessage]=useState("");
+    
+    const handleAuthorize =()=>{
+        let authData={
+            username:email,
+            password:password
+        }
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            setIsProcessing(true);
+            let params = `?username=${email}&password=${password}`;
 
             axios
-                .post(`${BaseUrl}${createDevice}`, createDeviceData, {
+                .get(`${BaseUrl}${kasaAuthenticate}${params}`, {
                     headers: header,
                 })
                 .then((res) => {
                     console.log(res.data);
+                    if(res.status===200){
+                        setShowLink(false);
+                        console.log(res.data.id);
+                        localStorage.setItem("kasa_id",res.data.id)
+                        setAuth(res.data.id);
+                    }
                 });
 
-            setIsProcessing(false);
-            setPageRefresh(!pageRefresh);
         } catch (error) {
-            setIsProcessing(false);
-            console.log('Failed to create Active device data');
+            setError(true);
+            console.log('Failed to Authenticate');
         }
-    };
+    }  
+   const handleAddDevice=(e,kasa_account_id,device_id)=>{
+    let authData={
+        "device_id":device_id,
+        "kasa_account_id":kasa_account_id
+    }
+    try {
+        let header = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
 
-    const nextPageData = async (path) => {
-        try {
-            if (path === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
-                let response = res.data;
-                setActiveDeviceData(response.data);
-                setPaginationData(res.data);
-
-                let onlineData = [];
-                let offlineData = [];
-
-                response.forEach((record) => {
-                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-                });
-
-                setOnlineDeviceData(onlineData);
-                setOfflineDeviceData(offlineData);
+        axios
+            .post(`${BaseUrl}${insert_kasa_devices}`,authData, {
+                headers: header,
+            })
+            .then((res) => {
+                console.log(res.data);
+                if(res.status===200){
+                    // setShowLink(false);
+                    // console.log(res.data.id);
+                    // localStorage.setItem("kasa_id",res.data.id)
+                    // setAuth(res.data.id);
+                }
             });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
-        }
-    };
 
-    const previousPageData = async (path) => {
-        try {
-            if (path === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
-                let response = res.data;
-                setActiveDeviceData(response.data);
-                setPaginationData(res.data);
+    } catch (error) {
+        setError(true);
+        console.log('Failed to Authenticate');
+    }
 
-                let onlineData = [];
-                let offlineData = [];
-
-                response.forEach((record) => {
-                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-                });
-
-                setOnlineDeviceData(onlineData);
-                setOfflineDeviceData(offlineData);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch all Active Devices');
-        }
-    };
-
+   }
     useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActiveDeviceData(response.data);
-                    const sampleData = response.data;
-                    console.log('sampleData => ', sampleData);
-                    setPaginationData(res.data);
-
-                    let onlineData = [];
-                    let offlineData = [];
-
-                    response.forEach((record) => {
-                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-                    });
-
-                    setOnlineDeviceData(onlineData);
-                    setOfflineDeviceData(offlineData);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Active Devices');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
-        fetchActiveDeviceData();
-        fetchLocationData();
-    }, [bldgId, pageRefresh]);
-
-    useEffect(() => {
-        const fetchActiveDeviceData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
-                await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActiveDeviceData(response.data);
-                    const sampleData = response.data;
-                    console.log('sampleData => ', sampleData);
-                    setPaginationData(res.data);
-
-                    let onlineData = [];
-                    let offlineData = [];
-
-                    response.forEach((record) => {
-                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-                    });
-
-                    setOnlineDeviceData(onlineData);
-                    setOfflineDeviceData(offlineData);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Active Devices');
-            }
-        };
-        fetchActiveDeviceData();
-    }, [pageSize]);
-
-    useEffect(() => {
+        setShow(false);
+        setShowLink(false);
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Provision Devices',
+                        label: 'Active Devices',
                         path: '/settings/active-devices',
                         active: true,
                     },
+                    {
+                        label: 'Provisioning',
+                        path: '/settings/active-devices/provision',
+                        active: false,
+                    },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
            
         };
         updateBreadcrumbStore();
 
-        let arr = [
-            { label: 'Status', value: 'status' },
-            { label: 'Identifier (MAC)', value: 'identifier' },
-            { label: 'Model', value: 'model' },
-            { label: 'Location', value: 'location' },
-            { label: 'Sensors', value: 'sensors' },
-            { label: 'Firmware Version', value: 'firmware-version' },
-            { label: 'Hardware Version', value: 'hardware-version' },
-        ];
-        setSelectedOptions(arr);
+        // let arr = [
+        //     { label: 'Status', value: 'status' },
+        //     { label: 'Identifier (MAC)', value: 'identifier' },
+        //     { label: 'Model', value: 'model' },
+        //     { label: 'Location', value: 'location' },
+        //     { label: 'Sensors', value: 'sensors' },
+        //     { label: 'Firmware Version', value: 'firmware-version' },
+        //     { label: 'Hardware Version', value: 'hardware-version' },
+        // ];
+        // setSelectedOptions(arr);
     }, []);
+    const getKasaAccount = () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            axios
+            .get(`${BaseUrl}${get_kasa_account}`, {
+                headers: header,
+            })
+            .then((res) => {
+                console.log(res.data.data);
+                setLinkedAccount(res.data.data);
+                let Hs=0;
+                let kp=0;
+                let Hs1=0;
+                let socket=0;
+                let capy=0;
+                res.data.data.forEach(ele => {
+                    Hs=Hs+ele.HS110s;
+                    kp=kp+ele.KP115s;
+                    Hs1=Hs1+ele.HS300s;
+                    socket=socket+ele.Socket;
+                    capy=capy+ele.Remaining_Capacity;
+                });
+                let arr={
+                    HS110s:Hs,
+                    KP115s:kp,
+                    HS300s:Hs1,
+                    Socket:socket,
+                    Remaining_Capacity:capy
+                }
+                setTotal(arr);
+                console.log(arr)
+            });
+        } catch (error) {
+            console.log('Failed to fetch kasa account');
+        }
+}
+const getKasaDevices=()=>{
+try {
+    let header = {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${userdata.token}`,
+    };
+    // let params = `?kasa_account_id=${auth}`;
+    axios
+    .get(`${BaseUrl}${get_kasa_devices}`, {
+        headers: header,
+    })
+    .then((res) => {
+        console.log(res.data.data);
+        res.data.data.forEach(ele => {
+            if(ele.action===true){
+                setReadyCount(readyCount+1)
+            }
+            else{
+                setProgressCount(progressCount+1)
+            }
+         });
+        setProvisioningData(res.data.data);
+    });
+} catch (error) {
+    console.log('Failed to fetch kasa account');
+}
 
+}
+useEffect(()=>{
+    getKasaAccount();
+      getKasaDevices();
+
+},[auth])
+
+    useEffect(()=>{
+        console.log(auth);
+
+          
+      getKasaAccount();
+      getKasaDevices();
+
+    },[])
     useEffect(() => {
         console.log('selectedOptions => ', selectedOptions);
     });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?page_size=${pageNo}&page_no=${pageSize}`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 let data = res.data;
-    //                 setActiveDeviceData(data);
-
-    //                 let onlineData = [];
-    //                 let offlineData = [];
-
-    //                 data.forEach((record) => {
-    //                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-    //                 });
-
-    //                 setOnlineDeviceData(onlineData);
-    //                 setOfflineDeviceData(offlineData);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-    //     fetchActiveDeviceData();
-    // });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-    //                 setActiveDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-
-    //     const fetchOnlineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=true`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOnlineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Online Devices');
-    //         }
-    //     };
-
-    //     const fetchOfflineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=false`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOfflineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Offline Devices');
-    //         }
-    //     };
-
-    //     const fetchLocationData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //                 setLocationData(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch Location Data');
-    //         }
-    //     };
-
-    //     fetchActiveDeviceData();
-    //     fetchOnlineDeviceData();
-    //     fetchOfflineDeviceData();
-    //     fetchLocationData();
-    // }, []);
 
     return (
         <React.Fragment>
@@ -1053,90 +288,101 @@ const Provision = () => {
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
                         Provision Devices
                     </span>
-
+                   
+                    </Col>
+            </Row>
+            <Row>
+                <Col md={7}>
+                    <span className='sub-heading' style={{ marginLeft: '20px' }}>Linked TP-Link Accounts</span>
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
-                            <button type="button" className="btn btn-md btn-light font-weight-bold">
-                                Attach Kasa Account
-                            </button>
-                        </div>
+                      
+                      <div className="mr-2">
+                          <button
+                              type="button"
+                              className="btn btn-md btn-outline-secondary font-weight-bold"
+                              onClick={() => {
+                                setShowLink(true);
+                            }}>
+                              <i className="uil uil-link mr-1"></i>Link Account
+                          </button>
+                      </div>
+                  </div>
+                  <Table className="m-4 bordered table-hover border" style={{borderRadius:"6px"}}>
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>HS110s</th>
+                            <th>KP115s</th>
+                            <th>HS300s</th>
+                            <th>Sockets</th>
+                            <th>Remaining Capacity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                                
+                        {linkedAccount.length!==0?
+                            <>
+                                {linkedAccount.map((record, index) => {
+                                return ( 
+                                <tr >
+                                        <td scope="row" className="email-head">
+                                            {record.email}
+                                        </td>
+                                        <td>{record.HS110s}</td>
+                                        <td>{record.KP115s}</td>
+                                        <td>{record.HS300s}</td>
+                                        <td>{record.Socket}</td>
+                                        <td>{record.Remaining_Capacity}</td>
+                                </tr>)})}
+                                <tr>
+                                        <td scope="row" className="email-head">
+                                            Totals
+                                        </td>
+                                        <td>{total.HS110s}</td>
+                                        <td>{total.KP115s}</td>
+                                        <td>{total.HS300s}</td>
+                                        <td>{total.Socket}</td>
+                                        <td>{total.Remaining_Capacity}</td>
+                                </tr>
+                        </>:
+                        <tr>
+                            <td colSpan={5}>No Account linked</td>
+                        </tr>
+                        }
+                    </tbody>
+                </Table>
+
+                </Col>
+                <Col md={5}>
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                      
                         <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Device
+                                >
+                                Done Provisioning
                             </button>
                         </div>
                     </div>
-                </Col>
-            </Row>
-
-            <Row className="mt-2">
-                <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
+                    <Row className='mt-5'>
+                        <Col md={8}>
+                        <div className='m-3' >
+                        <label>Wi-Fi Network</label>
+                        <MultiSelect
+                            options={tableColumnOptions1}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Select Wi-Fi Network';
+                            }}
+                            ClearSelectedIcon={null}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
-                            <Search className="icon-sm" />
-                        </span>
                     </div>
-                </Col>
-                <Col xl={9}>
-                    <div className="btn-group ml-2" role="group" aria-label="Basic example">
-                        <div>
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 0
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderTopRightRadius: '0px', borderBottomRightRadius: '0px' }}
-                                onClick={() => setSelectedTab(0)}>
-                                All Statuses
-                            </button>
-
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 1
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderRadius: '0px' }}
-                                onClick={() => setSelectedTab(1)}>
-                                <i className="uil uil-wifi mr-1"></i>Online
-                            </button>
-
-                            <button
-                                type="button"
-                                className={
-                                    selectedTab === 2
-                                        ? 'btn btn-light d-offline custom-active-btn'
-                                        : 'btn btn-white d-inline custom-inactive-btn'
-                                }
-                                style={{ borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
-                                onClick={() => setSelectedTab(2)}>
-                                <i className="uil uil-wifi-slash mr-1"></i>Offline
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="button" className="btn btn-white d-inline ml-2">
-                        <i className="uil uil-plus mr-1"></i>Add Filter
-                    </button>
-
-                    {/* ---------------------------------------------------------------------- */}
-
-                    <div className="float-right">
+                    <div className='m-3'>
+                        <label>Provisioners</label>
                         <MultiSelect
                             options={tableColumnOptions}
                             value={selectedOptions}
@@ -1144,59 +390,132 @@ const Provision = () => {
                             labelledBy="Columns"
                             className="column-filter-styling"
                             valueRenderer={() => {
-                                return 'Columns';
+                                return 'US Provisioners';
                             }}
                             ClearSelectedIcon={null}
                         />
                     </div>
+                        </Col>
+                        <Col md={4}>
+                        <div className='m-3'>
+                        <label style={{visibility:"hidden"}}>Provisioners</label>
+                          <button
+                              type="button"
+                              className="btn btn-md btn-outline-secondary font-weight-bold"
+                              onClick={() => {
+                                  handleShow();
+                              }}>
+                              <i className="uil uil-plus mr-1"></i>Network
+                          </button>
+                      </div>
+                      <div className='m-3'>
+                        <label style={{visibility:"hidden"}}>Provisioners</label>
+                          <button
+                              type="button"
+                              className="btn btn-md btn-outline-primary font-weight-bold">
+                              Provision
+                          </button>
+                      </div>
+                        </Col>
+                    </Row>
+                    
                 </Col>
             </Row>
+
+          
 
             <Row>
-                <Col lg={10}>
-                    {selectedTab === 0 && (
-                        <ActiveDevicesTable
-                            deviceData={activeDeviceData}
-                            setPageRequest={setPageRequest}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
-                            sampleData={sampleData}
-                            pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            selectedOptions={selectedOptions}
-                        />
-                    )}
-                    {selectedTab === 1 && (
-                        <ActiveDevicesTable
-                            deviceData={onlineDeviceData}
-                            setPageRequest={setPageRequest}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
-                            pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            selectedOptions={selectedOptions}
-                        />
-                    )}
-                    {selectedTab === 2 && (
-                        <ActiveDevicesTable
-                            deviceData={offlineDeviceData}
-                            setPageRequest={setPageRequest}
-                            nextPageData={nextPageData}
-                            previousPageData={previousPageData}
-                            paginationData={paginationData}
-                            pageSize={pageSize}
-                            setPageSize={setPageSize}
-                            selectedOptions={selectedOptions}
-                        />
-                    )}
+                <Col lg={11} >
+                <span className='sub-heading' style={{ marginLeft: '20px' }}>Provisioning</span>
+                
+                <div className="nav-header-container" style={{ marginLeft: '20px' }}>
+                <div className="passive-page-header">
+                    <div className="mt-2 single-passive-tabs-style">
+                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({provisioningData.length})</span></button>
+                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed</span></button>
+                    </div>
+                </div>
+            </div>
+            {selected===0?
+            <Table className="m-4 bordered table-hover border" style={{borderRadius:"6px",color:"#475467"}}>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Device ID</th>
+                            <th>Vendor</th>
+                            <th>Model</th>
+                            <th>Assigned</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {provisioningData.map((record, index) => {
+                        if(record.action===false){
+                            return (
+                         
+                                <tr >
+                                        <td scope="row" >
+                                        <FontAwesomeIcon icon={faGlobe} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Ready
+                                        </td>
+                                        <td>{record.device_mac}</td>
+                                        <td>{record.vendor}</td>
+                                        <td>{record.model}</td>
+                                        <td>{record.assigned}</td>
+                                        <td>{record.action===true?
+                                            <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
+                                             Already Added
+                              </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold" onClick={(e)=>{handleAddDevice(e,record.kasa_account_id,record.device_id)}}>
+                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Add
+                          </button>   
+                                    }</td>
+                                </tr>
+                            )}})}
+              
+                    </tbody>
+                </Table>:""}
+                {selected ===1?
+            <Table className="m-4 bordered table-hover border" style={{borderRadius:"6px",color:"#475467"}}>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Device ID</th>
+                            <th>Vendor</th>
+                            <th>Model</th>
+                            <th>Kasa Account</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                {/* <tr >
+                                        <td scope="row" >
+                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
+                                        </td>
+                                        <td>AA:AA:AA:AA</td>
+                                        <td>TP-Link</td>
+                                        <td>KP115s</td>
+                                        <td>kasa+sapientlab01@sapient.industries</td>
+                                </tr> */}
+                                {provisioningData.map((record, index) => {
+                            if(record.action===true){
+                            return (
+                         
+                                <tr >
+                                        <td scope="row" >
+                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
+                                        </td>
+                                        <td>{record.device_mac}</td>
+                                        <td>{record.vendor}</td>
+                                        <td>{record.model}</td>
+                                        <td>{record.kasa_account}</td>
+                                </tr>
+                            )}})}
+                    </tbody>
+                </Table>:""}
+
                 </Col>
             </Row>
-
-            <Modal show={show} onHide={handleClose} centered>
+            <Modal show={show} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal">
                 <Modal.Header>
-                    <Modal.Title>Add Active Device</Modal.Title>
+                    <Modal.Title>Add Network</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -1214,24 +533,20 @@ const Provision = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Model</Form.Label>
+                            <Form.Label>Password</Form.Label>
                             <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('model', e.target.value);
-                                }}>
-                                <option selected>Select Model</option>
-                                {activeDeviceModal.map((record) => {
+                                type="text"
+                                placeholder="Enter Password"
+                                className="font-weight-bold">
+                                {/* <option selected>Enter Password</option> */}
+                                {/* {activeDeviceModal.map((record) => {
                                     return <option value={record.value}>{record.label}</option>;
-                                })}
+                                })} */}
                             </Input>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Location</Form.Label>
+                            <Form.Label>Building</Form.Label>
                             <Input
                                 type="select"
                                 name="select"
@@ -1240,7 +555,7 @@ const Provision = () => {
                                 onChange={(e) => {
                                     handleChange('space_id', e.target.value);
                                 }}>
-                                <option selected>Select Location</option>
+                                <option selected>Select Building</option>
                                 {locationData.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
                                 })}
@@ -1248,21 +563,70 @@ const Provision = () => {
                         </Form.Group>
                     </Form>
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={handleClose}>
                         Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
+                    </button>
+                    <button
+                        className='btn btn-primary'
                         onClick={() => {
-                            saveDeviceData();
                             handleClose();
                         }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                        style={{width:"8rem"}}
+                        >Add
+                    </button>
                 </Modal.Footer>
             </Modal>
+
+            <Modal show={showlink} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal" >
+                <Modal.Header style={{margin:"0 auto"}}>
+                    <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
+                    <Form>
+                    {error && <Alert color="danger" isOpen={error ? true : false}>
+                                                    <div>{message}</div>
+                                                </Alert>}
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                           
+                            <Form.Control
+                                type="text"
+                                placeholder="Email"
+                                className="font-weight-bold"
+                                autoFocus
+                                onChange={(e)=>{setEmail(e.target.value)}}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            
+                            <Input
+                                type="password"
+                                placeholder="Password"
+                                className="font-weight-bold"
+                                onChange={(e)=>{setPassword(e.target.value)}}
+                                >
+                                {/* <option selected>Enter Password</option> */}
+                                {/* {activeDeviceModal.map((record) => {
+                                    return <option value={record.value}>{record.label}</option>;
+                                })} */}
+                            </Input>
+                        </Form.Group>
+                        <div style={{color:"blue",textAlign:"right",fontWeight:"bold"}}>Forgot Password?</div>
+                        
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button
+                        className='btn btn-primary'
+                        onClick={handleAuthorize}
+                        style={{width:"100%"}}
+                        >Authorize
+                    </button>
+                </Modal.Footer>
+            </Modal>
+
         </React.Fragment>
     );
 };

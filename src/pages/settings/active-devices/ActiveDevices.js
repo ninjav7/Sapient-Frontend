@@ -470,20 +470,26 @@ const ActiveDevices = () => {
                     </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mr-2">
+                        {/* <div className="mr-2">
                             <button type="button" className="btn btn-md btn-light font-weight-bold">
                                 Attach Kasa Account
                             </button>
-                        </div>
+                        </div> */}
                         <div className="mr-2">
+                        <Link
+                                 to={{
+                                    pathname: `/settings/active-devices/provision`,
+                                }}>
+
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
                                 onClick={() => {
                                     handleShow();
                                 }}>
-                                <i className="uil uil-plus mr-1"></i>Add Device
+                                <i className="uil uil-plus mr-1"></i>Add Device(s)
                             </button>
+                            </Link>
                         </div>
                     </div>
                 </Col>
@@ -614,75 +620,7 @@ const ActiveDevices = () => {
                 </Col>
             </Row>
 
-            <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Add Active Device</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Identifier"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('mac_address', e.target.value);
-                                }}
-                                autoFocus
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Model</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('model', e.target.value);
-                                }}>
-                                <option selected>Select Model</option>
-                                {activeDeviceModal.map((record) => {
-                                    return <option value={record.value}>{record.label}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Location</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('space_id', e.target.value);
-                                }}>
-                                <option selected>Select Location</option>
-                                {locationData.map((record) => {
-                                    return <option value={record.location_id}>{record.location_name}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                            handleClose();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            
         </React.Fragment>
     );
 };
