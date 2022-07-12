@@ -1,5 +1,5 @@
  export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-//export const BaseUrl = 'http://122.175.198.21:8000';
+//  export const BaseUrl = 'http://122.175.198.21:8000';
 // export const BaseUrl = 'http://localhost:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -21,6 +21,7 @@ export const generalBuildingDetail = '/api/config/general/building_details';
 export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
+export const generalBldgDelete = '/api/config/general/delete_building';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
@@ -33,6 +34,7 @@ export const endUsesUsageChart = '/api/energy/chart/usage';
 export const generalEquipments = '/api/config/equipments_details/';
 export const equipmentType = '/api/config/get_equipment_type/';
 export const createEquipment = '/api/config/equipments_details/create_equipment/';
+export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -67,9 +69,6 @@ export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 
 export const get_kasa_devices = '/api/config/kasa/get_devices';
 export const insert_kasa_devices = '/api/config/kasa/insert_device';
-
-// general settings
-export const deleteBuilding = '/api/config/general/delete_building';
 
 // layout
 export const getLayouts = '/api/config/get_layout';

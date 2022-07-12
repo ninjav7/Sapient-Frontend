@@ -7,7 +7,15 @@ import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../../services/Network';
+import {
+    BaseUrl,
+    generalActiveDevices,
+    getLocation,
+    sensorGraphData,
+    listSensor,
+    equipmentType,
+    linkActiveSensorToEquip,
+} from '../../../services/Network';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -17,6 +25,8 @@ import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const IndividualActiveDevice = () => {
@@ -29,6 +39,11 @@ const IndividualActiveDevice = () => {
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
 
+    // Equipment states
+    const [showEquipment, setShowEquipment] = useState(false);
+    const handleEquipmentClose = () => setShowEquipment(false);
+    const handleEquipmentShow = () => setShowEquipment(true);
+
     // Edit states
     const [showEdit, setShowEdit] = useState(false);
     const handleEditClose = () => setShowEdit(false);
@@ -39,8 +54,14 @@ const IndividualActiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
     const [activeData, setActiveData] = useState({});
     const [sensors, setSensors] = useState([]);
+    const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
+    const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
     const [sensorData, setSensorData] = useState([]);
+    const [equipmentTypeDevices, setEquipmentTypeDevices] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
+    const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
+    const [selectedSensorId, setSelectedSensorId] = useState('');
+    const [newEquipTypeID, setNewEquipTypeID] = useState('');
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
@@ -99,7 +120,9 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
+                    console.log('Sensor Data => ', response);
                     setSensors(response);
+                    setIsFetchingSensorData(false);
                 });
             } catch (error) {
                 console.log(error);
@@ -147,6 +170,28 @@ const IndividualActiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        const fetchActiveDeviceSensorData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${deviceId}`;
+                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setSensors(response);
+                    setIsFetchingSensorData(false);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active device sensor data');
+            }
+        };
+        fetchActiveDeviceSensorData();
+    }, [sensorAPIRefresh]);
+
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -175,6 +220,48 @@ const IndividualActiveDevice = () => {
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch Sensor Graph data');
+        }
+    };
+
+    const fetchEquipmentTypeData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?end_use=Plug&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setEquipmentTypeDevices(response);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Equipment Type data');
+        }
+    };
+
+    const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
+        if (currEquipId === newEquipID) {
+            return;
+        }
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setSensors([]);
+            setIsFetchingSensorData(true);
+            let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
+            await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
+                setSensorAPIRefresh(!sensorAPIRefresh);
+                console.log(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to link Sensor with Equipment');
         }
     };
 
@@ -388,39 +475,56 @@ const IndividualActiveDevice = () => {
                                 </div>
                             </div> */}
 
-                            {sensors.map((record, index) => {
-                                return (
-                                    <>
-                                        <div className="sensor-container-style mt-3">
-                                            <div className="sensor-data-style">
-                                                <span className="sensor-data-no">{index + 1}</span>
-                                                <span className="sensor-data-title">
-                                                    {record.name}{' '}
-                                                    {record.equipment_id === '' ? (
-                                                        ''
-                                                    ) : (
-                                                        <div className="ml-2 badge badge-soft-primary">
-                                                            {record.equipment}
-                                                        </div>
-                                                    )}
-                                                </span>
+                            {isFetchingSensorData ? (
+                                <div className="mt-4">
+                                    <Skeleton count={8} height={40} />
+                                </div>
+                            ) : (
+                                <>
+                                    {sensors.map((record, index) => {
+                                        return (
+                                            <div className="sensor-container-style mt-3">
+                                                <div className="sensor-data-style">
+                                                    <span className="sensor-data-no">{index + 1}</span>
+                                                    <span className="sensor-data-title">
+                                                        {record.equipment_type_name
+                                                            ? record.equipment_type_name
+                                                            : 'No Equipment'}
+                                                        {record.equipment_id === '' ? (
+                                                            ''
+                                                        ) : (
+                                                            <div className="ml-2 badge badge-soft-primary">
+                                                                {record.equipment}
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                <div className="sensor-data-style-right">
+                                                    <FontAwesomeIcon
+                                                        icon={faChartMixed}
+                                                        size="md"
+                                                        onClick={() => {
+                                                            handleChartShow(record.id);
+                                                        }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-default passive-edit-style"
+                                                        onClick={() => {
+                                                            fetchEquipmentTypeData();
+                                                            setSelectedEquipTypeId(record.equipment_type_id);
+                                                            setNewEquipTypeID(record.equipment_type_id);
+                                                            setSelectedSensorId(record.id);
+                                                            handleEquipmentShow();
+                                                        }}>
+                                                        Edit
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="sensor-data-style-right">
-                                                <FontAwesomeIcon
-                                                    icon={faChartMixed}
-                                                    size="md"
-                                                    onClick={() => {
-                                                        handleChartShow(record.id);
-                                                    }}
-                                                />
-                                                <button type="button" className="btn btn-default passive-edit-style">
-                                                    Edit
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -476,6 +580,46 @@ const IndividualActiveDevice = () => {
                             handleEditClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showEquipment} onHide={handleEquipmentClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Edit Socket</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Type</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    setNewEquipTypeID(e.target.value);
+                                }}
+                                value={newEquipTypeID}>
+                                <option selected>Select Equipment Type</option>
+                                {equipmentTypeDevices.map((record) => {
+                                    return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleEquipmentClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            handleEquipmentClose();
+                            linkSensorToEquipment(selectedSensorId, selectedEquipTypeId, newEquipTypeID);
+                        }}>
+                        Update Socket
                     </Button>
                 </Modal.Footer>
             </Modal>
