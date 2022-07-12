@@ -53,7 +53,7 @@ const ActiveDevicesTable = ({
                             )}
                             {selectedOptions.some((record) => record.value === 'model') && <th>Model</th>}
                             {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
-                            {selectedOptions.some((record) => record.value === 'type') && <th>Device Type</th>}
+                            {selectedOptions.some((record) => record.value === 'description') && <th>Device Type</th>}
                             {selectedOptions.some((record) => record.value === 'sensors') && <th>Sensors</th>}
                             {selectedOptions.some((record) => record.value === 'firmware-version') && (
                                 <th>Firmware Version</th>
@@ -134,8 +134,8 @@ const ActiveDevicesTable = ({
                                         {selectedOptions.some((record) => record.value === 'location') && (
                                             <td>{record.location}</td>
                                         )}
-                                        {selectedOptions.some((record) => record.value === 'type') && (
-                                            <th>{record.type}</th>
+                                        {selectedOptions.some((record) => record.value === 'description') && (
+                                            <th>{record.description}</th>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'sensors') && (
                                             <td>{record.sensor_number}</td>
@@ -203,7 +203,7 @@ const ActiveDevices = () => {
         { label: 'Identifier (MAC)', value: 'identifier' },
         { label: 'Model', value: 'model' },
         { label: 'Location', value: 'location' },
-        { label: 'Device Type', value: 'type' },
+        { label: 'Device Type', value: 'description' },
         { label: 'Sensors', value: 'sensors' },
         { label: 'Firmware Version', value: 'firmware-version' },
         { label: 'Hardware Version', value: 'hardware-version' },
@@ -464,7 +464,7 @@ const ActiveDevices = () => {
             { label: 'Identifier (MAC)', value: 'identifier' },
             { label: 'Model', value: 'model' },
             { label: 'Location', value: 'location' },
-            { label: 'Device Type', value: 'type' },
+            { label: 'Device Type', value: 'description' },
             { label: 'Sensors', value: 'sensors' },
             { label: 'Firmware Version', value: 'firmware-version' },
             { label: 'Hardware Version', value: 'hardware-version' },
