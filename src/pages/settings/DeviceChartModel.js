@@ -19,8 +19,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power']
-    const UNIT_DIVIDER = 1000
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const UNIT_DIVIDER = 1000;
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'consumedEnergy (Wh)' },
         { value: 'mV', label: 'voltage (V)' },
@@ -80,14 +80,15 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         }
         const exploreDataFetch = async () => {
             try {
+                if (sensorData.id === undefined) {
+                    return;
+                }
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // let params = `?sensor_id=629f436216701186eff7b79b`;
+                console.log('sensorData.id => ', sensorData.id);
                 let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
@@ -100,29 +101,27 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     )
                     .then((res) => {
                         let response = res.data;
-                        
+
                         let data = response;
                         let exploreData = [];
-                        
+
                         let recordToInsert = {
                             data: data,
                             name: selectedConsumption,
                         };
-                        
+
                         try {
                             recordToInsert.data = recordToInsert.data.map((_data) => {
-                                if(CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1){
-                                    _data[1] = _data[1]/ UNIT_DIVIDER
+                                if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                    _data[1] = _data[1] / UNIT_DIVIDER;
                                 }
 
-                                return _data
-                            })    
-                        } catch (error) {
-                            
-                        }
+                                return _data;
+                            });
+                        } catch (error) {}
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
-                        console.log("THIS IS SERIES", exploreData)
+                        console.log('THIS IS SERIES', exploreData);
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
@@ -141,7 +140,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     useEffect(() => {
         console.log(sensorData);
     }, []);
-
 
     const handleRefresh = () => {
         setDateFilter(dateValue);
@@ -183,16 +181,14 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         xaxis: {
             type: 'datetime',
         },
-        yaxis : {
+        yaxis: {
             labels: {
-                "formatter": function (val) {
-                    return val.toFixed(2)
-                }
-            }
-        }
+                formatter: function (val) {
+                    return val.toFixed(2);
+                },
+            },
+        },
     });
-
-
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -228,10 +224,10 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         yaxis: {
             tickAmount: 2,
             labels: {
-                "formatter": function (val) {
-                    return val.toFixed(2)
-                }
-            }
+                formatter: function (val) {
+                    return val.toFixed(2);
+                },
+            },
         },
     });
 
@@ -239,7 +235,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
             <div className="chart-model-header">
                 <div>
-                    <div className="model-sensor-date-time">{localStorage.getItem("identifier")}</div>
+                    <div className="model-sensor-date-time">{localStorage.getItem('identifier')}</div>
                     <div>
                         <span className="model-sensor-name mr-2">{sensorData.name}</span>
                         <span className="model-equip-name">{sensorData.equipment}</span>
@@ -263,9 +259,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         type="select"
                         name="select"
                         id="exampleSelect"
-                        onChange={e => {
-
-                            setConsumption(e.target.value)
+                        onChange={(e) => {
+                            setConsumption(e.target.value);
                         }}
                         className="font-weight-bold model-sensor-energy-filter mr-2"
                         style={{ display: 'inline-block', width: 'fit-content' }}

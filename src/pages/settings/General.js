@@ -86,7 +86,7 @@ const General = () => {
     const [endDate, setEndDate] = useState(new Date(`January 31 1980 12:50`));
     const [value, onChange] = useState('10:00');
     const [render, setRender] = useState(false);
-    const [activeToggle, setactiveToggle] = useState(false);
+    const [activeToggle, setActiveToggle] = useState(false);
     const [weekToggle, setWeekToggle] = useState({
         mon: false,
         tue: false,
@@ -133,7 +133,7 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-                    setactiveToggle(data.active);
+                    setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
                     console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
@@ -184,7 +184,7 @@ const General = () => {
                         time_format: data.time_format,
                         operating_hours: data.operating_hours,
                     });
-                    setactiveToggle(data.active);
+                    setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
                     console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
@@ -343,7 +343,7 @@ const General = () => {
     };
 
     const inputsActiveToggleHandler = (e) => {
-        setactiveToggle(!activeToggle);
+        setActiveToggle(!activeToggle);
         console.log('helloo');
         const headers = {
             'Content-Type': 'application/json',

@@ -63,7 +63,8 @@ export function useHover() {
 }
 
 const BuildingOverview = () => {
-    const { bldgId } = useParams();
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [overview, setOverview] = useState({
@@ -84,31 +85,6 @@ const BuildingOverview = () => {
     });
 
     const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
-
-    // const [buildingAlert, setBuildingAlerts] = useState([
-    //     {
-    //         type: 'string',
-    //         building_name: 'New Building Peak',
-    //         building_address: 'address',
-    //         trend: 'string',
-    //         last_known_value: '100',
-    //         current_value: '10',
-    //         message: 'test',
-    //         due_message: '10',
-    //         created_at: 'Today',
-    //     },
-    //     {
-    //         type: 'type2',
-    //         building_name: 'Energy trend Upward',
-    //         building_address: 'address',
-    //         trend: 'string',
-    //         last_known_value: '100',
-    //         current_value: '10',
-    //         message: 'test',
-    //         due_message: '10',
-    //         created_at: 'Today',
-    //     },
-    // ]);
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
 
@@ -142,11 +118,11 @@ const BuildingOverview = () => {
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
             type: 'donut',
-                events: {
-                  mounted: function(chartContext, config) {
-                     chartContext.toggleDataPointSelection(0,1)
-                   },
-                }
+            events: {
+                mounted: function (chartContext, config) {
+                    chartContext.toggleDataPointSelection(0, 1);
+                },
+            },
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -465,37 +441,6 @@ const BuildingOverview = () => {
         },
     });
 
-    // const [energyConsumption, setEnergyConsumption] = useState([
-    //     {
-    //         device: 'HVAC',
-    //         energy_consumption: {
-    //             now: 8000,
-    //             old: 100,
-    //         },
-    //     },
-    //     {
-    //         device: 'HVAC',
-    //         energy_consumption: {
-    //             now: 1000,
-    //             old: 100,
-    //         },
-    //     },
-    //     {
-    //         device: 'HVAC',
-    //         energy_consumption: {
-    //             now: 1000,
-    //             old: 100,
-    //         },
-    //     },
-    //     {
-    //         device: 'HVAC',
-    //         energy_consumption: {
-    //             now: 1000,
-    //             old: 100,
-    //         },
-    //     },
-    // ]);
-
     const [energyConsumption, setEnergyConsumption] = useState([]);
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState([]);
@@ -700,17 +645,17 @@ const BuildingOverview = () => {
         },
     });
 
-    const handleChange=(e,value)=>{
-        console.log("Selected Item ",value);
-        if(value==="HVAC"){
+    const handleChange = (e, value) => {
+        console.log('Selected Item ', value);
+        if (value === 'HVAC') {
             setDonutChartOpts({
                 chart: {
                     type: 'donut',
-                        events: {
-                          mounted: function(chartContext, config) {
-                             chartContext.toggleDataPointSelection(0)
-                           },
-                        }
+                    events: {
+                        mounted: function (chartContext, config) {
+                            chartContext.toggleDataPointSelection(0);
+                        },
+                    },
                 },
                 labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
                 colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -810,142 +755,23 @@ const BuildingOverview = () => {
                 stroke: {
                     width: 0,
                 },
-        
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            })
-        }
-        else if(value==="Lighting"){
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                        events: {
-                          mounted: function(chartContext, config) {
-                             chartContext.toggleDataPointSelection(1)
-                           },
-                        }
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-        
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            })
 
-        }
-        else if(value==="Process"){
+                itemMargin: {
+                    horizontal: 10,
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+            });
+        } else if (value === 'Lighting') {
             setDonutChartOpts({
                 chart: {
                     type: 'donut',
-                        events: {
-                          mounted: function(chartContext, config) {
-                             chartContext.toggleDataPointSelection(2)
-                           },
-                        }
+                    events: {
+                        mounted: function (chartContext, config) {
+                            chartContext.toggleDataPointSelection(1);
+                        },
+                    },
                 },
                 labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
                 colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -1045,134 +871,248 @@ const BuildingOverview = () => {
                 stroke: {
                     width: 0,
                 },
-        
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            })
-        }
-        else if(value==="Plug"){
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                        events: {
-                          mounted: function(chartContext, config) {
-                             chartContext.toggleDataPointSelection(3)
-                           },
-                        }
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-        
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            })
-        }
 
-    }
+                itemMargin: {
+                    horizontal: 10,
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+            });
+        } else if (value === 'Process') {
+            setDonutChartOpts({
+                chart: {
+                    type: 'donut',
+                    events: {
+                        mounted: function (chartContext, config) {
+                            chartContext.toggleDataPointSelection(2);
+                        },
+                    },
+                },
+                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+                series: [12553, 11553, 6503, 2333],
+                plotOptions: {
+                    pie: {
+                        startAngle: 0,
+                        endAngle: 360,
+                        expandOnClick: false,
+                        offsetX: 0,
+                        offsetY: 0,
+                        customScale: 1,
+                        dataLabels: {
+                            offset: 0,
+                            minAngleToShowLabel: 10,
+                        },
+                        donut: {
+                            size: '80%',
+                            background: 'grey',
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: false,
+                                    // fontSize: '22px',
+                                    // fontFamily: 'Helvetica, Arial, sans-serif',
+                                    // fontWeight: 600,
+                                    // color: '#373d3f',
+                                    // offsetY: -10,
+                                    // formatter: function (val) {
+                                    //     return val;
+                                    // },
+                                },
+                                value: {
+                                    show: true,
+                                    fontSize: '15px',
+                                    fontFamily: 'Helvetica, Arial, sans-serif',
+                                    fontWeight: 400,
+                                    color: 'red',
+                                    // offsetY: 16,
+                                    formatter: function (val) {
+                                        return `${val} kWh`;
+                                    },
+                                },
+                                total: {
+                                    show: true,
+                                    showAlways: false,
+                                    label: 'Total',
+                                    // color: '#373d3f',
+                                    fontSize: '22px',
+                                    fontWeight: 600,
+                                    // formatter: function (w) {
+                                    //     return w.globals.seriesTotals.reduce((a, b) => {
+                                    //         return a + b;
+                                    //     }, 0);
+                                    // },
+                                    formatter: function (w) {
+                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
+                                            return a + b;
+                                        }, 0);
+                                        return `${sum} kWh`;
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                responsive: [
+                    {
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                width: 300,
+                            },
+                            // legend: {
+                            //     show: true,
+                            //     showForSingleSeries:true,
+                            //     onItemHover: {
+                            //         highlightDataSeries: true
+                            //     },
+                            //     onItemClick: {
+                            //         toggleDataSeries: true
+                            //     },
+                            // },
+                        },
+                    },
+                ],
+                dataLabels: {
+                    enabled: false,
+                },
+                tooltip: {
+                    theme: 'dark',
+                    x: { show: false },
+                },
+                legend: {
+                    show: false,
+                },
+                stroke: {
+                    width: 0,
+                },
+
+                itemMargin: {
+                    horizontal: 10,
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+            });
+        } else if (value === 'Plug') {
+            setDonutChartOpts({
+                chart: {
+                    type: 'donut',
+                    events: {
+                        mounted: function (chartContext, config) {
+                            chartContext.toggleDataPointSelection(3);
+                        },
+                    },
+                },
+                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
+                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+                series: [12553, 11553, 6503, 2333],
+                plotOptions: {
+                    pie: {
+                        startAngle: 0,
+                        endAngle: 360,
+                        expandOnClick: false,
+                        offsetX: 0,
+                        offsetY: 0,
+                        customScale: 1,
+                        dataLabels: {
+                            offset: 0,
+                            minAngleToShowLabel: 10,
+                        },
+                        donut: {
+                            size: '80%',
+                            background: 'grey',
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: false,
+                                    // fontSize: '22px',
+                                    // fontFamily: 'Helvetica, Arial, sans-serif',
+                                    // fontWeight: 600,
+                                    // color: '#373d3f',
+                                    // offsetY: -10,
+                                    // formatter: function (val) {
+                                    //     return val;
+                                    // },
+                                },
+                                value: {
+                                    show: true,
+                                    fontSize: '15px',
+                                    fontFamily: 'Helvetica, Arial, sans-serif',
+                                    fontWeight: 400,
+                                    color: 'red',
+                                    // offsetY: 16,
+                                    formatter: function (val) {
+                                        return `${val} kWh`;
+                                    },
+                                },
+                                total: {
+                                    show: true,
+                                    showAlways: false,
+                                    label: 'Total',
+                                    // color: '#373d3f',
+                                    fontSize: '22px',
+                                    fontWeight: 600,
+                                    // formatter: function (w) {
+                                    //     return w.globals.seriesTotals.reduce((a, b) => {
+                                    //         return a + b;
+                                    //     }, 0);
+                                    // },
+                                    formatter: function (w) {
+                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
+                                            return a + b;
+                                        }, 0);
+                                        return `${sum} kWh`;
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                responsive: [
+                    {
+                        breakpoint: 480,
+                        options: {
+                            chart: {
+                                width: 300,
+                            },
+                            // legend: {
+                            //     show: true,
+                            //     showForSingleSeries:true,
+                            //     onItemHover: {
+                            //         highlightDataSeries: true
+                            //     },
+                            //     onItemClick: {
+                            //         toggleDataSeries: true
+                            //     },
+                            // },
+                        },
+                    },
+                ],
+                dataLabels: {
+                    enabled: false,
+                },
+                tooltip: {
+                    theme: 'dark',
+                    x: { show: false },
+                },
+                legend: {
+                    show: false,
+                },
+                stroke: {
+                    width: 0,
+                },
+
+                itemMargin: {
+                    horizontal: 10,
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+            });
+        }
+    };
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -1192,7 +1132,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -1220,7 +1159,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -1256,7 +1194,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${1}`;
@@ -1284,7 +1221,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&limit=${2}`;
@@ -1313,7 +1249,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -1352,7 +1287,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -1450,7 +1384,6 @@ const BuildingOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?aggregate=day&building_id=${bldgId}`;
@@ -1489,9 +1422,6 @@ const BuildingOverview = () => {
         const calculateDays = () => {
             let time_difference = endDate.getTime() - startDate.getTime();
             let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            // if (days_difference === 0) {
-            //     days_difference = 1;
-            // }
             days_difference = days_difference + 1;
             setDaysCount(days_difference);
         };
@@ -1528,7 +1458,6 @@ const BuildingOverview = () => {
     return (
         <React.Fragment>
             <Header title="Building Overview" />
-            {/* <h3>ID : {bldgId}</h3> */}
             <Row xl={12} className="mt-2">
                 <div className="energy-summary-alignment">
                     <div className="card-box-style button-style">
@@ -1553,7 +1482,6 @@ const BuildingOverview = () => {
                             <h5 className="card-title subtitle-style">
                                 Portfolio Rank&nbsp;&nbsp;
                                 <div>
-                                    {/* <i className="uil uil-info-circle avatar-xs rounded-circle" id="title" /> */}
                                     <FontAwesomeIcon icon={faCircleInfo} size="md" color="#D0D5DD" id="title" />
                                     <UncontrolledTooltip placement="bottom" target="#title">
                                         Portfolio Rank
@@ -1595,7 +1523,6 @@ const BuildingOverview = () => {
                                     overview.yearly_electric_eui.old
                                 )}
                                 consumptionNormal={overview.yearly_electric_eui.now >= overview.yearly_electric_eui.old}
-                                // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
                                 infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
                                 infoType={`total-bld-eui`}
                             />
@@ -1606,10 +1533,6 @@ const BuildingOverview = () => {
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
                                 <div>
-                                    {/* <i
-                                        className="uil uil-info-circle avatar-xs rounded-circle"
-                                        id="tooltip-monitored-load"
-                                    /> */}
                                     <FontAwesomeIcon
                                         icon={faCircleInfo}
                                         size="md"
@@ -1634,7 +1557,6 @@ const BuildingOverview = () => {
 
             {/* <Row> */}
             <div className="bldg-page-grid-style">
-                {/* <Col md={8} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
                     <div>
@@ -1677,7 +1599,9 @@ const BuildingOverview = () => {
                                                 to={{
                                                     pathname: `/energy/${record.device.toLowerCase()}/${bldgId}`,
                                                 }}>
-                                                <div className="custom-bldg-table-style building-consumption-style m-2 p-1" onMouseOver={(e)=>handleChange(e,record.device)}>
+                                                <div
+                                                    className="custom-bldg-table-style building-consumption-style m-2 p-1"
+                                                    onMouseOver={(e) => handleChange(e, record.device)}>
                                                     <div className="ml-2">
                                                         {record.device === 'HVAC' && (
                                                             <div

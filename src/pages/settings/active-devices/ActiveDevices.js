@@ -26,15 +26,17 @@ import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import Pagination from 'react-bootstrap/Pagination';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const ActiveDevicesTable = ({
     deviceData,
-    setPageRequest,
+    isDeviceProcessing,
+    setIsDeviceProcessing,
     nextPageData,
     previousPageData,
     paginationData,
-    sampleData,
     pageSize,
     setPageSize,
     selectedOptions,
@@ -60,73 +62,89 @@ const ActiveDevicesTable = ({
                             )}
                         </tr>
                     </thead>
-                    <tbody>
-                        {deviceData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    {selectedOptions.some((record) => record.value === 'status') && (
-                                        <td scope="row" className="text-center">
-                                            {record.status === 'Online' && (
-                                                <div className="icon-bg-styling">
-                                                    <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                            {record.status === 'Offline' && (
-                                                <div className="icon-bg-styling-slash">
-                                                    <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                        </td>
-                                    )}
+                    {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                    <Link
-                                        to={{
-                                            pathname: `/settings/active-devices/single/${record.equipments_id}`,
-                                        }}>
-                                        {selectedOptions.some((record) => record.value === 'identifier') && (
-                                            <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                        )}
-                                    </Link>
-                                    {selectedOptions.some((record) => record.value === 'model') && (
-                                        <td>{record.model}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'location') && (
-                                        <td>{record.location}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'sensors') && (
-                                        <td>{record.sensor_number}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'firmware-version') && (
-                                        <td>{record.firmware_version === null ? '-' : record.firmware_version}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                        <td>{record.hardware_version === null ? '-' : record.hardware_version}</td>
-                                    )}
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {deviceData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        {selectedOptions.some((record) => record.value === 'status') && (
+                                            <td scope="row" className="text-center">
+                                                {record.status === 'Online' && (
+                                                    <div className="icon-bg-styling">
+                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                                {record.status === 'Offline' && (
+                                                    <div className="icon-bg-styling-slash">
+                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        )}
+
+                                        <Link
+                                            to={{
+                                                pathname: `/settings/active-devices/single/${record.equipments_id}`,
+                                            }}>
+                                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                            )}
+                                        </Link>
+                                        {selectedOptions.some((record) => record.value === 'model') && (
+                                            <td>{record.model}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'location') && (
+                                            <td>{record.location}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'sensors') && (
+                                            <td>{record.sensor_number}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'firmware-version') && (
+                                            <td>{record.firmware_version === null ? '-' : record.firmware_version}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'hardware-version') && (
+                                            <td>{record.hardware_version === null ? '-' : record.hardware_version}</td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
-
-                <div className="mt-4">
-                    {/* <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'<<'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'<'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'>'}
-                    </button>
-                    <button type="button" className="btn btn-md btn-light font-weight-bold mt-4">
-                        {'>>'}
-                    </button> */}
-
-                    {/* <span className="react-bootstrap-table-pagination-total ml-4 mt-4">Page 2 of 5000</span> */}
-                    {/* <span className="mt-4 ml-2">
-                        | Go to page: <input type="number" style={{ width: '100px' }} />
-                    </span> */}
-                </div>
 
                 <div className="page-button-style ml-2">
                     <div>
@@ -209,20 +227,10 @@ const ActiveDevices = () => {
             label: 'HS300',
         },
     ]);
+
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
-    // const [activeDeviceData, setActiveDeviceData] = useState([
-    //     {
-    //         equipments_id: '629a250650044d23b0319bbd',
-    //         status: 'Online',
-    //         location: 'Hall > Ground Floor',
-    //         sensor_number: '1/6',
-    //         identifier: '10:27:F5:8F:8B:F3',
-    //         model: 'HS300',
-    //         firmware_version: null,
-    //         hardware_version: '0',
-    //     },
-    // ]);
+
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
     const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -230,508 +238,7 @@ const ActiveDevices = () => {
         device_type: 'active',
     });
 
-    const sampleData = [
-        {
-            equipments_id: '629f4a90cd75760615566d9c',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '6',
-            identifier: '10:27:F5:8F:8B:F3',
-            model: 'HS300',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d295d6dded1b23e61fc',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC',
-            model: 'H Test 1',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-        {
-            equipments_id: '62b07d3b5d6dded1b23e61ff',
-            status: 'Online',
-            location: 'Hall > Ground Floor',
-            sensor_number: '4',
-            identifier: 'Test MAC 2',
-            model: 'H Test 2',
-            firmware_version: null,
-            hardware_version: null,
-        },
-    ];
+    const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -769,6 +276,7 @@ const ActiveDevices = () => {
             if (path === null) {
                 return;
             }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -788,9 +296,11 @@ const ActiveDevices = () => {
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
@@ -800,6 +310,7 @@ const ActiveDevices = () => {
             if (path === null) {
                 return;
             }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -819,9 +330,11 @@ const ActiveDevices = () => {
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
@@ -829,6 +342,7 @@ const ActiveDevices = () => {
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {
+                setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -851,9 +365,11 @@ const ActiveDevices = () => {
 
                     setOnlineDeviceData(onlineData);
                     setOfflineDeviceData(offlineData);
+                    setIsDeviceProcessing(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsDeviceProcessing(false);
                 console.log('Failed to fetch all Active Devices');
             }
         };
@@ -863,7 +379,6 @@ const ActiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
@@ -882,6 +397,7 @@ const ActiveDevices = () => {
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {
+                setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -898,15 +414,17 @@ const ActiveDevices = () => {
                     let onlineData = [];
                     let offlineData = [];
 
-                    response.forEach((record) => {
+                    response.data.forEach((record) => {
                         record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                     });
 
                     setOnlineDeviceData(onlineData);
                     setOfflineDeviceData(offlineData);
                 });
+                setIsDeviceProcessing(false);
             } catch (error) {
                 console.log(error);
+                setIsDeviceProcessing(false);
                 console.log('Failed to fetch all Active Devices');
             }
         };
@@ -942,118 +460,6 @@ const ActiveDevices = () => {
         ];
         setSelectedOptions(arr);
     }, []);
-
-    useEffect(() => {
-        console.log('selectedOptions => ', selectedOptions);
-    });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?page_size=${pageNo}&page_no=${pageSize}`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 let data = res.data;
-    //                 setActiveDeviceData(data);
-
-    //                 let onlineData = [];
-    //                 let offlineData = [];
-
-    //                 data.forEach((record) => {
-    //                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
-    //                 });
-
-    //                 setOnlineDeviceData(onlineData);
-    //                 setOfflineDeviceData(offlineData);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-    //     fetchActiveDeviceData();
-    // });
-
-    // useEffect(() => {
-    //     const fetchActiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}`, { headers }).then((res) => {
-    //                 setActiveDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Active Devices');
-    //         }
-    //     };
-
-    //     const fetchOnlineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=true`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOnlineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Online Devices');
-    //         }
-    //     };
-
-    //     const fetchOfflineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=false`;
-    //             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOfflineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Offline Devices');
-    //         }
-    //     };
-
-    //     const fetchLocationData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //                 setLocationData(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch Location Data');
-    //         }
-    //     };
-
-    //     fetchActiveDeviceData();
-    //     fetchOnlineDeviceData();
-    //     fetchOfflineDeviceData();
-    //     fetchLocationData();
-    // }, []);
 
     return (
         <React.Fragment>
@@ -1176,10 +582,11 @@ const ActiveDevices = () => {
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
                             paginationData={paginationData}
-                            sampleData={sampleData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             selectedOptions={selectedOptions}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -1192,6 +599,8 @@ const ActiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             selectedOptions={selectedOptions}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -1204,6 +613,8 @@ const ActiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             selectedOptions={selectedOptions}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
                         />
                     )}
                 </Col>

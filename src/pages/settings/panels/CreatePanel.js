@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -22,7 +22,9 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
-import BreakersLink from './BreakersLink';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
+import CustomEdge from './panel-breaker-flow/CustomEdge';
+import CustomNodeSelector from './panel-breaker-flow/CustomNodeSelector';
 import '../style.css';
 import './panel-style.css';
 
@@ -161,6 +163,113 @@ const CreatePanel = () => {
         breakerNo: 0,
         type: 'main-breaker',
     });
+
+    // ReactFlow
+    const [open, setOpen] = useState(false);
+    const [reactflowInstance, setReactflowInstance] = useState(null);
+    const [elements, setElements] = useState([]);
+    const [bgColor, setBgColor] = useState(initBgColor);
+    const [nodeData, setnodeData] = useState(null);
+    const [inputChange, setinputChange] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+
+    const initBgColor = '#1A192B';
+
+    const connectionLineStyle = { stroke: '#fff' };
+    const snapGrid = [20, 20];
+
+    //added new onload function
+    const onLoad = (reactFlowInstance) => {
+        reactFlowInstance.fitView();
+        console.log(reactFlowInstance.getElements());
+    };
+
+    // ************* added node types ********************
+    const edgeTypes = {
+        customedge: CustomEdge,
+    };
+
+    const handleMouseEnter = (e, node) => {
+        console.log(node);
+        setnodeData(node);
+    };
+
+    const initialEdges = [
+        {
+            id: 'horizontal-e1-12',
+            source: 'horizontal-1',
+            type: 'smoothstep',
+            target: 'horizontal-2',
+            animated: false,
+            label: 'Label 1',
+        },
+        {
+            id: 'horizontal-e1-13',
+            source: 'horizontal-1',
+            type: 'smoothstep',
+            target: 'horizontal-3',
+            animated: false,
+            label: 'Label 2',
+        },
+    ];
+
+    // chnaged label in data
+    const onConnect = useCallback(
+        (params) =>
+            setElements((els) =>
+                addEdge(
+                    {
+                        ...params,
+                        id: `edge_${elements.length + 1}`,
+                        animated: false,
+                        type: 'customedge',
+                        style: { stroke: '#fff' },
+                        data: { type: 'edge', label: 'dhvsdhvd' },
+                        arrowHeadType: 'arrowclosed',
+                    },
+                    els
+                )
+            ),
+        []
+    );
+
+    const onNodeDragStop = (event, node) => {
+        const findElementindex = elements.findIndex((items) => items.id === node.id);
+        if (findElementindex > -1) {
+            elements[findElementindex] = node;
+            setElements([...elements]);
+        }
+        console.log(node, elements);
+    };
+
+    const onContextMenu = (e) => {
+        e.preventDefault();
+        setIsOpen(true);
+        setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
+    };
+
+    const onElementsRemove = useCallback(
+        (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els)),
+        []
+    );
+
+    const onElementClick = (event, node) => {
+        handleClickOpen();
+        setnodeData(node);
+        const findElement = elements.find((items) => items.id === node.id);
+        if (findElement) {
+            setinputChange(findElement?.data?.label || findElement?.label);
+        }
+    };
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const nodeTypes = {
+        customnode: CustomNodeSelector,
+    };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
@@ -831,12 +940,6 @@ const CreatePanel = () => {
         fetchEquipmentData();
     }, [bldgId]);
 
-    useEffect(() => {
-        console.log('Troubleshoot normalStruct => ', normalStruct);
-        // console.log('Troubleshoot disconnectBreakerConfig => ', disconnectBreakerConfig);
-        // console.log('Troubleshoot panel => ', panel);
-    });
-
     return (
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>
@@ -1072,10 +1175,7 @@ const CreatePanel = () => {
                                     </FormGroup>
                                 </Row>
 
-                                {/* <Row>
-                                    <BreakersLink />
-                                </Row> */}
-
+                                {/* Working Breakers without Linking  */}
                                 <Row>
                                     <Col lg={12}>
                                         <div>
@@ -1112,7 +1212,6 @@ const CreatePanel = () => {
                                                                             <>
                                                                                 <div className="breaker-equipName-style">
                                                                                     <h6 className=" ml-3 breaker-equip-name">
-                                                                                        {/* {element.equipment_link[0]} */}
                                                                                         {findEquipmentName(
                                                                                             element.equipment_link[0]
                                                                                         )}
@@ -1213,6 +1312,30 @@ const CreatePanel = () => {
                                         </div>
                                     </Col>
                                 </Row>
+
+                                {/* <Row>
+                                    <Col lg={12}>
+                                        <div style={{ width: '100%', height: '90vh' }}>
+                                            <ReactFlow
+                                                elements={elements}
+                                                onElementClick={onElementClick}
+                                                onElementsRemove={onElementsRemove}
+                                                onConnect={onConnect}
+                                                onNodeDragStop={onNodeDragStop}
+                                                style={{ background: bgColor }}
+                                                onLoad={onLoad}
+                                                nodeTypes={nodeTypes}
+                                                onNodeContextMenu={onContextMenu}
+                                                connectionLineStyle={connectionLineStyle}
+                                                snapToGrid={true}
+                                                snapGrid={snapGrid}
+                                                maxZoom={2}
+                                                defaultZoom={1.5}
+                                                onNodeMouseEnter={handleMouseEnter}
+                                                edges={initialEdges}></ReactFlow>
+                                        </div>
+                                    </Col> 
+                                </Row> */}
                             </>
                         )}
 
