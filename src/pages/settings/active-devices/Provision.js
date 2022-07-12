@@ -18,6 +18,8 @@ import './style.css';
 import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown } from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import tplink from "../../../assets/images/tplink.png";
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 
 const Provision = () => {
@@ -53,18 +55,13 @@ const Provision = () => {
     const handleShow = () => setShow(true);
     const [linkedAccount, setLinkedAccount]=useState([]);
     const [provisioningData, setProvisioningData]=useState([]);
-    const [readyCount, setReadyCount]=useState(0);
-    const [progressCount,setProgressCount]=useState(0);
+    const [readyData, setReadyData]=useState([]);
+    const [progressData,setProgressData]=useState([]);
     const [total, setTotal]=useState([]);
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
     const [isProcessing, setIsProcessing] = useState(false);
-    const [pageRefresh, setPageRefresh] = useState(false);
-
-    const [pageSize, setPageSize] = useState(10);
-    const [pageNo, setPageNo] = useState(1);
-
-    const [pageRequest, setPageRequest] = useState('');
+    const [isAddProcessing, setIsAddProcessing] = useState(false);
 
     const [activeDeviceModal, setActiveDeviceModal] = useState([
         {
@@ -127,6 +124,7 @@ const Provision = () => {
     }  
    const handleAddDevice=(e,kasa_account_id,device_id)=>{
     let authData={
+        "building_id":bldgId,
         "device_id":device_id,
         "kasa_account_id":kasa_account_id
     }
@@ -144,10 +142,7 @@ const Provision = () => {
             .then((res) => {
                 console.log(res.data);
                 if(res.status===200){
-                    // setShowLink(false);
-                    // console.log(res.data.id);
-                    // localStorage.setItem("kasa_id",res.data.id)
-                    // setAuth(res.data.id);
+                    getKasaDevices();
                 }
             });
 
@@ -196,6 +191,7 @@ const Provision = () => {
     }, []);
     const getKasaAccount = () => {
         try {
+            setIsProcessing(true);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -228,14 +224,19 @@ const Provision = () => {
                     Remaining_Capacity:capy
                 }
                 setTotal(arr);
-                console.log(arr)
+                console.log(arr);
+                setIsProcessing(false);
             });
         } catch (error) {
             console.log('Failed to fetch kasa account');
+            setIsProcessing(false);
         }
 }
 const getKasaDevices=()=>{
 try {
+    setIsAddProcessing(true);
+    let ready=[];
+    let progress=[];
     let header = {
         'Content-Type': 'application/json',
         accept: 'application/json',
@@ -250,16 +251,20 @@ try {
         console.log(res.data.data);
         res.data.data.forEach(ele => {
             if(ele.action===true){
-                setReadyCount(readyCount+1)
+                ready.push(ele);
             }
             else{
-                setProgressCount(progressCount+1)
+                progress.push(ele);
             }
          });
+         setReadyData(ready);
+         setProgressData(progress);
         setProvisioningData(res.data.data);
+        setIsAddProcessing(false);
     });
 } catch (error) {
     console.log('Failed to fetch kasa account');
+    setIsAddProcessing(false);
 }
 
 }
@@ -279,6 +284,8 @@ useEffect(()=>{
     },[])
     useEffect(() => {
         console.log('selectedOptions => ', selectedOptions);
+        console.log("readyData",readyData);
+        console.log("progressData",progressData);
     });
 
     return (
@@ -318,6 +325,37 @@ useEffect(()=>{
                             <th>Remaining Capacity</th>
                         </tr>
                     </thead>
+                    {isProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
                     <tbody>
                                                 
                         {linkedAccount.length!==0?
@@ -350,6 +388,7 @@ useEffect(()=>{
                         </tr>
                         }
                     </tbody>
+                    )}
                 </Table>
 
                 </Col>
@@ -431,8 +470,8 @@ useEffect(()=>{
                 <div className="nav-header-container" style={{ marginLeft: '20px' }}>
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
-                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({provisioningData.length})</span></button>
-                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed</span></button>
+                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({progressData.length})</span></button>
+                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed({readyData.length})</span></button>
                     </div>
                 </div>
             </div>
@@ -448,8 +487,39 @@ useEffect(()=>{
                             <th>Actions</th>
                         </tr>
                     </thead>
+                    {isAddProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
                     <tbody>
-                    {provisioningData.map((record, index) => {
+                    {progressData.map((record, index) => {
                         if(record.action===false){
                             return (
                          
@@ -472,6 +542,7 @@ useEffect(()=>{
                             )}})}
               
                     </tbody>
+                    )}
                 </Table>:""}
                 {selected ===1?
             <Table className="m-4 bordered table-hover border" style={{borderRadius:"6px",color:"#475467"}}>
@@ -484,17 +555,35 @@ useEffect(()=>{
                             <th>Kasa Account</th>
                         </tr>
                     </thead>
+                    {isAddProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
                     <tbody>
-                                {/* <tr >
-                                        <td scope="row" >
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
-                                        </td>
-                                        <td>AA:AA:AA:AA</td>
-                                        <td>TP-Link</td>
-                                        <td>KP115s</td>
-                                        <td>kasa+sapientlab01@sapient.industries</td>
-                                </tr> */}
-                                {provisioningData.map((record, index) => {
+                                {readyData.map((record, index) => {
                             if(record.action===true){
                             return (
                          
@@ -509,6 +598,7 @@ useEffect(()=>{
                                 </tr>
                             )}})}
                     </tbody>
+                    )}
                 </Table>:""}
 
                 </Col>
