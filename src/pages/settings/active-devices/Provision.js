@@ -432,7 +432,7 @@ useEffect(()=>{
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
                     <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({provisioningData.length})</span></button>
-                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed(4)</span></button>
+                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed</span></button>
                     </div>
                 </div>
             </div>
