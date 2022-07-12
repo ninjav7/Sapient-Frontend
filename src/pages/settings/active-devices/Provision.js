@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate } from '../../../services/Network';
+import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate, insert_kasa_devices } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -53,6 +53,8 @@ const Provision = () => {
     const handleShow = () => setShow(true);
     const [linkedAccount, setLinkedAccount]=useState([]);
     const [provisioningData, setProvisioningData]=useState([]);
+    const [readyCount, setReadyCount]=useState(0);
+    const [progressCount,setProgressCount]=useState(0);
     const [total, setTotal]=useState([]);
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
@@ -123,7 +125,38 @@ const Provision = () => {
             console.log('Failed to Authenticate');
         }
     }  
-   
+   const handleAddDevice=(e,kasa_account_id,device_id)=>{
+    let authData={
+        "device_id":device_id,
+        "kasa_account_id":kasa_account_id
+    }
+    try {
+        let header = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        axios
+            .post(`${BaseUrl}${insert_kasa_devices}`,authData, {
+                headers: header,
+            })
+            .then((res) => {
+                console.log(res.data);
+                if(res.status===200){
+                    // setShowLink(false);
+                    // console.log(res.data.id);
+                    // localStorage.setItem("kasa_id",res.data.id)
+                    // setAuth(res.data.id);
+                }
+            });
+
+    } catch (error) {
+        setError(true);
+        console.log('Failed to Authenticate');
+    }
+
+   }
     useEffect(() => {
         setShow(false);
         setShowLink(false);
@@ -161,71 +194,85 @@ const Provision = () => {
         // ];
         // setSelectedOptions(arr);
     }, []);
-
-    useEffect(()=>{
-        console.log(auth);
-
-            const getKasaAccount = () => {
-                try {
-                    let header = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                    axios
-                    .get(`${BaseUrl}${get_kasa_account}`, {
-                        headers: header,
-                    })
-                    .then((res) => {
-                        console.log(res.data.data);
-                        setLinkedAccount(res.data.data);
-                        let Hs=0;
-                        let kp=0;
-                        let Hs1=0;
-                        let socket=0;
-                        let capy=0;
-                        res.data.data.forEach(ele => {
-                            Hs=Hs+ele.HS110s;
-                            kp=kp+ele.KP115s;
-                            Hs1=Hs1+ele.HS300s;
-                            socket=socket+ele.Socket;
-                            capy=capy+ele.Remaining_Capacity;
-                        });
-                        let arr={
-                            HS110s:Hs,
-                            KP115s:kp,
-                            HS300s:Hs1,
-                            Socket:socket,
-                            Remaining_Capacity:capy
-                        }
-                        setTotal(arr);
-                        console.log(arr)
-                    });
-                } catch (error) {
-                    console.log('Failed to fetch kasa account');
-                }
-      }
-      const getKasaDevices=()=>{
+    const getKasaAccount = () => {
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            // let params = `?kasa_account_id=${auth}`;
             axios
-            .get(`${BaseUrl}${get_kasa_devices}`, {
+            .get(`${BaseUrl}${get_kasa_account}`, {
                 headers: header,
             })
             .then((res) => {
                 console.log(res.data.data);
-                setProvisioningData(res.data.data);
+                setLinkedAccount(res.data.data);
+                let Hs=0;
+                let kp=0;
+                let Hs1=0;
+                let socket=0;
+                let capy=0;
+                res.data.data.forEach(ele => {
+                    Hs=Hs+ele.HS110s;
+                    kp=kp+ele.KP115s;
+                    Hs1=Hs1+ele.HS300s;
+                    socket=socket+ele.Socket;
+                    capy=capy+ele.Remaining_Capacity;
+                });
+                let arr={
+                    HS110s:Hs,
+                    KP115s:kp,
+                    HS300s:Hs1,
+                    Socket:socket,
+                    Remaining_Capacity:capy
+                }
+                setTotal(arr);
+                console.log(arr)
             });
         } catch (error) {
             console.log('Failed to fetch kasa account');
         }
+}
+const getKasaDevices=()=>{
+try {
+    let header = {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${userdata.token}`,
+    };
+    // let params = `?kasa_account_id=${auth}`;
+    axios
+    .get(`${BaseUrl}${get_kasa_devices}`, {
+        headers: header,
+    })
+    .then((res) => {
+        console.log(res.data.data);
+        res.data.data.forEach(ele => {
+            if(ele.action===true){
+                setReadyCount(readyCount+1)
+            }
+            else{
+                setProgressCount(progressCount+1)
+            }
+         });
+        setProvisioningData(res.data.data);
+    });
+} catch (error) {
+    console.log('Failed to fetch kasa account');
+}
 
-      }
+}
+useEffect(()=>{
+    getKasaAccount();
+      getKasaDevices();
+
+},[auth])
+
+    useEffect(()=>{
+        console.log(auth);
+
+          
       getKasaAccount();
       getKasaDevices();
 
@@ -385,7 +432,7 @@ const Provision = () => {
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
                     <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({provisioningData.length})</span></button>
-                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed({provisioningData.length})</span></button>
+                    <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed(4)</span></button>
                     </div>
                 </div>
             </div>
@@ -403,6 +450,7 @@ const Provision = () => {
                     </thead>
                     <tbody>
                     {provisioningData.map((record, index) => {
+                        if(record.action===false){
                             return (
                          
                                 <tr >
@@ -416,12 +464,12 @@ const Provision = () => {
                                         <td>{record.action===true?
                                             <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
                                              Already Added
-                              </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
+                              </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold" onClick={(e)=>{handleAddDevice(e,record.kasa_account_id,record.device_id)}}>
                                         <FontAwesomeIcon icon={faRefresh} size="lg"/> Add
                           </button>   
                                     }</td>
                                 </tr>
-                            )})}
+                            )}})}
               
                     </tbody>
                 </Table>:""}
@@ -447,6 +495,7 @@ const Provision = () => {
                                         <td>kasa+sapientlab01@sapient.industries</td>
                                 </tr> */}
                                 {provisioningData.map((record, index) => {
+                            if(record.action===true){
                             return (
                          
                                 <tr >
@@ -456,9 +505,9 @@ const Provision = () => {
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
                                         <td>{record.model}</td>
-                                        <td>{record.email}</td>
+                                        <td>{record.kasa_account}</td>
                                 </tr>
-                            )})}
+                            )}})}
                     </tbody>
                 </Table>:""}
 
