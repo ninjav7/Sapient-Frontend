@@ -22,24 +22,11 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 
-const PanelsTable = ({ generalPanelData, selectedOptions }) => {
-    const records = [
-        {
-            name: 'Panel 1',
-            location: 'Floor 1 > Electrical Closet',
-            breakers: '40/48',
-            parent: '',
-        },
-        {
-            name: 'Panel 2',
-            location: 'Floor 1 > Electrical Closet',
-            breakers: '20/24',
-            parent: 'Panel 1',
-        },
-    ];
-
+const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) => {
     return (
         <Card>
             <CardBody>
@@ -60,40 +47,64 @@ const PanelsTable = ({ generalPanelData, selectedOptions }) => {
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {generalPanelData.map((record, index) => {
-                            return (
-                                <tr key={record.panel_id}>
-                                    {selectedOptions.some((record) => record.value === 'name') && (
-                                        <td className="font-weight-bold panel-name">
-                                            <Link
-                                                to={{
-                                                    pathname: `/settings/panels/editPanel/${record.panel_id}`,
-                                                }}>
-                                                <a>{record.panel_name}</a>
-                                            </Link>
-                                        </td>
-                                    )}
+                    {isPanelDataFetched ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                    {selectedOptions.some((record) => record.value === 'location') && (
-                                        <td className="">{record.location}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'breakers') && (
-                                        <td className="font-weight-bold">{record.breakers}</td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'parent') && (
-                                        <>
-                                            {record.parent === null ? (
-                                                <td className="font-weight-bold">-</td>
-                                            ) : (
-                                                <td className="font-weight-bold">{record.parent}</td>
-                                            )}
-                                        </>
-                                    )}
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {generalPanelData.map((record, index) => {
+                                return (
+                                    <tr key={record.panel_id}>
+                                        {selectedOptions.some((record) => record.value === 'name') && (
+                                            <td className="font-weight-bold panel-name">
+                                                <Link
+                                                    to={{
+                                                        pathname: `/settings/panels/editPanel/${record.panel_id}`,
+                                                    }}>
+                                                    <a>{record.panel_name}</a>
+                                                </Link>
+                                            </td>
+                                        )}
+
+                                        {selectedOptions.some((record) => record.value === 'location') && (
+                                            <td className="">{record.location}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'breakers') && (
+                                            <td className="font-weight-bold">{record.breakers}</td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'parent') && (
+                                            <>
+                                                {record.parent === null ? (
+                                                    <td className="font-weight-bold">-</td>
+                                                ) : (
+                                                    <td className="font-weight-bold">{record.parent}</td>
+                                                )}
+                                            </>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -116,9 +127,12 @@ const Panels = () => {
 
     const [generalPanelData, setGeneralPanelData] = useState([]);
 
+    const [isPanelDataFetched, setIsPanelDataFetched] = useState(true);
+
     useEffect(() => {
         const fetchPanelsData = async () => {
             try {
+                setIsPanelDataFetched(true);
                 let header = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -126,12 +140,13 @@ const Panels = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
-                    console.log('setGeneralPanelData => ', res.data);
                     setGeneralPanelData(res.data);
+                    setIsPanelDataFetched(false);
                     console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
+                setIsPanelDataFetched(false);
                 console.log('Failed to fetch Panels Data List');
             }
         };
@@ -230,7 +245,11 @@ const Panels = () => {
 
             <Row>
                 <Col lg={12}>
-                    <PanelsTable generalPanelData={generalPanelData} selectedOptions={selectedOptions} />
+                    <PanelsTable
+                        generalPanelData={generalPanelData}
+                        selectedOptions={selectedOptions}
+                        isPanelDataFetched={isPanelDataFetched}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

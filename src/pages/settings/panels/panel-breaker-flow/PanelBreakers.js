@@ -435,6 +435,7 @@ const PanelBreakers = () => {
                     onMouseLeave={() => setIsOpen(false)}
                     actions={[{ label: 'Delete', effect: deleteNode }]}
                 />*/}
+                <Controls />
             </ReactFlow>
         </div>
     );

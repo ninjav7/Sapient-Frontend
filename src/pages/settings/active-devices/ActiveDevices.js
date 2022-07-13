@@ -96,7 +96,6 @@ const ActiveDevicesTable = ({
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
-                                    
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -224,17 +223,6 @@ const ActiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
 
     const [pageRequest, setPageRequest] = useState('');
-
-    const [activeDeviceModal, setActiveDeviceModal] = useState([
-        {
-            value: 'KP115',
-            label: 'KP115',
-        },
-        {
-            value: 'HS300',
-            label: 'HS300',
-        },
-    ]);
 
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
@@ -487,19 +475,18 @@ const ActiveDevices = () => {
                             </button>
                         </div> */}
                         <div className="mr-2">
-                        <Link
-                                 to={{
+                            <Link
+                                to={{
                                     pathname: `/settings/active-devices/provision`,
                                 }}>
-
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Device(s)
-                            </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Device(s)
+                                </button>
                             </Link>
                         </div>
                     </div>
@@ -630,8 +617,6 @@ const ActiveDevices = () => {
                     )}
                 </Col>
             </Row>
-
-            
         </React.Fragment>
     );
 };

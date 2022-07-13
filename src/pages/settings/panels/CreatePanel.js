@@ -22,7 +22,7 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
-import ReactFlow from 'react-flow-renderer';
+import ReactFlow, { Controls, MiniMap, Background } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
 
@@ -622,34 +622,196 @@ const CreatePanel = () => {
         }
     };
 
-    const initialNodes = [
-        {
-            id: '1',
-            type: 'input',
-            data: { label: 'Input Node' },
-            position: { x: 250, y: 25 },
-        },
+    // ************* breakers and link components ********************
+    const BreakersComponent = () => {
+        return (
+            <FormGroup className="form-group row m-2 ml-4 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">1</div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
+                    </div>
+                </div>
+            </FormGroup>
+        );
+    };
 
+    const BreakersLink = () => {
+        return (
+            <div className="breaker-link-container">
+                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
+            </div>
+        );
+    };
+
+    // ************* added node and egde types ********************
+    const nodeTypes = {
+        breakerContainer: BreakersComponent,
+        breakerLink: BreakersLink,
+    };
+
+    // ************* initial elements & edges ********************
+    const initialElements = [
         {
-            id: '2',
-            // you can also pass a React component as a label
-            data: { label: <div>Default Node</div> },
-            position: { x: 100, y: 125 },
+            id: 'breaker-1',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 1' },
+            position: { x: 250, y: 60 },
+            draggable: false,
         },
         {
-            id: '3',
-            type: 'output',
-            data: { label: 'Output Node' },
-            position: { x: 250, y: 250 },
+            id: 'breaker-3',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 3' },
+            position: { x: 250, y: 140 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-5',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 5' },
+            position: { x: 250, y: 220 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-7',
+            targetPosition: 'left',
+            sourcePosition: 'right',
+            type: 'breakerContainer',
+            data: { label: 'Breaker 7' },
+            position: { x: 250, y: 300 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-2',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 2' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 60 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-4',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 4' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 140 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-6',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 6' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 220 },
+            draggable: false,
+        },
+        {
+            id: 'breaker-8',
+            targetPosition: 'right',
+            sourcePosition: 'left',
+            data: { label: 'Breaker 8' },
+            type: 'breakerContainer',
+            position: { x: 700, y: 300 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-24',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 120 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-46',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 200 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-68',
+            sourcePosition: 'left',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 1180, y: 280 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-13',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 120 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-35',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 200 },
+            draggable: false,
+        },
+        {
+            id: 'breakerslink-57',
+            sourcePosition: 'right',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 200, y: 280 },
+            draggable: false,
         },
     ];
 
     const initialEdges = [
-        { id: 'e1-2', source: '1', target: '2' },
-        { id: 'e2-3', source: '2', target: '3', animated: true },
+        {
+            id: 'link-e1-1',
+            source: 'breakerslink-13',
+            type: 'smoothstep',
+            target: 'breaker-1',
+            animated: false,
+        },
+        {
+            id: 'link-e1-3',
+            source: 'breakerslink-13',
+            type: 'smoothstep',
+            target: 'breaker-3',
+            animated: false,
+        },
     ];
 
-    const [nodes, setNodes] = useState(initialNodes);
+    const [nodes, setNodes] = useState(initialElements);
     const [edges, setEdges] = useState(initialEdges);
 
     useEffect(() => {
@@ -827,7 +989,8 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${generalPanels}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     setGeneralPanelData(res.data);
                 });
             } catch (error) {
@@ -844,7 +1007,7 @@ const CreatePanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
-                let params = `?page_size=10&page_no=1`;
+                let params = `?building_id=${bldgId}&page_size=10&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
                     setPassiveDeviceData(data.data);
@@ -1236,8 +1399,24 @@ const CreatePanel = () => {
 
                                 {/* <Row>
                                     <Col lg={12}>
-                                        <div style={{ width: '100%', height: '90vh', backgroundColor: 'red', position: 'relative' }}>
-                                            <ReactFlow nodes={nodes} edges={edges} fitView />
+                                        <div
+                                            style={{
+                                                width: '100%',
+                                                height: '90vh',
+                                                backgroundColor: 'grey',
+                                                position: 'relative',
+                                            }}>
+                                            <ReactFlow
+                                                nodes={nodes}
+                                                edges={edges}
+                                                nodeTypes={nodeTypes}
+                                                style={{ background: 'grey' }}
+                                                // fitView
+                                            >
+                                                <MiniMap />
+                                                <Controls />
+                                                <Background />
+                                            </ReactFlow>
                                         </div>
                                     </Col>
                                 </Row> */}
