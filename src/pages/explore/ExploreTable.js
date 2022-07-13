@@ -12,10 +12,6 @@ const ExploreTable = ({
     parentFilter,
     setParentFilter,
 }) => {
-    useEffect(() => {
-        console.log('exploreTableData => ', exploreTableData);
-    });
-
     return (
         <>
             <Card>

@@ -175,7 +175,7 @@ const CreatePanel = () => {
     };
 
     const handleCurrentLinkedBreaker = (currentIndex) => {
-        console.log('SSR newArray => ', currentIndex + 1);
+        // console.log('SSR newArray => ', currentIndex + 1);
 
         let linkedBreakers = activeLinkedBreakers;
         let newArray = linkedBreakers.filter((arrayElement) => {
@@ -502,7 +502,7 @@ const CreatePanel = () => {
             let params = `?device_id=${deviceId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
-                console.log('Sensor Data Response => ', response);
+                // console.log('Sensor Data Response => ', response);
                 setSensorData(response);
             });
         } catch (error) {

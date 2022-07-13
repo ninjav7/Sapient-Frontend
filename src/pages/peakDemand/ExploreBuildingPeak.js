@@ -398,7 +398,7 @@ const SelectPeakTable = () => {
                     )
                     .then((res) => {
                         setBuildingAlerts(res.data);
-                        console.log('Building Alert => ', res.data);
+                        // console.log('Building Alert => ', res.data);
                     });
             } catch (error) {
                 console.log(error);

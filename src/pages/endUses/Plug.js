@@ -245,7 +245,7 @@ const UsagePageThree = () => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);

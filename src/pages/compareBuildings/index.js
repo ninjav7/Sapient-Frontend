@@ -30,8 +30,8 @@ import './style.css';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
-    console.log(items);
-    console.log(config);
+    // console.log(items);
+    // console.log(config);
     const sortedItems = useMemo(() => {
       let sortableItems = [...items];
       if (sortConfig !== null) {

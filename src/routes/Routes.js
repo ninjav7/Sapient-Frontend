@@ -34,8 +34,8 @@ const HorizontalLayout = Loadable({
     loader: () => import('../layouts/Horizontal'),
     render(loaded, props) {
         let Component = loaded.default;
-        console.log('Horizontal Layout Props => ', props);
-        console.log('Horizontal Layout Loaded => ', loaded);
+        // console.log('Horizontal Layout Props => ', props);
+        // console.log('Horizontal Layout Loaded => ', loaded);
         return <Component {...props} />;
     },
     loading,
@@ -44,7 +44,7 @@ const HorizontalLayout = Loadable({
 class Routes extends Component {
     // returns the layout
     getLayout = () => {
-        console.log(isUserAuthenticated())
+        // console.log(isUserAuthenticated())
         if (!isUserAuthenticated()) return AuthLayout;
 
         let layoutCls = VerticalLayout;

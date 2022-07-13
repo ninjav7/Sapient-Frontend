@@ -687,8 +687,8 @@ const Explore = () => {
                             childExploreList.push(obj);
                         });
                         setExploreSecondLvlOpts(childExploreList);
-                        console.log('childExploreList => ', childExploreList);
-                        console.log('SSR API response => ', responseData);
+                        // console.log('childExploreList => ', childExploreList);
+                        // console.log('SSR API response => ', responseData);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -753,7 +753,7 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
+                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -774,7 +774,7 @@ const Explore = () => {
                         ]);
                     });
                 const duration = performance.now() - start;
-                console.log('fetching time ', duration);
+                // console.log('fetching time ', duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
@@ -796,7 +796,7 @@ const Explore = () => {
         const exploreFilterDataFetch = async () => {
             if (counter === 2) {
                 setShowEquipmentChart(true);
-                console.log(childFilter);
+                // console.log(childFilter);
                 setEquipmentData(childFilter);
             } else {
                 try {
@@ -822,7 +822,7 @@ const Explore = () => {
                             setSeriesData([]);
                             setSeriesLineData([]);
                             let responseData = res.data;
-                            console.log('SSR API response => ', responseData);
+                            // console.log('SSR API response => ', responseData);
                             setExploreTableData(responseData);
                             let data = responseData;
                             let exploreData = [];
@@ -837,7 +837,7 @@ const Explore = () => {
                             });
                             // console.log('SSR Customized exploreData => ', exploreData);
                             setCounter(counter + 1);
-                            console.log('Counter ', counter + 1);
+                            // console.log('Counter ', counter + 1);
                             setSeriesData(exploreData);
                             setSeriesLineData([
                                 {
@@ -855,7 +855,7 @@ const Explore = () => {
                             setChildFilter(newObj);
                             setParentFilter(newObj.parent);
                             const duration = performance.now() - start;
-                            console.log('fetching time ', duration);
+                            // console.log('fetching time ', duration);
                         });
                 } catch (error) {
                     console.log(error);
@@ -866,10 +866,6 @@ const Explore = () => {
 
         exploreFilterDataFetch();
     }, [childFilter]);
-
-    useEffect(() => {
-        console.log('Child Filter => ', childFilter);
-    });
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -886,14 +882,6 @@ const Explore = () => {
         };
         setCustomDate(dateFilter);
     }, [dateFilter]);
-
-    useEffect(() => {
-        console.log('set active => ', secActive.eq_name);
-        console.log('parentFilter => ', parentFilter);
-        console.log('childFilter => ', childFilter);
-        console.log('childFilter Parent => ', mainParent);
-        console.log('activeExploreOpt => ', activeExploreOpt.value);
-    });
 
     return (
         <>

@@ -87,7 +87,7 @@ const UtilityBills = () => {
                         Authorization: `Bearer ${userdata.token}`,
                     };
                     await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
-                        console.log(res);
+                        // console.log(res);
                         let responseData = res.data;
                         responseData.sort(
                             (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
@@ -130,7 +130,7 @@ const UtilityBills = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
-                console.log(res);
+                // console.log(res);
                 let responseData = res.data;
                 responseData.sort(
                     (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
@@ -174,10 +174,6 @@ const UtilityBills = () => {
             console.log('Failed to update Uility Bill Data');
         }
     };
-
-    useEffect(() => {
-        console.log('activeBuildingId => ', activeBuildingId);
-    });
 
     return (
         <React.Fragment>

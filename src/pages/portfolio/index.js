@@ -277,7 +277,7 @@ const PortfolioOverview = () => {
     let [color, setColor] = useState('#ffffff');
 
     const handleChange=(e,value)=>{
-        console.log("Selected Item ",value);
+        // console.log("Selected Item ",value);
         if(value==="HVAC"){
             const seriesIndex = 0;
             const dataPointIndex = 0;

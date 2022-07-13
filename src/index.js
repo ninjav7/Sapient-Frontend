@@ -7,7 +7,7 @@ import { configureStore } from './redux/store';
 import { BrowserRouter } from "react-router-dom";
 
 function SetLogout(){
-  console.log("entered in set logout")
+  // console.log("entered in set logout")
 
 }
 ReactDOM.render(

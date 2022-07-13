@@ -15,7 +15,7 @@ import './style.css';
 
 const NavbarNew = () => {
     const location = useLocation();
-    console.log(location);
+    // console.log(location);
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
     const activeSideRoutes = [];
     let history = useHistory();
@@ -26,11 +26,11 @@ const NavbarNew = () => {
         }
     });
     const handleLogout = () => {
-        console.log('logout entered');
+        // console.log('logout entered');
         cookies.remove('user', { path: '/' });
         const isAuthTokenValid = isUserAuthenticated();
-        console.log(history);
-        console.log(isAuthTokenValid);
+        // console.log(history);
+        // console.log(isAuthTokenValid);
         logoutUser(history);
         if (isAuthTokenValid) {
             return <Redirect to="/" />;
@@ -69,10 +69,6 @@ const NavbarNew = () => {
             return;
         }
     };
-
-    useEffect(() => {
-        console.log('location.pathname => ', location.pathname.split('/')[1]);
-    });
 
     return (
         <>

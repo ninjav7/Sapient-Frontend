@@ -193,7 +193,7 @@ const General = () => {
                     });
                     setActiveToggle(data.active);
                     setTimeToggle(data.time_format);
-                    console.log(buildingData);
+                    // console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
                     setWeekToggle({
@@ -284,12 +284,12 @@ const General = () => {
     };
 
     const inputsBuildingHandler = (e) => {
-        console.log(e.target.name);
+        // console.log(e.target.name);
         setInputField({ [e.target.name]: e.target.value });
     };
 
     const EditBuildingHandler = (e) => {
-        console.log('helloo');
+        // console.log('helloo');
         e.preventDefault();
         const headers = {
             'Content-Type': 'application/json',
@@ -297,7 +297,7 @@ const General = () => {
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
-            console.log(res.data);
+            // console.log(res.data);
             // handleClose();
             setRender(!render);
         });
@@ -308,7 +308,7 @@ const General = () => {
     };
 
     const EditAddressHandler = (e) => {
-        console.log('helloo');
+        // console.log('helloo');
         e.preventDefault();
         const headers = {
             'Content-Type': 'application/json',
@@ -346,14 +346,14 @@ const General = () => {
 
     const inputsActiveToggleHandler = (e) => {
         setActiveToggle(!activeToggle);
-        console.log('helloo');
+        // console.log('helloo');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
-            console.log(res.data);
+            // console.log(res.data);
             // handleClose();
 
             setRender(!render);
@@ -427,7 +427,7 @@ const General = () => {
 
     const inputsDateHandler = (e) => {
         setTimeToggle(!timeToggle);
-        console.log('helloo');
+        // console.log('helloo');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -445,15 +445,15 @@ const General = () => {
         var answer = window.confirm("'Are you sure wants o delete!!!'");
         if (answer) {
             //some code
-            console.log("'Are you sure wants o delete!!!'");
-            console.log('helloo');
+            // console.log("'Are you sure wants o delete!!!'");
+            // console.log('helloo');
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
             axios.delete(`${BaseUrl}${generalBldgDelete}/${bldgId}`, { headers }).then((res) => {
-                console.log(res.data);
+                // console.log(res.data);
                 setRender(!render);
             });
         }
@@ -463,7 +463,7 @@ const General = () => {
         // const currentDtae = dateHandler(inputField.operating_hours, day);
         // const time2 = moment(currentDtae[type2]).format('HH:MM');
         const time1 = moment(date).format('HH:MM');
-        console.log('inputField', inputField);
+        // console.log('inputField', inputField);
         const data = {
             [day]: {
                 time_range: {
@@ -494,7 +494,7 @@ const General = () => {
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
-            console.log(res.data);
+            // console.log(res.data);
             setRender(!render);
         });
     };

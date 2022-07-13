@@ -357,7 +357,7 @@ const EditPlugRule = ({
                         record.linked_rule = true;
                         linkedData.push(record);
                     });
-                    console.log(response.data);
+                    // console.log(response.data);
                     setLinkedRuleData(linkedData);
                 });
             } catch (error) {
@@ -405,15 +405,10 @@ const EditPlugRule = ({
     }, [linkedRuleData, unLinkedRuleData]);
 
     useEffect(() => {
-        console.log("currentData",currentData)
+        // console.log('currentData', currentData);
         let id = currentData.id ? currentData.id : null;
         setActiveRuleId(id);
     }, [currentData]);
-
-    useEffect(() => {
-        console.log("currentData",currentData)
-        console.log('allLinkedRuleData => ', allLinkedRuleData);
-    });
 
     return (
         <>
@@ -433,7 +428,10 @@ const EditPlugRule = ({
                                     </div>
                                     <div>
                                         <span className="plugrule-device-name">{currentData.name}</span>
-                                        <span className="plugrule-device-timezone"> TimeZone- {localStorage.getItem('timeZone')}</span>
+                                        <span className="plugrule-device-timezone">
+                                            {' '}
+                                            TimeZone- {localStorage.getItem('timeZone')}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="plug-rule-right-flex">
@@ -944,7 +942,9 @@ const EditPlugRule = ({
                                                             {/* <td className="font-weight-bold">{record.name}</td> */}
 
                                                             {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">{record.name}</td>
+                                                                <td className="font-weight-bold panel-name">
+                                                                    {record.name}
+                                                                </td>
                                                             ) : (
                                                                 <td className="font-weight-bold panel-name">
                                                                     <div className="plug-equip-container">
