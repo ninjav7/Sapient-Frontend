@@ -10,53 +10,16 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const UtilityBills = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const activeBuildingId = localStorage.getItem('buildingId');
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [avgRate, setAvgRate] = useState(0.6);
-
-    // Table data
-    const [records, setRecords] = useState([
-        {
-            id: 1,
-            date: 'Jan 2021',
-            kwh: null,
-            rate: null,
-            avg_rate: null,
-        },
-        {
-            id: 2,
-            date: 'Dec 2021',
-            kwh: 10142,
-            rate: 1369,
-            avg_rate: 0.6,
-        },
-        {
-            id: 3,
-            date: 'Nov 2021',
-            kwh: 10142,
-            rate: 1369,
-            avg_rate: 0.6,
-        },
-        {
-            id: 4,
-            date: 'Oct 2021',
-            kwh: null,
-            rate: null,
-            avg_rate: null,
-        },
-        {
-            id: 5,
-            date: 'Sept 2021',
-            kwh: 10142,
-            rate: 1369,
-            avg_rate: 0.6,
-        },
-    ]);
 
     const [utilityData, setUtilityData] = useState([]);
     const [billId, setBillId] = useState('');
@@ -65,6 +28,7 @@ const UtilityBills = () => {
     const [activeBillObj, setActiveBillObj] = useState({});
 
     const [render, setRender] = useState(false);
+    const [isUtilityBillsFetched, setIsUtilityBillsFetched] = useState(true);
 
     // Modal states
     const [show, setShow] = useState(false);
@@ -80,28 +44,29 @@ const UtilityBills = () => {
     useEffect(() => {
         const fetchUtilityBillsData = async () => {
             try {
-                if (activeBuildingId) {
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                    await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
-                        // console.log(res);
-                        let responseData = res.data;
-                        responseData.sort(
-                            (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
-                        );
-                        setUtilityData(responseData);
-                    });
-                }
+                setIsUtilityBillsFetched(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `/${bldgId}`;
+                await axios.get(`${BaseUrl}${generalUtilityBills}${params}`, { headers }).then((res) => {
+                    let responseData = res.data;
+                    responseData.sort(
+                        (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
+                    );
+                    setUtilityData(responseData);
+                    setIsUtilityBillsFetched(false);
+                });
             } catch (error) {
                 console.log(error);
+                setIsUtilityBillsFetched(false);
                 console.log('Failed to fetch UtilityBills Data');
             }
         };
         fetchUtilityBillsData();
-    }, [activeBuildingId]);
+    }, [bldgId]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -124,21 +89,24 @@ const UtilityBills = () => {
 
     const fetchUtilityBillsData = async () => {
         try {
+            setIsUtilityBillsFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${generalUtilityBills}/${activeBuildingId}`, { headers }).then((res) => {
-                // console.log(res);
+            let params = `/${bldgId}`;
+            await axios.get(`${BaseUrl}${generalUtilityBills}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 responseData.sort(
                     (a, b) => new moment(a.date).format('MMM YYYY') - new moment(b.date).format('MMM YYYY')
                 );
                 setUtilityData(responseData);
+                setIsUtilityBillsFetched(false);
             });
         } catch (error) {
             console.log(error);
+            setIsUtilityBillsFetched(false);
             console.log('Failed to fetch UtilityBills Data');
         }
     };
@@ -160,7 +128,7 @@ const UtilityBills = () => {
                 total_paid: activeBillObj.total_paid,
             };
 
-            let params = `/${activeBillObj.id}`;
+            let params = `/${bldgId}`;
 
             await axios
                 .patch(`${BaseUrl}${updateUtilityBill}${params}`, billObj, {
@@ -198,78 +166,102 @@ const UtilityBills = () => {
                                         <th>Blended Rate</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {utilityData.map((record, index) => {
-                                        return record.kWh === null ? (
-                                            <tr key={index} className="table-warning">
-                                                <td className="text-warning font-weight-bold">
-                                                    {dateFormater(record.date)}
+                                {isUtilityBillsFetched ? (
+                                    <tbody>
+                                        <SkeletonTheme color="#202020" height={35}>
+                                            <tr>
+                                                <td>
+                                                    <Skeleton count={5} />
                                                 </td>
-                                                {record.kWh === null ? (
-                                                    record.kWh === null && <td>-</td>
-                                                ) : (
-                                                    <td>{record.kWh} kWh</td>
-                                                )}
-                                                {record.total_paid === null ? (
-                                                    record.total_paid === null && <td>-</td>
-                                                ) : (
-                                                    <td>{record.total_paid} kWh</td>
-                                                )}
-                                                {record.blended_rate === null ? (
-                                                    record.blended_rate === null && <td>-</td>
-                                                ) : (
-                                                    <td>{record.blended_rate} kWh</td>
-                                                )}
-                                                <td className="font-weight-bold">
-                                                    <a
-                                                        class="link-primary"
-                                                        onClick={() => {
-                                                            handleShow();
-                                                            setBillId(record.id);
-                                                        }}>
-                                                        Add
-                                                    </a>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
                                                 </td>
                                             </tr>
-                                        ) : (
-                                            <tr key={index}>
-                                                <td className="font-weight-bold">{dateFormater(record.date)}</td>
-                                                {record.kWh === null ? (
-                                                    record.kWh === null && <td>-</td>
-                                                ) : (
-                                                    <td className="font-weight-bold">
-                                                        {record.kWh}
-                                                        kWh
+                                        </SkeletonTheme>
+                                    </tbody>
+                                ) : (
+                                    <tbody>
+                                        {utilityData.map((record, index) => {
+                                            return record.kWh === null ? (
+                                                <tr key={index} className="table-warning">
+                                                    <td className="text-warning font-weight-bold">
+                                                        {dateFormater(record.date)}
                                                     </td>
-                                                )}
-                                                {record.total_paid === null ? (
-                                                    record.total_paid === null && <td>-</td>
-                                                ) : (
+                                                    {record.kWh === null ? (
+                                                        record.kWh === null && <td>-</td>
+                                                    ) : (
+                                                        <td>{record.kWh} kWh</td>
+                                                    )}
+                                                    {record.total_paid === null ? (
+                                                        record.total_paid === null && <td>-</td>
+                                                    ) : (
+                                                        <td>{record.total_paid} kWh</td>
+                                                    )}
+                                                    {record.blended_rate === null ? (
+                                                        record.blended_rate === null && <td>-</td>
+                                                    ) : (
+                                                        <td>{record.blended_rate} kWh</td>
+                                                    )}
                                                     <td className="font-weight-bold">
-                                                        {record.total_paid}
-                                                        kWh
+                                                        <a
+                                                            class="link-primary"
+                                                            onClick={() => {
+                                                                handleShow();
+                                                                setBillId(record.id);
+                                                            }}>
+                                                            Add
+                                                        </a>
                                                     </td>
-                                                )}
-                                                {record.blended_rate === null ? (
-                                                    record.blended_rate === null && <td>-</td>
-                                                ) : (
-                                                    <td>{record.blended_rate} kWh</td>
-                                                )}
-                                                <td className="font-weight-bold">
-                                                    <a
-                                                        class="link-primary"
-                                                        onClick={() => {
-                                                            handleShow();
-                                                            setActiveBillObj(record);
-                                                            setBillId(record.id);
-                                                        }}>
-                                                        Edit
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
+                                                </tr>
+                                            ) : (
+                                                <tr key={index}>
+                                                    <td className="font-weight-bold">{dateFormater(record.date)}</td>
+                                                    {record.kWh === null ? (
+                                                        record.kWh === null && <td>-</td>
+                                                    ) : (
+                                                        <td className="font-weight-bold">
+                                                            {record.kWh}
+                                                            kWh
+                                                        </td>
+                                                    )}
+                                                    {record.total_paid === null ? (
+                                                        record.total_paid === null && <td>-</td>
+                                                    ) : (
+                                                        <td className="font-weight-bold">
+                                                            {record.total_paid}
+                                                            kWh
+                                                        </td>
+                                                    )}
+                                                    {record.blended_rate === null ? (
+                                                        record.blended_rate === null && <td>-</td>
+                                                    ) : (
+                                                        <td>{record.blended_rate} kWh</td>
+                                                    )}
+                                                    <td className="font-weight-bold">
+                                                        <a
+                                                            class="link-primary"
+                                                            onClick={() => {
+                                                                handleShow();
+                                                                setActiveBillObj(record);
+                                                                setBillId(record.id);
+                                                            }}>
+                                                            Edit
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                )}
                             </Table>
                         </CardBody>
                     </Card>

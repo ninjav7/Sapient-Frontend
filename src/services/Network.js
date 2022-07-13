@@ -1,4 +1,4 @@
- export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 //  export const BaseUrl = 'http://122.175.198.21:8000';
 // export const BaseUrl = 'http://localhost:8000';
 
@@ -38,6 +38,7 @@ export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
+export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
@@ -69,6 +70,7 @@ export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 
 export const get_kasa_devices = '/api/config/kasa/get_devices';
 export const insert_kasa_devices = '/api/config/kasa/insert_device';
+export const doneProvisioning = '/api/config/kasa/done_provisioning';
 
 // layout
 export const getLayouts = '/api/config/get_layout';
