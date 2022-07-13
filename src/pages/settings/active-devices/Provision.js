@@ -20,6 +20,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import tplink from "../../../assets/images/tplink.png";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
+import { Container, Label, FormGroup, InputGroup, InputGroupAddon } from 'reactstrap';
+import { Mail, Lock } from 'react-feather';
+import { ConsoleView } from 'react-device-detect';
 
 
 const Provision = () => {
@@ -91,6 +95,8 @@ const Provision = () => {
     const [message,setMessage]=useState("");
     
     const handleAuthorize =()=>{
+        console.log(email);
+        console.log(password);
         let authData={
             username:email,
             password:password
@@ -668,40 +674,33 @@ useEffect(()=>{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showlink} onHide={handleClose} centered>
+            <Modal show={showlink} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal">
                 <Modal.Header style={{margin:"0 auto"}}>
                     <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
                 </Modal.Header>
                 <Modal.Body>                    
-
-                    <Form>
-                    {error && <Alert color="danger" isOpen={error ? true : false}>
+                <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
+                <AvForm className="authentication-form" autoComplete="off">
+                {error && <Alert color="danger" isOpen={error ? true : false}>
                                                     <div>{message}</div>
                                                 </Alert>}
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                           
-                            <Form.Control
-                                type="text"
-                                placeholder="Email"
-                                className="font-weight-bold"
-                                onChange={(e)=>{setEmail(e.target.value)}}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            
-                            <Input
-                                type="password"
-                                placeholder="Password"
-                                className="font-weight-bold"
-                                onChange={(e)=>{setPassword(e.target.value)}}
-                                >
-                                
-                            </Input>
-                        </Form.Group>
-                        <div style={{color:"blue",textAlign:"right",fontWeight:"bold"}}>Forgot Password?</div>
-                        
-                    </Form>
+                                                    <AvGroup className="">
+                                                        <InputGroup>
+                                                           
+                                                            <AvInput type="text" name="username" id="username" placeholder="Email" value={email} onChange={(e)=>{setEmail(e.target.value)}} required />
+                                                        </InputGroup>
+                                                        
+                                                    </AvGroup>
+                                                    <AvGroup className="mb-3">
+                                                        <InputGroup>
+                                                           
+                                                            <AvInput type="password" name="password" id="password" placeholder="Password" value={password} onChange={(e)=>{setPassword(e.target.value)}} required />
+                                                        </InputGroup>
+                                                        <Link to="/account/forget-password" className="float-right text-muted text-unline-dashed ml-1">Forgot your password?</Link>
+                                                        
+                                                    </AvGroup>
+                 </AvForm>
+                    
                 </Modal.Body>
                 <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
                     <button
@@ -712,6 +711,8 @@ useEffect(()=>{
                     </button>
                 </Modal.Footer>
             </Modal>
+
+
 
         </React.Fragment>
     );
