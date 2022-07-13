@@ -219,7 +219,8 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
                 setPaginationData(res.data);
@@ -253,7 +254,8 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
                 setPaginationData(res.data);
