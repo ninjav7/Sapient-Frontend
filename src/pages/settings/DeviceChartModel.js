@@ -23,6 +23,7 @@ import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
+import moment from 'moment';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
     // console.log(sensorData.name);
@@ -187,6 +188,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         },
         xaxis: {
             type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD MMM - HH:MM');
+                },
+            },
         },
         yaxis: {
             labels: {
