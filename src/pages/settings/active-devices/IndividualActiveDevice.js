@@ -15,6 +15,7 @@ import {
     listSensor,
     equipmentType,
     linkActiveSensorToEquip,
+    updateActivePassiveDevice,
 } from '../../../services/Network';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -53,6 +54,7 @@ const IndividualActiveDevice = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [locationData, setLocationData] = useState([]);
     const [activeData, setActiveData] = useState({});
+    const [activeLocationId, setActiveLocationId] = useState('');
     const [sensors, setSensors] = useState([]);
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
@@ -101,7 +103,23 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    setActiveData(response.data[0]);
+                    // setActiveData(response.data[0]);
+                    // setActiveLocationId(response.data[0].location_id);
+                    let deviceData = {
+                        equipments_id: '62cd8c4325bb26b88e2da44d',
+                        status: 'Online',
+                        location_id: '62bc20c5f607beccf9c86a10',
+                        location: 'Hall > Ground Floor',
+                        sensor_number: '6',
+                        identifier: '98:DA:C4:B3:2B:96',
+                        model: 'HS300',
+                        description: 'Wi-Fi Smart Power Strip',
+                        firmware_version: '1.0.21 Build 210524 Rel.161309',
+                        hardware_version: '1.0',
+                    };
+                    setActiveData(deviceData);
+                    setActiveLocationId(deviceData.location_id);
+                    console.log('ActiveDevice Data => ', response.data[0]);
                     localStorage.setItem('identifier', response.data[0].identifier);
                 });
             } catch (error) {
@@ -138,7 +156,8 @@ const IndividualActiveDevice = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    let response = res.data;
+                    setLocationData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -265,6 +284,32 @@ const IndividualActiveDevice = () => {
         }
     };
 
+    const updateActiveDeviceData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${activeData.equipments_id}`;
+            await axios
+                .post(
+                    `${BaseUrl}${updateActivePassiveDevice}${params}`,
+                    {
+                        location_id: activeLocationId,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    setSensorAPIRefresh(!sensorAPIRefresh);
+                    console.log(res.data);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to link Sensor with Equipment');
+        }
+    };
+
     return (
         <>
             <div>
@@ -286,7 +331,18 @@ const IndividualActiveDevice = () => {
                                         Cancel
                                     </button>
                                 </Link>
-                                <button type="button" className="btn btn-primary passive-save-style ml-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary passive-save-style ml-2"
+                                    onClick={() => {
+                                        updateActiveDeviceData();
+                                    }}
+                                    disabled={
+                                        activeLocationId === 'Select location' ||
+                                        activeLocationId === activeData.location_id
+                                            ? true
+                                            : false
+                                    }>
                                     Save
                                 </button>
                             </div>
@@ -306,12 +362,22 @@ const IndividualActiveDevice = () => {
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Enter Identifier"
-                                            className="passive-location-style"
-                                            value={activeData.location}
-                                        />
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold"
+                                            onChange={(e) => {
+                                                setActiveLocationId(e.target.value);
+                                            }}
+                                            value={activeLocationId}>
+                                            <option>Select Location</option>
+                                            {locationData.map((record, index) => {
+                                                return (
+                                                    <option value={record.location_id}>{record.location_name}</option>
+                                                );
+                                            })}
+                                        </Input>
                                         <Form.Label className="device-sub-label-style mt-1">
                                             Location this device is installed in.
                                         </Form.Label>
@@ -576,7 +642,6 @@ const IndividualActiveDevice = () => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // saveDeviceData();
                             handleEditClose();
                         }}>
                         Save
