@@ -34,10 +34,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'consumedEnergy (Wh)' },
-        { value: 'mV', label: 'voltage (V)' },
-        { value: 'mAh', label: 'amperage (A)' },
-        { value: 'power', label: 'realPower (W)' },
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'mAh', label: 'Amperage (A)' },
+        { value: 'power', label: 'Real Power (W)' },
     ]);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [deviceData, setDeviceData] = useState([]);
