@@ -84,7 +84,6 @@ const IndividualActiveDevice = () => {
         setUpdatedSensorData(obj);
     };
     const handleChartShow = (id) => {
-        // console.log('handleChartShow id => ', id);
         setSensorId(id);
         setShowChart(true);
         let obj = sensors.find((o) => o.id === id);
@@ -103,23 +102,8 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    // setActiveData(response.data[0]);
-                    // setActiveLocationId(response.data[0].location_id);
-                    let deviceData = {
-                        equipments_id: '62cd8c4325bb26b88e2da44d',
-                        status: 'Online',
-                        location_id: '62bc20c5f607beccf9c86a10',
-                        location: 'Hall > Ground Floor',
-                        sensor_number: '6',
-                        identifier: '98:DA:C4:B3:2B:96',
-                        model: 'HS300',
-                        description: 'Wi-Fi Smart Power Strip',
-                        firmware_version: '1.0.21 Build 210524 Rel.161309',
-                        hardware_version: '1.0',
-                    };
-                    setActiveData(deviceData);
-                    setActiveLocationId(deviceData.location_id);
-                    console.log('ActiveDevice Data => ', response.data[0]);
+                    setActiveData(response.data[0]);
+                    setActiveLocationId(response.data[0].location_id);
                     localStorage.setItem('identifier', response.data[0].identifier);
                 });
             } catch (error) {
@@ -138,7 +122,6 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    // console.log('Sensor Data => ', response);
                     setSensors(response);
                     setIsFetchingSensorData(false);
                 });
@@ -234,7 +217,6 @@ const IndividualActiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-                    // console.log('Sensor Graph Data => ', response);
                 });
         } catch (error) {
             console.log(error);
@@ -276,7 +258,6 @@ const IndividualActiveDevice = () => {
             let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
             await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
                 setSensorAPIRefresh(!sensorAPIRefresh);
-                console.log(res.data);
             });
         } catch (error) {
             console.log(error);
