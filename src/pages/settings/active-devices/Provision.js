@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate, insert_kasa_devices } from '../../../services/Network';
+import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate, insert_kasa_devices, doneProvisioning } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -20,6 +20,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import tplink from "../../../assets/images/tplink.png";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
+import { Container, Label, FormGroup, InputGroup, InputGroupAddon } from 'reactstrap';
+import { Mail, Lock } from 'react-feather';
+import { ConsoleView } from 'react-device-detect';
 
 
 const Provision = () => {
@@ -50,8 +54,11 @@ const Provision = () => {
     const [selected, setSelected] = useState(0);
     const [tabclass,setTabclass]=useState('');
     const [show, setShow] = useState(false);
+    const [showEmail, setShowEmail] = useState(false);
     const [showlink, setShowLink] = useState(false);
-    const handleClose = () => setShowLink(false);
+    const [showDone,setShowDone]=useState(false);
+    const handleClose = () => setShow(false);
+    const handleLinkClose=()=>setShowLink(false);
     const handleShow = () => setShow(true);
     const [linkedAccount, setLinkedAccount]=useState([]);
     const [provisioningData, setProvisioningData]=useState([]);
@@ -60,6 +67,8 @@ const Provision = () => {
     const [total, setTotal]=useState([]);
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
+    const [selectedKasaEmail,setSelectedKasaEmail]=useState("");
+    const [selectedKasaId,setSelectedKasaId]=useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [isAddProcessing, setIsAddProcessing] = useState(false);
 
@@ -91,6 +100,8 @@ const Provision = () => {
     const [message,setMessage]=useState("");
     
     const handleAuthorize =()=>{
+        console.log(email);
+        console.log(password);
         let authData={
             username:email,
             password:password
@@ -104,7 +115,7 @@ const Provision = () => {
             let params = `?username=${email}&password=${password}`;
 
             axios
-                .get(`${BaseUrl}${kasaAuthenticate}${params}`, {
+                .post(`${BaseUrl}${kasaAuthenticate}`,authData, {
                     headers: header,
                 })
                 .then((res) => {
@@ -122,6 +133,39 @@ const Provision = () => {
             console.log('Failed to Authenticate');
         }
     }  
+    const handleAdd=()=>{
+        linkedAccount.forEach(ele=>{
+            if(ele.email===selectedKasaEmail){
+                setSelectedKasaId(ele.id);
+            }
+        })
+        setShowEmail(false);
+        setShowDone(true);
+    }
+    const handleDone=()=>{
+        console.log(selectedKasaId);
+        console.log(selectedKasaEmail);
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?kasa_account_id=${selectedKasaId}&building_id=${bldgId}`;
+            axios
+                .post(`${BaseUrl}${doneProvisioning}${params}`,{}, {
+                    headers: header,
+                })
+                .then((res) => {
+                    setShowDone(false);
+                    getKasaDevices();
+                });
+
+            } catch (error) {
+                setError(true);
+                console.log('Failed to Provision');
+            }
+    }
    const handleAddDevice=(e,kasa_account_id,device_id)=>{
     let authData={
         "building_id":bldgId,
@@ -250,7 +294,7 @@ try {
     .then((res) => {
         console.log(res.data.data);
         res.data.data.forEach(ele => {
-            if(ele.action===true){
+            if(ele.action===1){
                 ready.push(ele);
             }
             else{
@@ -399,6 +443,7 @@ useEffect(()=>{
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
+                                onClick={()=>{setShowEmail(true)}}
                                 >
                                 Done Provisioning
                             </button>
@@ -520,22 +565,22 @@ useEffect(()=>{
                     ) : (
                     <tbody>
                     {progressData.map((record, index) => {
-                        if(record.action===false){
+                        if(record.action!==1){
                             return (
                          
                                 <tr >
                                         <td scope="row" >
-                                        <FontAwesomeIcon icon={faGlobe} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Ready
+                                        <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
                                         <td>{record.model}</td>
                                         <td>{record.assigned}</td>
-                                        <td>{record.action===true?
+                                        <td>{record.action===0?
                                             <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
-                                             Already Added
+                                             Waiting
                               </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold" onClick={(e)=>{handleAddDevice(e,record.kasa_account_id,record.device_id)}}>
-                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Add
+                                        <FontAwesomeIcon icon={faRefresh} size="lg"/> Retry
                           </button>   
                                     }</td>
                                 </tr>
@@ -584,12 +629,12 @@ useEffect(()=>{
                     ) : (
                     <tbody>
                                 {readyData.map((record, index) => {
-                            if(record.action===true){
+                            if(record.action===1){
                             return (
                          
                                 <tr >
                                         <td scope="row" >
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px"}}/> Completed
+                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"green"}}/> Completed
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
@@ -603,6 +648,8 @@ useEffect(()=>{
 
                 </Col>
             </Row>
+
+            {/* Add network Modal */}
             <Modal show={show} onHide={handleClose} centered dialogClassName="my-modal" contentClassName="my-modal">
                 <Modal.Header>
                     <Modal.Title>Add Network</Modal.Title>
@@ -668,44 +715,34 @@ useEffect(()=>{
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={showlink} onHide={handleClose} centered>
+                        {/* Link Account Modal */}
+            <Modal show={showlink} onHide={handleLinkClose} centered dialogClassName="my-modal" contentClassName="my-modal">
                 <Modal.Header style={{margin:"0 auto"}}>
                     <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
-                    <Form>
-                    {error && <Alert color="danger" isOpen={error ? true : false}>
+                <Modal.Body>                    
+                <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
+                <AvForm className="authentication-form" autoComplete="off">
+                {error && <Alert color="danger" isOpen={error ? true : false}>
                                                     <div>{message}</div>
                                                 </Alert>}
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                           
-                            <Form.Control
-                                type="text"
-                                placeholder="Email"
-                                className="font-weight-bold"
-                                autoFocus
-                                onChange={(e)=>{setEmail(e.target.value)}}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            
-                            <Input
-                                type="password"
-                                placeholder="Password"
-                                className="font-weight-bold"
-                                onChange={(e)=>{setPassword(e.target.value)}}
-                                >
-                                {/* <option selected>Enter Password</option> */}
-                                {/* {activeDeviceModal.map((record) => {
-                                    return <option value={record.value}>{record.label}</option>;
-                                })} */}
-                            </Input>
-                        </Form.Group>
-                        <div style={{color:"blue",textAlign:"right",fontWeight:"bold"}}>Forgot Password?</div>
-                        
-                    </Form>
+                                                    <AvGroup className="">
+                                                        <InputGroup>
+                                                           
+                                                            <AvInput type="text" name="username" id="username" placeholder="Email" value={email} onChange={(e)=>{setEmail(e.target.value)}} required />
+                                                        </InputGroup>
+                                                        
+                                                    </AvGroup>
+                                                    <AvGroup className="mb-3">
+                                                        <InputGroup>
+                                                           
+                                                            <AvInput type="password" name="password" id="password" placeholder="Password" value={password} onChange={(e)=>{setPassword(e.target.value)}} required />
+                                                        </InputGroup>
+                                                        <Link to="/account/forget-password" className="float-right text-muted text-unline-dashed ml-1">Forgot your password?</Link>
+                                                        
+                                                    </AvGroup>
+                 </AvForm>
+                    
                 </Modal.Body>
                 <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
                     <button
@@ -716,6 +753,67 @@ useEffect(()=>{
                     </button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Done Provisioning */}
+            <Modal show={showEmail} onHide={()=>{setShowEmail(false)}} centered>
+                <Modal.Header>
+                    <Modal.Title>Verify Provisioning</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Kasa Account</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    setSelectedKasaEmail(e.target.value);
+                                }}>
+                                <option selected>Select Kasa Account</option>
+                                {linkedAccount.map((record) => {
+                                    return <option value={record.email}>{record.email}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={()=>{setShowEmail(false)}}>
+                        Cancel
+                    </button>
+                    <button
+                        className='btn btn-primary'
+                        onClick={() => {
+                         handleAdd();
+                        }}
+                        style={{width:"8rem"}}
+                        >Add
+                    </button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showDone} onHide={()=>{setShowDone(false)}} centered>
+                <Modal.Body>
+                    <p style={{textAlign:"center",marginTop:"1rem"}}>Are you sure you want to add this account devices<p style={{fontWeight:"bold"}}>{selectedKasaEmail}</p>in selected building <p style={{fontWeight:"bold"}}>{localStorage.getItem("buildingName")} ?</p></p>
+                </Modal.Body>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={()=>{setShowDone(false);setShowEmail(true);}}>
+                        Cancel
+                    </button>
+                    <button
+                        className='btn btn-primary'
+                        onClick={() => {
+                         handleDone();
+                        }}
+                        style={{width:"8rem"}}
+                        >Done
+                    </button>
+                </Modal.Footer>
+            </Modal>
+
+
 
         </React.Fragment>
     );
