@@ -453,7 +453,7 @@ const General = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             axios.delete(`${BaseUrl}${generalBldgDelete}/${bldgId}`, { headers }).then((res) => {
-                // console.log(res.data);
+                console.log(res.data);
                 setRender(!render);
             });
         }
