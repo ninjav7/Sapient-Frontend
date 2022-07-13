@@ -1404,7 +1404,7 @@ const CreatePanel = () => {
                                                 width: '100%',
                                                 height: '90vh',
                                                 backgroundColor: 'grey',
-                                                position: 'relative',
+                                                // position: 'relative',
                                             }}>
                                             <ReactFlow
                                                 nodes={nodes}

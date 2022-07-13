@@ -4,7 +4,7 @@ import { ContextMenu } from './contextMenu';
 import './styles.css';
 import CustomEdge from './CustomEdge';
 import CustomNodeSelector from './CustomNodeSelector';
-import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { ComponentStore } from '../../../../store/ComponentStore';
@@ -21,7 +21,7 @@ const initialElements = [
         id: 'breaker-1',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 1' },
         position: { x: 250, y: 60 },
         draggable: false,
@@ -30,7 +30,7 @@ const initialElements = [
         id: 'breaker-3',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 3' },
         position: { x: 250, y: 140 },
         draggable: false,
@@ -39,7 +39,7 @@ const initialElements = [
         id: 'breaker-5',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 5' },
         position: { x: 250, y: 220 },
         draggable: false,
@@ -48,7 +48,7 @@ const initialElements = [
         id: 'breaker-7',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 7' },
         position: { x: 250, y: 300 },
         draggable: false,
@@ -58,7 +58,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 2' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 60 },
         draggable: false,
     },
@@ -67,7 +67,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 4' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 140 },
         draggable: false,
     },
@@ -76,7 +76,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 6' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 220 },
         draggable: false,
     },
@@ -85,14 +85,14 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 8' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 300 },
         draggable: false,
     },
     {
         id: 'breakerslink-24',
         sourcePosition: 'left',
-        type: 'breakerLink',
+        type: 'breakerLinkLeft',
         data: { label: 'Link' },
         position: { x: 1180, y: 120 },
         draggable: false,
@@ -100,7 +100,7 @@ const initialElements = [
     {
         id: 'breakerslink-46',
         sourcePosition: 'left',
-        type: 'breakerLink',
+        type: 'breakerLinkLeft',
         data: { label: 'Link' },
         position: { x: 1180, y: 200 },
         draggable: false,
@@ -108,7 +108,7 @@ const initialElements = [
     {
         id: 'breakerslink-68',
         sourcePosition: 'left',
-        type: 'breakerLink',
+        type: 'breakerLinkLeft',
         data: { label: 'Link' },
         position: { x: 1180, y: 280 },
         draggable: false,
@@ -116,7 +116,7 @@ const initialElements = [
     {
         id: 'breakerslink-13',
         sourcePosition: 'right',
-        type: 'breakerLink',
+        type: 'breakerLinkRight',
         data: { label: 'Link' },
         position: { x: 200, y: 120 },
         draggable: false,
@@ -124,7 +124,7 @@ const initialElements = [
     {
         id: 'breakerslink-35',
         sourcePosition: 'right',
-        type: 'breakerLink',
+        type: 'breakerLinkRight',
         data: { label: 'Link' },
         position: { x: 200, y: 200 },
         draggable: false,
@@ -132,7 +132,7 @@ const initialElements = [
     {
         id: 'breakerslink-57',
         sourcePosition: 'right',
-        type: 'breakerLink',
+        type: 'breakerLinkRight',
         data: { label: 'Link' },
         position: { x: 200, y: 280 },
         draggable: false,
@@ -157,9 +157,10 @@ const initialEdges = [
 ];
 
 // ************* breakers and link components ********************
-const BreakersComponent = () => {
+const BreakersComponentLeft = () => {
     return (
-        <FormGroup className="form-group row m-2 ml-4 mb-4">
+        <FormGroup className="form-group row m-1 mb-4">
+            <Handle type="target" position={Position.Left} />
             <div className="breaker-container">
                 <div className="sub-breaker-style">
                     <div className="breaker-content-middle">
@@ -189,9 +190,53 @@ const BreakersComponent = () => {
     );
 };
 
-const BreakersLink = () => {
+const BreakersComponentRight = () => {
+    return (
+        <FormGroup className="form-group row m-1 mb-4">
+            <Handle type="target" position={Position.Right} />
+            <div className="breaker-container">
+                <div className="sub-breaker-style">
+                    <div className="breaker-content-middle">
+                        <div className="breaker-index">1</div>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="dot-status"></div>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="breaker-content">
+                            <span>100A</span>
+                            <span>200V</span>
+                        </div>
+                    </div>
+                    <div className="breaker-equipName-style">
+                        <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                    </div>
+                    <div className="breaker-content-middle">
+                        <div className="edit-icon-bg-styling mr-2">
+                            <i className="uil uil-pen"></i>
+                        </div>
+                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                    </div>
+                </div>
+            </div>
+        </FormGroup>
+    );
+};
+
+const BreakerLinkRight = () => {
     return (
         <div className="breaker-link-container">
+            <Handle type="source" position={Position.Right} />
+            {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
+        </div>
+    );
+};
+
+const BreakerLinkLeft = () => {
+    return (
+        <div className="breaker-link-container">
+            <Handle type="source" position={Position.Left} />
             {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
         </div>
@@ -207,8 +252,10 @@ const onLoad = (reactFlowInstance) => {
 // ************* added node and egde types ********************
 const nodeTypes = {
     customnode: CustomNodeSelector,
-    breakerContainer: BreakersComponent,
-    breakerLink: BreakersLink,
+    breakerContainerRight: BreakersComponentRight,
+    breakerContainerLeft: BreakersComponentLeft,
+    breakerLinkRight: BreakerLinkRight,
+    breakerLinkLeft: BreakerLinkLeft,
 };
 
 const edgeTypes = {
