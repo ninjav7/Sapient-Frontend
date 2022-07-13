@@ -486,10 +486,6 @@ const Equipment = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
-    //     console.log('createEqipmentData => ', createEqipmentData);
-    // });
-
     return (
         <React.Fragment>
             <Row className="page-title">

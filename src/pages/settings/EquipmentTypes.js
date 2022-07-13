@@ -343,7 +343,7 @@ const EquipmentTypes = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
-                    console.log('setGeneralEquipmentTypeData => ', res.data);
+                    // console.log('setGeneralEquipmentTypeData => ', res.data);
                     setGeneralEquipmentTypeData(res.data);
                 });
             } catch (error) {

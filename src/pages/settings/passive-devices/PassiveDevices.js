@@ -288,7 +288,6 @@ const PassiveDevices = () => {
                 let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
-                    console.log('Rai Passive Data => ', data);
                     setPassiveDeviceData(data.data);
 
                     let onlineData = [];

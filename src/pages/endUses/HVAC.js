@@ -332,7 +332,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -400,7 +400,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                             }
                             responseData.push(record);
                         });
-                        console.log('HVAC Response Filter Data => ', responseData);
+                        // console.log('HVAC Response Filter Data => ', responseData);
 
                         let newArray = [];
                         responseData.map((element) => {

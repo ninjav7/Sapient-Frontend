@@ -35,11 +35,11 @@ class Register extends Component {
      * Handles the submit
      */
     handleValidSubmit = (event, values) => {
-        console.log(values.fullname);
-        console.log(values.email);
-        console.log(values.password);
-        console.log(values.user_id);
-        console.log(values.vendor);
+        // console.log(values.fullname);
+        // console.log(values.email);
+        // console.log(values.password);
+        // console.log(values.user_id);
+        // console.log(values.vendor);
         this.props.registerUser(values.fullname.trim(), values.email.trim(), values.password.trim(), values.user_id.trim(), values.vendor.trim());
     }
 

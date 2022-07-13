@@ -646,7 +646,7 @@ const BuildingOverview = () => {
     });
 
     const handleChange = (e, value) => {
-        console.log('Selected Item ', value);
+        // console.log('Selected Item ', value);
         if (value === 'HVAC') {
             setDonutChartOpts({
                 chart: {
@@ -1146,7 +1146,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        console.log('setOverview => ', res.data);
+                        // console.log('setOverview => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -1173,7 +1173,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        console.log('setenergyConsumption', res.data);
+                        // console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
@@ -1208,7 +1208,7 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setBuildingAlerts(res.data);
-                        console.log('Building Alert => ', res.data);
+                        // console.log('Building Alert => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -1235,8 +1235,8 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setTopContributors(res.data);
-                        console.log('setTopContributors => ', res.data);
-                        console.log(res.data);
+                        // console.log('setTopContributors => ', res.data);
+                        // console.log(res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -1305,7 +1305,7 @@ const BuildingOverview = () => {
                         let weekDaysResData = response[0].weekdays;
                         let weekEndResData = response[0].weekend;
 
-                        console.log('weekDaysResData => ', weekDaysResData);
+                        // console.log('weekDaysResData => ', weekDaysResData);
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
@@ -1361,7 +1361,7 @@ const BuildingOverview = () => {
                                 });
                             }
                         }
-                        console.log('newWeekendsData => ', newWeekendsData);
+                        // console.log('newWeekendsData => ', newWeekendsData);
                         setWeekDaysSeries(newWeekdaysData);
                         setWeekEndsSeries(newWeekendsData);
                         // setWeekEndsSeries([
@@ -1410,7 +1410,7 @@ const BuildingOverview = () => {
                                 y: (record.y / 1000).toFixed(2),
                             });
                         });
-                        console.log('newArray => ', newArray);
+                        // console.log('newArray => ', newArray);
                         setBuildingConsumptionChart(newArray);
                     });
             } catch (error) {
