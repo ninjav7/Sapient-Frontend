@@ -315,10 +315,8 @@ const PlugRules = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                console.log("Get Building");
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
                     setBuildingRecord(data);
@@ -326,7 +324,7 @@ const PlugRules = () => {
                     data.map((record, index) => {
                         if(record.building_id===activeBuildingId){
                             localStorage.setItem("timeZone",record.timezone);
-                            console.log("timezone",record.timezone);
+                            // console.log("timezone",record.timezone);
                         }
                     })
                 });   
@@ -350,7 +348,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log("Plug Rule Data",response.data)
+                    // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];
@@ -379,7 +377,7 @@ const PlugRules = () => {
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log("Plug Rule Data",response.data)
+                    // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
                     let onlineData = [];
                     let offlineData = [];

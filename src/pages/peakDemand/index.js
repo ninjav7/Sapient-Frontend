@@ -462,8 +462,8 @@ const PeakDemand = () => {
                         setEquipTypePeakThree([]);
                         let responseData = res.data;
                         setTopBuildingPeaks(responseData);
-                        console.log(responseData);
-                        console.log(responseData[0].top_contributors);
+                        // console.log(responseData);
+                        // console.log(responseData[0].top_contributors);
                         setSingleEquipPeakOne(responseData[0].top_contributors);
                         setSingleEquipPeakTwo(responseData[1].top_contributors);
                         setSingleEquipPeakThree(responseData[2].top_contributors);

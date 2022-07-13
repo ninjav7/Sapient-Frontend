@@ -36,7 +36,7 @@ const PageTracker = () => {
     const [buildingData, setBuildingData] = useState({});
     const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
     const items = breadcrumList || [];
-    console.log(items);
+    // console.log(items);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 

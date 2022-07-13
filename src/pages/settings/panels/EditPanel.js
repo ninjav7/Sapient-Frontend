@@ -770,10 +770,6 @@ const EditPanel = () => {
         fetchEquipmentData();
     }, [panelId]);
 
-    useEffect(() => {
-        console.log('Troubleshoot normalStruct => ', normalStruct);
-    });
-
     return (
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>

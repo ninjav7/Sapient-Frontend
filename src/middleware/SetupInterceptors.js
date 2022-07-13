@@ -11,15 +11,15 @@ const SetupInterceptors = () => {
         
             // Any status code that lie within the range of 2xx cause this function to trigger
             // Do something with response data
-            console.log("interceptor response",response);
+            // console.log("interceptor response",response);
             
             return response;
           }, function (error) {
             // Any status codes that falls outside the range of 2xx cause this function to trigger
             // Do something with response error
-            console.log("interceptor error",error);
+            // console.log("interceptor error",error);
             if(error.response.status===403){
-              console.log("enter set");
+              // console.log("enter set");
               cookies.remove('user', { path: '/' });
                 history.push('/account/login');
                  window.location.reload();

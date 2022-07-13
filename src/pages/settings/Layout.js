@@ -143,11 +143,11 @@ const Layout = () => {
         },
     ];
     const relatedSpaceHandler = (i, item) => {
-        console.log(i);
+        // console.log(i);
 
         setIndexSpace1(floorsData[i]['related_spaces']);
         setIndexSpace1Name(item.floor_name);
-        console.log(floorsData[i]['related_spaces']);
+        // console.log(floorsData[i]['related_spaces']);
     };
     const relatedSpaceHandler2 = (i, item) => {
         const relatedSpaceArray = indexSpace1[i];
@@ -157,14 +157,14 @@ const Layout = () => {
         }
     };
     const relatedSpaceHandler3 = (i, item) => {
-        console.log('indexSpace3', indexSpace3);
-        console.log('index', i);
+        // console.log('indexSpace3', indexSpace3);
+        // console.log('index', i);
         const relatedSpaceArray = indexSpace2[i];
-        console.log(relatedSpaceArray);
+        // console.log(relatedSpaceArray);
         if (indexSpace2[i]['related_space']) {
             setIndexSpace3(relatedSpaceArray['related_space']);
             setIndexSpace3Name(item.name);
-            console.log(indexSpace2[i]['related_space']);
+            // console.log(indexSpace2[i]['related_space']);
         }
     };
     useEffect(() => {
