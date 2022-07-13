@@ -70,6 +70,7 @@ export const get_kasa_account = '/api/config/kasa/get_kasa_account';
 
 export const get_kasa_devices = '/api/config/kasa/get_devices';
 export const insert_kasa_devices = '/api/config/kasa/insert_device';
+export const doneProvisioning = '/api/config/kasa/done_provisioning';
 
 // layout
 export const getLayouts = '/api/config/get_layout';

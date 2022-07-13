@@ -103,6 +103,7 @@ const Buildings = () => {
         { value: 'Commercial Building', label: 'Commercial Building' },
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
+    const [buildingName,setBuildingName]=useState("");
     const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
@@ -115,21 +116,36 @@ const Buildings = () => {
         let obj = Object.assign({}, createBuildingData);
         obj[key] = value;
         setCreateBuildingData(obj);
+        console.log(obj);
     };
 
     const saveBuilding = async () => {
         try {
-            let header = {
+            let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            let buildingData={
+                'building_name':buildingName,
+                'building_type':buildingTypeSelected
+            }
             setIsProcessing(true);
-
-            axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
+            console.log(createBuildingData);
+            await axios
+            .post(
+                `${BaseUrl}${createBuilding}`,
+                buildingData,
+                { headers }
+            )
+            .then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
-                // handleClose();
+                // console.log('setOverview => ', res.data);
             });
+            // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
+            //     console.log('createBuilding sending data to API => ', res.data);
+            //     // handleClose();
+            // });
 
             setIsProcessing(false);
         } catch (error) {
@@ -249,7 +265,7 @@ const Buildings = () => {
                                 placeholder="Enter Building Name"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('building_name', e.target.value);
+                                    setBuildingName(e.target.value);
                                 }}
                                 autoFocus
                             />
@@ -266,7 +282,6 @@ const Buildings = () => {
                                     id="exampleSelect"
                                     onChange={(e) => {
                                         setBuildingTypeSelected(e.target.value);
-                                        handleChange('building_type', e.target.value);
                                     }}
                                     className="font-weight-bold">
                                     <option>Select Building Type</option>
@@ -299,10 +314,7 @@ const Buildings = () => {
                     <Button
                         variant="primary"
                         disabled={isProcessing}
-                        onClick={() => {
-                            saveBuilding();
-                            // handleClose();
-                        }}>
+                        onClick={saveBuilding}>
                         {isProcessing ? 'Adding...' : 'Add Building'}
                     </Button>
                 </Modal.Footer>
