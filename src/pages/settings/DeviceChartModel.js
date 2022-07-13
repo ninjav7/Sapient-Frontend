@@ -23,6 +23,7 @@ import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
+import { CSVLink } from 'react-csv';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
     // console.log(sensorData.name);
@@ -131,9 +132,13 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                                 return _data;
                             });
                         } catch (error) {}
+
                         exploreData.push(recordToInsert);
+
                         setDeviceData(exploreData);
-                        // console.log('THIS IS SERIES', exploreData);
+
+                        console.log('UPDATED_CODE', seriesData);
+
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
@@ -239,6 +244,14 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         },
     });
 
+    const getCSVLinkData = () => {
+        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+
+        // streamData.unshift(['Timestamp', selectedConsumption])
+
+        return [['timestamp', selectedConsumption], ...streamData];
+    };
+
     return (
         <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
             <div className="chart-model-header">
@@ -261,7 +274,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 </div>
             </div>
 
-            <div className="model-sensor-filters">
+            <div className="model-sensor-filters-v2">
                 <div className="">
                     <Input
                         type="select"
@@ -312,6 +325,17 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                 <div className="mr-3 sensor-chart-options">
                     <FontAwesomeIcon icon={faEllipsisV} size="lg" />
+                </div>
+
+                <div className="mr-3">
+                    <CSVLink
+                        filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
+                        className="btn btn-primary"
+                        target="_blank"
+                        data={getCSVLinkData()}>
+                        Download CSV
+                    </CSVLink>
+                    ;
                 </div>
             </div>
 
