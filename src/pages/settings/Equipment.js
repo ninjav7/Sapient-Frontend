@@ -24,6 +24,8 @@ import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const SingleEquipmentModal = ({ show, equipData, close }) => {
     return (
@@ -198,40 +200,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
     );
 };
 
-const EquipmentTable = ({ equipmentData }) => {
-    const records = [
-        {
-            status: 'available',
-            name: '-',
-            equipType: 'Desktop PC',
-            location: 'Floor 1 > 252',
-            tags: 'FINANCE',
-            sensorNo: 2,
-            lastData: '5 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-        {
-            status: 'available',
-            name: '-',
-            equipType: 'Refrigerator',
-            location: 'Floor 1 > W Kitchen',
-            tags: 'None',
-            sensorNo: '2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-        {
-            status: 'available',
-            name: 'AHU 1',
-            equipType: 'AHU',
-            location: 'Floor 1 > Mech.',
-            tags: 'None',
-            sensorNo: '1,2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-    ];
-
+const EquipmentTable = ({ equipmentData, isEquipDataFetched }) => {
     const [modal, setModal] = useState(false);
     const Toggle = () => setModal(!modal);
     const [equipData, setEquipData] = useState(null);
@@ -253,48 +222,86 @@ const EquipmentTable = ({ equipmentData }) => {
                                 <th>Device ID</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {equipmentData.map((record, index) => {
-                                return (
-                                    <tr
-                                        key={index}
-                                        onClick={() => {
-                                            setEquipData(record);
-                                            Toggle();
-                                        }}>
-                                        <td className="text-center">
-                                            <div>
-                                                {record.status === 'Online' && (
-                                                    <div className="icon-bg-styling">
-                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                                {record.status === 'Offline' && (
-                                                    <div className="icon-bg-styling-slash">
-                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="font-weight-bold">
-                                            {!(record.equipments_name === null) ? record.equipments_name : '-'}
-                                        </td>
-                                        <td className="font-weight-bold">{record.equipments_type}</td>
-                                        <td>{record.location}</td>
+                        {isEquipDataFetched ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
                                         <td>
-                                            {
-                                                <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                    {record.tags.length === 0 ? 'None' : record.tags[0]}
-                                                </div>
-                                            }
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td>{record.sensor_number}</td>
-                                        <td>{record.last_data === '' ? '-' : record.last_data}</td>
-                                        <td className="font-weight-bold">{record.device_id}</td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {equipmentData.map((record, index) => {
+                                    return (
+                                        <tr
+                                            key={index}
+                                            onClick={() => {
+                                                setEquipData(record);
+                                                Toggle();
+                                            }}>
+                                            <td className="text-center">
+                                                <div>
+                                                    {record.status === 'Online' && (
+                                                        <div className="icon-bg-styling">
+                                                            <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                    {record.status === 'Offline' && (
+                                                        <div className="icon-bg-styling-slash">
+                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="font-weight-bold">
+                                                {!(record.equipments_name === null) ? record.equipments_name : '-'}
+                                            </td>
+                                            <td className="font-weight-bold">{record.equipments_type}</td>
+                                            <td>{record.location}</td>
+                                            <td>
+                                                {
+                                                    <div className="badge badge-light mr-2 font-weight-bold week-day-style">
+                                                        {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>{record.sensor_number}</td>
+                                            <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                            <td className="font-weight-bold">{record.device_id}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
                     </Table>
                 </CardBody>
             </Card>
@@ -314,6 +321,7 @@ const Equipment = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isEquipDataFetched, setIsEquipDataFetched] = useState(true);
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -335,7 +343,6 @@ const Equipment = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
@@ -358,10 +365,10 @@ const Equipment = () => {
     useEffect(() => {
         const fetchEquipmentData = async () => {
             try {
+                setIsEquipDataFetched(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -380,9 +387,11 @@ const Equipment = () => {
                     });
                     setOnlineEquipData(onlineEquip);
                     setOfflineEquipData(offlineEquip);
+                    setIsEquipDataFetched(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsEquipDataFetched(false);
                 console.log('Failed to fetch all Equipments Data');
             }
         };
@@ -392,7 +401,6 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?stat=true&building_id=${bldgId}`;
@@ -411,7 +419,6 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?stat=false&building_id=${bldgId}`;
@@ -430,10 +437,10 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
                 });
             } catch (error) {
@@ -447,10 +454,8 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -588,9 +593,15 @@ const Equipment = () => {
 
             <Row>
                 <Col lg={11}>
-                    {selectedTab === 0 && <EquipmentTable equipmentData={generalEquipmentData} />}
-                    {selectedTab === 1 && <EquipmentTable equipmentData={onlineEquipData} />}
-                    {selectedTab === 2 && <EquipmentTable equipmentData={offlineEquipData} />}
+                    {selectedTab === 0 && (
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} />
+                    )}
+                    {selectedTab === 1 && (
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} />
+                    )}
+                    {selectedTab === 2 && (
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} />
+                    )}
                 </Col>
             </Row>
 
