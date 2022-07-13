@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import {
     BaseUrl,
@@ -34,6 +34,8 @@ const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    let history = useHistory();
+
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
     // Chart states
@@ -53,6 +55,7 @@ const IndividualActiveDevice = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [locationData, setLocationData] = useState([]);
+    const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeData, setActiveData] = useState({});
     const [activeLocationId, setActiveLocationId] = useState('');
     const [sensors, setSensors] = useState([]);
@@ -133,6 +136,7 @@ const IndividualActiveDevice = () => {
 
         const fetchLocationData = async () => {
             try {
+                setIsLocationFetched(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -141,9 +145,11 @@ const IndividualActiveDevice = () => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     let response = res.data;
                     setLocationData(response);
+                    setIsLocationFetched(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsLocationFetched(false);
                 console.log('Failed to fetch Location Data');
             }
         };
@@ -317,6 +323,7 @@ const IndividualActiveDevice = () => {
                                     className="btn btn-primary passive-save-style ml-2"
                                     onClick={() => {
                                         updateActiveDeviceData();
+                                        history.push('/settings/active-devices');
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
@@ -343,22 +350,29 @@ const IndividualActiveDevice = () => {
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                setActiveLocationId(e.target.value);
-                                            }}
-                                            value={activeLocationId}>
-                                            <option>Select Location</option>
-                                            {locationData.map((record, index) => {
-                                                return (
-                                                    <option value={record.location_id}>{record.location_name}</option>
-                                                );
-                                            })}
-                                        </Input>
+                                        {isLocationFetched ? (
+                                            <Skeleton count={1} height={35} />
+                                        ) : (
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold"
+                                                onChange={(e) => {
+                                                    setActiveLocationId(e.target.value);
+                                                }}
+                                                value={activeLocationId}>
+                                                <option>Select Location</option>
+                                                {locationData.map((record, index) => {
+                                                    return (
+                                                        <option value={record.location_id}>
+                                                            {record.location_name}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </Input>
+                                        )}
+
                                         <Form.Label className="device-sub-label-style mt-1">
                                             Location this device is installed in.
                                         </Form.Label>
