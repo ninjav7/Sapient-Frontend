@@ -244,7 +244,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('Lighting setEndUsesData => ', res.data);
+                        // console.log('Lighting setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -322,7 +322,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log('endUsesUsageChart => ', res.data);
+                        // console.log('endUsesUsageChart => ', res.data);
                         let data = res.data;
                         let energyUsage = [
                             {

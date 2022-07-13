@@ -106,21 +106,21 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Sensor Graph Data => ', response);
+                        // console.log('Sensor Graph Data => ', response);
                         let data = response;
-                        console.log(data.data);
-                        console.log(data.data.GRAPH);
-                        console.log(data.data.YTD_DATA[0].ytd.ytd);
+                        // console.log(data.data);
+                        // console.log(data.data.GRAPH);
+                        // console.log(data.data.YTD_DATA[0].ytd.ytd);
                         setTopConsumption(data.data.YTD_DATA[0].ytd.ytd);
                         setPeak(data.data.YTD_DATA[0].ytd_peak.energy);
-                        console.log(data.data.YTD_DATA[0].ytd_peak.energy);
+                        // console.log(data.data.YTD_DATA[0].ytd_peak.energy);
                         let exploreData = [];
                         let recordToInsert = {
                             data: data.data.GRAPH,
                             name: 'AHUs',
                         };
                         exploreData.push(recordToInsert);
-                        console.log('SSR Customized exploreData => ', exploreData);
+                        // console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
                         setSeriesData([
                             {
@@ -153,7 +153,7 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     )
                     .then((res) => {
                         setBuildingAlerts(res.data);
-                        console.log('Building Alert => ', res.data);
+                        // console.log('Building Alert => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -177,7 +177,7 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                 let endDate = new Date(); // today
                 let startDate = new Date();
                 startDate.setDate(startDate.getDate() - 7);
-                console.log(sensorData.eq_id);
+                // console.log(sensorData.eq_id);
                 // let params = `?sensor_id=629f436216701186eff7b79b`;
                 let params = `?equipment_id=${sensorData.eq_id}&consumption=energy`;
                 await axios
@@ -191,21 +191,21 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Sensor Graph Data => ', response);
+                        // console.log('Sensor Graph Data => ', response);
                         let data = response;
-                        console.log(data.data);
-                        console.log(data.data.GRAPH);
-                        console.log(data.data.YTD_DATA[0].ytd.ytd);
+                        // console.log(data.data);
+                        // console.log(data.data.GRAPH);
+                        // console.log(data.data.YTD_DATA[0].ytd.ytd);
                         setTopConsumption(data.data.YTD_DATA[0].ytd.ytd);
                         setPeak(data.data.YTD_DATA[0].ytd_peak.energy);
-                        console.log(data.data.YTD_DATA[0].ytd_peak.energy);
+                        // console.log(data.data.YTD_DATA[0].ytd_peak.energy);
                         let exploreData = [];
                         let recordToInsert = {
                             data: data.data.GRAPH,
                             name: 'AHUs',
                         };
                         exploreData.push(recordToInsert);
-                        console.log('SSR Customized exploreData => ', exploreData);
+                        // console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
                         setSeriesData([
                             {

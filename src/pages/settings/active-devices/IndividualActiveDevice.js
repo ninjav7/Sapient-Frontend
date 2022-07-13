@@ -82,7 +82,7 @@ const IndividualActiveDevice = () => {
         setUpdatedSensorData(obj);
     };
     const handleChartShow = (id) => {
-        console.log('handleChartShow id => ', id);
+        // console.log('handleChartShow id => ', id);
         setSensorId(id);
         setShowChart(true);
         let obj = sensors.find((o) => o.id === id);
@@ -120,7 +120,7 @@ const IndividualActiveDevice = () => {
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log('Sensor Data => ', response);
+                    // console.log('Sensor Data => ', response);
                     setSensors(response);
                     setIsFetchingSensorData(false);
                 });
@@ -215,7 +215,7 @@ const IndividualActiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-                    console.log('Sensor Graph Data => ', response);
+                    // console.log('Sensor Graph Data => ', response);
                 });
         } catch (error) {
             console.log(error);

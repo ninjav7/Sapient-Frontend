@@ -448,7 +448,7 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
+                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -461,7 +461,7 @@ const Explore = () => {
                                 exploreData.push(recordToInsert);
                             }
                         });
-                        console.log('SSR Customized exploreData => ', exploreData);
+                        // console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
