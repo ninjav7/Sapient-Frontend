@@ -47,6 +47,19 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const [seriesData, setSeriesData] = useState([]);
     const [startDate, endDate] = dateRange;
 
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+        metric.map(m=>{
+
+            if(m.value === value){
+                label = m.label
+            }
+
+            return m;
+        })
+
+        return label;
+    }
     const customDaySelect = [
         {
             label: 'Last 7 Days',
@@ -120,7 +133,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         let recordToInsert = {
                             data: data,
-                            name: selectedConsumption,
+                            name: getRequiredConsumptionLabel(selectedConsumption),
                         };
 
                         try {
@@ -198,7 +211,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(1);
+                    return val.toFixed(2);
                 },
             },
         },
@@ -245,7 +258,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             tickAmount: 2,
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(1);
+                    return val.toFixed(2);
                 },
             },
         }
