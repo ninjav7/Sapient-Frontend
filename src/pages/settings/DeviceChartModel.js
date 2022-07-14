@@ -12,9 +12,11 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
+import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
@@ -26,8 +28,6 @@ import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
-    // console.log(sensorData.name);
-    // console.log(sensorData.id);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -46,6 +46,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
     const [startDate, endDate] = dateRange;
+    const [sDateStr,setSDateStr]=useState("");
+    const [eDateStr,setEDateStr]=useState("");
+    const [dropDown,setDropDown]=useState("dropdown-menu dropdown-menu-right");
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -87,12 +90,17 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             startCustomDate.setDate(startCustomDate.getDate() - date);
+            endCustomDate.setDate(endCustomDate.getDate()-1);
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
             });
+            let estr=endCustomDate.getFullYear()+'-'+endCustomDate.getMonth()+'-'+endCustomDate.getDate();
+            let sstr=startCustomDate.getFullYear()+'-'+startCustomDate.getMonth()+'-'+startCustomDate.getDate();
+            setEDateStr(estr);
+            setSDateStr(sstr);
         };
         setCustomDate(dateFilter);
     }, [dateFilter]);
@@ -114,7 +122,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // console.log('sensorData.id => ', sensorData.id);
                 let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
@@ -176,6 +183,17 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         setDeviceData([]);
         setSeriesData([]);
     };
+    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    const fileExtension = '.xlsx';
+    // const exportToCSV=()=>{
+    //     let fileName="energy";
+    //     const ws = XLSX.utils.json_to_sheet(deviceData[0].data);
+    //     const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
+    //     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    //     const data = new Blob([excelBuffer], {type: fileType});
+    //     FileSaver.saveAs(data, fileName + fileExtension);
+
+    // }
 
     const [options, setOptions] = useState({
         chart: {
@@ -184,7 +202,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             height: 180,
             toolbar: {
                 autoSelected: 'pan',
-                show: false,
+                show: true,
+                
             },
             animations: {
                 enabled: false,
@@ -207,6 +226,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         },
         xaxis: {
             type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - hh:mm');
+                },
+            },
         },
         yaxis: {
             labels: {
@@ -232,6 +256,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 target: 'chart-line2',
                 enabled: true,
             },
+            toolbar: {
+                show: false,
+            },
             selection: {
                 enabled: true,
                 xaxis: {
@@ -253,6 +280,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             tooltip: {
                 enabled: false,
             },
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM');
+                },
+            },
         },
         yaxis: {
             tickAmount: 2,
@@ -263,8 +295,15 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             },
         }
     });
+    const handleShow=()=>{
+        if(dropDown==="dropdown-menu dropdown-menu-right")
+        setDropDown("dropdown-menu dropdown-menu-right show")
+        else
+        setDropDown("dropdown-menu dropdown-menu-right")
+    }
 
     const getCSVLinkData = () => {
+        console.log("csv entered");
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
@@ -344,19 +383,28 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 </div>
 
                 <div className="mr-3 sensor-chart-options">
-                    <FontAwesomeIcon icon={faEllipsisV} size="lg" />
+                        <Dropdown>
+                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
+                        <FontAwesomeIcon icon={faEllipsisV} size="lg" />
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu>
+                            <Dropdown.Item ><i className='uil uil-calendar-alt mr-2'></i>Configure Column</Dropdown.Item>
+                            <div className="mr-3">
+                                <CSVLink
+                                    style={{color:"black",paddingLeft:"1.5rem"}}
+                                    filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
+                                    target="_blank"
+                                    data={getCSVLinkData()}>
+                                    <i className='uil uil-download-alt mr-2'></i>
+                                    Download CSV
+                                </CSVLink>
+                             </div>
+                        </Dropdown.Menu>
+                        </Dropdown>
                 </div>
 
-                <div className="mr-3">
-                    <CSVLink
-                        filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
-                        className="btn btn-primary"
-                        target="_blank"
-                        data={getCSVLinkData()}>
-                        Download CSV
-                    </CSVLink>
-                    ;
-                </div>
+                
             </div>
 
             <div>
