@@ -92,7 +92,7 @@ const initialElements = [
     {
         id: 'breakerslink-24',
         sourcePosition: 'left',
-        type: 'breakerLinkLeft',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 1180, y: 120 },
         draggable: false,
@@ -100,7 +100,7 @@ const initialElements = [
     {
         id: 'breakerslink-46',
         sourcePosition: 'left',
-        type: 'breakerLinkLeft',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 1180, y: 200 },
         draggable: false,
@@ -108,7 +108,7 @@ const initialElements = [
     {
         id: 'breakerslink-68',
         sourcePosition: 'left',
-        type: 'breakerLinkLeft',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 1180, y: 280 },
         draggable: false,
@@ -116,7 +116,7 @@ const initialElements = [
     {
         id: 'breakerslink-13',
         sourcePosition: 'right',
-        type: 'breakerLinkRight',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 200, y: 120 },
         draggable: false,
@@ -124,7 +124,7 @@ const initialElements = [
     {
         id: 'breakerslink-35',
         sourcePosition: 'right',
-        type: 'breakerLinkRight',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 200, y: 200 },
         draggable: false,
@@ -132,7 +132,7 @@ const initialElements = [
     {
         id: 'breakerslink-57',
         sourcePosition: 'right',
-        type: 'breakerLinkRight',
+        type: 'breakerLink',
         data: { label: 'Link' },
         position: { x: 200, y: 280 },
         draggable: false,
@@ -143,14 +143,14 @@ const initialEdges = [
     {
         id: 'link-e1-1',
         source: 'breakerslink-13',
-        type: 'smoothstep',
+        type: 'step',
         target: 'breaker-1',
         animated: false,
     },
     {
         id: 'link-e1-3',
         source: 'breakerslink-13',
-        type: 'smoothstep',
+        type: 'step',
         target: 'breaker-3',
         animated: false,
     },
@@ -159,87 +159,87 @@ const initialEdges = [
 // ************* breakers and link components ********************
 const BreakersComponentLeft = () => {
     return (
-        <FormGroup className="form-group row m-1 mb-4">
-            <Handle type="target" position={Position.Left} />
-            <div className="breaker-container">
-                <div className="sub-breaker-style">
-                    <div className="breaker-content-middle">
-                        <div className="breaker-index">1</div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="dot-status"></div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="breaker-content">
-                            <span>100A</span>
-                            <span>200V</span>
+        <>
+            <Handle type="target" position="left" id="a" style={{ top: 20, background: '#555' }} />
+            <Handle type="target" position="left" id="b" style={{ bottom: 30, top: 'auto', background: '#555' }} />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">1</div>
                         </div>
-                    </div>
-                    <div className="breaker-equipName-style">
-                        <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="edit-icon-bg-styling mr-2">
-                            <i className="uil uil-pen"></i>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
                         </div>
-                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </FormGroup>
+            </FormGroup>
+        </>
     );
 };
 
 const BreakersComponentRight = () => {
     return (
-        <FormGroup className="form-group row m-1 mb-4">
-            <Handle type="target" position={Position.Right} />
-            <div className="breaker-container">
-                <div className="sub-breaker-style">
-                    <div className="breaker-content-middle">
-                        <div className="breaker-index">1</div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="dot-status"></div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="breaker-content">
-                            <span>100A</span>
-                            <span>200V</span>
+        <>
+            <Handle type="target" position="right" id="a" style={{ top: 20, background: '#555' }} />
+            <Handle type="target" position="right" id="b" style={{ bottom: 30, top: 'auto', background: '#555' }} />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">1</div>
                         </div>
-                    </div>
-                    <div className="breaker-equipName-style">
-                        <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="edit-icon-bg-styling mr-2">
-                            <i className="uil uil-pen"></i>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
                         </div>
-                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
                     </div>
                 </div>
+            </FormGroup>
+        </>
+    );
+};
+
+const BreakerLink = () => {
+    return (
+        <>
+            <Handle type="source" position="top" id="a" />
+            <Handle type="source" position="bottom" id="b" />
+            <div className="breaker-link-container">
+                {/* <Handle type="source" position={Position.Left} /> */}
+                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
             </div>
-        </FormGroup>
-    );
-};
-
-const BreakerLinkRight = () => {
-    return (
-        <div className="breaker-link-container">
-            <Handle type="source" position={Position.Right} />
-            {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
-            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
-        </div>
-    );
-};
-
-const BreakerLinkLeft = () => {
-    return (
-        <div className="breaker-link-container">
-            <Handle type="source" position={Position.Left} />
-            {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
-            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
-        </div>
+        </>
     );
 };
 
@@ -254,8 +254,7 @@ const nodeTypes = {
     customnode: CustomNodeSelector,
     breakerContainerRight: BreakersComponentRight,
     breakerContainerLeft: BreakersComponentLeft,
-    breakerLinkRight: BreakerLinkRight,
-    breakerLinkLeft: BreakerLinkLeft,
+    breakerLink: BreakerLink,
 };
 
 const edgeTypes = {
@@ -332,7 +331,8 @@ const PanelBreakers = () => {
                         ...params,
                         id: `edge_${elements.length + 1}`,
                         animated: false,
-                        type: 'customedge',
+                        // type: 'customedge',
+                        type: 'step',
                         style: { stroke: '#fff' },
                         data: { type: 'edge', label: 'dhvsdhvd' },
                         arrowHeadType: 'arrowclosed',
