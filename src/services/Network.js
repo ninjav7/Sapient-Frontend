@@ -1,5 +1,5 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-  //export const BaseUrl = 'http://122.175.198.21:8000';
+//export const BaseUrl = 'http://122.175.198.21:8000';
 // export const BaseUrl = 'http://localhost:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -33,6 +33,7 @@ export const endUsesUsageChart = '/api/energy/chart/usage';
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
 export const equipmentType = '/api/config/get_equipment_type/';
+export const addEquipmentType ='/api/config/create_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment/';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 

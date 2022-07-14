@@ -14,7 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, createEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -28,173 +28,64 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 
 const SingleEquipmentModal = ({ show, equipData, close }) => {
+    const [createDeviceData, setCreateDeviceData] = useState({
+        device_type: 'active',
+    });
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, createDeviceData);
+        obj[key] = value;
+        setCreateDeviceData(obj);
+    };
+
+
     return (
         <>
             {show ? (
-                <Modal show={show} onHide={close} dialogClassName="modal-container-style" centered>
-                    <Modal.Body>
-                        <Row>
-                            <Col lg={12}>
-                                <h6 className="text-muted">{`Floor 1 > 252 > Desktop PC`}</h6>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col lg={10}>
-                                <div>
-                                    <span className="heading-style">{equipData.equipType}</span>
-                                </div>
-                            </Col>
-                            <Col lg={2}>
-                                <div className="float-right">
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
-                                        Turn Off
-                                    </button>
-                                </div>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col lg={12}>
-                                <div className="mt-2 modal-tabs-style">
-                                    <span className="mr-3">Metrics</span>
-                                    <span className="mr-3 tab-styling">Configure</span>
-                                    <span className="mr-3">History</span>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Modal.Body>
-                    <Modal.Body>
-                        <Row>
-                            <Col lg={8}>
-                                <Row>
-                                    <Col lg={12}>
-                                        <h4>Equipment Details</h4>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={6}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Name</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Enter Equipment Name"
-                                                className="font-weight-bold"
-                                                defaultValue="Name"
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col lg={6}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Type</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold">
-                                                <option selected>Desktop PC</option>
-                                                <option>Refigerator</option>
-                                            </Input>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Location</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Enter Identifier"
-                                                className="font-weight-bold"
-                                                value="Floor 1, 252"
-                                            />
-                                            <Form.Label>Location this equipment is installed in.</Form.Label>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Applied Rule</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold">
-                                                <option selected>Desktop PC</option>
-                                                <option>Refigerator</option>
-                                            </Input>
-                                            <Form.Label>
-                                                The rule applied to this equipment to control when it is on.
-                                            </Form.Label>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        {/* <TagsInput
-                                            value={selected}
-                                            onChange={setSelected}
-                                            name="fruits"
-                                            placeHolder="enter fruits"
-                                        /> */}
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Notes</Form.Label>
-                                            <Input
-                                                type="textarea"
-                                                name="text"
-                                                id="exampleText"
-                                                rows="3"
-                                                placeholder="Enter a Note..."
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col lg={4}>
-                                <div className="modal-right-container">
-                                    <div className="modal-right-pic"></div>
-                                    <div className="modal-right-card mt-2">
-                                        <span className="modal-right-card-title">Power Strip Socket 2</span>
-                                        <button
-                                            type="button"
-                                            class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                            View Devices
-                                        </button>
-                                    </div>
-                                    <div className="mt-4 modal-right-group">
-                                        <FormGroup>
-                                            <div className="single-line-style">
-                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                    MAC Address
-                                                </h6>
-                                                <h6 className="card-title">AA:AA:AA:AA:AA:AA:AA</h6>
-                                            </div>
-                                        </FormGroup>
-                                        <FormGroup>
-                                            <div className="single-line-style">
-                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                    Device type
-                                                </h6>
-                                                <h6 className="card-title">HS300</h6>
-                                            </div>
-                                        </FormGroup>
-                                    </div>
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                                Installed at
-                                            </h6>
-                                            <h6 className="card-title">{`Floor 1 -> Room 253`}</h6>
-                                        </div>
-                                    </FormGroup>
-                                </div>
-                            </Col>
-                        </Row>
-                    </Modal.Body>
-                </Modal>
+                 <Modal show={show} onHide={close} centered>
+                 <Modal.Header>
+                     <Modal.Title>Edit Equipment Type</Modal.Title>
+                 </Modal.Header>
+                 <Modal.Body>
+                     <Form>
+                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                             <Form.Label>Name</Form.Label>
+                             <Form.Control
+                                 type="text"
+                                 placeholder="Enter Name"
+                                 className="font-weight-bold"
+                                 onChange={(e) => {
+                                     handleChange('name', e.target.value);
+                                 }}
+                                 autoFocus
+                             />
+                         </Form.Group>
+ 
+                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                             <Form.Label>End Use</Form.Label>
+                             <Form.Control
+                                 type="text"
+                                 placeholder="Select End Use"
+                                 className="font-weight-bold"
+                                 onChange={(e) => {
+                                     handleChange('identifier', e.target.value);
+                                 }}
+                             />
+                         </Form.Group>
+                     </Form>
+                 </Modal.Body>
+                 <Modal.Footer>
+                     <Button variant="light" onClick={close}>
+                         Cancel
+                     </Button>
+                     <Button
+                         variant="primary"
+                         onClick={close}
+                         >
+                         Add'
+                     </Button>
+                 </Modal.Footer>
+             </Modal>
+               
             ) : null}
         </>
     );
@@ -253,7 +144,7 @@ const EquipmentTable = ({ equipmentTypeData }) => {
                                         </td>
                                         <td>{record.status ? record.status : '-'}</td>
                                         <td>{record.end_use_name ? record.end_use_name : '-'}</td>
-                                        <td>{record.equipment_count ? record.equipment_count : '-'}</td>
+                                        <td>{record.equipment_count}</td>
                                     </tr>
                                 );
                             })}
@@ -292,16 +183,22 @@ const EquipmentTypes = () => {
     };
 
     const saveDeviceData = async () => {
+        let obj = Object.assign({}, createEqipmentData);
+        obj['building_id'] = bldgId;
+        obj['is_active']=true;
+        setCreateEqipmentData(obj);
+        console.log(obj);
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+
             setIsProcessing(true);
 
             axios
-                .post(`${BaseUrl}${createEquipment}`, createEqipmentData, {
+                .post(`${BaseUrl}${addEquipmentType}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -342,7 +239,8 @@ const EquipmentTypes = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`
+                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                     // console.log('setGeneralEquipmentTypeData => ', res.data);
                     setGeneralEquipmentTypeData(res.data);
                 });
@@ -414,14 +312,20 @@ const EquipmentTypes = () => {
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Select End Use"
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('identifier', e.target.value);
-                                }}
-                            />
+                                    handleChange('end_use', e.target.value);
+                                }}>
+                                <option selected>Select End Use</option>
+                                <option value="Plug">Plug</option>
+                                <option value="Process">Process</option>
+                                <option value="Lighting">Lighting</option>
+                                <option value="HVAC">HVAC</option>
+                            </Input>
                         </Form.Group>
                     </Form>
                 </Modal.Body>
