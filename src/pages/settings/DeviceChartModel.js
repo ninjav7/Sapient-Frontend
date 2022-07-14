@@ -303,6 +303,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     }
 
     const getCSVLinkData = () => {
+        console.log("csv entered");
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
@@ -388,22 +389,22 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            <Dropdown.Item ><i className='uil uil-download-alt mr-2'></i>Configure Column</Dropdown.Item>
-                            <Dropdown.Item onClick={getCSVLinkData()}><i className='uil uil-download-alt mr-2'></i>Download Data</Dropdown.Item>
+                            <Dropdown.Item ><i className='uil uil-calendar-alt mr-2'></i>Configure Column</Dropdown.Item>
+                            <div className="mr-3">
+                                <CSVLink
+                                    style={{color:"black",paddingLeft:"1.5rem"}}
+                                    filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
+                                    target="_blank"
+                                    data={getCSVLinkData()}>
+                                    <i className='uil uil-download-alt mr-2'></i>
+                                    Download CSV
+                                </CSVLink>
+                             </div>
                         </Dropdown.Menu>
                         </Dropdown>
                 </div>
 
-                {/* <div className="mr-3">
-                    <CSVLink
-                        filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
-                        className="btn btn-primary"
-                        target="_blank"
-                        data={getCSVLinkData()}>
-                        Download CSV
-                    </CSVLink>
-                    ;
-                </div> */}
+                
             </div>
 
             <div>

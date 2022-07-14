@@ -14,7 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, createEquipment } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, getEndUseId, createEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -175,11 +175,25 @@ const EquipmentTypes = () => {
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
+    const [endUseData, setEndUseData] = useState([]);
 
     const handleChange = (key, value) => {
+        let endUseId=""
+        if(key==="end_use"){
+            endUseData.forEach(ele=>{
+                if(ele.name===value){
+                    endUseId=ele.end_user_id;
+                }
+            })
+            let obj = Object.assign({}, createEqipmentData);
+        obj[key] = endUseId;
+        setCreateEqipmentData(obj);
+        }
+        else{
         let obj = Object.assign({}, createEqipmentData);
         obj[key] = value;
         setCreateEqipmentData(obj);
+        }
     };
 
     const saveDeviceData = async () => {
@@ -203,6 +217,8 @@ const EquipmentTypes = () => {
                 })
                 .then((res) => {
                     console.log(res.data);
+                    fetchEquipTypeData();
+
                 });
 
             setIsProcessing(false);
@@ -230,9 +246,28 @@ const EquipmentTypes = () => {
         };
         updateBreadcrumbStore();
     }, []);
+    const fetchEquipTypeData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}`
+            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                // console.log('setGeneralEquipmentTypeData => ', res.data);
+                setGeneralEquipmentTypeData(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Equipment Type Data');
+        }
+    };
 
     useEffect(() => {
-        const fetchEquipTypeData = async () => {
+     
+
+        const getEndUseIds= async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -240,17 +275,18 @@ const EquipmentTypes = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`
-                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                    // console.log('setGeneralEquipmentTypeData => ', res.data);
-                    setGeneralEquipmentTypeData(res.data);
+                await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
+                    //console.log('setEndUseData => ', res.data);
+                    setEndUseData(res.data);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Equipment Type Data');
+                console.log('Failed to fetch End Use Data');
             }
         };
 
         fetchEquipTypeData();
+        getEndUseIds();
     }, [bldgId]);
 
     return (
