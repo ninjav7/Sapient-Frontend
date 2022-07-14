@@ -160,8 +160,18 @@ const initialEdges = [
 const BreakersComponentLeft = () => {
     return (
         <>
-            <Handle type="target" position="left" id="a" style={{ top: 20, background: '#555' }} />
-            <Handle type="target" position="left" id="b" style={{ bottom: 30, top: 'auto', background: '#555' }} />
+            <Handle
+                type="target"
+                position="left"
+                id="a"
+                style={{ top: 20, background: '#555', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="left"
+                id="b"
+                style={{ bottom: 30, top: 'auto', background: '#555', width: '5px', height: '5px' }}
+            />
             <FormGroup className="form-group row m-1 mb-4">
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
@@ -196,8 +206,18 @@ const BreakersComponentLeft = () => {
 const BreakersComponentRight = () => {
     return (
         <>
-            <Handle type="target" position="right" id="a" style={{ top: 20, background: '#555' }} />
-            <Handle type="target" position="right" id="b" style={{ bottom: 30, top: 'auto', background: '#555' }} />
+            <Handle
+                type="target"
+                position="right"
+                id="a"
+                style={{ top: 20, background: '#555', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="right"
+                id="b"
+                style={{ bottom: 30, top: 'auto', background: '#555', width: '5px', height: '5px' }}
+            />
             <FormGroup className="form-group row m-1 mb-4">
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
@@ -232,10 +252,9 @@ const BreakersComponentRight = () => {
 const BreakerLink = () => {
     return (
         <>
-            <Handle type="source" position="top" id="a" />
-            <Handle type="source" position="bottom" id="b" />
+            <Handle type="source" position="top" id="a" style={{ width: '5px', height: '5px' }} />
+            <Handle type="source" position="bottom" id="b" style={{ width: '5px', height: '5px' }} />
             <div className="breaker-link-container">
-                {/* <Handle type="source" position={Position.Left} /> */}
                 {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
                 <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
             </div>
@@ -440,7 +459,7 @@ const PanelBreakers = () => {
 
     return (
         <div style={{ width: '100%', height: '90vh', position: 'relative' }}>
-            {permission && (
+            {/* {permission && (
                 <>
                     <Button
                         onClick={createNew}
@@ -457,7 +476,7 @@ const PanelBreakers = () => {
                         Save
                     </Button>
                 </>
-            )}
+            )} */}
             <ReactFlow
                 elements={elements}
                 edges={edges}
