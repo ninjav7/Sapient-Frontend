@@ -106,8 +106,8 @@ const IndividualActiveDevice = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data.data[0];
                     setActiveData(response);
-                    setActiveLocationId(response.data[0].location_id);
-                    localStorage.setItem('identifier', response.data[0].identifier);
+                    setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
