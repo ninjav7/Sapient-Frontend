@@ -198,7 +198,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return val.toFixed(1);
                 },
             },
         },
@@ -245,7 +245,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             tickAmount: 2,
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return val.toFixed(1);
                 },
             },
         }
