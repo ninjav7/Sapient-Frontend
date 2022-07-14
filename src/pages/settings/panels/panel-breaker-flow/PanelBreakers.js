@@ -4,7 +4,7 @@ import { ContextMenu } from './contextMenu';
 import './styles.css';
 import CustomEdge from './CustomEdge';
 import CustomNodeSelector from './CustomNodeSelector';
-import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls } from 'react-flow-renderer';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { ComponentStore } from '../../../../store/ComponentStore';
@@ -21,7 +21,7 @@ const initialElements = [
         id: 'breaker-1',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 1' },
         position: { x: 250, y: 60 },
         draggable: false,
@@ -30,7 +30,7 @@ const initialElements = [
         id: 'breaker-3',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 3' },
         position: { x: 250, y: 140 },
         draggable: false,
@@ -39,7 +39,7 @@ const initialElements = [
         id: 'breaker-5',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 5' },
         position: { x: 250, y: 220 },
         draggable: false,
@@ -48,7 +48,7 @@ const initialElements = [
         id: 'breaker-7',
         targetPosition: 'left',
         sourcePosition: 'right',
-        type: 'breakerContainer',
+        type: 'breakerContainerLeft',
         data: { label: 'Breaker 7' },
         position: { x: 250, y: 300 },
         draggable: false,
@@ -58,7 +58,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 2' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 60 },
         draggable: false,
     },
@@ -67,7 +67,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 4' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 140 },
         draggable: false,
     },
@@ -76,7 +76,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 6' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 220 },
         draggable: false,
     },
@@ -85,7 +85,7 @@ const initialElements = [
         targetPosition: 'right',
         sourcePosition: 'left',
         data: { label: 'Breaker 8' },
-        type: 'breakerContainer',
+        type: 'breakerContainerRight',
         position: { x: 700, y: 300 },
         draggable: false,
     },
@@ -143,58 +143,122 @@ const initialEdges = [
     {
         id: 'link-e1-1',
         source: 'breakerslink-13',
-        type: 'smoothstep',
+        type: 'step',
         target: 'breaker-1',
         animated: false,
     },
     {
         id: 'link-e1-3',
         source: 'breakerslink-13',
-        type: 'smoothstep',
+        type: 'step',
         target: 'breaker-3',
         animated: false,
     },
 ];
 
 // ************* breakers and link components ********************
-const BreakersComponent = () => {
+const BreakersComponentLeft = () => {
     return (
-        <FormGroup className="form-group row m-2 ml-4 mb-4">
-            <div className="breaker-container">
-                <div className="sub-breaker-style">
-                    <div className="breaker-content-middle">
-                        <div className="breaker-index">1</div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="dot-status"></div>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="breaker-content">
-                            <span>100A</span>
-                            <span>200V</span>
+        <>
+            <Handle
+                type="target"
+                position="left"
+                id="a"
+                style={{ top: 20, background: '#555', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="left"
+                id="b"
+                style={{ bottom: 30, top: 'auto', background: '#555', width: '5px', height: '5px' }}
+            />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">1</div>
                         </div>
-                    </div>
-                    <div className="breaker-equipName-style">
-                        <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
-                    </div>
-                    <div className="breaker-content-middle">
-                        <div className="edit-icon-bg-styling mr-2">
-                            <i className="uil uil-pen"></i>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
                         </div>
-                        <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </FormGroup>
+            </FormGroup>
+        </>
     );
 };
 
-const BreakersLink = () => {
+const BreakersComponentRight = () => {
     return (
-        <div className="breaker-link-container">
-            {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
-            <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
-        </div>
+        <>
+            <Handle
+                type="target"
+                position="right"
+                id="a"
+                style={{ top: 20, background: '#555', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="right"
+                id="b"
+                style={{ bottom: 30, top: 'auto', background: '#555', width: '5px', height: '5px' }}
+            />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">1</div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
+                    </div>
+                </div>
+            </FormGroup>
+        </>
+    );
+};
+
+const BreakerLink = () => {
+    return (
+        <>
+            <Handle type="source" position="top" id="a" style={{ width: '5px', height: '5px' }} />
+            <Handle type="source" position="bottom" id="b" style={{ width: '5px', height: '5px' }} />
+            <div className="breaker-link-container">
+                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
+            </div>
+        </>
     );
 };
 
@@ -207,8 +271,9 @@ const onLoad = (reactFlowInstance) => {
 // ************* added node and egde types ********************
 const nodeTypes = {
     customnode: CustomNodeSelector,
-    breakerContainer: BreakersComponent,
-    breakerLink: BreakersLink,
+    breakerContainerRight: BreakersComponentRight,
+    breakerContainerLeft: BreakersComponentLeft,
+    breakerLink: BreakerLink,
 };
 
 const edgeTypes = {
@@ -285,7 +350,8 @@ const PanelBreakers = () => {
                         ...params,
                         id: `edge_${elements.length + 1}`,
                         animated: false,
-                        type: 'customedge',
+                        // type: 'customedge',
+                        type: 'step',
                         style: { stroke: '#fff' },
                         data: { type: 'edge', label: 'dhvsdhvd' },
                         arrowHeadType: 'arrowclosed',
@@ -393,7 +459,7 @@ const PanelBreakers = () => {
 
     return (
         <div style={{ width: '100%', height: '90vh', position: 'relative' }}>
-            {permission && (
+            {/* {permission && (
                 <>
                     <Button
                         onClick={createNew}
@@ -410,7 +476,7 @@ const PanelBreakers = () => {
                         Save
                     </Button>
                 </>
-            )}
+            )} */}
             <ReactFlow
                 elements={elements}
                 edges={edges}

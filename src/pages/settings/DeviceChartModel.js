@@ -25,8 +25,7 @@ import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
-import * as XLSX from 'xlsx';
-import * as FileSaver from 'file-saver';
+import { CSVLink } from 'react-csv';
 
 const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
 
@@ -36,10 +35,11 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'consumedEnergy (Wh)' },
-        { value: 'mV', label: 'voltage (V)' },
-        { value: 'mAh', label: 'amperage (A)' },
-        { value: 'power', label: 'realPower (W)' },
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'mAh', label: 'Amperage (A)' },
+        { value: 'power', label: 'Real Power (W)' },
     ]);
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [deviceData, setDeviceData] = useState([]);
@@ -50,6 +50,19 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const [eDateStr,setEDateStr]=useState("");
     const [dropDown,setDropDown]=useState("dropdown-menu dropdown-menu-right");
 
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+        metric.map(m=>{
+
+            if(m.value === value){
+                label = m.label
+            }
+
+            return m;
+        })
+
+        return label;
+    }
     const customDaySelect = [
         {
             label: 'Last 7 Days',
@@ -127,7 +140,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         let recordToInsert = {
                             data: data,
-                            name: selectedConsumption,
+                            name: getRequiredConsumptionLabel(selectedConsumption),
                         };
 
                         try {
@@ -139,8 +152,13 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                                 return _data;
                             });
                         } catch (error) {}
+
                         exploreData.push(recordToInsert);
+
                         setDeviceData(exploreData);
+
+                        console.log('UPDATED_CODE', seriesData);
+
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
@@ -167,19 +185,19 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     };
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const fileExtension = '.xlsx';
-    const exportToCSV=()=>{
-        let fileName="energy";
-        const ws = XLSX.utils.json_to_sheet(deviceData[0].data);
-        const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-        const data = new Blob([excelBuffer], {type: fileType});
-        FileSaver.saveAs(data, fileName + fileExtension);
+    // const exportToCSV=()=>{
+    //     let fileName="energy";
+    //     const ws = XLSX.utils.json_to_sheet(deviceData[0].data);
+    //     const wb = { Sheets: { 'data': ws }, SheetNames: ['data'] };
+    //     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    //     const data = new Blob([excelBuffer], {type: fileType});
+    //     FileSaver.saveAs(data, fileName + fileExtension);
 
-    }
+    // }
 
     const [options, setOptions] = useState({
         chart: {
-            id: 'chart2',
+            id: 'chart-line2',
             type: 'line',
             height: 180,
             toolbar: {
@@ -199,6 +217,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             enabled: false,
         },
         colors: ['#10B981', '#2955E7'],
+      
         fill: {
             opacity: 1,
         },
@@ -220,15 +239,21 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 },
             },
         },
+        tooltip : {
+            x : {
+                show: true,
+                format: 'MM-dd hh:mm',
+            }
+        },
     });
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
-            id: 'chart1',
+            id: 'chart-line',
             height: 90,
             type: 'area',
             brush: {
-                target: 'chart2',
+                target: 'chart-line2',
                 enabled: true,
             },
             toolbar: {
@@ -268,7 +293,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     return val.toFixed(2);
                 },
             },
-        },
+        }
     });
     const handleShow=()=>{
         if(dropDown==="dropdown-menu dropdown-menu-right")
@@ -276,6 +301,14 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         else
         setDropDown("dropdown-menu dropdown-menu-right")
     }
+
+    const getCSVLinkData = () => {
+        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+
+        // streamData.unshift(['Timestamp', selectedConsumption])
+
+        return [['timestamp', selectedConsumption], ...streamData];
+    };
 
     return (
         <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
@@ -299,7 +332,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 </div>
             </div>
 
-            <div className="model-sensor-filters">
+            <div className="model-sensor-filters-v2">
                 <div className="">
                     <Input
                         type="select"
@@ -356,10 +389,21 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         <Dropdown.Menu>
                             <Dropdown.Item ><i className='uil uil-download-alt mr-2'></i>Configure Column</Dropdown.Item>
-                            <Dropdown.Item onClick={exportToCSV}><i className='uil uil-download-alt mr-2'></i>Download Data</Dropdown.Item>
+                            <Dropdown.Item onClick={getCSVLinkData()}><i className='uil uil-download-alt mr-2'></i>Download Data</Dropdown.Item>
                         </Dropdown.Menu>
                         </Dropdown>
                 </div>
+
+                {/* <div className="mr-3">
+                    <CSVLink
+                        filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
+                        className="btn btn-primary"
+                        target="_blank"
+                        data={getCSVLinkData()}>
+                        Download CSV
+                    </CSVLink>
+                    ;
+                </div> */}
             </div>
 
             <div>
