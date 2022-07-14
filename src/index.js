@@ -6,10 +6,9 @@ import { Provider } from 'react-redux';
 import { configureStore } from './redux/store';
 import { BrowserRouter } from "react-router-dom";
 
-function SetLogout(){
+// function SetLogout(){
   // console.log("entered in set logout")
-
-}
+// }
 ReactDOM.render(
     <Provider store={configureStore()}>
        <BrowserRouter><App /></BrowserRouter>

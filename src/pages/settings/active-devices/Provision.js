@@ -104,7 +104,8 @@ const Provision = () => {
         console.log(password);
         let authData={
             username:email,
-            password:password
+            password:password,
+            building_id:bldgId
         }
         try {
             let header = {
@@ -151,7 +152,7 @@ const Provision = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?kasa_account_id=${selectedKasaId}&building_id=${bldgId}`;
+            let params = `?kasa_account_id=${localStorage.getItem("kasa_id")}&building_id=${bldgId}`;
             axios
                 .post(`${BaseUrl}${doneProvisioning}${params}`,{}, {
                     headers: header,
@@ -443,9 +444,9 @@ useEffect(()=>{
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
-                                onClick={()=>{setShowEmail(true)}}
+                                onClick={handleDone}
                                 >
-                                Done Provisioning
+                                Done
                             </button>
                         </div>
                     </div>
@@ -570,7 +571,8 @@ useEffect(()=>{
                          
                                 <tr >
                                         <td scope="row" >
-                                        <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress
+                                        {/* <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress */}
+                                        {record.status}
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
@@ -805,7 +807,7 @@ useEffect(()=>{
                     <button
                         className='btn btn-primary'
                         onClick={() => {
-                         handleDone();
+                        //  handleDone();
                         }}
                         style={{width:"8rem"}}
                         >Done
