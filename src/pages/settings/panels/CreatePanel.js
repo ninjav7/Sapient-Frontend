@@ -22,9 +22,170 @@ import { Cookies } from 'react-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
-import ReactFlow, { Controls, MiniMap, Background } from 'react-flow-renderer';
+import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
+import CustomEdge from './panel-breaker-flow/CustomEdge';
+import CustomNodeSelector from './panel-breaker-flow/CustomNodeSelector';
 import '../style.css';
 import './panel-style.css';
+
+// ************* breakers and link components ********************
+const DisconnectedBreakerComponent = ({ data }) => {
+    return (
+        <>
+            <Handle
+                type="source"
+                position="left"
+                id="a"
+                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="left"
+                id="b"
+                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">{data.index}</div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>{`100A`}</span>
+                                <span>{`100V`}</span>
+                            </div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
+                    </div>
+                </div>
+            </FormGroup>
+        </>
+    );
+};
+
+const BreakersComponentLeft = ({ data }) => {
+    return (
+        <>
+            <Handle
+                type="source"
+                position="left"
+                id="a"
+                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="left"
+                id="b"
+                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">{data.index}</div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
+                    </div>
+                </div>
+            </FormGroup>
+        </>
+    );
+};
+
+const BreakersComponentRight = ({ data }) => {
+    return (
+        <>
+            <Handle
+                type="source"
+                position="right"
+                id="a"
+                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="right"
+                id="b"
+                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <FormGroup className="form-group row m-1 mb-4">
+                <div className="breaker-container">
+                    <div className="sub-breaker-style">
+                        <div className="breaker-content-middle">
+                            <div className="breaker-index">{data.index}</div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="dot-status"></div>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="breaker-content">
+                                <span>100A</span>
+                                <span>200V</span>
+                            </div>
+                        </div>
+                        <div className="breaker-equipName-style">
+                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
+                        </div>
+                        <div className="breaker-content-middle">
+                            <div className="edit-icon-bg-styling mr-2">
+                                <i className="uil uil-pen"></i>
+                            </div>
+                            <span className="font-weight-bold edit-btn-styling">Edit</span>
+                        </div>
+                    </div>
+                </div>
+            </FormGroup>
+        </>
+    );
+};
+
+const BreakerLink = () => {
+    return (
+        <>
+            <Handle
+                type="source"
+                position="top"
+                id="a"
+                style={{ width: '5px', height: '5px', backgroundColor: '#bababa' }}
+            />
+            <Handle
+                type="target"
+                position="bottom"
+                id="b"
+                style={{ width: '5px', height: '5px', backgroundColor: '#bababa' }}
+            />
+            <div className="breaker-link-container">
+                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
+                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#D0D5DD" size="md" />
+            </div>
+        </>
+    );
+};
 
 const CreatePanel = () => {
     let cookies = new Cookies();
@@ -135,6 +296,7 @@ const CreatePanel = () => {
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
     const [activePanelType, setActivePanelType] = useState('distribution');
+    // const [activePanelType, setActivePanelType] = useState('disconnect');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
@@ -175,8 +337,6 @@ const CreatePanel = () => {
     };
 
     const handleCurrentLinkedBreaker = (currentIndex) => {
-        // console.log('SSR newArray => ', currentIndex + 1);
-
         let linkedBreakers = activeLinkedBreakers;
         let newArray = linkedBreakers.filter((arrayElement) => {
             return arrayElement[0] === currentIndex + 1;
@@ -622,62 +782,16 @@ const CreatePanel = () => {
         }
     };
 
-    // ************* breakers and link components ********************
-    const BreakersComponent = () => {
-        return (
-            <FormGroup className="form-group row m-2 ml-4 mb-4">
-                <div className="breaker-container">
-                    <div className="sub-breaker-style">
-                        <div className="breaker-content-middle">
-                            <div className="breaker-index">1</div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="dot-status"></div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="breaker-content">
-                                <span>100A</span>
-                                <span>200V</span>
-                            </div>
-                        </div>
-                        <div className="breaker-equipName-style">
-                            <h6 className=" ml-3 breaker-equip-name">AHU1</h6>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="edit-icon-bg-styling mr-2">
-                                <i className="uil uil-pen"></i>
-                            </div>
-                            <span className="font-weight-bold edit-btn-styling">Edit</span>
-                        </div>
-                    </div>
-                </div>
-            </FormGroup>
-        );
-    };
+    // ReactFlow Code starting!
 
-    const BreakersLink = () => {
-        return (
-            <div className="breaker-link-container">
-                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
-                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="grey" size="md" />
-            </div>
-        );
-    };
-
-    // ************* added node and egde types ********************
-    const nodeTypes = {
-        breakerContainer: BreakersComponent,
-        breakerLink: BreakersLink,
-    };
-
-    // ************* initial elements & edges ********************
+    // ************* distributed initial elements & edges ********************
     const initialElements = [
         {
             id: 'breaker-1',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 1' },
+            type: 'breakerComponentLeft',
+            data: { label: 'Breaker 1', index: '1' },
             position: { x: 250, y: 60 },
             draggable: false,
         },
@@ -685,8 +799,8 @@ const CreatePanel = () => {
             id: 'breaker-3',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 3' },
+            type: 'breakerComponentLeft',
+            data: { label: 'Breaker 3', index: '3' },
             position: { x: 250, y: 140 },
             draggable: false,
         },
@@ -694,8 +808,8 @@ const CreatePanel = () => {
             id: 'breaker-5',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 5' },
+            type: 'breakerComponentLeft',
+            data: { label: 'Breaker 5', index: '5' },
             position: { x: 250, y: 220 },
             draggable: false,
         },
@@ -703,8 +817,8 @@ const CreatePanel = () => {
             id: 'breaker-7',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerContainer',
-            data: { label: 'Breaker 7' },
+            type: 'breakerComponentLeft',
+            data: { label: 'Breaker 7', index: '7' },
             position: { x: 250, y: 300 },
             draggable: false,
         },
@@ -712,8 +826,8 @@ const CreatePanel = () => {
             id: 'breaker-2',
             targetPosition: 'right',
             sourcePosition: 'left',
-            data: { label: 'Breaker 2' },
-            type: 'breakerContainer',
+            data: { label: 'Breaker 2', index: '2' },
+            type: 'breakerComponentRight',
             position: { x: 700, y: 60 },
             draggable: false,
         },
@@ -721,8 +835,8 @@ const CreatePanel = () => {
             id: 'breaker-4',
             targetPosition: 'right',
             sourcePosition: 'left',
-            data: { label: 'Breaker 4' },
-            type: 'breakerContainer',
+            data: { label: 'Breaker 4', index: '4' },
+            type: 'breakerComponentRight',
             position: { x: 700, y: 140 },
             draggable: false,
         },
@@ -730,8 +844,8 @@ const CreatePanel = () => {
             id: 'breaker-6',
             targetPosition: 'right',
             sourcePosition: 'left',
-            data: { label: 'Breaker 6' },
-            type: 'breakerContainer',
+            data: { label: 'Breaker 6', index: '6' },
+            type: 'breakerComponentRight',
             position: { x: 700, y: 220 },
             draggable: false,
         },
@@ -739,8 +853,8 @@ const CreatePanel = () => {
             id: 'breaker-8',
             targetPosition: 'right',
             sourcePosition: 'left',
-            data: { label: 'Breaker 8' },
-            type: 'breakerContainer',
+            data: { label: 'Breaker 8', index: '8' },
+            type: 'breakerComponentRight',
             position: { x: 700, y: 300 },
             draggable: false,
         },
@@ -749,7 +863,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             type: 'breakerLink',
             data: { label: 'Link' },
-            position: { x: 1180, y: 120 },
+            position: { x: 1140, y: 120 },
             draggable: false,
         },
         {
@@ -757,7 +871,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             type: 'breakerLink',
             data: { label: 'Link' },
-            position: { x: 1180, y: 200 },
+            position: { x: 1140, y: 200 },
             draggable: false,
         },
         {
@@ -765,7 +879,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             type: 'breakerLink',
             data: { label: 'Link' },
-            position: { x: 1180, y: 280 },
+            position: { x: 1140, y: 280 },
             draggable: false,
         },
         {
@@ -798,21 +912,160 @@ const CreatePanel = () => {
         {
             id: 'link-e1-1',
             source: 'breakerslink-13',
-            type: 'smoothstep',
+            type: 'step',
             target: 'breaker-1',
             animated: false,
+            style: { stroke: 'red' },
         },
         {
             id: 'link-e1-3',
             source: 'breakerslink-13',
-            type: 'smoothstep',
+            type: 'step',
             target: 'breaker-3',
             animated: false,
+            style: { stroke: 'red' },
         },
     ];
 
-    const [nodes, setNodes] = useState(initialElements);
+    // ************* disconnect initial elements & edges ********************
+    const initialDisconnetNodes = [
+        {
+            id: 'dis-breaker-1',
+            type: 'disconnectedBreakerComponent',
+            data: { label: 'Breaker 1', index: '1' },
+            position: { x: 450, y: 60 },
+            draggable: false,
+        },
+        {
+            id: 'dis-breaker-2',
+            type: 'disconnectedBreakerComponent',
+            data: { label: 'Breaker 2', index: '2' },
+            position: { x: 450, y: 140 },
+            draggable: false,
+        },
+        {
+            id: 'dis-breaker-3',
+            type: 'disconnectedBreakerComponent',
+            data: { label: 'Breaker 3', index: '3' },
+            position: { x: 450, y: 220 },
+            draggable: false,
+        },
+        {
+            id: 'dis-breakerslink-12',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 400, y: 120 },
+            draggable: false,
+        },
+        {
+            id: 'dis-breakerslink-23',
+            type: 'breakerLink',
+            data: { label: 'Link' },
+            position: { x: 400, y: 200 },
+            draggable: false,
+        },
+    ];
+
+    const initialDisconnectEdges = [
+        {
+            id: 'dis-link-12',
+            source: 'dis-breaker-1',
+            type: 'step',
+            target: 'dis-breaker-2',
+            animated: false,
+            style: { stroke: 'red' },
+        },
+        {
+            id: 'dis-link-23',
+            source: 'dis-breaker-2',
+            type: 'step',
+            target: 'dis-breaker-3',
+            animated: false,
+            style: { stroke: 'red' },
+        },
+    ];
+
+    const connectionLineStyle = { stroke: '#fff' };
+    const snapGrid = [10, 10];
+
+    //added new onload function
+    const onLoad = (reactFlowInstance) => {
+        reactFlowInstance.fitView();
+        console.log(reactFlowInstance.getElements());
+    };
+
+    // ************* added node and egde types ********************
+    const nodeTypes = {
+        customnode: CustomNodeSelector,
+        breakerComponentRight: BreakersComponentRight,
+        breakerComponentLeft: BreakersComponentLeft,
+        disconnectedBreakerComponent: DisconnectedBreakerComponent,
+        breakerLink: BreakerLink,
+    };
+
+    const onContextMenu = (e) => {
+        e.preventDefault();
+        setIsOpen(true);
+        setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
+    };
+
+    const handleMouseEnter = (e, node) => {
+        console.log(node);
+        setnodeData(node);
+    };
+
+    const edgeTypes = {
+        customedge: CustomEdge,
+    };
+
+    const [elements, setElements] = useState(initialElements);
     const [edges, setEdges] = useState(initialEdges);
+
+    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
+    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [nodeData, setnodeData] = useState(null);
+
+    // changed label in data
+    const onConnect = useCallback(
+        (params) =>
+            setElements((els) =>
+                addEdge(
+                    {
+                        ...params,
+                        id: `edge_${elements.length + 1}`,
+                        animated: false,
+                        type: 'step',
+                        style: { stroke: '#bababa' },
+                        data: { type: 'edge', label: 'dhvsdhvd' },
+                        // arrowHeadType: 'arrowclosed',
+                    },
+                    els
+                )
+            ),
+        []
+    );
+
+    const onConnectDisconnectedBreakers = useCallback(
+        (params) =>
+            setDisconnectBreakersNodes((els) =>
+                addEdge(
+                    {
+                        ...params,
+                        id: `edge_${disconnectBreakersNodes.length + 1}`,
+                        animated: false,
+                        type: 'step',
+                        style: { stroke: '#bababa' },
+                        data: { type: 'edge', label: 'dhvsdhvd' },
+                        // arrowHeadType: 'arrowclosed',
+                    },
+                    els
+                )
+            ),
+        []
+    );
 
     useEffect(() => {
         if (generatedPanelId === '') {
@@ -1024,6 +1277,90 @@ const CreatePanel = () => {
         fetchEquipmentData();
     }, [bldgId]);
 
+    useEffect(() => {
+        if(disconnectBreakerCount === 3){
+            let disconnectedNodes = [
+                {
+                    id: 'dis-breaker-1',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '1' },
+                    position: { x: 450, y: 60 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breaker-2',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '2' },
+                    position: { x: 450, y: 140 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breaker-3',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '3' },
+                    position: { x: 450, y: 220 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breakerslink-12',
+                    type: 'breakerLink',
+                    data: { label: 'Link' },
+                    position: { x: 400, y: 120 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breakerslink-23',
+                    type: 'breakerLink',
+                    data: { label: 'Link' },
+                    position: { x: 400, y: 200 },
+                    draggable: false,
+                },
+            ];
+            setDisconnectBreakersNodes(disconnectedNodes);
+        }
+
+        if(disconnectBreakerCount === 2){
+            let disconnectedNodes = [
+                {
+                    id: 'dis-breaker-1',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '1' },
+                    position: { x: 450, y: 60 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breaker-2',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '2' },
+                    position: { x: 450, y: 140 },
+                    draggable: false,
+                },
+                {
+                    id: 'dis-breakerslink-12',
+                    type: 'breakerLink',
+                    data: { label: 'Link' },
+                    position: { x: 400, y: 120 },
+                    draggable: false,
+                },
+            ];
+            setDisconnectBreakersNodes(disconnectedNodes);
+        }
+
+        if(disconnectBreakerCount === 1){
+            let disconnectedNodes = [
+                {
+                    id: 'dis-breaker-1',
+                    type: 'disconnectedBreakerComponent',
+                    data: { index: '1' },
+                    position: { x: 450, y: 60 },
+                    draggable: false,
+                }
+            ];
+            setDisconnectBreakersNodes(disconnectedNodes);
+        }
+        
+    }, [disconnectBreakerCount])
+
     return (
         <React.Fragment>
             <Row className="page-title" style={{ marginLeft: '20px' }}>
@@ -1183,27 +1520,6 @@ const CreatePanel = () => {
                                         )}
                                     </FormGroup>
                                 </div>
-                                {/* <div>
-                                    <FormGroup className="form-group row m-4 width-custom-style">
-                                        <Label for="panelName" className="card-title">
-                                            Breaker Level
-                                        </Label>
-
-                                        <Input
-                                            type="select"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-lvl-width"
-                                            value={currentBreakerLevel}
-                                            onChange={(e) => {
-                                                setCurrentBreakerLevel(e.target.value);
-                                            }}>
-                                            {breakerLevel.map((record) => {
-                                                return <option value={record.value}>{record.name}</option>;
-                                            })}
-                                        </Input>
-                                    </FormGroup>
-                                </div> */}
                             </div>
                             <div className="float-right m-4">
                                 <button
@@ -1211,7 +1527,6 @@ const CreatePanel = () => {
                                     className="btn btn-md btn-secondary font-weight-bold"
                                     onClick={() => {
                                         setIsEditing(!isEditing);
-                                        // saveNormalDataToPanel();
                                     }}>
                                     {isEditing ? 'Done Editing' : 'Edit Layout'}
                                 </button>
@@ -1260,7 +1575,7 @@ const CreatePanel = () => {
                                 </Row>
 
                                 {/* Working Breakers without Linking  */}
-                                <Row>
+                                {/* <Row>
                                     <Col lg={12}>
                                         <div>
                                             <div className="breakers-list-style">
@@ -1395,198 +1710,54 @@ const CreatePanel = () => {
                                             </div>
                                         </div>
                                     </Col>
-                                </Row>
-
-                                {/* <Row>
-                                    <Col lg={12}>
-                                        <div
-                                            style={{
-                                                width: '100%',
-                                                height: '90vh',
-                                                backgroundColor: 'grey',
-                                                // position: 'relative',
-                                            }}>
-                                            <ReactFlow
-                                                nodes={nodes}
-                                                edges={edges}
-                                                nodeTypes={nodeTypes}
-                                                style={{ background: 'grey' }}
-                                                // fitView
-                                            >
-                                                <MiniMap />
-                                                <Controls />
-                                                <Background />
-                                            </ReactFlow>
-                                        </div>
-                                    </Col>
                                 </Row> */}
 
-                                {/* <Row>
-                                    <Col lg={12}>
-                                        <div className="breaker-link-container">
-                                            <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="lg" />
-                                        </div>
-                                    </Col>
-                                </Row> */}
+                                <div className="row" style={{ width: '100%', height: '45vh', position: 'relative' }}>
+                                    <div className="col-sm">
+                                        <ReactFlow
+                                            elements={elements}
+                                            edges={edges}
+                                            onConnect={onConnect}
+                                            style={{ background: '#fafbfc' }}
+                                            onLoad={onLoad}
+                                            nodeTypes={nodeTypes}
+                                            onNodeContextMenu={onContextMenu}
+                                            connectionLineStyle={connectionLineStyle}
+                                            snapToGrid={false}
+                                            snapGrid={snapGrid}
+                                            // maxZoom={2}
+                                            // defaultZoom={2.5}
+                                            onNodeMouseEnter={handleMouseEnter}
+                                            // edgeTypes={edgeTypes}
+                                            zoomOnScroll={false}
+                                            panOnDrag={false}
+                                            zoomOnDoubleClick={false}></ReactFlow>
+                                    </div>
+                                </div>
                             </>
                         )}
 
                         {activePanelType === 'disconnect' && (
-                            <Row>
-                                <Col lg={12}>
-                                    <div>
-                                        <FormGroup className="form-group row m-2 ml-4">
-                                            <div className="disconnect-breaker-container">
-                                                {/* Breaker Online & Single Breaker */}
-                                                {disconnectBreakerConfig.map((element, index) => {
-                                                    return (
-                                                        <>
-                                                            <div className="breaker-container">
-                                                                <div className="sub-breaker-style">
-                                                                    <div className="breaker-content-middle">
-                                                                        <div className="breaker-index">
-                                                                            {element.breaker_number}
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="breaker-content-middle">
-                                                                        <div className="dot-status"></div>
-                                                                    </div>
-                                                                    <div className="breaker-content-middle">
-                                                                        <div className="breaker-content">
-                                                                            <span>{`${element.rated_amps}A`}</span>
-                                                                            <span>{`${element.voltage}V`}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    {!(element.equipment_link.length === 0) ? (
-                                                                        <>
-                                                                            <div className="breaker-equipName-style">
-                                                                                <h6 className="ml-3 breaker-equip-name">
-                                                                                    {/* {element.equipment_link[0]} */}
-                                                                                    {findEquipmentName(
-                                                                                        element.equipment_link[0]
-                                                                                    )}
-                                                                                </h6>
-                                                                            </div>
-                                                                            {!(
-                                                                                (currentBreakerLevel ===
-                                                                                    'triple-breaker' &&
-                                                                                    panel.voltage === '120/240') ||
-                                                                                (currentBreakerLevel ===
-                                                                                    'double-breaker' &&
-                                                                                    panel.voltage === '600')
-                                                                            ) && (
-                                                                                <div
-                                                                                    className="breaker-content-middle"
-                                                                                    onClick={() => {
-                                                                                        setCurrentBreakerObj(element);
-                                                                                        setCurrentBreakerIndex(index);
-                                                                                        setCurrentEquipIds(
-                                                                                            element.equipment_link
-                                                                                        );
-                                                                                        handleCurrentLinkedBreaker(
-                                                                                            index
-                                                                                        );
-                                                                                        if (element.device_id !== '') {
-                                                                                            fetchDeviceSensorData(
-                                                                                                element.device_id
-                                                                                            );
-                                                                                        }
-                                                                                        handleEditBreakerShow();
-                                                                                    }}>
-                                                                                    <div className="edit-icon-bg-styling mr-2">
-                                                                                        <i className="uil uil-pen"></i>
-                                                                                    </div>
-                                                                                    <span className="font-weight-bold edit-btn-styling">
-                                                                                        Edit
-                                                                                    </span>
-                                                                                </div>
-                                                                            )}
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            {!(
-                                                                                (currentBreakerLevel ===
-                                                                                    'triple-breaker' &&
-                                                                                    panel.voltage === '120/240') ||
-                                                                                (currentBreakerLevel ===
-                                                                                    'double-breaker' &&
-                                                                                    panel.voltage === '600')
-                                                                            ) && (
-                                                                                <div
-                                                                                    className="breaker-content-middle"
-                                                                                    onClick={() => {
-                                                                                        setCurrentBreakerObj(element);
-                                                                                        setCurrentBreakerIndex(index);
-                                                                                        setCurrentEquipIds(
-                                                                                            element.equipment_link
-                                                                                        );
-                                                                                        handleCurrentLinkedBreaker(
-                                                                                            index
-                                                                                        );
-                                                                                        if (element.device_id !== '') {
-                                                                                            fetchDeviceSensorData(
-                                                                                                element.device_id
-                                                                                            );
-                                                                                        }
-                                                                                        handleEditBreakerShow();
-                                                                                    }}>
-                                                                                    <div className="edit-icon-bg-styling mr-2">
-                                                                                        <i className="uil uil-pen"></i>
-                                                                                    </div>
-                                                                                    <span className="font-weight-bold edit-btn-styling">
-                                                                                        Edit
-                                                                                    </span>
-                                                                                </div>
-                                                                            )}
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* <div className="sub-breaker-style-no-device">
-                                                                <div className="breaker-content-middle">
-                                                                    <div className="breaker-index">1</div>
-                                                                </div>
-                                                                <div className="breaker-content-middle">
-                                                                    <div className="dot-status"></div>
-                                                                </div>
-                                                                <div className="breaker-content-middle">
-                                                                    <div className="breaker-content">
-                                                                        <span>80A</span>
-                                                                        <span>240V</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div
-                                                                    className="breaker-content-middle"
-                                                                    // onClick={() => {
-                                                                    //     handleBreakerShow();
-                                                                    // }}
-                                                                >
-                                                                    <div className="edit-icon-bg-styling mr-2">
-                                                                        <i className="uil uil-pen"></i>
-                                                                    </div>
-                                                                    <span className="font-weight-bold edit-btn-styling">
-                                                                        Edit
-                                                                    </span>
-                                                                </div>
-                                                            </div> */}
-                                                        </>
-                                                    );
-                                                })}
-                                            </div>
-                                        </FormGroup>
-                                    </div>
-                                </Col>
-                            </Row>
+                            <div className="row" style={{ width: '100%', height: '45vh', position: 'relative' }}>
+                                <div className="col-sm">
+                                    <ReactFlow
+                                        elements={disconnectBreakersNodes}
+                                        edges={disconnectBreakersEdges}
+                                        nodeTypes={nodeTypes}
+                                        onConnect={onConnectDisconnectedBreakers}
+                                        style={{ background: '#fafbfc' }}
+                                        onLoad={onLoad}
+                                        onNodeContextMenu={onContextMenu}
+                                        connectionLineStyle={connectionLineStyle}
+                                        snapToGrid={false}
+                                        snapGrid={snapGrid}
+                                        onNodeMouseEnter={handleMouseEnter}
+                                        zoomOnScroll={false}
+                                        panOnDrag={false}
+                                        zoomOnDoubleClick={false}></ReactFlow>
+                                </div>
+                            </div>
                         )}
-                    </div>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={12}>
-                    <div style={{ width: '100%', height: '90vh' }}>
-                        <ReactFlow nodes={nodes} edges={edges} fitView />
                     </div>
                 </Col>
             </Row>
