@@ -166,7 +166,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
     const [options, setOptions] = useState({
         chart: {
-            id: 'chart2',
+            id: 'chart-line2',
             type: 'line',
             height: 180,
             toolbar: {
@@ -185,6 +185,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             enabled: false,
         },
         colors: ['#10B981', '#2955E7'],
+      
         fill: {
             opacity: 1,
         },
@@ -197,19 +198,25 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
+        },
+        tooltip : {
+            x : {
+                show: true,
+                format: 'MM-dd hh:mm',
+            }
         },
     });
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
-            id: 'chart1',
+            id: 'chart-line',
             height: 90,
             type: 'area',
             brush: {
-                target: 'chart2',
+                target: 'chart-line2',
                 enabled: true,
             },
             selection: {
@@ -238,10 +245,10 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             tickAmount: 2,
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
-        },
+        }
     });
 
     const getCSVLinkData = () => {
