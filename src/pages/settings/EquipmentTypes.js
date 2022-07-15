@@ -213,22 +213,22 @@ const EquipmentTypes = () => {
     const [endUseData, setEndUseData] = useState([]);
 
     const handleChange = (key, value) => {
-        let endUseId=""
-        if(key==="end_use"){
-            endUseData.forEach(ele=>{
-                if(ele.name===value){
-                    endUseId=ele.end_user_id;
-                }
-            })
-            let obj = Object.assign({}, createEqipmentData);
-        obj[key] = endUseId;
-        setCreateEqipmentData(obj);
-        }
-        else{
+        // let endUseId=""
+        // if(key==="end_use"){
+        //     endUseData.forEach(ele=>{
+        //         if(ele.name===value){
+        //             endUseId=ele.end_user_id;
+        //         }
+        //     })
+        //     let obj = Object.assign({}, createEqipmentData);
+        // obj[key] = endUseId;
+        // setCreateEqipmentData(obj);
+        // }
+        // else{
         let obj = Object.assign({}, createEqipmentData);
         obj[key] = value;
         setCreateEqipmentData(obj);
-        }
+        // }
     };
 
     const saveDeviceData = async () => {
