@@ -14,7 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, getEndUseId, createEquipment } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, updateEquipmentType, getEndUseId, createEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -27,16 +27,46 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 
-const SingleEquipmentModal = ({ show, equipData, close }) => {
-    const [createDeviceData, setCreateDeviceData] = useState({
-        device_type: 'active',
-    });
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, createDeviceData);
-        obj[key] = value;
-        setCreateDeviceData(obj);
-    };
+const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    const [editEqipmentData, setEditEqipmentData] = useState({});
 
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, editEqipmentData);
+        obj[key] = value;
+        setEditEqipmentData(obj);
+     };
+    //  console.log(equipData);
+    //  console.log(endUseData);
+     const editDeviceData = async () => {
+        let obj = Object.assign({}, editEqipmentData);
+        obj['eqt_id'] = equipData.equipment_id;
+        obj['is_active']=true;
+        setEditEqipmentData(obj);
+        // console.log(obj);
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            axios
+                .post(`${BaseUrl}${updateEquipmentType}`, obj, {
+                    headers: header,
+                })
+                .then((res) => {
+                    // console.log(res.data);
+                    close();
+                    getDevices();
+
+                });
+
+        } catch (error) {
+            console.log('Failed to Edit Equipment data');
+        }
+    };
 
     return (
         <>
@@ -62,14 +92,19 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
  
                          <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                              <Form.Label>End Use</Form.Label>
-                             <Form.Control
-                                 type="text"
-                                 placeholder="Select End Use"
-                                 className="font-weight-bold"
-                                 onChange={(e) => {
-                                     handleChange('identifier', e.target.value);
-                                 }}
-                             />
+                             <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('end_use', e.target.value);
+                                }}>
+                                    <option selected>Select End Use</option>
+                                {endUseData.map((record) => {
+                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                })}
+                            </Input>
                          </Form.Group>
                      </Form>
                  </Modal.Body>
@@ -79,9 +114,9 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                      </Button>
                      <Button
                          variant="primary"
-                         onClick={close}
+                         onClick={()=>{editDeviceData();}}
                          >
-                         Add'
+                         Add
                      </Button>
                  </Modal.Footer>
              </Modal>
@@ -91,7 +126,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
     );
 };
 
-const EquipmentTable = ({ equipmentTypeData }) => {
+const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices }) => {
     const records = [
         {
             name: 'Air Handling Unit',
@@ -153,7 +188,7 @@ const EquipmentTable = ({ equipmentTypeData }) => {
                 </CardBody>
             </Card>
             <div>
-                <SingleEquipmentModal show={modal} equipData={equipData} close={Toggle} />
+                <SingleEquipmentModal show={modal} equipData={equipData} close={Toggle} endUseData={endUseData} getDevices={getDevices} />
             </div>
         </>
     );
@@ -201,7 +236,7 @@ const EquipmentTypes = () => {
         obj['building_id'] = bldgId;
         obj['is_active']=true;
         setCreateEqipmentData(obj);
-        console.log(obj);
+        // console.log(obj);
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -216,7 +251,7 @@ const EquipmentTypes = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     fetchEquipTypeData();
 
                 });
@@ -323,7 +358,7 @@ const EquipmentTypes = () => {
 
             <Row>
                 <Col lg={7}>
-                    <EquipmentTable equipmentTypeData={generalEquipmentTypeData} />
+                    <EquipmentTable equipmentTypeData={generalEquipmentTypeData} endUseData={endUseData} getDevices={fetchEquipTypeData} />
                 </Col>
             </Row>
 
@@ -356,11 +391,15 @@ const EquipmentTypes = () => {
                                 onChange={(e) => {
                                     handleChange('end_use', e.target.value);
                                 }}>
-                                <option selected>Select End Use</option>
+                                    <option selected>Select End Use</option>
+                                {endUseData.map((record) => {
+                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                })}
+                                {/* <option selected>Select End Use</option>
                                 <option value="Plug">Plug</option>
                                 <option value="Process">Process</option>
                                 <option value="Lighting">Lighting</option>
-                                <option value="HVAC">HVAC</option>
+                                <option value="HVAC">HVAC</option> */}
                             </Input>
                         </Form.Group>
                     </Form>
