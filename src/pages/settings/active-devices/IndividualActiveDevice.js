@@ -106,8 +106,8 @@ const IndividualActiveDevice = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data.data[0];
                     setActiveData(response);
-                    setActiveLocationId(response.data[0].location_id);
-                    localStorage.setItem('identifier', response.data[0].identifier);
+                    setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -313,7 +313,9 @@ const IndividualActiveDevice = () => {
                                     <span className="passive-device-name mr-3">
                                         {activeData.description ? activeData.description : ''}
                                     </span>
-                                    <span className="passive-sensor-count">{activeData.identifier}</span>
+                                    <span className="passive-sensor-count">
+                                        {activeData.identifier ? activeData.identifier : ''}
+                                    </span>
                                 </div>
                             </div>
                             <div>
@@ -387,13 +389,17 @@ const IndividualActiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Identifier
                                         </h6>
-                                        <h6 className="passive-device-value">{activeData.identifier}</h6>
+                                        <h6 className="passive-device-value">
+                                            {activeData.identifier ? activeData.identifier : ''}
+                                        </h6>
                                     </div>
                                     <div>
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Device Model
                                         </h6>
-                                        <h6 className="passive-device-value">{activeData.model}</h6>
+                                        <h6 className="passive-device-value">
+                                            {activeData.model ? activeData.model : ''}
+                                        </h6>
                                     </div>
                                 </div>
                                 <div className="single-passive-grid">

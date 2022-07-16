@@ -15,7 +15,7 @@ import Pagination from 'react-bootstrap/Pagination';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
-import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown } from '@fortawesome/pro-thin-svg-icons';
+import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown,faCheck ,faSignalStream,faPencil,faPlus} from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import tplink from "../../../assets/images/tplink.png";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -98,13 +98,15 @@ const Provision = () => {
     };
     const [error, setError]=useState(false);
     const [message,setMessage]=useState("");
+    const [kasaDevices,setKasaDevices]=useState([]);
     
     const handleAuthorize =()=>{
-        console.log(email);
-        console.log(password);
+        // console.log(email);
+        // console.log(password);
         let authData={
             username:email,
-            password:password
+            password:password,
+            building_id:bldgId
         }
         try {
             let header = {
@@ -119,10 +121,10 @@ const Provision = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     if(res.status===200){
                         setShowLink(false);
-                        console.log(res.data.id);
+                        // console.log(res.data.id);
                         localStorage.setItem("kasa_id",res.data.id)
                         setAuth(res.data.id);
                     }
@@ -143,17 +145,21 @@ const Provision = () => {
         setShowDone(true);
     }
     const handleDone=()=>{
-        console.log(selectedKasaId);
-        console.log(selectedKasaEmail);
+        // console.log(selectedKasaId);
+        // console.log(selectedKasaEmail);
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?kasa_account_id=${selectedKasaId}&building_id=${bldgId}`;
+            let arr={
+                "kasa_account_id":kasaDevices,
+                "building_id":bldgId
+            }
+            // let params = `?kasa_account_id=${localStorage.getItem("kasa_id")}&building_id=${bldgId}`;
             axios
-                .post(`${BaseUrl}${doneProvisioning}${params}`,{}, {
+                .post(`${BaseUrl}${doneProvisioning}`,arr, {
                     headers: header,
                 })
                 .then((res) => {
@@ -184,7 +190,7 @@ const Provision = () => {
                 headers: header,
             })
             .then((res) => {
-                console.log(res.data);
+                // console.log(res.data);
                 if(res.status===200){
                     getKasaDevices();
                 }
@@ -246,7 +252,8 @@ const Provision = () => {
                 headers: header,
             })
             .then((res) => {
-                console.log(res.data.data);
+                let kDevices=[];
+                // console.log(res.data.data);
                 setLinkedAccount(res.data.data);
                 let Hs=0;
                 let kp=0;
@@ -254,6 +261,9 @@ const Provision = () => {
                 let socket=0;
                 let capy=0;
                 res.data.data.forEach(ele => {
+                    if(ele.is_provisioned===false){
+                        kDevices.push(ele.id)
+                    }
                     Hs=Hs+ele.HS110s;
                     kp=kp+ele.KP115s;
                     Hs1=Hs1+ele.HS300s;
@@ -268,8 +278,10 @@ const Provision = () => {
                     Remaining_Capacity:capy
                 }
                 setTotal(arr);
-                console.log(arr);
+                // console.log(arr);
                 setIsProcessing(false);
+                // console.log("kasa devices",kDevices);
+                setKasaDevices(kDevices);
             });
         } catch (error) {
             console.log('Failed to fetch kasa account');
@@ -292,7 +304,7 @@ try {
         headers: header,
     })
     .then((res) => {
-        console.log(res.data.data);
+        // console.log(res.data.data);
         res.data.data.forEach(ele => {
             if(ele.action===1){
                 ready.push(ele);
@@ -305,6 +317,7 @@ try {
          setProgressData(progress);
         setProvisioningData(res.data.data);
         setIsAddProcessing(false);
+        
     });
 } catch (error) {
     console.log('Failed to fetch kasa account');
@@ -315,22 +328,26 @@ try {
 useEffect(()=>{
     getKasaAccount();
       getKasaDevices();
+     // console.log(progressData);
+    
 
 },[auth])
 
     useEffect(()=>{
-        console.log(auth);
+      // console.log(auth);
 
           
       getKasaAccount();
       getKasaDevices();
 
     },[])
-    useEffect(() => {
-        console.log('selectedOptions => ', selectedOptions);
-        console.log("readyData",readyData);
-        console.log("progressData",progressData);
-    });
+    // useEffect(() => {
+    //     // console.log('selectedOptions => ', selectedOptions);
+    //     // console.log("readyData",readyData);
+    //     // console.log("progressData",progressData);
+       
+        
+    // });
 
     return (
         <React.Fragment>
@@ -442,15 +459,39 @@ useEffect(()=>{
                         <div className="mr-2">
                             <button
                                 type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={()=>{setShowEmail(true)}}
+                                className="btn btn-md btn-outline-secondary font-weight-bold"
+                                onClick={handleDone}
                                 >
-                                Done Provisioning
+                                <FontAwesomeIcon icon={faCheck} size="md" style={{marginRight:"0.5rem"}}/>
+                                Done
+                            </button>
+                        </div>
+                        <div className="mr-2">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                >
+                                <FontAwesomeIcon icon={faSignalStream} size="md" style={{marginRight:"0.5rem"}}/>
+                                Provision
                             </button>
                         </div>
                     </div>
-                    <Row className='mt-5'>
-                        <Col md={8}>
+                    <Row className='mt-5 ml-5 mr-3'>
+                        <Col>
+                        <div className='m-3'>
+                        <label>Provisioners</label>
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'US Provisioners';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                         <div className='m-3' >
                         <label>Wi-Fi Network</label>
                         <MultiSelect
@@ -466,21 +507,26 @@ useEffect(()=>{
                         />
                     </div>
                     <div className='m-3'>
-                        <label>Provisioners</label>
-                        <MultiSelect
-                            options={tableColumnOptions}
-                            value={selectedOptions}
-                            onChange={setSelectedOptions}
-                            labelledBy="Columns"
-                            className="column-filter-styling"
-                            valueRenderer={() => {
-                                return 'US Provisioners';
-                            }}
-                            ClearSelectedIcon={null}
-                        />
+                    <button
+                              type="button"
+                              className="btn btn-md btn-outline-secondary font-weight-bold mr-4"
+                              style={{width:"10rem"}}
+                             >
+                              <FontAwesomeIcon icon={faPencil} size="md" style={{marginRight:"0.5rem"}}/>Edit Networks
+                          </button>
+                          <button
+                              type="button"
+                              className="btn btn-md btn-outline-secondary font-weight-bold"
+                              style={{width:"10rem"}}
+                              onClick={() => {
+                                  handleShow();
+                              }}>
+                              <FontAwesomeIcon icon={faPlus} size="md" style={{marginRight:"0.5rem"}}/>Network
+                          </button>
                     </div>
+                    
                         </Col>
-                        <Col md={4}>
+                        {/* <Col md={4}>
                         <div className='m-3'>
                         <label style={{visibility:"hidden"}}>Provisioners</label>
                           <button
@@ -500,7 +546,7 @@ useEffect(()=>{
                               Provision
                           </button>
                       </div>
-                        </Col>
+                        </Col> */}
                     </Row>
                     
                 </Col>
@@ -570,7 +616,8 @@ useEffect(()=>{
                          
                                 <tr >
                                         <td scope="row" >
-                                        <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress
+                                        {/* <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress */}
+                                        {record.status}
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
@@ -634,7 +681,8 @@ useEffect(()=>{
                          
                                 <tr >
                                         <td scope="row" >
-                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"green"}}/> Completed
+                                        {/* <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"green"}}/> Completed */}
+                                        {record.status}
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
@@ -716,17 +764,21 @@ useEffect(()=>{
             </Modal>
 
                         {/* Link Account Modal */}
-            <Modal show={showlink} onHide={handleLinkClose} centered dialogClassName="my-modal" contentClassName="my-modal">
-                <Modal.Header style={{margin:"0 auto"}}>
-                    <Modal.Title><img src={tplink} width="200px" height="80px"/></Modal.Title>
+            <Modal show={showlink} onHide={handleLinkClose} centered dialogClassName="my-modal1" contentClassName="my-modal1">
+                <Modal.Header style={{marginLeft:"1rem",marginTop:"10px",padding:"0px"}}>
+                    <Modal.Title>
+                        {/* <img src={tplink} width="200px" height="80px"/> */}
+                        <p style={{fontSize:"18px", fontWeight:"bold",marginBottom:"0px"}}>Add TP Link - Kasa Account</p>
+                        </Modal.Title>
                 </Modal.Header>
-                <Modal.Body>                    
-                <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p>
+                <Modal.Body style={{marginTop:"0px"}}>                    
+                {/* <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p> */}
                 <AvForm className="authentication-form" autoComplete="off">
                 {error && <Alert color="danger" isOpen={error ? true : false}>
                                                     <div>{message}</div>
                                                 </Alert>}
                                                     <AvGroup className="">
+                                                        <label>Email</label>
                                                         <InputGroup>
                                                            
                                                             <AvInput type="text" name="username" id="username" placeholder="Email" value={email} onChange={(e)=>{setEmail(e.target.value)}} required />
@@ -734,22 +786,28 @@ useEffect(()=>{
                                                         
                                                     </AvGroup>
                                                     <AvGroup className="mb-3">
+                                                    <label>Password</label>
                                                         <InputGroup>
                                                            
                                                             <AvInput type="password" name="password" id="password" placeholder="Password" value={password} onChange={(e)=>{setPassword(e.target.value)}} required />
                                                         </InputGroup>
-                                                        <Link to="/account/forget-password" className="float-right text-muted text-unline-dashed ml-1">Forgot your password?</Link>
+                                                        {/* <Link to="/account/forget-password" className="float-right text-muted text-unline-dashed ml-1">Forgot your password?</Link> */}
                                                         
                                                     </AvGroup>
                  </AvForm>
                     
                 </Modal.Body>
                 <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={handleLinkClose}>
+                        Cancel
+                    </button>
                     <button
                         className='btn btn-primary'
-                        onClick={handleAuthorize}
-                        style={{width:"100%"}}
-                        >Authorize
+                        onClick={() => {
+                         handleAuthorize();
+                        }}
+                        style={{width:"8rem"}}
+                        >Add
                     </button>
                 </Modal.Footer>
             </Modal>
@@ -805,7 +863,7 @@ useEffect(()=>{
                     <button
                         className='btn btn-primary'
                         onClick={() => {
-                         handleDone();
+                        //  handleDone();
                         }}
                         style={{width:"8rem"}}
                         >Done

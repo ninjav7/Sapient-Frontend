@@ -6314,6 +6314,11 @@
     "jest-message-util" "^24.9.0"
     "jest-regex-util" "^24.9.0"
 
+"export-to-csv@^0.2.1":
+  "integrity" "sha512-KTbrd3CAZ0cFceJEZr1e5uiMasabeCpXq1/5uvVxDl53o4jXJHnltasQoj2NkzrxD8hU9kdwjnMhoir/7nNx/A=="
+  "resolved" "https://registry.npmjs.org/export-to-csv/-/export-to-csv-0.2.1.tgz"
+  "version" "0.2.1"
+
 "express@^4.17.1":
   "integrity" "sha512-yuSQpz5I+Ch7gFrPCk4/c+dIBKlQUxtgwqzph132bsT6qhuzss6I8cLJQz7B3rFblzd6wtcI0ZbGltH/C4LjUg=="
   "resolved" "https://registry.npmjs.org/express/-/express-4.17.3.tgz"
@@ -11737,6 +11742,11 @@
     "@types/hoist-non-react-statics" "^3.0.1"
     "hoist-non-react-statics" "^3.0.0"
     "universal-cookie" "^4.0.0"
+
+"react-csv@^2.2.2":
+  "integrity" "sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw=="
+  "resolved" "https://registry.npmjs.org/react-csv/-/react-csv-2.2.2.tgz"
+  "version" "2.2.2"
 
 "react-date-object@^2.1.5":
   "integrity" "sha512-iAtF2nz+jZjy3w36qKx2MsxXqbiL7UgGljz9jPjLWxWCl4rDTZUMS/i7hKKiVbL1lJlmubz1Xu6W3i6CW06kTg=="
