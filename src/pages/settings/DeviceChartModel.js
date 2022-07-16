@@ -138,6 +138,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         try {
                             recordToInsert.data = recordToInsert.data.map((_data) => {
+                                _data[0] = new Date(_data[0])
                                 if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                     _data[1] = _data[1] / UNIT_DIVIDER;
                                 }
@@ -218,7 +219,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         tooltip : {
             x : {
                 show: true,
-                format: 'MM-dd hh:mm',
+                format: 'MM/dd hh:mm TT',
             }
         },
     });
