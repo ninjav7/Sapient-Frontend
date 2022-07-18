@@ -4,9 +4,9 @@ import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData, listSensor } from '../../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, sensorGraphData, listSensor, updateActivePassiveDevice } from '../../../services/Network';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -14,6 +14,7 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import './style.css';
 
 const SelectBreakerModel = ({
@@ -107,6 +108,8 @@ const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    let history = useHistory();
+
     const { deviceId } = useParams();
     console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
@@ -136,6 +139,10 @@ const IndividualPassiveDevice = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [sensors, setSensors] = useState([]);
     const [sensorData, setSensordata] = useState([]);
+
+    const [isLocationFetched, setIsLocationFetched] = useState(true);
+    const [activeLocationId, setActiveLocationId] = useState('');
+    const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
 
     const [breakers, setBreakers] = useState([
         {
@@ -187,8 +194,6 @@ const IndividualPassiveDevice = () => {
                 let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log(response);
-                    console.log(response.data[0]);
                     setPassiveData(response.data[0]);
                 });
             } catch (error) {
@@ -202,7 +207,6 @@ const IndividualPassiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}`;
@@ -218,17 +222,19 @@ const IndividualPassiveDevice = () => {
 
         const fetchLocationData = async () => {
             try {
+                setIsLocationFetched(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
+                setIsLocationFetched(false);
             } catch (error) {
                 console.log(error);
+                setIsLocationFetched(false);
                 console.log('Failed to fetch Location Data');
             }
         };
@@ -257,7 +263,6 @@ const IndividualPassiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -267,7 +272,6 @@ const IndividualPassiveDevice = () => {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                // 'user-auth': '628f3144b712934f578be895',
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
@@ -289,8 +293,34 @@ const IndividualPassiveDevice = () => {
             console.log('Failed to fetch Sensor Graph data');
         }
     };
-    //     fetchSensorGraphData();
-    // }, [sensorId]);
+
+    const updateActiveDeviceData = async () => {
+        if (passiveData.equipments_id) {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${passiveData.equipments_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
+                        {
+                            location_id: activeLocationId,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setSensorAPIRefresh(!sensorAPIRefresh);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to link Sensor with Equipment');
+            }
+        }
+    };
 
     return (
         <>
@@ -313,7 +343,19 @@ const IndividualPassiveDevice = () => {
                                         Cancel
                                     </button>
                                 </Link>
-                                <button type="button" className="btn btn-primary passive-save-style ml-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary passive-save-style ml-2"
+                                    onClick={() => {
+                                        updateActiveDeviceData();
+                                        history.push('/settings/active-devices');
+                                    }}
+                                    disabled={
+                                        activeLocationId === 'Select location' ||
+                                        activeLocationId === passiveData.location_id
+                                            ? true
+                                            : false
+                                    }>
                                     Save
                                 </button>
                             </div>
@@ -333,12 +375,30 @@ const IndividualPassiveDevice = () => {
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Enter Identifier"
-                                            className="passive-location-style"
-                                            value={passiveData.location}
-                                        />
+
+                                        {isLocationFetched ? (
+                                            <Skeleton count={1} height={35} />
+                                        ) : (
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold"
+                                                onChange={(e) => {
+                                                    setActiveLocationId(e.target.value);
+                                                }}
+                                                value={activeLocationId}>
+                                                <option>Select Location</option>
+                                                {locationData.map((record, index) => {
+                                                    return (
+                                                        <option value={record.location_id}>
+                                                            {record.location_name}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </Input>
+                                        )}
+
                                         <Form.Label className="device-sub-label-style mt-1">
                                             Location this device is installed in.
                                         </Form.Label>
@@ -376,7 +436,6 @@ const IndividualPassiveDevice = () => {
                         </div>
                         <div className="col-8">
                             <h5 className="device-title">Sensors ({sensors.length})</h5>
-                            {/* <h5 className="device-title">Sensors (1)</h5> */}
                             <div className="mt-2">
                                 <div className="active-sensor-header">
                                     <div className="search-container mr-2">
@@ -419,9 +478,7 @@ const IndividualPassiveDevice = () => {
                                             <div className="sensor-container-style mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">
-                                                        {record.breaker_link}
-                                                    </span>
+                                                    <span className="sensor-data-title">{record.breaker_link}</span>
                                                     <span className="sensor-data-device">{record.equipment}</span>
                                                 </div>
                                                 <div className="sensor-data-style-right">
@@ -453,7 +510,7 @@ const IndividualPassiveDevice = () => {
                 </div>
             </div>
 
-            <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} />
+            {/* <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} /> */}
 
             <SelectBreakerModel
                 showBreaker={showBreaker}
