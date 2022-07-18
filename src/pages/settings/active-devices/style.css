@@ -39,7 +39,14 @@
     /* line-height: 18px; */
     color: #667085;
 }
-
+.error-message{
+    border:1px solid #B42318;
+    border-radius: 5px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1rem;
+}
 .passive-device-name {
     width: 89px;
     height: 28px;
