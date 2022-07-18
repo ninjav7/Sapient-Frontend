@@ -386,10 +386,20 @@ const DeviceChartModel = ({
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
         else setDropDown('dropdown-menu dropdown-menu-right');
     };
+    const removeDuplicates = (arr = []) => {
+        const map = new Map();
+        arr.forEach((x) => map.set(JSON.stringify(x), x));
+        arr = [...map.values()];
+        return arr;
+    };
 
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+        let arr=seriesData.length > 0 ? seriesData[0].data : [];
+        let sData=removeDuplicates(arr);
+        // console.log(arr);
+        // console.log(sData);
+        let streamData = seriesData.length > 0 ? sData : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 

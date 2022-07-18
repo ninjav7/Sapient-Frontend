@@ -1421,7 +1421,6 @@ const BreakersComponentRight = ({ data, id }) => {
         let currentBreakerObj = Object.assign({}, data);
         setCurrentBreakerData(currentBreakerObj);
     }, []);
-
     return (
         <>
             <Handle
