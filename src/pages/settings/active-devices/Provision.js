@@ -327,7 +327,7 @@ try {
 }
 useEffect(()=>{
     getKasaAccount();
-      getKasaDevices();
+    //   getKasaDevices();
      // console.log(progressData);
     
 
@@ -338,7 +338,7 @@ useEffect(()=>{
 
           
       getKasaAccount();
-      getKasaDevices();
+    //   getKasaDevices();
 
     },[])
     // useEffect(() => {
@@ -460,23 +460,24 @@ useEffect(()=>{
                             <button
                                 type="button"
                                 className="btn btn-md btn-outline-secondary font-weight-bold"
-                                onClick={handleDone}
+                                onClick={getKasaDevices}
                                 >
                                 <FontAwesomeIcon icon={faCheck} size="md" style={{marginRight:"0.5rem"}}/>
-                                Done
+                                Find Devices
                             </button>
                         </div>
                         <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
+                                onClick={handleDone}
                                 >
                                 <FontAwesomeIcon icon={faSignalStream} size="md" style={{marginRight:"0.5rem"}}/>
-                                Provision
+                                Add to System
                             </button>
                         </div>
                     </div>
-                    <Row className='mt-5 ml-5 mr-3'>
+                    {/* <Row className='mt-5 ml-5 mr-3'>
                         <Col>
                         <div className='m-3'>
                         <label>Provisioners</label>
@@ -525,7 +526,7 @@ useEffect(()=>{
                           </button>
                     </div>
                     
-                        </Col>
+                        </Col> 
                         {/* <Col md={4}>
                         <div className='m-3'>
                         <label style={{visibility:"hidden"}}>Provisioners</label>
@@ -547,7 +548,7 @@ useEffect(()=>{
                           </button>
                       </div>
                         </Col> */}
-                    </Row>
+                    {/* </Row> */}
                     
                 </Col>
             </Row>
@@ -574,8 +575,9 @@ useEffect(()=>{
                             <th>Device ID</th>
                             <th>Vendor</th>
                             <th>Model</th>
-                            <th>Assigned</th>
-                            <th>Actions</th>
+                            {/* <th>Assigned</th> */}
+                            <th>Kasa Account</th>
+                            {/* <th>Actions</th> */}
                         </tr>
                     </thead>
                     {isAddProcessing ? (
@@ -602,9 +604,9 @@ useEffect(()=>{
                                         <Skeleton count={5} />
                                     </td>
 
-                                    <td>
+                                    {/* <td>
                                         <Skeleton count={5} />
-                                    </td>
+                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -622,14 +624,15 @@ useEffect(()=>{
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
                                         <td>{record.model}</td>
-                                        <td>{record.assigned}</td>
-                                        <td>{record.action===0?
+                                        {/* <td>{record.assigned}</td> */}
+                                        <td>{record.kasa_account}</td>
+                                        {/* <td>{record.action===0?
                                             <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
                                              Waiting
                               </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold" onClick={(e)=>{handleAddDevice(e,record.kasa_account_id,record.device_id)}}>
                                         <FontAwesomeIcon icon={faRefresh} size="lg"/> Retry
                           </button>   
-                                    }</td>
+                                    }</td> */}
                                 </tr>
                             )}})}
               

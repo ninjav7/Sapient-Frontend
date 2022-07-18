@@ -1515,6 +1515,7 @@ const CreatePanel = () => {
         {
             name: 'Distribution',
             value: 'distribution',
+
         },
         {
             name: 'Disconnect',
