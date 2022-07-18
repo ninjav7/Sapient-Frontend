@@ -3706,7 +3706,7 @@ const CreatePanel = () => {
                         )}
 
                         {activePanelType === 'disconnect' && (
-                            <div className="row" style={{ width: '100%', height: '45vh', position: 'relative' }}>
+                            <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
