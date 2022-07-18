@@ -223,7 +223,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         setDeviceData(exploreData);
 
-                        console.log('UPDATED_CODE', seriesData);
+                        // console.log('UPDATED_CODE', seriesData);
 
                         setSeriesData([
                             {
@@ -287,8 +287,8 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
             toolbar: {
                 autoSelected: 'pan',
-
-                show: true,
+                show: false,
+                
             },
 
             animations: {
@@ -414,8 +414,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     };
 
     const getCSVLinkData = () => {
-        console.log('csv entered');
-
+        // console.log("csv entered");
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
