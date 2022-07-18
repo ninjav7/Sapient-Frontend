@@ -892,7 +892,7 @@ const General = () => {
                                                     operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
                                                     setTimeValue({
                                                         ...timeValue,
-                                                        monFrom: date,
+                                                        monFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
                                                 showTimeSelect
