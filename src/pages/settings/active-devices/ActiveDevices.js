@@ -282,7 +282,6 @@ const ActiveDevices = () => {
             await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setActiveDeviceData(response.data);
-                // console.log(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -407,8 +406,6 @@ const ActiveDevices = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
-                    const sampleData = response.data;
-                    // console.log('sampleData => ', sampleData);
                     setPaginationData(res.data);
 
                     let onlineData = [];
@@ -423,7 +420,7 @@ const ActiveDevices = () => {
                 });
                 setIsDeviceProcessing(false);
             } catch (error) {
-                // console.log(error);
+                console.log(error);
                 setIsDeviceProcessing(false);
                 console.log('Failed to fetch all Active Devices');
             }
