@@ -3,7 +3,6 @@ import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } f
 import Switch from 'react-switch';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import './style.css';
 import {
@@ -21,6 +20,8 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const General = () => {
     let cookies = new Cookies();
@@ -50,6 +51,7 @@ const General = () => {
 
     const [bldgData, setBldgData] = useState({});
 
+    const [isbuildingDetailsFetched, setIsbuildingDetailsFetched] = useState(true);
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingDateTime, setBuildingDateTime] = useState({});
@@ -59,6 +61,119 @@ const General = () => {
     const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
     const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
     const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
+    const [timeZone, setTimeZone] = useState('12');
+    const [switchPhrase, setSwitchPhrace] = useState({
+        mon: false,
+        tue: false,
+        wed: false,
+        thu: false,
+        fri: false,
+        sat: false,
+        sun: false,
+    });
+    const [timeValue, setTimeValue] = useState({
+        monFrom: '',
+        monTo: '',
+        tueFrom: '',
+        tueTo: '',
+        wedFrom: '',
+        wedTo: '',
+        thuFrom: '',
+        thuTo: '',
+        friFrom: '',
+        friTo: '',
+        satFrom: '',
+        satTo: '',
+        sunFrom: '',
+        sunTo: '',
+    });
+
+    console.log('timeValue', timeValue);
+
+    useEffect(() => {
+        setSwitchPhrace({
+            mon: weekToggle?.mon,
+            tue: weekToggle?.tue,
+            wed: weekToggle?.wed,
+            thu: weekToggle?.thu,
+            fri: weekToggle?.fri,
+            sat: weekToggle?.sat,
+            sun: weekToggle?.sun,
+        });
+    }, [weekToggle]);
+
+    useEffect(() => {
+        setTimeValue({
+            monFrom: buildingOperatingHours?.operating_hours?.mon?.time_range?.frm,
+            monTo: buildingOperatingHours?.operating_hours?.mon?.time_range?.to,
+            tueFrom: buildingOperatingHours?.operating_hours?.tue?.time_range?.frm,
+            tueTo: buildingOperatingHours?.operating_hours?.tue?.time_range?.to,
+            wedFrom: buildingOperatingHours?.operating_hours?.wed?.time_range?.frm,
+            wedTo: buildingOperatingHours?.operating_hours?.wed?.time_range?.to,
+            thuFrom: buildingOperatingHours?.operating_hours?.thu?.time_range?.frm,
+            thuTo: buildingOperatingHours?.operating_hours?.thu?.time_range?.to,
+            friFrom: buildingOperatingHours?.operating_hours?.fri?.time_range?.frm,
+            friTo: buildingOperatingHours?.operating_hours?.fri?.time_range?.to,
+            satFrom: buildingOperatingHours?.operating_hours?.sat?.time_range?.frm,
+            satTo: buildingOperatingHours?.operating_hours?.sat?.time_range?.to,
+            sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
+            sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
+        });
+    }, [buildingOperatingHours]);
+
+    const operationTime = {
+        operating_hours: {
+            mon: {
+                stat: switchPhrase?.mon,
+                time_range: {
+                    frm: timeValue?.monFrom,
+                    to: timeValue?.monTo,
+                },
+            },
+            tue: {
+                stat: switchPhrase?.tue,
+                time_range: {
+                    frm: timeValue?.tueFrom,
+                    to: timeValue?.tueTo,
+                },
+            },
+            wed: {
+                stat: switchPhrase?.wed,
+                time_range: {
+                    frm: timeValue?.wedFrom,
+                    to: timeValue?.wedTo,
+                },
+            },
+            thu: {
+                stat: switchPhrase?.thu,
+                time_range: {
+                    frm: timeValue?.thuFrom,
+                    to: timeValue?.thuTo,
+                },
+            },
+            fri: {
+                stat: switchPhrase?.fri,
+                time_range: {
+                    frm: timeValue?.friFrom,
+                    to: timeValue?.friTo,
+                },
+            },
+            sat: {
+                stat: switchPhrase?.sat,
+                time_range: {
+                    frm: timeValue?.satFrom,
+                    to: timeValue?.satTo,
+                },
+            },
+            sun: {
+                stat: switchPhrase?.sun,
+                time_range: {
+                    frm: timeValue?.sunFrom,
+                    to: timeValue?.sunTo,
+                },
+            },
+        },
+    };
 
     const saveBuildingSettings = async () => {
         try {
@@ -82,6 +197,7 @@ const General = () => {
                     axios.patch(`${BaseUrl}${generalDateTime}${params}`, buildingDateTime, {
                         headers: header,
                     }),
+                    axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, operationTime, { headers: header }),
                 ])
                 .then(
                     axios.spread((data1, data2, data3) => {
@@ -97,117 +213,127 @@ const General = () => {
 
     useEffect(() => {
         const fetchBuildingData = async () => {
+            let fixing = true;
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                let response = res.data;
-                let data = {};
-                if (bldgId) {
-                    data = response.find((el) => el.building_id === bldgId);
-                    if (data === undefined) {
-                        return;
+            setIsbuildingDetailsFetched(true);
+            if (fixing) {
+                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                    let response = res.data;
+                    let data = {};
+                    if (bldgId) {
+                        data = response.find((el) => el.building_id === bldgId);
+                        if (data === undefined) {
+                            return (fixing = false);
+                        }
+                        setBldgData(data);
+
+                        let buildingDetailsObj = {
+                            name: data.building_name,
+                            typee: data.building_type,
+                            square_footage: data.building_size,
+                            active: data.active,
+                        };
+                        setBuildingDetails(buildingDetailsObj);
+                        setResponseBuildingDetails(buildingDetailsObj);
+
+                        let buildingAddressObj = {
+                            street_address: data.street_address,
+                            address_2: data.address_2,
+                            city: data.city,
+                            state: data.state,
+                            zip_code: data.zip_code,
+                        };
+                        setBuildingAddress(buildingAddressObj);
+                        setResponseBuildingAddress(buildingAddressObj);
+
+                        let buildingDateTimeObj = {
+                            timezone: data.timezone,
+                            time_format: data.time_format,
+                        };
+                        setBuildingDateTime(buildingDateTimeObj);
+                        setResponseBuildingDateTime(buildingDateTimeObj);
+
+                        let buildingOperatingHours = {
+                            operating_hours: data.operating_hours,
+                        };
+                        setBuildingOperatingHours(buildingOperatingHours);
+                        setResponseBuildingOperatingHours(buildingOperatingHours);
+
+                        const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+                        setWeekToggle({
+                            mon: mon['stat'],
+                            tue: tue['stat'],
+                            wed: wed['stat'],
+                            thu: thu['stat'],
+                            fri: fri['stat'],
+                            sat: sat['stat'],
+                            sun: sun['stat'],
+                        });
                     }
-                    setBldgData(data);
-
-                    let buildingDetailsObj = {
-                        name: data.building_name,
-                        typee: data.building_type,
-                        square_footage: data.building_size,
-                        active: data.active,
-                    };
-                    setBuildingDetails(buildingDetailsObj);
-                    setResponseBuildingDetails(buildingDetailsObj);
-
-                    let buildingAddressObj = {
-                        street_address: data.street_address,
-                        address_2: data.address_2,
-                        city: data.city,
-                        state: data.state,
-                        zip_code: data.zip_code,
-                    };
-                    setBuildingAddress(buildingAddressObj);
-                    setResponseBuildingAddress(buildingAddressObj);
-
-                    let buildingDateTimeObj = {
-                        timezone: data.timezone,
-                        time_format: data.time_format,
-                    };
-                    setBuildingDateTime(buildingDateTimeObj);
-                    setResponseBuildingDateTime(buildingDateTimeObj);
-
-                    let buildingOperatingHours = {
-                        operating_hours: data.operating_hours,
-                    };
-                    setBuildingOperatingHours(buildingOperatingHours);
-                    setResponseBuildingOperatingHours(buildingOperatingHours);
-
-                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-                    setWeekToggle({
-                        mon: mon['stat'],
-                        tue: tue['stat'],
-                        wed: wed['stat'],
-                        thu: thu['stat'],
-                        fri: fri['stat'],
-                        sat: sat['stat'],
-                        sun: sun['stat'],
-                    });
-                }
-                setBuildingData(data);
-            });
+                    setBuildingData(data);
+                    setIsbuildingDetailsFetched(false);
+                });
+            }
         };
         fetchBuildingData();
     }, [bldgId]);
 
     useEffect(() => {
+        let fixing = true;
         const fetchBuildingData = async () => {
+            setIsbuildingDetailsFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                let response = res.data;
-                let data = {};
-                if (bldgId) {
-                    data = response.find((el) => el.building_id === bldgId);
-                    if (data === undefined) {
-                        return;
-                    }
-                    setInputField({
-                        ...inputField,
-                        active: data.active,
-                        name: data.building_name,
-                        square_footage: data.building_size,
-                        typee: data.building_type,
-                        street_address: data.street_address,
-                        address_2: data.address_2,
-                        city: data.city,
-                        state: data.state,
-                        zip_code: data.zip_code,
-                        timezone: data.timezone,
-                        time_format: data.time_format,
-                        operating_hours: data.operating_hours,
-                    });
-                    setActiveToggle(data.active);
-                    setTimeToggle(data.time_format);
-                    // console.log(buildingData);
-                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+            if (fixing) {
+                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                    let response = res.data;
+                    let data = {};
+                    if (bldgId) {
+                        data = response.find((el) => el.building_id === bldgId);
+                        if (data === undefined) {
+                            return (fixing = false);
+                        }
+                        setInputField({
+                            ...inputField,
+                            active: data.active,
+                            name: data.building_name,
+                            square_footage: data.building_size,
+                            typee: data.building_type,
+                            street_address: data.street_address,
+                            address_2: data.address_2,
+                            city: data.city,
+                            state: data.state,
+                            zip_code: data.zip_code,
+                            timezone: data.timezone,
+                            time_format: data.time_format,
+                            operating_hours: data.operating_hours,
+                        });
+                        setActiveToggle(data.active);
+                        setTimeToggle(data.time_format);
+                        // console.log(buildingData);
+                        const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
-                    setWeekToggle({
-                        mon: mon['stat'],
-                        tue: tue['stat'],
-                        wed: wed['stat'],
-                        thu: thu['stat'],
-                        fri: fri['stat'],
-                        sat: sat['stat'],
-                        sun: sun['stat'],
-                    });
-                }
-                setBuildingData(data);
-            });
+                        setWeekToggle({
+                            mon: mon['stat'],
+                            tue: tue['stat'],
+                            wed: wed['stat'],
+                            thu: thu['stat'],
+                            fri: fri['stat'],
+                            sat: sat['stat'],
+                            sun: sun['stat'],
+                        });
+                    }
+                    setBuildingData(data);
+                    setIsbuildingDetailsFetched(false);
+                });
+            }
         };
         fetchBuildingData();
     }, [render]);
@@ -231,95 +357,13 @@ const General = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const sampleOperatingHour = {
-        mon: {
-            stat: false,
-            timeRange: {
-                frm: '16:23',
-                to: '16:24',
-            },
-        },
-        tue: {
-            stat: false,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-        wed: {
-            stat: true,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-        thu: {
-            stat: false,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-        fri: {
-            stat: true,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-        sat: {
-            stat: false,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-        sun: {
-            stat: false,
-            timeRange: {
-                frm: '16:23',
-                to: '16:25',
-            },
-        },
-    };
-
     const inputsBuildingHandler = (e) => {
         // console.log(e.target.name);
         setInputField({ [e.target.name]: e.target.value });
     };
 
-    const EditBuildingHandler = (e) => {
-        // console.log('helloo');
-        e.preventDefault();
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, inputField, { headers }).then((res) => {
-            // console.log(res.data);
-            // handleClose();
-            setRender(!render);
-        });
-    };
-
     const inputsAddressHandler = (e) => {
         setInputField({ [e.target.name]: e.target.value });
-    };
-
-    const EditAddressHandler = (e) => {
-        // console.log('helloo');
-        e.preventDefault();
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.patch(`${BaseUrl}${generalBuildingAddress}/${bldgId}`, inputField, { headers }).then((res) => {
-            console.log(res.data);
-            // handleClose();
-            setRender(!render);
-        });
     };
 
     const dateHandler = (operating_hours, day) => {
@@ -333,10 +377,6 @@ const General = () => {
             timeTo = days['time_range'].to;
             stat = days['stat'];
         }
-        // ${operating_hours.mon.time_range.from}
-        // const days = operating_hours[day];
-        // // console.log(days);
-        // const time = '15:02'
         return {
             frm: new Date(`January 31 1980 ${timeFrom}`),
             to: new Date(`January 31 1980 ${timeTo}`),
@@ -346,16 +386,12 @@ const General = () => {
 
     const inputsActiveToggleHandler = (e) => {
         setActiveToggle(!activeToggle);
-        // console.log('helloo');
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
-            // console.log(res.data);
-            // handleClose();
-
             setRender(!render);
         });
     };
@@ -425,22 +461,6 @@ const General = () => {
         }
     };
 
-    const inputsDateHandler = (e) => {
-        setTimeToggle(!timeToggle);
-        // console.log('helloo');
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.patch(`${BaseUrl}${generalDateTime}/${bldgId}`, { time_format: e }, { headers }).then((res) => {
-            console.log(res.data);
-            // handleClose();
-
-            setRender(!render);
-        });
-    };
-
     const deleteBuildingHandler = () => {
         var answer = window.confirm("'Are you sure wants o delete!!!'");
         if (answer) {
@@ -460,10 +480,7 @@ const General = () => {
     };
 
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
-        // const currentDtae = dateHandler(inputField.operating_hours, day);
-        // const time2 = moment(currentDtae[type2]).format('HH:MM');
         const time1 = moment(date).format('HH:MM');
-        // console.log('inputField', inputField);
         const data = {
             [day]: {
                 time_range: {
@@ -471,7 +488,6 @@ const General = () => {
                 },
             },
         };
-        dateChangeHandler({ operating_hours: data });
     };
 
     const checkDateTimeHandler = (day, value) => {
@@ -484,19 +500,6 @@ const General = () => {
                 stat: value,
             },
         };
-        dateChangeHandler({ operating_hours: data });
-    };
-
-    const dateChangeHandler = (value) => {
-        const headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, value, { headers }).then((res) => {
-            // console.log(res.data);
-            setRender(!render);
-        });
     };
 
     // update section end
@@ -509,22 +512,28 @@ const General = () => {
                             General Building Settings
                         </div>
                         <div>
-                            <button
-                                type="button"
-                                className="btn btn-default buildings-cancel-style"
-                                onClick={() => {
-                                    setIsEditing(false);
-                                }}>
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary buildings-save-style ml-3"
-                                onClick={() => {
-                                    saveBuildingSettings();
-                                }}>
-                                Save
-                            </button>
+                            {isbuildingDetailsFetched ? (
+                                <Skeleton count={1} height={40} width={150} />
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="btn btn-default buildings-cancel-style"
+                                        onClick={() => {
+                                            setIsEditing(false);
+                                        }}>
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary buildings-save-style ml-3"
+                                        onClick={() => {
+                                            saveBuildingSettings();
+                                        }}>
+                                        Save
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -551,17 +560,20 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <Switch
-                                            onChange={() => {
-                                                handleSwitchChange();
-                                                // handleBldgSettingChanges('active', e.target.value);
-                                            }}
-                                            checked={buildingDetails.active}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={75} />
+                                        ) : (
+                                            <Switch
+                                                onChange={() => {
+                                                    handleSwitchChange();
+                                                }}
+                                                checked={buildingDetails.active}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
@@ -574,20 +586,24 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <div className="singleline-box-style">
-                                            <Input
-                                                type="text"
-                                                name="name"
-                                                id="buildingName"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('name', e.target.value);
-                                                }}
-                                                onBlur={EditBuildingHandler}
-                                                placeholder="Enter Building Name"
-                                                className="single-line-style font-weight-bold"
-                                                value={buildingDetails.name}
-                                            />
-                                        </div>
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={350} />
+                                        ) : (
+                                            <div className="singleline-box-style">
+                                                <Input
+                                                    type="text"
+                                                    name="name"
+                                                    id="buildingName"
+                                                    onChange={(e) => {
+                                                        handleBldgSettingChanges('name', e.target.value);
+                                                    }}
+                                                    // onBlur={EditBuildingHandler}
+                                                    placeholder="Enter Building Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={buildingDetails.name}
+                                                />
+                                            </div>
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
@@ -600,21 +616,25 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <div className="singleline-box-style">
-                                            <Input
-                                                type="select"
-                                                name="typee"
-                                                id="exampleSelect"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('typee', e.target.value);
-                                                }}
-                                                onBlur={EditBuildingHandler}
-                                                value={buildingDetails.typee}
-                                                className="font-weight-bold">
-                                                <option>Office Building</option>
-                                                <option>Residential Building</option>
-                                            </Input>
-                                        </div>
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={350} />
+                                        ) : (
+                                            <div className="singleline-box-style">
+                                                <Input
+                                                    type="select"
+                                                    name="typee"
+                                                    id="exampleSelect"
+                                                    onChange={(e) => {
+                                                        handleBldgSettingChanges('typee', e.target.value);
+                                                    }}
+                                                    // onBlur={EditBuildingHandler}
+                                                    value={buildingDetails.typee}
+                                                    className="font-weight-bold">
+                                                    <option>Office Building</option>
+                                                    <option>Residential Building</option>
+                                                </Input>
+                                            </div>
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
@@ -627,20 +647,24 @@ const General = () => {
                                     </FormGroup>
 
                                     <FormGroup>
-                                        <div className="singleline-box-style">
-                                            <Input
-                                                type="text"
-                                                name="square_footage"
-                                                id="exampleNumber"
-                                                placeholder="Enter value"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('square_footage', +e.target.value);
-                                                }}
-                                                onBlur={EditBuildingHandler}
-                                                value={buildingDetails.square_footage}
-                                                className="font-weight-bold"
-                                            />
-                                        </div>
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={350} />
+                                        ) : (
+                                            <div className="singleline-box-style">
+                                                <Input
+                                                    type="text"
+                                                    name="square_footage"
+                                                    id="exampleNumber"
+                                                    placeholder="Enter value"
+                                                    onChange={(e) => {
+                                                        handleBldgSettingChanges('square_footage', +e.target.value);
+                                                    }}
+                                                    // onBlur={EditBuildingHandler}
+                                                    value={buildingDetails.square_footage}
+                                                    className="font-weight-bold"
+                                                />
+                                            </div>
+                                        )}
                                     </FormGroup>
                                 </div>
                             </Form>
@@ -664,36 +688,44 @@ const General = () => {
                                         <Label for="userAddress1" className="building-content-title">
                                             Street Address
                                         </Label>
-                                        <Input
-                                            type="text"
-                                            name="street_address"
-                                            id="userAddress1"
-                                            placeholder="Address 1"
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('street_address', e.target.value);
-                                            }}
-                                            onBlur={EditAddressHandler}
-                                            className="font-weight-bold"
-                                            value={buildingAddress.street_address}
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={200} />
+                                        ) : (
+                                            <Input
+                                                type="text"
+                                                name="street_address"
+                                                id="userAddress1"
+                                                placeholder="Address 1"
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('street_address', e.target.value);
+                                                }}
+                                                // onBlur={EditAddressHandler}
+                                                className="font-weight-bold"
+                                                value={buildingAddress.street_address}
+                                            />
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label for="userAddress2" className="building-content-title">
                                             Address 2 (optional)
                                         </Label>
-                                        <Input
-                                            type="text"
-                                            name="address_2"
-                                            id="userAddress2"
-                                            placeholder="Address 2"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('address_2', e.target.value);
-                                            }}
-                                            onBlur={EditAddressHandler}
-                                            value={buildingAddress.address_2}
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={200} />
+                                        ) : (
+                                            <Input
+                                                type="text"
+                                                name="address_2"
+                                                id="userAddress2"
+                                                placeholder="Address 2"
+                                                className="font-weight-bold"
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('address_2', e.target.value);
+                                                }}
+                                                // onBlur={EditAddressHandler}
+                                                value={buildingAddress.address_2}
+                                            />
+                                        )}
                                     </FormGroup>
                                 </div>
 
@@ -702,55 +734,67 @@ const General = () => {
                                         <Label for="userCity" className="building-content-title">
                                             City
                                         </Label>
-                                        <Input
-                                            type="text"
-                                            name="city"
-                                            id="userCity"
-                                            placeholder="Enter your city"
-                                            className="font-weight-bold"
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('city', e.target.value);
-                                            }}
-                                            onBlur={EditAddressHandler}
-                                            value={buildingAddress.city}
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={200} />
+                                        ) : (
+                                            <Input
+                                                type="text"
+                                                name="city"
+                                                id="userCity"
+                                                placeholder="Enter your city"
+                                                className="font-weight-bold"
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('city', e.target.value);
+                                                }}
+                                                // onBlur={EditAddressHandler}
+                                                value={buildingAddress.city}
+                                            />
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label for="userState" className="building-content-title">
                                             State
                                         </Label>
-                                        <Input
-                                            type="select"
-                                            name="state"
-                                            id="userState"
-                                            defaultChecked={buildingAddress.state}
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('state', e.target.value);
-                                            }}
-                                            onBlur={EditAddressHandler}
-                                            className="font-weight-bold">
-                                            <option>Oregon</option>
-                                            <option>Washington</option>
-                                        </Input>
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={200} />
+                                        ) : (
+                                            <Input
+                                                type="select"
+                                                name="state"
+                                                id="userState"
+                                                defaultChecked={buildingAddress.state}
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('state', e.target.value);
+                                                }}
+                                                // onBlur={EditAddressHandler}
+                                                className="font-weight-bold">
+                                                <option>Oregon</option>
+                                                <option>Washington</option>
+                                            </Input>
+                                        )}
                                     </FormGroup>
 
                                     <FormGroup>
                                         <Label for="useZipCode" className="building-content-title">
                                             Zip
                                         </Label>
-                                        <Input
-                                            type="number"
-                                            name="zip_code"
-                                            id="useZipCode"
-                                            placeholder="Enter zip code"
-                                            value={buildingAddress.zip_code}
-                                            onChange={(e) => {
-                                                handleBldgSettingChanges('zip_code', +e.target.value);
-                                            }}
-                                            onBlur={EditAddressHandler}
-                                            className="font-weight-bold"
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={35} width={200} />
+                                        ) : (
+                                            <Input
+                                                type="number"
+                                                name="zip_code"
+                                                id="useZipCode"
+                                                placeholder="Enter zip code"
+                                                value={buildingAddress.zip_code}
+                                                onChange={(e) => {
+                                                    handleBldgSettingChanges('zip_code', +e.target.value);
+                                                }}
+                                                // onBlur={EditAddressHandler}
+                                                className="font-weight-bold"
+                                            />
+                                        )}
                                     </FormGroup>
                                 </div>
                             </Form>
@@ -774,21 +818,37 @@ const General = () => {
                                         <h6 className="building-content-title">Timezone</h6>
                                     </div>
                                     <div className="single-line-style">
-                                        <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={25} width={150} />
+                                        ) : (
+                                            <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
+                                        )}
                                     </div>
                                     <div className="single-line-style">
                                         <h6 className="building-content-title">Use 24-hour Clock</h6>
                                     </div>
                                     <div>
-                                        <Switch
-                                            onChange={handleDateTimeSwitch}
-                                            checked={buildingDateTime.time_format}
-                                            onColor={'#2955E7'}
-                                            name="time_format"
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
+                                        {isbuildingDetailsFetched ? (
+                                            <Skeleton count={1} height={25} width={150} />
+                                        ) : (
+                                            <Switch
+                                                onChange={(e) => {
+                                                    handleDateTimeSwitch();
+                                                    if (e) {
+                                                        setTimeZone('24');
+                                                    }
+                                                    if (!e) {
+                                                        setTimeZone('12');
+                                                    }
+                                                }}
+                                                checked={buildingDateTime.time_format}
+                                                onColor={'#2955E7'}
+                                                name="time_format"
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </Form>
@@ -808,257 +868,390 @@ const General = () => {
                         <CardBody>
                             <Row>
                                 <div>
-                                    {/* Monday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('mon', e)}
-                                            checked={weekToggle['mon']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Mon
+                                    <>
+                                        {/* Monday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('mon', e);
+                                                    setSwitchPhrace({ ...switchPhrase, mon: e });
+                                                }}
+                                                checked={weekToggle['mon']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Mon
+                                            </div>
+                                            <DatePicker
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        monFrom: date,
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                value={timeValue?.monFrom}
+                                                timeIntervals={60}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'mon').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        monTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.monTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'mon').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'mon', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'mon').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'mon', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Tuesday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('tue', e)}
-                                            checked={weekToggle['tue']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Tue
+                                        {/* Tuesday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('tue', e);
+                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                }}
+                                                checked={weekToggle['tue']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Tue
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'tue').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        tueFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.tueFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'tue').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        tueTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.tueTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'tue').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'tue', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'tue').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'tue', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Wednesday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('wed', e)}
-                                            checked={weekToggle['wed']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Wed
+                                        {/* Wednesday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('wed', e);
+                                                    setSwitchPhrace({ ...switchPhrase, wed: e });
+                                                }}
+                                                checked={weekToggle['wed']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Wed
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'wed').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        wedFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.wedFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'wed').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        wedTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.wedTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'wed').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'wed', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'wed').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'wed', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Thursday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('thu', e)}
-                                            checked={weekToggle['thu']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Thu
+                                        {/* Thursday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('thu', e);
+                                                    setSwitchPhrace({ ...switchPhrase, thu: e });
+                                                }}
+                                                checked={weekToggle['thu']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Thu
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'thu').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        thuFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.thuFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'thu').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        thuTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.thuTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'thu').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'thu', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'thu').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'thu', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Friday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('fri', e)}
-                                            checked={weekToggle['fri']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Fri
+                                        {/* Friday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('fri', e);
+                                                    setSwitchPhrace({ ...switchPhrase, fri: e });
+                                                }}
+                                                checked={weekToggle['fri']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Fri
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'fri').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        friFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.friFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'fri').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        friTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.friTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'fri').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'fri', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'fri').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'fri', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Saturday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('sat', e)}
-                                            checked={weekToggle['sat']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Sat
+                                        {/* Saturday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('sat', e);
+                                                    setSwitchPhrace({ ...switchPhrase, sat: e });
+                                                }}
+                                                checked={weekToggle['sat']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Sat
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'sat').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        satFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.satFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'sat').to}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        satTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.satTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'sat').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'sat', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'sat').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'sat', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style"
-                                        />
-                                    </div>
 
-                                    {/* Sunday */}
-                                    <div className="operate-hour-style">
-                                        <Switch
-                                            onChange={(e) => checkDateTimeHandler('sun', e)}
-                                            checked={weekToggle['sun']}
-                                            onColor={'#2955E7'}
-                                            uncheckedIcon={false}
-                                            checkedIcon={false}
-                                            className="react-switch"
-                                        />
-                                        <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                            Sun
+                                        {/* Sunday */}
+                                        <div className="operate-hour-style">
+                                            <Switch
+                                                onChange={(e) => {
+                                                    checkDateTimeHandler('sun', e);
+                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                }}
+                                                checked={weekToggle['sun']}
+                                                onColor={'#2955E7'}
+                                                uncheckedIcon={false}
+                                                checkedIcon={false}
+                                                className="react-switch"
+                                            />
+                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                Sun
+                                            </div>
+                                            <DatePicker
+                                                // selected={dateHandler(inputField.operating_hours, 'sun').frm}
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        sunFrom: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.sunFrom}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
+                                            <div className="spacing"> to </div>
+                                            <DatePicker
+                                                onChange={(date) => {
+                                                    operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        sunTo: moment(date)?.format('HH:MM'),
+                                                    });
+                                                }}
+                                                showTimeSelect
+                                                showTimeSelectOnly
+                                                timeIntervals={60}
+                                                value={timeValue?.sunTo}
+                                                timeCaption="Time"
+                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                className="time-picker-style"
+                                            />
                                         </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'sun').frm}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'sun', 'frm', 'to')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={15}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style-disabled time-picker-text-style-disabled"
-                                        />
-                                        <div className="spacing"> to </div>
-                                        <DatePicker
-                                            selected={dateHandler(inputField.operating_hours, 'sun').to}
-                                            onChange={(date) => operatingHoursChangeHandler(date, 'sun', 'to', 'frm')}
-                                            showTimeSelect
-                                            showTimeSelectOnly
-                                            timeIntervals={30}
-                                            timeCaption="Time"
-                                            dateFormat="h:mm aa"
-                                            className="time-picker-style-disabled time-picker-text-style-disabled"
-                                        />
-                                    </div>
+                                    </>
                                 </div>
                             </Row>
                         </CardBody>
@@ -1077,12 +1270,16 @@ const General = () => {
                         <CardBody>
                             <Form>
                                 <FormGroup>
-                                    <button
-                                        type="button"
-                                        onClick={deleteBuildingHandler}
-                                        className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                        <i className="uil uil-trash mr-2"></i>Delete Building
-                                    </button>
+                                    {isbuildingDetailsFetched ? (
+                                        <Skeleton count={1} height={40} width={150} />
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={deleteBuildingHandler}
+                                            className="btn btn-md btn-danger font-weight-bold trash-button-style">
+                                            <i className="uil uil-trash mr-2"></i>Delete Building
+                                        </button>
+                                    )}
                                 </FormGroup>
                             </Form>
                         </CardBody>

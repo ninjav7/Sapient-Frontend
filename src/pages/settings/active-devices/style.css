@@ -25,6 +25,10 @@
     width:300px !important;
     max-width:300px !important;
 }
+.my-modal1{
+    width:350px !important;
+    max-width:350px !important;
+}
 .passive-device-style {
     width: 88px;
     height: 18px;
@@ -381,7 +385,19 @@
     justify-content: left;
     align-items: stretch;
     align-content: stretch;
-    width: 50%;
+    width: 100%;
+}
+
+.model-sensor-filters-v2 {
+    padding: 25px;
+    padding-top: 0px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    align-items: stretch;
+    align-content: stretch;
+    width: 100%;
 }
 
 .model-sensor-energy-filter {

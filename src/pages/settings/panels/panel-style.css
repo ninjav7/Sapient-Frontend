@@ -156,8 +156,9 @@
     gap: 10px;
     width: 25px;
     height: 25px;
-    background: #dbe8fe;
-    border: 1px solid #bed5fe;
+    background: #F9FAFB;
+    border: 1px solid #EAECF0;
+    /* border: 1px solid #bababa; */
     border-radius: 3px;
 }
 
