@@ -182,9 +182,9 @@ const PassiveDevices = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
-
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${createDevice}`, createDeviceData, {
+                .post(`${BaseUrl}${createDevice}${params}`, createDeviceData, {
                     headers: header,
                 })
                 .then((res) => {
