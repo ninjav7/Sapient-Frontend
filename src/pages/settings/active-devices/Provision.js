@@ -61,7 +61,7 @@ const Provision = () => {
     const [showFind, setShowFind] = useState(false);
     const [showDone,setShowDone]=useState(false);
     const handleClose = () => setShow(false);
-    const handleLinkClose=()=>{setShowLink(false);setError(false);};
+    const handleLinkClose=()=>{setShowLink(false);setError(false);setEmail("");setPassword("");};
     const handleUnLinkClose=()=>{setShowUnLink(false);setError(false);};
     const handleFindClose=()=>setShowFind(false);
     const handleShow = () => setShow(true);
@@ -124,11 +124,12 @@ const Provision = () => {
                 })
                 .then((res) => {
                     console.log(res);
-                    if(res.success===false){
-                        setError(true);
-                        setMessage(res.message);
-                    }
-                    else{
+                    if(res.status===200){
+                        if(res.data.success===false){
+                            setError(true);
+                            setMessage(res.data.message);
+                        }
+                        else{
                         handleUnLinkClose();
                         let arr={
                             "kasa_account_ids": [],
@@ -138,6 +139,7 @@ const Provision = () => {
                         getKasaDevices(arr);
                         // console.log(res.data.id);
                     }
+                }
                 });
 
         } catch (error) {
@@ -197,9 +199,10 @@ const Provision = () => {
                 })
                 .then((res) => {
                     console.log(res);
-                    if(res.success===false){
+                    if(res.status===200){
+                    if(res.data.success===false){
                         setError(true);
-                        setMessage(res.message);
+                        setMessage(res.data.message);
                     }
                     else{
                         handleLinkClose();
@@ -207,6 +210,7 @@ const Provision = () => {
                         localStorage.setItem("kasa_id",res.data.id)
                         setAuth(res.data.id);
                     }
+                }
                 });
                 console.log(err);
 
