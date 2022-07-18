@@ -12,6 +12,7 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway } from '../../../services/Network';
@@ -33,6 +34,7 @@ const PassiveDevicesTable = ({
     paginationData,
     isDeviceProcessing,
     setIsDeviceProcessing,
+    selectedOptions,
 }) => {
     return (
         <Card>
@@ -40,11 +42,11 @@ const PassiveDevicesTable = ({
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Status</th>
-                            <th>Identifier</th>
-                            <th>Model</th>
-                            <th>Location</th>
-                            <th>Sensors</th>
+                            {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
+                            {selectedOptions.some((record) => record.value === 'identifier') && <th>Identifier</th>}
+                            {selectedOptions.some((record) => record.value === 'model') && <th>Model</th>}
+                            {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
+                            {selectedOptions.some((record) => record.value === 'sensors') && <th>Sensors</th>}
                         </tr>
                     </thead>
                     {isDeviceProcessing ? (
@@ -78,27 +80,41 @@ const PassiveDevicesTable = ({
                             {deviceData.map((record, index) => {
                                 return (
                                     <tr key={index}>
-                                        <td scope="row" className="text-center">
-                                            {record.status === 'Online' && (
-                                                <div className="icon-bg-styling">
-                                                    <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                            {record.status === 'Offline' && (
-                                                <div className="icon-bg-styling-slash">
-                                                    <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                </div>
-                                            )}
-                                        </td>
+                                        {selectedOptions.some((record) => record.value === 'status') && (
+                                            <td scope="row" className="text-center">
+                                                {record.status === 'Online' && (
+                                                    <div className="icon-bg-styling">
+                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                                {record.status === 'Offline' && (
+                                                    <div className="icon-bg-styling-slash">
+                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        )}
+
                                         <Link
                                             to={{
                                                 pathname: `/settings/passive-devices/single/${record.equipments_id}`,
                                             }}>
-                                            <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                            )}
                                         </Link>
-                                        <td>{record.model}</td>
-                                        <td>{record.location}</td>
-                                        <td>{record.sensor_number}</td>
+
+                                        {selectedOptions.some((record) => record.value === 'model') && (
+                                            <td>{record.model}</td>
+                                        )}
+
+                                        {selectedOptions.some((record) => record.value === 'location') && (
+                                            <td>{record.location}</td>
+                                        )}
+
+                                        {selectedOptions.some((record) => record.value === 'sensors') && (
+                                            <td>{record.sensor_number}</td>
+                                        )}
                                     </tr>
                                 );
                             })}
@@ -133,6 +149,16 @@ const PassiveDevices = () => {
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const tableColumnOptions = [
+        { label: 'Status', value: 'status' },
+        { label: 'Identifier', value: 'identifier' },
+        { label: 'Model', value: 'model' },
+        { label: 'Location', value: 'location' },
+        { label: 'Sensors', value: 'sensors' },
+    ];
+
+    const [selectedOptions, setSelectedOptions] = useState([]);
 
     // Modal states
     const [show, setShow] = useState(false);
@@ -361,6 +387,15 @@ const PassiveDevices = () => {
             });
         };
         updateBreadcrumbStore();
+
+        let arr = [
+            { label: 'Status', value: 'status' },
+            { label: 'Identifier', value: 'identifier' },
+            { label: 'Model', value: 'model' },
+            { label: 'Location', value: 'location' },
+            { label: 'Sensors', value: 'sensors' },
+        ];
+        setSelectedOptions(arr);
     }, []);
 
     return (
@@ -448,21 +483,19 @@ const PassiveDevices = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
 
@@ -476,6 +509,7 @@ const PassiveDevices = () => {
                             paginationData={paginationData}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -486,6 +520,7 @@ const PassiveDevices = () => {
                             paginationData={paginationData}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -496,6 +531,7 @@ const PassiveDevices = () => {
                             paginationData={paginationData}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
                         />
                     )}
                 </Col>
