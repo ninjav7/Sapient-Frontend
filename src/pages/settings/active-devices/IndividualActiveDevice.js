@@ -61,7 +61,8 @@ const IndividualActiveDevice = () => {
     const [sensors, setSensors] = useState([]);
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
-    const [sensorData, setSensorData] = useState([]);
+    const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
+    const [sensorData, setSensorData] = useState({});
     const [equipmentTypeDevices, setEquipmentTypeDevices] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
     const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
@@ -81,18 +82,66 @@ const IndividualActiveDevice = () => {
         },
     ]);
 
+    // *********************************************************************************** //
+
+    const [seriesData, setSeriesData] = useState([]);
+    const [deviceData, setDeviceData] = useState([]);
+
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+
+    const UNIT_DIVIDER = 1000;
+
+    const [metric, setMetric] = useState([
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+
+        { value: 'mV', label: 'Voltage (V)' },
+
+        { value: 'mAh', label: 'Amperage (A)' },
+
+        { value: 'power', label: 'Real Power (W)' },
+    ]);
+
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+
+        metric.map((m) => {
+            if (m.value === value) {
+                label = m.label;
+            }
+
+            return m;
+        });
+
+        return label;
+    };
+
+    // *********************************************************************************** //
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updatedSensorData);
         obj[key] = value;
         setUpdatedSensorData(obj);
     };
+
     const handleChartShow = (id) => {
         setSensorId(id);
-        setShowChart(true);
         let obj = sensors.find((o) => o.id === id);
+        console.log('Sensor Data Object => ', obj);
         setSensorData(obj);
         fetchSensorGraphData(id);
+        setShowChart(true);
     };
+
+    useEffect(() => {
+        if(showChart){
+            return;
+        }
+        setConsumption('energy');
+    }, [showChart]);
 
     useEffect(() => {
         const fetchSingleActiveDevice = async () => {
@@ -211,6 +260,7 @@ const IndividualActiveDevice = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            setIsSensorChartLoading(true);
             let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
@@ -223,6 +273,40 @@ const IndividualActiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
+
+                    let data = response;
+
+                    let exploreData = [];
+
+                    let recordToInsert = {
+                        data: data,
+
+                        name: getRequiredConsumptionLabel(selectedConsumption),
+                    };
+
+                    try {
+                        recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = new Date(_data[0]);
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                _data[1] = _data[1] / UNIT_DIVIDER;
+                            }
+
+                            return _data;
+                        });
+                    } catch (error) {}
+
+                    exploreData.push(recordToInsert);
+
+                    setDeviceData(exploreData);
+
+                    console.log('UPDATED_CODE', seriesData);
+
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsSensorChartLoading(false);
                 });
         } catch (error) {
             console.log(error);
@@ -578,7 +662,7 @@ const IndividualActiveDevice = () => {
                                                             handleChartShow(record.id);
                                                         }}
                                                     />
-                                                    <button
+                                                    <Button
                                                         type="button"
                                                         className="btn btn-default passive-edit-style"
                                                         onClick={() => {
@@ -589,7 +673,7 @@ const IndividualActiveDevice = () => {
                                                             handleEquipmentShow();
                                                         }}>
                                                         Edit
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </div>
                                         );
@@ -601,7 +685,24 @@ const IndividualActiveDevice = () => {
                 </div>
             </div>
 
-            <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} />
+            <DeviceChartModel
+                showChart={showChart}
+                handleChartClose={handleChartClose}
+                sensorData={sensorData}
+                seriesData={seriesData}
+                setSeriesData={setSeriesData}
+                deviceData={deviceData}
+                setDeviceData={setDeviceData}
+                CONVERSION_ALLOWED_UNITS={CONVERSION_ALLOWED_UNITS}
+                UNIT_DIVIDER={UNIT_DIVIDER}
+                metric={metric}
+                setMetric={setMetric}
+                selectedConsumption={selectedConsumption}
+                setConsumption={setConsumption}
+                getRequiredConsumptionLabel={getRequiredConsumptionLabel}
+                isSensorChartLoading={isSensorChartLoading}
+                setIsSensorChartLoading={setIsSensorChartLoading}
+            />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
                 <Modal.Header>

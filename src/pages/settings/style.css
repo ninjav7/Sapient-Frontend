@@ -611,3 +611,10 @@
     align-items: center;
     color: #475467;
 }
+
+.loader-center-style {
+    height: 47vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
