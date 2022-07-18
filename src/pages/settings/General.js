@@ -211,74 +211,75 @@ const General = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchBuildingData = async () => {
-            let fixing = true;
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsbuildingDetailsFetched(true);
-            if (fixing) {
-                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    let response = res.data;
-                    let data = {};
-                    if (bldgId) {
-                        data = response.find((el) => el.building_id === bldgId);
-                        if (data === undefined) {
-                            return (fixing = false);
-                        }
-                        setBldgData(data);
-
-                        let buildingDetailsObj = {
-                            name: data.building_name,
-                            typee: data.building_type,
-                            square_footage: data.building_size,
-                            active: data.active,
-                        };
-                        setBuildingDetails(buildingDetailsObj);
-                        setResponseBuildingDetails(buildingDetailsObj);
-
-                        let buildingAddressObj = {
-                            street_address: data.street_address,
-                            address_2: data.address_2,
-                            city: data.city,
-                            state: data.state,
-                            zip_code: data.zip_code,
-                        };
-                        setBuildingAddress(buildingAddressObj);
-                        setResponseBuildingAddress(buildingAddressObj);
-
-                        let buildingDateTimeObj = {
-                            timezone: data.timezone,
-                            time_format: data.time_format,
-                        };
-                        setBuildingDateTime(buildingDateTimeObj);
-                        setResponseBuildingDateTime(buildingDateTimeObj);
-
-                        let buildingOperatingHours = {
-                            operating_hours: data.operating_hours,
-                        };
-                        setBuildingOperatingHours(buildingOperatingHours);
-                        setResponseBuildingOperatingHours(buildingOperatingHours);
-
-                        const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-                        setWeekToggle({
-                            mon: mon['stat'],
-                            tue: tue['stat'],
-                            wed: wed['stat'],
-                            thu: thu['stat'],
-                            fri: fri['stat'],
-                            sat: sat['stat'],
-                            sun: sun['stat'],
-                        });
-                    }
-                    setBuildingData(data);
-                    setIsbuildingDetailsFetched(false);
-                });
-            }
+    const fetchBuildingData = async () => {
+        let fixing = true;
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
         };
+        setIsbuildingDetailsFetched(true);
+        if (fixing) {
+            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                let response = res.data;
+                let data = {};
+                if (bldgId) {
+                    data = response.find((el) => el.building_id === bldgId);
+                    if (data === undefined) {
+                        return (fixing = false);
+                    }
+                    setBldgData(data);
+
+                    let buildingDetailsObj = {
+                        name: data.building_name,
+                        typee: data.building_type,
+                        square_footage: data.building_size,
+                        active: data.active,
+                    };
+                    setBuildingDetails(buildingDetailsObj);
+                    setResponseBuildingDetails(buildingDetailsObj);
+
+                    let buildingAddressObj = {
+                        street_address: data.street_address,
+                        address_2: data.address_2,
+                        city: data.city,
+                        state: data.state,
+                        zip_code: data.zip_code,
+                    };
+                    setBuildingAddress(buildingAddressObj);
+                    setResponseBuildingAddress(buildingAddressObj);
+
+                    let buildingDateTimeObj = {
+                        timezone: data.timezone,
+                        time_format: data.time_format,
+                    };
+                    setBuildingDateTime(buildingDateTimeObj);
+                    setResponseBuildingDateTime(buildingDateTimeObj);
+
+                    let buildingOperatingHours = {
+                        operating_hours: data.operating_hours,
+                    };
+                    setBuildingOperatingHours(buildingOperatingHours);
+                    setResponseBuildingOperatingHours(buildingOperatingHours);
+
+                    const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+                    setWeekToggle({
+                        mon: mon['stat'],
+                        tue: tue['stat'],
+                        wed: wed['stat'],
+                        thu: thu['stat'],
+                        fri: fri['stat'],
+                        sat: sat['stat'],
+                        sun: sun['stat'],
+                    });
+                }
+                setBuildingData(data);
+                setIsbuildingDetailsFetched(false);
+            });
+        }
+    };
+
+    useEffect(() => {
         fetchBuildingData();
     }, [bldgId]);
 
@@ -521,6 +522,7 @@ const General = () => {
                                         className="btn btn-default buildings-cancel-style"
                                         onClick={() => {
                                             setIsEditing(false);
+                                            fetchBuildingData();
                                         }}>
                                         Cancel
                                     </button>
