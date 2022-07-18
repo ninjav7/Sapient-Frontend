@@ -243,6 +243,7 @@ const IndividualActiveDevice = () => {
                 });
             } catch (error) {
                 console.log(error);
+                setIsFetchingSensorData(false);
                 console.log('Failed to fetch Active device sensor data');
             }
         };
