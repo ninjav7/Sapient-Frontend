@@ -412,10 +412,17 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
         else setDropDown('dropdown-menu dropdown-menu-right');
     };
+    const removeDuplicates = (arr = []) => {
+        const map = new Map();
+        arr.forEach((x) => map.set(JSON.stringify(x), x));
+        arr = [...map.values()];
+        return arr;
+    };
 
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+        let sData=removeDuplicates(seriesData);
+        let streamData = sData.length > 0 ? sData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
