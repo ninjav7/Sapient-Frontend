@@ -395,8 +395,11 @@ const DeviceChartModel = ({
 
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        let sData=removeDuplicates(seriesData);
-        let streamData = sData.length > 0 ? sData[0].data : [];
+        let arr=seriesData.length > 0 ? seriesData[0].data : [];
+        let sData=removeDuplicates(arr);
+        // console.log(arr);
+        // console.log(sData);
+        let streamData = seriesData.length > 0 ? sData : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
