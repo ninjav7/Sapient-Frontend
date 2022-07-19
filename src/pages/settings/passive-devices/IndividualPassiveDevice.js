@@ -458,7 +458,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=mAh`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -685,6 +685,13 @@ const IndividualPassiveDevice = () => {
                                                             <span className="sensor-data-title">Not Attached</span>
                                                         </div>
                                                         <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-default passive-edit-style"
