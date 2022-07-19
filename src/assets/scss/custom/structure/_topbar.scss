@@ -141,6 +141,20 @@
     letter-spacing: 1px;
 }
 
+
+.energy-top-nav__vertical-separator {
+    width: 0.0625rem;
+    height: 1.6875rem;
+    background: #2F3949;
+    margin: 0.5625rem 0.1875rem;
+}
+
+.energy-top-nav__vertical-separator + .top-nav-routes-list {
+    margin-left: 0.9375rem;
+}
+
+
+
 /* Notification */
 @keyframes blinker {
     50% {

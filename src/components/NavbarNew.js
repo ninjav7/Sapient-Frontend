@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Cookies } from 'react-cookie';
 import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
 import { Settings } from 'react-feather';
-import sapientLogo from '../assets/images/Sapient_Logo.png';
+import {ReactComponent as SapientLogo} from '../assets/images/logo-white.svg';
 import SearchModal from './SearchModal';
 import { Row, Col, Card } from 'reactstrap';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../routes/index';
@@ -74,8 +74,12 @@ const NavbarNew = () => {
         <>
             <div className="energy-top-nav">
                 <span className="logo-lg energy-logo-style">
-                    <img src={sapientLogo} alt="" height="30" className="ml-4 mr-4 mt-1" />
+                    <Link className='energy-logo-link-style' to='/'>
+                        <SapientLogo />
+                    </Link>
                 </span>
+
+                <div className='energy-top-nav__vertical-separator'></div>
 
                 {/* All Routes  */}
                 <div className="top-nav-routes-list">

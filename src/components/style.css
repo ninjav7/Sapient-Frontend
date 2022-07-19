@@ -390,7 +390,7 @@
     width: 100%;
     z-index: 100;
     left: 0;
-    top: 3em;
+    top: 2.8125rem;
     height: 3em;
 }
 
@@ -411,7 +411,7 @@
     position: fixed;
     vertical-align: top;
     background: #101828;
-    height: 3em;
+    height: 2.8125rem;
     width: 100%;
     z-index: 100;
     left: 0;
@@ -420,13 +420,16 @@
     flex-direction: row;
 }
 
-/* .energy-side-nav {
-    height: 500px;
-    position: sticky;
-    left: 0px;
-    top: 90px;
-    background: #215f9e;
-} */
+.energy-logo-style {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+}
+
+.energy-logo-link-style:hover path {
+    fill: white;
+}
 
 .energy-side-nav {
     position: fixed;
@@ -580,6 +583,7 @@ div.navbar-icon-container:hover .other-font-icon-style {
     align-items: center;
     height: 100%;
     border-bottom: 3px solid #3c65f5 !important;
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
     color: white !important;
 }
 
