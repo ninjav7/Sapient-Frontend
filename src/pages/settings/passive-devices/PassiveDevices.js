@@ -590,7 +590,7 @@ const PassiveDevices = () => {
                             </Input>
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Gateway</Form.Label>
                             <Input
                                 type="select"
@@ -605,7 +605,7 @@ const PassiveDevices = () => {
                                     return <option value={record.equipments_id}>{record.model}</option>;
                                 })}
                             </Input>
-                        </Form.Group>
+                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
