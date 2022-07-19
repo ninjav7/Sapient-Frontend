@@ -240,15 +240,15 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        // { value: 'energy', label: 'Consumed Energy (Wh)' },
 
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
 
-        { value: 'mV', label: 'Voltage (V)' },
+        // { value: 'mV', label: 'Voltage (V)' },
 
-        { value: 'mAh', label: 'Amperage (A)' },
+        { value: 'mAh', label: 'Amps' },
 
-        { value: 'power', label: 'Real Power (W)' },
+        // { value: 'power', label: 'Real Power (W)' },
     ]);
 
     const handleChartShow = (id) => {
