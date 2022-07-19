@@ -23,8 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import CustomEdge from './panel-breaker-flow/CustomEdge';
-import CustomNodeSelector from './panel-breaker-flow/CustomNodeSelector';
+import CustomNodeSelector from './panel-breaker-poc/CustomNodeSelector';
 import '../style.css';
 import './panel-style.css';
 
@@ -2781,7 +2780,7 @@ const CreatePanel = () => {
         {
             id: 'link-e1-1',
             source: 'breakerslink-13',
-            type: 'step',
+            type: 'straight',
             target: 'breaker-1',
             animated: false,
             style: { stroke: 'red' },
@@ -2931,10 +2930,6 @@ const CreatePanel = () => {
         setnodeData(node);
     };
 
-    const edgeTypes = {
-        customedge: CustomEdge,
-    };
-
     const [elements, setElements] = useState(initialElements);
     const [edges, setEdges] = useState(initialEdges);
 
@@ -2945,7 +2940,6 @@ const CreatePanel = () => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [nodeData, setnodeData] = useState(null);
 
-    // changed label in data
     const onConnect = useCallback(
         (params) =>
             setElements((els) =>
@@ -2964,6 +2958,8 @@ const CreatePanel = () => {
             ),
         []
     );
+
+    // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
     const onConnectDisconnectedBreakers = useCallback(
         (params) =>
@@ -3021,28 +3017,6 @@ const CreatePanel = () => {
                 });
 
                 console.log('Breaker Data => ', panelBreakerObjs);
-
-                // let newBreakerArray = [];
-
-                // if (activePanelType === 'distribution') {
-                //     normalStruct.forEach((breaker) => {
-                //         if (breaker.link_type === 'unlinked') {
-                //             breaker.link_id = generateBreakerLinkId();
-                //         }
-                //         breaker.voltage = parseInt(breaker.voltage);
-                //         newBreakerArray.push(breaker);
-                //     });
-                // }
-
-                // if (activePanelType === 'disconnect') {
-                //     disconnectBreakerConfig.forEach((breaker) => {
-                //         if (breaker.link_type === 'unlinked') {
-                //             breaker.link_id = generateBreakerLinkId();
-                //         }
-                //         breaker.voltage = parseInt(breaker.voltage);
-                //         newBreakerArray.push(breaker);
-                //     });
-                // }
 
                 let params = `?panel_id=${panelID}`;
                 await axios
@@ -3311,7 +3285,6 @@ const CreatePanel = () => {
             }
             obj.data.equipment_data = equipmentData;
         });
-        // console.log('Elements with equipmentData => ', newArray);
         setElements(newArray);
     }, [equipmentData]);
 
@@ -3323,13 +3296,8 @@ const CreatePanel = () => {
             }
             obj.data.passive_data = passiveDeviceData;
         });
-        // console.log('Elements with passiveData => ', newArray);
         setElements(newArray);
     }, [passiveDeviceData]);
-
-    useEffect(() => {
-        console.log('Breakers Elements Data => ', elements);
-    });
 
     return (
         <React.Fragment>
@@ -3688,9 +3656,9 @@ const CreatePanel = () => {
                                             elements={elements}
                                             edges={edges}
                                             onConnect={onConnect}
-                                            style={{ background: '#fafbfc' }}
                                             onLoad={onLoad}
                                             nodeTypes={nodeTypes}
+                                            style={{ background: '#fafbfc' }}
                                             onNodeContextMenu={onContextMenu}
                                             connectionLineStyle={connectionLineStyle}
                                             snapToGrid={false}
