@@ -92,27 +92,21 @@ const NavbarNew = () => {
                         return (
                             <>
                                 {active === 0 ? (
-                                    <div key={index} className="container navbar-head-container-active">
+                                    <div key={index} className="navbar-head-container active">
                                         <Link to={item.path}>
-                                            <div class="row" style={{ width: '7vw' }}>
+                                            <div class="d-flex align-items-center">
                                                 {item.name === 'Energy' && (
-                                                    <div
-                                                        className="col-3 font-icon-style-active"
-                                                        style={{ margin: '0' }}>
+                                                    <div className="font-icon-style active">
                                                         <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Control' && (
-                                                    <div
-                                                        className="col-3 font-icon-style-active"
-                                                        style={{ margin: '0' }}>
+                                                    <div className="font-icon-style active">
                                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Explore' && (
-                                                    <div
-                                                        className="col-3 font-icon-style-active"
-                                                        style={{ margin: '0' }}>
+                                                    <div className="font-icon-style active">
                                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                                     </div>
                                                 )}
@@ -120,37 +114,36 @@ const NavbarNew = () => {
                                                     onClick={() => {
                                                         setSideNavBar(item.name);
                                                     }}
-                                                    className="col-9 navbar-heading-active">
+                                                    className="navbar-heading active">
                                                     {item.name}
                                                 </div>
                                             </div>
                                         </Link>
                                     </div>
                                 ) : (
-                                    <div key={index} className="container navbar-head-container">
+                                    <div key={index} className="navbar-head-container">
                                         <Link to={item.path}>
-                                            <div class="row" style={{ width: '7vw' }}>
+                                            <div class="d-flex align-items-center">
                                                 {item.name === 'Energy' && (
-                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
+                                                    <div className="font-icon-style">
                                                         <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Control' && (
-                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
+                                                    <div className="font-icon-style">
                                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                                     </div>
                                                 )}
                                                 {item.name === 'Explore' && (
-                                                    <div className="col-3 font-icon-style" style={{ margin: '0' }}>
+                                                    <div className="font-icon-style">
                                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                                     </div>
                                                 )}
-                                                {/* <span className="custom-icon-style">{item.icon && <Icon />}</span> */}
                                                 <div
                                                     onClick={() => {
                                                         setSideNavBar(item.name);
                                                     }}
-                                                    className="col-9 navbar-heading">
+                                                    className="navbar-heading">
                                                     {item.name}
                                                 </div>
                                             </div>
