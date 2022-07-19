@@ -445,3 +445,10 @@
     line-height: 20px !important;
     color: #344054 !important;
 }
+
+.passive-device-flex{
+    display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+}
