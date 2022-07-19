@@ -28,6 +28,8 @@ import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 
 const ActiveDevicesTable = ({
@@ -40,26 +42,224 @@ const ActiveDevicesTable = ({
     pageSize,
     setPageSize,
     selectedOptions,
+    activeDeviceDataWithFilter,
 }) => {
+    const [identifierOrder, setIdentifierOrder] = useState(false);
+    const [modelOrder, setModelOrder] = useState(false);
+    const [locationOrder, setLocationOrder] = useState(false);
+    const [deviceTypeOrder, setDeviceTypeOrder] = useState(false);
+    const [sensorOrder, setSensorOrder] = useState(false);
+    const [firmwareOrder, setFirmwareOrder] = useState(false);
+    const [hardwareOrder, setHardwareOrder] = useState(false);
+
+    const handleColumnSort = (order, columnName) => {
+        if (columnName === 'mac_address') {
+            setModelOrder(false);
+            setLocationOrder(false);
+            setDeviceTypeOrder(false);
+            setSensorOrder(false);
+            setFirmwareOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'model') {
+            setIdentifierOrder(false);
+            setLocationOrder(false);
+            setDeviceTypeOrder(false);
+            setSensorOrder(false);
+            setFirmwareOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'device_description') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setLocationOrder(false);
+            setSensorOrder(false);
+            setFirmwareOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'location') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setDeviceTypeOrder(false);
+            setSensorOrder(false);
+            setFirmwareOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'sensor_count') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setLocationOrder(false);
+            setDeviceTypeOrder(false);
+            setFirmwareOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'firmware_version') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setLocationOrder(false);
+            setDeviceTypeOrder(false);
+            setSensorOrder(false);
+            setHardwareOrder(false);
+        }
+        if (columnName === 'hardware_version') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setLocationOrder(false);
+            setDeviceTypeOrder(false);
+            setSensorOrder(false);
+            setFirmwareOrder(false);
+        }
+        activeDeviceDataWithFilter(order, columnName);
+    };
+
     return (
         <Card>
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
-                            {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
-                            {selectedOptions.some((record) => record.value === 'identifier') && (
-                                <th>Identifier (MAC)</th>
+                            {selectedOptions.some((record) => record.value === 'status') && (
+                                <th className="active-device-header">
+                                    <div className="active-device-flex">
+                                        <div>Status</div>
+                                    </div>
+                                </th>
                             )}
-                            {selectedOptions.some((record) => record.value === 'model') && <th>Model</th>}
-                            {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
-                            {selectedOptions.some((record) => record.value === 'description') && <th>Device Type</th>}
-                            {selectedOptions.some((record) => record.value === 'sensors') && <th>Sensors</th>}
+                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                <th
+                                    className="active-device-header"
+                                    onClick={() => setIdentifierOrder(!identifierOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Identifier (MAC)</div>
+                                        {identifierOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'model') && (
+                                <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Model</div>
+                                        {modelOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'location') && (
+                                <th className="active-device-header" onClick={() => setLocationOrder(!locationOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Location</div>
+                                        {locationOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'description') && (
+                                <th
+                                    className="active-device-header"
+                                    onClick={() => setDeviceTypeOrder(!deviceTypeOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Device Type</div>
+                                        {deviceTypeOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'device_description')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'device_description')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'sensors') && (
+                                <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Sensors</div>
+                                        {sensorOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
                             {selectedOptions.some((record) => record.value === 'firmware-version') && (
-                                <th>Firmware Version</th>
+                                <th className="active-device-header" onClick={() => setFirmwareOrder(!firmwareOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Firmware Version</div>
+                                        {firmwareOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'firmware_version')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'firmware_version')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'hardware-version') && (
-                                <th>Hardware Version</th>
+                                <th className="active-device-header" onClick={() => setHardwareOrder(!hardwareOrder)}>
+                                    <div className="active-device-flex">
+                                        <div>Hardware Version</div>
+                                        {hardwareOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'hardware_version')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'hardware_version')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
                             )}
                         </tr>
                     </thead>
@@ -264,6 +464,38 @@ const ActiveDevices = () => {
         } catch (error) {
             setIsProcessing(false);
             console.log('Failed to create Active device data');
+        }
+    };
+
+    const activeDeviceDataWithFilter = async (order, filterBy) => {
+        try {
+            setIsDeviceProcessing(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&page_size=10&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
+            await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setActiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsDeviceProcessing(false);
+            console.log('Failed to fetch Filtered Active Devices');
         }
     };
 
@@ -584,6 +816,7 @@ const ActiveDevices = () => {
                             selectedOptions={selectedOptions}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            activeDeviceDataWithFilter={activeDeviceDataWithFilter}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -598,6 +831,7 @@ const ActiveDevices = () => {
                             selectedOptions={selectedOptions}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            activeDeviceDataWithFilter={activeDeviceDataWithFilter}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -612,6 +846,7 @@ const ActiveDevices = () => {
                             selectedOptions={selectedOptions}
                             isDeviceProcessing={isDeviceProcessing}
                             setIsDeviceProcessing={setIsDeviceProcessing}
+                            activeDeviceDataWithFilter={activeDeviceDataWithFilter}
                         />
                     )}
                 </Col>
