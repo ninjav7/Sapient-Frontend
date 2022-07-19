@@ -154,7 +154,7 @@ const SelectBreakerModel = ({
                                 }}>
                                 <option selected>Select Breaker</option>
                                 {breakersData.map((record) => {
-                                    return <option value={record.breaker_id}>{record.breaker_name}</option>;
+                                    return <option value={record.id}>{record.name}</option>;
                                 })}
                             </Input>
                         )}

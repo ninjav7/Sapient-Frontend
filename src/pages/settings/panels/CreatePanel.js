@@ -3009,10 +3009,9 @@ const CreatePanel = () => {
                         link_type: 'unlinked',
                         link_id: '',
                         equipment_link: el.data.equipment_link,
-                        sensor_link: el.data.sensor_id,
-                        device_link: el.data.device_id,
+                        sensor_id: el.data.sensor_id,
+                        device_id: el.data.device_id,
                     };
-
                     panelBreakerObjs.push(obj);
                 });
 
