@@ -81,7 +81,7 @@ const FilterBuildings = ({ handleValueChange, value }) => {
     );
 };
 
-const SelectBuilding = () => {
+const BuildingSwitcher = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -136,15 +136,15 @@ const SelectBuilding = () => {
 
     return (
         <div className="tracker-dropdown">
-            <FontAwesomeIcon
-                icon={bldStoreName === 'Portfolio' ? faBuildings : faBuilding}
-                size="lg"
-                className="ml-2"
-            />
+            <FontAwesomeIcon icon={bldStoreName === 'Portfolio' ? faBuildings : faBuilding} size="lg" />
 
             <Dropdown>
-                <Dropdown.Toggle id="bts-button-styling" className="bts-btn-style" variant="secondary">
-                    {dropDownTitle}
+                <Dropdown.Toggle
+                    id="bts-button-styling"
+                    className="bts-btn-style page-tracker-dropdown-btn"
+                    variant="secondary">
+                    <div className="page-tracker-dropdown-text">{dropDownTitle}</div>
+
                     <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                 </Dropdown.Toggle>
 
@@ -162,4 +162,4 @@ const SelectBuilding = () => {
     );
 };
 
-export default SelectBuilding;
+export default BuildingSwitcher;

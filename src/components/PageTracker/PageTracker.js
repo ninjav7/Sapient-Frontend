@@ -8,8 +8,11 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import BuildingSwitcher from './BuildingSwitcher';
+
 import '../style.css';
-import SelectBuilding from './SelectBuilding';
+import './PageTracker.scss'
+
 
 const PageTracker = () => {
     const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
@@ -19,7 +22,7 @@ const PageTracker = () => {
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
                 <>
-                    <SelectBuilding />
+                    <BuildingSwitcher />
                     <div className="vl"></div>
                 </>
                 <div className="route-tracker">
