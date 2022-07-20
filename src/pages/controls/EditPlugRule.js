@@ -222,13 +222,14 @@ const EditPlugRule = ({
             ],
         },
     ]);
+
     const handleFilterEquipment = (e) => {
         let activeId = e.target.value;
         if (activeId === 'All') {
             setAllLinkedRuleData(allData);
             // console.log(allData);
         } else {
-            const result = allData.find(({ id }) => id === activeId);
+            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
             // console.log(result);
             let arr = [];
             arr.push(result);
@@ -952,9 +953,15 @@ const EditPlugRule = ({
                                                     }}>
                                                     <option>Select Equipment Type</option>
                                                     <option value="All">ALL</option>
-                                                    {allData.map((record, index) => {
-                                                        return <option value={record.id}>{record.name}</option>;
-                                                    })}
+                                                    {allData
+                                                        ?.filter((item) => item?.equipment_type_name?.length > 0)
+                                                        ?.map((record, index) => {
+                                                            return (
+                                                                <option value={record.equipment_type_name}>
+                                                                    {record.equipment_type_name}
+                                                                </option>
+                                                            );
+                                                        })}
 
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
