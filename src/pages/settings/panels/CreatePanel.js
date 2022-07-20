@@ -111,6 +111,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         setCurrentBreakerData(currentBreakerObj);
     }, []);
 
+    useEffect(() => {
+        console.log('DisconnectedBreakerComp data => ', data);
+    });
+
     return (
         <>
             <Handle
@@ -2123,7 +2127,6 @@ const CreatePanel = () => {
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
     const [activePanelType, setActivePanelType] = useState('distribution');
-    // const [activePanelType, setActivePanelType] = useState('disconnect');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
@@ -2800,6 +2803,8 @@ const CreatePanel = () => {
         {
             id: 'dis-breaker-1',
             type: 'disconnectedBreakerComponent',
+            targetPosition: 'left',
+            sourcePosition: 'right',
             data: {
                 name: '',
                 breaker_number: '1',
@@ -2822,6 +2827,9 @@ const CreatePanel = () => {
         },
         {
             id: 'dis-breaker-2',
+            type: 'disconnectedBreakerComponent',
+            targetPosition: 'right',
+            sourcePosition: 'left',
             data: {
                 name: '',
                 breaker_number: '2',
@@ -2839,12 +2847,14 @@ const CreatePanel = () => {
                 passive_data: [],
                 onChange: handleBreakerChange,
             },
-            data: { label: 'Breaker 2', index: '2' },
             position: { x: 450, y: 140 },
             draggable: false,
         },
         {
             id: 'dis-breaker-3',
+            type: 'disconnectedBreakerComponent',
+            targetPosition: 'left',
+            sourcePosition: 'right',
             data: {
                 name: '',
                 breaker_number: '3',
@@ -2868,6 +2878,7 @@ const CreatePanel = () => {
         },
         {
             id: 'dis-breakerslink-12',
+            sourcePosition: 'right',
             type: 'breakerLink',
             data: { label: 'Link' },
             position: { x: 400, y: 120 },
@@ -2875,6 +2886,7 @@ const CreatePanel = () => {
         },
         {
             id: 'dis-breakerslink-23',
+            sourcePosition: 'right',
             type: 'breakerLink',
             data: { label: 'Link' },
             position: { x: 400, y: 200 },
@@ -3199,21 +3211,76 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '1',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-2',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '2' },
+                    targetPosition: 'right',
+                    sourcePosition: 'left',
+                    data: {
+                        name: '',
+                        breaker_number: '2',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 140 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-3',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '3' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '3',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
+                    data: { label: 'Breaker 3', index: '3' },
                     position: { x: 450, y: 220 },
                     draggable: false,
                 },
@@ -3240,14 +3307,50 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '1',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-2',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '2' },
+                    targetPosition: 'right',
+                    sourcePosition: 'left',
+                    data: {
+                        name: '',
+                        breaker_number: '2',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 140 },
                     draggable: false,
                 },
@@ -3267,7 +3370,25 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '1',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
@@ -3284,7 +3405,18 @@ const CreatePanel = () => {
             }
             obj.data.equipment_data = equipmentData;
         });
+        console.log('setElements for data.equipment_data => ', newArray);
         setElements(newArray);
+
+        let newDisconnectedArray = disconnectBreakersNodes;
+        newDisconnectedArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.equipment_data = equipmentData;
+        });
+        console.log('setDisconnectBreakersNodes for data.equipment_data => ', newDisconnectedArray);
+        setDisconnectBreakersNodes(newDisconnectedArray);
     }, [equipmentData]);
 
     useEffect(() => {
@@ -3295,7 +3427,18 @@ const CreatePanel = () => {
             }
             obj.data.passive_data = passiveDeviceData;
         });
+        console.log('setElements for data.passive_data => ', newArray);
         setElements(newArray);
+
+        let newDisconnectedArray = disconnectBreakersNodes;
+        newDisconnectedArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.passive_data = passiveDeviceData;
+        });
+        console.log('setDisconnectBreakersNodes for data.passive_data => ', newDisconnectedArray);
+        setDisconnectBreakersNodes(newDisconnectedArray);
     }, [passiveDeviceData]);
 
     return (
@@ -3357,11 +3500,11 @@ const CreatePanel = () => {
                                 onChange={(e) => {
                                     handleChange('parent_panel', e.target.value);
                                 }}>
-                                {panel.parent_id !== null ? (
+                                {/* {panel.parent_id !== null ? (
                                     <option value={panel.parent_id}>{panel.parent}</option>
-                                ) : (
+                                ) : ( */}
                                     <option>None</option>
-                                )}
+                                {/* )} */}
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}

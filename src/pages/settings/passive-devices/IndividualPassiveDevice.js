@@ -240,15 +240,14 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        // { value: 'energy', label: 'Consumed Energy (Wh)' },
-
-        // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-
-        // { value: 'mV', label: 'Voltage (V)' },
-
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'power', label: 'Real Power (W)' },
         { value: 'mAh', label: 'Amps' },
-
-        // { value: 'power', label: 'Real Power (W)' },
+        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
+        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
+        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
     ]);
 
     const handleChartShow = (id) => {
@@ -288,6 +287,7 @@ const IndividualPassiveDevice = () => {
                     let response = res.data.data[0];
                     setPassiveData(response);
                     setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -458,7 +458,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=mAh`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
