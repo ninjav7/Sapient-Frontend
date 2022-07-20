@@ -666,6 +666,12 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
 const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2,setModal2]=useState(false);
+    const Close1=()=>{
+        setModal1(false);
+    }
+    const Close2=()=>{
+        setModal2(false);
+    }
     const Toggle = (record) => {
         if(record.device_type==="passive"){
             setModal2(!modal2)
@@ -758,7 +764,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }
                                                 </div>
                                             </td>
                                             <td className="font-weight-bold">
-                                                {!(record.equipments_name === null) ? record.equipments_name : '-'}
+                                                {!(record.equipments_name === "") ? record.equipments_name : '-'}
                                             </td>
                                             <td className="font-weight-bold">{record.equipments_type}</td>
                                             <td>{record.location}</td>
@@ -781,8 +787,8 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }
                 </CardBody>
             </Card>
             <div>
-                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Toggle} equipmentTypeData={equipmentTypeData}/>
-                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Toggle} equipmentTypeData={equipmentTypeData}/>
+                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData}/>
             </div>
         </>
     );
