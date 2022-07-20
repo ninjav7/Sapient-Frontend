@@ -111,10 +111,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         setCurrentBreakerData(currentBreakerObj);
     }, []);
 
-    useEffect(() => {
-        console.log('DisconnectedBreakerComp data => ', data);
-    });
-
     return (
         <>
             <Handle
@@ -145,7 +141,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                 <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
                             </div>
                         </div>
-                        {!(data.equipment_link.length === 0) ? (
+                        {data.equipment_link && data.equipment_link.length !== 0 && (
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
@@ -175,7 +171,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     </div>
                                 )}
                             </>
-                        ) : (
+                        )}
+
+                        {data.equipment_link && data.equipment_link.length === 0 && (
                             <>
                                 {!(
                                     (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
@@ -347,7 +345,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                             addSelectedBreakerEquip(e.target.value);
                                             data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        value={data.equipment_link[0]}>
+                                        value={data?.equipment_link?.[0]}>
                                         <option>Select Equipment</option>
                                         {data.equipment_data.map((record) => {
                                             return <option value={record.value}>{record.label}</option>;
@@ -3503,7 +3501,7 @@ const CreatePanel = () => {
                                 {/* {panel.parent_id !== null ? (
                                     <option value={panel.parent_id}>{panel.parent}</option>
                                 ) : ( */}
-                                    <option>None</option>
+                                <option>None</option>
                                 {/* )} */}
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
