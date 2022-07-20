@@ -515,7 +515,8 @@
     justify-content: center !important;
     align-items: center !important;
     height: 100%;
-    border-bottom: 3px solid transparent;
+    border-bottom: 0.1875rem solid transparent;
+    border-top: 0.1875rem solid transparent;
 }
 
 .navbar-heading {
@@ -532,7 +533,7 @@
 } */
 
 .navbar-head-container:hover {
-    border-bottom: 3px solid #3c65f5;
+    border-bottom: 0.1875rem solid #3c65f5;
 }
 
 div.navbar-head-container:hover .font-icon-style {
@@ -548,7 +549,7 @@ div.navbar-head-container:hover .navbar-heading {
     align-items: center;
     height: 100%;
     width: fit-content;
-    border-bottom: 3px solid #3c65f5 !important;
+    border-bottom: 0.1875rem solid #3c65f5 !important;
     color: white !important;
 }
 
@@ -559,10 +560,14 @@ div.navbar-head-container:hover .navbar-heading {
     height: 100%;
     width: fit-content;
     color: white !important;
+    border-bottom: 0.1875rem solid transparent;
+    border-top: 0.1875rem solid transparent;
 }
 
 .other-font-icon-style {
     color: grey !important;
+    padding: 0;
+    border: 0;
 }
 
 .other-font-icon-style:hover {

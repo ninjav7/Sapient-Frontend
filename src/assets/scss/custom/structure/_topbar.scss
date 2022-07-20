@@ -153,6 +153,18 @@
     margin-left: 0.9375rem;
 }
 
+.topbar {
+    &-buttons {
+        // margin: 0 0.4375rem;
+    }
+    &-buttons-wrapper {
+        width: 100%;
+        float: right;
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 0.9375rem;
+    }
+}
 
 
 /* Notification */
