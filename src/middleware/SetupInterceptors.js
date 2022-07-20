@@ -17,7 +17,7 @@ const SetupInterceptors = () => {
           }, function (error) {
             // Any status codes that falls outside the range of 2xx cause this function to trigger
             // Do something with response error
-            // console.log("interceptor error",error);
+            console.log("interceptor error",error);
             if(error.response.status===403){
               // console.log("enter set");
               cookies.remove('user', { path: '/' });

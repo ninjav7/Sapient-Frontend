@@ -1,18 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
+import { Input, Spinner } from 'reactstrap';
 
 import Dropdown from 'react-bootstrap/Dropdown';
 
@@ -42,34 +30,32 @@ import { Cookies } from 'react-cookie';
 
 import { CSVLink } from 'react-csv';
 
-const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineData }) => {
+import './style.css';
+
+const DeviceChartModel = ({
+    showChart,
+    handleChartClose,
+    sensorData,
+    sensorLineData,
+    seriesData,
+    setSeriesData,
+    deviceData,
+    setDeviceData,
+    CONVERSION_ALLOWED_UNITS,
+    UNIT_DIVIDER,
+    metric,
+    setMetric,
+    selectedConsumption,
+    setConsumption,
+    getRequiredConsumptionLabel,
+    isSensorChartLoading,
+    setIsSensorChartLoading,
+}) => {
     let cookies = new Cookies();
 
     let userdata = cookies.get('user');
 
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
-
-    const UNIT_DIVIDER = 1000;
-
-    const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Consumed Energy (Wh)' },
-
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-
-        { value: 'mV', label: 'Voltage (V)' },
-
-        { value: 'mAh', label: 'Amperage (A)' },
-
-        { value: 'power', label: 'Real Power (W)' },
-    ]);
-
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
-
-    const [deviceData, setDeviceData] = useState([]);
-
     const [dateRange, setDateRange] = useState([null, null]);
-
-    const [seriesData, setSeriesData] = useState([]);
 
     const [startDate, endDate] = dateRange;
 
@@ -78,20 +64,6 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
     const [eDateStr, setEDateStr] = useState('');
 
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
-
-    const getRequiredConsumptionLabel = (value) => {
-        let label = '';
-
-        metric.map((m) => {
-            if (m.value === value) {
-                label = m.label;
-            }
-
-            return m;
-        });
-
-        return label;
-    };
 
     const customDaySelect = [
         {
@@ -171,6 +143,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                     return;
                 }
 
+                setIsSensorChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
 
@@ -210,7 +183,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         try {
                             recordToInsert.data = recordToInsert.data.map((_data) => {
-                                _data[0] = new Date(_data[0])
+                                _data[0] = new Date(_data[0]);
                                 if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                     _data[1] = _data[1] / UNIT_DIVIDER;
                                 }
@@ -223,13 +196,14 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
                         setDeviceData(exploreData);
 
-                        console.log('UPDATED_CODE', seriesData);
+                        // console.log('UPDATED_CODE', seriesData);
 
                         setSeriesData([
                             {
                                 data: exploreData[0].data,
                             },
                         ]);
+                        setIsSensorChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
@@ -287,8 +261,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
 
             toolbar: {
                 autoSelected: 'pan',
-
-                show: true,
+                show: false,
             },
 
             animations: {
@@ -338,7 +311,7 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
             x: {
                 show: true,
                 format: 'MM/dd hh:mm TT',
-            }
+            },
         },
     });
 
@@ -364,9 +337,9 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 enabled: true,
 
                 xaxis: {
-                    min: new Date('24 May 2022').getTime(),
+                    min: new Date('16 July 2022').getTime(),
 
-                    max: new Date('31 May 2022').getTime(),
+                    max: new Date('17 July 2022').getTime(),
                 },
             },
         },
@@ -412,11 +385,20 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
         if (dropDown === 'dropdown-menu dropdown-menu-right') setDropDown('dropdown-menu dropdown-menu-right show');
         else setDropDown('dropdown-menu dropdown-menu-right');
     };
+    const removeDuplicates = (arr = []) => {
+        const map = new Map();
+        arr.forEach((x) => map.set(JSON.stringify(x), x));
+        arr = [...map.values()];
+        return arr;
+    };
 
     const getCSVLinkData = () => {
-        console.log('csv entered');
-
-        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+        // console.log("csv entered");
+        let arr = seriesData.length > 0 ? seriesData[0].data : [];
+        let sData = removeDuplicates(arr);
+        // console.log(arr);
+        // console.log(sData);
+        let streamData = seriesData.length > 0 ? sData : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
@@ -524,14 +506,20 @@ const DeviceChartModel = ({ showChart, handleChartClose, sensorData, sensorLineD
                 </div>
             </div>
 
-            <div>
-                <BrushChart
-                    seriesData={deviceData}
-                    optionsData={options}
-                    seriesLineData={seriesData}
-                    optionsLineData={optionsLine}
-                />
-            </div>
+            {isSensorChartLoading ? (
+                <div className="loader-center-style">
+                    <Spinner className="m-2" color={'primary'} />
+                </div>
+            ) : (
+                <div>
+                    <BrushChart
+                        seriesData={deviceData}
+                        optionsData={options}
+                        seriesLineData={seriesData}
+                        optionsLineData={optionsLine}
+                    />
+                </div>
+            )}
         </Modal>
     );
 };

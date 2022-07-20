@@ -85,6 +85,7 @@ const BreakersComponentLeft = ({ data, id }) => {
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
+    const [currentBreakerData, setCurrentBreakerData] = useState({});
 
     const fetchDeviceSensorData = async (deviceId) => {
         try {
@@ -99,32 +100,13 @@ const BreakersComponentLeft = ({ data, id }) => {
             let params = `?device_id=${deviceId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
+                console.log('Sensor Data => ', response);
                 setSensorData(response);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch Sensor Data');
         }
-    };
-
-    const handleBreakerConfigChange = (key, value) => {
-        // let obj = Object.assign({}, currentBreakerObj);
-        // if (key === 'rated_amps') {
-        //     value = parseInt(value);
-        // }
-        // if (key === 'phase_configuration') {
-        //     value = parseInt(value);
-        // }
-        // if (key === 'equipment_link') {
-        //     let arr = [];
-        //     arr.push(value);
-        //     value = arr;
-        // }
-        // if (value === 'Select Volts') {
-        //     value = '';
-        // }
-        // obj[key] = value;
-        // setCurrentBreakerObj(obj);
     };
 
     const addSelectedBreakerEquip = (equipId) => {
@@ -163,6 +145,16 @@ const BreakersComponentLeft = ({ data, id }) => {
         }
     };
 
+    const findEquipmentName = (equipId) => {
+        let equip = data.equipment_data.find((record) => record.value === equipId);
+        return equip.label;
+    };
+
+    useEffect(() => {
+        let currentBreakerObj = Object.assign({}, data);
+        setCurrentBreakerData(currentBreakerObj);
+    }, []);
+
     return (
         <React.Fragment>
             <Handle
@@ -197,8 +189,7 @@ const BreakersComponentLeft = ({ data, id }) => {
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
-                                        {/* {findEquipmentName(data.equipment_link[0])} */}
-                                        Equipment_Name
+                                        {findEquipmentName(data.equipment_link[0])}
                                     </h6>
                                 </div>
                                 {!(
@@ -216,8 +207,7 @@ const BreakersComponentLeft = ({ data, id }) => {
                                             //     fetchDeviceSensorData(element.device_id);
                                             // }
                                             handleEditBreakerShow();
-                                        }}
-                                    >
+                                        }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
                                         </div>
@@ -242,8 +232,7 @@ const BreakersComponentLeft = ({ data, id }) => {
                                             //     fetchDeviceSensorData(element.device_id);
                                             // }
                                             handleEditBreakerShow();
-                                        }}
-                                    >
+                                        }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
                                         </div>
@@ -282,10 +271,11 @@ const BreakersComponentLeft = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Phase"
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('phase_configuration', e.target.value);
+                                                data.onChange(id, 'phase_configuration', +e.target.value);
                                             }}
                                             value={data.phase_configuration}
-                                            disabled={true}></Input>
+                                            disabled={true}
+                                            min={0}></Input>
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -295,8 +285,9 @@ const BreakersComponentLeft = ({ data, id }) => {
                                             placeholder="Enter Amps"
                                             className="font-weight-bold"
                                             value={data.rated_amps}
+                                            min={0}
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('rated_amps', e.target.value);
+                                                data.onChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -310,10 +301,11 @@ const BreakersComponentLeft = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Volts"
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('voltage', e.target.value);
+                                                data.onChange(id, 'voltage', e.target.value);
                                             }}
                                             value={data.voltage}
-                                            disabled={true}></Input>
+                                            disabled={true}
+                                            min={0}></Input>
                                     </Form.Group>
                                 </div>
 
@@ -343,16 +335,12 @@ const BreakersComponentLeft = ({ data, id }) => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id', e.target.value);
+                                                    data.onChange(id, 'device_id', e.target.value);
                                                 }}
                                                 value={data.device_id}>
                                                 <option>Select Device</option>
                                                 {data.passive_data.map((record) => {
-                                                    return (
-                                                        <option value={record.equipments_id}>
-                                                            {record.identifier}
-                                                        </option>
-                                                    );
+                                                    return <option value={record.value}>{record.label}</option>;
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -366,11 +354,10 @@ const BreakersComponentLeft = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    data.onChange(id, 'sensor_id', e.target.value);
                                                     handleLinkedSensor(data.sensor_id, e.target.value);
                                                 }}
-                                                // value={currentBreakerObj.sensor_id}
-                                                >
+                                                value={data.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
@@ -398,24 +385,14 @@ const BreakersComponentLeft = ({ data, id }) => {
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
                                             addSelectedBreakerEquip(e.target.value);
-                                            handleBreakerConfigChange('equipment_link', e.target.value);
+                                            data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        // value={currentEquipIds[0]}
-                                    >
+                                        value={data.equipment_link[0]}>
                                         <option>Select Equipment</option>
                                         {data.equipment_data.map((record) => {
-                                            return (
-                                                <option value={record.equipments_id}>{record.equipments_name}</option>
-                                            );
+                                            return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
-                                    {/* <MultiSelect
-                                        options={equipmentData}
-                                        value={selectedEquipOptions}
-                                        onChange={setSelectedEquipOptions}
-                                        labelledBy="Columns"
-                                        hasSelectAll={false}
-                                    /> */}
                                 </Form.Group>
                             </Form>
                         </Modal.Body>
@@ -756,6 +733,7 @@ const BreakersComponentRight = ({ data, id }) => {
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
+    const [currentBreakerData, setCurrentBreakerData] = useState({});
 
     const fetchDeviceSensorData = async (deviceId) => {
         try {
@@ -770,32 +748,13 @@ const BreakersComponentRight = ({ data, id }) => {
             let params = `?device_id=${deviceId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
+                console.log('Sensor Data => ', response);
                 setSensorData(response);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch Sensor Data');
         }
-    };
-
-    const handleBreakerConfigChange = (key, value) => {
-        // let obj = Object.assign({}, currentBreakerObj);
-        // if (key === 'rated_amps') {
-        //     value = parseInt(value);
-        // }
-        // if (key === 'phase_configuration') {
-        //     value = parseInt(value);
-        // }
-        // if (key === 'equipment_link') {
-        //     let arr = [];
-        //     arr.push(value);
-        //     value = arr;
-        // }
-        // if (value === 'Select Volts') {
-        //     value = '';
-        // }
-        // obj[key] = value;
-        // setCurrentBreakerObj(obj);
     };
 
     const addSelectedBreakerEquip = (equipId) => {
@@ -833,6 +792,17 @@ const BreakersComponentRight = ({ data, id }) => {
             setLinkedSensors(filteredList);
         }
     };
+
+    const findEquipmentName = (equipId) => {
+        let equip = data.equipment_data.find((record) => record.value === equipId);
+        return equip.label;
+    };
+
+    useEffect(() => {
+        let currentBreakerObj = Object.assign({}, data);
+        setCurrentBreakerData(currentBreakerObj);
+    }, []);
+
     return (
         <>
             <Handle
@@ -866,8 +836,7 @@ const BreakersComponentRight = ({ data, id }) => {
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
-                                        {/* {findEquipmentName(data.equipment_link[0])} */}
-                                        Equipment_Name
+                                        {findEquipmentName(data.equipment_link[0])}
                                     </h6>
                                 </div>
                                 {!(
@@ -885,8 +854,7 @@ const BreakersComponentRight = ({ data, id }) => {
                                             //     fetchDeviceSensorData(element.device_id);
                                             // }
                                             handleEditBreakerShow();
-                                        }}
-                                    >
+                                        }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
                                         </div>
@@ -911,8 +879,7 @@ const BreakersComponentRight = ({ data, id }) => {
                                             //     fetchDeviceSensorData(element.device_id);
                                             // }
                                             handleEditBreakerShow();
-                                        }}
-                                    >
+                                        }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
                                         </div>
@@ -951,10 +918,11 @@ const BreakersComponentRight = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Phase"
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('phase_configuration', e.target.value);
+                                                data.onChange(id, 'phase_configuration', +e.target.value);
                                             }}
                                             value={data.phase_configuration}
-                                            disabled={true}></Input>
+                                            disabled={true}
+                                            min={0}></Input>
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -964,8 +932,9 @@ const BreakersComponentRight = ({ data, id }) => {
                                             placeholder="Enter Amps"
                                             className="font-weight-bold"
                                             value={data.rated_amps}
+                                            min={0}
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('rated_amps', e.target.value);
+                                                data.onChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -979,10 +948,11 @@ const BreakersComponentRight = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Volts"
                                             onChange={(e) => {
-                                                handleBreakerConfigChange('voltage', e.target.value);
+                                                data.onChange(id, 'voltage', e.target.value);
                                             }}
                                             value={data.voltage}
-                                            disabled={true}></Input>
+                                            disabled={true}
+                                            min={0}></Input>
                                     </Form.Group>
                                 </div>
 
@@ -1012,16 +982,12 @@ const BreakersComponentRight = ({ data, id }) => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleBreakerConfigChange('device_id', e.target.value);
+                                                    data.onChange(id, 'device_id', e.target.value);
                                                 }}
                                                 value={data.device_id}>
                                                 <option>Select Device</option>
                                                 {data.passive_data.map((record) => {
-                                                    return (
-                                                        <option value={record.equipments_id}>
-                                                            {record.identifier}
-                                                        </option>
-                                                    );
+                                                    return <option value={record.value}>{record.label}</option>;
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -1035,11 +1001,10 @@ const BreakersComponentRight = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleBreakerConfigChange('sensor_id', e.target.value);
+                                                    data.onChange(id, 'sensor_id', e.target.value);
                                                     handleLinkedSensor(data.sensor_id, e.target.value);
                                                 }}
-                                                // value={currentBreakerObj.sensor_id}
-                                                >
+                                                value={data.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
@@ -1067,15 +1032,12 @@ const BreakersComponentRight = ({ data, id }) => {
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
                                             addSelectedBreakerEquip(e.target.value);
-                                            handleBreakerConfigChange('equipment_link', e.target.value);
+                                            data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        // value={currentEquipIds[0]}
-                                    >
+                                        value={data.equipment_link[0]}>
                                         <option>Select Equipment</option>
                                         {data.equipment_data.map((record) => {
-                                            return (
-                                                <option value={record.equipments_id}>{record.equipments_name}</option>
-                                            );
+                                            return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
                                     {/* <MultiSelect
@@ -1494,7 +1456,6 @@ const CreatePanel = () => {
         {
             name: 'Distribution',
             value: 'distribution',
-
         },
         {
             name: 'Disconnect',
@@ -1920,6 +1881,7 @@ const CreatePanel = () => {
                 obj.data.phase_configuration = 1;
             }
         });
+        console.log('Voltage change => ', newArray);
         setElements(newArray);
     };
 
@@ -2058,6 +2020,26 @@ const CreatePanel = () => {
 
     // ReactFlow Code starting!
 
+    const handleBreakerChange = (id, key, value) => {
+        let elementsList = Object.assign([], elements);
+
+        elementsList.forEach((el) => {
+            if (el.id === id) {
+                if (key === 'equipment_link') {
+                    let arr = [];
+                    arr.push(value);
+                    value = arr;
+                }
+                if (value === 'Select Volts') {
+                    value = '';
+                }
+                el.data[key] = value;
+            }
+        });
+
+        setElements(elementsList);
+    };
+
     // ************* distributed initial elements & edges ********************
     const initialElements = [
         {
@@ -2078,8 +2060,9 @@ const CreatePanel = () => {
                 device_id: '',
                 breaker_level: 'single-breaker',
                 panel_voltage: '',
-                equipment_data: equipmentData,
-                passive_data: passiveDeviceData,
+                equipment_data: [],
+                passive_data: [],
+                onChange: handleBreakerChange,
             },
             position: { x: 250, y: 60 },
             draggable: false,
@@ -2102,8 +2085,9 @@ const CreatePanel = () => {
                 device_id: '',
                 breaker_level: 'single-breaker',
                 panel_voltage: '',
-                equipment_data: equipmentData,
-                passive_data: passiveDeviceData,
+                equipment_data: [],
+                passive_data: [],
+                onChange: handleBreakerChange,
             },
             position: { x: 250, y: 140 },
             draggable: false,
@@ -2125,8 +2109,9 @@ const CreatePanel = () => {
                 device_id: '',
                 breaker_level: 'single-breaker',
                 panel_voltage: '',
-                equipment_data: equipmentData,
-                passive_data: passiveDeviceData,
+                equipment_data: [],
+                passive_data: [],
+                onChange: handleBreakerChange,
             },
             type: 'breakerComponentRight',
             position: { x: 700, y: 60 },
@@ -2149,8 +2134,9 @@ const CreatePanel = () => {
                 device_id: '',
                 breaker_level: 'single-breaker',
                 panel_voltage: '',
-                equipment_data: equipmentData,
-                passive_data: passiveDeviceData,
+                equipment_data: [],
+                passive_data: [],
+                onChange: handleBreakerChange,
             },
             type: 'breakerComponentRight',
             position: { x: 700, y: 140 },
@@ -2453,25 +2439,18 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                let params = `?building_id=${requestedBldgId}`;
+                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
-                    // let equipArray = [];
-                    // responseData.forEach((record) => {
-                    //     let obj = {
-                    //         label: record.equipments_name,
-                    //         value: record.equipments_id,
-                    //     };
-                    //     equipArray.push(obj);
-                    // });
-                    // setEquipmentData(equipArray);
-                    setEquipmentData(responseData);
+                    let equipArray = [];
+                    responseData.forEach((record) => {
+                        let obj = {
+                            label: record.equipments_name,
+                            value: record.equipments_id,
+                        };
+                        equipArray.push(obj);
+                    });
+                    setEquipmentData(equipArray);
                 });
             } catch (error) {
                 console.log(error);
@@ -2525,11 +2504,18 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // let params = `?page_size=${pageSize}&page_no=${pageNo}`;
                 let params = `?building_id=${bldgId}&page_size=10&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setPassiveDeviceData(data.data);
+                    let responseData = res.data.data;
+                    let newArray = [];
+                    responseData.forEach((record) => {
+                        let obj = {
+                            label: record.identifier,
+                            value: record.equipments_id,
+                        };
+                        newArray.push(obj);
+                    });
+                    setPassiveDeviceData(newArray);
                 });
             } catch (error) {
                 console.log(error);
@@ -2626,26 +2612,27 @@ const CreatePanel = () => {
         }
     }, [disconnectBreakerCount]);
 
-    // useEffect(() => {
-    //     let newArray = elements;
-    //     newArray.forEach((obj) => {
-    //         obj.equipment_data = equipmentData;
-    //     });
-    //     setElements(newArray);
-    // }, [equipmentData]);
+    useEffect(() => {
+        let newArray = elements;
+        newArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.equipment_data = equipmentData;
+        });
+        // console.log('Elements with equipmentData => ', newArray);
+        setElements(newArray);
+    }, [equipmentData]);
 
     useEffect(() => {
         let newArray = elements;
-        console.log('SSR obj.passive_data newArray b4 => ', newArray);
         newArray.forEach((obj) => {
-            if(!obj.data.type === 'breakerLink'){
-                let passiveDataToPush = passiveDeviceData;
-                let newObj = Object.assign({}, obj);
-                console.log('SSR passiveDataToPush => ', passiveDataToPush)
-                newObj.data.passive_data = passiveDataToPush;
-            }           
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.passive_data = passiveDeviceData;
         });
-        console.log('SSR obj.passive_data newArray a4 => ', newArray);
+        // console.log('Elements with passiveData => ', newArray);
         setElements(newArray);
     }, [passiveDeviceData]);
 

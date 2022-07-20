@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, get_kasa_devices, get_kasa_account, kasaAuthenticate, insert_kasa_devices, doneProvisioning } from '../../../services/Network';
+import { BaseUrl, get_kasa_devices, get_kasa_account, kasaLinkAccount, kasaUnLinkAccount, insert_kasa_devices, addToSystem } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -15,12 +15,12 @@ import Pagination from 'react-bootstrap/Pagination';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
-import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown,faCheck ,faSignalStream,faPencil,faPlus} from '@fortawesome/pro-thin-svg-icons';
+import { faCircleCheck, faGlobe, faClock, faRefresh, faArrowUpArrowDown, faCloudArrowDown,faCheck ,faSignalStream,faPencil,faPlus,faLink, faLinkSlash,faMagnifyingGlass,faXmarkLarge,faExclamationCircle} from '@fortawesome/pro-thin-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import tplink from "../../../assets/images/tplink.png";
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
+import { AvForm, AvGroup, AvInput, AvCheckboxGroup, AvCheckbox } from 'availity-reactstrap-validation';
 import { Container, Label, FormGroup, InputGroup, InputGroupAddon } from 'reactstrap';
 import { Mail, Lock } from 'react-feather';
 import { ConsoleView } from 'react-device-detect';
@@ -56,9 +56,14 @@ const Provision = () => {
     const [show, setShow] = useState(false);
     const [showEmail, setShowEmail] = useState(false);
     const [showlink, setShowLink] = useState(false);
+    const [checkFind, setCheckFind] = useState(true);
+    const [showUnlink, setShowUnLink] = useState(false);
+    const [showFind, setShowFind] = useState(false);
     const [showDone,setShowDone]=useState(false);
     const handleClose = () => setShow(false);
-    const handleLinkClose=()=>setShowLink(false);
+    const handleLinkClose=()=>{setShowLink(false);setError(false);setEmail("");setPassword("");};
+    const handleUnLinkClose=()=>{setShowUnLink(false);setError(false);};
+    const handleFindClose=()=>setShowFind(false);
     const handleShow = () => setShow(true);
     const [linkedAccount, setLinkedAccount]=useState([]);
     const [provisioningData, setProvisioningData]=useState([]);
@@ -82,7 +87,8 @@ const Provision = () => {
             label: 'HS300',
         },
     ]);
-    const [activeDeviceData, setActiveDeviceData] = useState([]);
+    const [checkedEmail, setCheckedEmail] = useState([]);
+    const [checkedEmailFind, setCheckedEmailFind] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'active',
@@ -99,8 +105,79 @@ const Provision = () => {
     const [error, setError]=useState(false);
     const [message,setMessage]=useState("");
     const [kasaDevices,setKasaDevices]=useState([]);
+
+    const handleUnlink=()=>{
+        let authData={
+            "kasa_account_id": checkedEmail,
+            building_id:bldgId
+        }
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            axios
+                .post(`${BaseUrl}${kasaUnLinkAccount}`,authData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res);
+                    if(res.status===200){
+                        if(res.data.success===false){
+                            setError(true);
+                            setMessage(res.data.message);
+                        }
+                        else{
+                        handleUnLinkClose();
+                        let arr={
+                            "kasa_account_ids": [],
+                            "find_new": false
+                          }
+                        getKasaAccount();
+                        getKasaDevices(arr);
+                        // console.log(res.data.id);
+                    }
+                }
+                });
+
+        } catch (error) {
+            setError(true);
+            console.log(error)
+            console.log('Failed to UnLink');
+        }
+
+    }
+
+    const handleFindDevices=()=>{
+        if(checkedEmailFind.length===0){
+            setShowFind(true);
+            setCheckFind(true);
+        }
+        else{
+        let arr={
+            "kasa_account_ids": checkedEmailFind,
+              "find_new": true
+        }
+        getKasaDevices(arr);
+        setShowFind(false);
+        setCheckFind(false);
+    }
+    }
+
+    const handleCheckedEmail=(e)=>{
+        console.log(e.target.value);
+        checkedEmail.push(e.target.value);
+        console.log(checkedEmail)
+    }
+    const handleCheckedEmailFind=(e)=>{
+        console.log(e.target.value);
+        checkedEmailFind.push(e.target.value);
+        console.log(checkedEmailFind)
+    }
     
-    const handleAuthorize =()=>{
+    const handleAuthorize =async()=>{
         // console.log(email);
         // console.log(password);
         let authData={
@@ -116,22 +193,30 @@ const Provision = () => {
             };
             let params = `?username=${email}&password=${password}`;
 
-            axios
-                .post(`${BaseUrl}${kasaAuthenticate}`,authData, {
+            const err = await axios
+                .post(`${BaseUrl}${kasaLinkAccount}`,authData, {
                     headers: header,
                 })
                 .then((res) => {
-                    // console.log(res.data);
+                    console.log(res);
                     if(res.status===200){
-                        setShowLink(false);
+                    if(res.data.success===false){
+                        setError(true);
+                        setMessage(res.data.message);
+                    }
+                    else{
+                        handleLinkClose();
                         // console.log(res.data.id);
                         localStorage.setItem("kasa_id",res.data.id)
                         setAuth(res.data.id);
                     }
+                }
                 });
+                console.log(err);
 
         } catch (error) {
-            setError(true);
+            // setError(true);
+            console.log("catch block executed")
             console.log('Failed to Authenticate');
         }
     }  
@@ -154,17 +239,21 @@ const Provision = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr={
-                "kasa_account_id":kasaDevices,
+                "kasa_account_id":checkedEmailFind,
                 "building_id":bldgId
             }
             // let params = `?kasa_account_id=${localStorage.getItem("kasa_id")}&building_id=${bldgId}`;
             axios
-                .post(`${BaseUrl}${doneProvisioning}`,arr, {
+                .post(`${BaseUrl}${addToSystem}`,arr, {
                     headers: header,
                 })
                 .then((res) => {
                     setShowDone(false);
-                    getKasaDevices();
+                    let arr={
+                        "kasa_account_ids": checkedEmailFind,
+                          "find_new": true
+                    }
+                    getKasaDevices(arr);
                 });
 
             } catch (error) {
@@ -247,8 +336,9 @@ const Provision = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+            let params = `?building_id=${bldgId}`;
             axios
-            .get(`${BaseUrl}${get_kasa_account}`, {
+            .get(`${BaseUrl}${get_kasa_account}${params}`, {
                 headers: header,
             })
             .then((res) => {
@@ -288,7 +378,7 @@ const Provision = () => {
             setIsProcessing(false);
         }
 }
-const getKasaDevices=()=>{
+const getKasaDevices=(details)=>{
 try {
     setIsAddProcessing(true);
     let ready=[];
@@ -298,9 +388,9 @@ try {
         accept: 'application/json',
         Authorization: `Bearer ${userdata.token}`,
     };
-    // let params = `?kasa_account_id=${auth}`;
+    let params = `?building_id=${bldgId}`;
     axios
-    .get(`${BaseUrl}${get_kasa_devices}`, {
+    .post(`${BaseUrl}${get_kasa_devices}${params}`,details, {
         headers: header,
     })
     .then((res) => {
@@ -327,7 +417,7 @@ try {
 }
 useEffect(()=>{
     getKasaAccount();
-      getKasaDevices();
+    //   getKasaDevices();
      // console.log(progressData);
     
 
@@ -335,10 +425,13 @@ useEffect(()=>{
 
     useEffect(()=>{
       // console.log(auth);
-
+        let arr={
+            "kasa_account_ids": [],
+            "find_new": false
+          }
           
       getKasaAccount();
-      getKasaDevices();
+      getKasaDevices(arr);
 
     },[])
     // useEffect(() => {
@@ -354,7 +447,7 @@ useEffect(()=>{
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Provision Devices
+                        Add Devices
                     </span>
                    
                     </Col>
@@ -363,7 +456,16 @@ useEffect(()=>{
                 <Col md={7}>
                     <span className='sub-heading' style={{ marginLeft: '20px' }}>Linked TP-Link Accounts</span>
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                      
+                    <div className="mr-2">
+                          <button
+                              type="button"
+                              className="btn btn-md btn-outline-secondary font-weight-bold"
+                              onClick={() => {
+                                setShowUnLink(true);
+                            }}>
+                                <FontAwesomeIcon icon={faLinkSlash} size="md" style={{marginRight:"0.5rem"}}/>UnLink Account
+                          </button>
+                      </div>
                       <div className="mr-2">
                           <button
                               type="button"
@@ -371,7 +473,7 @@ useEffect(()=>{
                               onClick={() => {
                                 setShowLink(true);
                             }}>
-                              <i className="uil uil-link mr-1"></i>Link Account
+                                <FontAwesomeIcon icon={faLink} size="md" style={{marginRight:"0.5rem"}}/>Link Account
                           </button>
                       </div>
                   </div>
@@ -454,29 +556,30 @@ useEffect(()=>{
 
                 </Col>
                 <Col md={5}>
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                    {/* <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                       
                         <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-outline-secondary font-weight-bold"
-                                onClick={handleDone}
+                                onClick={getKasaDevices}
                                 >
                                 <FontAwesomeIcon icon={faCheck} size="md" style={{marginRight:"0.5rem"}}/>
-                                Done
+                                Find Devices
                             </button>
                         </div>
                         <div className="mr-2">
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
+                                onClick={handleDone}
                                 >
                                 <FontAwesomeIcon icon={faSignalStream} size="md" style={{marginRight:"0.5rem"}}/>
-                                Provision
+                                Add to System
                             </button>
                         </div>
-                    </div>
-                    <Row className='mt-5 ml-5 mr-3'>
+                    </div> */}
+                    {/* <Row className='mt-5 ml-5 mr-3'>
                         <Col>
                         <div className='m-3'>
                         <label>Provisioners</label>
@@ -525,7 +628,7 @@ useEffect(()=>{
                           </button>
                     </div>
                     
-                        </Col>
+                        </Col> 
                         {/* <Col md={4}>
                         <div className='m-3'>
                         <label style={{visibility:"hidden"}}>Provisioners</label>
@@ -547,21 +650,54 @@ useEffect(()=>{
                           </button>
                       </div>
                         </Col> */}
-                    </Row>
+                    {/* </Row> */}
                     
                 </Col>
             </Row>
 
           
-
+            <Row>
+                <Col lg={7} >
+                <span className='sub-heading' style={{ marginLeft: '20px' }}>Devices</span>
+                </Col>
+                <Col md={5}>
+                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                      
+                        <div className="mr-2">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-outline-secondary font-weight-bold"
+                                onClick={() => {
+                                    setShowFind(true);
+                                    setCheckFind(false);
+                                }}
+                                >
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" style={{marginRight:"0.5rem"}}/>
+                                Find Devices
+                            </button>
+                        </div>
+                        <div className="mr-2">
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={handleDone}
+                                disabled={checkFind}
+                                >
+                                <FontAwesomeIcon icon={faSignalStream} size="md" style={{marginRight:"0.5rem"}}/>
+                                Add to System
+                            </button>
+                        </div>
+                    </div>
+                </Col>
+            </Row>
             <Row>
                 <Col lg={11} >
-                <span className='sub-heading' style={{ marginLeft: '20px' }}>Provisioning</span>
-                
+                {/* <span className='sub-heading' style={{ marginLeft: '20px' }}>Devices</span>
+                 */}
                 <div className="nav-header-container" style={{ marginLeft: '20px' }}>
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
-                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>In Progress({progressData.length})</span></button>
+                    <button className='button-hide' onClick={()=>{setSelected(0)}}><span className={selected===0?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Available({progressData.length})</span></button>
                     <button className="button-hide" onClick={()=>{setSelected(1)}}><span className={selected===1?"mr-3 single-passive-tab-active":"mr-3 single-passive-tab"}>Completed({readyData.length})</span></button>
                     </div>
                 </div>
@@ -574,8 +710,9 @@ useEffect(()=>{
                             <th>Device ID</th>
                             <th>Vendor</th>
                             <th>Model</th>
-                            <th>Assigned</th>
-                            <th>Actions</th>
+                            {/* <th>Assigned</th> */}
+                            <th>Kasa Account</th>
+                            {/* <th>Actions</th> */}
                         </tr>
                     </thead>
                     {isAddProcessing ? (
@@ -602,9 +739,9 @@ useEffect(()=>{
                                         <Skeleton count={5} />
                                     </td>
 
-                                    <td>
+                                    {/* <td>
                                         <Skeleton count={5} />
-                                    </td>
+                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -616,20 +753,28 @@ useEffect(()=>{
                          
                                 <tr >
                                         <td scope="row" >
-                                        {/* <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress */}
+                                        {record.status==="Found"?<>
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" className="ml-2" style={{marginRight:"4px"}}/>
                                         {record.status}
+                                            </>:record.status==="Failed"?<>
+                                            <FontAwesomeIcon icon={faXmarkLarge} size="lg" className="ml-2" style={{marginRight:"4px", color:"red"}}/>
+                                        {record.status}
+                                            </>:<>{record.status}</>}
+                                        {/* <FontAwesomeIcon icon={faArrowUpArrowDown} size="lg" className="ml-2" style={{marginRight:"4px"}}/> In Progress */}
+                                        
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
                                         <td>{record.model}</td>
-                                        <td>{record.assigned}</td>
-                                        <td>{record.action===0?
+                                        {/* <td>{record.assigned}</td> */}
+                                        <td>{record.kasa_account}</td>
+                                        {/* <td>{record.action===0?
                                             <button type="button" className="btn btn-md btn-outline-secondary font-weight-bold">
                                              Waiting
                               </button> :<button type="button" className="btn btn-md btn-outline-secondary font-weight-bold" onClick={(e)=>{handleAddDevice(e,record.kasa_account_id,record.device_id)}}>
                                         <FontAwesomeIcon icon={faRefresh} size="lg"/> Retry
                           </button>   
-                                    }</td>
+                                    }</td> */}
                                 </tr>
                             )}})}
               
@@ -681,8 +826,10 @@ useEffect(()=>{
                          
                                 <tr >
                                         <td scope="row" >
-                                        {/* <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"green"}}/> Completed */}
+                                            {record.status==="Completed"?<>
+                                        <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"green"}}/>
                                         {record.status}
+                                            </>:<>{record.status}</>}
                                         </td>
                                         <td>{record.device_mac}</td>
                                         <td>{record.vendor}</td>
@@ -774,9 +921,10 @@ useEffect(()=>{
                 <Modal.Body style={{marginTop:"0px"}}>                    
                 {/* <p style={{textAlign:"center"}}>Sign in to allow Sapient industries to control your TP-Link Kasa devices. Remote control should be enabled on your TP-Link Kasa device to work with Sapient Industries.</p> */}
                 <AvForm className="authentication-form" autoComplete="off">
-                {error && <Alert color="danger" isOpen={error ? true : false}>
+                {error?<div className='error-message'>
+                                                    <div style={{marginRight:"1rem"}}><FontAwesomeIcon icon={faExclamationCircle} size="lg" className="ml-2" style={{marginRight:"4px", color:"#B42318"}}/></div>
                                                     <div>{message}</div>
-                                                </Alert>}
+                                                </div>:""}
                                                     <AvGroup className="">
                                                         <label>Email</label>
                                                         <InputGroup>
@@ -808,6 +956,103 @@ useEffect(()=>{
                         }}
                         style={{width:"8rem"}}
                         >Add
+                    </button>
+                </Modal.Footer>
+            </Modal>
+
+                         {/* UnLink Account Modal */}
+                         <Modal show={showUnlink} onHide={handleUnLinkClose} centered dialogClassName="my-modal1" contentClassName="my-modal1">
+                <Modal.Header style={{marginLeft:"1rem",marginTop:"10px",padding:"0px"}}>
+                    <Modal.Title>
+                        {/* <img src={tplink} width="200px" height="80px"/> */}
+                        <p style={{fontSize:"18px", fontWeight:"bold",marginBottom:"0px"}}>Unlink Account</p>
+                        </Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{marginTop:"0px"}}>                    
+                <p style={{textAlign:"center"}}>Choose the account that you would like to unlink from this building</p>
+                <AvForm className="authentication-form" autoComplete="off">
+                {error?<div className='error-message'>
+                                                    <div style={{marginRight:"1rem"}}><FontAwesomeIcon icon={faExclamationCircle} size="lg" className="ml-2" style={{marginRight:"4px", color:"#B42318"}}/></div>
+                                                    <div>{message}</div>
+                                                </div>:""}
+                                                    <AvGroup className="" style={{border:"1px solid #EAECF0", borderRadius:"8px",padding:"0px 8px 4px"}}>
+                                                        <label style={{marginBottom:"0px",padding:"0.5rem"}}>Email</label>
+                                                        <hr/>
+                                                        <AvCheckboxGroup name="email">
+                                                        {linkedAccount.map((record, index) => {
+                                                            return ( 
+                                                                <>
+                                                                <div style={{display:"flex",flexDirection:"row"}}>
+                                                            <AvCheckbox name="email" value={record.id} required  onChange={(e)=>{handleCheckedEmail(e)}}/><label style={{color:"blue"}}>{record.email}</label>
+                                                            </div>
+                                                            </>
+                                                            )})}
+                                                        </AvCheckboxGroup>
+                                                        
+                                                    </AvGroup>
+                                                    
+                 </AvForm>
+                    
+                </Modal.Body>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={handleUnLinkClose}>
+                        Cancel
+                    </button>
+                    <button
+                        className='btn'
+                        style={{backgroundColor:"#B42318", width:"8rem"}}
+                        onClick={() => {
+                         handleUnlink();
+                        }}
+                        >Unlink
+                    </button>
+                </Modal.Footer>
+            </Modal>
+
+             {/* Find Devices Modal */}
+             <Modal show={showFind} onHide={handleFindClose} centered dialogClassName="my-modal1" contentClassName="my-modal1">
+                <Modal.Header style={{marginLeft:"1rem",marginTop:"10px",padding:"0px"}}>
+                    <Modal.Title>
+                        {/* <img src={tplink} width="200px" height="80px"/> */}
+                        <p style={{fontSize:"18px", fontWeight:"bold",marginBottom:"0px"}}>Find Devices</p>
+                        </Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{marginTop:"0px"}}>                    
+                <p style={{textAlign:"center"}}>Select the account you would like to find devices from</p>
+                <AvForm className="authentication-form" autoComplete="off">
+                {error && <Alert color="danger" isOpen={error ? true : false}>
+                                                    <div>{message}</div>
+                                                </Alert>}
+                                                    <AvGroup className="" style={{border:"1px solid #EAECF0", borderRadius:"8px",padding:"0px 8px 4px"}}>
+                                                        <label style={{marginBottom:"0px",padding:"0.5rem"}}>Email</label>
+                                                        <hr/>
+                                                        <AvCheckboxGroup name="email">
+                                                        {linkedAccount.map((record, index) => {
+                                                            return ( 
+                                                                <>
+                                                                <div style={{display:"flex",flexDirection:"row"}}>
+                                                            <AvCheckbox name="email" value={record.id} required  onChange={(e)=>{handleCheckedEmailFind(e)}}/><label style={{color:"blue"}}>{record.email}</label>
+                                                            </div>
+                                                            </>
+                                                            )})}
+                                                        </AvCheckboxGroup>
+                                                        
+                                                    </AvGroup>
+                                                    
+                 </AvForm>
+                    
+                </Modal.Body>
+                <Modal.Footer style={{justifyContent:"center",margin:"0rem"}}>
+                    <button className='btn btn-outline-secondary' style={{width:"8rem"}}  onClick={handleFindClose}>
+                        Cancel
+                    </button>
+                    <button
+                        className='btn btn-primary'
+                        onClick={() => {
+                         handleFindDevices();
+                        }}
+                        style={{width:"8rem"}}
+                        >Find Devices
                     </button>
                 </Modal.Footer>
             </Modal>
