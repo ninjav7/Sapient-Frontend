@@ -1743,7 +1743,15 @@ const CreatePanel = () => {
             };
 
             let newPanel = Object.assign({}, panel);
-            newPanel.breaker_count = normalCount;
+
+            if (activePanelType === 'distribution') {
+                newPanel.breaker_count = normalCount;
+            }
+
+            if (activePanelType === 'disconnect') {
+                newPanel.breaker_count = disconnectBreakerCount;
+            }
+
             newPanel.panel_type = activePanelType;
 
             setIsProcessing(true);
@@ -2255,7 +2263,6 @@ const CreatePanel = () => {
                 passive_data: [],
                 onChange: handleDisconnectedBreakerChange,
             },
-            data: { label: 'Breaker 3', index: '3' },
             position: { x: 450, y: 220 },
             draggable: false,
         },
@@ -2296,6 +2303,16 @@ const CreatePanel = () => {
         },
     ];
 
+    const [elements, setElements] = useState(initialElements);
+    const [edges, setEdges] = useState(initialEdges);
+
+    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
+    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [nodeData, setnodeData] = useState(null);
+
     const connectionLineStyle = { stroke: '#fff' };
     const snapGrid = [10, 10];
 
@@ -2319,20 +2336,22 @@ const CreatePanel = () => {
         setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
     };
 
+    const getYaxisCordinates = (index) => {
+        if (index === 1 || index === 2) {
+            return 70;
+        }
+        if (index === 3 || index === 4) {
+            return 70 * 2;
+        }
+        if (index === 5 || index === 6) {
+            return 70 * 3;
+        }
+    };
+
     const handleMouseEnter = (e, node) => {
         console.log(node);
         setnodeData(node);
     };
-
-    const [elements, setElements] = useState(initialElements);
-    const [edges, setEdges] = useState(initialEdges);
-
-    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
-    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
-
-    const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [nodeData, setnodeData] = useState(null);
 
     const onConnect = useCallback(
         (params) =>
@@ -2374,6 +2393,7 @@ const CreatePanel = () => {
         []
     );
 
+    // Trigers Breaker API to save
     useEffect(() => {
         if (generatedPanelId === '') {
             return;
@@ -2388,26 +2408,51 @@ const CreatePanel = () => {
 
                 let panelBreakerObjs = [];
 
-                elements.forEach((el) => {
-                    if (el.type === 'breakerLink') {
-                        return;
-                    }
+                if (activePanelType === 'distribution') {
+                    elements.forEach((el) => {
+                        if (el.type === 'breakerLink') {
+                            return;
+                        }
 
-                    let obj = {
-                        id: el.id,
-                        name: `Breaker ${el.data.breaker_number}`,
-                        breaker_number: +el.data.breaker_number,
-                        phase_configuration: el.data.phase_configuration,
-                        rated_amps: el.data.rated_amps,
-                        voltage: +el.data.voltage,
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: el.data.equipment_link,
-                        sensor_id: el.data.sensor_id,
-                        device_id: el.data.device_id,
-                    };
-                    panelBreakerObjs.push(obj);
-                });
+                        let obj = {
+                            id: el.id,
+                            name: `Breaker ${el.data.breaker_number}`,
+                            breaker_number: +el.data.breaker_number,
+                            phase_configuration: el.data.phase_configuration,
+                            rated_amps: el.data.rated_amps,
+                            voltage: +el.data.voltage,
+                            link_type: 'unlinked',
+                            link_id: '',
+                            equipment_link: el.data.equipment_link,
+                            sensor_id: el.data.sensor_id,
+                            device_id: el.data.device_id,
+                        };
+                        panelBreakerObjs.push(obj);
+                    });
+                }
+
+                if (activePanelType === 'disconnect') {
+                    disconnectBreakersNodes.forEach((el) => {
+                        if (el.type === 'breakerLink') {
+                            return;
+                        }
+
+                        let obj = {
+                            id: el.id,
+                            name: `Breaker ${el.data.breaker_number}`,
+                            breaker_number: +el.data.breaker_number,
+                            phase_configuration: el.data.phase_configuration,
+                            rated_amps: el.data.rated_amps,
+                            voltage: +el.data.voltage,
+                            link_type: 'unlinked',
+                            link_id: '',
+                            equipment_link: el.data.equipment_link,
+                            sensor_id: el.data.sensor_id,
+                            device_id: el.data.device_id,
+                        };
+                        panelBreakerObjs.push(obj);
+                    });
+                }
 
                 let params = `?panel_id=${panelID}`;
                 await axios
@@ -2447,18 +2492,6 @@ const CreatePanel = () => {
         setDisconnectBreakerConfig(newBreakers);
     }, []);
 
-    const getYaxisCordinates = (index) => {
-        if (index === 1 || index === 2) {
-            return 70;
-        }
-        if (index === 3 || index === 4) {
-            return 70 * 2;
-        }
-        if (index === 5 || index === 6) {
-            return 70 * 3;
-        }
-    };
-
     useEffect(() => {
         let newBreakers = [];
         for (let index = 1; index <= normalCount; index++) {
@@ -2490,7 +2523,7 @@ const CreatePanel = () => {
             newBreakers.push(obj);
         }
         console.log('Hunt => ', newBreakers);
-        // setNormalStruct(newBreakers);
+        setElements(newBreakers);
     }, []);
 
     useEffect(() => {
@@ -2620,7 +2653,7 @@ const CreatePanel = () => {
                     sourcePosition: 'right',
                     data: {
                         name: '',
-                        breaker_number: '1',
+                        breaker_number: 1,
                         phase_configuration: 1,
                         rated_amps: 0,
                         voltage: '',
@@ -2645,7 +2678,7 @@ const CreatePanel = () => {
                     sourcePosition: 'left',
                     data: {
                         name: '',
-                        breaker_number: '2',
+                        breaker_number: 2,
                         phase_configuration: 1,
                         rated_amps: 0,
                         voltage: '',
@@ -2670,7 +2703,7 @@ const CreatePanel = () => {
                     sourcePosition: 'right',
                     data: {
                         name: '',
-                        breaker_number: '3',
+                        breaker_number: 3,
                         phase_configuration: 1,
                         rated_amps: 0,
                         voltage: '',
