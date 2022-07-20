@@ -240,15 +240,14 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        // { value: 'energy', label: 'Consumed Energy (Wh)' },
-
-        // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-
-        // { value: 'mV', label: 'Voltage (V)' },
-
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'power', label: 'Real Power (W)' },
         { value: 'mAh', label: 'Amps' },
-
-        // { value: 'power', label: 'Real Power (W)' },
+        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
+        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
+        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
     ]);
 
     const handleChartShow = (id) => {
@@ -288,6 +287,7 @@ const IndividualPassiveDevice = () => {
                     let response = res.data.data[0];
                     setPassiveData(response);
                     setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -685,6 +685,13 @@ const IndividualPassiveDevice = () => {
                                                             <span className="sensor-data-title">Not Attached</span>
                                                         </div>
                                                         <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-default passive-edit-style"
