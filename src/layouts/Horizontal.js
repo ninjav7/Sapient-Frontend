@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import './style.css';
 import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
-import PageTracker from '../components/PageTracker';
+import PageTracker from '../components/PageTracker/PageTracker';
 import SideNavbar from '../components/SideNavbar';
 import { Link, useLocation } from 'react-router-dom';
 import TopNav from '../components/TopNav/TopNav';
