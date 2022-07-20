@@ -27,6 +27,7 @@ import moment from 'moment';
 import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
+import { ceil } from 'lodash';
 
 const EditPlugRule = ({
     showEditRule,
@@ -60,10 +61,15 @@ const EditPlugRule = ({
 
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
+    const [allData, setAllData] = useState([]);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
+    const [pageSize, setPageSize] = useState(20);
+    const [pageNo, setPageNo] = useState(1);
+    const [totalSocket,setTotalSocket]=useState(0);
+    const [paginationData, setPaginationData] = useState({});
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
+    
     const socketData = [
         {
             equip_type: 'Monitor',
@@ -216,6 +222,21 @@ const EditPlugRule = ({
             ],
         },
     ]);
+    const handleFilterEquipment=(e)=>{
+        let activeId=e.target.value;
+        if(activeId==="All"){
+            setAllLinkedRuleData(allData);
+            // console.log(allData);
+        }
+        else{
+        const result = allData.find( ({ id }) => id === activeId );
+        // console.log(result);
+        let arr=[];
+        arr.push(result);
+        // console.log(arr)
+        setAllLinkedRuleData(arr);
+        }
+    }
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -338,6 +359,62 @@ const EditPlugRule = ({
         }
     };
 
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setPageNo(pageNo+1)
+            let params = `?page_size=${pageSize}&page_no=${pageNo+1}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+            await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                let unLinkedData = [];
+                response.data.forEach((record) => {
+                    record.linked_rule = false;
+                    unLinkedData.push(record);
+                });
+                setUnLinkedRuleData(unLinkedData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setPageNo(pageNo-1)
+            let params = `?page_size=${pageSize}&page_no=${pageNo-1}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+            await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                    let unLinkedData = [];
+                    response.data.forEach((record) => {
+                        record.linked_rule = false;
+                        unLinkedData.push(record);
+                    });
+                    setUnLinkedRuleData(unLinkedData);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+
     useEffect(() => {
         if (activeRuleId === null) {
             return;
@@ -352,6 +429,7 @@ const EditPlugRule = ({
                 let params = `?rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
+                   
                     let linkedData = [];
                     response.data.sensor_id.forEach((record) => {
                         record.linked_rule = true;
@@ -373,9 +451,11 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=10&page_no=1&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
+                    // console.log(response.total_data);
+                    setTotalSocket(parseInt(response.total_data));
                     let unLinkedData = [];
                     response.data.forEach((record) => {
                         record.linked_rule = false;
@@ -402,6 +482,31 @@ const EditPlugRule = ({
 
         const allRuleData = arr1.concat(arr2);
         setAllLinkedRuleData(allRuleData);
+        // console.log(allRuleData);
+        // console.log(totalSocket);
+        const fetchAllData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?page_size=${totalSocket}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+                await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    let unLinkedData = [];
+                    response.data.forEach((record) => {
+                        record.linked_rule = false;
+                        unLinkedData.push(record);
+                    });
+                    setAllData(unLinkedData);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch list of Unlinked Rules data');
+            }
+        };
+        fetchAllData();
     }, [linkedRuleData, unLinkedRuleData]);
 
     useEffect(() => {
@@ -492,7 +597,7 @@ const EditPlugRule = ({
                                             : 'mr-3 single-plugrule-tab'
                                     }
                                     onClick={() => setSelectedTab(1)}>
-                                    Sockets ({allLinkedRuleData.length})
+                                    Sockets ({totalSocket})
                                 </span>
                             </div>
                         </div>
@@ -840,8 +945,15 @@ const EditPlugRule = ({
                                                     type="select"
                                                     name="state"
                                                     id="userState"
-                                                    className="font-weight-bold socket-filter-width">
-                                                    <option>ALL</option>
+                                                    className="font-weight-bold socket-filter-width"
+                                                    onChange={(e)=>{handleFilterEquipment(e)}}>
+                                                        <option>Select Equipment Type</option>
+                                                    <option value="All">ALL</option>
+                                                    {allData.map((record, index) => {
+                                                         return (
+                                                        <option value={record.id}>{record.name}</option>
+                                                    )})}
+
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
@@ -1052,6 +1164,26 @@ const EditPlugRule = ({
                                             </tbody>
                                         )}
                                     </Table>
+                                    <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={pageNo<=1}
+                        onClick={() => {
+                            previousPageData();
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={pageNo>=ceil(totalSocket/pageSize)}
+                        onClick={() => {
+                            nextPageData();
+                        }}>
+                        Next
+                    </button>
+                </div>
                                 </div>
                             </div>
                         </div>
