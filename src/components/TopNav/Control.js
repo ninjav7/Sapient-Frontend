@@ -9,6 +9,8 @@ import { isUserAuthenticated } from '../../helpers/authUtils';
 import { logoutUser } from '../../redux/actions';
 import { faGear, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 
+import {ReactComponent as LogoutIcon} from '../../assets/images/logout.svg'
+
 const Control = () => {
     const location = useLocation();
     
@@ -93,15 +95,14 @@ const Control = () => {
                     <div
                         className={`${
                             location.pathname.split('/')[1] === 'settings'
-                                ? 'navbar-icon-container-active float-right'
-                                : 'navbar-icon-container float-right'
-                        }`}
-                        style={{ height: '100%' }}>
+                                ? 'navbar-icon-container-active'
+                                : 'navbar-icon-container'
+                        }`}>
                         <button
                             className={`${
                                 location.pathname.split('/')[1] === 'settings'
-                                    ? 'btn btn-sm float-right other-font-icon-style-active'
-                                    : 'btn btn-sm float-right other-font-icon-style'
+                                    ? 'btn btn-sm other-font-icon-style-active p-0'
+                                    : 'btn btn-sm other-font-icon-style'
                             }`}
                             onClick={() => {
                                 setSideNavBar('account');
@@ -122,10 +123,10 @@ const Control = () => {
             </div>
 
             <button
-                className="btn btn-sm btn-link nav-link right-bar-toggle float-right navbar-heading font-weight-bold"
-                style={{ marginRight: '3vw' }}
+                className="btn topbar-logout-btn"
                 onClick={handleLogout}>
-                Logout
+                    <LogoutIcon />
+                    Sign Out
             </button>
         </>
     )
