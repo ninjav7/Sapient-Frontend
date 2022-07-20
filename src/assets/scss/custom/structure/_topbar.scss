@@ -186,6 +186,7 @@
         }
 
         &:hover {
+            background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
             color: rgba(255, 255, 255, 0.6);
             border-bottom-color: $primary-indigo-500;
         }

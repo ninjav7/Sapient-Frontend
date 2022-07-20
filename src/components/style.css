@@ -408,6 +408,7 @@
 }
 
 .energy-top-nav {
+    font-family: 'Inter';
     position: fixed;
     vertical-align: top;
     background: #101828;
@@ -515,12 +516,11 @@
     justify-content: center !important;
     align-items: center !important;
     height: 100%;
-    border-bottom: 0.1875rem solid transparent;
-    border-top: 0.1875rem solid transparent;
+    border-bottom: 0.125rem solid transparent;
+    border-top: 0.125rem solid transparent;
 }
 
 .navbar-heading {
-    font-family: 'Inter';
     font-style: normal;
     font-weight: 500;
     font-size: 0.75rem;
@@ -533,7 +533,8 @@
 } */
 
 .navbar-head-container:hover {
-    border-bottom: 0.1875rem solid #3c65f5;
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+    border-bottom: 0.125rem solid #6172F3;
 }
 
 div.navbar-head-container:hover .font-icon-style {
@@ -549,8 +550,15 @@ div.navbar-head-container:hover .navbar-heading {
     align-items: center;
     height: 100%;
     width: fit-content;
-    border-bottom: 0.1875rem solid #3c65f5 !important;
+    border-top: 0.125rem solid transparent !important;
+    border-bottom: 0.125rem solid #3c65f5 !important;
     color: white !important;
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+}
+
+.navbar-icon-container-active button {
+    border: 0;
+    outline: none;
 }
 
 .navbar-icon-container {
@@ -560,8 +568,8 @@ div.navbar-head-container:hover .navbar-heading {
     height: 100%;
     width: fit-content;
     color: white !important;
-    border-bottom: 0.1875rem solid transparent;
-    border-top: 0.1875rem solid transparent;
+    border-bottom: 0.125rem solid transparent;
+    border-top: 0.125rem solid transparent;
 }
 
 .other-font-icon-style {
@@ -570,12 +578,17 @@ div.navbar-head-container:hover .navbar-heading {
     border: 0;
 }
 
+.other-font-icon-style-active:hover {
+    color: white;
+}
+
 .other-font-icon-style:hover {
     color: white !important;
 }
 
 div.navbar-icon-container:hover {
-    border-bottom: 3px solid #3c65f5 !important;
+    border-bottom: 0.125rem solid #6172F3 !important;
+    background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
 }
 
 div.navbar-icon-container:hover .other-font-icon-style {
@@ -587,7 +600,7 @@ div.navbar-icon-container:hover .other-font-icon-style {
     justify-content: center;
     align-items: center;
     height: 100%;
-    border-bottom: 3px solid #3c65f5 !important;
+    border-bottom: 0.125rem solid #6172F3 !important;
     background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
     color: white !important;
 }
