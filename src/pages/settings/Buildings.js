@@ -100,7 +100,7 @@ const Buildings = () => {
 
     // building type
     const [buildingType, setBuildingType] = useState([
-        { value: 'Commercial Building', label: 'Commercial Building' },
+        { value: 'Office Building', label: 'Office Building' },
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
     const [buildingName,setBuildingName]=useState("");

@@ -431,7 +431,6 @@ const EditPlugRule = ({
                 let params = `?rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-
                     let linkedData = [];
                     response.data.sensor_id.forEach((record) => {
                         record.linked_rule = true;

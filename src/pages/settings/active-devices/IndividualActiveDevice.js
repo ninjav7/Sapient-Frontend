@@ -569,12 +569,12 @@ const IndividualActiveDevice = () => {
                                 </div>
                             </div>
 
-                            {/* <div className="socket-container">
+                            <div className="socket-container">
                                 <div className="mt-2 sockets-slots-container">
                                     {sensors.map((record, index) => {
                                         return (
                                             <>
-                                                {record.sensor_type === 'active' && (
+                                                {record.status && (
                                                     <div>
                                                         <div className="power-off-style">
                                                             <FontAwesomeIcon
@@ -583,7 +583,7 @@ const IndividualActiveDevice = () => {
                                                                 color="#3C6DF5"
                                                             />
                                                         </div>
-                                                        {record.equipment_id === '' ? (
+                                                        {record.equipment_type_id === '' ? (
                                                             <div className="socket-rect">
                                                                 <img src={SocketLogo} alt="Socket" />
                                                             </div>
@@ -600,7 +600,7 @@ const IndividualActiveDevice = () => {
                                                     </div>
                                                 )}
 
-                                                {record.sensor_type === 'passive' && (
+                                                {!record.status && (
                                                     <div>
                                                         <div className="power-off-style">
                                                             <FontAwesomeIcon
@@ -609,7 +609,7 @@ const IndividualActiveDevice = () => {
                                                                 color="#EAECF0"
                                                             />
                                                         </div>
-                                                        {record.equipment_id === '' ? (
+                                                        {record.equipment_type_id === '' ? (
                                                             <div className="socket-rect">
                                                                 <img src={SocketLogo} alt="Socket" />
                                                             </div>
@@ -629,7 +629,7 @@ const IndividualActiveDevice = () => {
                                         );
                                     })}
                                 </div>
-                            </div> */}
+                            </div>
 
                             {isFetchingSensorData ? (
                                 <div className="mt-4">

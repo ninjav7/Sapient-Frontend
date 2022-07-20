@@ -261,6 +261,7 @@ const DeviceChartModel = ({
 
             toolbar: {
                 autoSelected: 'pan',
+
                 show: false,
             },
 

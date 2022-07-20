@@ -13,6 +13,8 @@ import {
     sensorGraphData,
     listSensor,
     updateActivePassiveDevice,
+    generalPanels,
+    getBreakers,
 } from '../../../services/Network';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -27,15 +29,24 @@ import './style.css';
 const SelectBreakerModel = ({
     showBreaker,
     handleBreakerClose,
-    breakers,
-    panels,
     currentRecord,
     setCurrentRecord,
     sensors,
     setSensors,
     currentIndex,
     setCurrentIndex,
+    bldgId,
+    equipmentId,
 }) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    const [panelData, setPanelData] = useState([]);
+    const [breakersData, setBreakersData] = useState([]);
+
+    const [isPanelDataFetched, setPanelDataFetched] = useState(true);
+    const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
+
     const saveToSensorArray = () => {
         let currentArray = sensors;
         currentArray[currentIndex] = currentRecord;
@@ -48,16 +59,67 @@ const SelectBreakerModel = ({
         setCurrentRecord(obj);
     };
 
+    const fetchBreakersList = async (panelId) => {
+        if (panelId === '') {
+            return;
+        }
+        try {
+            setBreakerDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?panel_id=${panelId}`;
+            await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
+                setBreakersData(res.data);
+            });
+            setBreakerDataFetched(false);
+        } catch (error) {
+            console.log(error);
+            setBreakerDataFetched(false);
+            console.log('Failed to fetch Breakers Data List');
+        }
+    };
+
+    useEffect(() => {
+        const fetchPanelsData = async () => {
+            if (!showBreaker) {
+                return;
+            }
+            try {
+                setPanelDataFetched(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
+                    setPanelData(res.data);
+                });
+                setPanelDataFetched(false);
+            } catch (error) {
+                console.log(error);
+                setPanelDataFetched(false);
+                console.log('Failed to fetch Panels Data List');
+            }
+        };
+        fetchPanelsData();
+    }, [showBreaker]);
+
     return (
         <>
             <Modal show={showBreaker} onHide={handleBreakerClose} size={'md'} centered>
-                <Modal.Header>
+                <Modal.Header className="m-3 p-2 mb-0">
                     <Modal.Title>Select Breaker</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Panel</Form.Label>
+                <Form className="m-4 mt-0">
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Label>Panel</Form.Label>
+                        {isPanelDataFetched ? (
+                            <Skeleton count={1} height={40} className="mb-2" />
+                        ) : (
                             <Input
                                 type="select"
                                 name="select"
@@ -66,16 +128,21 @@ const SelectBreakerModel = ({
                                 defaultValue={currentRecord.panel_name}
                                 onChange={(e) => {
                                     handleSensorChange('panel_name', e.target.value);
+                                    fetchBreakersList(e.target.value);
                                 }}>
                                 <option selected>Select Panel</option>
-                                {panels.map((record) => {
+                                {panelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
                             </Input>
-                        </Form.Group>
+                        )}
+                    </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Breaker</Form.Label>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Label>Breaker</Form.Label>
+                        {isBreakerDataFetched ? (
+                            <Skeleton count={1} height={35} />
+                        ) : (
                             <Input
                                 type="select"
                                 name="select"
@@ -86,13 +153,21 @@ const SelectBreakerModel = ({
                                     handleSensorChange('breaker_name', e.target.value);
                                 }}>
                                 <option selected>Select Breaker</option>
-                                {breakers.map((record) => {
-                                    return <option value={record.breaker_id}>{record.breaker_name}</option>;
+                                {breakersData.map((record) => {
+                                    return <option value={record.id}>{record.name}</option>;
                                 })}
                             </Input>
+                        )}
+                    </Form.Group>
+
+                    {equipmentId === '' && (
+                        <Form.Group className="mb-3 mt-2">
+                            <Button variant="light" className="select-breaker-style">
+                                Select Next Available Breaker
+                            </Button>
                         </Form.Group>
-                    </Form>
-                </Modal.Body>
+                    )}
+                </Form>
                 <Modal.Footer>
                     <Button variant="light" onClick={handleBreakerClose}>
                         Cancel
@@ -144,52 +219,60 @@ const IndividualPassiveDevice = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [equipmentId, setEquipmentId] = useState('');
     const [sensors, setSensors] = useState([]);
-    const [sensorData, setSensordata] = useState([]);
+    const [sensorData, setSensorData] = useState([]);
 
     const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeLocationId, setActiveLocationId] = useState('');
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
 
-    const [breakers, setBreakers] = useState([
-        {
-            breaker_name: 'Breaker 1',
-            breaker_id: 'Breaker 1',
-        },
-        {
-            breaker_name: 'Breaker 2',
-            breaker_id: 'Breaker 2',
-        },
-        {
-            breaker_name: 'Breaker 3',
-            breaker_id: 'Breaker 3',
-        },
-    ]);
+    // *********************************************************************************** //
 
-    const [panels, setPanels] = useState([
-        {
-            panel_name: 'Panel 1',
-            panel_id: 'Panel 1',
-        },
-        {
-            panel_name: 'Panel 2',
-            panel_id: 'Panel 2',
-        },
-        {
-            panel_name: 'Panel 3',
-            panel_id: 'Panel 3',
-        },
+    const [seriesData, setSeriesData] = useState([]);
+    const [deviceData, setDeviceData] = useState([]);
+
+    const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
+
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+
+    const UNIT_DIVIDER = 1000;
+
+    const [metric, setMetric] = useState([
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'power', label: 'Real Power (W)' },
+        { value: 'mAh', label: 'Amps' },
+        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
+        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
+        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
     ]);
 
     const handleChartShow = (id) => {
         setSensorId(id);
-        setShowChart(true);
         let obj = sensors.find((o) => o.id === id);
-        setSensordata(obj);
+        setSensorData(obj);
         fetchSensorGraphData(id);
+        setShowChart(true);
     };
-    console.log('panel', panels);
+
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+
+        metric.map((m) => {
+            if (m.value === value) {
+                label = m.label;
+            }
+
+            return m;
+        });
+
+        return label;
+    };
 
     useEffect(() => {
         const fetchSinglePassiveDevice = async () => {
@@ -204,6 +287,7 @@ const IndividualPassiveDevice = () => {
                     let response = res.data.data[0];
                     setPassiveData(response);
                     setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -223,6 +307,93 @@ const IndividualPassiveDevice = () => {
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setSensors(response);
+                    // let sampleResponse = [
+                    //     {
+                    //         id: '62d55dd8732eadc6370ea4ae',
+                    //         name: 'passive 1',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: '',
+                    //         equipment_id: '',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    //     {
+                    //         id: '62d55de3732eadc6370ea4af',
+                    //         name: 'passive 2',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: '',
+                    //         equipment_id: '',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    //     {
+                    //         id: '62d55dea732eadc6370ea4b0',
+                    //         name: 'passive 3',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: 'AHU_NYPL',
+                    //         equipment_id: '629674e71209c9a7b261620c',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    //     {
+                    //         id: '62d55df1732eadc6370ea4b1',
+                    //         name: 'passive 4',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: '',
+                    //         equipment_id: '',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    //     {
+                    //         id: '62d55df9732eadc6370ea4b2',
+                    //         name: 'passive 5',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: '',
+                    //         equipment_id: '',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    //     {
+                    //         id: '62d55e01732eadc6370ea4b3',
+                    //         name: 'passive 6',
+                    //         device_linked: 'H8:07:B6:88:A8:3S',
+                    //         device_linked_id: '62d55b9ca557e451d3ca8fbc',
+                    //         sensor_type: '',
+                    //         breaker_link: '',
+                    //         equipment: '',
+                    //         equipment_id: '',
+                    //         sapient_id: '',
+                    //         equipment_type_id: '',
+                    //         equipment_type_name: '',
+                    //         status: false,
+                    //     },
+                    // ];
+                    // setSensors(sampleResponse);
                 });
                 setIsFetchingSensorData(false);
             } catch (error) {
@@ -286,7 +457,8 @@ const IndividualPassiveDevice = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}`;
+            setIsSensorChartLoading(true);
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -298,7 +470,40 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-                    console.log('Sensor Graph Data => ', response);
+
+                    let data = response;
+
+                    let exploreData = [];
+
+                    let recordToInsert = {
+                        data: data,
+
+                        name: getRequiredConsumptionLabel(selectedConsumption),
+                    };
+
+                    try {
+                        recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = new Date(_data[0]);
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                _data[1] = _data[1] / UNIT_DIVIDER;
+                            }
+
+                            return _data;
+                        });
+                    } catch (error) {}
+
+                    exploreData.push(recordToInsert);
+
+                    setDeviceData(exploreData);
+
+                    console.log('UPDATED_CODE', seriesData);
+
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsSensorChartLoading(false);
                 });
         } catch (error) {
             console.log(error);
@@ -360,7 +565,7 @@ const IndividualPassiveDevice = () => {
                                     className="btn btn-primary passive-save-style ml-2"
                                     onClick={() => {
                                         updateActiveDeviceData();
-                                        history.push('/settings/active-devices');
+                                        history.push('/settings/passive-devices');
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
@@ -477,17 +682,25 @@ const IndividualPassiveDevice = () => {
                                                     <div className="sensor-container-style-notAttached mt-3">
                                                         <div className="sensor-data-style">
                                                             <span className="sensor-data-no">{index + 1}</span>
-                                                            <span className="sensor-data-title">No Attached</span>
+                                                            <span className="sensor-data-title">Not Attached</span>
                                                         </div>
                                                         <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
                                                             <button
                                                                 type="button"
-                                                                className="btn btn-default passive-edit-style">
-                                                                {/* onClick={() => {
-                                                            handleBreakerShow();
-                                                            setCurrentRecord(record);
-                                                            setCurrentIndex(index);
-                                                        }}> */}
+                                                                className="btn btn-default passive-edit-style"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setCurrentRecord(record);
+                                                                    setCurrentIndex(index);
+                                                                    setEquipmentId(record.equipment_id);
+                                                                }}>
                                                                 Edit
                                                             </button>
                                                         </div>
@@ -513,12 +726,13 @@ const IndividualPassiveDevice = () => {
                                                             />
                                                             <button
                                                                 type="button"
-                                                                className="btn btn-default passive-edit-style">
-                                                                {/* // onClick={() => {
-                                                        //     handleBreakerShow();
-                                                        //     setCurrentRecord(record);
-                                                        //     setCurrentIndex(index);
-                                                        // }}> */}
+                                                                className="btn btn-default passive-edit-style"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setCurrentRecord(record);
+                                                                    setCurrentIndex(index);
+                                                                    setEquipmentId(record.equipment_id);
+                                                                }}>
                                                                 Edit
                                                             </button>
                                                         </div>
@@ -536,16 +750,35 @@ const IndividualPassiveDevice = () => {
 
             {/* <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} /> */}
 
+            <DeviceChartModel
+                showChart={showChart}
+                handleChartClose={handleChartClose}
+                sensorData={sensorData}
+                seriesData={seriesData}
+                setSeriesData={setSeriesData}
+                deviceData={deviceData}
+                setDeviceData={setDeviceData}
+                CONVERSION_ALLOWED_UNITS={CONVERSION_ALLOWED_UNITS}
+                UNIT_DIVIDER={UNIT_DIVIDER}
+                metric={metric}
+                setMetric={setMetric}
+                selectedConsumption={selectedConsumption}
+                setConsumption={setConsumption}
+                getRequiredConsumptionLabel={getRequiredConsumptionLabel}
+                isSensorChartLoading={isSensorChartLoading}
+                setIsSensorChartLoading={setIsSensorChartLoading}
+            />
+
             <SelectBreakerModel
                 showBreaker={showBreaker}
                 handleBreakerClose={handleBreakerClose}
-                breakers={breakers}
-                panels={panels}
                 sensors={sensors}
                 setSensors={setSensors}
                 currentRecord={currentRecord}
                 setCurrentRecord={setCurrentRecord}
                 currentIndex={currentIndex}
+                bldgId={bldgId}
+                equipmentId={equipmentId}
             />
         </>
     );
