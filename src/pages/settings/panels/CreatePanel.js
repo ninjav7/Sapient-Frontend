@@ -1132,7 +1132,6 @@ const CreatePanel = () => {
                         if (el.type === 'breakerLink') {
                             return;
                         }
-
                         let obj = {
                             id: el.id,
                             name: `Breaker ${el.data.breaker_number}`,
@@ -1161,8 +1160,8 @@ const CreatePanel = () => {
                             name: `Breaker ${el.data.breaker_number}`,
                             breaker_number: +el.data.breaker_number,
                             phase_configuration: el.data.phase_configuration,
-                            rated_amps: el.data.rated_amps,
-                            voltage: +el.data.voltage,
+                            rated_amps: 0,
+                            voltage: '',
                             link_type: 'unlinked',
                             link_id: '',
                             equipment_link: el.data.equipment_link,
