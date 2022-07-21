@@ -338,9 +338,9 @@ const DeviceChartModel = ({
                 enabled: true,
 
                 xaxis: {
-                    min: new Date('16 July 2022').getTime(),
+                    min: new Date('19 July 2022').getTime(),
 
-                    max: new Date('17 July 2022').getTime(),
+                    max: new Date('20 July 2022').getTime(),
                 },
             },
         },
