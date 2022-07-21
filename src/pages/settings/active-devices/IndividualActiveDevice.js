@@ -323,9 +323,9 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?end_use=Plug&building_id=${bldgId}`;
+            let params = `?end_use=Plug&building_id=${bldgId}&page_size=20&page_no=1`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                let response = res.data;
+                let response = res.data.data;
                 setEquipmentTypeDevices(response);
             });
         } catch (error) {

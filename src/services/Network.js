@@ -1,4 +1,5 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
 // export const BaseUrl = 'http://122.175.198.21:8000';
 // export const BaseUrl = 'http://localhost:8000';
 
