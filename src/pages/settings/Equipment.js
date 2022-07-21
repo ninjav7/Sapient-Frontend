@@ -832,9 +832,9 @@ const Equipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&end_use=${result.name}`;
+            let params = `?building_id=${bldgId}&end_use=${result.name}&page_size=100&page_no=1`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                setEquipmentSelectedTypeData(res.data);
+                setEquipmentSelectedTypeData(res.data.data);
             });
         } catch (error) {
             console.log(error);
