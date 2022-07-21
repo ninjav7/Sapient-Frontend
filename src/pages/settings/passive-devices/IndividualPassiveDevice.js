@@ -240,14 +240,14 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Consumed Energy (Wh)' },
-        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-        { value: 'mV', label: 'Voltage (V)' },
-        { value: 'power', label: 'Real Power (W)' },
-        { value: 'mAh', label: 'Amps' },
+        // { value: 'energy', label: 'Consumed Energy (Wh)' },
+        // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+        // { value: 'mV', label: 'Voltage (V)' },
+        // { value: 'power', label: 'Real Power (W)' },
         { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
         { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
         { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
+        { value: 'mAh', label: 'Amps' },
     ]);
 
     const handleChartShow = (id) => {
@@ -458,7 +458,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -470,7 +470,7 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-
+                    
                     let data = response;
 
                     let exploreData = [];
@@ -494,6 +494,7 @@ const IndividualPassiveDevice = () => {
 
                     exploreData.push(recordToInsert);
 
+                    console.log('SSR exploreData => ', exploreData);
                     setDeviceData(exploreData);
 
                     console.log('UPDATED_CODE', seriesData);
