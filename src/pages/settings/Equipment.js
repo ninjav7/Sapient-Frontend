@@ -1139,6 +1139,18 @@ const Equipment = () => {
                 <Modal.Body>
                     <Form>
                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Equipment"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('name', e.target.value);
+                                }}
+                                autoFocus
+                            />
+                        </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use Category</Form.Label>
                             <Input
                                 type="select"
@@ -1155,6 +1167,7 @@ const Equipment = () => {
                                 })}
                             </Input>
                         </Form.Group>
+                        
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
                             <Input

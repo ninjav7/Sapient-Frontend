@@ -295,7 +295,7 @@ const DeviceChartModel = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - hh:mm');
+                    return moment(timestamp).format('DD/MMM - HH:mm');
                 },
             },
         },
@@ -311,7 +311,7 @@ const DeviceChartModel = ({
         tooltip: {
             x: {
                 show: true,
-                format: 'MM/dd hh:mm TT',
+                format: 'MM/dd HH:mm',
             },
         },
     });
@@ -392,14 +392,35 @@ const DeviceChartModel = ({
         arr = [...map.values()];
         return arr;
     };
+    // const TimeZoneConvert=(arr=[])=>{
+    //     arr.forEach((x)=>{
+    //         var d=new Date(x[0]);
+    //         console.log(x[0]);
+    //         console.log(x[0].getTime());
+    //         // var MyTimeZone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //         console.log(x[0].getTimezoneOffset());
 
+    //         var date=new Date();
+    //         var offset=date.getTimezoneOffset();var date=new Date();
+    //         var offset=date.getTimezoneOffset();
+    //         console.log(offset)
+    //         var nd=new Date(x[0].getTime()+(60000*(x[0].getTimezoneOffset()-offset)));
+    //         // var utc=d.getTime()+(d.getTimezoneOffset()/-60);    //
+    //         // console.log(utc);
+            
+    //         // console.log(offset)
+    //         // var nd=new Date((utc+(3600000*offset)));
+    //         console.log(nd);
+    //         // console.log(nd.toLocaleString())
+    //     })
+    // }
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        let arr=seriesData.length > 0 ? seriesData[0].data : [];
-        let sData=removeDuplicates(arr);
+        // let arr=seriesData.length > 0 ? seriesData[0].data : [];
+        // TimeZoneConvert(arr);
         // console.log(arr);
         // console.log(sData);
-        let streamData = seriesData.length > 0 ? sData : [];
+        let streamData = seriesData.length > 0 ? seriesData[0].data  : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
