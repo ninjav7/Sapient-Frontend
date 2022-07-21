@@ -14,20 +14,16 @@ import { Cookies } from 'react-cookie';
 import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
-import {ReactComponent as CheckIcon} from '../../assets/icon/check.svg';
+import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     return (
         <div>
             {location.pathname === '/energy/portfolio/overview' ? (
-                <Dropdown.Item className='selected'>
+                <Dropdown.Item className="selected">
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
-                            <FontAwesomeIcon
-                                icon={faBuildings}
-                                size="lg"
-                                className="mr-2"
-                            />
+                            <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
 
                             <Link to="/energy/portfolio/overview">
                                 <span
@@ -39,18 +35,14 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                                 </span>
                             </Link>
                         </div>
-                        <div className='dropdown-item-selected'>
+                        <div className="dropdown-item-selected">
                             <CheckIcon />
                         </div>
                     </div>
                 </Dropdown.Item>
             ) : (
                 <Dropdown.Item>
-                    <FontAwesomeIcon
-                        icon={faBuildings}
-                        size="lg"
-                        className="mr-2"
-                    />
+                    <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
                     <Link to="/energy/portfolio/overview">
                         <span
                             className="portfolio-txt-style"
@@ -91,7 +83,7 @@ const BuildingSwitcher = () => {
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
     const [portfolioName, setPortfolioName] = useState('');
-    
+
     useEffect(() => {
         const getBuildingList = async () => {
             let headers = {
@@ -107,7 +99,7 @@ const BuildingSwitcher = () => {
         };
         getBuildingList();
     }, []);
-    
+
     useEffect(() => {
         ComponentStore.update((s) => {
             s.parent = 'portfolio';
@@ -131,8 +123,8 @@ const BuildingSwitcher = () => {
     }, []);
 
     const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
-    const filteredBuildings = buildingList.filter(({building_name}) => {
-        return building_name.toLowerCase().includes(value.toLowerCase())
+    const filteredBuildings = buildingList.filter(({ building_name }) => {
+        return building_name.toLowerCase().includes(value.toLowerCase());
     });
 
     return (
@@ -153,7 +145,7 @@ const BuildingSwitcher = () => {
                     <div className="content-font-style">
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
-                        <div className='tracker-dropdown-content'>
+                        <div className="tracker-dropdown-content">
                             <PortfolioItem handlePortfolioClick={setPortfolioName} />
 
                             <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />

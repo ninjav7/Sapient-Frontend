@@ -42,21 +42,7 @@
 /* .search-result-row {
 } */
 
-.route-tracker {
-    width: fit-content;
-    height: 100%;
-    left: 8px;
-    top: 6px;
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    color: #1d2939;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-}
+
 
 .recent-btn-grp {
     padding: 4px;

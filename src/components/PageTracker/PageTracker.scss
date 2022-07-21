@@ -1,5 +1,9 @@
 @import '../../assets/scss/colors';
 
+.page-tracker-container {
+    border-bottom: 1px solid $primary-gray-200;
+}
+
 .tracker-dropdown {
     display: flex;
     align-items: center;
@@ -126,20 +130,7 @@
     width: 18.75rem;
 }
 
-.custom-breadcrumb-style {
-    background: transparent;
-    height: 3.3em;
-    width: 100%;
-    padding-top: 2px;
-    margin: 0px !important;
-    margin-top: 5px !important;
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 15px;
-    color: #1d2939;
-}
+
 
 .breadcrumb {
     background: #ffffff;
@@ -161,9 +152,4 @@
     font-size: 14px;
     line-height: 20px;
     color: #1d2939 !important;
-}
-
-.breadcrumb-item + .breadcrumb-item::before {
-    content: '>' !important;
-    padding-left: 2px !important;
 }
