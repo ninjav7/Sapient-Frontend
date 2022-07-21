@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Cookies } from 'react-cookie';
 import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import DonutChart from '../charts/DonutChart';
 import ApexDonutChart from '../charts/ApexDonutChart';
+import ApexCharts from 'apexcharts';
 import LineChart from '../charts/LineChart';
 import SimpleMaps from '../charts/SimpleMaps';
 import EnergyMap from './EnergyMap';
@@ -32,12 +34,12 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const PortfolioOverview = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
     // const isLoading = ProcessingStore.useState((s) => s.isLoading);
     // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
-    const [buildingRecord, setBuildingRecord] = useState([]);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -116,18 +118,22 @@ const PortfolioOverview = () => {
             },
             x: {
                 show: true,
-                format: 'dd/MMM - hh:mm TT',
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value +' K';
+                    return value + ' K';
                 },
             },
         },
         xaxis: {
             type: 'datetime',
+            // labels: {
+            //     format: 'dd/MMM - hh:mm TT',
+            // },
             labels: {
-                format: 'dd/MMM - hh:mm TT',
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - hh:mm');
+                },
             },
         },
         yaxis: {
@@ -137,7 +143,7 @@ const PortfolioOverview = () => {
                     // if (val >= 1000) {
                     //     val = (val / 1000).toFixed(0) + ' K';
                     // }
-                    return val+' K';
+                    return val + ' K';
                 },
             },
             style: {
@@ -270,12 +276,41 @@ const PortfolioOverview = () => {
 
     let [color, setColor] = useState('#ffffff');
 
+    const handleChange=(e,value)=>{
+        // console.log("Selected Item ",value);
+        if(value==="HVAC"){
+            const seriesIndex = 0;
+            const dataPointIndex = 0;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Lighting"){
+            const seriesIndex = 0;
+            const dataPointIndex = 1;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Process"){
+            const seriesIndex = 0;
+            const dataPointIndex = 2;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+        else if(value==="Plug"){
+            const seriesIndex = 0;
+            const dataPointIndex = 3;
+            ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
+        }
+    }
     // const [series, setSeries] = useState([44, 55, 41, 17]);
     const [series, setSeries] = useState([0, 0, 0, 0]);
 
     const [options, setOptions] = useState({
         chart: {
             type: 'donut',
+            id: 'genderplot',
+            events: {
+                mounted: function(chartContext, config) {
+                   chartContext.toggleDataPointSelection(0,0)
+                 },
+              }
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -359,7 +394,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -372,7 +408,6 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         setOveralldata(res.data);
-                        console.log('setOveralldata => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -385,7 +420,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -417,7 +453,8 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = '?aggregate=day';
                 await axios
@@ -431,7 +468,6 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        console.log('Line Chart Response => ', response);
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -439,35 +475,19 @@ const PortfolioOverview = () => {
                             },
                         ];
                         response.forEach((record) => {
+                            const d = new Date(record.x);
+                            const milliseconds = d.getTime();
                             newArray[0].data.push({
                                 // x: moment(record.x).format('MMM D'),
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(2),
+                                x: milliseconds,
+                                y: (record.y / 1000).toFixed(4),
                             });
                         });
-                        console.log('Line Chart New Array => ', newArray);
                         setEnergyConsumptionChart(newArray);
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Energy Consumption Data');
-            }
-        };
-
-        const getBuildingData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setBuildingRecord(data);
-                });
-            } catch (error) {
-                console.log(error);
-                alert('Failed to fetch Building Data');
+                console.log('Failed to fetch Energy Consumption Data');
             }
         };
 
@@ -476,7 +496,7 @@ const PortfolioOverview = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
@@ -489,7 +509,6 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('setBuildingsEnergyConsume => ', data);
                         setBuildingsEnergyConsume(data);
                         let markerArray = [];
                         data.map((record) => {
@@ -500,11 +519,15 @@ const PortfolioOverview = () => {
                             };
                             markerArray.push(markerObj);
                         });
-                        setMarkers(markerArray);
+                        const markerArr = [
+                            { markerOffset: 25, name: 'NYPL', coordinates: [-74.006, 40.7128] },
+                            { markerOffset: 25, name: 'Justin', coordinates: [90.56, 76.76] },
+                        ];
+                        setMarkers(markerArr);
                     });
             } catch (error) {
                 console.log(error);
-                alert('Failed to fetch Portfolio Buildings Data');
+                console.log('Failed to fetch Portfolio Buildings Data');
             }
         };
 
@@ -524,7 +547,6 @@ const PortfolioOverview = () => {
 
         // setIsProcessing(true);
         // setLoading();
-        getBuildingData();
         portfolioBuilidingsData();
         portfolioOverallData();
         portfolioEndUsesData();
@@ -532,7 +554,7 @@ const PortfolioOverview = () => {
         calculateDays();
         // setLoading();
         // setIsProcessing(false);
-    }, [startDate, endDate]);
+    }, [startDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -545,6 +567,9 @@ const PortfolioOverview = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'portfolio';
             });
         };
         updateBreadcrumbStore();
@@ -578,7 +603,7 @@ const PortfolioOverview = () => {
                         <div className="card-box-style button-style">
                             <div className="card-body">
                                 <h5 className="card-title subtitle-style">Total Buildings</h5>
-                                <p className="card-text card-content-style">{buildingRecord.length}</p>
+                                <p className="card-text card-content-style">{buildingsEnergyConsume.length}</p>
                             </div>
                         </div>
 
@@ -633,7 +658,8 @@ const PortfolioOverview = () => {
                                     consumptionNormal={
                                         overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
                                     }
-                                    infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                    // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
+                                    infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
                                     infoType={`total-eui`}
                                 />
                             </div>
@@ -674,6 +700,7 @@ const PortfolioOverview = () => {
                                                 BuildingStore.update((s) => {
                                                     s.BldgId = item.buildingID;
                                                     s.BldgName = item.buildingName;
+                                                    s.timeZone = item.timeZone;
                                                 });
                                                 ComponentStore.update((s) => {
                                                     s.parent = 'buildings';
@@ -771,7 +798,7 @@ const PortfolioOverview = () => {
                                     {energyConsumption.map((record, index) => {
                                         return (
                                             <div>
-                                                <div className="custom-enduse-table-style consumption-style m-2 p-1">
+                                                <div className="custom-enduse-table-style consumption-style m-2 p-1" onMouseOver={(e)=>handleChange(e,record.device)}>
                                                     <div className="ml-2">
                                                         {record.device === 'HVAC' && (
                                                             <div

@@ -212,7 +212,20 @@
     top: 8.5px;
     margin: 4px;
 }
-
+.account-setting-options {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 10px;
+    margin-left: 1rem;
+    display: flex;
+    flex-direction: row;
+}
+.account-option {
+    color: #7c879c;
+    margin-right: 2rem;
+}
 .content-font-style {
     font-family: 'Inter';
     font-style: normal;
@@ -590,4 +603,22 @@ div.navbar-icon-container:hover .other-font-icon-style {
     line-height: 18px;
     border-bottom: 3px solid transparent;
     color: white !important;
+}
+
+.filter-bld-style {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}
+
+.filter-name-style {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: stretch;
 }

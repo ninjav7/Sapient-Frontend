@@ -22,19 +22,31 @@ const Header = (props) => {
         },
         {
             label: 'Last 7 Days',
-            value: 6,
+            value: 7,
         },
         {
             label: 'Last 4 Weeks',
-            value: 27,
+            value: 28,
         },
         {
             label: 'Last 3 Months',
-            value: 89,
+            value: 90,
         },
         {
             label: 'Last 12 Months',
-            value: 364,
+            value: 365,
+        },
+        {
+            label: 'Month to Date',
+            value: 30,
+        },
+        {
+            label: 'Quarter to Date',
+            value: 120,
+        },
+        {
+            label: 'Year to Date',
+            value: 365,
         },
     ];
 
@@ -43,6 +55,7 @@ const Header = (props) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             localStorage.setItem('dateFilter', date);
+            endCustomDate.setDate(endCustomDate.getDate() - 1);
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
             // localStorage.setItem('startDate', startCustomDate);
@@ -60,6 +73,7 @@ const Header = (props) => {
         const setCustomDate = (date) => {
             let startCustomDate = date[0];
             let endCustomDate = date[1];
+            let dt = new Date();
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
@@ -118,7 +132,7 @@ const Header = (props) => {
                             <div className="float-right ml-2">
                                 <Link
                                     to={{
-                                        pathname: `/energy/building-peak-explore/${localStorage.getItem('buildingId')}`,
+                                        pathname: `/explore/page`,
                                     }}>
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                         <i className="uil uil-pen mr-1"></i>Explore

@@ -14,16 +14,24 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
+import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import { faPlus } from '@fortawesome/pro-solid-svg-icons';
+import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-const SingleEquipmentModal = ({ show, equipData, close }) => {
+const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
+    const [selected,setSelected]=useState([]);
     return (
         <>
             {show ? (
@@ -31,20 +39,37 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                     <Modal.Body>
                         <Row>
                             <Col lg={12}>
-                                <h6 className="text-muted">{`Floor 1 > 252 > Desktop PC`}</h6>
+                                <h6 className="text-muted">{`Floor 1 > 252 > ${equipData.equipments_type}`}</h6>
                             </Col>
                         </Row>
                         <Row>
                             <Col lg={10}>
                                 <div>
-                                    <span className="heading-style">{equipData.equipType}</span>
+                                    <span className="heading-style">{equipData.equipments_type}</span>
                                 </div>
                             </Col>
                             <Col lg={2}>
-                                <div className="float-right">
+                           
+                                <div className='button-wrapper'>
+                                <div style={{paddingTop:"0.5rem",marginRight:"1rem"}}>
+                                    <FontAwesomeIcon
+                                        icon={faPowerOff}
+                                        size="lg"
+                                        style={{color:"blue"}}
+                                    />
+                                </div>
+                                <div>
                                     <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
                                         Turn Off
                                     </button>
+                                </div>
+                                <div style={{paddingTop:"0.5rem"}}>
+                                    <FontAwesomeIcon
+                                        icon={faXmark}
+                                        size="lg"
+                                        onClick={close}
+                                    />
+                                </div>
                                 </div>
                             </Col>
                         </Row>
@@ -74,7 +99,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                                 type="text"
                                                 placeholder="Enter Equipment Name"
                                                 className="font-weight-bold"
-                                                defaultValue="Name"
+                                                defaultValue={equipData.equipments_name}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -85,9 +110,11 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold">
-                                                <option selected>Desktop PC</option>
-                                                <option>Refigerator</option>
+                                                className="font-weight-bold" defaultValue={equipData.equipments_type}>
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_type}>{record.equipment_type}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -100,7 +127,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                                 type="text"
                                                 placeholder="Enter Identifier"
                                                 className="font-weight-bold"
-                                                value="Floor 1, 252"
+                                                value={equipData.location}
                                             />
                                             <Form.Label>Location this equipment is installed in.</Form.Label>
                                         </Form.Group>
@@ -126,12 +153,15 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                 </Row>
                                 <Row>
                                     <Col lg={12}>
-                                        {/* <TagsInput
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Tags</Form.Label>
+                                        <TagsInput
                                             value={selected}
                                             onChange={setSelected}
-                                            name="fruits"
-                                            placeHolder="enter fruits"
-                                        /> */}
+                                            name="tag"
+                                            placeHolder="+ Add Tag"
+                                        />
+                                    </Form.Group>
                                     </Col>
                                 </Row>
                                 <Row>
@@ -160,13 +190,25 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                             View Devices
                                         </button>
                                     </div>
+                                    <div>
+                                        {equipData.status === 'Online' && (
+                                                        <div className="icon-bg-pop-styling">
+                                                            ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                    {equipData.status === 'Offline' && (
+                                                        <div className="icon-bg-pop-styling-slash">
+                                                          OFFLINE  <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                        </div>
                                     <div className="mt-4 modal-right-group">
                                         <FormGroup>
                                             <div className="single-line-style">
                                                 <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
                                                     MAC Address
                                                 </h6>
-                                                <h6 className="card-title">AA:AA:AA:AA:AA:AA:AA</h6>
+                                                <h6 className="card-title">{equipData.device_mac}</h6>
                                             </div>
                                         </FormGroup>
                                         <FormGroup>
@@ -174,7 +216,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                                 <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
                                                     Device type
                                                 </h6>
-                                                <h6 className="card-title">HS300</h6>
+                                                <h6 className="card-title">{equipData.device_type}</h6>
                                             </div>
                                         </FormGroup>
                                     </div>
@@ -183,7 +225,7 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
                                             <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
                                                 Installed at
                                             </h6>
-                                            <h6 className="card-title">{`Floor 1 -> Room 253`}</h6>
+                                            <h6 className="card-title">{equipData.device_location}</h6>
                                         </div>
                                     </FormGroup>
                                 </div>
@@ -195,43 +237,453 @@ const SingleEquipmentModal = ({ show, equipData, close }) => {
         </>
     );
 };
+const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
+    const [selectedTags,setSelectedTags]=useState([]);
+    const [selectedZones,setSelectedZones]=useState([]);
 
-const EquipmentTable = ({ equipmentData }) => {
-    const records = [
-        {
-            status: 'available',
-            name: '-',
-            equipType: 'Desktop PC',
-            location: 'Floor 1 > 252',
-            tags: 'FINANCE',
-            sensorNo: 2,
-            lastData: '5 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-        {
-            status: 'available',
-            name: '-',
-            equipType: 'Refrigerator',
-            location: 'Floor 1 > W Kitchen',
-            tags: 'None',
-            sensorNo: '2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-        {
-            status: 'available',
-            name: 'AHU 1',
-            equipType: 'AHU',
-            location: 'Floor 1 > Mech.',
-            tags: 'None',
-            sensorNo: '1,2',
-            lastData: '2 min ago',
-            deviceId: 'D8:07:B6:88:D8:3B',
-        },
-    ];
+    return (
+        <>
+            {show ? (
+                <Modal show={show} onHide={close} dialogClassName="modal-container-style" centered>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={12}>
+                                <h6 className="text-muted">{`Floor 1 > 252 > ${equipData.equipments_type}`}</h6>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={10}>
+                                <div>
+                                    <span className="heading-style">{equipData.equipments_type}</span>
+                                </div>
+                            </Col>
+                            <Col lg={2}>
+                           
+                                <div className='button-wrapper'>
+                                <div style={{paddingTop:"0.5rem",marginRight:"1rem"}}>
+                                    <FontAwesomeIcon
+                                        icon={faPowerOff}
+                                        size="lg"
+                                        style={{color:"blue"}}
+                                    />
+                                </div>
+                                <div>
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
+                                        Turn Off
+                                    </button>
+                                </div>
+                                <div style={{paddingTop:"0.5rem"}}>
+                                    <FontAwesomeIcon
+                                        icon={faXmark}
+                                        size="lg"
+                                        onClick={close}
+                                    />
+                                </div>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col lg={12}>
+                                <div className="mt-2 modal-tabs-style">
+                                    <span className="mr-3">Metrics</span>
+                                    <span className="mr-3 tab-styling">Configure</span>
+                                    <span className="mr-3">History</span>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                    <Modal.Body>
+                        <Row>
+                            <Col lg={8}>
+                                <Row>
+                                    <Col lg={12}>
+                                        <h4>Equipment Details</h4>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Name</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Enter Equipment Name"
+                                                className="font-weight-bold"
+                                                defaultValue={equipData.equipments_name}
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Type</Form.Label>
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold" defaultValue={equipData.equipments_type}>
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_type}>{record.equipment_type}</option>;
+                                                        })}
+                                            </Input>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>End Use Category</Form.Label>
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold" defaultValue={equipData.equipments_type}>
+                                                 <option selected>Select Category</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_type}>{record.equipment_type}</option>;
+                                                        })}
+                                            </Input>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Equipment Location</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Enter Identifier"
+                                                className="font-weight-bold"
+                                                value={equipData.location}
+                                            />
+                                            <Form.Label>Location this equipment is installed in.</Form.Label>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Serves Zones</Form.Label>
+                                            <TagsInput
+                                            value={selectedZones}
+                                            onChange={setSelectedZones}
+                                            name="Zones"
+                                            placeHolder="+ Add Location"
+                                        />
+                                            <Form.Label>
+                                                What area this piece of equipment services.
+                                            </Form.Label>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Tags</Form.Label>
+                                        <TagsInput
+                                            value={selectedTags}
+                                            onChange={setSelectedTags}
+                                            name="tag"
+                                            placeHolder="+ Add Tag"
+                                        />
+                                    </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Notes</Form.Label>
+                                            <Input
+                                                type="textarea"
+                                                name="text"
+                                                id="exampleText"
+                                                rows="3"
+                                                placeholder="Enter a Note..."
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={12}>
+                                        <h4>Equipment MetaData</h4>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={2}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Amps</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Amps"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={2}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Volts</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Volts"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={2}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Phases</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Phases"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={2}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>% Efficiency</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="% Efficiency"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={2}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>% PF</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="% PF"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>RLA (Amps)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="RLA"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>VFD (hZ)</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="VFD"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>RPM</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="RPM"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    
+                                </Row>
+                                <Row>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Model #</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Model No."
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Serial #</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Serial No."
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                            <Form.Label>Schedule Run Hours</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Run Hours"
+                                                className="font-weight-bold"
+                                            />
+                                        </Form.Group>
+                                    </Col>
+                                    
+                                </Row>
+                            </Col>
+                            <Col lg={4}>
+                                <div className="modal-right-container">
+                                    <div className='pic-container'>
+                                        <div className="modal-right-pic"></div>
+                                        <div className="modal-right-card mt-2" style={{padding:"1rem"}}>
+                                        <span className="modal-right-card-title">Energy Monitoring</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                                    Select
+                                                </button>
+                                        </div>
+                                    </div>
+                                    <div className='pic-container mt-3'>
+                                    <div className="modal-right-card mt-2 p-4">
+                                        <span className="modal-right-card-title">Relationships</span>
+                                    </div>
+                                    <div className="modal-right-card mt-1 p-4">
+                                        <span className="modal-right-card-title">Component of System</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
 
-    const [modal, setModal] = useState(false);
-    const Toggle = () => setModal(!modal);
+                                        <div className="grey-container">  <FontAwesomeIcon
+                                        icon={faPlus}
+                                        size="lg"
+                                    /> Select the system</div>
+                                    </div>
+                                    <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Related to System</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
+
+                                        <div className="white-container">
+                                            Chilled Water Plant
+                                            <span className='float-right mr-2'>
+                                            <FontAwesomeIcon
+                                                    icon={faTrash}
+                                                    size="lg"
+                                                />
+                                            </span> 
+                                        </div>
+                                    </div>
+                                    <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Parent Equipment</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
+
+                                        <div className="grey-container">  <FontAwesomeIcon
+                                        icon={faPlus}
+                                        size="lg"
+                                    /> Add Parent</div>
+                                    </div>
+                                    <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Component Equipment</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
+
+                                        <div className="white-container">
+                                            Supply Fan
+                                            <span className='float-right mr-2'>
+                                            <FontAwesomeIcon
+                                                    icon={faTrash}
+                                                    size="lg"
+                                                />
+                                            </span> 
+                                        </div>
+                                        
+                                        {/* <div className="white-container" style={{clear:"both"}}>
+                                            Exhaust Fan
+                                            <span className='float-right mr-2'>
+                                            <FontAwesomeIcon
+                                                    icon={faTrash}
+                                                    size="lg"
+                                                />
+                                            </span> 
+                                        </div> */}
+
+                                    </div>
+                                    </div>
+                                    {/* <div>
+                                        {equipData.status === 'Online' && (
+                                                        <div className="icon-bg-pop-styling">
+                                                            ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                    {equipData.status === 'Offline' && (
+                                                        <div className="icon-bg-pop-styling-slash">
+                                                          OFFLINE  <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                        </div>
+                                    <div className="mt-4 modal-right-group">
+                                        <FormGroup>
+                                            <div className="single-line-style">
+                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    MAC Address
+                                                </h6>
+                                                <h6 className="card-title">{equipData.device_mac}</h6>
+                                            </div>
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <div className="single-line-style">
+                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    Device type
+                                                </h6>
+                                                <h6 className="card-title">{equipData.device_type}</h6>
+                                            </div>
+                                        </FormGroup>
+                                    </div>
+                                    <FormGroup>
+                                        <div className="single-line-style">
+                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                Installed at
+                                            </h6>
+                                            <h6 className="card-title">{equipData.device_location}</h6>
+                                        </div>
+                                                    </FormGroup>*/}
+                                </div> 
+                            </Col>
+                        </Row>
+                    </Modal.Body>
+                </Modal>
+            ) : null}
+        </>
+    );
+};
+
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }) => {
+    const [modal1, setModal1] = useState(false);
+    const [modal2,setModal2]=useState(false);
+    const Close1=()=>{
+        setModal1(false);
+    }
+    const Close2=()=>{
+        setModal2(false);
+    }
+    const Toggle = (record) => {
+        if(record.device_type==="passive"){
+            setModal2(!modal2)
+        }
+        else if(record.device_type==="active"){
+            setModal1(!modal1)
+        }
+        else{
+            setModal2(!modal2);
+        }
+        
+    };
     const [equipData, setEquipData] = useState(null);
 
     return (
@@ -251,64 +703,107 @@ const EquipmentTable = ({ equipmentData }) => {
                                 <th>Device ID</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {equipmentData.map((record, index) => {
-                                return (
-                                    <tr
-                                        key={index}
-                                        onClick={() => {
-                                            setEquipData(record);
-                                            Toggle();
-                                        }}>
-                                        <td className="text-center">
-                                            <div>
-                                                {record.status === 'Online' && (
-                                                    <div className="icon-bg-styling">
-                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                                {record.status === 'Offline' && (
-                                                    <div className="icon-bg-styling-slash">
-                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="font-weight-bold">
-                                            {!(record.equipments_name === null) ? record.equipments_name : '-'}
-                                        </td>
-                                        <td className="font-weight-bold">{record.equipments_type}</td>
-                                        <td>{record.location}</td>
+                        {isEquipDataFetched ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
                                         <td>
-                                            {
-                                                <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                    {record.tags.length === 0 ? 'None' : record.tags[0]}
-                                                </div>
-                                            }
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td>{record.sensor_number}</td>
-                                        <td>{record.last_data === '' ? '-' : record.last_data}</td>
-                                        <td className="font-weight-bold">{record.device_id}</td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {equipmentData.map((record, index) => {
+                                    return (
+                                        <tr
+                                            key={index}
+                                            onClick={() => {
+                                                setEquipData(record);
+                                                Toggle(record);
+                                            }}>
+                                            <td className="text-center">
+                                                <div>
+                                                    {record.status === 'Online' && (
+                                                        <div className="icon-bg-styling">
+                                                            <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                    {record.status === 'Offline' && (
+                                                        <div className="icon-bg-styling-slash">
+                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="font-weight-bold">
+                                                {!(record.equipments_name === "") ? record.equipments_name : '-'}
+                                            </td>
+                                            <td className="font-weight-bold">{record.equipments_type}</td>
+                                            <td>{record.location}</td>
+                                            <td>
+                                                {
+                                                    <div className="badge badge-light mr-2 font-weight-bold week-day-style">
+                                                        {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>{record.sensor_number}</td>
+                                            <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                            <td className="font-weight-bold">{record.device_mac}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
                     </Table>
                 </CardBody>
             </Card>
             <div>
-                <SingleEquipmentModal show={modal} equipData={equipData} close={Toggle} />
+                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData}/>
             </div>
         </>
     );
 };
 
 const Equipment = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isEquipDataFetched, setIsEquipDataFetched] = useState(true);
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -316,8 +811,11 @@ const Equipment = () => {
     const [onlineEquipData, setOnlineEquipData] = useState([]);
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
+    const [equipmentSelectedTypeData, setEquipmentSelectedTypeData] = useState([]);
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
+    const [endUseData, setEndUseData] = useState([]);
+
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
@@ -325,56 +823,92 @@ const Equipment = () => {
         setCreateEqipmentData(obj);
     };
 
+    const handleEquipmentTypeCall=async(value)=>{
+        const result = endUseData.find( ({ end_user_id }) => end_user_id === value );
+        console.log(result.name);
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&end_use=${result.name}`;
+            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                setEquipmentSelectedTypeData(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Equipment Type Data');
+        }
+
+    }
     const saveDeviceData = async () => {
+        let obj = Object.assign({}, createEqipmentData);
+        obj["building_id"] = bldgId;
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
-                // Authorization: `JWT ${_user.token}`,
+                Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
 
             axios
-                .post(`${BaseUrl}${createEquipment}`, createEqipmentData, {
+                .post(`${BaseUrl}${createEquipment}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
                     console.log(res.data);
+                    fetchEquipmentData();
                 });
 
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Passive device data');
+            console.log('Failed to create Passive device data');
+        }
+    };
+    const fetchEquipmentData = async () => {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                let responseData = res.data;
+                setGeneralEquipmentData(responseData);
+                let onlineEquip = [];
+                let offlineEquip = [];
+                responseData.forEach((record) => {
+                    if (record.status === 'Online') {
+                        onlineEquip.push(record);
+                    }
+                    if (record.status === 'Offline') {
+                        offlineEquip.push(record);
+                    }
+                });
+                setOnlineEquipData(onlineEquip);
+                setOfflineEquipData(offlineEquip);
+                setIsEquipDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipments Data');
         }
     };
 
     useEffect(() => {
-        const fetchEquipmentData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    setGeneralEquipmentData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Equipments Data');
-            }
-        };
-
+      
         const fetchOnlineEquipData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?stat=true&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -392,7 +926,7 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
@@ -404,15 +938,35 @@ const Equipment = () => {
                 console.log('Failed to fetch offline Equipments Data');
             }
         };
+        const fetchEndUseData= async()=>{
+            try{
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`
+                await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
+                    //console.log('setEndUseData => ', res.data);
+                    setEndUseData(res.data);
+                });
+
+            }
+            catch(error){
+                console.log(error);
+                console.log("Failed to fetch End Use Data")
+            }
+        }
 
         const fetchEquipTypeData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${equipmentType}`, { headers }).then((res) => {
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                     setEquipmentTypeData(res.data);
                 });
             } catch (error) {
@@ -426,9 +980,8 @@ const Equipment = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -439,8 +992,9 @@ const Equipment = () => {
         };
 
         fetchEquipmentData();
-        fetchOnlineEquipData();
-        fetchOfflineEquipData();
+        fetchEndUseData();
+        // fetchOnlineEquipData();
+        // fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
     }, [bldgId]);
@@ -457,13 +1011,12 @@ const Equipment = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
-
-    // useEffect(() => {
-    //     console.log('createEqipmentData => ', createEqipmentData);
-    // });
 
     return (
         <React.Fragment>
@@ -567,9 +1120,15 @@ const Equipment = () => {
 
             <Row>
                 <Col lg={11}>
-                    {selectedTab === 0 && <EquipmentTable equipmentData={generalEquipmentData} />}
-                    {selectedTab === 1 && <EquipmentTable equipmentData={onlineEquipData} />}
-                    {selectedTab === 2 && <EquipmentTable equipmentData={offlineEquipData} />}
+                    {selectedTab === 0 && (
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                    )}
+                    {selectedTab === 1 && (
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                    )}
+                    {selectedTab === 2 && (
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                    )}
                 </Col>
             </Row>
 
@@ -579,31 +1138,23 @@ const Equipment = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Equipment Name</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Equipment"
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>End Use Category</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('name', e.target.value);
-                                }}
-                                autoFocus
-                            />
+                                    handleChange('end_use', e.target.value);
+                                    handleEquipmentTypeCall(e.target.value);
+                                }}>
+                                <option selected>Select Category</option>
+                                {endUseData.map((record) => {
+                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                })}
+                            </Input>
                         </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Identifier</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter Identifier"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('identifier', e.target.value);
-                                }}
-                            />
-                        </Form.Group>
-
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
                             <Input
@@ -614,8 +1165,8 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.target.value);
                                 }}>
-                                <option selected>Select Model</option>
-                                {equipmentTypeData.map((record) => {
+                                <option selected>Select Type</option>
+                                {equipmentSelectedTypeData.map((record) => {
                                     return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                 })}
                             </Input>

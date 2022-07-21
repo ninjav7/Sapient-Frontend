@@ -10,10 +10,15 @@ import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../se
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const UsagePageThree = () => {
     const { bldgId } = useParams();
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -202,6 +207,9 @@ const UsagePageThree = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -222,7 +230,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=Plug`;
                 await axios
@@ -236,7 +245,7 @@ const UsagePageThree = () => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -249,7 +258,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=plug`;
                 await axios
@@ -267,7 +277,7 @@ const UsagePageThree = () => {
                         let floorConsumption = [];
                         data.map((record, index) => {
                             floorName.push(record.floor);
-                            floorConsumption.push(parseInt(record.energy_consumption.toFixed(2)));
+                            floorConsumption.push(parseInt((record.energy_consumption / 1000).toFixed(2)));
                         });
                         let floorConsumptionData = [
                             {
@@ -299,7 +309,8 @@ const UsagePageThree = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=plug`;
                 await axios
@@ -497,12 +508,14 @@ const UsagePageThree = () => {
                                             After-Hours Consumption
                                         </p>
                                         <p className="card-text usage-card-content-style">
-                                            {(record.after_hours_energy_consumption.now / 1000).toLocaleString(
-                                                undefined,
-                                                {
-                                                    maximumFractionDigits: 2,
-                                                }
-                                            )}
+                                            {record.after_hours_energy_consumption.now
+                                                ? (record.after_hours_energy_consumption.now / 1000).toLocaleString(
+                                                      undefined,
+                                                      {
+                                                          maximumFractionDigits: 2,
+                                                      }
+                                                  )
+                                                : 0}
                                             <span className="card-unit-style">&nbsp;kWh</span>
                                         </p>
                                         {record.after_hours_energy_consumption.now >=
@@ -512,10 +525,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.old / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -526,10 +541,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.old / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -545,10 +562,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.yearly / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -559,10 +578,12 @@ const UsagePageThree = () => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now / 1000,
-                                                            record.after_hours_energy_consumption.yearly / 1000
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -628,14 +649,16 @@ const UsagePageThree = () => {
                     />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
-                    <h6 className="card-title custom-title">Usage by Floor</h6>
-                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
-                    <div className="card-body">
-                        <div>
-                            <UsageBarChart
-                                floorUsageChartOptions={floorUsageChartOptions}
-                                floorUsageChartData={floorUsageChartData}
-                            />
+                    <div className="usage-floor-styling">
+                        <h6 className="card-title custom-title">Usage by Floor</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
+                        <div className="card-body">
+                            <div>
+                                <UsageBarChart
+                                    floorUsageChartOptions={floorUsageChartOptions}
+                                    floorUsageChartData={floorUsageChartData}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>

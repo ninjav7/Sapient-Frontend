@@ -11,9 +11,11 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { ComponentStore } from '../../store/ComponentStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -284,6 +286,9 @@ const ModalEquipment = ({ show, equipData, close, buildingAlert, setBuildingAler
 };
 
 const SelectPeakTable = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -378,7 +383,8 @@ const SelectPeakTable = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${1}`;
                 await axios
@@ -392,7 +398,7 @@ const SelectPeakTable = () => {
                     )
                     .then((res) => {
                         setBuildingAlerts(res.data);
-                        console.log('Building Alert => ', res.data);
+                        // console.log('Building Alert => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -540,6 +546,9 @@ const ExploreBuildingPeak = (props) => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     // Column Chart Data
     const [columnChartSeries, setColumnChartSeries] = useState([
         {
@@ -600,6 +609,9 @@ const ExploreBuildingPeak = (props) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
             });
         };
         updateBreadcrumbStore();

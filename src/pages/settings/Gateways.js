@@ -14,6 +14,9 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
 import { BaseUrl, generalGateway } from '../../services/Network';
+import { BuildingStore } from '../../store/BuildingStore';
+import { Cookies } from 'react-cookie';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 
 const GatewaysTable = ({ generalGatewayData }) => {
@@ -47,6 +50,9 @@ const GatewaysTable = ({ generalGatewayData }) => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();
@@ -103,6 +109,10 @@ const GatewaysTable = ({ generalGatewayData }) => {
 
 const Gateways = () => {
     const [generalGatewayData, setGeneralGatewayData] = useState([]);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     useEffect(() => {
         const fetchGatewayData = async () => {
@@ -110,9 +120,11 @@ const Gateways = () => {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 // 'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
+            let params = `?building_id=${bldgId}`;
             await axios
-                .get(`${BaseUrl}${generalGateway}`, {}, { headers })
+                .get(`${BaseUrl}${generalGateway}${params}`, { headers })
                 .then((res) => {
                     setGeneralGatewayData(res.data);
                     console.log(res.data);

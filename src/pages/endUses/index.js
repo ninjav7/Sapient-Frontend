@@ -10,10 +10,17 @@ import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import useSortableData from '../../helpers/useSortableData';
+import { BuildingStore } from '../../store/BuildingStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const EndUses = () => {
-    const { bldgId } = useParams();
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const [endUsage, seteEndUsage] = useState([
@@ -74,7 +81,7 @@ const EndUses = () => {
                 formatter: function (value) {
                     var val = Math.abs(value);
                     if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' kWh';
+                        val = (val / 1000).toFixed(0) + ' K';
                     }
                     return val;
                 },
@@ -84,7 +91,7 @@ const EndUses = () => {
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + 'kWh';
+                    return val + 'k';
                 },
             },
             theme: 'dark',
@@ -137,7 +144,8 @@ const EndUses = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -163,7 +171,7 @@ const EndUses = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -177,7 +185,6 @@ const EndUses = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log('EndUses Response Data => ', responseData);
                         let newArray = [];
                         responseData.map((element) => {
                             let newObj = {
@@ -190,8 +197,19 @@ const EndUses = () => {
                         let newXaxis = {
                             categories: [],
                         };
-                        responseData[0].data.map((element) => {
-                            return newXaxis.categories.push(`Week ${element._id}`);
+                        let weeksArray = [];
+                        responseData.forEach((enduse) => {
+                            enduse.data.forEach((element) => {
+                                weeksArray.push(element._id);
+                            });
+                        });
+                        let uniqueSet = new Set(weeksArray);
+                        let newList = Array.from(uniqueSet);
+                        newList.sort(function (a, b) {
+                            return a - b;
+                        });
+                        newList.map((num) => {
+                            return newXaxis.categories.push(`Week ${num}`);
                         });
                         setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
                     });
@@ -215,6 +233,9 @@ const EndUses = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();

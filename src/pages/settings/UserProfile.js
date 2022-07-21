@@ -15,10 +15,10 @@ import {
     generalOperatingHours,
 } from '../../services/Network';
 import axios from 'axios';
+import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UserProfile = () => {
-    const [buildingId, setBuildingId] = useState(1);
     const [buildingData, setBuildingData] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
@@ -39,6 +39,9 @@ const UserProfile = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
             });
         };
         updateBreadcrumbStore();

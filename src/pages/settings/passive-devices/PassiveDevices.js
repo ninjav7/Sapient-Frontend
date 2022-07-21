@@ -12,6 +12,7 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway } from '../../../services/Network';
@@ -20,51 +21,213 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 
-const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, paginationData }) => {
+const PassiveDevicesTable = ({
+    deviceData,
+    nextPageData,
+    previousPageData,
+    paginationData,
+    isDeviceProcessing,
+    setIsDeviceProcessing,
+    selectedOptions,
+    passiveDeviceDataWithFilter,
+}) => {
+    const [identifierOrder, setIdentifierOrder] = useState(false);
+    const [modelOrder, setModelOrder] = useState(false);
+    const [locationOrder, setLocationOrder] = useState(false);
+    const [sensorOrder, setSensorOrder] = useState(false);
+
+    const handleColumnSort = (order, columnName) => {
+        if (columnName === 'mac_address') {
+            setModelOrder(false);
+            setLocationOrder(false);
+            setSensorOrder(false);
+        }
+        if (columnName === 'model') {
+            setIdentifierOrder(false);
+            setLocationOrder(false);
+            setSensorOrder(false);
+        }
+        if (columnName === 'location') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setSensorOrder(false);
+        }
+        if (columnName === 'sensor_count') {
+            setIdentifierOrder(false);
+            setModelOrder(false);
+            setLocationOrder(false);
+        }
+        passiveDeviceDataWithFilter(order, columnName);
+    };
+
     return (
         <Card>
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
-                            <th>Status</th>
-                            <th>Identifier</th>
-                            <th>Model</th>
-                            <th>Location</th>
-                            <th>Sensors</th>
+                            {selectedOptions.some((record) => record.value === 'status') && (
+                                <th className="active-device-header">
+                                    <div className="passive-device-flex">
+                                        <div>Status</div>
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                <th
+                                    className="active-device-header"
+                                    onClick={() => setIdentifierOrder(!identifierOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Identifier (MAC)</div>
+                                        {identifierOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'model') && (
+                                <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Model</div>
+                                        {modelOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'location') && (
+                                <th className="active-device-header" onClick={() => setLocationOrder(!locationOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Location</div>
+                                        {locationOrder ? (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
+                            {selectedOptions.some((record) => record.value === 'sensors') && (
+                                <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
+                                    <div className="passive-device-flex">
+                                        <div>Sensors</div>
+                                        {sensorOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                            )}
                         </tr>
                     </thead>
-                    <tbody>
-                        {deviceData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <td scope="row" className="text-center">
-                                        {record.status === 'Online' && (
-                                            <div className="icon-bg-styling">
-                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                            </div>
-                                        )}
-                                        {record.status === 'Offline' && (
-                                            <div className="icon-bg-styling-slash">
-                                                <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                            </div>
-                                        )}
+                    {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
-                                    <Link
-                                        to={{
-                                            pathname: `/settings/passive-devices/single/${record.equipments_id}`,
-                                        }}>
-                                        <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                    </Link>
-                                    <td>{record.model}</td>
-                                    <td>{record.location}</td>
-                                    <td>{record.sensor_number}</td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {deviceData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        {selectedOptions.some((record) => record.value === 'status') && (
+                                            <td scope="row" className="text-center">
+                                                {record.status === 'Online' && (
+                                                    <div className="icon-bg-styling">
+                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                                {record.status === 'Offline' && (
+                                                    <div className="icon-bg-styling-slash">
+                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        )}
+
+                                        <Link
+                                            to={{
+                                                pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                            }}>
+                                            {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                            )}
+                                        </Link>
+
+                                        {selectedOptions.some((record) => record.value === 'model') && (
+                                            <td>{record.model}</td>
+                                        )}
+
+                                        {selectedOptions.some((record) => record.value === 'location') && (
+                                            <td>{record.location}</td>
+                                        )}
+
+                                        {selectedOptions.some((record) => record.value === 'sensors') && (
+                                            <td>{record.sensor_number}</td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
                 <div className="page-button-style">
                     <button
@@ -90,6 +253,21 @@ const PassiveDevicesTable = ({ deviceData, nextPageData, previousPageData, pagin
 };
 
 const PassiveDevices = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const tableColumnOptions = [
+        { label: 'Status', value: 'status' },
+        { label: 'Identifier', value: 'identifier' },
+        { label: 'Model', value: 'model' },
+        { label: 'Location', value: 'location' },
+        { label: 'Sensors', value: 'sensors' },
+    ];
+
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -122,7 +300,7 @@ const PassiveDevices = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
     });
-    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -135,12 +313,12 @@ const PassiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             setIsProcessing(true);
-
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${createDevice}`, createDeviceData, {
+                .post(`${BaseUrl}${createDevice}${params}`, createDeviceData, {
                     headers: header,
                 })
                 .then((res) => {
@@ -152,21 +330,20 @@ const PassiveDevices = () => {
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Passive device data');
+            console.log('Failed to create Passive device data');
         }
     };
 
-    const nextPageData = async (path) => {
+    const passiveDeviceDataWithFilter = async (order, filterBy) => {
         try {
-            if (path === null) {
-                return;
-            }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+            let params = `?building_id=${bldgId}&page_size=10&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
+            await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
                 setPaginationData(res.data);
@@ -180,9 +357,46 @@ const PassiveDevices = () => {
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
+            console.log('Failed to fetch Filtered Active Devices');
+        }
+    };
+
+    const nextPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            setIsDeviceProcessing(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(response.data);
+                setPaginationData(res.data);
+
+                let onlineData = [];
+                let offlineData = [];
+
+                response.forEach((record) => {
+                    record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                });
+
+                setOnlineDeviceData(onlineData);
+                setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
@@ -192,12 +406,14 @@ const PassiveDevices = () => {
             if (path === null) {
                 return;
             }
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.get(`${BaseUrl}${path}`, { headers }).then((res) => {
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
                 setPaginationData(res.data);
@@ -205,109 +421,33 @@ const PassiveDevices = () => {
                 let onlineData = [];
                 let offlineData = [];
 
-                response.forEach((record) => {
+                response.data.forEach((record) => {
                     record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
                 });
 
                 setOnlineDeviceData(onlineData);
                 setOfflineDeviceData(offlineData);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
+            setIsDeviceProcessing(false);
             console.log('Failed to fetch all Active Devices');
         }
     };
 
-    
-    // useEffect(() => {
-    //     const fetchPassiveDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             await axios.get(`${BaseUrl}${generalPassiveDevices}`, { headers }).then((res) => {
-    //                 setPassiveDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Passive devices');
-    //         }
-    //     };
-
-    //     const fetchOnlineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=true`;
-    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOnlineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch all Online devices');
-    //         }
-    //     };
-
-    //     const fetchOfflineDeviceData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             let params = `?stat=false`;
-    //             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-    //                 setOfflineDeviceData(res.data);
-    //                 console.log(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch Offline devices');
-    //         }
-    //     };
-
-    //     const fetchLocationData = async () => {
-    //         try {
-    //             let headers = {
-    //                 'Content-Type': 'application/json',
-    //                 accept: 'application/json',
-    //                 'user-auth': '628f3144b712934f578be895',
-    //             };
-    //             // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //             await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-    //                 setLocationData(res.data);
-    //             });
-    //         } catch (error) {
-    //             console.log(error);
-    //             console.log('Failed to fetch Location Data');
-    //         }
-    //     };
-
-    //     fetchPassiveDeviceData();
-    //     fetchOnlineDeviceData();
-    //     fetchOfflineDeviceData();
-    //     fetchLocationData();
-    // }, []);
-
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
+                setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
-                    console.log('Rai Passive Data => ', data);
                     setPassiveDeviceData(data.data);
 
                     let onlineData = [];
@@ -319,9 +459,11 @@ const PassiveDevices = () => {
 
                     setOnlineDeviceData(onlineData);
                     setOfflineDeviceData(offlineData);
+                    setIsDeviceProcessing(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsDeviceProcessing(false);
                 console.log('Failed to fetch all Passive devices');
             }
         };
@@ -331,9 +473,8 @@ const PassiveDevices = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                // await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     setLocationData(res.data);
                 });
@@ -347,7 +488,7 @@ const PassiveDevices = () => {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?building_id=${bldgId}`;
             await axios
@@ -381,13 +522,21 @@ const PassiveDevices = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
         };
         updateBreadcrumbStore();
-    }, []);
 
-    useEffect(() => {
-        console.log('createDeviceData => ', createDeviceData);
-    });
+        let arr = [
+            { label: 'Status', value: 'status' },
+            { label: 'Identifier', value: 'identifier' },
+            { label: 'Model', value: 'model' },
+            { label: 'Location', value: 'location' },
+            { label: 'Sensors', value: 'sensors' },
+        ];
+        setSelectedOptions(arr);
+    }, []);
 
     return (
         <React.Fragment>
@@ -474,38 +623,60 @@ const PassiveDevices = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={8}>
-                    {selectedTab === 0 && <PassiveDevicesTable deviceData={passiveDeviceData}
+                    {selectedTab === 0 && (
+                        <PassiveDevicesTable
+                            deviceData={passiveDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData}/>}
-                    {selectedTab === 1 && <PassiveDevicesTable deviceData={onlineDeviceData}
+                            paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
+                            passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                        />
+                    )}
+                    {selectedTab === 1 && (
+                        <PassiveDevicesTable
+                            deviceData={onlineDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData} />}
-                    {selectedTab === 2 && <PassiveDevicesTable deviceData={offlineDeviceData}
+                            paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
+                            passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                        />
+                    )}
+                    {selectedTab === 2 && (
+                        <PassiveDevicesTable
+                            deviceData={offlineDeviceData}
                             nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData} />}
+                            paginationData={paginationData}
+                            isDeviceProcessing={isDeviceProcessing}
+                            setIsDeviceProcessing={setIsDeviceProcessing}
+                            selectedOptions={selectedOptions}
+                            passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                        />
+                    )}
                 </Col>
             </Row>
 
@@ -562,7 +733,7 @@ const PassiveDevices = () => {
                             </Input>
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Gateway</Form.Label>
                             <Input
                                 type="select"
@@ -577,7 +748,7 @@ const PassiveDevices = () => {
                                     return <option value={record.equipments_id}>{record.model}</option>;
                                 })}
                             </Input>
-                        </Form.Group>
+                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

@@ -3,24 +3,50 @@ import { FormGroup } from 'reactstrap';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
+import { faPowerOff } from '@fortawesome/pro-solid-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../../services/Network';
+import {
+    BaseUrl,
+    generalActiveDevices,
+    getLocation,
+    sensorGraphData,
+    listSensor,
+    equipmentType,
+    linkActiveSensorToEquip,
+    updateActivePassiveDevice,
+} from '../../../services/Network';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
+import { ComponentStore } from '../../../store/ComponentStore';
 import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
+import { Cookies } from 'react-cookie';
+import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
+import UnionLogo from '../../../assets/images/active-devices/Union.svg';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const IndividualActiveDevice = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    let history = useHistory();
+
     const { deviceId } = useParams();
     const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);
     const handleChartClose = () => setShowChart(false);
-    
+
+    // Equipment states
+    const [showEquipment, setShowEquipment] = useState(false);
+    const handleEquipmentClose = () => setShowEquipment(false);
+    const handleEquipmentShow = () => setShowEquipment(true);
+
     // Edit states
     const [showEdit, setShowEdit] = useState(false);
     const handleEditClose = () => setShowEdit(false);
@@ -29,10 +55,19 @@ const IndividualActiveDevice = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [locationData, setLocationData] = useState([]);
+    const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeData, setActiveData] = useState({});
+    const [activeLocationId, setActiveLocationId] = useState('');
     const [sensors, setSensors] = useState([]);
-    const [sensorData, setSensorData] = useState([]);
+    const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
+    const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
+    const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
+    const [sensorData, setSensorData] = useState({});
+    const [equipmentTypeDevices, setEquipmentTypeDevices] = useState([]);
     const [sensorCount, setSensorCount] = useState(0);
+    const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
+    const [selectedSensorId, setSelectedSensorId] = useState('');
+    const [newEquipTypeID, setNewEquipTypeID] = useState('');
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
@@ -47,31 +82,81 @@ const IndividualActiveDevice = () => {
         },
     ]);
 
+    // *********************************************************************************** //
+
+    const [seriesData, setSeriesData] = useState([]);
+    const [deviceData, setDeviceData] = useState([]);
+
+    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+
+    const UNIT_DIVIDER = 1000;
+
+    const [metric, setMetric] = useState([
+        { value: 'energy', label: 'Consumed Energy (Wh)' },
+
+        { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
+
+        { value: 'mV', label: 'Voltage (V)' },
+
+        { value: 'mAh', label: 'Amperage (A)' },
+
+        { value: 'power', label: 'Real Power (W)' },
+    ]);
+
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+
+    const getRequiredConsumptionLabel = (value) => {
+        let label = '';
+
+        metric.map((m) => {
+            if (m.value === value) {
+                label = m.label;
+            }
+
+            return m;
+        });
+
+        return label;
+    };
+
+    // *********************************************************************************** //
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updatedSensorData);
         obj[key] = value;
         setUpdatedSensorData(obj);
     };
+
     const handleChartShow = (id) => {
         setSensorId(id);
-        setShowChart(true);
-        let obj = sensors.find(o => o.id === id);
+        let obj = sensors.find((o) => o.id === id);
+        console.log('Sensor Data Object => ', obj);
         setSensorData(obj);
         fetchSensorGraphData(id);
-    }
+        setShowChart(true);
+    };
+
     useEffect(() => {
-        console.log("entered in useeffect")
+        if(showChart){
+            return;
+        }
+        setConsumption('energy');
+    }, [showChart]);
+
+    useEffect(() => {
         const fetchSingleActiveDevice = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_id=${deviceId}&page_size=100&page_no=1`;
+                let params = `?device_id=${deviceId}&page_size=100&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setActiveData(response.data[0]);
+                    let response = res.data.data[0];
+                    setActiveData(response);
+                    setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -84,12 +169,13 @@ const IndividualActiveDevice = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?device_id=${deviceId}`;
                 await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setSensors(response);
+                    setIsFetchingSensorData(false);
                 });
             } catch (error) {
                 console.log(error);
@@ -99,16 +185,20 @@ const IndividualActiveDevice = () => {
 
         const fetchLocationData = async () => {
             try {
+                setIsLocationFetched(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    let response = res.data;
+                    setLocationData(response);
+                    setIsLocationFetched(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsLocationFetched(false);
                 console.log('Failed to fetch Location Data');
             }
         };
@@ -130,40 +220,169 @@ const IndividualActiveDevice = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
 
-    
-    // useEffect(() => {
-        const fetchSensorGraphData = async (id) => {
+    useEffect(() => {
+        const fetchActiveDeviceSensorData = async () => {
             try {
-                let endDate = new Date(); // today
-                let startDate = new Date();
-                startDate.setDate(startDate.getDate() - 7);
-                
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${id===sensorId?sensorId:id}`;
-                await axios.post(`${BaseUrl}${sensorGraphData}${params}`, 
-                {
-                    date_from: dateFormatHandler(startDate),
-                    date_to: dateFormatHandler(endDate),
-                }
-                ,{ headers }).then((res) => {
+                let params = `?device_id=${deviceId}`;
+                await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                    console.log('Sensor Graph Data => ', response);
+                    setSensors(response);
+                    setIsFetchingSensorData(false);
                 });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Sensor Graph data');
+                setIsFetchingSensorData(false);
+                console.log('Failed to fetch Active device sensor data');
             }
         };
-    //     fetchSensorGraphData();
-    // }, [sensorId]);
+        fetchActiveDeviceSensorData();
+    }, [sensorAPIRefresh]);
+
+    const fetchSensorGraphData = async (id) => {
+        try {
+            let endDate = new Date(); // today
+            let startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setIsSensorChartLoading(true);
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${sensorGraphData}${params}`,
+                    {
+                        date_from: dateFormatHandler(startDate),
+                        date_to: dateFormatHandler(endDate),
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+
+                    let data = response;
+
+                    let exploreData = [];
+
+                    let recordToInsert = {
+                        data: data,
+
+                        name: getRequiredConsumptionLabel(selectedConsumption),
+                    };
+
+                    try {
+                        recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = new Date(_data[0]);
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                _data[1] = _data[1] / UNIT_DIVIDER;
+                            }
+
+                            return _data;
+                        });
+                    } catch (error) {}
+
+                    exploreData.push(recordToInsert);
+
+                    setDeviceData(exploreData);
+
+                    console.log('UPDATED_CODE', seriesData);
+
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsSensorChartLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Sensor Graph data');
+        }
+    };
+
+    const fetchEquipmentTypeData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?end_use=Plug&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setEquipmentTypeDevices(response);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Equipment Type data');
+        }
+    };
+
+    const linkSensorToEquipment = async (sensorId, currEquipId, newEquipID) => {
+        if (currEquipId === newEquipID) {
+            return;
+        }
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setSensors([]);
+            setIsFetchingSensorData(true);
+            let params = `?sensor_id=${sensorId}&equipment_type_id=${newEquipID}`;
+            await axios.post(`${BaseUrl}${linkActiveSensorToEquip}${params}`, {}, { headers }).then((res) => {
+                setSensorAPIRefresh(!sensorAPIRefresh);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to link Sensor with Equipment');
+        }
+    };
+
+    const updateActiveDeviceData = async () => {
+        if (activeData.equipments_id) {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${activeData.equipments_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
+                        {
+                            location_id: activeLocationId,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setSensorAPIRefresh(!sensorAPIRefresh);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to link Sensor with Equipment');
+            }
+        }
+    };
 
     return (
         <>
@@ -176,8 +395,12 @@ const IndividualActiveDevice = () => {
                                     <span className="passive-device-style">Active Device</span>
                                 </div>
                                 <div>
-                                    <span className="passive-device-name mr-3">Power Strip</span>
-                                    <span className="passive-sensor-count">{activeData.identifier}</span>
+                                    <span className="passive-device-name mr-3">
+                                        {activeData.description ? activeData.description : ''}
+                                    </span>
+                                    <span className="passive-sensor-count">
+                                        {activeData.identifier ? activeData.identifier : ''}
+                                    </span>
                                 </div>
                             </div>
                             <div>
@@ -186,7 +409,19 @@ const IndividualActiveDevice = () => {
                                         Cancel
                                     </button>
                                 </Link>
-                                <button type="button" className="btn btn-primary passive-save-style ml-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary passive-save-style ml-2"
+                                    onClick={() => {
+                                        updateActiveDeviceData();
+                                        history.push('/settings/active-devices');
+                                    }}
+                                    disabled={
+                                        activeLocationId === 'Select location' ||
+                                        activeLocationId === activeData.location_id
+                                            ? true
+                                            : false
+                                    }>
                                     Save
                                 </button>
                             </div>
@@ -206,12 +441,29 @@ const IndividualActiveDevice = () => {
                                 <div>
                                     <Form.Group className="mb-1" controlId="exampleForm.ControlInput1">
                                         <Form.Label className="device-label-style">Installed Location</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Enter Identifier"
-                                            className="passive-location-style"
-                                            value={activeData.location}
-                                        />
+                                        {isLocationFetched ? (
+                                            <Skeleton count={1} height={35} />
+                                        ) : (
+                                            <Input
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold"
+                                                onChange={(e) => {
+                                                    setActiveLocationId(e.target.value);
+                                                }}
+                                                value={activeLocationId}>
+                                                <option>Select Location</option>
+                                                {locationData.map((record, index) => {
+                                                    return (
+                                                        <option value={record.location_id}>
+                                                            {record.location_name}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </Input>
+                                        )}
+
                                         <Form.Label className="device-sub-label-style mt-1">
                                             Location this device is installed in.
                                         </Form.Label>
@@ -222,13 +474,17 @@ const IndividualActiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Identifier
                                         </h6>
-                                        <h6 className="passive-device-value">{activeData.identifier}</h6>
+                                        <h6 className="passive-device-value">
+                                            {activeData.identifier ? activeData.identifier : ''}
+                                        </h6>
                                     </div>
                                     <div>
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Device Model
                                         </h6>
-                                        <h6 className="passive-device-value">{activeData.model}</h6>
+                                        <h6 className="passive-device-value">
+                                            {activeData.model ? activeData.model : ''}
+                                        </h6>
                                     </div>
                                 </div>
                                 <div className="single-passive-grid">
@@ -249,7 +505,6 @@ const IndividualActiveDevice = () => {
                         </div>
                         <div className="col-8">
                             <h5 className="device-title">Sensors ({sensors.length})</h5>
-                            {/* <h5 className="device-title">Sensors (1)</h5> */}
                             <div className="mt-2">
                                 <div className="active-sensor-header">
                                     <div className="search-container mr-2">
@@ -314,30 +569,91 @@ const IndividualActiveDevice = () => {
                                 </div>
                             </div>
 
-                            <div className="mt-2 socket-image-container"></div>
+                            <div className="socket-container">
+                                <div className="mt-2 sockets-slots-container">
+                                    {sensors.map((record, index) => {
+                                        return (
+                                            <>
+                                                {record.status && (
+                                                    <div>
+                                                        <div className="power-off-style">
+                                                            <FontAwesomeIcon
+                                                                icon={faPowerOff}
+                                                                size="lg"
+                                                                color="#3C6DF5"
+                                                            />
+                                                        </div>
+                                                        {record.equipment_type_id === '' ? (
+                                                            <div className="socket-rect">
+                                                                <img src={SocketLogo} alt="Socket" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="online-socket-container">
+                                                                <img
+                                                                    src={UnionLogo}
+                                                                    alt="Union"
+                                                                    className="union-icon-style"
+                                                                    width="35vw"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
 
-                            {sensors.map((record, index) => {
-                                return (
-                                    <>
-                                        {record.equipment_id === '' ? (
-                                            <div className="sensor-container-style-notAttached mt-3">
-                                                <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">No Equipment</span>
-                                                </div>
-                                                <div className="sensor-data-style-right">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-default passive-edit-style">
-                                                        Edit
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
+                                                {!record.status && (
+                                                    <div>
+                                                        <div className="power-off-style">
+                                                            <FontAwesomeIcon
+                                                                icon={faPowerOff}
+                                                                size="lg"
+                                                                color="#EAECF0"
+                                                            />
+                                                        </div>
+                                                        {record.equipment_type_id === '' ? (
+                                                            <div className="socket-rect">
+                                                                <img src={SocketLogo} alt="Socket" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="online-socket-container">
+                                                                <img
+                                                                    src={UnionLogo}
+                                                                    alt="Union"
+                                                                    className="union-icon-style"
+                                                                    width="35vw"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {isFetchingSensorData ? (
+                                <div className="mt-4">
+                                    <Skeleton count={8} height={40} />
+                                </div>
+                            ) : (
+                                <>
+                                    {sensors.map((record, index) => {
+                                        return (
                                             <div className="sensor-container-style mt-3">
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{index + 1}</span>
-                                                    <span className="sensor-data-title">{record.equipment}</span>
+                                                    <span className="sensor-data-title">
+                                                        {record.equipment_type_name
+                                                            ? record.equipment_type_name
+                                                            : 'No Equipment'}
+                                                        {record.equipment_id === '' ? (
+                                                            ''
+                                                        ) : (
+                                                            <div className="ml-2 badge badge-soft-primary">
+                                                                {record.equipment}
+                                                            </div>
+                                                        )}
+                                                    </span>
                                                 </div>
                                                 <div className="sensor-data-style-right">
                                                     <FontAwesomeIcon
@@ -347,23 +663,47 @@ const IndividualActiveDevice = () => {
                                                             handleChartShow(record.id);
                                                         }}
                                                     />
-                                                    <button
+                                                    <Button
                                                         type="button"
-                                                        className="btn btn-default passive-edit-style">
+                                                        className="btn btn-default passive-edit-style"
+                                                        onClick={() => {
+                                                            fetchEquipmentTypeData();
+                                                            setSelectedEquipTypeId(record.equipment_type_id);
+                                                            setNewEquipTypeID(record.equipment_type_id);
+                                                            setSelectedSensorId(record.id);
+                                                            handleEquipmentShow();
+                                                        }}>
                                                         Edit
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </div>
-                                        )}
-                                    </>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <DeviceChartModel showChart={showChart} handleChartClose={handleChartClose} sensorData={sensorData} />
+            <DeviceChartModel
+                showChart={showChart}
+                handleChartClose={handleChartClose}
+                sensorData={sensorData}
+                seriesData={seriesData}
+                setSeriesData={setSeriesData}
+                deviceData={deviceData}
+                setDeviceData={setDeviceData}
+                CONVERSION_ALLOWED_UNITS={CONVERSION_ALLOWED_UNITS}
+                UNIT_DIVIDER={UNIT_DIVIDER}
+                metric={metric}
+                setMetric={setMetric}
+                selectedConsumption={selectedConsumption}
+                setConsumption={setConsumption}
+                getRequiredConsumptionLabel={getRequiredConsumptionLabel}
+                isSensorChartLoading={isSensorChartLoading}
+                setIsSensorChartLoading={setIsSensorChartLoading}
+            />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
                 <Modal.Header>
@@ -409,10 +749,49 @@ const IndividualActiveDevice = () => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // saveDeviceData();
                             handleEditClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showEquipment} onHide={handleEquipmentClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Edit Socket</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Equipment Type</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    setNewEquipTypeID(e.target.value);
+                                }}
+                                value={newEquipTypeID}>
+                                <option selected>Select Equipment Type</option>
+                                {equipmentTypeDevices.map((record) => {
+                                    return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleEquipmentClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            handleEquipmentClose();
+                            linkSensorToEquipment(selectedSensorId, selectedEquipTypeId, newEquipTypeID);
+                        }}>
+                        Update Socket
                     </Button>
                 </Modal.Footer>
             </Modal>

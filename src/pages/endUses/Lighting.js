@@ -10,10 +10,15 @@ import { BaseUrl, endUses, endUsesFloorChart, endUsesUsageChart } from '../../se
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageTwo = ({ title = 'Lighting' }) => {
     const { bldgId } = useParams();
+
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -201,6 +206,9 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -221,7 +229,8 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=Lighting`;
                 await axios
@@ -235,7 +244,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('Lighting setEndUsesData => ', res.data);
+                        // console.log('Lighting setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -248,7 +257,8 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=lighting`;
                 await axios
@@ -298,7 +308,8 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=lighting`;
                 await axios
@@ -311,7 +322,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log('endUsesUsageChart => ', res.data);
+                        // console.log('endUsesUsageChart => ', res.data);
                         let data = res.data;
                         let energyUsage = [
                             {
@@ -512,10 +523,12 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -526,10 +539,12 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                                                 style={{ width: 'auto' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
-                                                        {percentageHandler(
-                                                            record.after_hours_energy_consumption.now,
-                                                            record.after_hours_energy_consumption.old
-                                                        )}
+                                                        {record.after_hours_energy_consumption.now
+                                                            ? percentageHandler(
+                                                                  record.after_hours_energy_consumption.now / 1000,
+                                                                  record.after_hours_energy_consumption.old / 1000
+                                                              )
+                                                            : 0}
                                                         %
                                                     </strong>
                                                 </i>
@@ -628,14 +643,16 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     />
                 </Col>
                 <Col xl={5} className="mt-5 ml-3">
-                    <h6 className="card-title custom-title">Usage by Floor</h6>
-                    <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
-                    <div className="card-body">
-                        <div>
-                            <UsageBarChart
-                                floorUsageChartOptions={floorUsageChartOptions}
-                                floorUsageChartData={floorUsageChartData}
-                            />
+                    <div className="usage-floor-styling">
+                        <h6 className="card-title custom-title">Usage by Floor</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
+                        <div className="card-body">
+                            <div>
+                                <UsageBarChart
+                                    floorUsageChartOptions={floorUsageChartOptions}
+                                    floorUsageChartData={floorUsageChartData}
+                                />
+                            </div>
                         </div>
                     </div>
                 </Col>

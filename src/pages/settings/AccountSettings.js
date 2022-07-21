@@ -6,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
 import {
     BaseUrl,
@@ -31,6 +32,9 @@ const AccountSettings = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -40,7 +44,7 @@ const AccountSettings = () => {
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        General Building Settings
+                        General Account Settings
                     </span>
                 </Col>
             </Row>
@@ -85,7 +89,7 @@ const AccountSettings = () => {
                 </Col>
             </Row>
 
-            <Row>
+            {/* <Row>
                 <Col lg={8}>
                     <Card className="custom-card card-alignment">
                         <CardHeader>
@@ -119,7 +123,7 @@ const AccountSettings = () => {
                         </CardBody>
                     </Card>
                 </Col>
-            </Row>
+            </Row> */}
         </React.Fragment>
     );
 };

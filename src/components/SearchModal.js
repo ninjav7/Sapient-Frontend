@@ -34,14 +34,14 @@ const SearchModal = () => {
         { value: 'Building 4', label: '246 Blackburn Rd. Philadelphia, PA' },
     ]);
 
-    console.log('allRoutes => ', allRoutes);
+    // console.log('allRoutes => ', allRoutes);
     const pageList = [];
 
     for (let route in allRoutes) {
         // code block to be executed
         if (route.name) {
             pageList.push(route.name);
-            console.log('pageList => ', pageList);
+            // console.log('pageList => ', pageList);
             // if (route.children) {
             //     for (let child in route.children) {
             //         if (child.name) {

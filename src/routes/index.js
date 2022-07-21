@@ -10,10 +10,13 @@ import General from '../pages/settings/General';
 import UtilityBills from '../pages/settings/UtilityBills';
 import Layout from '../pages/settings/Layout';
 import Equipment from '../pages/settings/Equipment';
+import EquipmentTypes from '../pages/settings/EquipmentTypes';
 import Panels from '../pages/settings/panels/Panels';
 import CreatePanel from '../pages/settings/panels/CreatePanel';
+// import PanelBreakers from '../pages/settings/panels/panel-breaker-flow/PanelBreakers';
 import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
+import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
 import IndividualPassiveDevice from '../pages/settings/passive-devices/IndividualPassiveDevice';
 import IndividualActiveDevice from '../pages/settings/active-devices/IndividualActiveDevice';
@@ -115,12 +118,12 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
                 return <Redirect to={{ pathname: '/account/login', state: { from: props.location } }} />;
             }
 
-            const loggedInUser = getLoggedInUser();
-            // check if route is restricted by role
-            if (roles && roles.indexOf(loggedInUser.role) === -1) {
-                // role not authorised so redirect to home page
-                return <Redirect to={{ pathname: '/' }} />;
-            }
+            // const loggedInUser = getLoggedInUser();
+            // // check if route is restricted by role
+            // if (roles && (roles.indexOf(loggedInUser.role) === -1)) {
+            //     // role not authorised so redirect to home page
+            //     return <Redirect to={{ pathname: '/' }} />;
+            // }
 
             // authorised so return component
             return <Component {...props} />;
@@ -481,27 +484,35 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/panels',
-            name: 'Panels',
-            component: Panels,
+            path: '/settings/panels/editPanel/:panelId',
+            name: 'Edit Panel',
+            component: EditPanel,
             route: PrivateRoute,
-            visibility: true,
+            visibility: false,
             parent: 'building-settings',
         },
         {
-            path: '/settings/createPanel',
+            path: '/settings/panels/createPanel',
             name: 'Create Panel',
             component: CreatePanel,
             route: PrivateRoute,
             visibility: false,
             parent: 'building-settings',
         },
+        // {
+        //     path: '/settings/panels/panelBreakersFlow',
+        //     name: 'Panel Breakers',
+        //     component: PanelBreakers,
+        //     route: PrivateRoute,
+        //     visibility: false,
+        //     parent: 'building-settings',
+        // },
         {
-            path: '/settings/editPanel',
-            name: 'Edit Panel',
-            component: EditPanel,
+            path: '/settings/panels',
+            name: 'Panels',
+            component: Panels,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'building-settings',
         },
         {
@@ -513,11 +524,27 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
+            path: '/settings/active-devices/provision',
+            name: 'Provision Devices',
+            component: Provision,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'building-settings',
+        },
+        {
             path: '/settings/active-devices',
             name: 'Active Devices',
             component: ActiveDevices,
             route: PrivateRoute,
             visibility: true,
+            parent: 'building-settings',
+        },
+        {
+            path: '/settings/active-devices/provision',
+            name: 'Provision Devices',
+            component: Provision,
+            route: PrivateRoute,
+            visibility: false,
             parent: 'building-settings',
         },
         {
@@ -593,9 +620,9 @@ const settingsRoutes = {
             parent: 'account',
         },
         {
-            path: '/settings/equipment',
-            name: 'Equipment Type',
-            component: Equipment,
+            path: '/settings/equipment-types',
+            name: 'Equipment Types',
+            component: EquipmentTypes,
             route: PrivateRoute,
             visibility: true,
             parent: 'account',
@@ -612,8 +639,8 @@ const exploreRoutes = {
     route: PrivateRoute,
     visibility: true,
     icon: FeatherIcon.PieChart,
-    roles: ['Admin'],
     parent: 'explore',
+    roles: ['Admin'],
 };
 
 const controlRoutes = {
@@ -739,6 +766,12 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
+        {
+            path: '/*',
+            name: 'Error 404',
+            component: Error404,
+            route: Route,
+        },
     ],
 };
 
@@ -758,13 +791,13 @@ const flattenRoutes = (routes) => {
 // All routes
 const allRoutes = [
     rootRoute,
-    authRoutes,
     dashboardRoutes,
     chartRoutes,
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
     exploreRoutes,
+    authRoutes,
     // ...appRoutes,
     // pagesRoutes,
     // componentsRoutes,
@@ -781,5 +814,6 @@ const authProtectedRoutes = [
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
+
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };
