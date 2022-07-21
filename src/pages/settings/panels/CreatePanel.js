@@ -1399,12 +1399,20 @@ const CreatePanel = () => {
     const handleMainClose = () => setShowMain(false);
     const handleMainShow = () => setShowMain(true);
 
+    // JSON Modal
+    const [showJSON, setShowJSON] = useState(false);
+    const handleJsonModelClose = () => setShowJSON(false);
+    const handleJsonModelShow = () => setShowJSON(true);
+
     const [updateData, setUpdateData] = useState({});
     const [equipmentData, setEquipmentData] = useState([]);
     const [sensorData, setSensorData] = useState([]);
 
     const [currentBreakerObj, setCurrentBreakerObj] = useState({});
     const [currentBreakerIndex, setCurrentBreakerIndex] = useState(0);
+
+    const [jsonPanelData, setJsonPanelData] = useState('');
+    const [jsonBreakerData, setJsonBreakerData] = useState('');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -1768,6 +1776,67 @@ const CreatePanel = () => {
             setIsProcessing(false);
             console.log('Failed to save Panel');
         }
+    };
+
+    const getJSONFormatedData = () => {
+        let newPanel = Object.assign({}, panel);
+        if (activePanelType === 'distribution') {
+            newPanel.breaker_count = normalCount;
+        }
+        if (activePanelType === 'disconnect') {
+            newPanel.breaker_count = disconnectBreakerCount;
+        }
+        newPanel.panel_type = activePanelType;
+        setJsonPanelData(JSON.stringify(newPanel, undefined, 4));
+
+        let panelBreakerObjs = [];
+
+        if (activePanelType === 'distribution') {
+            elements.forEach((el) => {
+                if (el.type === 'breakerLink') {
+                    return;
+                }
+
+                let obj = {
+                    id: el.id,
+                    name: `Breaker ${el.data.breaker_number}`,
+                    breaker_number: +el.data.breaker_number,
+                    phase_configuration: el.data.phase_configuration,
+                    rated_amps: el.data.rated_amps,
+                    voltage: +el.data.voltage,
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: el.data.equipment_link,
+                    sensor_id: el.data.sensor_id,
+                    device_id: el.data.device_id,
+                };
+                panelBreakerObjs.push(obj);
+            });
+        }
+
+        if (activePanelType === 'disconnect') {
+            disconnectBreakersNodes.forEach((el) => {
+                if (el.type === 'breakerLink') {
+                    return;
+                }
+
+                let obj = {
+                    id: el.id,
+                    name: `Breaker ${el.data.breaker_number}`,
+                    breaker_number: +el.data.breaker_number,
+                    phase_configuration: el.data.phase_configuration,
+                    rated_amps: el.data.rated_amps,
+                    voltage: +el.data.voltage,
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: el.data.equipment_link,
+                    sensor_id: el.data.sensor_id,
+                    device_id: el.data.device_id,
+                };
+                panelBreakerObjs.push(obj);
+            });
+        }
+        setJsonBreakerData(JSON.stringify(panelBreakerObjs, undefined, 4));
     };
 
     const mainVoltageChange = (voltageValue) => {
@@ -2303,7 +2372,9 @@ const CreatePanel = () => {
         },
     ];
 
+    // const [elements, setElements] = useState(initialElements);
     const [elements, setElements] = useState(initialElements);
+    // const [elements, setElements] = useState([]);
     const [edges, setEdges] = useState(initialEdges);
 
     const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
@@ -2522,7 +2593,7 @@ const CreatePanel = () => {
             };
             newBreakers.push(obj);
         }
-        console.log('Hunt => ', newBreakers);
+        console.log('ReactFlow Breakers => ', newBreakers);
         setElements(newBreakers);
     }, []);
 
@@ -2894,7 +2965,9 @@ const CreatePanel = () => {
                                 className="btn btn-md btn-primary font-weight-bold"
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
-                                    savePanelData();
+                                    // savePanelData();
+                                    getJSONFormatedData();
+                                    handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
@@ -3226,7 +3299,7 @@ const CreatePanel = () => {
                                     </Col>
                                 </Row> */}
 
-                                <div className="row" style={{ width: '100%', height: '25vh', position: 'relative' }}>
+                                <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
                                     <div className="col-sm">
                                         <ReactFlow
                                             elements={elements}
@@ -3249,7 +3322,7 @@ const CreatePanel = () => {
                         )}
 
                         {activePanelType === 'disconnect' && (
-                            <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
+                            <div className="row" style={{ width: '100%', height: '40vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
@@ -3326,6 +3399,24 @@ const CreatePanel = () => {
                             handleMainClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showJSON} onHide={handleJsonModelClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Label>Panel JSON Data:</Form.Label>
+                        <Form.Control as="textarea" rows={10} value={jsonPanelData} />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Label>Breakers JSON Data:</Form.Label>
+                        <Form.Control as="textarea" rows={15} value={jsonBreakerData} />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleJsonModelClose}>
+                        Close
                     </Button>
                 </Modal.Footer>
             </Modal>
