@@ -10,9 +10,14 @@ import axios from 'axios';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UsagePageOne = ({ title = 'HVAC' }) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const { bldgId } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
@@ -289,6 +294,9 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -309,7 +317,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&end_uses_type=HVAC`;
                 await axios
@@ -323,7 +332,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        console.log('setEndUsesData => ', res.data);
+                        // console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -336,7 +345,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios
@@ -369,7 +379,8 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?end_uses_type=HVAC&building_id=${bldgId}`;
                 await axios
@@ -389,7 +400,7 @@ const UsagePageOne = ({ title = 'HVAC' }) => {
                             }
                             responseData.push(record);
                         });
-                        console.log('HVAC Response Filter Data => ', responseData);
+                        // console.log('HVAC Response Filter Data => ', responseData);
 
                         let newArray = [];
                         responseData.map((element) => {

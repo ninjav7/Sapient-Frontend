@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Routes from './routes/Routes';
 
 // setup fake backend
 import { configureFakeBackend } from './helpers';
-
+import { createBrowserHistory } from 'history';
+import SetupInterceptors from './middleware/SetupInterceptors';
 // Themes
 
 // default
@@ -22,10 +23,10 @@ configureFakeBackend();
 /**
  * Main app component
  */
-class App extends Component {
-  render() {
+const App=()=>{
+  const history = createBrowserHistory();
+  SetupInterceptors(history);
     return <Routes></Routes>;
-  }
 }
 
 export default App;

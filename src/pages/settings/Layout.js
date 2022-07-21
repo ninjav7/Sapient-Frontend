@@ -18,8 +18,13 @@ import axios from 'axios';
 import { BaseUrl, getLayouts } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
 
 const Layout = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     // const store = useSelector((state) => state.counterState);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [floorsData, setfloorsData] = useState([]);
@@ -138,11 +143,11 @@ const Layout = () => {
         },
     ];
     const relatedSpaceHandler = (i, item) => {
-        console.log(i);
+        // console.log(i);
 
         setIndexSpace1(floorsData[i]['related_spaces']);
         setIndexSpace1Name(item.floor_name);
-        console.log(floorsData[i]['related_spaces']);
+        // console.log(floorsData[i]['related_spaces']);
     };
     const relatedSpaceHandler2 = (i, item) => {
         const relatedSpaceArray = indexSpace1[i];
@@ -152,14 +157,14 @@ const Layout = () => {
         }
     };
     const relatedSpaceHandler3 = (i, item) => {
-        console.log('indexSpace3', indexSpace3);
-        console.log('index', i);
+        // console.log('indexSpace3', indexSpace3);
+        // console.log('index', i);
         const relatedSpaceArray = indexSpace2[i];
-        console.log(relatedSpaceArray);
+        // console.log(relatedSpaceArray);
         if (indexSpace2[i]['related_space']) {
             setIndexSpace3(relatedSpaceArray['related_space']);
             setIndexSpace3Name(item.name);
-            console.log(indexSpace2[i]['related_space']);
+            // console.log(indexSpace2[i]['related_space']);
         }
     };
     useEffect(() => {
@@ -167,6 +172,7 @@ const Layout = () => {
             'Content-Type': 'application/json',
             accept: 'application/json',
             // 'user-auth': '628f3144b712934f578be895',
+            Authorization: `Bearer ${userdata.token}`,
         };
         axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
             console.log(res.data);
@@ -196,6 +202,9 @@ const Layout = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'building-settings';
             });
         };
         updateBreadcrumbStore();

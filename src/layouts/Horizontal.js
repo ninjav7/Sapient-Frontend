@@ -45,7 +45,7 @@ class HorizontalLayout extends Component {
     render() {
         // get the child view which we would like to render
         const children = this.props.children || null;
-        console.log('children => ', this.props.children);
+        // console.log('children => ', this.props.children);
         const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
         const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
         // const location = useLocation();

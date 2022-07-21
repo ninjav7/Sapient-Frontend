@@ -5,11 +5,98 @@
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05) !important;
     border-radius: 8px !important;
 }
+.button-wrapper{
+    display: flex;
+    flex-direction: row;
+}
+.icon-bg-pop-styling{
+    align-items: center;
+padding: 2px 6px;
+gap: 3px;
 
+width: 100px;
+height: 25px;
+color:white;
+
+/* Success/500 */
+
+background: #12B76A;
+/* Success/600 */
+
+border: 1px solid #039855;
+border-radius: 24px;
+
+}
+.icon-bg-pop-styling-slash{
+    align-items: center;
+    padding: 2px 6px;
+    gap: 3px;
+    
+    width: 100px;
+    height: 25px;
+    color:white;
+    
+    /* Success/500 */
+    
+    background: rgb(240, 28, 28);
+    /* Success/600 */
+    
+    border: 1px solid rgb(240, 28, 28);
+    border-radius: 24px;
+}
+.grey-container{
+    margin-top: 1rem;
+    padding:1rem;
+    background: #F9FAFB;
+    width:145%;
+/* Gray/200 (borders) */
+
+border: 1px solid #EAECF0;
+/* shadow/base */
+
+box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+border-radius: 4px;
+}
+.white-container{
+    clear:both;
+    margin-top: 1rem;
+    padding:1rem;
+    width:145%;
+    background: #FFFFFF;
+/* Gray/200 (borders) */
+
+border: 1px solid #EAECF0;
+/* shadow/base */
+
+box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.01), 0px 1px 2px rgba(0, 0, 0, 0.06);
+border-radius: 4px;
+
+}
+.pic-container{
+    background: #FFFFFF;
+/* Gray/200 (borders) */
+
+border: 1px solid #EAECF0;
+/* shadow/sm */
+
+box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+border-radius: 4px;
+}
 .singleline-toggle-switch {
     /* float: right; */
     height: 10px;
     width: 10px;
+}
+
+.equip-type-style {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    display: flex;
+    align-items: center;
+    color: #3c6df5;
 }
 
 .singleline-box-style {
@@ -88,10 +175,25 @@
 }
 
 .week-day-style {
-    background: #f2f4f7;
     border-radius: 4px;
     width: 50px;
     height: 22px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px 8px 4px;
+    gap: 10px;
+    background: #f2f4f7;
+    border-radius: 4px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 15px;
+    display: flex;
+    align-items: center;
+    color: #000000;
 }
 
 .spacing {
@@ -353,7 +455,7 @@
 }
 
 .breaker-equip-name {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     color: #1d2939;
 }
@@ -414,12 +516,16 @@
 }
 
 .buildings-name {
+    font-family: 'Inter';
+    font-style: normal;
     font-weight: 600;
     font-size: 14px;
     line-height: 17px;
     display: flex;
     align-items: center;
     color: #2955e7;
+    line-height: 17px;
+    color: #3c6df5;
 }
 
 .label-styling {
@@ -516,4 +622,75 @@
     border: 1px solid #d0d5dd;
     border-radius: 0px 6px 6px 0px;
     margin: 0px 0px;
+}
+
+.building-heading-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}
+
+.buildings-cancel-style {
+    background: #ffffff !important;
+    border: 1px solid #d9dde2 !important;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05) !important;
+    border-radius: 6px !important;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: black !important;
+}
+
+.buildings-save-style {
+    background: #2955e7 !important;
+    border: 1px solid #2142d4 !important;
+    box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05) !important;
+    border-radius: 6px !important;
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #ffffff !important;
+}
+
+.building-section-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 18px;
+    display: flex;
+    align-items: center;
+    color: #475467;
+}
+
+.building-content-title {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    color: #1d2939;
+}
+
+.building-content-subtitle {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    color: #475467;
+}
+
+.loader-center-style {
+    height: 47vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

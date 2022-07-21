@@ -1,9 +1,5 @@
-.react-select > div {
-    width: max-content;
-}
 .explorer-select-style {
-    width: 100% !important;
-    /* position: fixed !important; */
+    width: 10vw !important;
 }
 
 .explore-page-filter {
@@ -13,4 +9,9 @@
     justify-content: space-between !important;
     align-items: stretch !important;
     align-content: stretch !important;
+}
+
+.button-danger,
+.button-success {
+    width: fit-content !important;
 }

@@ -1,19 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    FormGroup,
-    Label,
-    Input,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button, FormGroup, Label, Input } from 'reactstrap';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
@@ -23,9 +9,13 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BaseUrl, getBuildings, createBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
+import { ComponentStore } from '../../store/ComponentStore';
+import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
-const BuildingTable = ({ buildingsData }) => {
+const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
         <Card>
             <CardBody>
@@ -37,26 +27,59 @@ const BuildingTable = ({ buildingsData }) => {
                             <th>Devices</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {buildingsData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <th scope="row">
-                                        <Link to="#">
-                                            <a className="buildings-name">{record.building_name}</a>
-                                        </Link>
-                                        <span className="badge badge-soft-secondary label-styling mr-2">
-                                            {record.building_type}
-                                        </span>
-                                    </th>
-                                    <td className="font-weight-bold">
-                                        {record.building_size.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    {isDataProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
-                                    <td className="font-weight-bold">{0}</td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {buildingsData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <th scope="row">
+                                            <Link to="/settings/general">
+                                                <div
+                                                    className="buildings-name"
+                                                    onClick={() => {
+                                                        localStorage.setItem('buildingId', record.building_id);
+                                                        localStorage.setItem('buildingName', record.building_name);
+                                                        BuildingStore.update((s) => {
+                                                            s.BldgId = record.building_id;
+                                                            s.BldgName = record.building_name;
+                                                        });
+                                                    }}>
+                                                    {record.building_name}
+                                                </div>
+                                            </Link>
+                                            <span className="badge badge-soft-secondary label-styling mr-2">
+                                                {record.building_type}
+                                            </span>
+                                        </th>
+                                        <td className="font-weight-bold">
+                                            {record.building_size.toLocaleString(undefined, {
+                                                maximumFractionDigits: 2,
+                                            })}
+                                        </td>
+                                        <td className="font-weight-bold">{0}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -64,18 +87,23 @@ const BuildingTable = ({ buildingsData }) => {
 };
 
 const Buildings = () => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     // Modal states
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isDataProcessing, setIsDataProcessing] = useState(true);
 
     // building type
     const [buildingType, setBuildingType] = useState([
-        { value: 'Commercial Building', label: 'Commercial Building' },
+        { value: 'Office Building', label: 'Office Building' },
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
+    const [buildingName,setBuildingName]=useState("");
     const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
@@ -88,26 +116,41 @@ const Buildings = () => {
         let obj = Object.assign({}, createBuildingData);
         obj[key] = value;
         setCreateBuildingData(obj);
+        console.log(obj);
     };
 
     const saveBuilding = async () => {
         try {
-            let header = {
+            let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
-                'user-auth': '628f3144b712934f578be895',
+                Authorization: `Bearer ${userdata.token}`,
             };
+            let buildingData={
+                'building_name':buildingName,
+                'building_type':buildingTypeSelected
+            }
             setIsProcessing(true);
-
-            axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
+            console.log(createBuildingData);
+            await axios
+            .post(
+                `${BaseUrl}${createBuilding}`,
+                buildingData,
+                { headers }
+            )
+            .then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
-                // handleClose();
+                // console.log('setOverview => ', res.data);
             });
+            // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
+            //     console.log('createBuilding sending data to API => ', res.data);
+            //     // handleClose();
+            // });
 
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
-            alert('Failed to create Building');
+            console.log('Failed to create Building');
         }
     };
 
@@ -123,27 +166,35 @@ const Buildings = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
         };
         updateBreadcrumbStore();
     }, []);
 
     useEffect(() => {
-        console.log('createBuildingData => ', createBuildingData);
-    });
-
-    useEffect(() => {
         const fetchBuildingData = async () => {
             try {
+                setIsDataProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    setBuildingsData(res.data);
+                    let activeBuildings = [];
+                    res.data.forEach((bldg) => {
+                        if (bldg.active) {
+                            activeBuildings.push(bldg);
+                        }
+                    });
+                    setBuildingsData(activeBuildings);
+                    setIsDataProcessing(false);
                 });
             } catch (error) {
                 console.log(error);
+                setIsDataProcessing(false);
                 console.log('Failed to fetch Building Data List');
             }
         };
@@ -193,7 +244,11 @@ const Buildings = () => {
 
             <Row>
                 <Col lg={6}>
-                    <BuildingTable buildingsData={buildingsData} />
+                    <BuildingTable
+                        buildingsData={buildingsData}
+                        isDataProcessing={isDataProcessing}
+                        setIsDataProcessing={setIsDataProcessing}
+                    />
                 </Col>
             </Row>
 
@@ -210,7 +265,7 @@ const Buildings = () => {
                                 placeholder="Enter Building Name"
                                 className="font-weight-bold"
                                 onChange={(e) => {
-                                    handleChange('building_name', e.target.value);
+                                    setBuildingName(e.target.value);
                                 }}
                                 autoFocus
                             />
@@ -227,7 +282,6 @@ const Buildings = () => {
                                     id="exampleSelect"
                                     onChange={(e) => {
                                         setBuildingTypeSelected(e.target.value);
-                                        handleChange('building_type', e.target.value);
                                     }}
                                     className="font-weight-bold">
                                     <option>Select Building Type</option>
@@ -260,10 +314,7 @@ const Buildings = () => {
                     <Button
                         variant="primary"
                         disabled={isProcessing}
-                        onClick={() => {
-                            saveBuilding();
-                            // handleClose();
-                        }}>
+                        onClick={saveBuilding}>
                         {isProcessing ? 'Adding...' : 'Add Building'}
                     </Button>
                 </Modal.Footer>

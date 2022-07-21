@@ -6,18 +6,23 @@ import { BaseUrl } from '../services/Network';
  * @param {*} url
  * @param {*} options
  */
-const fetchJSON = (url, options = {}) => {
-    return fetch(url, options)
+const fetchJSON = async(url, options = {}) => {
+    return await fetch(url, options)
         .then((response) => {
+            // console.log(response);
             if (!response.status === 200) {
                 throw response.json();
             }
-            return response.json();
+            let data = response.json();
+            // console.log(data);
+            return data;
         })
         .then((json) => {
+            // console.log(json);
             return json;
         })
         .catch((error) => {
+            // console.log(error);
             throw error;
         });
 };

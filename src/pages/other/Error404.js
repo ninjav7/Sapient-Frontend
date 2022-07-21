@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 import { Container, Row, Col } from 'reactstrap';
 
 import imgNotFound from '../../assets/images/not-found.png';
 
-
 class Error404 extends Component {
-
     componentDidMount() {
         document.body.classList.add('authentication-bg');
     }
@@ -19,7 +17,7 @@ class Error404 extends Component {
     render() {
         return (
             <React.Fragment>
-                <div className="account-pages my-5">
+                <div className="account-pages m-0">
                     <Container>
                         <Row className="justify-content-center">
                             <Col xl={4} lg={5}>
@@ -34,15 +32,20 @@ class Error404 extends Component {
                         <Row>
                             <Col className="text-center">
                                 <h3 className="mt-3">We couldn’t connect the dots</h3>
-                                <p className="text-muted mb-5">This page was not found. <br /> You may have mistyped the address or the page may have moved.</p>
+                                <p className="text-muted mb-5">
+                                    This page was not found. <br /> You may have mistyped the address or the page may
+                                    have moved.
+                                </p>
 
-                                <Link to="/" className="btn btn-lg btn-primary mt-4">Take me back to Home</Link>
+                                <Link to="/energy/portfolio/overview" className="btn btn-lg btn-primary mt-4">
+                                    Take me back to Home Page
+                                </Link>
                             </Col>
                         </Row>
                     </Container>
                 </div>
             </React.Fragment>
-        )
+        );
     }
 }
 

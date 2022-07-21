@@ -9,6 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import { ComponentStore } from '../../store/ComponentStore';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
 import { BaseUrl, getExplore } from '../../services/Network';
@@ -16,6 +17,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 // const BuildingPeakTable = () => {
@@ -273,6 +275,9 @@ const Explore = () => {
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
 
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
     const customDaySelect = [
         {
             label: 'Today',
@@ -280,19 +285,19 @@ const Explore = () => {
         },
         {
             label: 'Last 7 Days',
-            value: 6,
+            value: 7,
         },
         {
             label: 'Last 4 Weeks',
-            value: 27,
+            value: 28,
         },
         {
             label: 'Last 3 Months',
-            value: 89,
+            value: 90,
         },
         {
             label: 'Last 12 Months',
-            value: 364,
+            value: 365,
         },
     ];
 
@@ -409,6 +414,9 @@ const Explore = () => {
                 ];
                 bs.items = newList;
             });
+            ComponentStore.update((s) => {
+                s.parent = 'explore';
+            });
         };
         updateBreadcrumbStore();
     }, []);
@@ -425,7 +433,8 @@ const Explore = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?filters=${activeExploreOpt.value}`;
                 await axios
@@ -439,7 +448,7 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log('SSR API response => ', responseData);
+                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
@@ -452,7 +461,7 @@ const Explore = () => {
                                 exploreData.push(recordToInsert);
                             }
                         });
-                        console.log('SSR Customized exploreData => ', exploreData);
+                        // console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {

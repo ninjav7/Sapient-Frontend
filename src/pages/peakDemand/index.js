@@ -8,41 +8,12 @@ import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { Cookies } from 'react-cookie';
 import moment from 'moment';
-
-// const BuildingPeakButton = (props) => {
-//     return (
-//         <>
-//             <h5 className="card-title card-title-style">{props.title}&nbsp;&nbsp;</h5>
-//             <p className="card-text card-content-style">
-//                 {props.description}
-//                 <span className="card-unit-style">
-//                     &nbsp;&nbsp;{props.unit}&nbsp;&nbsp;&nbsp;
-//                     {props.consumptionNormal && (
-//                         <button
-//                             className="button-success text-success font-weight-bold font-size-5"
-//                             style={{ width: '100%' }}>
-//                             <i className="uil uil-chart-down">
-//                                 <strong>{props.value} %</strong>
-//                             </i>
-//                         </button>
-//                     )}
-//                     {!props.consumptionNormal && (
-//                         <button
-//                             className="button-danger text-danger font-weight-bold font-size-5"
-//                             style={{ width: '100%' }}>
-//                             <i className="uil uil-arrow-growth">
-//                                 <strong>{props.value} %</strong>
-//                             </i>
-//                         </button>
-//                     )}
-//                 </span>
-//             </p>
-//         </>
-//     );
-// };
 
 const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
     return (
@@ -90,7 +61,7 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/energy/building-peak-explore">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -168,7 +139,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/energy/building-peak-explore">
+                        <Link to="/explore/page">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -238,7 +209,11 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
-    const { bldgId } = useParams();
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    // const { bldgId } = useParams();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
@@ -464,7 +439,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -486,8 +462,8 @@ const PeakDemand = () => {
                         setEquipTypePeakThree([]);
                         let responseData = res.data;
                         setTopBuildingPeaks(responseData);
-                        console.log(responseData);
-                        console.log(responseData[0].top_contributors);
+                        // console.log(responseData);
+                        // console.log(responseData[0].top_contributors);
                         setSingleEquipPeakOne(responseData[0].top_contributors);
                         setSingleEquipPeakTwo(responseData[1].top_contributors);
                         setSingleEquipPeakThree(responseData[2].top_contributors);
@@ -506,7 +482,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -547,7 +524,8 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    'user-auth': '628f3144b712934f578be895',
+                    // 'user-auth': '628f3144b712934f578be895',
+                    Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -585,6 +563,9 @@ const PeakDemand = () => {
                     },
                 ];
                 bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
             });
         };
         updateBreadcrumbStore();
@@ -676,9 +657,9 @@ const PeakDemand = () => {
                                                     <BuildingPeakButton
                                                         buildingPeakData={record}
                                                         recordDate={record.timeRange.to.split(' ')[0]}
-                                                        recordTime={convert24hourTo12HourFormat(
-                                                            record.timeRange.to.split(' ')[1].split('.')[0]
-                                                        )}
+                                                        // recordTime={convert24hourTo12HourFormat(
+                                                        //     record.timeRange.to.split(' ')[1].split('.')[0]
+                                                        // )}
                                                     />
                                                 </div>
                                             </div>

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Cookies } from 'react-cookie';
+import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
 import { Settings } from 'react-feather';
 import sapientLogo from '../assets/images/Sapient_Logo.png';
 import SearchModal from './SearchModal';
@@ -7,19 +8,37 @@ import { Row, Col, Card } from 'reactstrap';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../routes/index';
 import { ComponentStore } from '../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { isUserAuthenticated } from '../helpers/authUtils';
+import { logoutUser } from '../redux/actions';
 import { faGear, faTelescope, faToggleOn, faCircleBolt, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import './style.css';
 
 const NavbarNew = () => {
     const location = useLocation();
+    // console.log(location);
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
     const activeSideRoutes = [];
-
+    let history = useHistory();
+    let cookies = new Cookies();
     allFlattenRoutes.forEach((route) => {
         if (route.parent === 'portfolio') {
             activeSideRoutes.push(route);
         }
     });
+    const handleLogout = () => {
+        // console.log('logout entered');
+        cookies.remove('user', { path: '/' });
+        const isAuthTokenValid = isUserAuthenticated();
+        // console.log(history);
+        // console.log(isAuthTokenValid);
+        logoutUser(history);
+        if (isAuthTokenValid) {
+            return <Redirect to="/" />;
+        } else {
+            history.push('/account/login');
+            window.location.reload();
+        }
+    };
 
     const setSideNavBar = (componentName) => {
         if (componentName === 'Energy') {
@@ -50,10 +69,6 @@ const NavbarNew = () => {
             return;
         }
     };
-
-    useEffect(() => {
-        console.log('location.pathname => ', location.pathname.split('/')[1]);
-    });
 
     return (
         <>
@@ -206,6 +221,14 @@ const NavbarNew = () => {
                         </button>
                     </div>
                 </div>
+
+                <button
+                    className="btn btn-sm btn-link nav-link right-bar-toggle float-right navbar-heading font-weight-bold"
+                    style={{ marginRight: '3vw' }}
+                    onClick={handleLogout}>
+                    Logout
+                    {/* <FontAwesomeIcon icon={faGear} className="mt-1" size="xl" /> */}
+                </button>
             </div>
         </>
     );
