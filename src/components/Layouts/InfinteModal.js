@@ -62,10 +62,10 @@ const EditFloorModal = (props) => {
                     <Button onClick={props.onHide}>Cancel</Button>
                     <Button
                         onClick={() => {
-                            setFloors((el) => [...el, floorName]);
-                            createFloorsFunc();
+                            // setFloors((el) => [...el, floorName]);
+                            // createFloorsFunc();
                             props.onHide();
-                            setFloorModal(true);
+                            // setFloorModal(true);
                         }}>
                         Save
                     </Button>

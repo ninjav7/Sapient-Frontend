@@ -1,33 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    CardHeader,
-    Form,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-    Input,
-    Label,
-} from 'reactstrap';
+import { Row, Col, UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap';
 import { useAtom } from 'jotai';
 import './style.css';
 import axios from 'axios';
-import { BaseUrl, getFloors, getLayouts } from '../../services/Network';
+import { BaseUrl, createSpace, getFloors, getLayouts, getSpaces } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import { Button } from 'reactstrap';
-import Modal from 'react-bootstrap/Modal';
 import { Cookies } from 'react-cookie';
 import EditFloorModal from '../../components/Layouts/EditFloorModal';
-import { areaList, floorList, iterationNumber, spacesList } from '../../store/globalState';
+import {
+    closedEditFloorModal,
+    closeEditSpaceModal,
+    floorid,
+    floorState,
+    iterationDataList,
+    iterationNumber,
+    spaceId,
+    spaceName,
+} from '../../store/globalState';
+import InfiniteSpae from '../../components/Layouts/InfiniteSpae';
 import EditSpace from '../../components/Layouts/EditSpace';
-import EditArea from '../../components/Layouts/EditArea';
-import InfiniteLayout from '../../components/Layouts/InfiniteLayout';
 
 const Layout = () => {
     let cookies = new Cookies();
@@ -35,38 +28,62 @@ const Layout = () => {
 
     console.log('userdata', userdata);
 
-    // const store = useSelector((state) => state.counterState);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
-    const [floorClicked, setFloorClicked] = useState('');
-    const [spaceClicked, setSpaceClicked] = useState('');
-    const [areaClicked, setAreaClicked] = useState('');
-    const [clickedToOpen, setClickedToOpen] = useState(1);
-    const [modalShow, setModalShow] = useState(false);
-    const [modalShowSpace, setModalShowSpace] = useState(false);
-    const [modalShowArea, setModalShowArea] = useState(false);
+    // Saving API data
+    const [floorListAPI, setFloorListAPI] = useState([]);
+    const [spaceListAPI, setSpaceListAPI] = useState([]);
+    console.log('floorListAPI', floorListAPI);
 
-    const [floorName] = useAtom(floorList);
-    const [space] = useAtom(spacesList);
-    const [area] = useAtom(areaList);
+    const [modalShow, setModalShow] = useState(false);
+    const [floorId, setFloorId] = useState('');
+
+    const [floorModal] = useAtom(closedEditFloorModal);
+    const [getSpaceName, setGetSpaceName] = useAtom(spaceName);
+    // const [spaceID, setSpaceID] = useAtom(spaceId);
+
+    const [iterationValue, setInterationValue] = useAtom(iterationDataList);
+    const [iteratingNumber, setIteratingNumber] = useAtom(iterationNumber);
+
+    const [modelToShow, setModelToShow] = useState(1);
+    const [modalSpaceShow, setModalSpaceShow] = useState(false);
+    const [closeModal] = useAtom(closeEditSpaceModal);
+
+    const [currentFloorId, setCurrentFloorId] = useAtom(floorid);
+    console.log('iterationValue', iterationValue, iteratingNumber);
+    const [floor2] = useAtom(floorState);
+    console.log('floor2', floor2);
+    const [spaceBody, setSpaceBody] = useState({
+        floor_id: currentFloorId,
+        building_id: bldgId,
+    });
 
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
         const params = `?building_id=${bldgId}`;
         axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
-            console.log(res.data);
-            // setfloorsData(res.data);
-            // let data = {};
-            // if (bldgId) {
-            //     console.log(data);
-            // }
+            setFloorListAPI(res.data.data);
         });
     }, [bldgId]);
+
+    // Call only when floor create modal is completed
+    useEffect(() => {
+        if (floorModal) {
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
+                setFloorListAPI(res.data.data);
+            });
+        }
+    }, [floorModal]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -87,11 +104,39 @@ const Layout = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        if (floorId) {
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?floor_id=${floorId}`;
+            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+                setSpaceListAPI(res.data.data);
+            });
+        }
+    }, [floorId]);
+
+    const createSpacesAPI = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {});
+    };
+
+    useEffect(() => {
+        if (closeModal) {
+            createSpacesAPI();
+        }
+    }, [closeModal]);
+
     return (
         <React.Fragment>
             <EditFloorModal show={modalShow} onHide={() => setModalShow(false)} />
-            <EditSpace floorIndex={floorClicked} show={modalShowSpace} onHide={() => setModalShowSpace(false)} />
-            <EditArea spaceIndex={spaceClicked} show={modalShowArea} onHide={() => setModalShowArea(false)} />
+            <EditSpace show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style" style={{ marginLeft: '20px' }}>
@@ -125,6 +170,7 @@ const Layout = () => {
                 <Col lg={12}>
                     <div className="layout-container mt-4">
                         {/* Floor List */}
+
                         <div className="container-column">
                             <div className="container-heading">
                                 <span>Building Root</span>
@@ -149,29 +195,34 @@ const Layout = () => {
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floorName.map((floorName, i) => (
+                                {floorListAPI.map((floorName, i) => (
                                     <div
                                         className="container-single-content mr-4"
                                         style={{ cursor: 'pointer' }}
                                         onClick={() => {
-                                            setFloorClicked(i);
-                                            setClickedToOpen(2);
+                                            setFloorId(floorName?.floor_id);
+                                            // setSpaceID(floorName?.floor_id);
+                                            setCurrentFloorId(floorName?.floor_id);
+                                            setGetSpaceName(floorName?.name);
+                                            setModelToShow(2);
                                         }}>
-                                        <span> {floorName}</span>
-                                        <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {/* {floor.tag[0]} */}
-                                        </span>
+                                        <span> {floorName?.name}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4"></span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-
-                        {/* Open on floor name onClick */}
-                        {clickedToOpen >= 2 && (
-                            <div className="header">
+                        {/* Spaces */}
+                        {/* {Array(iteratingNumber)
+                            .fill(0)
+                            .map((_, i) => {
+                                return <InfiniteSpae floorId={floorId} />;
+                            })} */}
+                        {/* Create Space */}
+                        {modelToShow >= 2 && (
+                            <div className="container-column">
                                 <div className="container-heading">
-                                    <span>{floorName[floorClicked]}</span>
-                                    <i className="uil uil-pen ml-2"></i>
+                                    <span>{getSpaceName}</span>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
                                         {/* <i className="uil uil-plus mr-2"></i> */}
@@ -184,93 +235,32 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalShowSpace(true);
+                                                        setModalSpaceShow(true);
                                                     }}>
-                                                    Add Space
-                                                </DropdownItem>
-                                                <DropdownItem>Add HVAC Zone</DropdownItem>
-                                                <DropdownItem>Add Lightning Zone</DropdownItem>
-                                                <DropdownItem>Add Panel</DropdownItem>
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
-                                    </div>
-                                </div>
-                                <div className="container-content-group">
-                                    {space
-                                        ?.filter((items) => items?.floorIndex === floorClicked)
-                                        .map((item, i) => (
-                                            <div
-                                                className="container-single-content mr-4"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => {
-                                                    setSpaceClicked(i);
-                                                    setClickedToOpen(3);
-                                                }}>
-                                                <span>{item.spaceName}</span>
-                                                <span class="badge badge-light font-weight-bold float-right mr-4">
-                                                    {item?.typeName}
-                                                </span>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Open on space name onClick */}
-                        {clickedToOpen >= 3 && (
-                            <div className="header">
-                                <div className="container-heading">
-                                    <span>{space[spaceClicked]?.spaceName}</span>
-                                    <i className="uil uil-pen ml-2"></i>
-                                    <div className="mr-2" style={{ marginLeft: 'auto' }}>
-                                        <i className="uil uil-filter mr-3"></i>
-                                        {/* <i className="uil uil-plus mr-2"></i> */}
-                                        <UncontrolledDropdown className="align-self-center float-right">
-                                            <DropdownToggle
-                                                tag="button"
-                                                className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                <i className="uil uil-plus mr-2"></i>
-                                            </DropdownToggle>
-                                            <DropdownMenu right>
-                                                <DropdownItem
-                                                    onClick={() => {
-                                                        setModalShowArea(true);
-                                                    }}>
-                                                    Add Room
+                                                    Add Floor
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {area
-                                        ?.filter((item) => item?.spaceIndex === spaceClicked)
-                                        ?.map((record, i) => (
-                                            <div
-                                                className="container-single-content mr-4"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => {
-                                                    setAreaClicked(i);
-                                                    setClickedToOpen(4);
-                                                }}>
-                                                <span>{record.areaName}</span>
-                                                <span class="badge badge-light font-weight-bold float-right mr-4">
-                                                    {record?.typeName}
-                                                </span>
-                                            </div>
-                                        ))}
+                                    {spaceListAPI.map((spaceName, i) => (
+                                        <div
+                                            className="container-single-content mr-4"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                // setFloorId(spaceName?.floor_id);
+                                                // setSpaceID(spaceName?.floor_id);
+                                                setGetSpaceName(spaceName?.name);
+                                                // setIteratingNumber(iteratingNumber + 1);
+                                            }}>
+                                            <span> {spaceName?.name}</span>
+                                            <span class="badge badge-light font-weight-bold float-right mr-4"></span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
-
-                        {/* Open an area name onClick */}
-                        {/* <InfiniteLayout /> */}
-                        {/* {clickedToOpen >= 4 &&
-                            Array(iterations)
-                                .fill(0)
-                                .map((_, i) => {
-                                    return <InfiniteLayout iterationValue={i} />;
-                                })} */}
                     </div>
                 </Col>
             </Row>
