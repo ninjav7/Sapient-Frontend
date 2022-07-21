@@ -15,6 +15,8 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import BuildingList from './BuildingList';
+import Input from '../../sharedComponents/form/input/Input';
+import SearchIcon from '../../assets/icon/search.svg';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     return (
@@ -69,14 +71,17 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
 };
 
 const FilterBuildings = ({ handleValueChange, value }) => {
+    const handleChange = (e) => handleValueChange && handleValueChange(e.target.value);
+    
     return (
         <div>
-            <FormControl
-                className="mx-3 my-2 w-auto"
-                placeholder="Filter Buildings"
-                onChange={(e) => handleValueChange && handleValueChange(e.target.value)}
-                value={value}
-            />
+            <Input 
+                iconUrl={SearchIcon} 
+                placeholder="Filter Buildings" 
+                onChange={handleChange}
+                value={value}  
+                className="tracker-dropdown-search"
+                />
         </div>
     );
 };

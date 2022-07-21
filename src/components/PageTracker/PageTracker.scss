@@ -10,6 +10,14 @@
     &:hover {
         background-color: $primary-gray-100;
     }
+
+    .dropdown-menu {
+        padding: 0;
+    }
+
+    &-search {
+        
+    }
 }
 .page-tracker-dropdown-btn {
     padding: 0;
