@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
-import FormControl from 'react-bootstrap/FormControl';
 import { BaseUrl, getBuilding } from '../../services/Network';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
-import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -17,19 +14,19 @@ import { Cookies } from 'react-cookie';
 import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
+import {ReactComponent as CheckIcon} from '../../assets/icon/check.svg';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     return (
         <div>
             {location.pathname === '/energy/portfolio/overview' ? (
-                <Dropdown.Item>
+                <Dropdown.Item className='selected'>
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon
                                 icon={faBuildings}
                                 size="lg"
                                 className="mr-2"
-                                style={{ display: 'inline-block' }}
                             />
 
                             <Link to="/energy/portfolio/overview">
@@ -42,18 +39,17 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                                 </span>
                             </Link>
                         </div>
-                        <div>
-                            <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                        <div className='dropdown-item-selected'>
+                            <CheckIcon />
                         </div>
                     </div>
                 </Dropdown.Item>
             ) : (
-                <Dropdown.Item style={{ display: 'inline-block' }}>
+                <Dropdown.Item>
                     <FontAwesomeIcon
                         icon={faBuildings}
                         size="lg"
                         className="mr-2"
-                        style={{ display: 'inline-block' }}
                     />
                     <Link to="/energy/portfolio/overview">
                         <span
@@ -72,17 +68,15 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
 
 const FilterBuildings = ({ handleValueChange, value }) => {
     const handleChange = (e) => handleValueChange && handleValueChange(e.target.value);
-    
+
     return (
-        <div>
-            <Input 
-                iconUrl={SearchIcon} 
-                placeholder="Filter Buildings" 
-                onChange={handleChange}
-                value={value}  
-                className="tracker-dropdown-search"
-                />
-        </div>
+        <Input
+            iconUrl={SearchIcon}
+            placeholder="Filter Buildings"
+            onChange={handleChange}
+            value={value}
+            className="tracker-dropdown-search"
+        />
     );
 };
 
@@ -138,6 +132,9 @@ const BuildingSwitcher = () => {
     }, []);
 
     const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
+    const filteredBuildings = buildingList.filter(({building_name}) => {
+        return building_name.toLowerCase().includes(value.toLowerCase())
+    });
 
     return (
         <div className="tracker-dropdown">
@@ -157,9 +154,11 @@ const BuildingSwitcher = () => {
                     <div className="content-font-style">
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
-                        <PortfolioItem handlePortfolioClick={setPortfolioName} />
+                        <div className='tracker-dropdown-content'>
+                            <PortfolioItem handlePortfolioClick={setPortfolioName} />
 
-                        <BuildingList buildingList={buildingList} bldStoreId={bldStoreId} />
+                            <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />
+                        </div>
                     </div>
                 </Dropdown.Menu>
             </Dropdown>

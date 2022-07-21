@@ -313,14 +313,7 @@
     height: 50px !important;
 }
 
-.portfolio-txt-style {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 20px;
-    color: #1d2939;
-}
+
 
 .energy-top-nav {
     font-family: 'Inter';
@@ -535,16 +528,6 @@ div.navbar-icon-container:hover .other-font-icon-style {
 .navbar-heading.active {
     color: white !important;
 }
-
-.filter-bld-style {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-    align-content: stretch;
-}
-
 .filter-name-style {
     display: flex;
     flex-direction: row;
