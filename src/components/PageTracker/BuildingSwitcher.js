@@ -91,8 +91,7 @@ const BuildingSwitcher = () => {
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
     const [portfolioName, setPortfolioName] = useState('');
-    const breadcrumList = BreadcrumbStore.useState((bs) => bs.items);
-
+    
     useEffect(() => {
         const getBuildingList = async () => {
             let headers = {
@@ -108,7 +107,7 @@ const BuildingSwitcher = () => {
         };
         getBuildingList();
     }, []);
-
+    
     useEffect(() => {
         ComponentStore.update((s) => {
             s.parent = 'portfolio';
