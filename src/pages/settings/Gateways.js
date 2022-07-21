@@ -199,10 +199,6 @@ const Gateways = () => {
                     <GatewaysTable generalGatewayData={generalGatewayData} />
                 </Col>
             </Row>
-
-            <Row>
-                <span className="gateway-content-style">What about a KPI about unique devices</span>
-            </Row>
         </React.Fragment>
     );
 };
