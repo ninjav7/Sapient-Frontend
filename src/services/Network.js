@@ -43,6 +43,9 @@ export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to
 export const generalActiveDevices = '/api/config/devices/active';
 export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
+//search active and passive device
+export const searchDevices = '/api/config/devices/search_by_devices';
+
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';

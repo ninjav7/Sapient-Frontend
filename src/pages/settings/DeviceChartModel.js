@@ -332,7 +332,6 @@ const DeviceChartModel = ({
     //         var nd=new Date(x[0].getTime()+(60000*(x[0].getTimezoneOffset()-offset)));
     //         // var utc=d.getTime()+(d.getTimezoneOffset()/-60);    //
     //         // console.log(utc);
-
     //         // console.log(offset)
     //         // var nd=new Date((utc+(3600000*offset)));
     //         console.log(nd);
