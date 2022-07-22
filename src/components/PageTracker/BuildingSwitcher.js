@@ -17,6 +17,7 @@ import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
+    const location = useLocation();
     return (
         <div>
             {location.pathname === '/energy/portfolio/overview' ? (
