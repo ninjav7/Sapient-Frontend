@@ -29,9 +29,11 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { result } from 'lodash';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
     const [selected,setSelected]=useState([]);
+    console.log(equipmentTypeData)
     const handleSave=()=>{
 
     }
@@ -241,10 +243,36 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
         </>
     );
 };
-const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
+const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse }) => {
     const [selectedTags,setSelectedTags]=useState([]);
     const [selectedZones,setSelectedZones]=useState([]);
+    const [endUseName,setEndUseName]=useState([]);
+    const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
+    var result=[];
+        if(equipData!==null){
+            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // var x=document.getElementById('endUsePop');
+            // console.log(x);
+            // if(x!==null)
+            // x.value=result.end_use_name;
+            console.log(result);
+        }
+        const handleChange = (key, value) => {
+            let obj = Object.assign({}, updateEqipmentData);
+            if(key==="equipment_type"){
+                const result =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+                // console.log(result.end_use_name);
+                // const eq_id=endUseData.find(({name})=>name===result.end_use_name);
+                // console.log(eq_id.end_user_id);
+                // var x=document.getElementById("endUseSelect");
+                // x.value=(eq_id.end_user_id);
+                // obj['end_use']=eq_id.end_user_id;
+            }
+            obj[key] = value;
+            setUpdateEqipmentData(obj);
+        };
+    
     return (
         <>
             {show ? (
@@ -306,6 +334,9 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 placeholder="Enter Equipment Name"
                                                 className="font-weight-bold"
                                                 defaultValue={equipData.equipments_name}
+                                                onChange={(e) => {
+                                                    handleChange('name', e.target.value);
+                                                }}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -316,10 +347,13 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold" defaultValue={equipData.equipments_type}>
+                                                className="font-weight-bold" defaultValue={result.equipment_id}
+                                                onChange={(e) => {
+                                                    handleChange('equipment_type', e.target.value);
+                                                }}>
                                                  <option selected>Select Type</option>
                                                      {equipmentTypeData.map((record) => {
-                                                            return <option value={record.equipment_type}>{record.equipment_type}</option>;
+                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                                         })}
                                             </Input>
                                         </Form.Group>
@@ -330,11 +364,12 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Input
                                                 type="select"
                                                 name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold" defaultValue={equipData.equipments_type}>
+                                                id="endUsePop"
+                                                className="font-weight-bold"
+                                                defaultValue={result.end_use_name}>
                                                  <option selected>Select Category</option>
-                                                     {equipmentTypeData.map((record) => {
-                                                            return <option value={record.equipment_type}>{record.equipment_type}</option>;
+                                                     {endUse.map((record) => {
+                                                            return <option value={record.name}>{record.name}</option>;
                                                         })}
                                             </Input>
                                         </Form.Group>
@@ -346,7 +381,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter Identifier"
+                                                placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
                                             />
@@ -660,7 +695,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2,setModal2]=useState(false);
     const Close1=()=>{
@@ -785,7 +820,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }
             </Card>
             <div>
                 <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData}/>
-                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse}/>
             </div>
         </>
     );
@@ -1131,13 +1166,13 @@ const Equipment = () => {
             <Row>
                 <Col lg={11}>
                     {selectedTab === 0 && (
-                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData}/>
                     )}
                     {selectedTab === 1 && (
-                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData}/>
                     )}
                     {selectedTab === 2 && (
-                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData}/>
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData}/>
                     )}
                 </Col>
             </Row>
