@@ -94,19 +94,9 @@
     /* font-family: 'Inter', sans-serif; */
 }
 
-.custom-button-group {
-    float: right;
-    justify-self: end;
-    padding-right: 0.5rem;
-    text-align: center;
-    margin-bottom: 0px;
-}
 
-.header-widget-styling {
-    color: black !important;
-    font-weight: bold !important;
-    /* font-family: 'Inter', sans-serif; */
-}
+
+
 
 /* .custom-title {
     font-style: normal;
