@@ -421,15 +421,6 @@
     border-radius: 4px;
 }
 
-.heading-style {
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 125%;
-    color: #1d2939;
-    font-family: 'SpaceGrotesk' !important;
-}
-
 .real-power-style {
     color: #1d2939;
     font-family: 'Inter';
