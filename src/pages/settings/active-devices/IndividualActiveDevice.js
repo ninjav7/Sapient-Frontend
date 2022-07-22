@@ -104,6 +104,7 @@ const IndividualActiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -262,7 +263,7 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -703,6 +704,7 @@ const IndividualActiveDevice = () => {
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
+                timeZone={timeZone}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
