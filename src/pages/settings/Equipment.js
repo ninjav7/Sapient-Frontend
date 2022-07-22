@@ -866,7 +866,10 @@ const Equipment = () => {
                 })
                 .then((res) => {
                     console.log(res.data);
-                    fetchEquipmentData();
+                    setTimeout(function(){
+                        fetchEquipmentData();
+                      }, 3000);
+                
                 });
 
             setIsProcessing(false);
