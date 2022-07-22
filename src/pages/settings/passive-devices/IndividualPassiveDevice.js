@@ -24,6 +24,7 @@ import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import EditSensorPanelModel from './EditSensorPanelModel';
 import './style.css';
 
 const SelectBreakerModel = ({
@@ -204,6 +205,11 @@ const IndividualPassiveDevice = () => {
     const handleBreakerClose = () => setShowBreaker(false);
     const handleBreakerShow = () => setShowBreaker(true);
 
+    // Edit Sensor Panel model state
+    const [showEditSensorPanel, setShowEditSensorPanel] = useState(false);
+    const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
+    const openEditSensorPanelModel = () => setShowEditSensorPanel(true);
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -218,6 +224,8 @@ const IndividualPassiveDevice = () => {
     });
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [currentRecord, setCurrentRecord] = useState({});
+    const [currentSensorObj, setCurrentSensorObj] = useState({});
+    const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [equipmentId, setEquipmentId] = useState('');
     const [sensors, setSensors] = useState([]);
@@ -460,7 +468,9 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
+            let params = `?sensor_id=${
+                id === sensorId ? sensorId : id
+            }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -472,7 +482,7 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-                    
+
                     let data = response;
 
                     let exploreData = [];
@@ -731,10 +741,9 @@ const IndividualPassiveDevice = () => {
                                                                 type="button"
                                                                 className="btn btn-default passive-edit-style"
                                                                 onClick={() => {
-                                                                    handleBreakerShow();
-                                                                    setCurrentRecord(record);
-                                                                    setCurrentIndex(index);
-                                                                    setEquipmentId(record.equipment_id);
+                                                                    setEditSenorModelRefresh(true);
+                                                                    setCurrentSensorObj(record);
+                                                                    openEditSensorPanelModel();                                                                    
                                                                 }}>
                                                                 Edit
                                                             </button>
@@ -783,6 +792,16 @@ const IndividualPassiveDevice = () => {
                 currentIndex={currentIndex}
                 bldgId={bldgId}
                 equipmentId={equipmentId}
+            />
+
+            <EditSensorPanelModel
+                showEditSensorPanel={showEditSensorPanel}
+                closeEditSensorPanelModel={closeEditSensorPanelModel}
+                currentSensorObj={currentSensorObj}
+                setCurrentSensorObj={setCurrentSensorObj}
+                editSenorModelRefresh={editSenorModelRefresh}
+                setEditSenorModelRefresh={setEditSenorModelRefresh}
+                bldgId={bldgId}
             />
         </>
     );
