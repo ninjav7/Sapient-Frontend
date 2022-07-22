@@ -15,7 +15,7 @@ import {
 import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway } from '../../../services/Network';
+import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway,searchDevices } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
@@ -281,7 +281,7 @@ const PassiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
 
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
-
+    const [duplicatePassiveDeviceData, setDuplicatePassiveDeviceData] = useState([]);
     const [passiveDeviceModel, setPassiveDeviceModel] = useState([
         {
             value: 'PR55-4A',
@@ -300,6 +300,8 @@ const PassiveDevices = () => {
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
     });
+    const [search, setSearch] = useState('');
+
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
     const handleChange = (key, value) => {
@@ -346,6 +348,7 @@ const PassiveDevices = () => {
             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
+                setDuplicatePassiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -365,6 +368,41 @@ const PassiveDevices = () => {
             console.log('Failed to fetch Filtered Active Devices');
         }
     };
+    const handleSearchtxt=(e)=>{
+        if(e.target.value!==""){
+        setSearch(e.target.value.toUpperCase());
+        }
+        else{
+            setPassiveDeviceData(duplicatePassiveDeviceData)
+        }
+    }
+
+    const handleSearch=async()=>{
+        if(search!==""){
+            try {
+                setIsDeviceProcessing(true);
+                 let headers = {
+                     'Content-Type': 'application/json',
+                     accept: 'application/json',
+                     Authorization: `Bearer ${userdata.token}`,
+                 };
+                 let params = `?device_type=passive&building_id=${bldgId}&mac=${search}`;
+                 await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                     let response = res.data;
+                     setPassiveDeviceData(res.data);
+                 });
+                 setIsDeviceProcessing(false);
+             } catch (error) {
+                 console.log(error);
+                 setIsDeviceProcessing(false);
+                 console.log('Failed to fetch all Active Devices');
+             }
+      }
+      else{
+        setPassiveDeviceData(duplicatePassiveDeviceData)
+      }
+    }
+
 
     const nextPageData = async (path) => {
         try {
@@ -381,6 +419,7 @@ const PassiveDevices = () => {
             await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
+                setDuplicatePassiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -401,6 +440,7 @@ const PassiveDevices = () => {
         }
     };
 
+
     const previousPageData = async (path) => {
         try {
             if (path === null) {
@@ -416,6 +456,7 @@ const PassiveDevices = () => {
             await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
+                setDuplicatePassiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -449,7 +490,7 @@ const PassiveDevices = () => {
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
                     setPassiveDeviceData(data.data);
-
+                    setDuplicatePassiveDeviceData(data.data);
                     let onlineData = [];
                     let offlineData = [];
 
@@ -563,17 +604,18 @@ const PassiveDevices = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                <div class="input-group rounded ml-4">
                         <input
                             type="search"
                             class="form-control rounded"
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e)=>{handleSearchtxt(e)}}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
+                        <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
-                        </span>
+                        </button>
                     </div>
                 </Col>
 
