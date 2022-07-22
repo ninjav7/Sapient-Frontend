@@ -5,7 +5,7 @@ import './style.css';
 import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker/PageTracker';
-import SideNavbar from '../components/SideNavbar';
+import SideNav from '../components/SideNav/SideNav';
 import { Link, useLocation } from 'react-router-dom';
 import TopNav from '../components/TopNav/TopNav';
 
@@ -69,7 +69,7 @@ class HorizontalLayout extends Component {
 
                     <div>
                         <div className="energy-side-nav">
-                            <SideNavbar />
+                            <SideNav />
                         </div>
                         <div className="energy-page-content">
                             <Suspense fallback={loading()}>
