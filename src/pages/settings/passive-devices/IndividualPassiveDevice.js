@@ -241,14 +241,13 @@ const IndividualPassiveDevice = () => {
 
     const [metric, setMetric] = useState([
         // { value: 'energy', label: 'Consumed Energy (Wh)' },
-
         // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-
         // { value: 'mV', label: 'Voltage (V)' },
-
-        { value: 'mAh', label: 'Amps' },
-
         // { value: 'power', label: 'Real Power (W)' },
+        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
+        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
+        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
+        { value: 'mAh', label: 'Amps' },
     ]);
 
     const handleChartShow = (id) => {
@@ -288,6 +287,7 @@ const IndividualPassiveDevice = () => {
                     let response = res.data.data[0];
                     setPassiveData(response);
                     setActiveLocationId(response.location_id);
+                    localStorage.setItem('identifier', response.identifier);
                 });
             } catch (error) {
                 console.log(error);
@@ -458,7 +458,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -470,7 +470,7 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-
+                    
                     let data = response;
 
                     let exploreData = [];
@@ -494,6 +494,7 @@ const IndividualPassiveDevice = () => {
 
                     exploreData.push(recordToInsert);
 
+                    console.log('SSR exploreData => ', exploreData);
                     setDeviceData(exploreData);
 
                     console.log('UPDATED_CODE', seriesData);
@@ -685,6 +686,13 @@ const IndividualPassiveDevice = () => {
                                                             <span className="sensor-data-title">Not Attached</span>
                                                         </div>
                                                         <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-default passive-edit-style"

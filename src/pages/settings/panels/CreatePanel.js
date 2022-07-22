@@ -24,1995 +24,11 @@ import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import CustomNodeSelector from './panel-breaker-poc/CustomNodeSelector';
+import BreakersComponent from './Breakers';
+import DisconnectedBreakerComponent from './DisconnectedBreaker';
+import BreakerLink from './BreakerLink';
 import '../style.css';
 import './panel-style.css';
-
-// ************* breakers and link components ********************
-const DisconnectedBreakerComponent = ({ data, id }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    // Edit Breaker Modal
-    const [showEditBreaker, setShowEditBreaker] = useState(false);
-    const handleEditBreakerClose = () => setShowEditBreaker(false);
-    const handleEditBreakerShow = () => setShowEditBreaker(true);
-
-    const [sensorData, setSensorData] = useState([]);
-    const [linkedSensors, setLinkedSensors] = useState([]);
-
-    const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    const [currentBreakerData, setCurrentBreakerData] = useState({});
-
-    const fetchDeviceSensorData = async (deviceId) => {
-        try {
-            if (deviceId === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                console.log('Sensor Data => ', response);
-                setSensorData(response);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Data');
-        }
-    };
-
-    const addSelectedBreakerEquip = (equipId) => {
-        let newArray = [];
-        newArray.push(equipId);
-        setCurrentEquipIds(newArray);
-    };
-
-    const updateSingleBreakerData = () => {
-        // if (activePanelType === 'distribution') {
-        //     let newArray = normalStruct;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setNormalStruct(newArray);
-        // }
-        // if (activePanelType === 'disconnect') {
-        //     let newArray = disconnectBreakerConfig;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setDisconnectBreakerConfig(newArray);
-        // }
-    };
-
-    const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        if (previousSensorId === '') {
-            let newSensorList = linkedSensors;
-            newSensorList.push(newSensorId);
-            setLinkedSensors(newSensorList);
-        } else {
-            let newSensorList = linkedSensors;
-
-            let filteredList = newSensorList.filter((record) => {
-                return record !== previousSensorId;
-            });
-
-            filteredList.push(newSensorId);
-            setLinkedSensors(filteredList);
-        }
-    };
-
-    const findEquipmentName = (equipId) => {
-        let equip = data.equipment_data.find((record) => record.value === equipId);
-        return equip.label;
-    };
-
-    useEffect(() => {
-        let currentBreakerObj = Object.assign({}, data);
-        setCurrentBreakerData(currentBreakerObj);
-    }, []);
-
-    return (
-        <>
-            <Handle
-                type="source"
-                position="left"
-                id="a"
-                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-            <Handle
-                type="target"
-                position="left"
-                id="b"
-                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-
-            <FormGroup className="form-group row m-1 mb-4">
-                <div className="breaker-container">
-                    <div className="sub-breaker-style">
-                        <div className="breaker-content-middle">
-                            <div className="breaker-index">{data.breaker_number}</div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="dot-status"></div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="breaker-content">
-                                <span>{data.rated_amps === 0 ? '' : `${data.rated_amps}A`}</span>
-                                <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
-                            </div>
-                        </div>
-                        {!(data.equipment_link.length === 0) ? (
-                            <>
-                                <div className="breaker-equipName-style">
-                                    <h6 className=" ml-3 breaker-equip-name">
-                                        {findEquipmentName(data.equipment_link[0])}
-                                    </h6>
-                                </div>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </FormGroup>
-
-            <Modal show={showEditBreaker} onHide={handleEditBreakerClose} centered backdrop="static" keyboard={false}>
-                {!(data.breaker_level === 'triple-breaker') ? (
-                    // For Single & Double Breaker
-                    <>
-                        <div className="mt-4 ml-4 mb-0">
-                            <Modal.Title className="edit-breaker-title mb-0">
-                                {data.breaker_level === 'single-breaker' ? 'Edit Breaker' : 'Edit Linked Breaker'}
-                            </Modal.Title>
-                            <Modal.Title className="edit-breaker-no mt-0">
-                                {data.breaker_level === 'single-breaker' && `Breaker ${data.breaker_number}`}
-                                {/* {data.breaker_level === 'double-breaker' &&
-                                    `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
-                            </Modal.Title>
-                        </div>
-                        <Modal.Body>
-                            <Form>
-                                <div className="panel-model-row-style ml-2 mr-2">
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Phase</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Phase"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'phase_configuration', +e.target.value);
-                                            }}
-                                            value={data.phase_configuration}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            placeholder="Enter Amps"
-                                            className="font-weight-bold"
-                                            value={data.rated_amps}
-                                            min={0}
-                                            onChange={(e) => {
-                                                data.onChange(id, 'rated_amps', +e.target.value);
-                                            }}
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Volts</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Volts"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'voltage', e.target.value);
-                                            }}
-                                            value={data.voltage}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-                                </div>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <>
-                                    {data.breaker_level === 'single-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {data.breaker_number}
-                                        </div>
-                                    )}
-
-                                    {/* {currentBreakerLevel === 'double-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {doubleLinkedBreaker[0][0]} & {doubleLinkedBreaker[0][1]}
-                                        </div>
-                                    )} */}
-
-                                    <div className="panel-edit-grid ml-2 mr-2">
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Device ID</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Device"
-                                                onChange={(e) => {
-                                                    fetchDeviceSensorData(e.target.value);
-                                                    data.onChange(id, 'device_id', e.target.value);
-                                                }}
-                                                value={data.device_id}>
-                                                <option>Select Device</option>
-                                                {data.passive_data.map((record) => {
-                                                    return <option value={record.value}>{record.label}</option>;
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    data.onChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(data.sensor_id, e.target.value);
-                                                }}
-                                                value={data.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-                                    </div>
-                                </>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Equipment</Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        className="font-weight-bold breaker-phase-selection"
-                                        placeholder="Select Equipment"
-                                        onChange={(e) => {
-                                            addSelectedBreakerEquip(e.target.value);
-                                            data.onChange(id, 'equipment_link', e.target.value);
-                                        }}
-                                        value={data.equipment_link[0]}>
-                                        <option>Select Equipment</option>
-                                        {data.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
-                                        })}
-                                    </Input>
-                                    {/* <MultiSelect
-                                        options={equipmentData}
-                                        value={selectedEquipOptions}
-                                        onChange={setSelectedEquipOptions}
-                                        labelledBy="Columns"
-                                        hasSelectAll={false}
-                                    /> */}
-                                </Form.Group>
-                            </Form>
-                        </Modal.Body>
-                    </>
-                ) : (
-                    <></>
-                    // For Triple Breaker
-                    // <>
-                    //     <div className="mt-4 ml-4 mb-0">
-                    //         <Modal.Title className="edit-breaker-title mb-0">Edit Linked Breaker</Modal.Title>
-                    //         <Modal.Title className="edit-breaker-no mt-0">
-                    //             {currentBreakerLevel === 'triple-breaker' &&
-                    //                 `Breaker ${tripleLinkedBreaker[0].map((number) => ` ${number}`)}`}
-                    //         </Modal.Title>
-                    //     </div>
-                    //     <Modal.Body>
-                    //         <Form>
-                    //             <div className="panel-model-row-style ml-2 mr-2">
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Phase</Form.Label>
-                    //                     {/* <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.phase_configuration}
-                    //                         disabled={true}>
-                    //                         <option>Select Phase</option>
-                    //                         <option value="3">3</option>
-                    //                         <option value="1">1</option>
-                    //                     </Input> */}
-                    //                     <Input
-                    //                         type="number"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={3}
-                    //                         disabled={true}></Input>
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
-                    //                     <Form.Control
-                    //                         type="number"
-                    //                         placeholder="Enter Amps"
-                    //                         className="font-weight-bold"
-                    //                         value={currentBreakerObj.rated_amps}
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('rated_amps', e.target.value);
-                    //                         }}
-                    //                     />
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Volts</Form.Label>
-
-                    //                     <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Volts"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('voltage', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.voltage}
-                    //                         disabled={true}>
-                    //                         <option>Select Volts</option>
-                    //                         <option value="120">120</option>
-                    //                         <option value="208">208</option>
-                    //                         <option value="277">277</option>
-                    //                         <option value="347">347</option>
-                    //                     </Input>
-                    //                 </Form.Group>
-                    //             </div>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <>
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][0]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][1]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id1', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id1}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id1', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id1}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][2]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id2', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id2}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id2', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id2}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-                    //             </>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                    //                 <Form.Label>Equipment</Form.Label>
-                    //                 <Input
-                    //                     type="select"
-                    //                     name="state"
-                    //                     id="userState"
-                    //                     className="font-weight-bold breaker-phase-selection"
-                    //                     placeholder="Select Equipment"
-                    //                     onChange={(e) => {
-                    //                         addSelectedBreakerEquip(e.target.value);
-                    //                         handleBreakerConfigChange('equipment_link', e.target.value);
-                    //                     }}
-                    //                     value={currentEquipIds[0]}>
-                    //                     <option>Select Equipment</option>
-                    //                     {equipmentData.map((record) => {
-                    //                         return (
-                    //                             <option value={record.equipments_id}>{record.equipments_name}</option>
-                    //                         );
-                    //                     })}
-                    //                 </Input>
-                    //             </Form.Group>
-                    //         </Form>
-                    //     </Modal.Body>
-                    // </>
-                )}
-
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleEditBreakerClose}>
-                        Cancel
-                    </Button>
-                    {data.breaker_level === 'single-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateSingleBreakerData();
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )}
-
-                    {/* {data.breaker_level === 'double-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateDoubleBreakerData(doubleLinkedBreaker[0][0], doubleLinkedBreaker[0][1]);
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-
-                    {/* {data.breaker_level === 'triple-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateTripleBreakerData(
-                                    tripleLinkedBreaker[0][0],
-                                    tripleLinkedBreaker[0][1],
-                                    tripleLinkedBreaker[0][2]
-                                );
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-                </Modal.Footer>
-            </Modal>
-        </>
-    );
-};
-
-const BreakersComponentLeft = ({ data, id }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    // Edit Breaker Modal
-    const [showEditBreaker, setShowEditBreaker] = useState(false);
-    const handleEditBreakerClose = () => setShowEditBreaker(false);
-    const handleEditBreakerShow = () => setShowEditBreaker(true);
-
-    const [sensorData, setSensorData] = useState([]);
-    const [linkedSensors, setLinkedSensors] = useState([]);
-
-    const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    const [currentBreakerData, setCurrentBreakerData] = useState({});
-
-    const fetchDeviceSensorData = async (deviceId) => {
-        try {
-            if (deviceId === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                console.log('Sensor Data => ', response);
-                setSensorData(response);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Data');
-        }
-    };
-
-    const addSelectedBreakerEquip = (equipId) => {
-        let newArray = [];
-        newArray.push(equipId);
-        setCurrentEquipIds(newArray);
-    };
-
-    const updateSingleBreakerData = () => {
-        // if (activePanelType === 'distribution') {
-        //     let newArray = normalStruct;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setNormalStruct(newArray);
-        // }
-        // if (activePanelType === 'disconnect') {
-        //     let newArray = disconnectBreakerConfig;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setDisconnectBreakerConfig(newArray);
-        // }
-    };
-
-    const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        if (previousSensorId === '') {
-            let newSensorList = linkedSensors;
-            newSensorList.push(newSensorId);
-            setLinkedSensors(newSensorList);
-        } else {
-            let newSensorList = linkedSensors;
-
-            let filteredList = newSensorList.filter((record) => {
-                return record !== previousSensorId;
-            });
-
-            filteredList.push(newSensorId);
-            setLinkedSensors(filteredList);
-        }
-    };
-
-    const findEquipmentName = (equipId) => {
-        let equip = data.equipment_data.find((record) => record.value === equipId);
-        return equip.label;
-    };
-
-    useEffect(() => {
-        let currentBreakerObj = Object.assign({}, data);
-        setCurrentBreakerData(currentBreakerObj);
-    }, []);
-
-    return (
-        <React.Fragment>
-            <Handle
-                type="source"
-                position="left"
-                id="a"
-                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-            <Handle
-                type="target"
-                position="left"
-                id="b"
-                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-
-            <FormGroup className="form-group row m-1 mb-4">
-                <div className="breaker-container">
-                    <div className="sub-breaker-style">
-                        <div className="breaker-content-middle">
-                            <div className="breaker-index">{data.breaker_number}</div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="dot-status"></div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="breaker-content">
-                                <span>{data.rated_amps === 0 ? '' : `${data.rated_amps}A`}</span>
-                                <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
-                            </div>
-                        </div>
-                        {!(data.equipment_link.length === 0) ? (
-                            <>
-                                <div className="breaker-equipName-style">
-                                    <h6 className=" ml-3 breaker-equip-name">
-                                        {findEquipmentName(data.equipment_link[0])}
-                                    </h6>
-                                </div>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </FormGroup>
-
-            <Modal show={showEditBreaker} onHide={handleEditBreakerClose} centered backdrop="static" keyboard={false}>
-                {!(data.breaker_level === 'triple-breaker') ? (
-                    // For Single & Double Breaker
-                    <>
-                        <div className="mt-4 ml-4 mb-0">
-                            <Modal.Title className="edit-breaker-title mb-0">
-                                {data.breaker_level === 'single-breaker' ? 'Edit Breaker' : 'Edit Linked Breaker'}
-                            </Modal.Title>
-                            <Modal.Title className="edit-breaker-no mt-0">
-                                {data.breaker_level === 'single-breaker' && `Breaker ${data.breaker_number}`}
-                                {/* {data.breaker_level === 'double-breaker' &&
-                                    `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
-                            </Modal.Title>
-                        </div>
-                        <Modal.Body>
-                            <Form>
-                                <div className="panel-model-row-style ml-2 mr-2">
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Phase</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Phase"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'phase_configuration', +e.target.value);
-                                            }}
-                                            value={data.phase_configuration}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            placeholder="Enter Amps"
-                                            className="font-weight-bold"
-                                            value={data.rated_amps}
-                                            min={0}
-                                            onChange={(e) => {
-                                                data.onChange(id, 'rated_amps', +e.target.value);
-                                            }}
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Volts</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Volts"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'voltage', e.target.value);
-                                            }}
-                                            value={data.voltage}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-                                </div>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <>
-                                    {data.breaker_level === 'single-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {data.breaker_number}
-                                        </div>
-                                    )}
-
-                                    {/* {currentBreakerLevel === 'double-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {doubleLinkedBreaker[0][0]} & {doubleLinkedBreaker[0][1]}
-                                        </div>
-                                    )} */}
-
-                                    <div className="panel-edit-grid ml-2 mr-2">
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Device ID</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Device"
-                                                onChange={(e) => {
-                                                    fetchDeviceSensorData(e.target.value);
-                                                    data.onChange(id, 'device_id', e.target.value);
-                                                }}
-                                                value={data.device_id}>
-                                                <option>Select Device</option>
-                                                {data.passive_data.map((record) => {
-                                                    return <option value={record.value}>{record.label}</option>;
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    data.onChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(data.sensor_id, e.target.value);
-                                                }}
-                                                value={data.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-                                    </div>
-                                </>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Equipment</Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        className="font-weight-bold breaker-phase-selection"
-                                        placeholder="Select Equipment"
-                                        onChange={(e) => {
-                                            addSelectedBreakerEquip(e.target.value);
-                                            data.onChange(id, 'equipment_link', e.target.value);
-                                        }}
-                                        value={data.equipment_link[0]}>
-                                        <option>Select Equipment</option>
-                                        {data.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
-                                        })}
-                                    </Input>
-                                    {/* <MultiSelect
-                                        options={equipmentData}
-                                        value={selectedEquipOptions}
-                                        onChange={setSelectedEquipOptions}
-                                        labelledBy="Columns"
-                                        hasSelectAll={false}
-                                    /> */}
-                                </Form.Group>
-                            </Form>
-                        </Modal.Body>
-                    </>
-                ) : (
-                    <></>
-                    // For Triple Breaker
-                    // <>
-                    //     <div className="mt-4 ml-4 mb-0">
-                    //         <Modal.Title className="edit-breaker-title mb-0">Edit Linked Breaker</Modal.Title>
-                    //         <Modal.Title className="edit-breaker-no mt-0">
-                    //             {currentBreakerLevel === 'triple-breaker' &&
-                    //                 `Breaker ${tripleLinkedBreaker[0].map((number) => ` ${number}`)}`}
-                    //         </Modal.Title>
-                    //     </div>
-                    //     <Modal.Body>
-                    //         <Form>
-                    //             <div className="panel-model-row-style ml-2 mr-2">
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Phase</Form.Label>
-                    //                     {/* <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.phase_configuration}
-                    //                         disabled={true}>
-                    //                         <option>Select Phase</option>
-                    //                         <option value="3">3</option>
-                    //                         <option value="1">1</option>
-                    //                     </Input> */}
-                    //                     <Input
-                    //                         type="number"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={3}
-                    //                         disabled={true}></Input>
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
-                    //                     <Form.Control
-                    //                         type="number"
-                    //                         placeholder="Enter Amps"
-                    //                         className="font-weight-bold"
-                    //                         value={currentBreakerObj.rated_amps}
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('rated_amps', e.target.value);
-                    //                         }}
-                    //                     />
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Volts</Form.Label>
-
-                    //                     <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Volts"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('voltage', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.voltage}
-                    //                         disabled={true}>
-                    //                         <option>Select Volts</option>
-                    //                         <option value="120">120</option>
-                    //                         <option value="208">208</option>
-                    //                         <option value="277">277</option>
-                    //                         <option value="347">347</option>
-                    //                     </Input>
-                    //                 </Form.Group>
-                    //             </div>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <>
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][0]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][1]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id1', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id1}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id1', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id1}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][2]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id2', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id2}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id2', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id2}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-                    //             </>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                    //                 <Form.Label>Equipment</Form.Label>
-                    //                 <Input
-                    //                     type="select"
-                    //                     name="state"
-                    //                     id="userState"
-                    //                     className="font-weight-bold breaker-phase-selection"
-                    //                     placeholder="Select Equipment"
-                    //                     onChange={(e) => {
-                    //                         addSelectedBreakerEquip(e.target.value);
-                    //                         handleBreakerConfigChange('equipment_link', e.target.value);
-                    //                     }}
-                    //                     value={currentEquipIds[0]}>
-                    //                     <option>Select Equipment</option>
-                    //                     {equipmentData.map((record) => {
-                    //                         return (
-                    //                             <option value={record.equipments_id}>{record.equipments_name}</option>
-                    //                         );
-                    //                     })}
-                    //                 </Input>
-                    //             </Form.Group>
-                    //         </Form>
-                    //     </Modal.Body>
-                    // </>
-                )}
-
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleEditBreakerClose}>
-                        Cancel
-                    </Button>
-                    {data.breaker_level === 'single-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateSingleBreakerData();
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )}
-
-                    {/* {data.breaker_level === 'double-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateDoubleBreakerData(doubleLinkedBreaker[0][0], doubleLinkedBreaker[0][1]);
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-
-                    {/* {data.breaker_level === 'triple-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateTripleBreakerData(
-                                    tripleLinkedBreaker[0][0],
-                                    tripleLinkedBreaker[0][1],
-                                    tripleLinkedBreaker[0][2]
-                                );
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-                </Modal.Footer>
-            </Modal>
-        </React.Fragment>
-    );
-};
-
-const BreakersComponentRight = ({ data, id }) => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    // Edit Breaker Modal
-    const [showEditBreaker, setShowEditBreaker] = useState(false);
-    const handleEditBreakerClose = () => setShowEditBreaker(false);
-    const handleEditBreakerShow = () => setShowEditBreaker(true);
-
-    const [sensorData, setSensorData] = useState([]);
-    const [linkedSensors, setLinkedSensors] = useState([]);
-
-    const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    const [currentBreakerData, setCurrentBreakerData] = useState({});
-
-    const fetchDeviceSensorData = async (deviceId) => {
-        try {
-            if (deviceId === null) {
-                return;
-            }
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
-                let response = res.data;
-                console.log('Sensor Data => ', response);
-                setSensorData(response);
-            });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Data');
-        }
-    };
-
-    const addSelectedBreakerEquip = (equipId) => {
-        let newArray = [];
-        newArray.push(equipId);
-        setCurrentEquipIds(newArray);
-    };
-
-    const updateSingleBreakerData = () => {
-        // if (activePanelType === 'distribution') {
-        //     let newArray = normalStruct;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setNormalStruct(newArray);
-        // }
-        // if (activePanelType === 'disconnect') {
-        //     let newArray = disconnectBreakerConfig;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setDisconnectBreakerConfig(newArray);
-        // }
-    };
-
-    const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        if (previousSensorId === '') {
-            let newSensorList = linkedSensors;
-            newSensorList.push(newSensorId);
-            setLinkedSensors(newSensorList);
-        } else {
-            let newSensorList = linkedSensors;
-
-            let filteredList = newSensorList.filter((record) => {
-                return record !== previousSensorId;
-            });
-
-            filteredList.push(newSensorId);
-            setLinkedSensors(filteredList);
-        }
-    };
-
-    const findEquipmentName = (equipId) => {
-        let equip = data.equipment_data.find((record) => record.value === equipId);
-        return equip.label;
-    };
-
-    useEffect(() => {
-        let currentBreakerObj = Object.assign({}, data);
-        setCurrentBreakerData(currentBreakerObj);
-    }, []);
-    return (
-        <>
-            <Handle
-                type="source"
-                position="right"
-                id="a"
-                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-            <Handle
-                type="target"
-                position="right"
-                id="b"
-                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-            <FormGroup className="form-group row m-1 mb-4">
-                <div className="breaker-container">
-                    <div className="sub-breaker-style">
-                        <div className="breaker-content-middle">
-                            <div className="breaker-index">{data.breaker_number}</div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="dot-status"></div>
-                        </div>
-                        <div className="breaker-content-middle">
-                            <div className="breaker-content">
-                                <span>{data.rated_amps === 0 ? '' : `${data.rated_amps}A`}</span>
-                                <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
-                            </div>
-                        </div>
-                        {!(data.equipment_link.length === 0) ? (
-                            <>
-                                <div className="breaker-equipName-style">
-                                    <h6 className=" ml-3 breaker-equip-name">
-                                        {findEquipmentName(data.equipment_link[0])}
-                                    </h6>
-                                </div>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {!(
-                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
-                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
-                                ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            // setCurrentBreakerObj(element);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
-                                            handleEditBreakerShow();
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            </FormGroup>
-
-            <Modal show={showEditBreaker} onHide={handleEditBreakerClose} centered backdrop="static" keyboard={false}>
-                {!(data.breaker_level === 'triple-breaker') ? (
-                    // For Single & Double Breaker
-                    <>
-                        <div className="mt-4 ml-4 mb-0">
-                            <Modal.Title className="edit-breaker-title mb-0">
-                                {data.breaker_level === 'single-breaker' ? 'Edit Breaker' : 'Edit Linked Breaker'}
-                            </Modal.Title>
-                            <Modal.Title className="edit-breaker-no mt-0">
-                                {data.breaker_level === 'single-breaker' && `Breaker ${data.breaker_number}`}
-                                {/* {data.breaker_level === 'double-breaker' &&
-                                    `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
-                            </Modal.Title>
-                        </div>
-                        <Modal.Body>
-                            <Form>
-                                <div className="panel-model-row-style ml-2 mr-2">
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Phase</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Phase"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'phase_configuration', +e.target.value);
-                                            }}
-                                            value={data.phase_configuration}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            placeholder="Enter Amps"
-                                            className="font-weight-bold"
-                                            value={data.rated_amps}
-                                            min={0}
-                                            onChange={(e) => {
-                                                data.onChange(id, 'rated_amps', +e.target.value);
-                                            }}
-                                        />
-                                    </Form.Group>
-
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Volts</Form.Label>
-                                        <Input
-                                            type="number"
-                                            name="state"
-                                            id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
-                                            placeholder="Select Volts"
-                                            onChange={(e) => {
-                                                data.onChange(id, 'voltage', e.target.value);
-                                            }}
-                                            value={data.voltage}
-                                            disabled={true}
-                                            min={0}></Input>
-                                    </Form.Group>
-                                </div>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <>
-                                    {data.breaker_level === 'single-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {data.breaker_number}
-                                        </div>
-                                    )}
-
-                                    {/* {currentBreakerLevel === 'double-breaker' && (
-                                        <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {doubleLinkedBreaker[0][0]} & {doubleLinkedBreaker[0][1]}
-                                        </div>
-                                    )} */}
-
-                                    <div className="panel-edit-grid ml-2 mr-2">
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Device ID</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Device"
-                                                onChange={(e) => {
-                                                    fetchDeviceSensorData(e.target.value);
-                                                    data.onChange(id, 'device_id', e.target.value);
-                                                }}
-                                                value={data.device_id}>
-                                                <option>Select Device</option>
-                                                {data.passive_data.map((record) => {
-                                                    return <option value={record.value}>{record.label}</option>;
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    data.onChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(data.sensor_id, e.target.value);
-                                                }}
-                                                value={data.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-                                    </div>
-                                </>
-
-                                <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                                <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Equipment</Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        className="font-weight-bold breaker-phase-selection"
-                                        placeholder="Select Equipment"
-                                        onChange={(e) => {
-                                            addSelectedBreakerEquip(e.target.value);
-                                            data.onChange(id, 'equipment_link', e.target.value);
-                                        }}
-                                        value={data.equipment_link[0]}>
-                                        <option>Select Equipment</option>
-                                        {data.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
-                                        })}
-                                    </Input>
-                                    {/* <MultiSelect
-                                        options={equipmentData}
-                                        value={selectedEquipOptions}
-                                        onChange={setSelectedEquipOptions}
-                                        labelledBy="Columns"
-                                        hasSelectAll={false}
-                                    /> */}
-                                </Form.Group>
-                            </Form>
-                        </Modal.Body>
-                    </>
-                ) : (
-                    <></>
-                    // For Triple Breaker
-                    // <>
-                    //     <div className="mt-4 ml-4 mb-0">
-                    //         <Modal.Title className="edit-breaker-title mb-0">Edit Linked Breaker</Modal.Title>
-                    //         <Modal.Title className="edit-breaker-no mt-0">
-                    //             {currentBreakerLevel === 'triple-breaker' &&
-                    //                 `Breaker ${tripleLinkedBreaker[0].map((number) => ` ${number}`)}`}
-                    //         </Modal.Title>
-                    //     </div>
-                    //     <Modal.Body>
-                    //         <Form>
-                    //             <div className="panel-model-row-style ml-2 mr-2">
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Phase</Form.Label>
-                    //                     {/* <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.phase_configuration}
-                    //                         disabled={true}>
-                    //                         <option>Select Phase</option>
-                    //                         <option value="3">3</option>
-                    //                         <option value="1">1</option>
-                    //                     </Input> */}
-                    //                     <Input
-                    //                         type="number"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Phase"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('phase_configuration', e.target.value);
-                    //                         }}
-                    //                         value={3}
-                    //                         disabled={true}></Input>
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
-                    //                     <Form.Control
-                    //                         type="number"
-                    //                         placeholder="Enter Amps"
-                    //                         className="font-weight-bold"
-                    //                         value={currentBreakerObj.rated_amps}
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('rated_amps', e.target.value);
-                    //                         }}
-                    //                     />
-                    //                 </Form.Group>
-
-                    //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Volts</Form.Label>
-
-                    //                     <Input
-                    //                         type="select"
-                    //                         name="state"
-                    //                         id="userState"
-                    //                         className="font-weight-bold breaker-phase-selection"
-                    //                         placeholder="Select Volts"
-                    //                         onChange={(e) => {
-                    //                             handleBreakerConfigChange('voltage', e.target.value);
-                    //                         }}
-                    //                         value={currentBreakerObj.voltage}
-                    //                         disabled={true}>
-                    //                         <option>Select Volts</option>
-                    //                         <option value="120">120</option>
-                    //                         <option value="208">208</option>
-                    //                         <option value="277">277</option>
-                    //                         <option value="347">347</option>
-                    //                     </Input>
-                    //                 </Form.Group>
-                    //             </div>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <>
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][0]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][1]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id1', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id1}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id1', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id1}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-
-                    //                 <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                    //                     Breaker {tripleLinkedBreaker[0][2]}
-                    //                 </div>
-                    //                 <div className="panel-edit-grid ml-2 mr-2">
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Device ID</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Device"
-                    //                             onChange={(e) => {
-                    //                                 fetchDeviceSensorData(e.target.value);
-                    //                                 handleBreakerConfigChange('device_id2', e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.device_id2}>
-                    //                             <option>Select Device</option>
-                    //                             {passiveDeviceData.map((record) => {
-                    //                                 return (
-                    //                                     <option value={record.equipments_id}>
-                    //                                         {record.identifier}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-
-                    //                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                         <Form.Label>Sensor #</Form.Label>
-                    //                         <Input
-                    //                             type="select"
-                    //                             name="state"
-                    //                             id="userState"
-                    //                             className="font-weight-bold breaker-phase-selection"
-                    //                             placeholder="Select Sensor"
-                    //                             onChange={(e) => {
-                    //                                 handleBreakerConfigChange('sensor_id2', e.target.value);
-                    //                                 handleLinkedSensor(currentBreakerObj.sensor_id, e.target.value);
-                    //                             }}
-                    //                             value={currentBreakerObj.sensor_id2}>
-                    //                             <option>Select Sensor</option>
-                    //                             {sensorData.map((record) => {
-                    //                                 return (
-                    //                                     <option
-                    //                                         value={record.id}
-                    //                                         disabled={linkedSensors.includes(record.id)}>
-                    //                                         {record.name}
-                    //                                     </option>
-                    //                                 );
-                    //                             })}
-                    //                         </Input>
-                    //                     </Form.Group>
-                    //                 </div>
-                    //             </>
-
-                    //             <div className="edit-form-breaker ml-2 mr-2 mb-2" />
-
-                    //             <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
-                    //                 <Form.Label>Equipment</Form.Label>
-                    //                 <Input
-                    //                     type="select"
-                    //                     name="state"
-                    //                     id="userState"
-                    //                     className="font-weight-bold breaker-phase-selection"
-                    //                     placeholder="Select Equipment"
-                    //                     onChange={(e) => {
-                    //                         addSelectedBreakerEquip(e.target.value);
-                    //                         handleBreakerConfigChange('equipment_link', e.target.value);
-                    //                     }}
-                    //                     value={currentEquipIds[0]}>
-                    //                     <option>Select Equipment</option>
-                    //                     {equipmentData.map((record) => {
-                    //                         return (
-                    //                             <option value={record.equipments_id}>{record.equipments_name}</option>
-                    //                         );
-                    //                     })}
-                    //                 </Input>
-                    //             </Form.Group>
-                    //         </Form>
-                    //     </Modal.Body>
-                    // </>
-                )}
-
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleEditBreakerClose}>
-                        Cancel
-                    </Button>
-                    {data.breaker_level === 'single-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateSingleBreakerData();
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )}
-
-                    {/* {data.breaker_level === 'double-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateDoubleBreakerData(doubleLinkedBreaker[0][0], doubleLinkedBreaker[0][1]);
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-
-                    {/* {data.breaker_level === 'triple-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateTripleBreakerData(
-                                    tripleLinkedBreaker[0][0],
-                                    tripleLinkedBreaker[0][1],
-                                    tripleLinkedBreaker[0][2]
-                                );
-                                handleEditBreakerClose();
-                            }}>
-                            Update
-                        </Button>
-                    )} */}
-                </Modal.Footer>
-            </Modal>
-        </>
-    );
-};
-
-const BreakerLink = () => {
-    return (
-        <>
-            <Handle
-                type="source"
-                position="top"
-                id="a"
-                style={{ width: '5px', height: '5px', backgroundColor: '#bababa' }}
-            />
-            <Handle
-                type="target"
-                position="bottom"
-                id="b"
-                style={{ width: '5px', height: '5px', backgroundColor: '#bababa' }}
-            />
-            <div className="breaker-link-container">
-                {/* <FontAwesomeIcon icon={faLinkHorizontal} color="#3C6DF5" size="md" /> */}
-                <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#D0D5DD" size="md" />
-            </div>
-        </>
-    );
-};
 
 const CreatePanel = () => {
     let cookies = new Cookies();
@@ -2031,12 +47,20 @@ const CreatePanel = () => {
     const handleMainClose = () => setShowMain(false);
     const handleMainShow = () => setShowMain(true);
 
+    // JSON Modal
+    const [showJSON, setShowJSON] = useState(false);
+    const handleJsonModelClose = () => setShowJSON(false);
+    const handleJsonModelShow = () => setShowJSON(true);
+
     const [updateData, setUpdateData] = useState({});
     const [equipmentData, setEquipmentData] = useState([]);
     const [sensorData, setSensorData] = useState([]);
 
     const [currentBreakerObj, setCurrentBreakerObj] = useState({});
     const [currentBreakerIndex, setCurrentBreakerIndex] = useState(0);
+
+    const [jsonPanelData, setJsonPanelData] = useState('');
+    const [jsonBreakerData, setJsonBreakerData] = useState('');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -2123,7 +147,6 @@ const CreatePanel = () => {
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
     const [activePanelType, setActivePanelType] = useState('distribution');
-    // const [activePanelType, setActivePanelType] = useState('disconnect');
     const [generalPanelData, setGeneralPanelData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
@@ -2376,7 +399,15 @@ const CreatePanel = () => {
             };
 
             let newPanel = Object.assign({}, panel);
-            newPanel.breaker_count = normalCount;
+
+            if (activePanelType === 'distribution') {
+                newPanel.breaker_count = normalCount;
+            }
+
+            if (activePanelType === 'disconnect') {
+                newPanel.breaker_count = disconnectBreakerCount;
+            }
+
             newPanel.panel_type = activePanelType;
 
             setIsProcessing(true);
@@ -2393,6 +424,67 @@ const CreatePanel = () => {
             setIsProcessing(false);
             console.log('Failed to save Panel');
         }
+    };
+
+    const getJSONFormatedData = () => {
+        let newPanel = Object.assign({}, panel);
+        if (activePanelType === 'distribution') {
+            newPanel.breaker_count = normalCount;
+        }
+        if (activePanelType === 'disconnect') {
+            newPanel.breaker_count = disconnectBreakerCount;
+        }
+        newPanel.panel_type = activePanelType;
+        setJsonPanelData(JSON.stringify(newPanel, undefined, 4));
+
+        let panelBreakerObjs = [];
+
+        if (activePanelType === 'distribution') {
+            elements.forEach((el) => {
+                if (el.type === 'breakerLink') {
+                    return;
+                }
+
+                let obj = {
+                    id: el.id,
+                    name: `Breaker ${el.data.breaker_number}`,
+                    breaker_number: +el.data.breaker_number,
+                    phase_configuration: el.data.phase_configuration,
+                    rated_amps: el.data.rated_amps,
+                    voltage: +el.data.voltage,
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: el.data.equipment_link,
+                    sensor_id: el.data.sensor_id,
+                    device_id: el.data.device_id,
+                };
+                panelBreakerObjs.push(obj);
+            });
+        }
+
+        if (activePanelType === 'disconnect') {
+            disconnectBreakersNodes.forEach((el) => {
+                if (el.type === 'breakerLink') {
+                    return;
+                }
+
+                let obj = {
+                    id: el.id,
+                    name: `Breaker ${el.data.breaker_number}`,
+                    breaker_number: +el.data.breaker_number,
+                    phase_configuration: el.data.phase_configuration,
+                    rated_amps: el.data.rated_amps,
+                    voltage: +el.data.voltage,
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: el.data.equipment_link,
+                    sensor_id: el.data.sensor_id,
+                    device_id: el.data.device_id,
+                };
+                panelBreakerObjs.push(obj);
+            });
+        }
+        setJsonBreakerData(JSON.stringify(panelBreakerObjs, undefined, 4));
     };
 
     const mainVoltageChange = (voltageValue) => {
@@ -2498,7 +590,6 @@ const CreatePanel = () => {
                 obj.data.phase_configuration = 1;
             }
         });
-        console.log('Voltage change => ', newArray);
         setElements(newArray);
     };
 
@@ -2656,16 +747,36 @@ const CreatePanel = () => {
         setElements(elementsList);
     };
 
+    const handleDisconnectedBreakerChange = (id, key, value) => {
+        let disconnectedBreakerList = Object.assign([], disconnectBreakersNodes);
+
+        disconnectedBreakerList.forEach((el) => {
+            if (el.id === id) {
+                if (key === 'equipment_link') {
+                    let arr = [];
+                    arr.push(value);
+                    value = arr;
+                }
+                if (value === 'Select Volts') {
+                    value = '';
+                }
+                el.data[key] = value;
+            }
+        });
+
+        setDisconnectBreaker(disconnectedBreakerList);
+    };
+
     // ************* distributed initial elements & edges ********************
     const initialElements = [
         {
             id: 'breaker-1',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerComponentLeft',
+            type: 'breakerComponent',
             data: {
                 name: '',
-                breaker_number: '1',
+                breaker_number: 1,
                 phase_configuration: 1,
                 rated_amps: 0,
                 voltage: '',
@@ -2680,17 +791,17 @@ const CreatePanel = () => {
                 passive_data: [],
                 onChange: handleBreakerChange,
             },
-            position: { x: 250, y: 60 },
+            position: { x: 250, y: 70 },
             draggable: false,
         },
         {
             id: 'breaker-3',
             targetPosition: 'left',
             sourcePosition: 'right',
-            type: 'breakerComponentLeft',
+            type: 'breakerComponent',
             data: {
                 name: '',
-                breaker_number: '3',
+                breaker_number: 3,
                 phase_configuration: 1,
                 rated_amps: 0,
                 voltage: '',
@@ -2714,7 +825,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             data: {
                 name: '',
-                breaker_number: '2',
+                breaker_number: 2,
                 phase_configuration: 1,
                 rated_amps: 0,
                 voltage: '',
@@ -2729,8 +840,8 @@ const CreatePanel = () => {
                 passive_data: [],
                 onChange: handleBreakerChange,
             },
-            type: 'breakerComponentRight',
-            position: { x: 700, y: 60 },
+            type: 'breakerComponent',
+            position: { x: 700, y: 70 },
             draggable: false,
         },
         {
@@ -2739,7 +850,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             data: {
                 name: '',
-                breaker_number: '4',
+                breaker_number: 4,
                 phase_configuration: 1,
                 rated_amps: 0,
                 voltage: '',
@@ -2754,7 +865,7 @@ const CreatePanel = () => {
                 passive_data: [],
                 onChange: handleBreakerChange,
             },
-            type: 'breakerComponentRight',
+            type: 'breakerComponent',
             position: { x: 700, y: 140 },
             draggable: false,
         },
@@ -2763,7 +874,7 @@ const CreatePanel = () => {
             sourcePosition: 'left',
             type: 'breakerLink',
             data: { label: 'Link' },
-            position: { x: 1140, y: 120 },
+            position: { x: 1130, y: 125 },
             draggable: false,
         },
         {
@@ -2771,7 +882,7 @@ const CreatePanel = () => {
             sourcePosition: 'right',
             type: 'breakerLink',
             data: { label: 'Link' },
-            position: { x: 200, y: 120 },
+            position: { x: 200, y: 125 },
             draggable: false,
         },
     ];
@@ -2800,12 +911,14 @@ const CreatePanel = () => {
         {
             id: 'dis-breaker-1',
             type: 'disconnectedBreakerComponent',
+            targetPosition: 'left',
+            sourcePosition: 'right',
             data: {
                 name: '',
-                breaker_number: '1',
+                breaker_number: 1,
                 phase_configuration: 1,
                 rated_amps: 0,
-                voltage: '',
+                voltage: '120',
                 link_type: 'unlinked',
                 link_id: '',
                 equipment_link: [],
@@ -2815,19 +928,22 @@ const CreatePanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleBreakerChange,
+                onChange: handleDisconnectedBreakerChange,
             },
             position: { x: 450, y: 60 },
             draggable: false,
         },
         {
             id: 'dis-breaker-2',
+            type: 'disconnectedBreakerComponent',
+            targetPosition: 'right',
+            sourcePosition: 'left',
             data: {
                 name: '',
-                breaker_number: '2',
+                breaker_number: 2,
                 phase_configuration: 1,
                 rated_amps: 0,
-                voltage: '',
+                voltage: '120',
                 link_type: 'unlinked',
                 link_id: '',
                 equipment_link: [],
@@ -2837,20 +953,22 @@ const CreatePanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleBreakerChange,
+                onChange: handleDisconnectedBreakerChange,
             },
-            data: { label: 'Breaker 2', index: '2' },
             position: { x: 450, y: 140 },
             draggable: false,
         },
         {
             id: 'dis-breaker-3',
+            type: 'disconnectedBreakerComponent',
+            targetPosition: 'left',
+            sourcePosition: 'right',
             data: {
                 name: '',
-                breaker_number: '3',
+                breaker_number: 3,
                 phase_configuration: 1,
                 rated_amps: 0,
-                voltage: '',
+                voltage: '120',
                 link_type: 'unlinked',
                 link_id: '',
                 equipment_link: [],
@@ -2860,14 +978,14 @@ const CreatePanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleBreakerChange,
+                onChange: handleDisconnectedBreakerChange,
             },
-            data: { label: 'Breaker 3', index: '3' },
             position: { x: 450, y: 220 },
             draggable: false,
         },
         {
             id: 'dis-breakerslink-12',
+            sourcePosition: 'right',
             type: 'breakerLink',
             data: { label: 'Link' },
             position: { x: 400, y: 120 },
@@ -2875,6 +993,7 @@ const CreatePanel = () => {
         },
         {
             id: 'dis-breakerslink-23',
+            sourcePosition: 'right',
             type: 'breakerLink',
             data: { label: 'Link' },
             position: { x: 400, y: 200 },
@@ -2901,6 +1020,18 @@ const CreatePanel = () => {
         },
     ];
 
+    // const [elements, setElements] = useState(initialElements);
+    const [elements, setElements] = useState(initialElements);
+    // const [elements, setElements] = useState([]);
+    const [edges, setEdges] = useState(initialEdges);
+
+    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
+    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [nodeData, setnodeData] = useState(null);
+
     const connectionLineStyle = { stroke: '#fff' };
     const snapGrid = [10, 10];
 
@@ -2913,8 +1044,7 @@ const CreatePanel = () => {
     // ************* added node and egde types ********************
     const nodeTypes = {
         customnode: CustomNodeSelector,
-        breakerComponentRight: BreakersComponentRight,
-        breakerComponentLeft: BreakersComponentLeft,
+        breakerComponent: BreakersComponent,
         disconnectedBreakerComponent: DisconnectedBreakerComponent,
         breakerLink: BreakerLink,
     };
@@ -2925,20 +1055,22 @@ const CreatePanel = () => {
         setPosition({ x: e.clientX - 20, y: e.clientY - 20 });
     };
 
+    const getYaxisCordinates = (index) => {
+        if (index === 1 || index === 2) {
+            return 70;
+        }
+        if (index === 3 || index === 4) {
+            return 70 * 2;
+        }
+        if (index === 5 || index === 6) {
+            return 70 * 3;
+        }
+    };
+
     const handleMouseEnter = (e, node) => {
         console.log(node);
         setnodeData(node);
     };
-
-    const [elements, setElements] = useState(initialElements);
-    const [edges, setEdges] = useState(initialEdges);
-
-    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
-    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
-
-    const [isOpen, setIsOpen] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [nodeData, setnodeData] = useState(null);
 
     const onConnect = useCallback(
         (params) =>
@@ -2980,6 +1112,7 @@ const CreatePanel = () => {
         []
     );
 
+    // Trigers Breaker API to save
     useEffect(() => {
         if (generatedPanelId === '') {
             return;
@@ -2994,28 +1127,50 @@ const CreatePanel = () => {
 
                 let panelBreakerObjs = [];
 
-                elements.forEach((el) => {
-                    if (el.type === 'breakerLink') {
-                        return;
-                    }
+                if (activePanelType === 'distribution') {
+                    elements.forEach((el) => {
+                        if (el.type === 'breakerLink') {
+                            return;
+                        }
+                        let obj = {
+                            id: el.id,
+                            name: `Breaker ${el.data.breaker_number}`,
+                            breaker_number: +el.data.breaker_number,
+                            phase_configuration: el.data.phase_configuration,
+                            rated_amps: el.data.rated_amps,
+                            voltage: +el.data.voltage,
+                            link_type: 'unlinked',
+                            link_id: '',
+                            equipment_link: el.data.equipment_link,
+                            sensor_id: el.data.sensor_id,
+                            device_id: el.data.device_id,
+                        };
+                        panelBreakerObjs.push(obj);
+                    });
+                }
 
-                    let obj = {
-                        id: el.id,
-                        name: `Breaker ${el.data.breaker_number}`,
-                        breaker_number: +el.data.breaker_number,
-                        phase_configuration: el.data.phase_configuration,
-                        rated_amps: el.data.rated_amps,
-                        voltage: +el.data.voltage,
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: el.data.equipment_link,
-                        sensor_id: el.data.sensor_id,
-                        device_id: el.data.device_id,
-                    };
-                    panelBreakerObjs.push(obj);
-                });
+                if (activePanelType === 'disconnect') {
+                    disconnectBreakersNodes.forEach((el) => {
+                        if (el.type === 'breakerLink') {
+                            return;
+                        }
 
-                console.log('Breaker Data => ', panelBreakerObjs);
+                        let obj = {
+                            id: el.id,
+                            name: `Breaker ${el.data.breaker_number}`,
+                            breaker_number: +el.data.breaker_number,
+                            phase_configuration: el.data.phase_configuration,
+                            rated_amps: 0,
+                            voltage: '',
+                            link_type: 'unlinked',
+                            link_id: '',
+                            equipment_link: el.data.equipment_link,
+                            sensor_id: el.data.sensor_id,
+                            device_id: el.data.device_id,
+                        };
+                        panelBreakerObjs.push(obj);
+                    });
+                }
 
                 let params = `?panel_id=${panelID}`;
                 await axios
@@ -3058,22 +1213,35 @@ const CreatePanel = () => {
     useEffect(() => {
         let newBreakers = [];
         for (let index = 1; index <= normalCount; index++) {
-            // let newId = getBreakerId();
             let obj = {
-                name: `Breaker ${index}`,
-                breaker_number: index,
-                phase_configuration: 0,
-                rated_amps: 0,
-                voltage: '',
-                link_type: 'unlinked',
-                link_id: '',
-                equipment_link: [],
-                sensor_id: '',
-                device_id: '',
+                id: `breaker-${index}`,
+                targetPosition: index % 2 === 0 ? 'right' : 'left',
+                sourcePosition: index % 2 === 0 ? 'left' : 'right',
+                type: 'breakerComponent',
+                data: {
+                    name: '',
+                    breaker_number: index,
+                    phase_configuration: 1,
+                    rated_amps: 0,
+                    voltage: '',
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: [],
+                    sensor_id: '',
+                    device_id: '',
+                    breaker_level: 'single-breaker',
+                    panel_voltage: '',
+                    equipment_data: [],
+                    passive_data: [],
+                    onChange: handleBreakerChange,
+                },
+                position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
+                draggable: false,
             };
             newBreakers.push(obj);
         }
-        setNormalStruct(newBreakers);
+        console.log('ReactFlow Breakers => ', newBreakers);
+        setElements(newBreakers);
     }, []);
 
     useEffect(() => {
@@ -3199,21 +1367,76 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: 1,
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-2',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '2' },
+                    targetPosition: 'right',
+                    sourcePosition: 'left',
+                    data: {
+                        name: '',
+                        breaker_number: 2,
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 140 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-3',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '3' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: 3,
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
+                    data: { label: 'Breaker 3', index: '3' },
                     position: { x: 450, y: 220 },
                     draggable: false,
                 },
@@ -3240,14 +1463,50 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '1',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
                 {
                     id: 'dis-breaker-2',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '2' },
+                    targetPosition: 'right',
+                    sourcePosition: 'left',
+                    data: {
+                        name: '',
+                        breaker_number: '2',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 140 },
                     draggable: false,
                 },
@@ -3267,7 +1526,25 @@ const CreatePanel = () => {
                 {
                     id: 'dis-breaker-1',
                     type: 'disconnectedBreakerComponent',
-                    data: { index: '1' },
+                    targetPosition: 'left',
+                    sourcePosition: 'right',
+                    data: {
+                        name: '',
+                        breaker_number: '1',
+                        phase_configuration: 1,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: [],
+                        sensor_id: '',
+                        device_id: '',
+                        breaker_level: 'single-breaker',
+                        panel_voltage: '',
+                        equipment_data: [],
+                        passive_data: [],
+                        onChange: handleBreakerChange,
+                    },
                     position: { x: 450, y: 60 },
                     draggable: false,
                 },
@@ -3285,6 +1562,15 @@ const CreatePanel = () => {
             obj.data.equipment_data = equipmentData;
         });
         setElements(newArray);
+
+        let newDisconnectedArray = disconnectBreakersNodes;
+        newDisconnectedArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.equipment_data = equipmentData;
+        });
+        setDisconnectBreakersNodes(newDisconnectedArray);
     }, [equipmentData]);
 
     useEffect(() => {
@@ -3296,6 +1582,15 @@ const CreatePanel = () => {
             obj.data.passive_data = passiveDeviceData;
         });
         setElements(newArray);
+
+        let newDisconnectedArray = disconnectBreakersNodes;
+        newDisconnectedArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.passive_data = passiveDeviceData;
+        });
+        setDisconnectBreakersNodes(newDisconnectedArray);
     }, [passiveDeviceData]);
 
     return (
@@ -3318,6 +1613,8 @@ const CreatePanel = () => {
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
+                                    // getJSONFormatedData();
+                                    // handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
@@ -3357,11 +1654,11 @@ const CreatePanel = () => {
                                 onChange={(e) => {
                                     handleChange('parent_panel', e.target.value);
                                 }}>
-                                {panel.parent_id !== null ? (
+                                {/* {panel.parent_id !== null ? (
                                     <option value={panel.parent_id}>{panel.parent}</option>
-                                ) : (
-                                    <option>None</option>
-                                )}
+                                ) : ( */}
+                                <option>None</option>
+                                {/* )} */}
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
@@ -3649,7 +1946,7 @@ const CreatePanel = () => {
                                     </Col>
                                 </Row> */}
 
-                                <div className="row" style={{ width: '100%', height: '25vh', position: 'relative' }}>
+                                <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
                                     <div className="col-sm">
                                         <ReactFlow
                                             elements={elements}
@@ -3672,7 +1969,7 @@ const CreatePanel = () => {
                         )}
 
                         {activePanelType === 'disconnect' && (
-                            <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
+                            <div className="row" style={{ width: '100%', height: '40vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
@@ -3749,6 +2046,24 @@ const CreatePanel = () => {
                             handleMainClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showJSON} onHide={handleJsonModelClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Label>Panel JSON Data:</Form.Label>
+                        <Form.Control as="textarea" rows={10} value={jsonPanelData} />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
+                        <Form.Label>Breakers JSON Data:</Form.Label>
+                        <Form.Control as="textarea" rows={15} value={jsonBreakerData} />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleJsonModelClose}>
+                        Close
                     </Button>
                 </Modal.Footer>
             </Modal>

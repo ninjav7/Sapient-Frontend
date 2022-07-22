@@ -126,7 +126,9 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
     );
 };
 
-const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices }) => {
+const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageData,
+    previousPageData,
+    paginationData, }) => {
     const records = [
         {
             name: 'Air Handling Unit',
@@ -185,6 +187,24 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices }) => {
                             })}
                         </tbody>
                     </Table>
+                    <div className="page-button-style">
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            previousPageData(paginationData.pagination.previous);
+                        }}>
+                        Previous
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-md btn-light font-weight-bold mt-4"
+                        onClick={() => {
+                            nextPageData(paginationData.pagination.next);
+                        }}>
+                        Next
+                    </button>
+                </div>
                 </CardBody>
             </Card>
             <div>
@@ -211,6 +231,9 @@ const EquipmentTypes = () => {
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    const [pageSize, setPageSize] = useState(10);
+    const [pageNo, setPageNo] = useState(1);
 
     const handleChange = (key, value) => {
         // let endUseId=""
@@ -263,6 +286,51 @@ const EquipmentTypes = () => {
         }
     };
 
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(response.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(response.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -288,10 +356,11 @@ const EquipmentTypes = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}`
+            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 // console.log('setGeneralEquipmentTypeData => ', res.data);
-                setGeneralEquipmentTypeData(res.data);
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(res.data.data);
             });
         } catch (error) {
             console.log(error);
@@ -358,7 +427,9 @@ const EquipmentTypes = () => {
 
             <Row>
                 <Col lg={7}>
-                    <EquipmentTable equipmentTypeData={generalEquipmentTypeData} endUseData={endUseData} getDevices={fetchEquipTypeData} />
+                    <EquipmentTable equipmentTypeData={generalEquipmentTypeData} endUseData={endUseData} getDevices={fetchEquipTypeData}  nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData} />
                 </Col>
             </Row>
 

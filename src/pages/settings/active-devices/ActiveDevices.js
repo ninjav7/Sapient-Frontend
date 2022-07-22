@@ -425,6 +425,7 @@ const ActiveDevices = () => {
     const [pageRequest, setPageRequest] = useState('');
 
     const [activeDeviceData, setActiveDeviceData] = useState([]);
+    const [duplicateactiveDeviceData, setduplicateActiveDeviceData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
 
     const [onlineDeviceData, setOnlineDeviceData] = useState([]);
@@ -499,6 +500,26 @@ const ActiveDevices = () => {
         }
     };
 
+    const handleSearch=async(e)=>{
+        var txt=e.target.value;
+        let oldAct=activeDeviceData;
+        if(txt!==""){
+        console.log(activeDeviceData)
+        let regex = new RegExp(txt, 'i');
+        let newAct=[]
+        activeDeviceData.forEach((ele)=>{
+            if(regex.test(ele.identifier)){
+                newAct.push(ele);
+            }
+        })
+        console.log(newAct);
+        setActiveDeviceData(newAct);
+      }
+      else{
+        setActiveDeviceData(duplicateactiveDeviceData)
+      }
+    }
+
     const nextPageData = async (path) => {
         try {
             if (path === null) {
@@ -514,6 +535,7 @@ const ActiveDevices = () => {
             await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setActiveDeviceData(response.data);
+                setduplicateActiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -549,6 +571,7 @@ const ActiveDevices = () => {
             await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setActiveDeviceData(response.data);
+                setduplicateActiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
@@ -582,6 +605,7 @@ const ActiveDevices = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
+                    setduplicateActiveDeviceData(response.data);
                     // console.log(response.data);
                     const sampleData = response.data;
                     // console.log('sampleData => ', sampleData);
@@ -638,6 +662,7 @@ const ActiveDevices = () => {
                 await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActiveDeviceData(response.data);
+                    setduplicateActiveDeviceData(response.data);
                     setPaginationData(res.data);
 
                     let onlineData = [];
@@ -733,6 +758,7 @@ const ActiveDevices = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e)=>{handleSearch(e)}}
                         />
                         <span class="input-group-text border-0" id="search-addon">
                             <Search className="icon-sm" />
