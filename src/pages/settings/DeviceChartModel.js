@@ -262,10 +262,10 @@ const DeviceChartModel = ({
 
             selection: {
                 enabled: true,
-                xaxis: {
-                    min: new Date('21 July 2022').getTime(),
-                    max: new Date('22 July 2022').getTime(),
-                },
+                // xaxis: {
+                //     min: new Date('19 July 2022').getTime(),
+                //     max: new Date('20 July 2022').getTime(),
+                // },
             },
         },
 
