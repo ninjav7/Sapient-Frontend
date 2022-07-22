@@ -247,8 +247,10 @@ const IndividualPassiveDevice = () => {
         { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
         { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
         { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
-        { value: 'mAh', label: 'Amps' },
+        // { value: 'mAh', label: 'Amps' },
     ]);
+
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -458,7 +460,7 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -768,6 +770,7 @@ const IndividualPassiveDevice = () => {
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
+                timeZone={timeZone}
             />
 
             <SelectBreakerModel
