@@ -1157,6 +1157,7 @@ const Equipment = () => {
                                 autoFocus
                             />
                         </Form.Group>
+                        
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
                             <Input

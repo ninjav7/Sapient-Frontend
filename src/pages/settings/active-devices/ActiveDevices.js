@@ -535,6 +535,7 @@ const ActiveDevices = () => {
       }
     }
 
+  
     const nextPageData = async (path) => {
         try {
             if (path === null) {
