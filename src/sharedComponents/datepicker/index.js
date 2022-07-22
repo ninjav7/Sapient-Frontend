@@ -8,7 +8,9 @@ const Datepicker = ({ className = '', datepickerClassName = '', iconBtnClassName
     const datepickerRef = useRef(null);
 
     const handleClickDatepickerBtn = () => {
-        datepickerRef.current?.setFocus(true);
+        if (datepickerRef.current) {
+            datepickerRef.current.setFocus(true);
+        }
     };
 
     return (
