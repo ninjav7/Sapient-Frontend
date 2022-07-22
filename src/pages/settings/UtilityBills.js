@@ -147,7 +147,7 @@ const UtilityBills = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                    <span className="heading-style">
                         Utility Bills
                     </span>
                 </Col>

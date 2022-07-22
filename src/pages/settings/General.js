@@ -512,7 +512,7 @@ const General = () => {
             <Row className="page-title">
                 <Col lg={8}>
                     <div className="building-heading-container">
-                        <div className="heading-style" style={{ marginLeft: '20px' }}>
+                        <div className="heading-style">
                             General Building Settings
                         </div>
                         <div>
