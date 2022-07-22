@@ -96,7 +96,7 @@ const Header = (props) => {
                         <div>
                             <Select
                                 style={{ color: 'black', fontWeight: 'bold' }}
-                                // className="select-button form-control form-control-md custom-day-selection"
+                                className="header-datefilter-select"
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
@@ -118,10 +118,7 @@ const Header = (props) => {
                             </Input> */}
                         </div>
 
-                        <div
-                        // className="select-button form-control form-control-md font-weight-bold custom-date-picker-block"
-                        >
-                            {/* <FontAwesomeIcon icon={faCalendar} style={{ fontSize: '1.3em' }} /> */}
+                        <div className="header-datefilter-datepicker-wrapper">
                             <Datepicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -131,7 +128,7 @@ const Header = (props) => {
                                 }}
                                 maxDate={new Date()}
                                 dateFormat="MMMM d"
-                                // className="custom-date-picker-props ml-2"
+                                className="header-datefilter-datepicker"
                                 placeholderText="Select Date Range"
                                 // monthsShown={2}
                             />
