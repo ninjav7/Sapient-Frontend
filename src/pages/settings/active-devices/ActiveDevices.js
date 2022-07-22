@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, createDevice } from '../../../services/Network';
+import { BaseUrl, generalActiveDevices, getLocation, createDevice,searchDevices } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -423,6 +423,7 @@ const ActiveDevices = () => {
     const [pageNo, setPageNo] = useState(1);
 
     const [pageRequest, setPageRequest] = useState('');
+    const [search, setSearch] = useState('');
 
     const [activeDeviceData, setActiveDeviceData] = useState([]);
     const [duplicateactiveDeviceData, setduplicateActiveDeviceData] = useState([]);
@@ -499,21 +500,35 @@ const ActiveDevices = () => {
             console.log('Failed to fetch Filtered Active Devices');
         }
     };
+    const handleSearchtxt=(e)=>{
+        if(e.target.value!==""){
+        setSearch(e.target.value.toUpperCase());
+        }
+        else{
+            setActiveDeviceData(duplicateactiveDeviceData)
+          }
+    }
 
-    const handleSearch=async(e)=>{
-        var txt=e.target.value;
-        let oldAct=activeDeviceData;
-        if(txt!==""){
-        console.log(activeDeviceData)
-        let regex = new RegExp(txt, 'i');
-        let newAct=[]
-        activeDeviceData.forEach((ele)=>{
-            if(regex.test(ele.identifier)){
-                newAct.push(ele);
-            }
-        })
-        console.log(newAct);
-        setActiveDeviceData(newAct);
+    const handleSearch=async()=>{
+        if(search!==""){
+            try {
+                setIsDeviceProcessing(true);
+                 let headers = {
+                     'Content-Type': 'application/json',
+                     accept: 'application/json',
+                     Authorization: `Bearer ${userdata.token}`,
+                 };
+                 let params = `?device_type=active&building_id=${bldgId}&mac=${search}`;
+                 await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                     let response = res.data;
+                     setActiveDeviceData(res.data);
+                 });
+                 setIsDeviceProcessing(false);
+             } catch (error) {
+                 console.log(error);
+                 setIsDeviceProcessing(false);
+                 console.log('Failed to fetch all Active Devices');
+             }
       }
       else{
         setActiveDeviceData(duplicateactiveDeviceData)
@@ -652,7 +667,7 @@ const ActiveDevices = () => {
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {
-                setIsDeviceProcessing(true);
+               setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -664,7 +679,7 @@ const ActiveDevices = () => {
                     setActiveDeviceData(response.data);
                     setduplicateActiveDeviceData(response.data);
                     setPaginationData(res.data);
-
+ 
                     let onlineData = [];
                     let offlineData = [];
 
@@ -758,11 +773,11 @@ const ActiveDevices = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
-                            onChange={(e)=>{handleSearch(e)}}
+                            onChange={(e)=>{handleSearchtxt(e)}}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
+                        <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
-                        </span>
+                        </button>
                     </div>
                 </Col>
                 <Col xl={9}>
