@@ -326,15 +326,7 @@
     fill: white;
 }
 
-.energy-side-nav {
-    position: fixed;
-    left: 0;
-    top: 5.5625rem;
-    width: 12.25rem;
-    height: 100%;
-    background-color: #f9fafb;
-    padding-left: 1.5em;
-}
+
 
 .energy-page-content {
     margin-top: 5.5625rem;
