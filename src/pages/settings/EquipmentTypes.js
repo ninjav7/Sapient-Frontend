@@ -23,6 +23,7 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
@@ -128,7 +129,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
 
 const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageData,
     previousPageData,
-    paginationData, }) => {
+    paginationData, pageSize,setPageSize,  isDeviceProcessing, }) => {
     const records = [
         {
             name: 'Air Handling Unit',
@@ -149,7 +150,7 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageDat
             equipment_count: 138,
         },
     ];
-
+   
     const [modal, setModal] = useState(false);
     const Toggle = () => setModal(!modal);
     const [equipData, setEquipData] = useState(null);
@@ -167,6 +168,29 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageDat
                                 <th>Equipment Count</th>
                             </tr>
                         </thead>
+                        {isDeviceProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={20}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
                         <tbody>
                             {equipmentTypeData.map((record, index) => {
                                 return (
@@ -186,11 +210,13 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageDat
                                 );
                             })}
                         </tbody>
+                         )}
                     </Table>
                     <div className="page-button-style">
                     <button
                         type="button"
                         className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={paginationData.pagination!==undefined?paginationData.pagination.previous===null?true:false:false}
                         onClick={() => {
                             previousPageData(paginationData.pagination.previous);
                         }}>
@@ -199,11 +225,26 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices, nextPageDat
                     <button
                         type="button"
                         className="btn btn-md btn-light font-weight-bold mt-4"
+                        disabled={paginationData.pagination!==undefined?paginationData.pagination.next===null?true:false:false}
                         onClick={() => {
                             nextPageData(paginationData.pagination.next);
                         }}>
                         Next
                     </button>
+                    <div>
+                        <select
+                            value={pageSize}
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onChange={(e) => {
+                                setPageSize(parseInt(e.target.value));
+                            }}>
+                            {[20, 50, 100].map((pageSize) => (
+                                <option key={pageSize} value={pageSize} className="align-options-center">
+                                    Show {pageSize} devices
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
                 </CardBody>
             </Card>
@@ -232,8 +273,10 @@ const EquipmentTypes = () => {
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
+    const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+
 
     const handleChange = (key, value) => {
         // let endUseId=""
@@ -289,6 +332,7 @@ const EquipmentTypes = () => {
     const nextPageData = async (path) => {
         // console.log("next path ",path);
         try {
+            setIsDeviceProcessing(true);
             if (path === null) {
                 return;
             }
@@ -302,15 +346,18 @@ const EquipmentTypes = () => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch all Active Devices');
+            setIsDeviceProcessing(false);
         }
     };
 
     const previousPageData = async (path) => {
         try {
+            setIsDeviceProcessing(true);
             if (path === null) {
                 return;
             }
@@ -324,10 +371,12 @@ const EquipmentTypes = () => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch all Active Devices');
+            setIsDeviceProcessing(false);
         }
     };
 
@@ -351,6 +400,7 @@ const EquipmentTypes = () => {
     }, []);
     const fetchEquipTypeData = async () => {
         try {
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -361,13 +411,19 @@ const EquipmentTypes = () => {
                 // console.log('setGeneralEquipmentTypeData => ', res.data);
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch Equipment Type Data');
+            setIsDeviceProcessing(false);
         }
     };
 
+    useEffect(()=>{
+        fetchEquipTypeData();
+
+    },[pageSize])
     useEffect(() => {
      
 
@@ -429,7 +485,10 @@ const EquipmentTypes = () => {
                 <Col lg={7}>
                     <EquipmentTable equipmentTypeData={generalEquipmentTypeData} endUseData={endUseData} getDevices={fetchEquipTypeData}  nextPageData={nextPageData}
                             previousPageData={previousPageData}
-                            paginationData={paginationData} />
+                            paginationData={paginationData} 
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                            isDeviceProcessing={isDeviceProcessing}/>
                 </Col>
             </Row>
 

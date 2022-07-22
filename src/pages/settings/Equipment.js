@@ -32,6 +32,9 @@ import 'react-loading-skeleton/dist/skeleton.css';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
     const [selected,setSelected]=useState([]);
+    const handleSave=()=>{
+
+    }
     return (
         <>
             {show ? (
@@ -43,32 +46,33 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
                             </Col>
                         </Row>
                         <Row>
-                            <Col lg={10}>
+                            <Col lg={9}>
                                 <div>
                                     <span className="heading-style">{equipData.equipments_type}</span>
                                 </div>
                             </Col>
-                            <Col lg={2}>
+                            <Col lg={3}>
                            
-                                <div className='button-wrapper'>
-                                <div style={{paddingTop:"0.5rem",marginRight:"1rem"}}>
+                            <div className='button-wrapper'>
+                                <div>
+                                    <button type="button" className="btn btn-md btn-outline-danger font-weight-bold mr-4">
                                     <FontAwesomeIcon
                                         icon={faPowerOff}
                                         size="lg"
-                                        style={{color:"blue"}}
-                                    />
-                                </div>
-                                <div>
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
-                                        Turn Off
+                                        style={{color:"red"}}
+                                    /> Turn Off
                                     </button>
                                 </div>
-                                <div style={{paddingTop:"0.5rem"}}>
-                                    <FontAwesomeIcon
-                                        icon={faXmark}
-                                        size="lg"
-                                        onClick={close}
-                                    />
+                                    
+                                <div>
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
+                                        Cancel
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
+                                        Save
+                                    </button>
                                 </div>
                                 </div>
                             </Col>
@@ -252,32 +256,25 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                             </Col>
                         </Row>
                         <Row>
-                            <Col lg={10}>
+                            <Col lg={9}>
                                 <div>
                                     <span className="heading-style">{equipData.equipments_type}</span>
                                 </div>
                             </Col>
-                            <Col lg={2}>
+                            <Col lg={3}>
                            
                                 <div className='button-wrapper'>
-                                <div style={{paddingTop:"0.5rem",marginRight:"1rem"}}>
-                                    <FontAwesomeIcon
-                                        icon={faPowerOff}
-                                        size="lg"
-                                        style={{color:"blue"}}
-                                    />
-                                </div>
+                                
+                                    
                                 <div>
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4">
-                                        Turn Off
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
+                                        Cancel
                                     </button>
                                 </div>
-                                <div style={{paddingTop:"0.5rem"}}>
-                                    <FontAwesomeIcon
-                                        icon={faXmark}
-                                        size="lg"
-                                        onClick={close}
-                                    />
+                                <div>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4">
+                                        Save
+                                    </button>
                                 </div>
                                 </div>
                             </Col>
@@ -815,10 +812,20 @@ const Equipment = () => {
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
+    const [selectedEndUse,setSelectedEndUse]= useState([]);
 
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
+        if(key==="equipment_type"){
+            const result =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+            console.log(result.end_use_name);
+            const eq_id=endUseData.find(({name})=>name===result.end_use_name);
+            console.log(eq_id.end_user_id);
+            var x=document.getElementById("endUseSelect");
+            x.value=(eq_id.end_user_id);
+            obj['end_use']=eq_id.end_user_id;
+        }
         obj[key] = value;
         setCreateEqipmentData(obj);
     };
@@ -859,7 +866,10 @@ const Equipment = () => {
                 })
                 .then((res) => {
                     console.log(res.data);
-                    fetchEquipmentData();
+                    setTimeout(function(){
+                        fetchEquipmentData();
+                      }, 3000);
+                
                 });
 
             setIsProcessing(false);
@@ -967,7 +977,7 @@ const Equipment = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                    setEquipmentTypeData(res.data);
+                    setEquipmentTypeData(res.data.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1150,23 +1160,6 @@ const Equipment = () => {
                                 autoFocus
                             />
                         </Form.Group>
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>End Use Category</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('end_use', e.target.value);
-                                    handleEquipmentTypeCall(e.target.value);
-                                }}>
-                                <option selected>Select Category</option>
-                                {endUseData.map((record) => {
-                                    return <option value={record.end_user_id}>{record.name}</option>;
-                                })}
-                            </Input>
-                        </Form.Group>
                         
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
@@ -1178,13 +1171,29 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.target.value);
                                 }}>
-                                <option selected>Select Type</option>
-                                {equipmentSelectedTypeData.map((record) => {
+                                <option value="" selected>Select Type</option>
+                                {equipmentTypeData.map((record) => {
                                     return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                 })}
                             </Input>
                         </Form.Group>
-
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>End Use Category</Form.Label>
+                            <Input
+                                type="select"
+                                name="select"
+                                id="endUseSelect"
+                                className="font-weight-bold"
+                                defaultValue={selectedEndUse}
+                                onChange={(e) => {
+                                    handleChange('end_use', e.target.value);
+                                }}>
+                                <option value="">Select Category</option>
+                                {endUseData.map((record) => {
+                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                })}
+                            </Input>
+                        </Form.Group>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Location</Form.Label>
                             <Input
@@ -1195,7 +1204,7 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('space_id', e.target.value);
                                 }}>
-                                <option selected>Select Location</option>
+                                <option value="" selected>Select Location</option>
                                 {locationData.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
                                 })}
