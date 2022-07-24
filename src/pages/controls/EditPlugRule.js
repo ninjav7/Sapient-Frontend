@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
+import Select from 'react-select';
+import { MultiSelect } from 'react-multi-select-component';
 import Form from 'react-bootstrap/Form';
 import {
     Row,
@@ -67,6 +69,8 @@ const EditPlugRule = ({
     const [pageNo, setPageNo] = useState(1);
     const [totalSocket, setTotalSocket] = useState(0);
     const [paginationData, setPaginationData] = useState({});
+    const [checkedAll, setCheckedAll] = useState(false);
+    const [options, setOptions] = useState([]);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -223,20 +227,8 @@ const EditPlugRule = ({
         },
     ]);
 
-    const handleFilterEquipment = (e) => {
-        let activeId = e.target.value;
-        if (activeId === 'All') {
-            setAllLinkedRuleData(allData);
-            // console.log(allData);
-        } else {
-            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
-            // console.log(result);
-            let arr = [];
-            arr.push(result);
-            // console.log(arr)
-            setAllLinkedRuleData(arr);
-        }
-    };
+    const [selectedOption, setSelectedOption] = useState([]);
+    console.log('selectedOption', selectedOption);
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -418,6 +410,23 @@ const EditPlugRule = ({
         }
     };
 
+    const addOptions = () => {
+        {
+            console.log('manas');
+        }
+        return allData
+            ?.filter((item) => item?.equipment_type_name?.length > 0)
+            ?.map((record, index) => {
+                setOptions((el) => [...el, { value: record?.equipment_type, label: record?.name }]);
+            });
+    };
+
+    useEffect(() => {
+        if (allData) {
+            addOptions();
+        }
+    }, [allData]);
+
     useEffect(() => {
         if (activeRuleId === null) {
             return;
@@ -516,6 +525,46 @@ const EditPlugRule = ({
         let id = currentData.id ? currentData.id : null;
         setActiveRuleId(id);
     }, [currentData]);
+
+    const data = [];
+
+    const columns = [
+        {
+            title: 'Equipment Type',
+            dataIndex: 'equipmentType',
+            key: 'equipmentType',
+        },
+        {
+            title: 'Location',
+            dataIndex: 'location',
+            key: 'location',
+        },
+        {
+            title: 'MAC Address',
+            dataIndex: 'macAddress',
+            key: 'macAddress',
+        },
+        {
+            title: 'Sensor',
+            dataIndex: 'sensor',
+            key: 'sensor',
+        },
+        {
+            title: 'Assigned Rule',
+            dataIndex: 'assignedRule',
+            key: 'assignedRule',
+        },
+        {
+            title: 'Tags',
+            dataIndex: 'tags',
+            key: 'tags',
+        },
+        {
+            title: 'Last Data',
+            dataIndex: 'lastData',
+            key: 'lastData',
+        },
+    ];
 
     return (
         <>
@@ -943,28 +992,18 @@ const EditPlugRule = ({
                                                 <Form.Label for="userState" className="card-title">
                                                     Equipment Type
                                                 </Form.Label>
-                                                <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold socket-filter-width"
-                                                    onChange={(e) => {
-                                                        handleFilterEquipment(e);
-                                                    }}>
-                                                    <option>Select Equipment Type</option>
-                                                    <option value="All">ALL</option>
-                                                    {allData
-                                                        ?.filter((item) => item?.equipment_type_name?.length > 0)
-                                                        ?.map((record, index) => {
-                                                            return (
-                                                                <option value={record.equipment_type_name}>
-                                                                    {record.equipment_type_name}
-                                                                </option>
-                                                            );
-                                                        })}
 
-                                                    {/* <option>Option 1</option> */}
-                                                </Input>
+                                                <MultiSelect
+                                                    options={options}
+                                                    value={selectedOption}
+                                                    onChange={setSelectedOption}
+                                                    labelledBy="Columns"
+                                                    className="column-filter-styling"
+                                                    valueRenderer={() => {
+                                                        return 'Columns';
+                                                    }}
+                                                    ClearSelectedIcon={null}
+                                                />
                                             </Form.Group>
                                         </div>
 
@@ -1028,8 +1067,11 @@ const EditPlugRule = ({
                                                         type="checkbox"
                                                         id="vehicle1"
                                                         name="vehicle1"
-                                                        checked={false}
-                                                        disabled
+                                                        checked={checkedAll}
+                                                        onChange={() => {
+                                                            setCheckedAll(!checkedAll);
+                                                        }}
+                                                        // disabled
                                                     />
                                                 </th>
                                                 <th>Equipment Type</th>
@@ -1042,7 +1084,7 @@ const EditPlugRule = ({
                                             </tr>
                                         </thead>
 
-                                        {selectedRuleFilter === 0 && (
+                                        {selectedRuleFilter === 0 && selectedOption?.length === 0 && (
                                             <tbody>
                                                 {allLinkedRuleData.map((record, index) => {
                                                     return (
@@ -1052,8 +1094,10 @@ const EditPlugRule = ({
                                                                     type="checkbox"
                                                                     id="socket_rule"
                                                                     name="socket_rule"
-                                                                    checked={record.linked_rule}
-                                                                    value={record.linked_rule ? true : false}
+                                                                    checked={record.linked_rule || checkedAll}
+                                                                    value={
+                                                                        record.linked_rule || checkedAll ? true : false
+                                                                    }
                                                                     onChange={(e) => {
                                                                         handleRuleStateChange(e.target.value, record);
                                                                     }}
@@ -1064,13 +1108,11 @@ const EditPlugRule = ({
                                                             {/* <td className="font-weight-bold">{record.name}</td> */}
 
                                                             {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    {record.name}
-                                                                </td>
+                                                                <td className="font-weight-bold panel-name">-</td>
                                                             ) : (
                                                                 <td className="font-weight-bold panel-name">
                                                                     <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                        {`${record.equipment_link_type}`}
                                                                     </div>
                                                                 </td>
                                                             )}
@@ -1098,7 +1140,7 @@ const EditPlugRule = ({
                                             </tbody>
                                         )}
 
-                                        {selectedRuleFilter === 1 && (
+                                        {selectedRuleFilter === 1 && selectedOption?.length === 0 && (
                                             <tbody>
                                                 {linkedRuleData.map((record, index) => {
                                                     return (
@@ -1108,8 +1150,10 @@ const EditPlugRule = ({
                                                                     type="checkbox"
                                                                     id="socket_rule"
                                                                     name="socket_rule"
-                                                                    checked={record.linked_rule}
-                                                                    value={record.linked_rule ? true : false}
+                                                                    checked={record.linked_rule || checkedAll}
+                                                                    value={
+                                                                        record.linked_rule || checkedAll ? true : false
+                                                                    }
                                                                     onChange={(e) => {
                                                                         handleRuleStateChange(e.target.value, record);
                                                                     }}
@@ -1117,13 +1161,11 @@ const EditPlugRule = ({
                                                             </td>
 
                                                             {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    {record.name}
-                                                                </td>
+                                                                <td className="font-weight-bold panel-name">-</td>
                                                             ) : (
                                                                 <td className="font-weight-bold panel-name">
                                                                     <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                        {`${record.equipment_link_type}`}
                                                                     </div>
                                                                 </td>
                                                             )}
@@ -1151,7 +1193,7 @@ const EditPlugRule = ({
                                             </tbody>
                                         )}
 
-                                        {selectedRuleFilter === 2 && (
+                                        {selectedRuleFilter === 2 && selectedOption?.length === 0 && (
                                             <tbody>
                                                 {unLinkedRuleData.map((record, index) => {
                                                     return (
@@ -1161,8 +1203,10 @@ const EditPlugRule = ({
                                                                     type="checkbox"
                                                                     id="socket_rule"
                                                                     name="socket_rule"
-                                                                    checked={record.linked_rule}
-                                                                    value={record.linked_rule ? true : false}
+                                                                    checked={record.linked_rule || checkedAll}
+                                                                    value={
+                                                                        record.linked_rule || checkedAll ? true : false
+                                                                    }
                                                                     onChange={(e) => {
                                                                         handleRuleStateChange(e.target.value, record);
                                                                     }}
@@ -1170,13 +1214,11 @@ const EditPlugRule = ({
                                                             </td>
 
                                                             {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    {record.name}
-                                                                </td>
+                                                                <td className="font-weight-bold panel-name">-</td>
                                                             ) : (
                                                                 <td className="font-weight-bold panel-name">
                                                                     <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                        {`${record.equipment_link_type}`}
                                                                     </div>
                                                                 </td>
                                                             )}
