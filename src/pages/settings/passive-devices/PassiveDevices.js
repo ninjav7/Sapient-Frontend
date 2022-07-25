@@ -38,6 +38,8 @@ const PassiveDevicesTable = ({
     setIsDeviceProcessing,
     selectedOptions,
     passiveDeviceDataWithFilter,
+    pageSize,
+    setPageSize,
 }) => {
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
@@ -229,23 +231,40 @@ const PassiveDevicesTable = ({
                         </tbody>
                     )}
                 </Table>
-                <div className="page-button-style">
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        onClick={() => {
-                            previousPageData(paginationData.pagination.previous);
-                        }}>
-                        Previous
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        onClick={() => {
-                            nextPageData(paginationData.pagination.next);
-                        }}>
-                        Next
-                    </button>
+
+                <div className="page-button-style ml-2">
+                    <div>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                    </div>
+                    <div>
+                        <select
+                            value={pageSize}
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            onChange={(e) => {
+                                setPageSize(parseInt(e.target.value));
+                            }}>
+                            {[10, 25, 50].map((pageSize) => (
+                                <option key={pageSize} value={pageSize} className="align-options-center">
+                                    Show {pageSize} devices
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </CardBody>
         </Card>
@@ -552,6 +571,42 @@ const PassiveDevices = () => {
     }, [pageRefresh, bldgId]);
 
     useEffect(() => {
+        const fetchPassiveDeviceData = async () => {
+            try {
+                setIsDeviceProcessing(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPassiveDeviceData(response.data);
+                    // setduplicateActiveDeviceData(response.data);
+                    setPaginationData(res.data);
+
+                    let onlineData = [];
+                    let offlineData = [];
+
+                    response.data.forEach((record) => {
+                        record.status === 'Online' ? onlineData.push(record) : offlineData.push(record);
+                    });
+
+                    setOnlineDeviceData(onlineData);
+                    setOfflineDeviceData(offlineData);
+                });
+                setIsDeviceProcessing(false);
+            } catch (error) {
+                console.log(error);
+                setIsDeviceProcessing(false);
+                console.log('Failed to fetch all Active Devices');
+            }
+        };
+        fetchPassiveDeviceData();
+    }, [pageSize]);
+
+    useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
@@ -693,6 +748,8 @@ const PassiveDevices = () => {
                             setIsDeviceProcessing={setIsDeviceProcessing}
                             selectedOptions={selectedOptions}
                             passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -705,6 +762,8 @@ const PassiveDevices = () => {
                             setIsDeviceProcessing={setIsDeviceProcessing}
                             selectedOptions={selectedOptions}
                             passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -717,6 +776,8 @@ const PassiveDevices = () => {
                             setIsDeviceProcessing={setIsDeviceProcessing}
                             selectedOptions={selectedOptions}
                             passiveDeviceDataWithFilter={passiveDeviceDataWithFilter}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
                         />
                     )}
                 </Col>

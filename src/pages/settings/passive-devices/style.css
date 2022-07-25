@@ -452,3 +452,12 @@
 	flex-wrap: nowrap;
 	justify-content: space-between;
 }
+
+.selected-option-style {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}

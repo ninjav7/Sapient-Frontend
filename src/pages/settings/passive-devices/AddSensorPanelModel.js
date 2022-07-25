@@ -8,14 +8,17 @@ import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
-const EditSensorPanelModel = ({
-    showEditSensorPanel,
-    closeEditSensorPanelModel,
-    currentSensorObj,
-    setCurrentSensorObj,
-    editSenorModelRefresh,
-    setEditSenorModelRefresh,
+const AddSensorPanelModel = ({
+    showBreaker,
+    handleBreakerClose,
+    currentRecord,
+    setCurrentRecord,
+    sensors,
+    setSensors,
+    currentIndex,
+    setCurrentIndex,
     bldgId,
+    equipmentId,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -26,23 +29,20 @@ const EditSensorPanelModel = ({
     const [isPanelDataFetched, setPanelDataFetched] = useState(true);
     const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
 
-    // const saveToSensorArray = () => {
-    //     let currentArray = sensors;
-    //     currentArray[currentIndex] = currentRecord;
-    //     setSensors(currentArray);
-    // };
+    const saveToSensorArray = () => {
+        let currentArray = sensors;
+        currentArray[currentIndex] = currentRecord;
+        setSensors(currentArray);
+    };
 
     const handleSensorChange = (key, value) => {
-        let obj = Object.assign({}, currentSensorObj);
+        let obj = Object.assign({}, currentRecord);
         obj[key] = value;
-        setCurrentSensorObj(obj);
+        setCurrentRecord(obj);
     };
 
     const fetchBreakersList = async (panelId) => {
         if (panelId === '') {
-            return;
-        }
-        if (panelId === 'Select Panel') {
             return;
         }
         try {
@@ -54,8 +54,7 @@ const EditSensorPanelModel = ({
             };
             let params = `?panel_id=${panelId}`;
             await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                let response = res.data.data;
-                setBreakersData(response);
+                setBreakersData(res.data);
             });
             setBreakerDataFetched(false);
         } catch (error) {
@@ -67,7 +66,7 @@ const EditSensorPanelModel = ({
 
     useEffect(() => {
         const fetchPanelsData = async () => {
-            if (!editSenorModelRefresh) {
+            if (!showBreaker) {
                 return;
             }
             try {
@@ -88,39 +87,12 @@ const EditSensorPanelModel = ({
                 console.log('Failed to fetch Panels Data List');
             }
         };
-
-        const fetchBreakersData = async () => {
-            if (!editSenorModelRefresh) {
-                return;
-            }
-            try {
-                setBreakerDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let panelId = currentSensorObj.panel_id ? currentSensorObj.panel_id : '';
-                let params = `?panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setBreakersData(response.data);
-                });
-                setBreakerDataFetched(false);
-            } catch (error) {
-                console.log(error);
-                setBreakerDataFetched(false);
-                console.log('Failed to fetch Breakers Data List');
-            }
-        };
-
         fetchPanelsData();
-        fetchBreakersData();
-    }, [editSenorModelRefresh]);
+    }, [showBreaker]);
 
     return (
         <>
-            <Modal show={showEditSensorPanel} onHide={closeEditSensorPanelModel} size={'md'} centered>
+            <Modal show={showBreaker} onHide={handleBreakerClose} size={'md'} centered>
                 <Modal.Header className="m-3 p-2 mb-0">
                     <Modal.Title>Select Breaker</Modal.Title>
                 </Modal.Header>
@@ -135,29 +107,15 @@ const EditSensorPanelModel = ({
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
-                                defaultValue={currentSensorObj.panel_id}
+                                defaultValue={currentRecord.panel_name}
                                 onChange={(e) => {
                                     handleSensorChange('panel_name', e.target.value);
                                     fetchBreakersList(e.target.value);
                                 }}>
                                 <option selected>Select Panel</option>
                                 {panelData.map((record) => {
-                                    return (
-                                        // <div>
-                                            <option value={record.panel_id}>{record.panel_name}</option>
-                                        // </div>
-                                    );
+                                    return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
-
-                                {/* <div className="filter-bld-style">
-                                    <div className="portfolio-txt-style">{record.building_name}</div>
-                                    {location.pathname !== '/energy/portfolio/overview' &&
-                                        record.building_id === bldStoreId && (
-                                            <div>
-                                                <FontAwesomeIcon icon={faCheck} className="mr-2" />
-                                            </div>
-                                        )}
-                                </div> */}
                             </Input>
                         )}
                     </Form.Group>
@@ -172,7 +130,7 @@ const EditSensorPanelModel = ({
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
-                                defaultValue={currentSensorObj.breaker_id}
+                                defaultValue={currentRecord.breaker_name}
                                 onChange={(e) => {
                                     handleSensorChange('breaker_name', e.target.value);
                                 }}>
@@ -184,29 +142,23 @@ const EditSensorPanelModel = ({
                         )}
                     </Form.Group>
 
-                    {/* {equipmentId === '' && (
+                    {equipmentId === '' && (
                         <Form.Group className="mb-3 mt-2">
                             <Button variant="light" className="select-breaker-style">
                                 Select Next Available Breaker
                             </Button>
                         </Form.Group>
-                    )} */}
+                    )}
                 </Form>
                 <Modal.Footer>
-                    <Button
-                        variant="light"
-                        onClick={() => {
-                            setEditSenorModelRefresh(false);
-                            closeEditSensorPanelModel();
-                        }}>
+                    <Button variant="light" onClick={handleBreakerClose}>
                         Cancel
                     </Button>
                     <Button
                         variant="primary"
                         onClick={() => {
-                            closeEditSensorPanelModel();
-                            setEditSenorModelRefresh(false);
-                            // saveToSensorArray();
+                            handleBreakerClose();
+                            saveToSensorArray();
                         }}>
                         Save
                     </Button>
@@ -216,4 +168,4 @@ const EditSensorPanelModel = ({
     );
 };
 
-export default EditSensorPanelModel;
+export default AddSensorPanelModel;
