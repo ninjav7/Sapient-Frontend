@@ -6,6 +6,8 @@ import Modal from 'react-bootstrap/Modal';
 import { Button, Input } from 'reactstrap';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheck } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
 
 const EditSensorPanelModel = ({
@@ -144,7 +146,7 @@ const EditSensorPanelModel = ({
                                 {panelData.map((record) => {
                                     return (
                                         // <div>
-                                            <option value={record.panel_id}>{record.panel_name}</option>
+                                        <option value={record.panel_id}>{record.panel_name}</option>
                                         // </div>
                                     );
                                 })}
@@ -178,9 +180,18 @@ const EditSensorPanelModel = ({
                                 }}>
                                 <option selected>Select Breaker</option>
                                 {breakersData.map((record) => {
-                                    return <option value={record.id}>{record.name}</option>;
+                                    return (
+                                        <option value={record.id} className="checkmark">
+                                            {record.name}
+                                        </option>
+                                    );
                                 })}
                             </Input>
+                            // <select className="selectpicker show-tick">
+                            //     <option>Mustard</option>
+                            //     <option>Ketchup</option>
+                            //     <option>Relish</option>
+                            // </select>
                         )}
                     </Form.Group>
 

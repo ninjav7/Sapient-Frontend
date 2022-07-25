@@ -346,9 +346,7 @@ const BreakersFlow = ({ data, id }) => {
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
+                                                        <option value={record.id} disabled={record.breaker_id !== ''}>
                                                             {record.name}
                                                         </option>
                                                     );
@@ -375,7 +373,13 @@ const BreakersFlow = ({ data, id }) => {
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
                                         {breakerData.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
+                                            return (
+                                                record.equipments_name !== '' && (
+                                                    <option value={record.value} disabled={record.breaker_id !== ''}>
+                                                        {record.label}
+                                                    </option>
+                                                )
+                                            );
                                         })}
                                     </Input>
                                     {/* <MultiSelect

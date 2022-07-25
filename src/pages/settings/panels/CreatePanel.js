@@ -1238,9 +1238,13 @@ const CreatePanel = () => {
                     let responseData = res.data;
                     let equipArray = [];
                     responseData.forEach((record) => {
+                        if (record.equipments_name === '') {
+                            return;
+                        }
                         let obj = {
                             label: record.equipments_name,
                             value: record.equipments_id,
+                            breaker_id: record.breaker_id,
                         };
                         equipArray.push(obj);
                     });
