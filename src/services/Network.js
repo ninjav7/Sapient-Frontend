@@ -36,6 +36,7 @@ export const equipmentType = '/api/config/get_equipment_type/';
 export const addEquipmentType ='/api/config/create_equipment_type';
 export const updateEquipmentType ='/api/config/update_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
+export const updateEquipment = '/api/config/equipments_details/update_equipment';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 
