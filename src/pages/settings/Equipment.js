@@ -14,14 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import {
-    BaseUrl,
-    generalEquipments,
-    getLocation,
-    equipmentType,
-    createEquipment,
-    getEndUseId,
-} from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -36,10 +29,62 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { result } from 'lodash';
 
-const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
-    const [selected, setSelected] = useState([]);
-    const handleSave = () => {};
+const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
+    const [selected,setSelected]=useState([]);
+    console.log(equipmentTypeData)
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    const [updateEqipmentData, setUpdateEqipmentData] = useState({});
+
+    var result=[];
+        if(equipData!==null){
+            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // var x=document.getElementById('endUsePop');
+            // console.log(x);
+            // if(x!==null)
+            // x.value=result.end_use_name;
+            console.log(result);
+        }
+        console.log(equipData)
+        const handleChange = (key, value) => {
+            let obj = Object.assign({}, updateEqipmentData);
+            // if(key==="equipment_type"){
+            //     const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+            //     console.log(result1.end_use_name);
+            //     // const eq_id=endUse.find(({name})=>name===result1.end_use_name);
+            //     // console.log(eq_id);
+            //     // var x=document.getElementById("endUsePop");
+            //     // x.value=(eq_id.end_user_id);
+            //     // obj['end_use']=eq_id.end_user_id;
+            // }
+            obj[key] = value;
+            console.log(obj);
+            setUpdateEqipmentData(obj);
+        };
+        const handleSave=()=>{
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params=`?equipment_id=${equipData.equipments_id}`
+            axios
+                .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                    fetchEquipmentData();
+                    close();
+                
+                });
+        } catch (error) {
+            console.log('Failed to update Passive device data');
+        }
+        }
     return (
         <>
             {show ? (
@@ -113,6 +158,9 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
                                                 placeholder="Enter Equipment Name"
                                                 className="font-weight-bold"
                                                 defaultValue={equipData.equipments_name}
+                                                onChange={(e) => {
+                                                    handleChange('name', e.target.value);
+                                                }}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -123,16 +171,15 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold"
-                                                defaultValue={equipData.equipments_type}>
-                                                <option selected>Select Type</option>
-                                                {equipmentTypeData.map((record) => {
-                                                    return (
-                                                        <option value={record.equipment_type}>
-                                                            {record.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
+                                                className="font-weight-bold" 
+                                                defaultValue={result.length===0?"":result.equipment_id}
+                                                onChange={(e) => {
+                                                    handleChange('equipment_type', e.target.value);
+                                                }}>
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -192,6 +239,9 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                onChange={(e) => {
+                                                    handleChange('note', e.target.value);
+                                                }}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -255,10 +305,61 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData 
         </>
     );
 };
-const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData }) => {
-    const [selectedTags, setSelectedTags] = useState([]);
-    const [selectedZones, setSelectedZones] = useState([]);
+const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+    const [selectedTags,setSelectedTags]=useState([]);
+    const [selectedZones,setSelectedZones]=useState([]);
+    const [endUseName,setEndUseName]=useState([]);
+    const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
+    var result=[];
+        if(equipData!==null){
+            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // var x=document.getElementById('endUsePop');
+            // console.log(x);
+            // if(x!==null)
+            // x.value=result.end_use_name;
+            console.log(result);
+        }
+        console.log(equipData)
+        const handleChange = (key, value) => {
+            let obj = Object.assign({}, updateEqipmentData);
+            if(key==="equipment_type"){
+                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+                console.log(result1.end_use_name);
+                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
+                console.log(eq_id);
+                var x=document.getElementById("endUsePop");
+                x.value=(eq_id.end_user_id);
+                // obj['end_use']=eq_id.end_user_id;
+            }
+            obj[key] = value;
+            console.log(obj);
+            setUpdateEqipmentData(obj);
+        };
+        const handleSave=()=>{
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params=`?equipment_id=${equipData.equipments_id}`
+            axios
+                .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                    fetchEquipmentData();
+                    close();
+                
+                });
+        } catch (error) {
+            console.log('Failed to update Passive device data');
+        }
+        }
     return (
         <>
             {show ? (
@@ -276,20 +377,20 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                 </div>
                             </Col>
                             <Col lg={3}>
-                                <div className="button-wrapper">
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-md btn-light font-weight-bold mr-4"
-                                            onClick={close}>
-                                            Cancel
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4">
-                                            Save
-                                        </button>
-                                    </div>
+                           
+                                <div className='button-wrapper'>
+                                
+                                    
+                                <div>
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
+                                        Cancel
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
+                                        Save
+                                    </button>
+                                </div>
                                 </div>
                             </Col>
                         </Row>
@@ -320,6 +421,9 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 placeholder="Enter Equipment Name"
                                                 className="font-weight-bold"
                                                 defaultValue={equipData.equipments_name}
+                                                onChange={(e) => {
+                                                    handleChange('name', e.target.value);
+                                                }}
                                             />
                                         </Form.Group>
                                     </Col>
@@ -330,16 +434,14 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold"
-                                                defaultValue={equipData.equipments_type}>
-                                                <option selected>Select Type</option>
-                                                {equipmentTypeData.map((record) => {
-                                                    return (
-                                                        <option value={record.equipment_type}>
-                                                            {record.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
+                                                className="font-weight-bold" defaultValue={result.length===0?"":result.equipment_id}
+                                                onChange={(e) => {
+                                                    handleChange('equipment_type', e.target.value);
+                                                }}>
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -349,17 +451,13 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Input
                                                 type="select"
                                                 name="select"
-                                                id="exampleSelect"
+                                                id="endUsePop"
                                                 className="font-weight-bold"
-                                                defaultValue={equipData.equipments_type}>
-                                                <option selected>Select Category</option>
-                                                {equipmentTypeData.map((record) => {
-                                                    return (
-                                                        <option value={record.equipment_type}>
-                                                            {record.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
+                                                defaultValue={result.length===0?"":result.end_use_id}>
+                                                 <option selected>Select Category</option>
+                                                     {endUse.map((record) => {
+                                                            return <option value={record.end_user_id}>{record.name}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -370,7 +468,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter Identifier"
+                                                placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
                                             />
@@ -415,16 +513,19 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                onChange={(e) => {
+                                                    handleChange('note', e.target.value);
+                                                }}
                                             />
                                         </Form.Group>
                                     </Col>
                                 </Row>
-                                <Row>
+                                {/* <Row>
                                     <Col lg={12}>
                                         <h4>Equipment MetaData</h4>
                                     </Col>
-                                </Row>
-                                <Row>
+                                </Row> */}
+                                {/* <Row>
                                     <Col lg={2}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Amps</Form.Label>
@@ -467,8 +568,8 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Control type="text" placeholder="% PF" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
-                                </Row>
-                                <Row>
+                                </Row> */}
+                                {/* <Row>
                                     <Col lg={4}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>RLA (Amps)</Form.Label>
@@ -487,8 +588,9 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Control type="text" placeholder="RPM" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
-                                </Row>
-                                <Row>
+                                    
+                                </Row> */}
+                                {/* <Row>
                                     <Col lg={4}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Model #</Form.Label>
@@ -519,7 +621,8 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             />
                                         </Form.Group>
                                     </Col>
-                                </Row>
+                                    
+                                </Row> */}
                             </Col>
                             <Col lg={4}>
                                 <div className="modal-right-container">
@@ -534,71 +637,73 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="pic-container mt-3">
-                                        <div className="modal-right-card mt-2 p-4">
-                                            <span className="modal-right-card-title">Relationships</span>
+                                    {/* <div className='pic-container mt-3'> */}
+                                    {/* <div className="modal-right-card mt-2 p-4">
+                                        <span className="modal-right-card-title">Relationships</span>
+                                    </div>
+                                    <div className="modal-right-card mt-1 p-4">
+                                        <span className="modal-right-card-title">Component of System</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
+
+                                        <div className="grey-container">  <FontAwesomeIcon
+                                        icon={faPlus}
+                                        size="lg"
+                                    /> Select the system</div>
+                                    </div> */}
+                                    {/* <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Related to System</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
+
+                                        <div className="white-container">
+                                            Chilled Water Plant
+                                            <span className='float-right mr-2'>
+                                            <FontAwesomeIcon
+                                                    icon={faTrash}
+                                                    size="lg"
+                                                />
+                                            </span> 
                                         </div>
-                                        <div className="modal-right-card mt-1 p-4">
-                                            <span className="modal-right-card-title">Component of System</span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
-                                                style={{ color: 'blue' }}>
-                                                Add
-                                            </button>
+                                    </div> */}
+                                    {/* <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Parent Equipment</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
 
-                                            <div className="grey-container">
-                                                {' '}
-                                                <FontAwesomeIcon icon={faPlus} size="lg" /> Select the system
-                                            </div>
-                                        </div>
-                                        <div className="modal-right-card mt-1 p-4">
-                                            <span className="modal-right-card-title">Related to System</span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
-                                                style={{ color: 'blue' }}>
-                                                Add
-                                            </button>
+                                        <div className="grey-container">  <FontAwesomeIcon
+                                        icon={faPlus}
+                                        size="lg"
+                                    /> Add Parent</div>
+                                    </div> */}
+                                    {/* <div className="modal-right-card mt-1 p-4">
+                                    <span className="modal-right-card-title">Component Equipment</span>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" style={{color:"blue"}}>
+                                                    Add
+                                                </button>
 
-                                            <div className="white-container">
-                                                Chilled Water Plant
-                                                <span className="float-right mr-2">
-                                                    <FontAwesomeIcon icon={faTrash} size="lg" />
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="modal-right-card mt-1 p-4">
-                                            <span className="modal-right-card-title">Parent Equipment</span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
-                                                style={{ color: 'blue' }}>
-                                                Add
-                                            </button>
-
-                                            <div className="grey-container">
-                                                {' '}
-                                                <FontAwesomeIcon icon={faPlus} size="lg" /> Add Parent
-                                            </div>
-                                        </div>
-                                        <div className="modal-right-card mt-1 p-4">
-                                            <span className="modal-right-card-title">Component Equipment</span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
-                                                style={{ color: 'blue' }}>
-                                                Add
-                                            </button>
-
-                                            <div className="white-container">
-                                                Supply Fan
-                                                <span className="float-right mr-2">
-                                                    <FontAwesomeIcon icon={faTrash} size="lg" />
-                                                </span>
-                                            </div>
-
-                                            {/* <div className="white-container" style={{clear:"both"}}>
+                                        <div className="white-container">
+                                            Supply Fan
+                                            <span className='float-right mr-2'>
+                                            <FontAwesomeIcon
+                                                    icon={faTrash}
+                                                    size="lg"
+                                                />
+                                            </span> 
+                                        </div> */}
+                                        
+                                        {/* <div className="white-container" style={{clear:"both"}}>
                                             Exhaust Fan
                                             <span className='float-right mr-2'>
                                             <FontAwesomeIcon
@@ -607,8 +712,9 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 />
                                             </span> 
                                         </div> */}
-                                        </div>
-                                    </div>
+
+                                    {/* </div>
+                                    </div> */}
                                     {/* <div>
                                         {equipData.status === 'Online' && (
                                                         <div className="icon-bg-pop-styling">
@@ -657,7 +763,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
     const Close1 = () => {
@@ -782,18 +888,8 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData }
                 </CardBody>
             </Card>
             <div>
-                <SingleActiveEquipmentModal
-                    show={modal1}
-                    equipData={equipData}
-                    close={Close1}
-                    equipmentTypeData={equipmentTypeData}
-                />
-                <SinglePassiveEquipmentModal
-                    show={modal2}
-                    equipData={equipData}
-                    close={Close2}
-                    equipmentTypeData={equipmentTypeData}
-                />
+                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} fetchEquipmentData={fetchEquipmentData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
             </div>
         </>
     );
@@ -1131,25 +1227,13 @@ const Equipment = () => {
             <Row>
                 <Col lg={11}>
                     {selectedTab === 0 && (
-                        <EquipmentTable
-                            equipmentData={generalEquipmentData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                        />
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                     {selectedTab === 1 && (
-                        <EquipmentTable
-                            equipmentData={onlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                        />
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                     {selectedTab === 2 && (
-                        <EquipmentTable
-                            equipmentData={offlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                        />
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                 </Col>
             </Row>
