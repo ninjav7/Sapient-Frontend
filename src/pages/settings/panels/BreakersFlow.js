@@ -64,6 +64,7 @@ const BreakersFlow = ({ data, id }) => {
         //     newArray[currentBreakerIndex] = currentBreakerObj;
         //     setDisconnectBreakerConfig(newArray);
         // }
+        data.onChange(id, breakerData);
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
@@ -103,6 +104,11 @@ const BreakersFlow = ({ data, id }) => {
         breaker[key] = value;
         setBreakerData(breaker);
     };
+
+    useEffect(() => {
+        console.log('SSR breakerData => ', breakerData);
+        console.log('SSR breakerData.elements => ', breakerData.elements);
+    });
 
     return (
         <React.Fragment>

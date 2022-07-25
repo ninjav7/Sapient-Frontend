@@ -24,18 +24,15 @@ import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import CustomNodeSelector from './panel-breaker-poc/CustomNodeSelector';
-import BreakersFlow from './BreakersFlow';
-import DisconnectedBreakerFlow from './DisconnectedBreakerFlow';
 import BreakerLinkFlow from './BreakerLinkFlow';
-import { BreakersStore } from '../../../store/BreakersStore';
+import DisconnectedBreakerFlow from './DisconnectedBreakerFlow';
+import BreakersFlow from './BreakersFlow';
 import '../style.css';
 import './panel-style.css';
 
 const CreatePanel = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
-    const breakerElements = BreakersStore.useState((s) => s.elements);
 
     const { v4: uuidv4 } = require('uuid');
     const generateBreakerLinkId = () => uuidv4();
@@ -425,8 +422,8 @@ const CreatePanel = () => {
     ];
 
     // const [elements, setElements] = useState(initialElements);
-    // const [elements, setElements] = useState();
-    // console.log('elements typeof => ', typeof elements);
+    const [elements, setElements] = useState();
+    console.log('elements typeof => ', typeof elements);
 
     // if (elements) {
     //     console.log('elements Obj => ', Object.values(elements));
@@ -790,10 +787,10 @@ const CreatePanel = () => {
 
         // setNormalStruct(newArray);
 
-        // console.log('mainVoltageChange elements => ', elements);
-        // console.log('mainVoltageChange elements typeOf => ', typeof elements);
+        console.log('mainVoltageChange elements => ', elements);
+        console.log('mainVoltageChange elements typeOf => ', typeof elements);
 
-        let newArray = breakerElements;
+        let newArray = elements;
         newArray.forEach((obj) => {
             if (voltageValue === '120/240') {
                 obj.data.voltage = '120';
@@ -816,10 +813,7 @@ const CreatePanel = () => {
                 obj.data.phase_configuration = 1;
             }
         });
-        // setElements(newArray);
-        BreakersStore.update((s) => {
-            s.elements = newArray;
-        });
+        setElements(newArray);
     };
 
     const fetchDeviceSensorData = async (deviceId) => {
@@ -954,37 +948,46 @@ const CreatePanel = () => {
         }
     };
 
-    // console.log('elements before handleBreakerChange fun => ', elements);
+    console.log('elements before handleBreakerChange fun => ', elements);
 
-    const handleBreakerChange = (id, key, value) => {
-        // console.log('handleBreakerChange id => ', id);
-        // console.log('handleBreakerChange key => ', key);
-        // console.log('handleBreakerChange value => ', value);
-        // console.log('handleBreakerChange elements => ', elements);
-        // console.log('handleBreakerChange elements typeOf => ', typeof elements);
+    const updateBreakerData = (id, key, value) => {
+        console.log('updateBreakerData id => ', id);
+        console.log('updateBreakerData key => ', key);
+        console.log('updateBreakerData value => ', value);
+        console.log('updateBreakerData elements => ', elements);
+        console.log('updateBreakerData elements typeOf => ', typeof elements);
+    };
 
-        if (breakerElements) {
-            let elementsList = Object.assign({}, breakerElements);
+    // const handleBreakerChange = (id, key, value) => {
+    //     updateBreakerData(id, key, value);
 
-            console.log('handleBreakerChange elementsList => ', elementsList);
+    //     if (elements) {
+    //         let elementsList = Object.assign({}, elements);
 
-            elementsList.forEach((el) => {
-                if (el.id === id) {
-                    if (key === 'equipment_link') {
-                        let arr = [];
-                        arr.push(value);
-                        value = arr;
-                    }
-                    if (value === 'Select Volts') {
-                        value = '';
-                    }
-                    el.data[key] = value;
-                }
-            });
-            BreakersStore.update((s) => {
-                s.elements = elementsList;
-            });
-        }
+    //         console.log('handleBreakerChange elementsList => ', elementsList);
+
+    //         elementsList.forEach((el) => {
+    //             if (el.id === id) {
+    //                 if (key === 'equipment_link') {
+    //                     let arr = [];
+    //                     arr.push(value);
+    //                     value = arr;
+    //                 }
+    //                 if (value === 'Select Volts') {
+    //                     value = '';
+    //                 }
+    //                 el.data[key] = value;
+    //             }
+    //         });
+
+    //         setElements(elementsList);
+    //     }
+    // };
+
+    const handleBreakerChange = (id, breakerObj) => {
+        console.log('handleBreakerChange id => ', id);
+        console.log('handleBreakerChange breakerObj => ', breakerObj);
+        console.log('handleBreakerChange elements => ', elements);
     };
 
     const handleDisconnectedBreakerChange = (id, key, value) => {
@@ -1032,22 +1035,20 @@ const CreatePanel = () => {
 
     const onConnect = useCallback(
         (params) =>
-            BreakersStore.update((s) => {
-                s.elements = (els) =>
-                    addEdge(
-                        {
-                            ...params,
-                            id: `edge_${breakerElements.length + 1}`,
-                            animated: false,
-                            type: 'step',
-                            style: { stroke: '#bababa' },
-                            data: { type: 'edge', label: 'dhvsdhvd' },
-                            // arrowHeadType: 'arrowclosed',
-                        },
-                        els
-                    );
-            }),
-
+            setElements((els) =>
+                addEdge(
+                    {
+                        ...params,
+                        id: `edge_${elements.length + 1}`,
+                        animated: false,
+                        type: 'step',
+                        style: { stroke: '#bababa' },
+                        data: { type: 'edge', label: 'dhvsdhvd' },
+                        // arrowHeadType: 'arrowclosed',
+                    },
+                    els
+                )
+            ),
         []
     );
 
@@ -1088,7 +1089,7 @@ const CreatePanel = () => {
                 let panelBreakerObjs = [];
 
                 if (activePanelType === 'distribution') {
-                    breakerElements.forEach((el) => {
+                    elements.forEach((el) => {
                         if (el.type === 'breakerLink') {
                             return;
                         }
@@ -1194,6 +1195,7 @@ const CreatePanel = () => {
                     equipment_data: [],
                     passive_data: [],
                     onChange: handleBreakerChange,
+                    elements: elements,
                 },
                 position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
                 draggable: false,
@@ -1201,16 +1203,8 @@ const CreatePanel = () => {
             newBreakers.push(obj);
         }
         console.log('ReactFlow Breakers => ', newBreakers);
-        console.log('newBreakers');
-        BreakersStore.update((s) => {
-            s.elements = newBreakers;
-        });
-        console.log('ReactFlow breakerElements => ', breakerElements);
+        setElements(newBreakers);
     }, []);
-
-    useEffect(()=>{
-        console.log('ReactFlow => ', breakerElements);
-    })
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1522,17 +1516,15 @@ const CreatePanel = () => {
     }, [disconnectBreakerCount]);
 
     useEffect(() => {
-        if (breakerElements) {
-            let newArray = Object.values(breakerElements);
+        if (elements) {
+            let newArray = elements;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
                 obj.data.equipment_data = equipmentData;
             });
-            BreakersStore.update((s) => {
-                s.elements = newArray;
-            });
+            setElements(newArray);
 
             let newDisconnectedArray = disconnectBreakersNodes;
             newDisconnectedArray.forEach((obj) => {
@@ -1546,18 +1538,15 @@ const CreatePanel = () => {
     }, [equipmentData]);
 
     useEffect(() => {
-        if (breakerElements) {
-            let newArray = breakerElements;
+        if (elements) {
+            let newArray = elements;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
                 obj.data.passive_data = passiveDeviceData;
             });
-
-            BreakersStore.update((s) => {
-                s.elements = newArray;
-            });
+            setElements(newArray);
 
             let newDisconnectedArray = disconnectBreakersNodes;
             newDisconnectedArray.forEach((obj) => {
@@ -1924,12 +1913,10 @@ const CreatePanel = () => {
                                     </Col>
                                 </Row> */}
 
-                                {console.log('breakerElements => ', breakerElements)}
-
                                 <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
                                     <div className="col-sm">
                                         <ReactFlow
-                                            elements={breakerElements}
+                                            elements={elements}
                                             edges={edges}
                                             onConnect={onConnect}
                                             onLoad={onLoad}
