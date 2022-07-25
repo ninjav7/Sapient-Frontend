@@ -15,7 +15,14 @@ import {
 import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { BaseUrl, generalPassiveDevices, getLocation, createDevice, generalGateway,searchDevices } from '../../../services/Network';
+import {
+    BaseUrl,
+    generalPassiveDevices,
+    getLocation,
+    createDevice,
+    generalGateway,
+    searchDevices,
+} from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
@@ -219,7 +226,11 @@ const PassiveDevicesTable = ({
                                         )}
 
                                         {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>{record.location}</td>
+                                            <td>
+                                                {record.location === ' > '
+                                                    ? ' - '
+                                                    : record.location.split('>').reverse().join(' > ')}
+                                            </td>
                                         )}
 
                                         {selectedOptions.some((record) => record.value === 'sensors') && (
@@ -387,41 +398,38 @@ const PassiveDevices = () => {
             console.log('Failed to fetch Filtered Active Devices');
         }
     };
-    const handleSearchtxt=(e)=>{
-        if(e.target.value!==""){
-        setSearch(e.target.value.toUpperCase());
+    const handleSearchtxt = (e) => {
+        if (e.target.value !== '') {
+            setSearch(e.target.value.toUpperCase());
+        } else {
+            setPassiveDeviceData(duplicatePassiveDeviceData);
         }
-        else{
-            setPassiveDeviceData(duplicatePassiveDeviceData)
-        }
-    }
+    };
 
-    const handleSearch=async()=>{
-        if(search!==""){
+    const handleSearch = async () => {
+        if (search !== '') {
             try {
                 setIsDeviceProcessing(true);
-                 let headers = {
-                     'Content-Type': 'application/json',
-                     accept: 'application/json',
-                     Authorization: `Bearer ${userdata.token}`,
-                 };
-                 let params = `?device_type=passive&building_id=${bldgId}&mac=${search}`;
-                 await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
-                     let response = res.data;
-                     setPassiveDeviceData(res.data);
-                 });
-                 setIsDeviceProcessing(false);
-             } catch (error) {
-                 console.log(error);
-                 setIsDeviceProcessing(false);
-                 console.log('Failed to fetch all Active Devices');
-             }
-      }
-      else{
-        setPassiveDeviceData(duplicatePassiveDeviceData)
-      }
-    }
-
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_type=passive&building_id=${bldgId}&mac=${search}`;
+                await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPassiveDeviceData(res.data);
+                });
+                setIsDeviceProcessing(false);
+            } catch (error) {
+                console.log(error);
+                setIsDeviceProcessing(false);
+                console.log('Failed to fetch all Active Devices');
+            }
+        } else {
+            setPassiveDeviceData(duplicatePassiveDeviceData);
+        }
+    };
 
     const nextPageData = async (path) => {
         try {
@@ -458,7 +466,6 @@ const PassiveDevices = () => {
             console.log('Failed to fetch all Active Devices');
         }
     };
-
 
     const previousPageData = async (path) => {
         try {
@@ -638,9 +645,7 @@ const PassiveDevices = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Passive Devices
-                    </span>
+                    <span className="heading-style">Passive Devices</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -659,14 +664,16 @@ const PassiveDevices = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                <div class="input-group rounded ml-4">
+                    <div class="input-group rounded ml-4">
                         <input
                             type="search"
                             class="form-control rounded"
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
-                            onChange={(e)=>{handleSearchtxt(e)}}
+                            onChange={(e) => {
+                                handleSearchtxt(e);
+                            }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
