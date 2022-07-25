@@ -1,0 +1,38 @@
+//
+// header.scss
+//
+
+.heading-style {
+    font-family: 'Space Grotesk' !important;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 125%;
+    color: #1d2939;
+    margin-left: 1.25rem;
+}
+
+.header-datefilter-datepicker {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+.header-datefilter-select {
+    [class*='-control'] {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: 0 !important;
+    }
+}
+
+.header-widget-styling {
+    filter: drop-shadow(0px 1px 0px rgba(16, 24, 40, 0.05));
+    display: inline-flex;
+    position: relative;
+    z-index: 1;
+}
+
+.custom-button-group {
+    float: right;
+    justify-self: end;
+    text-align: center;
+}

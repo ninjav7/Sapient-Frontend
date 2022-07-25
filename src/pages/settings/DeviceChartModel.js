@@ -140,7 +140,7 @@ const DeviceChartModel = ({
 
                                 return _data;
                             });
-                        } catch (error) {}
+                        } catch (error) { }
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
                         setSeriesData([
@@ -262,10 +262,13 @@ const DeviceChartModel = ({
 
             selection: {
                 enabled: true,
-                xaxis: {
-                    min: new Date('21 July 2022').getTime(),
-                    max: new Date('22 July 2022').getTime(),
-                },
+                // xaxis: {
+                //     min: new Date('19 July 2022').getTime(),
+                //     max: new Date('20 July 2022').getTime(),
+                // },
+            },
+            animations: {
+                enabled: false,
             },
         },
 
