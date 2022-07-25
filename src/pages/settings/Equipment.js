@@ -102,28 +102,32 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                 </div>
                             </Col>
                             <Col lg={3}>
-                           
-                            <div className='button-wrapper'>
-                                <div>
-                                    <button type="button" className="btn btn-md btn-outline-danger font-weight-bold mr-4">
-                                    <FontAwesomeIcon
-                                        icon={faPowerOff}
-                                        size="lg"
-                                        style={{color:"red"}}
-                                    /> Turn Off
-                                    </button>
-                                </div>
-                                    
-                                <div>
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
-                                        Cancel
-                                    </button>
-                                </div>
-                                <div>
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
-                                        Save
-                                    </button>
-                                </div>
+                                <div className="button-wrapper">
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-outline-danger font-weight-bold mr-4">
+                                            <FontAwesomeIcon icon={faPowerOff} size="lg" style={{ color: 'red' }} />{' '}
+                                            Turn Off
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-light font-weight-bold mr-4"
+                                            onClick={close}>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            onClick={handleSave}>
+                                            Save
+                                        </button>
+                                    </div>
                                 </div>
                             </Col>
                         </Row>
@@ -214,15 +218,15 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                 </Row>
                                 <Row>
                                     <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
-                                        <TagsInput
-                                            value={selected}
-                                            onChange={setSelected}
-                                            name="tag"
-                                            placeHolder="+ Add Tag"
-                                        />
-                                    </Form.Group>
+                                            <TagsInput
+                                                value={selected}
+                                                onChange={setSelected}
+                                                name="tag"
+                                                placeHolder="+ Add Tag"
+                                            />
+                                        </Form.Group>
                                     </Col>
                                 </Row>
                                 <Row>
@@ -256,16 +260,16 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                     </div>
                                     <div>
                                         {equipData.status === 'Online' && (
-                                                        <div className="icon-bg-pop-styling">
-                                                            ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )}
-                                                    {equipData.status === 'Offline' && (
-                                                        <div className="icon-bg-pop-styling-slash">
-                                                          OFFLINE  <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )}
-                                        </div>
+                                            <div className="icon-bg-pop-styling">
+                                                ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                            </div>
+                                        )}
+                                        {equipData.status === 'Offline' && (
+                                            <div className="icon-bg-pop-styling-slash">
+                                                OFFLINE <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="mt-4 modal-right-group">
                                         <FormGroup>
                                             <div className="single-line-style">
@@ -477,28 +481,26 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Serves Zones</Form.Label>
                                             <TagsInput
-                                            value={selectedZones}
-                                            onChange={setSelectedZones}
-                                            name="Zones"
-                                            placeHolder="+ Add Location"
-                                        />
-                                            <Form.Label>
-                                                What area this piece of equipment services.
-                                            </Form.Label>
+                                                value={selectedZones}
+                                                onChange={setSelectedZones}
+                                                name="Zones"
+                                                placeHolder="+ Add Location"
+                                            />
+                                            <Form.Label>What area this piece of equipment services.</Form.Label>
                                         </Form.Group>
                                     </Col>
                                 </Row>
                                 <Row>
                                     <Col lg={12}>
-                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
-                                        <TagsInput
-                                            value={selectedTags}
-                                            onChange={setSelectedTags}
-                                            name="tag"
-                                            placeHolder="+ Add Tag"
-                                        />
-                                    </Form.Group>
+                                            <TagsInput
+                                                value={selectedTags}
+                                                onChange={setSelectedTags}
+                                                name="tag"
+                                                placeHolder="+ Add Tag"
+                                            />
+                                        </Form.Group>
                                     </Col>
                                 </Row>
                                 <Row>
@@ -527,11 +529,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                     <Col lg={2}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Amps</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Amps"
-                                                className="font-weight-bold"
-                                            />
+                                            <Form.Control type="text" placeholder="Amps" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
                                     <Col lg={2}>
@@ -567,11 +565,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                     <Col lg={2}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>% PF</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="% PF"
-                                                className="font-weight-bold"
-                                            />
+                                            <Form.Control type="text" placeholder="% PF" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
                                 </Row> */}
@@ -579,31 +573,19 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                     <Col lg={4}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>RLA (Amps)</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="RLA"
-                                                className="font-weight-bold"
-                                            />
+                                            <Form.Control type="text" placeholder="RLA" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
                                     <Col lg={4}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>VFD (hZ)</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="VFD"
-                                                className="font-weight-bold"
-                                            />
+                                            <Form.Control type="text" placeholder="VFD" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
                                     <Col lg={4}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>RPM</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="RPM"
-                                                className="font-weight-bold"
-                                            />
+                                            <Form.Control type="text" placeholder="RPM" className="font-weight-bold" />
                                         </Form.Group>
                                     </Col>
                                     
@@ -644,15 +626,15 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                             </Col>
                             <Col lg={4}>
                                 <div className="modal-right-container">
-                                    <div className='pic-container'>
+                                    <div className="pic-container">
                                         <div className="modal-right-pic"></div>
-                                        <div className="modal-right-card mt-2" style={{padding:"1rem"}}>
-                                        <span className="modal-right-card-title">Energy Monitoring</span>
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                    Select
-                                                </button>
+                                        <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
+                                            <span className="modal-right-card-title">Energy Monitoring</span>
+                                            <button
+                                                type="button"
+                                                class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                                Select
+                                            </button>
                                         </div>
                                     </div>
                                     {/* <div className='pic-container mt-3'> */}
@@ -771,7 +753,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <h6 className="card-title">{equipData.device_location}</h6>
                                         </div>
                                                     </FormGroup>*/}
-                                </div> 
+                                </div>
                             </Col>
                         </Row>
                     </Modal.Body>
@@ -783,24 +765,21 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
 
 const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData }) => {
     const [modal1, setModal1] = useState(false);
-    const [modal2,setModal2]=useState(false);
-    const Close1=()=>{
+    const [modal2, setModal2] = useState(false);
+    const Close1 = () => {
         setModal1(false);
-    }
-    const Close2=()=>{
+    };
+    const Close2 = () => {
         setModal2(false);
-    }
+    };
     const Toggle = (record) => {
-        if(record.device_type==="passive"){
-            setModal2(!modal2)
-        }
-        else if(record.device_type==="active"){
-            setModal1(!modal1)
-        }
-        else{
+        if (record.device_type === 'passive') {
+            setModal2(!modal2);
+        } else if (record.device_type === 'active') {
+            setModal1(!modal1);
+        } else {
             setModal2(!modal2);
         }
-        
     };
     const [equipData, setEquipData] = useState(null);
 
@@ -882,10 +861,14 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                 </div>
                                             </td>
                                             <td className="font-weight-bold">
-                                                {!(record.equipments_name === "") ? record.equipments_name : '-'}
+                                                {!(record.equipments_name === '') ? record.equipments_name : '-'}
                                             </td>
                                             <td className="font-weight-bold">{record.equipments_type}</td>
-                                            <td>{record.location}</td>
+                                            <td>
+                                                {record.location === ' > '
+                                                    ? ' - '
+                                                    : record.location.split('>').reverse().join(' > ')}
+                                            </td>
                                             <td>
                                                 {
                                                     <div className="badge badge-light mr-2 font-weight-bold week-day-style">
@@ -933,26 +916,25 @@ const Equipment = () => {
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
-    const [selectedEndUse,setSelectedEndUse]= useState([]);
-
+    const [selectedEndUse, setSelectedEndUse] = useState([]);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
-        if(key==="equipment_type"){
-            const result =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+        if (key === 'equipment_type') {
+            const result = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
             console.log(result.end_use_name);
-            const eq_id=endUseData.find(({name})=>name===result.end_use_name);
+            const eq_id = endUseData.find(({ name }) => name === result.end_use_name);
             console.log(eq_id.end_user_id);
-            var x=document.getElementById("endUseSelect");
-            x.value=(eq_id.end_user_id);
-            obj['end_use']=eq_id.end_user_id;
+            var x = document.getElementById('endUseSelect');
+            x.value = eq_id.end_user_id;
+            obj['end_use'] = eq_id.end_user_id;
         }
         obj[key] = value;
         setCreateEqipmentData(obj);
     };
 
-    const handleEquipmentTypeCall=async(value)=>{
-        const result = endUseData.find( ({ end_user_id }) => end_user_id === value );
+    const handleEquipmentTypeCall = async (value) => {
+        const result = endUseData.find(({ end_user_id }) => end_user_id === value);
         console.log(result.name);
         try {
             let headers = {
@@ -968,11 +950,10 @@ const Equipment = () => {
             console.log(error);
             console.log('Failed to fetch Equipment Type Data');
         }
-
-    }
+    };
     const saveDeviceData = async () => {
         let obj = Object.assign({}, createEqipmentData);
-        obj["building_id"] = bldgId;
+        obj['building_id'] = bldgId;
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -987,10 +968,9 @@ const Equipment = () => {
                 })
                 .then((res) => {
                     console.log(res.data);
-                    setTimeout(function(){
+                    setTimeout(function () {
                         fetchEquipmentData();
-                      }, 3000);
-                
+                    }, 3000);
                 });
 
             setIsProcessing(false);
@@ -1033,7 +1013,6 @@ const Equipment = () => {
     };
 
     useEffect(() => {
-      
         const fetchOnlineEquipData = async () => {
             try {
                 let headers = {
@@ -1069,25 +1048,23 @@ const Equipment = () => {
                 console.log('Failed to fetch offline Equipments Data');
             }
         };
-        const fetchEndUseData= async()=>{
-            try{
+        const fetchEndUseData = async () => {
+            try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`
+                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
                     //console.log('setEndUseData => ', res.data);
                     setEndUseData(res.data);
                 });
-
-            }
-            catch(error){
+            } catch (error) {
                 console.log(error);
-                console.log("Failed to fetch End Use Data")
+                console.log('Failed to fetch End Use Data');
             }
-        }
+        };
 
         const fetchEquipTypeData = async () => {
             try {
@@ -1153,9 +1130,7 @@ const Equipment = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Equipment
-                    </span>
+                    <span className="heading-style">Equipment</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -1269,7 +1244,7 @@ const Equipment = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Name</Form.Label>
                             <Form.Control
                                 type="text"
@@ -1281,7 +1256,7 @@ const Equipment = () => {
                                 autoFocus
                             />
                         </Form.Group>
-                        
+
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
                             <Input
@@ -1292,13 +1267,15 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('equipment_type', e.target.value);
                                 }}>
-                                <option value="" selected>Select Type</option>
+                                <option value="" selected>
+                                    Select Type
+                                </option>
                                 {equipmentTypeData.map((record) => {
                                     return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                 })}
                             </Input>
                         </Form.Group>
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use Category</Form.Label>
                             <Input
                                 type="select"
@@ -1325,7 +1302,9 @@ const Equipment = () => {
                                 onChange={(e) => {
                                     handleChange('space_id', e.target.value);
                                 }}>
-                                <option value="" selected>Select Location</option>
+                                <option value="" selected>
+                                    Select Location
+                                </option>
                                 {locationData.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
                                 })}

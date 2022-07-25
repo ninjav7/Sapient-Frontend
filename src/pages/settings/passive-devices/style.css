@@ -446,9 +446,41 @@
     color: #344054 !important;
 }
 
-.passive-device-flex{
+.passive-device-flex {
     display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.selected-option-style {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: stretch;
+}
+
+.checkmark:before {
+    content: 'L' !important;
+    font-family: arial !important;
+    -ms-transform: scaleX(-1) rotate(-35deg) !important; /* IE 9 */
+    -webkit-transform: scaleX(-1) rotate(-35deg) !important; /* Chrome, Safari, Opera */
+    transform: scaleX(-1) rotate(-35deg) !important;
+    display: inline-block !important;
+    vertical-align: top !important;
+    line-height: 1em !important;
+    width: 1em !important;
+    color: green !important;
+    height: 1em !important;
+    margin-right: 0.3em !important;
+    text-align: center !important;
+    position: absolute !important;
+    right: 0 !important;
+}
+
+.breaker-select-style {
+    width: 50px !important;
+    height: 50px !important;
 }
