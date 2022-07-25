@@ -103,7 +103,7 @@ const Roles = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                    <span className="heading-style">
                         Roles
                     </span>
 

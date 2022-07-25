@@ -141,6 +141,59 @@
     letter-spacing: 1px;
 }
 
+
+.energy-top-nav__vertical-separator {
+    width: 0.0625rem;
+    height: 1.6875rem;
+    background: #2F3949;
+    margin: 0.5625rem 0.1875rem;
+}
+
+.energy-top-nav__vertical-separator + .top-nav-routes-list {
+    margin-left: 0.9375rem;
+}
+
+.topbar {
+    &-buttons {
+        // margin: 0 0.4375rem;
+    }
+    &-buttons-wrapper {
+        width: 100%;
+        float: right;
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 0.9375rem;
+    }
+    &-logout-btn {
+        padding: 0;
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.125rem;
+        border: 0;
+        margin-right: 1.5rem;
+        margin-left: 2.1875rem;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, 0.6);
+        border-radius: 0;
+        border-top: 0.125rem solid transparent;
+        border-bottom: 0.125rem solid transparent;
+
+        & svg {
+            path {
+                fill: rgba(255, 255, 255, 0.6);
+            }
+            margin-right: 0.5625rem;
+        }
+
+        &:hover {
+            background: radial-gradient(55.59% 55.59% at 50% 91.96%, rgba(77, 83, 237, 0.27) 0%, rgba(16, 24, 40, 0) 100%);
+            color: rgba(255, 255, 255, 0.6);
+            border-bottom-color: $primary-indigo-500;
+        }
+    }
+}
+
+
 /* Notification */
 @keyframes blinker {
     50% {
