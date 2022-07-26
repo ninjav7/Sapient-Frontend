@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices, getLocation, createDevice,searchDevices } from '../../../services/Network';
+import { BaseUrl, generalActiveDevices, getLocation, createDevice, searchDevices } from '../../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { BuildingStore } from '../../../store/BuildingStore';
@@ -331,7 +331,11 @@ const ActiveDevicesTable = ({
                                             <td>{record.model}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>{record.location}</td>
+                                            <td>
+                                                {record.location === ' > '
+                                                    ? ' - '
+                                                    : record.location.split('>').reverse().join(' > ')}
+                                            </td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'description') && (
                                             <th>{record.description}</th>
@@ -500,42 +504,39 @@ const ActiveDevices = () => {
             console.log('Failed to fetch Filtered Active Devices');
         }
     };
-    const handleSearchtxt=(e)=>{
-        if(e.target.value!==""){
-        setSearch(e.target.value.toUpperCase());
+    const handleSearchtxt = (e) => {
+        if (e.target.value !== '') {
+            setSearch(e.target.value.toUpperCase());
+        } else {
+            setActiveDeviceData(duplicateactiveDeviceData);
         }
-        else{
-            setActiveDeviceData(duplicateactiveDeviceData)
-          }
-    }
+    };
 
-    const handleSearch=async()=>{
-        if(search!==""){
+    const handleSearch = async () => {
+        if (search !== '') {
             try {
                 setIsDeviceProcessing(true);
-                 let headers = {
-                     'Content-Type': 'application/json',
-                     accept: 'application/json',
-                     Authorization: `Bearer ${userdata.token}`,
-                 };
-                 let params = `?device_type=active&building_id=${bldgId}&mac=${search}`;
-                 await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
-                     let response = res.data;
-                     setActiveDeviceData(res.data);
-                 });
-                 setIsDeviceProcessing(false);
-             } catch (error) {
-                 console.log(error);
-                 setIsDeviceProcessing(false);
-                 console.log('Failed to fetch all Active Devices');
-             }
-      }
-      else{
-        setActiveDeviceData(duplicateactiveDeviceData)
-      }
-    }
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_type=active&building_id=${bldgId}&mac=${search}`;
+                await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setActiveDeviceData(res.data);
+                });
+                setIsDeviceProcessing(false);
+            } catch (error) {
+                console.log(error);
+                setIsDeviceProcessing(false);
+                console.log('Failed to fetch all Active Devices');
+            }
+        } else {
+            setActiveDeviceData(duplicateactiveDeviceData);
+        }
+    };
 
-  
     const nextPageData = async (path) => {
         try {
             if (path === null) {
@@ -668,7 +669,7 @@ const ActiveDevices = () => {
     useEffect(() => {
         const fetchActiveDeviceData = async () => {
             try {
-               setIsDeviceProcessing(true);
+                setIsDeviceProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -680,7 +681,7 @@ const ActiveDevices = () => {
                     setActiveDeviceData(response.data);
                     setduplicateActiveDeviceData(response.data);
                     setPaginationData(res.data);
- 
+
                     let onlineData = [];
                     let offlineData = [];
 
@@ -736,9 +737,7 @@ const ActiveDevices = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Active Devices
-                    </span>
+                    <span className="heading-style">Active Devices</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         {/* <div className="mr-2">
@@ -774,7 +773,9 @@ const ActiveDevices = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
-                            onChange={(e)=>{handleSearchtxt(e)}}
+                            onChange={(e) => {
+                                handleSearchtxt(e);
+                            }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
