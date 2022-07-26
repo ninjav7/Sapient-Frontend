@@ -86,11 +86,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                                         )}
 
                                         {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>
-                                                {record.location === ' > '
-                                                    ? ' - '
-                                                    : record.location.split('>').reverse().join(' > ')}
-                                            </td>
+                                            <td className="">{record.location}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'breakers') && (
                                             <td className="font-weight-bold">{record.breakers}</td>
@@ -188,7 +184,9 @@ const Panels = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">Panels</span>
+                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                        Panels
+                    </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">

@@ -54,7 +54,11 @@ const AddSensorPanelModel = ({
             };
             let params = `?panel_id=${panelId}`;
             await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                setBreakersData(res.data);
+                let response = res.data.data;
+                response.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+                setBreakersData(response);
             });
             setBreakerDataFetched(false);
         } catch (error) {
@@ -78,7 +82,11 @@ const AddSensorPanelModel = ({
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    setPanelData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.panel_name.localeCompare(b.panel_name);
+                    });
+                    setPanelData(response);
                 });
                 setPanelDataFetched(false);
             } catch (error) {

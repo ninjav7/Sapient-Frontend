@@ -1071,9 +1071,7 @@ const Equipment = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
-                    //console.log('setEndUseData => ', res.data);
                     setEndUseData(res.data);
                 });
             } catch (error) {
@@ -1091,7 +1089,11 @@ const Equipment = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                    setEquipmentTypeData(res.data.data);
+                    let response = res.data.data;
+                    response.sort((a, b) => {
+                        return a.equipment_type.localeCompare(b.equipment_type);
+                    });
+                    setEquipmentTypeData(response);
                 });
             } catch (error) {
                 console.log(error);

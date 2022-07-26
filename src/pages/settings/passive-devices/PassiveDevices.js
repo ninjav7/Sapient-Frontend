@@ -314,12 +314,12 @@ const PassiveDevices = () => {
     const [duplicatePassiveDeviceData, setDuplicatePassiveDeviceData] = useState([]);
     const [passiveDeviceModel, setPassiveDeviceModel] = useState([
         {
-            value: 'PR55-4A',
-            label: 'PR55-4A',
-        },
-        {
             value: 'HYDRA-1',
             label: 'HYDRA-1',
+        },
+        {
+            value: 'PR55-4A',
+            label: 'PR55-4A',
         },
     ]);
     const [paginationData, setPaginationData] = useState({});
@@ -374,7 +374,7 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&page_size=10&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
+            let params = `?building_id=${bldgId}&page_size=40&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
@@ -543,7 +543,11 @@ const PassiveDevices = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.location_name.localeCompare(b.location_name);
+                    });
+                    setLocationData(response);
                 });
             } catch (error) {
                 console.log(error);
