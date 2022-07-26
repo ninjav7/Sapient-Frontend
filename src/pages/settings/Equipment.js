@@ -14,6 +14,7 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -33,7 +34,7 @@ import { result } from 'lodash';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
     const [selected,setSelected]=useState([]);
-    console.log(equipmentTypeData)
+    // console.log(equipmentTypeData)
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
@@ -45,22 +46,22 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
             // console.log(x);
             // if(x!==null)
             // x.value=result.end_use_name;
-            console.log(result);
+            // console.log(result);
         }
         console.log(equipData)
         const handleChange = (key, value) => {
             let obj = Object.assign({}, updateEqipmentData);
             if(key==="equipment_type"){
                 const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-                console.log(result1.end_use_name);
+                // console.log(result1.end_use_name);
                 const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-                console.log(eq_id);
+                // console.log(eq_id);
                 // var x=document.getElementById("endUsePop");
                 // x.value=(eq_id.end_user_id);
                 obj['end_use']=eq_id.end_user_id;
             }
             obj[key] = value;
-            console.log(obj);
+            // console.log(obj);
             setUpdateEqipmentData(obj);
         };
         const handleSave=()=>{
@@ -76,7 +77,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     fetchEquipmentData();
                     close();
                 
@@ -190,7 +191,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter Identifier"
+                                                placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
                                             />
@@ -253,11 +254,16 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                     <div className="modal-right-pic"></div>
                                     <div className="modal-right-card mt-2">
                                         <span className="modal-right-card-title">Power Strip Socket 2</span>
+                                        <Link
+                                            to={{
+                                                pathname: equipData.device_id!==""?`/settings/active-devices/single/${equipData.device_id}`:`equipment/#`,
+                                            }}>
                                         <button
                                             type="button"
-                                            class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                            class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipData.device_id===""?true:false}>
                                             View Devices
                                         </button>
+                                        </Link>
                                     </div>
                                     <div>
                                         {equipData.status === 'Online' && (
@@ -321,22 +327,22 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
             // console.log(x);
             // if(x!==null)
             // x.value=result.end_use_name;
-            console.log(result);
+            // console.log(result);
         }
-        console.log(equipData)
+        // console.log(equipData)
         const handleChange = (key, value) => {
             let obj = Object.assign({}, updateEqipmentData);
             if(key==="equipment_type"){
                 const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-                console.log(result1.end_use_name);
+                // console.log(result1.end_use_name);
                 const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-                console.log(eq_id);
+                // console.log(eq_id);
                 var x=document.getElementById("endUsePop");
                 x.value=(eq_id.end_user_id);
                 obj['end_use']=eq_id.end_user_id;
             }
             obj[key] = value;
-            console.log(obj);
+            // console.log(obj);
             setUpdateEqipmentData(obj);
         };
         const handleSave=()=>{
@@ -352,7 +358,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     fetchEquipmentData();
                     close();
                 
@@ -632,11 +638,17 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <div className="modal-right-pic"></div>
                                         <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                             <span className="modal-right-card-title">Energy Monitoring</span>
+                                            
+                                        <Link
+                                            to={{
+                                                pathname: equipData.device_id!==""?`/settings/passive-devices/single/${equipData.device_id}`:`equipment/#`,
+                                            }}>
                                             <button
                                                 type="button"
                                                 class="btn btn-light btn-md font-weight-bold float-right mr-2">
                                                 View
                                             </button>
+                                            </Link>
                                         </div>
                                     </div>
                                     {/* <div className='pic-container mt-3'> */}
@@ -924,9 +936,9 @@ const Equipment = () => {
         let obj = Object.assign({}, createEqipmentData);
         if (key === 'equipment_type') {
             const result = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-            console.log(result.end_use_name);
+            // console.log(result.end_use_name);
             const eq_id = endUseData.find(({ name }) => name === result.end_use_name);
-            console.log(eq_id.end_user_id);
+            // console.log(eq_id.end_user_id);
             var x = document.getElementById('endUseSelect');
             x.value = eq_id.end_user_id;
             obj['end_use'] = eq_id.end_user_id;
@@ -937,7 +949,7 @@ const Equipment = () => {
 
     const handleEquipmentTypeCall = async (value) => {
         const result = endUseData.find(({ end_user_id }) => end_user_id === value);
-        console.log(result.name);
+        // console.log(result.name);
         try {
             let headers = {
                 'Content-Type': 'application/json',
@@ -969,7 +981,7 @@ const Equipment = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     setTimeout(function () {
                         fetchEquipmentData();
                     }, 3000);
@@ -1043,7 +1055,7 @@ const Equipment = () => {
                 let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOfflineEquipData(res.data);
-                    console.log(res.data);
+                    // console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);

@@ -38,7 +38,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
         obj[key] = value;
         setEditEqipmentData(obj);
      };
-    //  console.log(equipData);
+     // console.log(equipData);
     //  console.log(endUseData);
      const editDeviceData = async () => {
         let obj = Object.assign({}, editEqipmentData);
@@ -84,6 +84,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                                  type="text"
                                  placeholder="Enter Name"
                                  className="font-weight-bold"
+                                defaultValue={equipData.equipment_type}
                                  onChange={(e) => {
                                      handleChange('name', e.target.value);
                                  }}
@@ -98,6 +99,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
+                                defaultValue={equipData.end_use_id}
                                 onChange={(e) => {
                                     handleChange('end_use', e.target.value);
                                 }}>
@@ -115,9 +117,9 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                      </Button>
                      <Button
                          variant="primary"
-                         onClick={()=>{editDeviceData();}}
+                        //  onClick={()=>{editDeviceData();}}
                          >
-                         Add
+                         Update
                      </Button>
                  </Modal.Footer>
              </Modal>
