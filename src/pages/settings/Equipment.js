@@ -191,6 +191,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
+                                                readOnly
                                                 placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
@@ -475,6 +476,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
+                                                readOnly
                                                 placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}

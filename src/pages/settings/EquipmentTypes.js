@@ -83,6 +83,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                              <Form.Control
                                  type="text"
                                  placeholder="Enter Name"
+                                 readOnly
                                  className="font-weight-bold"
                                 defaultValue={equipData.equipment_type}
                                  onChange={(e) => {
