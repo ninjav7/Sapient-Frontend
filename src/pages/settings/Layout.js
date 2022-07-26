@@ -1,195 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    CardHeader,
-    Form,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownItem,
-    DropdownToggle,
-} from 'reactstrap';
-import { Filter } from 'react-feather';
+import { Row, Col, UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap';
+import { useAtom } from 'jotai';
 import './style.css';
-// import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { BaseUrl, getLayouts } from '../../services/Network';
+import { BaseUrl, createSpace, getFloors, getLayouts, getSpaces } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import EditFloorModal from '../../components/Layouts/EditFloorModal';
+import {
+    closedEditFloorModal,
+    closeEditSpaceModal,
+    floorid,
+    floorState,
+    iterationDataList,
+    iterationNumber,
+    spaceId,
+    spaceName,
+} from '../../store/globalState';
+import InfiniteSpae from '../../components/Layouts/InfiniteSpae';
+import EditSpace from '../../components/Layouts/EditSpace';
 
 const Layout = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    // const store = useSelector((state) => state.counterState);
+    console.log('userdata', userdata);
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [floorsData, setfloorsData] = useState([]);
-    const [indexSpace1, setIndexSpace1] = useState([]);
-    const [indexSpace1Name, setIndexSpace1Name] = useState('');
-    const [indexSpace2, setIndexSpace2] = useState([]);
-    const [indexSpace2Name, setIndexSpace2Name] = useState('');
-    const [indexSpace3, setIndexSpace3] = useState([]);
-    const [indexSpace3Name, setIndexSpace3Name] = useState('');
-    const floors = [
-        {
-            number: 1,
-            label: 'Floor',
-        },
-        {
-            number: 2,
-            label: 'Floor',
-        },
-        {
-            number: 3,
-            label: 'Floor',
-        },
-        {
-            number: 4,
-            label: 'Floor',
-        },
-    ];
 
-    const floor1 = [
-        {
-            area: 'Main Area',
-            label: 'Room',
-        },
-        {
-            area: 'Front Office',
-            label: 'Room',
-        },
-        {
-            area: 'Main Conference Room',
-            label: 'Room',
-        },
-        {
-            area: 'Conference Room 2',
-            label: 'Area',
-        },
-        {
-            area: 'Primary HVAC Zone',
-            label: 'HVAC',
-        },
-        {
-            area: 'Lighting Zone 1',
-            label: 'Lighting',
-        },
-        {
-            area: 'Lighting Zone 2',
-            label: 'Lighting',
-        },
-    ];
+    // Saving API data
+    const [floorListAPI, setFloorListAPI] = useState([]);
+    const [spaceListAPI, setSpaceListAPI] = useState([]);
+    console.log('floorListAPI', floorListAPI);
 
-    const mainArea = [
-        {
-            name: '1WE  (Mech. Room)',
-            label: 'Room',
-        },
-        {
-            name: '123',
-            label: 'Room',
-        },
-        {
-            name: '124',
-            label: 'Room',
-        },
-        {
-            name: '125',
-            label: 'Room',
-        },
-        {
-            name: '126',
-            label: 'Room',
-        },
-        {
-            name: '127',
-            label: 'Room',
-        },
-        {
-            name: '128',
-            label: 'Room',
-        },
-        {
-            name: '129',
-            label: 'Room',
-        },
-        {
-            name: '130',
-            label: 'Room',
-        },
-        {
-            name: '131',
-            label: 'Room',
-        },
-        {
-            name: '132',
-            label: 'Room',
-        },
-        {
-            name: '133',
-            label: 'Room',
-        },
-        {
-            name: '134',
-            label: 'Room',
-        },
-        {
-            name: '135',
-            label: 'Room',
-        },
-    ];
-    const relatedSpaceHandler = (i, item) => {
-        // console.log(i);
+    const [modalShow, setModalShow] = useState(false);
+    const [floorId, setFloorId] = useState('');
 
-        setIndexSpace1(floorsData[i]['related_spaces']);
-        setIndexSpace1Name(item.floor_name);
-        // console.log(floorsData[i]['related_spaces']);
-    };
-    const relatedSpaceHandler2 = (i, item) => {
-        const relatedSpaceArray = indexSpace1[i];
-        if (indexSpace1[i]['related_space']) {
-            setIndexSpace2(relatedSpaceArray['related_space']);
-            setIndexSpace2Name(item.name);
-        }
-    };
-    const relatedSpaceHandler3 = (i, item) => {
-        // console.log('indexSpace3', indexSpace3);
-        // console.log('index', i);
-        const relatedSpaceArray = indexSpace2[i];
-        // console.log(relatedSpaceArray);
-        if (indexSpace2[i]['related_space']) {
-            setIndexSpace3(relatedSpaceArray['related_space']);
-            setIndexSpace3Name(item.name);
-            // console.log(indexSpace2[i]['related_space']);
-        }
-    };
+    const [floorModal] = useAtom(closedEditFloorModal);
+    const [getSpaceName, setGetSpaceName] = useAtom(spaceName);
+    // const [spaceID, setSpaceID] = useAtom(spaceId);
+
+    const [iterationValue, setInterationValue] = useAtom(iterationDataList);
+    const [iteratingNumber, setIteratingNumber] = useAtom(iterationNumber);
+
+    const [modelToShow, setModelToShow] = useState(1);
+    const [modalSpaceShow, setModalSpaceShow] = useState(false);
+    const [closeModal] = useAtom(closeEditSpaceModal);
+
+    const [currentFloorId, setCurrentFloorId] = useAtom(floorid);
+    console.log('iterationValue', iterationValue, iteratingNumber);
+    const [floor2] = useAtom(floorState);
+    console.log('floor2', floor2);
+    const [spaceBody, setSpaceBody] = useState({
+        floor_id: currentFloorId,
+        building_id: bldgId,
+    });
+
     useEffect(() => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
-            // 'user-auth': '628f3144b712934f578be895',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.get(`${BaseUrl}${getLayouts}/${bldgId}`, { headers }).then((res) => {
-            console.log(res.data);
-            setfloorsData(res.data);
-            let data = {};
-            if (bldgId) {
-                console.log(data);
-            }
+        const params = `?building_id=${bldgId}`;
+        axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
+            setFloorListAPI(res.data.data);
         });
     }, [bldgId]);
 
+    // Call only when floor create modal is completed
     useEffect(() => {
-        setIndexSpace2([]);
-        setIndexSpace3([]);
-        setIndexSpace2Name('');
-        setIndexSpace3Name('');
-    }, [indexSpace1]);
+        if (floorModal) {
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
+                setFloorListAPI(res.data.data);
+            });
+        }
+    }, [floorModal]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -210,8 +104,39 @@ const Layout = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        if (floorId) {
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?floor_id=${floorId}`;
+            axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
+                setSpaceListAPI(res.data.data);
+            });
+        }
+    }, [floorId]);
+
+    const createSpacesAPI = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {});
+    };
+
+    useEffect(() => {
+        if (closeModal) {
+            createSpacesAPI();
+        }
+    }, [closeModal]);
+
     return (
         <React.Fragment>
+            <EditFloorModal show={modalShow} onHide={() => setModalShow(false)} />
+            <EditSpace show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">
@@ -244,6 +169,8 @@ const Layout = () => {
             <Row>
                 <Col lg={12}>
                     <div className="layout-container mt-4">
+                        {/* Floor List */}
+
                         <div className="container-column">
                             <div className="container-heading">
                                 <span>Building Root</span>
@@ -257,129 +184,83 @@ const Layout = () => {
                                             <i className="uil uil-plus mr-2"></i>
                                         </DropdownToggle>
                                         <DropdownMenu right>
-                                            <DropdownItem>Add Floor</DropdownItem>
+                                            <DropdownItem
+                                                onClick={() => {
+                                                    setModalShow(true);
+                                                }}>
+                                                Add Floor
+                                            </DropdownItem>
                                         </DropdownMenu>
                                     </UncontrolledDropdown>
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floorsData.map((floor, i) => (
+                                {floorListAPI.map((floorName, i) => (
                                     <div
                                         className="container-single-content mr-4"
                                         style={{ cursor: 'pointer' }}
-                                        onClick={() => relatedSpaceHandler(i, floor)}>
-                                        <span> {floor.floor_name}</span>
-                                        <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {/* {floor.tag[0]} */}
-                                        </span>
+                                        onClick={() => {
+                                            setFloorId(floorName?.floor_id);
+                                            // setSpaceID(floorName?.floor_id);
+                                            setCurrentFloorId(floorName?.floor_id);
+                                            setGetSpaceName(floorName?.name);
+                                            setModelToShow(2);
+                                        }}>
+                                        <span> {floorName?.name}</span>
+                                        <span class="badge badge-light font-weight-bold float-right mr-4"></span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="header">
-                            <div className="container-heading">
-                                <span>{indexSpace1Name}</span>
-                                <i className="uil uil-pen ml-2"></i>
-                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
-                                    <i className="uil uil-filter mr-3"></i>
-                                    {/* <i className="uil uil-plus mr-2"></i> */}
-                                    <UncontrolledDropdown className="align-self-center float-right">
-                                        <DropdownToggle
-                                            tag="button"
-                                            className="btn btn-link p-0 dropdown-toggle text-muted">
-                                            <i className="uil uil-plus mr-2"></i>
-                                        </DropdownToggle>
-                                        <DropdownMenu right>
-                                            <DropdownItem>Add Space</DropdownItem>
-                                            <DropdownItem>Add HVAC Zone</DropdownItem>
-                                            <DropdownItem>Add Lightning Zone</DropdownItem>
-                                            <DropdownItem>Add Panel</DropdownItem>
-                                        </DropdownMenu>
-                                    </UncontrolledDropdown>
-                                </div>
-                            </div>
-                            <div className="container-content-group">
-                                {indexSpace1.map((floor, i) => (
-                                    <div
-                                        className="container-single-content mr-4"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => relatedSpaceHandler2(i, floor)}>
-                                        <span>{floor.name}</span>
-                                        <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {floor.tag[0]}
-                                        </span>
+                        {/* Spaces */}
+                        {/* {Array(iteratingNumber)
+                            .fill(0)
+                            .map((_, i) => {
+                                return <InfiniteSpae floorId={floorId} />;
+                            })} */}
+                        {/* Create Space */}
+                        {modelToShow >= 2 && (
+                            <div className="container-column">
+                                <div className="container-heading">
+                                    <span>{getSpaceName}</span>
+                                    <div className="mr-2" style={{ marginLeft: 'auto' }}>
+                                        <i className="uil uil-filter mr-3"></i>
+                                        {/* <i className="uil uil-plus mr-2"></i> */}
+                                        <UncontrolledDropdown className="align-self-center float-right">
+                                            <DropdownToggle
+                                                tag="button"
+                                                className="btn btn-link p-0 dropdown-toggle text-muted">
+                                                <i className="uil uil-plus mr-2"></i>
+                                            </DropdownToggle>
+                                            <DropdownMenu right>
+                                                <DropdownItem
+                                                    onClick={() => {
+                                                        setModalSpaceShow(true);
+                                                    }}>
+                                                    Add Floor
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </UncontrolledDropdown>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="header">
-                            <div className="container-heading">
-                                <span>{indexSpace2Name}</span>
-                                <i className="uil uil-pen ml-2"></i>
-                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
-                                    <i className="uil uil-filter mr-3"></i>
-                                    {/* <i className="uil uil-plus mr-2"></i> */}
-                                    <UncontrolledDropdown className="align-self-center float-right">
-                                        <DropdownToggle
-                                            tag="button"
-                                            className="btn btn-link p-0 dropdown-toggle text-muted">
-                                            <i className="uil uil-plus mr-2"></i>
-                                        </DropdownToggle>
-                                        <DropdownMenu right>
-                                            <DropdownItem>Add Room</DropdownItem>
-                                        </DropdownMenu>
-                                    </UncontrolledDropdown>
+                                </div>
+                                <div className="container-content-group">
+                                    {spaceListAPI.map((spaceName, i) => (
+                                        <div
+                                            className="container-single-content mr-4"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                // setFloorId(spaceName?.floor_id);
+                                                // setSpaceID(spaceName?.floor_id);
+                                                setGetSpaceName(spaceName?.name);
+                                                // setIteratingNumber(iteratingNumber + 1);
+                                            }}>
+                                            <span> {spaceName?.name}</span>
+                                            <span class="badge badge-light font-weight-bold float-right mr-4"></span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                            <div className="container-content-group">
-                                {indexSpace2.map((record, i) => (
-                                    <div
-                                        className="container-single-content mr-4"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => relatedSpaceHandler3(i, record)}>
-                                        <span>{record.name}</span>
-                                        <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {record.tag[0]}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="header">
-                            <div className="container-heading">
-                                <span>{indexSpace3Name}</span>
-                                <i className="uil uil-pen ml-2"></i>
-                                <div className="mr-2" style={{ marginLeft: 'auto' }}>
-                                    <i className="uil uil-plus mr-2"></i>
-                                </div>
-                            </div>
-                            <div className="container-content-group">
-                                {indexSpace3.map((record) => (
-                                    <div className="container-single-content mr-4">
-                                        <span>{record.name || ''}</span>
-                                        <span class="badge badge-light font-weight-bold float-right mr-4">
-                                            {record.tag[0] || ''}
-                                        </span>
-                                    </div>
-                                ))}
-                                <span className="text-center m-2">No area in this room</span>
-                                <span className="text-left text-uppercase m-2 equip-head-style">
-                                    Equipment in this space
-                                </span>
-                                <div className="m-2">
-                                    <span style={{ fontWeight: 600 }} className="mt-3">
-                                        4 items
-                                    </span>
-                                    <button type="button" class="btn btn-light btn-sm float-right font-weight-bold">
-                                        Views
-                                    </button>
-                                </div>
-
-                                {/* <div className="container-single-content">No areas in this room</div>
-                                <div className="container-single-content">Equipment in this space</div>
-                                <div className="container-single-content">4 items</div> */}
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </Col>
             </Row>
