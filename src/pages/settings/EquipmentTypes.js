@@ -46,8 +46,8 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
         let obj = Object.assign({}, editEqipmentData);
         obj[key] = value;
         setEditEqipmentData(obj);
-    };
-    //  console.log(equipData);
+     };
+     // console.log(equipData);
     //  console.log(endUseData);
     const editDeviceData = async () => {
         let obj = Object.assign({}, editEqipmentData);
@@ -79,56 +79,59 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
     return (
         <>
             {show ? (
-                <Modal show={show} onHide={close} centered>
-                    <Modal.Header>
-                        <Modal.Title>Edit Equipment Type</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter Name"
-                                    className="font-weight-bold"
-                                    onChange={(e) => {
-                                        handleChange('name', e.target.value);
-                                    }}
-                                    autoFocus
-                                />
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>End Use</Form.Label>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="exampleSelect"
-                                    className="font-weight-bold"
-                                    onChange={(e) => {
-                                        handleChange('end_use', e.target.value);
-                                    }}>
+                 <Modal show={show} onHide={close} centered>
+                 <Modal.Header>
+                     <Modal.Title>Edit Equipment Type</Modal.Title>
+                 </Modal.Header>
+                 <Modal.Body>
+                     <Form>
+                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                             <Form.Label>Name</Form.Label>
+                             <Form.Control
+                                 type="text"
+                                 placeholder="Enter Name"
+                                 readOnly
+                                 className="font-weight-bold"
+                                defaultValue={equipData.equipment_type}
+                                 onChange={(e) => {
+                                     handleChange('name', e.target.value);
+                                 }}
+                                 autoFocus
+                             />
+                         </Form.Group>
+ 
+                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                             <Form.Label>End Use</Form.Label>
+                             <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                defaultValue={equipData.end_use_id}
+                                onChange={(e) => {
+                                    handleChange('end_use', e.target.value);
+                                }}>
                                     <option selected>Select End Use</option>
-                                    {endUseData.map((record) => {
-                                        return <option value={record.end_user_id}>{record.name}</option>;
-                                    })}
-                                </Input>
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="light" onClick={close}>
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                editDeviceData();
-                            }}>
-                            Add
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                                {endUseData.map((record) => {
+                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                })}
+                            </Input>
+                         </Form.Group>
+                     </Form>
+                 </Modal.Body>
+                 <Modal.Footer>
+                     <Button variant="light" onClick={close}>
+                         Cancel
+                     </Button>
+                     <Button
+                         variant="primary"
+                        //  onClick={()=>{editDeviceData();}}
+                         >
+                         Update
+                     </Button>
+                 </Modal.Footer>
+             </Modal>
+               
             ) : null}
         </>
     );

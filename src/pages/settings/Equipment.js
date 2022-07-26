@@ -14,15 +14,8 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import {
-    BaseUrl,
-    generalEquipments,
-    getLocation,
-    equipmentType,
-    createEquipment,
-    getEndUseId,
-    updateEquipment,
-} from '../../services/Network';
+import { Link } from 'react-router-dom';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -39,59 +32,60 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
 
-const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
-    const [selected, setSelected] = useState([]);
-    console.log(equipmentTypeData);
+const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
+    const [selected,setSelected]=useState([]);
+    // console.log(equipmentTypeData)
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
-    var result = [];
-    if (equipData !== null) {
-        result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
-        // var x=document.getElementById('endUsePop');
-        // console.log(x);
-        // if(x!==null)
-        // x.value=result.end_use_name;
-        console.log(result);
-    }
-    console.log(equipData);
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, updateEqipmentData);
-        // if(key==="equipment_type"){
-        //     const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-        //     console.log(result1.end_use_name);
-        //     // const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-        //     // console.log(eq_id);
-        //     // var x=document.getElementById("endUsePop");
-        //     // x.value=(eq_id.end_user_id);
-        //     // obj['end_use']=eq_id.end_user_id;
-        // }
-        obj[key] = value;
-        console.log(obj);
-        setUpdateEqipmentData(obj);
-    };
-    const handleSave = () => {
+    var result=[];
+        if(equipData!==null){
+            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // var x=document.getElementById('endUsePop');
+            // console.log(x);
+            // if(x!==null)
+            // x.value=result.end_use_name;
+            // console.log(result);
+        }
+        console.log(equipData)
+        const handleChange = (key, value) => {
+            let obj = Object.assign({}, updateEqipmentData);
+            if(key==="equipment_type"){
+                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+                // console.log(result1.end_use_name);
+                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
+                // console.log(eq_id);
+                // var x=document.getElementById("endUsePop");
+                // x.value=(eq_id.end_user_id);
+                obj['end_use']=eq_id.end_user_id;
+            }
+            obj[key] = value;
+            // console.log(obj);
+            setUpdateEqipmentData(obj);
+        };
+        const handleSave=()=>{
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipData.equipments_id}`;
+            let params=`?equipment_id=${equipData.equipments_id}`
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     fetchEquipmentData();
                     close();
+                
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
         }
-    };
+        }
     return (
         <>
             {show ? (
@@ -178,19 +172,15 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold"
-                                                defaultValue={result.length === 0 ? '' : result.equipment_id}
+                                                className="font-weight-bold" 
+                                                defaultValue={result.length===0?"":result.equipment_id}
                                                 onChange={(e) => {
                                                     handleChange('equipment_type', e.target.value);
                                                 }}>
-                                                <option selected>Select Type</option>
-                                                {equipmentTypeData.map((record) => {
-                                                    return (
-                                                        <option value={record.equipment_id}>
-                                                            {record.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -201,7 +191,8 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Enter Identifier"
+                                                readOnly
+                                                placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
                                             />
@@ -250,6 +241,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                defaultValue={equipData.note}
                                                 onChange={(e) => {
                                                     handleChange('note', e.target.value);
                                                 }}
@@ -263,11 +255,16 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                     <div className="modal-right-pic"></div>
                                     <div className="modal-right-card mt-2">
                                         <span className="modal-right-card-title">Power Strip Socket 2</span>
+                                        <Link
+                                            to={{
+                                                pathname: equipData.device_id!==""?`/settings/active-devices/single/${equipData.device_id}`:`equipment/#`,
+                                            }}>
                                         <button
                                             type="button"
-                                            class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                            class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipData.device_id===""?true:false}>
                                             View Devices
                                         </button>
+                                        </Link>
                                     </div>
                                     <div>
                                         {equipData.status === 'Online' && (
@@ -316,60 +313,61 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         </>
     );
 };
-const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
+const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const [selectedTags, setSelectedTags] = useState([]);
-    const [selectedZones, setSelectedZones] = useState([]);
-    const [endUseName, setEndUseName] = useState([]);
+    const [selectedTags,setSelectedTags]=useState([]);
+    const [selectedZones,setSelectedZones]=useState([]);
+    const [endUseName,setEndUseName]=useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
-    var result = [];
-    if (equipData !== null) {
-        result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
-        // var x=document.getElementById('endUsePop');
-        // console.log(x);
-        // if(x!==null)
-        // x.value=result.end_use_name;
-        console.log(result);
-    }
-    console.log(equipData);
-    const handleChange = (key, value) => {
-        let obj = Object.assign({}, updateEqipmentData);
-        if (key === 'equipment_type') {
-            const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-            console.log(result1.end_use_name);
-            const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
-            console.log(eq_id);
-            var x = document.getElementById('endUsePop');
-            x.value = eq_id.end_user_id;
-            // obj['end_use']=eq_id.end_user_id;
+    var result=[];
+        if(equipData!==null){
+            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // var x=document.getElementById('endUsePop');
+            // console.log(x);
+            // if(x!==null)
+            // x.value=result.end_use_name;
+            // console.log(result);
         }
-        obj[key] = value;
-        console.log(obj);
-        setUpdateEqipmentData(obj);
-    };
-    const handleSave = () => {
+        // console.log(equipData)
+        const handleChange = (key, value) => {
+            let obj = Object.assign({}, updateEqipmentData);
+            if(key==="equipment_type"){
+                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+                // console.log(result1.end_use_name);
+                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
+                // console.log(eq_id);
+                var x=document.getElementById("endUsePop");
+                x.value=(eq_id.end_user_id);
+                obj['end_use']=eq_id.end_user_id;
+            }
+            obj[key] = value;
+            // console.log(obj);
+            setUpdateEqipmentData(obj);
+        };
+        const handleSave=()=>{
         try {
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipData.equipments_id}`;
+            let params=`?equipment_id=${equipData.equipments_id}`
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     fetchEquipmentData();
                     close();
+                
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
         }
-    };
+        }
     return (
         <>
             {show ? (
@@ -387,23 +385,20 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                 </div>
                             </Col>
                             <Col lg={3}>
-                                <div className="button-wrapper">
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-md btn-light font-weight-bold mr-4"
-                                            onClick={close}>
-                                            Cancel
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-md btn-primary font-weight-bold mr-4"
-                                            onClick={handleSave}>
-                                            Save
-                                        </button>
-                                    </div>
+                           
+                                <div className='button-wrapper'>
+                                
+                                    
+                                <div>
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
+                                        Cancel
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
+                                        Save
+                                    </button>
+                                </div>
                                 </div>
                             </Col>
                         </Row>
@@ -447,19 +442,14 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold"
-                                                defaultValue={result.length === 0 ? '' : result.equipment_id}
+                                                className="font-weight-bold" defaultValue={result.length===0?"":result.equipment_id}
                                                 onChange={(e) => {
                                                     handleChange('equipment_type', e.target.value);
                                                 }}>
-                                                <option selected>Select Type</option>
-                                                {equipmentTypeData.map((record) => {
-                                                    return (
-                                                        <option value={record.equipment_id}>
-                                                            {record.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
+                                                 <option selected>Select Type</option>
+                                                     {equipmentTypeData.map((record) => {
+                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -471,11 +461,11 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 name="select"
                                                 id="endUsePop"
                                                 className="font-weight-bold"
-                                                defaultValue={result.length === 0 ? '' : result.end_use_id}>
-                                                <option selected>Select Category</option>
-                                                {endUse.map((record) => {
-                                                    return <option value={record.end_user_id}>{record.name}</option>;
-                                                })}
+                                                defaultValue={result.length===0?"":result.end_use_id}>
+                                                 <option selected>Select Category</option>
+                                                     {endUse.map((record) => {
+                                                            return <option value={record.end_user_id}>{record.name}</option>;
+                                                        })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -486,6 +476,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Form.Control
                                                 type="text"
+                                                readOnly
                                                 placeholder="Enter Location"
                                                 className="font-weight-bold"
                                                 value={equipData.location}
@@ -531,6 +522,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                defaultValue={equipData.note}
                                                 onChange={(e) => {
                                                     handleChange('note', e.target.value);
                                                 }}
@@ -648,11 +640,17 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <div className="modal-right-pic"></div>
                                         <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                             <span className="modal-right-card-title">Energy Monitoring</span>
+                                            
+                                        <Link
+                                            to={{
+                                                pathname: equipData.device_id!==""?`/settings/passive-devices/single/${equipData.device_id}`:`equipment/#`,
+                                            }}>
                                             <button
                                                 type="button"
                                                 class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                Select
+                                                View
                                             </button>
+                                            </Link>
                                         </div>
                                     </div>
                                     {/* <div className='pic-container mt-3'> */}
@@ -720,8 +718,8 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 />
                                             </span> 
                                         </div> */}
-
-                                    {/* <div className="white-container" style={{clear:"both"}}>
+                                        
+                                        {/* <div className="white-container" style={{clear:"both"}}>
                                             Exhaust Fan
                                             <span className='float-right mr-2'>
                                             <FontAwesomeIcon
@@ -781,7 +779,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse, fetchEquipmentData }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
     const Close1 = () => {
@@ -906,21 +904,8 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 </CardBody>
             </Card>
             <div>
-                <SingleActiveEquipmentModal
-                    show={modal1}
-                    equipData={equipData}
-                    close={Close1}
-                    equipmentTypeData={equipmentTypeData}
-                    fetchEquipmentData={fetchEquipmentData}
-                />
-                <SinglePassiveEquipmentModal
-                    show={modal2}
-                    equipData={equipData}
-                    close={Close2}
-                    equipmentTypeData={equipmentTypeData}
-                    endUse={endUse}
-                    fetchEquipmentData={fetchEquipmentData}
-                />
+                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
             </div>
         </>
     );
@@ -953,9 +938,9 @@ const Equipment = () => {
         let obj = Object.assign({}, createEqipmentData);
         if (key === 'equipment_type') {
             const result = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
-            console.log(result.end_use_name);
+            // console.log(result.end_use_name);
             const eq_id = endUseData.find(({ name }) => name === result.end_use_name);
-            console.log(eq_id.end_user_id);
+            // console.log(eq_id.end_user_id);
             var x = document.getElementById('endUseSelect');
             x.value = eq_id.end_user_id;
             obj['end_use'] = eq_id.end_user_id;
@@ -966,7 +951,7 @@ const Equipment = () => {
 
     const handleEquipmentTypeCall = async (value) => {
         const result = endUseData.find(({ end_user_id }) => end_user_id === value);
-        console.log(result.name);
+        // console.log(result.name);
         try {
             let headers = {
                 'Content-Type': 'application/json',
@@ -998,7 +983,7 @@ const Equipment = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    // console.log(res.data);
                     setTimeout(function () {
                         fetchEquipmentData();
                     }, 3000);
@@ -1072,7 +1057,7 @@ const Equipment = () => {
                 let params = `?stat=false&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     setOfflineEquipData(res.data);
-                    console.log(res.data);
+                    // console.log(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1260,31 +1245,13 @@ const Equipment = () => {
             <Row>
                 <Col lg={11}>
                     {selectedTab === 0 && (
-                        <EquipmentTable
-                            equipmentData={generalEquipmentData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                        />
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                     {selectedTab === 1 && (
-                        <EquipmentTable
-                            equipmentData={onlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                        />
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                     {selectedTab === 2 && (
-                        <EquipmentTable
-                            equipmentData={offlineEquipData}
-                            isEquipDataFetched={isEquipDataFetched}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUseData}
-                            fetchEquipmentData={fetchEquipmentData}
-                        />
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
                     )}
                 </Col>
             </Row>
