@@ -39,6 +39,9 @@ const BreakersFlow = ({ data, id }) => {
             let params = `?device_id=${deviceId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
+                response.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
                 setSensorData(response);
             });
         } catch (error) {
@@ -104,11 +107,6 @@ const BreakersFlow = ({ data, id }) => {
         breaker[key] = value;
         setBreakerData(breaker);
     };
-
-    useEffect(() => {
-        console.log('SSR breakerData => ', breakerData);
-        console.log('SSR breakerData.elements => ', breakerData.elements);
-    });
 
     return (
         <React.Fragment>

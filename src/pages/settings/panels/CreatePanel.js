@@ -829,6 +829,9 @@ const CreatePanel = () => {
             let params = `?device_id=${deviceId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
+                response.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
                 setSensorData(response);
             });
         } catch (error) {
@@ -1248,6 +1251,9 @@ const CreatePanel = () => {
                         };
                         equipArray.push(obj);
                     });
+                    equipArray.sort((a, b) => {
+                        return a.label.localeCompare(b.label);
+                    });
                     setEquipmentData(equipArray);
                 });
             } catch (error) {
@@ -1270,7 +1276,11 @@ const CreatePanel = () => {
                     requestedBldgId = bldgId;
                 }
                 await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.location_name.localeCompare(b.location_name);
+                    });
+                    setLocationData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1287,7 +1297,11 @@ const CreatePanel = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    setGeneralPanelData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.panel_name.localeCompare(b.panel_name);
+                    });
+                    setGeneralPanelData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1312,6 +1326,9 @@ const CreatePanel = () => {
                             value: record.equipments_id,
                         };
                         newArray.push(obj);
+                    });
+                    newArray.sort((a, b) => {
+                        return a.label.localeCompare(b.label);
                     });
                     setPassiveDeviceData(newArray);
                 });
