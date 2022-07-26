@@ -65,11 +65,11 @@ const EditPlugRule = ({
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
-    const [totalSocket,setTotalSocket]=useState(0);
+    const [totalSocket, setTotalSocket] = useState(0);
     const [paginationData, setPaginationData] = useState({});
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    
+
     const socketData = [
         {
             equip_type: 'Monitor',
@@ -222,21 +222,21 @@ const EditPlugRule = ({
             ],
         },
     ]);
-    const handleFilterEquipment=(e)=>{
-        let activeId=e.target.value;
-        if(activeId==="All"){
+
+    const handleFilterEquipment = (e) => {
+        let activeId = e.target.value;
+        if (activeId === 'All') {
             setAllLinkedRuleData(allData);
             // console.log(allData);
+        } else {
+            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
+            // console.log(result);
+            let arr = [];
+            arr.push(result);
+            // console.log(arr)
+            setAllLinkedRuleData(arr);
         }
-        else{
-        const result = allData.find( ({ id }) => id === activeId );
-        // console.log(result);
-        let arr=[];
-        arr.push(result);
-        // console.log(arr)
-        setAllLinkedRuleData(arr);
-        }
-    }
+    };
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -370,8 +370,10 @@ const EditPlugRule = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            setPageNo(pageNo+1)
-            let params = `?page_size=${pageSize}&page_no=${pageNo+1}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+            setPageNo(pageNo + 1);
+            let params = `?page_size=${pageSize}&page_no=${
+                pageNo + 1
+            }&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
             await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 let unLinkedData = [];
@@ -397,23 +399,24 @@ const EditPlugRule = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            setPageNo(pageNo-1)
-            let params = `?page_size=${pageSize}&page_no=${pageNo-1}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+            setPageNo(pageNo - 1);
+            let params = `?page_size=${pageSize}&page_no=${
+                pageNo - 1
+            }&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
             await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                 let response = res.data;
-                    let unLinkedData = [];
-                    response.data.forEach((record) => {
-                        record.linked_rule = false;
-                        unLinkedData.push(record);
-                    });
-                    setUnLinkedRuleData(unLinkedData);
+                let unLinkedData = [];
+                response.data.forEach((record) => {
+                    record.linked_rule = false;
+                    unLinkedData.push(record);
+                });
+                setUnLinkedRuleData(unLinkedData);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch all Active Devices');
         }
     };
-
 
     useEffect(() => {
         if (activeRuleId === null) {
@@ -429,7 +432,6 @@ const EditPlugRule = ({
                 let params = `?rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${linkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
-                   
                     let linkedData = [];
                     response.data.sensor_id.forEach((record) => {
                         record.linked_rule = true;
@@ -946,13 +948,20 @@ const EditPlugRule = ({
                                                     name="state"
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width"
-                                                    onChange={(e)=>{handleFilterEquipment(e)}}>
-                                                        <option>Select Equipment Type</option>
+                                                    onChange={(e) => {
+                                                        handleFilterEquipment(e);
+                                                    }}>
+                                                    <option>Select Equipment Type</option>
                                                     <option value="All">ALL</option>
-                                                    {allData.map((record, index) => {
-                                                         return (
-                                                        <option value={record.id}>{record.name}</option>
-                                                    )})}
+                                                    {allData
+                                                        ?.filter((item) => item?.equipment_type_name?.length > 0)
+                                                        ?.map((record, index) => {
+                                                            return (
+                                                                <option value={record.equipment_type_name}>
+                                                                    {record.equipment_type_name}
+                                                                </option>
+                                                            );
+                                                        })}
 
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
@@ -1023,12 +1032,13 @@ const EditPlugRule = ({
                                                         disabled
                                                     />
                                                 </th>
-                                                {/* <th>MAC Address</th> */}
                                                 <th>Equipment Type</th>
                                                 <th>Location</th>
+                                                <th>MAC Address</th>
+                                                <th>Sensor</th>
                                                 <th>Assigned Rule</th>
-                                                {/* <th>Tags</th>
-                                                <th>Last Data</th> */}
+                                                <th>Tags</th>
+                                                <th>Last Data</th>
                                             </tr>
                                         </thead>
 
@@ -1069,15 +1079,19 @@ const EditPlugRule = ({
                                                                 {record.equipment_link_location}
                                                             </td>
 
+                                                            <td className="font-weight-bold">{record.device_link}</td>
+
+                                                            <td className="font-weight-bold">-</td>
+
                                                             <td className="font-weight-bold">
                                                                 {record.assigned_rules.length === 0
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
 
-                                                            {/* <td className="font-weight-bold">{record.tag}</td>
+                                                            <td className="font-weight-bold">{record.tag}</td>
 
-                                                            <td className="font-weight-bold">{record.last_data}</td> */}
+                                                            <td className="font-weight-bold">{record.last_data}</td>
                                                         </tr>
                                                     );
                                                 })}
@@ -1102,22 +1116,35 @@ const EditPlugRule = ({
                                                                 />
                                                             </td>
 
-                                                            <td className="font-weight-bold panel-name">
-                                                                <div className="plug-equip-container">
-                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
-                                                                </div>
-                                                            </td>
+                                                            {record.equipment_link_type === '' ? (
+                                                                <td className="font-weight-bold panel-name">
+                                                                    {record.name}
+                                                                </td>
+                                                            ) : (
+                                                                <td className="font-weight-bold panel-name">
+                                                                    <div className="plug-equip-container">
+                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                    </div>
+                                                                </td>
+                                                            )}
 
                                                             <td className="font-weight-bold">
                                                                 {record.equipment_link_location}
                                                             </td>
+
+                                                            <td className="font-weight-bold">{record.device_link}</td>
+
+                                                            <td className="font-weight-bold">-</td>
+
                                                             <td className="font-weight-bold">
                                                                 {record.assigned_rules.length === 0
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
-                                                            {/* <td className="font-weight-bold">{record.tag}</td>
-                                                            <td className="font-weight-bold">{record.last_data}</td> */}
+
+                                                            <td className="font-weight-bold">{record.tag}</td>
+
+                                                            <td className="font-weight-bold">{record.last_data}</td>
                                                         </tr>
                                                     );
                                                 })}
@@ -1142,22 +1169,35 @@ const EditPlugRule = ({
                                                                 />
                                                             </td>
 
-                                                            <td className="font-weight-bold panel-name">
-                                                                <div className="plug-equip-container">
-                                                                    {`${record.equipment_link_type} [${record.equipment_link}]`}
-                                                                </div>
-                                                            </td>
+                                                            {record.equipment_link_type === '' ? (
+                                                                <td className="font-weight-bold panel-name">
+                                                                    {record.name}
+                                                                </td>
+                                                            ) : (
+                                                                <td className="font-weight-bold panel-name">
+                                                                    <div className="plug-equip-container">
+                                                                        {`${record.equipment_link_type} [${record.equipment_link}]`}
+                                                                    </div>
+                                                                </td>
+                                                            )}
 
                                                             <td className="font-weight-bold">
                                                                 {record.equipment_link_location}
                                                             </td>
+
+                                                            <td className="font-weight-bold">{record.device_link}</td>
+
+                                                            <td className="font-weight-bold">-</td>
+
                                                             <td className="font-weight-bold">
                                                                 {record.assigned_rules.length === 0
                                                                     ? 'None'
                                                                     : record.assigned_rules}
                                                             </td>
-                                                            {/* <td className="font-weight-bold">{record.tag}</td>
-                                                            <td className="font-weight-bold">{record.last_data}</td> */}
+
+                                                            <td className="font-weight-bold">{record.tag}</td>
+
+                                                            <td className="font-weight-bold">{record.last_data}</td>
                                                         </tr>
                                                     );
                                                 })}
@@ -1165,25 +1205,25 @@ const EditPlugRule = ({
                                         )}
                                     </Table>
                                     <div className="page-button-style">
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        disabled={pageNo<=1}
-                        onClick={() => {
-                            previousPageData();
-                        }}>
-                        Previous
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-md btn-light font-weight-bold mt-4"
-                        disabled={pageNo>=ceil(totalSocket/pageSize)}
-                        onClick={() => {
-                            nextPageData();
-                        }}>
-                        Next
-                    </button>
-                </div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-light font-weight-bold mt-4"
+                                            disabled={pageNo <= 1}
+                                            onClick={() => {
+                                                previousPageData();
+                                            }}>
+                                            Previous
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-light font-weight-bold mt-4"
+                                            disabled={pageNo >= ceil(totalSocket / pageSize)}
+                                            onClick={() => {
+                                                nextPageData();
+                                            }}>
+                                            Next
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
