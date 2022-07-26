@@ -52,7 +52,7 @@ const UserProfile = () => {
             <Row className="page-title">
                 <Col md={8} className="header-container">
                     <div>
-                        <span className="heading-style" style={{ marginLeft: '20px' }}>
+                        <span className="heading-style">
                             Michael Scott
                         </span>
                         <p style={{ marginLeft: '20px' }} className="emailId-style">

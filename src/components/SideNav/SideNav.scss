@@ -1,0 +1,54 @@
+@import '../../assets/scss/colors';
+.side-nav {
+    margin-top: 1.0625rem;
+}
+.side-nav-content {
+    padding: 0.375rem 0.375rem 0.375rem 0.9375rem;
+    width: 100%;
+    background: $primary-gray-50;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $primary-gray-550;
+    position: relative;
+    line-height: 1.25rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &.active,
+    &:hover {
+        background: #ffffff;
+        color: $primary-gray-800;
+        box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
+        z-index: 1;
+        width: calc(100% + 1px);
+        &::before {
+            position: absolute;
+            left: 0;
+            top: 0.1875rem;
+            bottom: 0.1875rem;
+            width: 0.1875rem;
+            border-radius: 0 7.5rem 7.5rem 0;
+            background: $primary-indigo-500;
+            box-shadow: 0px -3px 10px rgba(60, 101, 245, 0.3), 0px 0px 4px rgba(60, 101, 245, 0.3);
+            content: ' ';
+        }
+    }
+
+    &:not(&.active):hover {
+        &::before {
+            box-shadow: none;
+            background: none;
+        }
+    }
+}
+
+.energy-side-nav {
+    position: fixed;
+    left: 0;
+    top: 5.5625rem;
+    width: 12.25rem;
+    height: 100%;
+    padding-left: 1.5em;
+    border-right: 1px solid $primary-gray-200;
+}

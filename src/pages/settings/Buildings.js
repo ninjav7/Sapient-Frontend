@@ -103,7 +103,7 @@ const Buildings = () => {
         { value: 'Office Building', label: 'Office Building' },
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
-    const [buildingName,setBuildingName]=useState("");
+    const [buildingName, setBuildingName] = useState('');
     const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
@@ -126,25 +126,21 @@ const Buildings = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let buildingData={
-                'building_name':buildingName,
-                'building_type':buildingTypeSelected
-            }
+            let buildingData = {
+                building_name: buildingName,
+                building_type: buildingTypeSelected,
+            };
             setIsProcessing(true);
             console.log(createBuildingData);
-            await axios
-            .post(
-                `${BaseUrl}${createBuilding}`,
-                buildingData,
-                { headers }
-            )
-            .then((res) => {
+            await axios.post(`${BaseUrl}${createBuilding}`, buildingData, { headers }).then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
                 // console.log('setOverview => ', res.data);
+                handleClose();
+                fetchBuildingData();
             });
             // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
             //     console.log('createBuilding sending data to API => ', res.data);
-            //     // handleClose();
+
             // });
 
             setIsProcessing(false);
@@ -172,32 +168,32 @@ const Buildings = () => {
         };
         updateBreadcrumbStore();
     }, []);
+    const fetchBuildingData = async () => {
+        try {
+            setIsDataProcessing(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
+                // let activeBuildings = [];
+                // res.data.forEach((bldg) => {
+                //     if (bldg.active) {
+                //         activeBuildings.push(bldg);
+                //     }
+                // });
+                setBuildingsData(res.data);
+                setIsDataProcessing(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsDataProcessing(false);
+            console.log('Failed to fetch Building Data List');
+        }
+    };
 
     useEffect(() => {
-        const fetchBuildingData = async () => {
-            try {
-                setIsDataProcessing(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    let activeBuildings = [];
-                    res.data.forEach((bldg) => {
-                        if (bldg.active) {
-                            activeBuildings.push(bldg);
-                        }
-                    });
-                    setBuildingsData(activeBuildings);
-                    setIsDataProcessing(false);
-                });
-            } catch (error) {
-                console.log(error);
-                setIsDataProcessing(false);
-                console.log('Failed to fetch Building Data List');
-            }
-        };
         fetchBuildingData();
     }, [bldgId]);
 
@@ -205,9 +201,7 @@ const Buildings = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Buildings
-                    </span>
+                    <span className="heading-style">Buildings</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -311,10 +305,7 @@ const Buildings = () => {
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button
-                        variant="primary"
-                        disabled={isProcessing}
-                        onClick={saveBuilding}>
+                    <Button variant="primary" disabled={isProcessing} onClick={saveBuilding}>
                         {isProcessing ? 'Adding...' : 'Add Building'}
                     </Button>
                 </Modal.Footer>

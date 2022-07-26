@@ -94,7 +94,11 @@ const GatewaysTable = ({ generalGatewayData }) => {
                                     </td>
                                     <td className="font-weight-bold panel-name">{record.identifier}</td>
                                     <td className="font-weight-bold">{record.model}</td>
-                                    <td className="">{record.location}</td>
+                                    <td>
+                                        {record.location === ' > '
+                                            ? ' - '
+                                            : record.location.split('>').reverse().join(' > ')}
+                                    </td>
                                     <td className="font-weight-bold">{record.devices_connected}</td>
                                     <td className="font-weight-bold">{record.unique_device_count}</td>
                                 </tr>
@@ -141,9 +145,7 @@ const Gateways = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Gateways
-                    </span>
+                    <span className="heading-style">Gateways</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -198,10 +200,6 @@ const Gateways = () => {
                 <Col lg={12}>
                     <GatewaysTable generalGatewayData={generalGatewayData} />
                 </Col>
-            </Row>
-
-            <Row>
-                <span className="gateway-content-style">What about a KPI about unique devices</span>
             </Row>
         </React.Fragment>
     );

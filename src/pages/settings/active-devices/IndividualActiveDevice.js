@@ -104,6 +104,7 @@ const IndividualActiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -137,7 +138,7 @@ const IndividualActiveDevice = () => {
     };
 
     useEffect(() => {
-        if(showChart){
+        if (showChart) {
             return;
         }
         setConsumption('energy');
@@ -262,7 +263,7 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -323,9 +324,9 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?end_use=Plug&building_id=${bldgId}`;
+            let params = `?end_use=Plug&building_id=${bldgId}&page_size=20&page_no=1`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
-                let response = res.data;
+                let response = res.data.data;
                 setEquipmentTypeDevices(response);
             });
         } catch (error) {
@@ -703,6 +704,7 @@ const IndividualActiveDevice = () => {
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
+                timeZone={timeZone}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>

@@ -32,15 +32,19 @@ export const endUsesUsageChart = '/api/energy/chart/usage';
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
 export const equipmentType = '/api/config/get_equipment_type/';
-export const addEquipmentType ='/api/config/create_equipment_type';
-export const updateEquipmentType ='/api/config/update_equipment_type';
+export const addEquipmentType = '/api/config/create_equipment_type';
+export const updateEquipmentType = '/api/config/update_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
+export const updateEquipment = '/api/config/equipments_details/update_equipment';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
 export const updateActivePassiveDevice = '/api/config/devices/update_device';
+
+//search active and passive device
+export const searchDevices = '/api/config/devices/search_by_devices';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';

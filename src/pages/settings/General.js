@@ -509,9 +509,7 @@ const General = () => {
             <Row className="page-title">
                 <Col lg={8}>
                     <div className="building-heading-container">
-                        <div className="heading-style" style={{ marginLeft: '20px' }}>
-                            General Building Settings
-                        </div>
+                        <div className="heading-style">General Building Settings</div>
                         <div>
                             {isbuildingDetailsFetched ? (
                                 <Skeleton count={1} height={40} width={150} />

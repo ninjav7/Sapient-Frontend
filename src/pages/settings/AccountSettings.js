@@ -43,9 +43,7 @@ const AccountSettings = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        General Account Settings
-                    </span>
+                    <span className="heading-style">General Account Settings</span>
                 </Col>
             </Row>
 

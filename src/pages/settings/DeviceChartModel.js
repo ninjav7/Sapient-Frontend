@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react';
-
 import { Input, Spinner } from 'reactstrap';
-
 import Dropdown from 'react-bootstrap/Dropdown';
-
 import Modal from 'react-bootstrap/Modal';
 
 import DatePicker from 'react-datepicker';
 
 import Form from 'react-bootstrap/Form';
-
 import moment from 'moment';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -25,11 +20,8 @@ import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 
 import BrushChart from '../charts/BrushChart';
-
 import { Cookies } from 'react-cookie';
-
 import { CSVLink } from 'react-csv';
-
 import './style.css';
 
 const DeviceChartModel = ({
@@ -50,21 +42,17 @@ const DeviceChartModel = ({
     getRequiredConsumptionLabel,
     isSensorChartLoading,
     setIsSensorChartLoading,
+    timeZone,
 }) => {
     let cookies = new Cookies();
-
     let userdata = cookies.get('user');
-
     const [dateRange, setDateRange] = useState([null, null]);
-
     const [startDate, endDate] = dateRange;
 
-    const [sDateStr, setSDateStr] = useState('');
-
-    const [eDateStr, setEDateStr] = useState('');
+    // const [sDateStr, setSDateStr] = useState('');
+    // const [eDateStr, setEDateStr] = useState('');
 
     const [dropDown, setDropDown] = useState('dropdown-menu dropdown-menu-right');
-
     const customDaySelect = [
         {
             label: 'Last 7 Days',
@@ -102,8 +90,7 @@ const DeviceChartModel = ({
             let startCustomDate = new Date();
 
             startCustomDate.setDate(startCustomDate.getDate() - date);
-
-            endCustomDate.setDate(endCustomDate.getDate() - 1);
+            endCustomDate.setDate(endCustomDate.getDate());
 
             setDateRange([startCustomDate, endCustomDate]);
 
@@ -115,14 +102,11 @@ const DeviceChartModel = ({
                 s.endDate = endCustomDate;
             });
 
-            let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
-
-            let sstr =
-                startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
-
-            setEDateStr(estr);
-
-            setSDateStr(sstr);
+            // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
+            // let sstr =
+            //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
+            // setEDateStr(estr);
+            // setSDateStr(sstr);
         };
 
         setCustomDate(dateFilter);
@@ -142,45 +126,31 @@ const DeviceChartModel = ({
                 if (sensorData.id === undefined) {
                     return;
                 }
-
                 setIsSensorChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
-
                     accept: 'application/json',
-
                     Authorization: `Bearer ${userdata.token}`,
                 };
-
-                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
-
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&tz_info=${timeZone}`;
                 await axios
-
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
-
                         {
                             date_from: dateFormatHandler(startDate),
-
                             date_to: dateFormatHandler(endDate),
                         },
-
                         { headers }
                     )
-
                     .then((res) => {
                         let response = res.data;
-
                         let data = response;
-
                         let exploreData = [];
 
                         let recordToInsert = {
                             data: data,
-
                             name: getRequiredConsumptionLabel(selectedConsumption),
                         };
-
                         try {
                             recordToInsert.data = recordToInsert.data.map((_data) => {
                                 _data[0] = new Date(_data[0]);
@@ -191,9 +161,7 @@ const DeviceChartModel = ({
                                 return _data;
                             });
                         } catch (error) {}
-
                         exploreData.push(recordToInsert);
-
                         setDeviceData(exploreData);
 
                         // console.log('UPDATED_CODE', seriesData);
@@ -207,32 +175,23 @@ const DeviceChartModel = ({
                     });
             } catch (error) {
                 console.log(error);
-
                 console.log('Failed to fetch Sensor Graph data');
             }
         };
-
         exploreDataFetch();
     }, [startDate, endDate, selectedConsumption]);
 
     const handleRefresh = () => {
         setDateFilter(dateValue);
-
         let endDate = new Date(); // today
-
         let startDate = new Date();
-
         startDate.setDate(startDate.getDate() - 7);
-
         setDateRange([startDate, endDate]);
-
         setDeviceData([]);
-
         setSeriesData([]);
     };
 
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-
     const fileExtension = '.xlsx';
 
     // const exportToCSV=()=>{
@@ -269,37 +228,28 @@ const DeviceChartModel = ({
                 enabled: false,
             },
         },
-
         colors: ['#546E7A'],
-
         stroke: {
             width: 3,
         },
-
         dataLabels: {
             enabled: false,
         },
-
         colors: ['#10B981', '#2955E7'],
-
         fill: {
             opacity: 1,
         },
-
         markers: {
             size: 0,
         },
-
         xaxis: {
             type: 'datetime',
-
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - hh:mm');
+                    return moment(timestamp).format('DD/MMM - HH:mm');
                 },
             },
         },
-
         yaxis: {
             labels: {
                 formatter: function (val) {
@@ -307,11 +257,10 @@ const DeviceChartModel = ({
                 },
             },
         },
-
         tooltip: {
             x: {
                 show: true,
-                format: 'MM/dd hh:mm TT',
+                format: 'MM/dd HH:mm',
             },
         },
     });
@@ -336,12 +285,13 @@ const DeviceChartModel = ({
 
             selection: {
                 enabled: true,
-
-                xaxis: {
-                    min: new Date('16 July 2022').getTime(),
-
-                    max: new Date('17 July 2022').getTime(),
-                },
+                // xaxis: {
+                //     min: new Date('19 July 2022').getTime(),
+                //     max: new Date('20 July 2022').getTime(),
+                // },
+            },
+            animations: {
+                enabled: false,
             },
         },
 
@@ -392,19 +342,57 @@ const DeviceChartModel = ({
         arr = [...map.values()];
         return arr;
     };
+    // const TimeZoneConvert=(arr=[])=>{
+    //     arr.forEach((x)=>{
+    //         var d=new Date(x[0]);
+    //         console.log(x[0]);
+    //         console.log(x[0].getTime());
+    //         // var MyTimeZone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //         console.log(x[0].getTimezoneOffset());
 
+    //         var date=new Date();
+    //         var offset=date.getTimezoneOffset();var date=new Date();
+    //         var offset=date.getTimezoneOffset();
+    //         console.log(offset)
+    //         var nd=new Date(x[0].getTime()+(60000*(x[0].getTimezoneOffset()-offset)));
+    //         // var utc=d.getTime()+(d.getTimezoneOffset()/-60);    //
+    //         // console.log(utc);
+    //         // console.log(offset)
+    //         // var nd=new Date((utc+(3600000*offset)));
+    //         console.log(nd);
+    //         // console.log(nd.toLocaleString())
+    //     })
+    // }
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        let arr=seriesData.length > 0 ? seriesData[0].data : [];
-        let sData=removeDuplicates(arr);
+        // let arr=seriesData.length > 0 ? seriesData[0].data : [];
+        // TimeZoneConvert(arr);
         // console.log(arr);
         // console.log(sData);
-        let streamData = seriesData.length > 0 ? sData : [];
+        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
         return [['timestamp', selectedConsumption], ...streamData];
     };
+
+    useEffect(() => {
+        // console.log('optionsLine => ', optionsLine);
+        // if (endDate) {
+        //     let eDate = moment();
+        //     eDate.subtract(1, 'days');
+        //     eDate.format('DD-MM-YYYY');
+        //     console.log('eDate', eDate);
+        // }
+        // console.log(
+        //     'startDate => ',
+        //     endDate ? moment(endDate.getDate() - 1).format('DD MMMM YYYY') : new Date('15 July 2022').getTime()
+        // );
+        // console.log(
+        //     'endDate => ',
+        //     endDate ? moment(endDate.getDate()).format('DD MMMM YYYY') : new Date('15 July 2022').getTime()
+        // );
+    });
 
     return (
         <Modal show={showChart} onHide={handleChartClose} size="xl" centered>
@@ -457,7 +445,7 @@ const DeviceChartModel = ({
                         style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
                         className="select-button form-control form-control-md model-sensor-energy-filter"
                         onChange={(e) => {
-                            setDateFilter(e.target.value);
+                            setDateFilter(+e.target.value);
                         }}
                         defaultValue={dateFilter}>
                         {customDaySelect.map((el, index) => {
@@ -507,7 +495,7 @@ const DeviceChartModel = ({
             </div>
 
             {isSensorChartLoading ? (
-                <div className='loader-center-style'>
+                <div className="loader-center-style">
                     <Spinner className="m-2" color={'primary'} />
                 </div>
             ) : (
