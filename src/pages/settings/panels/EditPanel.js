@@ -751,7 +751,7 @@ const EditPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=10&page_no=1&building_id=${bldgId}`;
+                let params = `?page_size=50&page_no=1&building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let data = res.data;
                     setPassiveDeviceData(data.data);

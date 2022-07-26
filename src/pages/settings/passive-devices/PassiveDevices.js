@@ -374,7 +374,7 @@ const PassiveDevices = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&page_size=10&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
+            let params = `?building_id=${bldgId}&page_size=40&page_no=1&ordered_by=${filterBy}&sort_by=${order}`;
             await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setPassiveDeviceData(response.data);
