@@ -50,15 +50,15 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         console.log(equipData)
         const handleChange = (key, value) => {
             let obj = Object.assign({}, updateEqipmentData);
-            // if(key==="equipment_type"){
-            //     const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-            //     console.log(result1.end_use_name);
-            //     // const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-            //     // console.log(eq_id);
-            //     // var x=document.getElementById("endUsePop");
-            //     // x.value=(eq_id.end_user_id);
-            //     // obj['end_use']=eq_id.end_user_id;
-            // }
+            if(key==="equipment_type"){
+                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
+                console.log(result1.end_use_name);
+                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
+                console.log(eq_id);
+                // var x=document.getElementById("endUsePop");
+                // x.value=(eq_id.end_user_id);
+                obj['end_use']=eq_id.end_user_id;
+            }
             obj[key] = value;
             console.log(obj);
             setUpdateEqipmentData(obj);
@@ -239,6 +239,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                defaultValue={equipData.note}
                                                 onChange={(e) => {
                                                     handleChange('note', e.target.value);
                                                 }}
@@ -332,7 +333,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                 console.log(eq_id);
                 var x=document.getElementById("endUsePop");
                 x.value=(eq_id.end_user_id);
-                // obj['end_use']=eq_id.end_user_id;
+                obj['end_use']=eq_id.end_user_id;
             }
             obj[key] = value;
             console.log(obj);
@@ -513,6 +514,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
+                                                defaultValue={equipData.note}
                                                 onChange={(e) => {
                                                     handleChange('note', e.target.value);
                                                 }}
@@ -633,7 +635,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                             <button
                                                 type="button"
                                                 class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                Select
+                                                View
                                             </button>
                                         </div>
                                     </div>
@@ -888,7 +890,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 </CardBody>
             </Card>
             <div>
-                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} fetchEquipmentData={fetchEquipmentData}/>
+                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
                 <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
             </div>
         </>
