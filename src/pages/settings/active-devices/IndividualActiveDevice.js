@@ -138,7 +138,7 @@ const IndividualActiveDevice = () => {
     };
 
     useEffect(() => {
-        if(showChart){
+        if (showChart) {
             return;
         }
         setConsumption('energy');
