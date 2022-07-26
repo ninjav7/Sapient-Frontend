@@ -140,7 +140,7 @@ const DeviceChartModel = ({
 
                                 return _data;
                             });
-                        } catch (error) { }
+                        } catch (error) {}
                         exploreData.push(recordToInsert);
                         setDeviceData(exploreData);
                         setSeriesData([
@@ -362,7 +362,6 @@ const DeviceChartModel = ({
         //     eDate.format('DD-MM-YYYY');
         //     console.log('eDate', eDate);
         // }
-
         // console.log(
         //     'startDate => ',
         //     endDate ? moment(endDate.getDate() - 1).format('DD MMMM YYYY') : new Date('15 July 2022').getTime()
@@ -392,6 +391,7 @@ const DeviceChartModel = ({
                         size="lg"
                         onClick={() => {
                             handleChartClose();
+
                             handleRefresh();
                         }}
                     />

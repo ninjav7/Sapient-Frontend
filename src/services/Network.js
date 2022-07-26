@@ -33,8 +33,8 @@ export const endUsesUsageChart = '/api/energy/chart/usage';
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
 export const equipmentType = '/api/config/get_equipment_type/';
-export const addEquipmentType ='/api/config/create_equipment_type';
-export const updateEquipmentType ='/api/config/update_equipment_type';
+export const addEquipmentType = '/api/config/create_equipment_type';
+export const updateEquipmentType = '/api/config/update_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
 export const updateEquipment = '/api/config/equipments_details/update_equipment';
 export const getEndUseId = '/api/config/get_end_use';
@@ -81,7 +81,12 @@ export const insert_kasa_devices = '/api/config/kasa/insert_device';
 export const addToSystem = '/api/config/kasa/add_to_system';
 
 // layout
-export const getLayouts = '/api/config/get_layout';
+export const getLayouts = '/api/config/get_layout/';
+export const getFloors = '/api/config/layout/get-floors';
+export const createFloors = '/api/config/layout/create-floor';
+export const getSpaces = '/api/config/layout/get-spaces';
+export const getSpaceTypes = '/api/config/layout/get-spacetype';
+export const createSpace = '/api/config/layout/create-space';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
