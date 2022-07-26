@@ -503,15 +503,17 @@ const General = () => {
         };
     };
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     // update section end
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col lg={8}>
                     <div className="building-heading-container">
-                        <div className="heading-style">
-                            General Building Settings
-                        </div>
+                        <div className="heading-style">General Building Settings</div>
                         <div>
                             {isbuildingDetailsFetched ? (
                                 <Skeleton count={1} height={40} width={150} />
