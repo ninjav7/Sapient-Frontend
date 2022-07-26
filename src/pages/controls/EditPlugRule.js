@@ -3,19 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Select from 'react-select';
 import { MultiSelect } from 'react-multi-select-component';
 import Form from 'react-bootstrap/Form';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
+import { Table, Input } from 'reactstrap';
 import Switch from 'react-switch';
 import LineChart from '../charts/LineChart';
 import DatePicker from 'react-datepicker';
@@ -73,37 +61,6 @@ const EditPlugRule = ({
     const [options, setOptions] = useState([]);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
-    const socketData = [
-        {
-            equip_type: 'Monitor',
-            location: 'Floor 1 > 152',
-            assigned_rule: 'None',
-            tags: '-',
-            last_date: '<5 minutes ago',
-        },
-        {
-            equip_type: 'Desktop PC',
-            location: 'Floor 1 > 152',
-            assigned_rule: 'None',
-            tags: '-',
-            last_date: '<5 minutes ago',
-        },
-        {
-            equip_type: 'Floor Lamp',
-            location: 'Floor 1 > 152',
-            assigned_rule: 'None',
-            tags: '-',
-            last_date: '<5 minutes ago',
-        },
-        {
-            equip_type: 'Monitor',
-            location: 'Floor 1 > 153',
-            assigned_rule: 'None',
-            tags: '-',
-            last_date: '<5 minutes ago',
-        },
-    ];
 
     const [lineChartOptions, setLineChartOptions] = useState({
         chart: {
