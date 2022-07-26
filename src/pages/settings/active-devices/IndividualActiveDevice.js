@@ -104,6 +104,7 @@ const IndividualActiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -193,6 +194,11 @@ const IndividualActiveDevice = () => {
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
                     let response = res.data;
+
+                    response.sort((a, b) => {
+                        return a.location_name.localeCompare(b.location_name);
+                    });
+
                     setLocationData(response);
                     setIsLocationFetched(false);
                 });
@@ -262,7 +268,7 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -323,9 +329,12 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?end_use=Plug&building_id=${bldgId}&page_size=20&page_no=1`;
+            let params = `?end_use=Plug&building_id=${bldgId}&page_size=1000&page_no=1`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 let response = res.data.data;
+                response.sort((a, b) => {
+                    return a.equipment_type.localeCompare(b.equipment_type);
+                });
                 setEquipmentTypeDevices(response);
             });
         } catch (error) {
@@ -703,6 +712,7 @@ const IndividualActiveDevice = () => {
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
+                timeZone={timeZone}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>

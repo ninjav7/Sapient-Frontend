@@ -229,6 +229,20 @@ const EditPlugRule = ({
 
     const [selectedOption, setSelectedOption] = useState([]);
     console.log('selectedOption', selectedOption);
+    const handleFilterEquipment = (e) => {
+        let activeId = e.target.value;
+        if (activeId === 'All') {
+            setAllLinkedRuleData(allData);
+            // console.log(allData);
+        } else {
+            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
+            // console.log(result);
+            let arr = [];
+            arr.push(result);
+            // console.log(arr)
+            setAllLinkedRuleData(arr);
+        }
+    };
 
     const handleSwitchChange = () => {
         let obj = currentData;

@@ -139,7 +139,7 @@ const Layout = () => {
             <EditSpace show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
+                    <span className="heading-style">
                         Layout
                     </span>
 

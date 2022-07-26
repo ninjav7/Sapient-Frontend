@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Input } from 'reactstrap';
-import DatePicker from 'react-datepicker';
+import Datepicker from '../sharedComponents/datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/portfolio/style.css';
+import Select from '../sharedComponents/form/select';
 
 const Header = (props) => {
     const [dateRange, setDateRange] = useState([null, null]);
@@ -86,21 +87,27 @@ const Header = (props) => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        {props.title}
-                    </span>
+                    <span className="heading-style">{props.title}</span>
 
                     <div
                         className="btn-group custom-button-group header-widget-styling"
                         role="group"
                         aria-label="Basic example">
                         <div>
-                            <Input
+                            <Select
+                                style={{ color: 'black', fontWeight: 'bold' }}
+                                className="header-datefilter-select"
+                                options={customDaySelect}
+                                defaultValue={dateFilter}
+                                onChange={({ value }) => {
+                                    setDateFilter(value);
+                                }}
+                            />
+
+                            {/* <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
-                                style={{ color: 'black', fontWeight: 'bold' }}
-                                className="select-button form-control form-control-md custom-day-selection"
                                 onChange={(e) => {
                                     setDateFilter(e.target.value);
                                 }}
@@ -108,12 +115,11 @@ const Header = (props) => {
                                 {customDaySelect.map((el, index) => {
                                     return <option value={el.value}>{el.label}</option>;
                                 })}
-                            </Input>
+                            </Input> */}
                         </div>
 
-                        <div className="select-button form-control form-control-md font-weight-bold custom-date-picker-block">
-                            <FontAwesomeIcon icon={faCalendar} style={{ fontSize: '1.3em' }} />
-                            <DatePicker
+                        <div className="header-datefilter-datepicker-wrapper">
+                            <Datepicker
                                 selectsRange={true}
                                 startDate={startDate}
                                 endDate={endDate}
@@ -122,7 +128,7 @@ const Header = (props) => {
                                 }}
                                 maxDate={new Date()}
                                 dateFormat="MMMM d"
-                                className="custom-date-picker-props ml-2"
+                                className="header-datefilter-datepicker"
                                 placeholderText="Select Date Range"
                                 // monthsShown={2}
                             />

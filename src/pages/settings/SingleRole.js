@@ -82,7 +82,7 @@ const SingleRole = () => {
             <Row className="page-title">
                 <Col lg={10} className="header-container">
                     <div>
-                        <span className="heading-style" style={{ marginLeft: '20px' }}>
+                        <span className="heading-style">
                             Account Administrator
                         </span>
                     </div>

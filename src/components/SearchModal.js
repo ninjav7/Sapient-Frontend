@@ -56,9 +56,9 @@ const SearchModal = () => {
 
     return (
         <>
-            <div className="navbar-icon-container float-right">
-                <button className="btn btn-sm float-right other-font-icon-style">
-                    <FontAwesomeIcon icon={faBellOn} size="lg" onClick={() => searchModalOpen()} />
+            <div className="navbar-icon-container float-right topbar-buttons">
+                <button className="btn btn-sm float-right other-font-icon-style" onClick={() => searchModalOpen()} >
+                    <FontAwesomeIcon icon={faBellOn} size="lg" />
                 </button>
             </div>
 

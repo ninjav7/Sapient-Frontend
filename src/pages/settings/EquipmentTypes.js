@@ -14,7 +14,16 @@ import {
     FormGroup,
 } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, addEquipmentType, updateEquipmentType, getEndUseId, createEquipment } from '../../services/Network';
+import {
+    BaseUrl,
+    generalEquipments,
+    getLocation,
+    equipmentType,
+    addEquipmentType,
+    updateEquipmentType,
+    getEndUseId,
+    createEquipment,
+} from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -23,11 +32,12 @@ import Form from 'react-bootstrap/Form';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 
-const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) => {
+const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [editEqipmentData, setEditEqipmentData] = useState({});
@@ -37,12 +47,12 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
         obj[key] = value;
         setEditEqipmentData(obj);
      };
-    //  console.log(equipData);
+     // console.log(equipData);
     //  console.log(endUseData);
-     const editDeviceData = async () => {
+    const editDeviceData = async () => {
         let obj = Object.assign({}, editEqipmentData);
         obj['eqt_id'] = equipData.equipment_id;
-        obj['is_active']=true;
+        obj['is_active'] = true;
         setEditEqipmentData(obj);
         // console.log(obj);
         try {
@@ -60,9 +70,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                     // console.log(res.data);
                     close();
                     getDevices();
-
                 });
-
         } catch (error) {
             console.log('Failed to Edit Equipment data');
         }
@@ -82,7 +90,9 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                              <Form.Control
                                  type="text"
                                  placeholder="Enter Name"
+                                 readOnly
                                  className="font-weight-bold"
+                                defaultValue={equipData.equipment_type}
                                  onChange={(e) => {
                                      handleChange('name', e.target.value);
                                  }}
@@ -97,6 +107,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                                 name="select"
                                 id="exampleSelect"
                                 className="font-weight-bold"
+                                defaultValue={equipData.end_use_id}
                                 onChange={(e) => {
                                     handleChange('end_use', e.target.value);
                                 }}>
@@ -114,9 +125,9 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
                      </Button>
                      <Button
                          variant="primary"
-                         onClick={()=>{editDeviceData();}}
+                        //  onClick={()=>{editDeviceData();}}
                          >
-                         Add
+                         Update
                      </Button>
                  </Modal.Footer>
              </Modal>
@@ -126,7 +137,17 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData,getDevices}) 
     );
 };
 
-const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices }) => {
+const EquipmentTable = ({
+    equipmentTypeData,
+    endUseData,
+    getDevices,
+    nextPageData,
+    previousPageData,
+    paginationData,
+    pageSize,
+    setPageSize,
+    isDeviceProcessing,
+}) => {
     const records = [
         {
             name: 'Air Handling Unit',
@@ -165,30 +186,106 @@ const EquipmentTable = ({ equipmentTypeData, endUseData, getDevices }) => {
                                 <th>Equipment Count</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {equipmentTypeData.map((record, index) => {
-                                return (
-                                    <tr
-                                        key={index}
-                                        onClick={() => {
-                                            setEquipData(record);
-                                            Toggle();
-                                        }}>
-                                        <td className="equip-type-style">
-                                            {record.equipment_type ? record.equipment_type : '-'}
+                        {isDeviceProcessing ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={20}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td>{record.status ? record.status : '-'}</td>
-                                        <td>{record.end_use_name ? record.end_use_name : '-'}</td>
-                                        <td>{record.equipment_count}</td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {equipmentTypeData.map((record, index) => {
+                                    return (
+                                        <tr
+                                            key={index}
+                                            onClick={() => {
+                                                setEquipData(record);
+                                                Toggle();
+                                            }}>
+                                            <td className="equip-type-style">
+                                                {record.equipment_type ? record.equipment_type : '-'}
+                                            </td>
+                                            <td>{record.status ? record.status : '-'}</td>
+                                            <td>{record.end_use_name ? record.end_use_name : '-'}</td>
+                                            <td>{record.equipment_count}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
                     </Table>
+                    <div className="page-button-style">
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.previous === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.next === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[20, 50, 100].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                 </CardBody>
             </Card>
             <div>
-                <SingleEquipmentModal show={modal} equipData={equipData} close={Toggle} endUseData={endUseData} getDevices={getDevices} />
+                <SingleEquipmentModal
+                    show={modal}
+                    equipData={equipData}
+                    close={Toggle}
+                    endUseData={endUseData}
+                    getDevices={getDevices}
+                />
             </div>
         </>
     );
@@ -211,6 +308,10 @@ const EquipmentTypes = () => {
     const [createEqipmentData, setCreateEqipmentData] = useState({});
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    const [pageSize, setPageSize] = useState(20);
+    const [pageNo, setPageNo] = useState(1);
+    const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
     const handleChange = (key, value) => {
         // let endUseId=""
@@ -234,7 +335,7 @@ const EquipmentTypes = () => {
     const saveDeviceData = async () => {
         let obj = Object.assign({}, createEqipmentData);
         obj['building_id'] = bldgId;
-        obj['is_active']=true;
+        obj['is_active'] = true;
         setCreateEqipmentData(obj);
         // console.log(obj);
         try {
@@ -253,13 +354,63 @@ const EquipmentTypes = () => {
                 .then((res) => {
                     // console.log(res.data);
                     fetchEquipTypeData();
-
                 });
 
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
             console.log('Failed to create Passive device data');
+        }
+    };
+
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            setIsDeviceProcessing(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(response.data);
+                setIsDeviceProcessing(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+            setIsDeviceProcessing(false);
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            setIsDeviceProcessing(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(response.data);
+                setIsDeviceProcessing(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+            setIsDeviceProcessing(false);
         }
     };
 
@@ -283,36 +434,44 @@ const EquipmentTypes = () => {
     }, []);
     const fetchEquipTypeData = async () => {
         try {
+            setIsDeviceProcessing(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}`
+            let params = `?page_size=${pageSize}&page_no=${pageNo}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
                 // console.log('setGeneralEquipmentTypeData => ', res.data);
-                setGeneralEquipmentTypeData(res.data);
+                setPaginationData(res.data);
+                setGeneralEquipmentTypeData(res.data.data);
+                setIsDeviceProcessing(false);
             });
         } catch (error) {
             console.log(error);
             console.log('Failed to fetch Equipment Type Data');
+            setIsDeviceProcessing(false);
         }
     };
 
     useEffect(() => {
-     
-
-        const getEndUseIds= async () => {
+        fetchEquipTypeData();
+    }, [pageSize]);
+    useEffect(() => {
+        const getEndUseIds = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`
+                let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
-                    //console.log('setEndUseData => ', res.data);
-                    setEndUseData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.name.localeCompare(b.name);
+                    });
+                    setEndUseData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -328,9 +487,7 @@ const EquipmentTypes = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style" style={{ marginLeft: '20px' }}>
-                        Equipment Types
-                    </span>
+                    <span className="heading-style">Equipment Types</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -358,7 +515,17 @@ const EquipmentTypes = () => {
 
             <Row>
                 <Col lg={7}>
-                    <EquipmentTable equipmentTypeData={generalEquipmentTypeData} endUseData={endUseData} getDevices={fetchEquipTypeData} />
+                    <EquipmentTable
+                        equipmentTypeData={generalEquipmentTypeData}
+                        endUseData={endUseData}
+                        getDevices={fetchEquipTypeData}
+                        nextPageData={nextPageData}
+                        previousPageData={previousPageData}
+                        paginationData={paginationData}
+                        pageSize={pageSize}
+                        setPageSize={setPageSize}
+                        isDeviceProcessing={isDeviceProcessing}
+                    />
                 </Col>
             </Row>
 
@@ -391,7 +558,7 @@ const EquipmentTypes = () => {
                                 onChange={(e) => {
                                     handleChange('end_use', e.target.value);
                                 }}>
-                                    <option selected>Select End Use</option>
+                                <option selected>Select End Use</option>
                                 {endUseData.map((record) => {
                                     return <option value={record.end_user_id}>{record.name}</option>;
                                 })}

@@ -1,8 +1,6 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
 // export const BaseUrl = 'http://122.175.198.21:8000';
-// export const BaseUrl = 'http://localhost:8000';
-// export const BaseUrl = 'http://192.168.31.12:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -38,12 +36,16 @@ export const equipmentType = '/api/config/get_equipment_type/';
 export const addEquipmentType = '/api/config/create_equipment_type';
 export const updateEquipmentType = '/api/config/update_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
+export const updateEquipment = '/api/config/equipments_details/update_equipment';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
 export const updateActivePassiveDevice = '/api/config/devices/update_device';
+
+//search active and passive device
+export const searchDevices = '/api/config/devices/search_by_devices';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
