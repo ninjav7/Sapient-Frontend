@@ -12,7 +12,7 @@ import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, 
 import '../style.css';
 import './panel-style.css';
 
-const DisconnectedBreakerFlow = ({ data, id }) => {
+const DisconnectedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -668,4 +668,4 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
     );
 };
 
-export default DisconnectedBreakerFlow;
+export default DisconnectedBreakerComponent;

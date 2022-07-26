@@ -3,17 +3,18 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor } from '../../../services/Network';
+import {
+    BaseUrl,
+    listSensor,
+} from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
 
-const BreakersFlow = ({ data, id }) => {
+const BreakersComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
-    const [breakerData, setBreakerData] = useState(data);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
@@ -64,7 +65,6 @@ const BreakersFlow = ({ data, id }) => {
         //     newArray[currentBreakerIndex] = currentBreakerObj;
         //     setDisconnectBreakerConfig(newArray);
         // }
-        data.onChange(id, breakerData);
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
@@ -85,34 +85,13 @@ const BreakersFlow = ({ data, id }) => {
     };
 
     const findEquipmentName = (equipId) => {
-        let equip = breakerData.equipment_data.find((record) => record.value === equipId);
+        let equip = data.equipment_data.find((record) => record.value === equipId);
         return equip.label;
     };
 
-    const handleChange = (id, key, value) => {
-        let breaker = Object.assign({}, breakerData);
-
-        if (key === 'equipment_link') {
-            let arr = [];
-            arr.push(value);
-            value = arr;
-        }
-        if (value === 'Select Volts') {
-            value = '';
-        }
-
-        breaker[key] = value;
-        setBreakerData(breaker);
-    };
-
-    useEffect(() => {
-        console.log('SSR breakerData => ', breakerData);
-        console.log('SSR breakerData.elements => ', breakerData.elements);
-    });
-
     return (
         <React.Fragment>
-            {breakerData.breaker_number % 2 === 1 && (
+            {data.breaker_number % 2 === 1 && (
                 <>
                     <Handle
                         type="source"
@@ -129,7 +108,7 @@ const BreakersFlow = ({ data, id }) => {
                 </>
             )}
 
-            {breakerData.breaker_number % 2 === 0 && (
+            {data.breaker_number % 2 === 0 && (
                 <>
                     <Handle
                         type="source"
@@ -150,29 +129,27 @@ const BreakersFlow = ({ data, id }) => {
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
                         <div className="breaker-content-middle">
-                            <div className="breaker-index">{breakerData.breaker_number}</div>
+                            <div className="breaker-index">{data.breaker_number}</div>
                         </div>
                         <div className="breaker-content-middle">
                             <div className="dot-status"></div>
                         </div>
                         <div className="breaker-content-middle">
                             <div className="breaker-content">
-                                <span>{breakerData.rated_amps === 0 ? '' : `${breakerData.rated_amps}A`}</span>
-                                <span>{breakerData.voltage === '' ? '' : `${breakerData.voltage}V`}</span>
+                                <span>{data.rated_amps === 0 ? '' : `${data.rated_amps}A`}</span>
+                                <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
                             </div>
                         </div>
-                        {!(breakerData.equipment_link.length === 0) ? (
+                        {!(data.equipment_link.length === 0) ? (
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
-                                        {findEquipmentName(breakerData.equipment_link[0])}
+                                        {findEquipmentName(data.equipment_link[0])}
                                     </h6>
                                 </div>
                                 {!(
-                                    (breakerData.breaker_level === 'triple-breaker' &&
-                                        breakerData.panel_voltage === '120/240') ||
-                                    (breakerData.breaker_level === 'double-breaker' &&
-                                        breakerData.panel_voltage === '600')
+                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
+                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
                                 ) && (
                                     <div
                                         className="breaker-content-middle"
@@ -197,10 +174,8 @@ const BreakersFlow = ({ data, id }) => {
                         ) : (
                             <>
                                 {!(
-                                    (breakerData.breaker_level === 'triple-breaker' &&
-                                        breakerData.panel_voltage === '120/240') ||
-                                    (breakerData.breaker_level === 'double-breaker' &&
-                                        breakerData.panel_voltage === '600')
+                                    (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
+                                    (data.breaker_level === 'double-breaker' && data.panel_voltage === '600')
                                 ) && (
                                     <div
                                         className="breaker-content-middle"
@@ -228,19 +203,16 @@ const BreakersFlow = ({ data, id }) => {
             </FormGroup>
 
             <Modal show={showEditBreaker} onHide={handleEditBreakerClose} centered backdrop="static" keyboard={false}>
-                {!(breakerData.breaker_level === 'triple-breaker') ? (
+                {!(data.breaker_level === 'triple-breaker') ? (
                     // For Single & Double Breaker
                     <>
                         <div className="mt-4 ml-4 mb-0">
                             <Modal.Title className="edit-breaker-title mb-0">
-                                {breakerData.breaker_level === 'single-breaker'
-                                    ? 'Edit Breaker'
-                                    : 'Edit Linked Breaker'}
+                                {data.breaker_level === 'single-breaker' ? 'Edit Breaker' : 'Edit Linked Breaker'}
                             </Modal.Title>
                             <Modal.Title className="edit-breaker-no mt-0">
-                                {breakerData.breaker_level === 'single-breaker' &&
-                                    `Breaker ${breakerData.breaker_number}`}
-                                {/* {breakerData.breaker_level === 'double-breaker' &&
+                                {data.breaker_level === 'single-breaker' && `Breaker ${data.breaker_number}`}
+                                {/* {data.breaker_level === 'double-breaker' &&
                                     `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
                             </Modal.Title>
                         </div>
@@ -256,9 +228,9 @@ const BreakersFlow = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Phase"
                                             onChange={(e) => {
-                                                handleChange(id, 'phase_configuration', +e.target.value);
+                                                data.onChange(id, 'phase_configuration', +e.target.value);
                                             }}
-                                            value={breakerData.phase_configuration}
+                                            value={data.phase_configuration}
                                             disabled={true}
                                             min={0}></Input>
                                     </Form.Group>
@@ -269,10 +241,10 @@ const BreakersFlow = ({ data, id }) => {
                                             type="number"
                                             placeholder="Enter Amps"
                                             className="font-weight-bold"
-                                            value={breakerData.rated_amps}
+                                            value={data.rated_amps}
                                             min={0}
                                             onChange={(e) => {
-                                                handleChange(id, 'rated_amps', +e.target.value);
+                                                data.onChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -286,9 +258,9 @@ const BreakersFlow = ({ data, id }) => {
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Volts"
                                             onChange={(e) => {
-                                                handleChange(id, 'voltage', e.target.value);
+                                                data.onChange(id, 'voltage', e.target.value);
                                             }}
-                                            value={breakerData.voltage}
+                                            value={data.voltage}
                                             disabled={true}
                                             min={0}></Input>
                                     </Form.Group>
@@ -297,9 +269,9 @@ const BreakersFlow = ({ data, id }) => {
                                 <div className="edit-form-breaker ml-2 mr-2 mb-2" />
 
                                 <>
-                                    {breakerData.breaker_level === 'single-breaker' && (
+                                    {data.breaker_level === 'single-breaker' && (
                                         <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {breakerData.breaker_number}
+                                            Breaker {data.breaker_number}
                                         </div>
                                     )}
 
@@ -320,11 +292,11 @@ const BreakersFlow = ({ data, id }) => {
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
                                                     fetchDeviceSensorData(e.target.value);
-                                                    handleChange(id, 'device_id', e.target.value);
+                                                    data.onChange(id, 'device_id', e.target.value);
                                                 }}
-                                                value={breakerData.device_id}>
+                                                value={data.device_id}>
                                                 <option>Select Device</option>
-                                                {breakerData.passive_data.map((record) => {
+                                                {data.passive_data.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
                                             </Input>
@@ -339,14 +311,16 @@ const BreakersFlow = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
-                                                    handleChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    data.onChange(id, 'sensor_id', e.target.value);
+                                                    handleLinkedSensor(data.sensor_id, e.target.value);
                                                 }}
-                                                value={breakerData.sensor_id}>
+                                                value={data.sensor_id}>
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
-                                                        <option value={record.id} disabled={record.breaker_id !== ''}>
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
                                                             {record.name}
                                                         </option>
                                                     );
@@ -368,18 +342,12 @@ const BreakersFlow = ({ data, id }) => {
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
                                             addSelectedBreakerEquip(e.target.value);
-                                            handleChange(id, 'equipment_link', e.target.value);
+                                            data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        value={breakerData.equipment_link[0]}>
+                                        value={data.equipment_link[0]}>
                                         <option>Select Equipment</option>
-                                        {breakerData.equipment_data.map((record) => {
-                                            return (
-                                                record.equipments_name !== '' && (
-                                                    <option value={record.value} disabled={record.breaker_id !== ''}>
-                                                        {record.label}
-                                                    </option>
-                                                )
-                                            );
+                                        {data.equipment_data.map((record) => {
+                                            return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
                                     {/* <MultiSelect
@@ -674,7 +642,7 @@ const BreakersFlow = ({ data, id }) => {
                     <Button variant="light" onClick={handleEditBreakerClose}>
                         Cancel
                     </Button>
-                    {breakerData.breaker_level === 'single-breaker' && (
+                    {data.breaker_level === 'single-breaker' && (
                         <Button
                             variant="primary"
                             onClick={() => {
@@ -716,4 +684,4 @@ const BreakersFlow = ({ data, id }) => {
     );
 };
 
-export default BreakersFlow;
+export default BreakersComponent;

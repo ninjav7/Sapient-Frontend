@@ -259,7 +259,11 @@ const IndividualPassiveDevice = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    let response = res.data;
+                    response.sort((a, b) => {
+                        return a.location_name.localeCompare(b.location_name);
+                    });
+                    setLocationData(response);
                 });
                 setIsLocationFetched(false);
             } catch (error) {
