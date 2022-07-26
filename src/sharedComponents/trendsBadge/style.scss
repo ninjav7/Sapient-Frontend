@@ -1,0 +1,54 @@
+@import '../../assets/scss/colors';
+
+.trends {
+    &-badge {
+        font-style: normal;
+        font-weight: 600;
+        font-size: 0.75rem;
+        line-height: 1.125rem;
+        height: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: flex-end;
+        padding: 0 0.25rem;
+        margin: 0 0 0.0625rem 0.5rem;
+        background-color: $success-100;
+        border-radius: 0.375rem;
+        color: $success-600;
+
+        &.downward-trend {
+            background-color: $success-100;
+            color: $success-600;
+            svg {
+                path {
+                    fill: $success-600;
+                }
+            }
+        }
+
+        &.upward-trend {
+            background-color: $error-100;
+            color: $error-500;
+            svg {
+                path {
+                    fill: $error-500;
+                }
+            }
+        }
+
+        &.neutral-trend {
+            background-color: $primary-gray-100;
+            color: $primary-gray-500;
+            svg {
+                path {
+                    fill: $primary-gray-500;
+                }
+            }
+        }
+
+        svg {
+            margin-right: 0.25rem;
+        }
+    }
+}
