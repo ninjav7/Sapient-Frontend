@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-} from 'reactstrap';
+import {Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Input,FormGroup} from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment,listSensor } from '../../services/Network';
