@@ -42,8 +42,8 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
     let userdata = cookies.get('user');
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
-    // useEffect(() => {
-    //     const fetchActiveDeviceSensorData = async () => {
+    useEffect(() => {
+        const fetchActiveDeviceSensorData = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
@@ -59,9 +59,9 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                 console.log(error);
                 console.log('Failed to fetch Active device sensor data');
             }
-    //     };
-    //     fetchActiveDeviceSensorData();
-    // }, []);
+        };
+        fetchActiveDeviceSensorData();
+    }, [equipData]);
     var result=[];
         if(equipData!==null){
             result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
