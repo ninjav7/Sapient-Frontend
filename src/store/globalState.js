@@ -46,4 +46,6 @@ export const floorState = atom([]);
 export const spaceNameList = atom([]);
 export const floorIdState = atom('');
 
+export const reloadSpaces = atom('false');
+
 // export const floor1 = atom(['Room', 'Area']);

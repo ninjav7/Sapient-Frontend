@@ -18,6 +18,7 @@ import {
     floorState,
     iterationDataList,
     iterationNumber,
+    reloadSpaces,
     spaceId,
     spaceName,
     spaceName10,
@@ -194,8 +195,11 @@ const Layout = () => {
         updateBreadcrumbStore();
     }, []);
 
+    const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
+    console.log('reloadSpace', reloadSpace);
+
     useEffect(() => {
-        if (floorid) {
+        if (floorid || reloadSpace === 'true') {
             const headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -205,6 +209,7 @@ const Layout = () => {
             axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 if (modelToShow === 2) {
                     setSpaceListAPI(res.data.data);
+                    setReloadSpace('false');
                 }
                 if (modelToShow === 3) {
                     setSpaceListAPI2(res.data.data);
@@ -259,7 +264,7 @@ const Layout = () => {
                 }
             });
         }
-    }, [floorid]);
+    }, [floorid, reloadSpace]);
 
     const createSpacesAPI = () => {
         const headers = {
@@ -406,7 +411,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -452,7 +457,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow2(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -498,7 +503,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow4(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -544,7 +549,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow5(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -590,7 +595,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow6(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -636,7 +641,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow7(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -682,7 +687,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow8(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -728,7 +733,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow8(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -774,7 +779,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow9(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -820,7 +825,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow10(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -866,7 +871,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow11(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -912,7 +917,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow12(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -958,7 +963,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow13(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1004,7 +1009,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow14(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1050,7 +1055,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow15(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1096,7 +1101,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow16(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1142,7 +1147,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow17(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1188,7 +1193,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow18(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>
@@ -1234,7 +1239,7 @@ const Layout = () => {
                                                     onClick={() => {
                                                         setModalSpaceShow19(true);
                                                     }}>
-                                                    Add Floor
+                                                    Add Space
                                                 </DropdownItem>
                                             </DropdownMenu>
                                         </UncontrolledDropdown>

@@ -3,7 +3,14 @@ import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 
 import { Button, Input, Label } from 'reactstrap';
-import { closeEditSpaceModal, floorid, flooridNew, floorState, spacesList } from '../../store/globalState';
+import {
+    closeEditSpaceModal,
+    floorid,
+    flooridNew,
+    floorState,
+    reloadSpaces,
+    spacesList,
+} from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BaseUrl, createSpace, getSpaceTypes } from '../../services/Network';
@@ -18,6 +25,8 @@ const EditSpace = (props) => {
 
     const [currentFloorId] = useAtom(flooridNew);
     console.log('currentFloorId', currentFloorId);
+
+    const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
 
     const [spaceName, setSpaceName] = useState('');
     const [floor2, setFloor1] = useAtom(floorState);
@@ -43,7 +52,9 @@ const EditSpace = (props) => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {});
+        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {
+            setReloadSpace('true');
+        });
     };
 
     return (
