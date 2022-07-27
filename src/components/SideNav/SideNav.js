@@ -4,7 +4,7 @@ import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../../routes';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 
-import "./SideNav.scss"
+import './SideNav.scss';
 
 const SideNav = () => {
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
@@ -37,7 +37,7 @@ const SideNav = () => {
                     let active = str1.localeCompare(str2);
 
                     return (
-                        <Link to={item.path}>
+                        <Link to={item.path} key={index}>
                             {active === 0 ? (
                                 <div
                                     // className="side-nav-content"
