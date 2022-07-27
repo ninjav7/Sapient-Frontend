@@ -15,7 +15,7 @@ import {
 } from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment,listSensor } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -25,6 +25,8 @@ import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
+import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
@@ -34,11 +36,32 @@ import { result } from 'lodash';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
     const [selected,setSelected]=useState([]);
+    const [sensors, setSensors] = useState([]);
     // console.log(equipmentTypeData)
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
 
+    // useEffect(() => {
+    //     const fetchActiveDeviceSensorData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${equipData.device_id}`;
+                axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setSensors(response);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active device sensor data');
+            }
+    //     };
+    //     fetchActiveDeviceSensorData();
+    // }, []);
     var result=[];
         if(equipData!==null){
             result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
@@ -252,7 +275,67 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                             </Col>
                             <Col lg={4}>
                                 <div className="modal-right-container">
-                                    <div className="modal-right-pic"></div>
+                                <div className="equip-socket-container">
+                                <div className="mt-2 sockets-slots-container">
+                                    {sensors.map((record, index) => {
+                                        return (
+                                            <>
+                                                {record.status && (
+                                                    <div>
+                                                        <div className="power-off-style">
+                                                            <FontAwesomeIcon
+                                                                icon={faPowerOff}
+                                                                size="lg"
+                                                                color="#3C6DF5"
+                                                            />
+                                                        </div>
+                                                        {record.equipment_type_id === '' ? (
+                                                            <div className="socket-rect">
+                                                                <img src={SocketLogo} alt="Socket" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="online-socket-container">
+                                                                <img
+                                                                    src={UnionLogo}
+                                                                    alt="Union"
+                                                                    className="union-icon-style"
+                                                                    width="35vw"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {!record.status && (
+                                                    <div>
+                                                        <div className="power-off-style">
+                                                            <FontAwesomeIcon
+                                                                icon={faPowerOff}
+                                                                size="lg"
+                                                                color="#EAECF0"
+                                                            />
+                                                        </div>
+                                                        {record.equipment_type_id === '' ? (
+                                                            <div className="socket-rect">
+                                                                <img src={SocketLogo} alt="Socket" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="online-socket-container">
+                                                                <img
+                                                                    src={UnionLogo}
+                                                                    alt="Union"
+                                                                    className="union-icon-style"
+                                                                    width="35vw"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                                     <div className="modal-right-card mt-2">
                                         <span className="modal-right-card-title">Power Strip Socket 2</span>
                                         <Link
