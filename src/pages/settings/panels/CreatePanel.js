@@ -23,7 +23,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import CustomNodeSelector from './panel-breaker-poc/CustomNodeSelector';
 import BreakersComponent from './Breakers';
 import DisconnectedBreakerComponent from './DisconnectedBreaker';
 import BreakerLink from './BreakerLink';
@@ -36,6 +35,7 @@ const CreatePanel = () => {
 
     const { v4: uuidv4 } = require('uuid');
     const generateBreakerLinkId = () => uuidv4();
+    const generateBreakerId = () => uuidv4();
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
@@ -71,7 +71,6 @@ const CreatePanel = () => {
     const [panel, setPanel] = useState({
         name: 'Panel Name',
         parent_panel: '',
-        device_id: '',
         space_id: '',
         voltage: '',
         phase_config: 1,
@@ -426,67 +425,6 @@ const CreatePanel = () => {
         }
     };
 
-    const getJSONFormatedData = () => {
-        let newPanel = Object.assign({}, panel);
-        if (activePanelType === 'distribution') {
-            newPanel.breaker_count = normalCount;
-        }
-        if (activePanelType === 'disconnect') {
-            newPanel.breaker_count = disconnectBreakerCount;
-        }
-        newPanel.panel_type = activePanelType;
-        setJsonPanelData(JSON.stringify(newPanel, undefined, 4));
-
-        let panelBreakerObjs = [];
-
-        if (activePanelType === 'distribution') {
-            elements.forEach((el) => {
-                if (el.type === 'breakerLink') {
-                    return;
-                }
-
-                let obj = {
-                    id: el.id,
-                    name: `Breaker ${el.data.breaker_number}`,
-                    breaker_number: +el.data.breaker_number,
-                    phase_configuration: el.data.phase_configuration,
-                    rated_amps: el.data.rated_amps,
-                    voltage: +el.data.voltage,
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: el.data.equipment_link,
-                    sensor_id: el.data.sensor_id,
-                    device_id: el.data.device_id,
-                };
-                panelBreakerObjs.push(obj);
-            });
-        }
-
-        if (activePanelType === 'disconnect') {
-            disconnectBreakersNodes.forEach((el) => {
-                if (el.type === 'breakerLink') {
-                    return;
-                }
-
-                let obj = {
-                    id: el.id,
-                    name: `Breaker ${el.data.breaker_number}`,
-                    breaker_number: +el.data.breaker_number,
-                    phase_configuration: el.data.phase_configuration,
-                    rated_amps: el.data.rated_amps,
-                    voltage: +el.data.voltage,
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: el.data.equipment_link,
-                    sensor_id: el.data.sensor_id,
-                    device_id: el.data.device_id,
-                };
-                panelBreakerObjs.push(obj);
-            });
-        }
-        setJsonBreakerData(JSON.stringify(panelBreakerObjs, undefined, 4));
-    };
-
     const mainVoltageChange = (voltageValue) => {
         // let newArray = normalStruct;
 
@@ -790,6 +728,8 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                savePanelData: savePanelData,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 70 },
             draggable: false,
@@ -815,6 +755,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 140 },
             draggable: false,
@@ -839,6 +780,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 70 },
@@ -864,6 +806,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 140 },
@@ -1043,7 +986,6 @@ const CreatePanel = () => {
 
     // ************* added node and egde types ********************
     const nodeTypes = {
-        customnode: CustomNodeSelector,
         breakerComponent: BreakersComponent,
         disconnectedBreakerComponent: DisconnectedBreakerComponent,
         breakerLink: BreakerLink,
@@ -1111,6 +1053,88 @@ const CreatePanel = () => {
             ),
         []
     );
+
+    const updateBreakerWithPanelId = (panelId) => {
+        let newArray = elements;
+        newArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.panelId = panelId;
+        });
+        setElements(newArray);
+    };
+
+    const saveBreakersData = async (panelID) => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let panelBreakerObjs = [];
+
+            if (activePanelType === 'distribution') {
+                elements.forEach((el) => {
+                    if (el.type === 'breakerLink') {
+                        return;
+                    }
+                    let obj = {
+                        id: el.id,
+                        name: `Breaker ${el.data.breaker_number}`,
+                        breaker_number: +el.data.breaker_number,
+                        phase_configuration: el.data.phase_configuration,
+                        rated_amps: el.data.rated_amps,
+                        voltage: +el.data.voltage,
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: el.data.equipment_link,
+                        sensor_id: el.data.sensor_id,
+                        device_id: el.data.device_id,
+                    };
+                    panelBreakerObjs.push(obj);
+                });
+            }
+
+            if (activePanelType === 'disconnect') {
+                disconnectBreakersNodes.forEach((el) => {
+                    if (el.type === 'breakerLink') {
+                        return;
+                    }
+
+                    let obj = {
+                        id: el.id,
+                        name: `Breaker ${el.data.breaker_number}`,
+                        breaker_number: +el.data.breaker_number,
+                        phase_configuration: el.data.phase_configuration,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: el.data.equipment_link,
+                        sensor_id: el.data.sensor_id,
+                        device_id: el.data.device_id,
+                    };
+                    panelBreakerObjs.push(obj);
+                });
+            }
+
+            let params = `?panel_id=${panelID}`;
+            await axios
+                .post(`${BaseUrl}${createBreaker}${params}`, panelBreakerObjs, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            console.log('Failed to save Breakers');
+        }
+    };
 
     // Trigers Breaker API to save
     useEffect(() => {
@@ -1188,7 +1212,12 @@ const CreatePanel = () => {
             }
         };
         saveBreakersData(generatedPanelId);
+        updateBreakerWithPanelId(generatedPanelId);
     }, [generatedPanelId]);
+
+    useEffect(() => {
+        console.log('elements => ', elements);
+    });
 
     useEffect(() => {
         let newBreakers = [];
@@ -1613,7 +1642,6 @@ const CreatePanel = () => {
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
-                                    // getJSONFormatedData();
                                     // handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
@@ -1675,6 +1703,9 @@ const CreatePanel = () => {
                                 id="userState"
                                 className="font-weight-bold"
                                 onChange={(e) => {
+                                    if (e.target.value === 'Select Location') {
+                                        return;
+                                    }
                                     handleChange('space_id', e.target.value);
                                 }}>
                                 <option>Select Location</option>
