@@ -893,7 +893,6 @@ const IndividualPassiveDevice = () => {
 
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [getSearchValue, setGetSearchValue] = useState('');
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
 
@@ -1251,7 +1250,6 @@ const IndividualPassiveDevice = () => {
                             </div>
                         </div>
                         <div className="col-8">
-                            {/* TODO: */}
                             <h5 className="device-title">Sensors ({sensors.length})</h5>
                             <div className="mt-2">
                                 <div className="active-sensor-header">
@@ -1261,13 +1259,9 @@ const IndividualPassiveDevice = () => {
                                             className="search-box ml-2"
                                             type="search"
                                             name="search"
-                                            onChange={(e) => {
-                                                console.log('e.target.value', e.target.value);
-                                                setGetSearchValue(e.target.value);
-                                                handleSearchChange();
-                                            }}
                                             placeholder="Search..."
                                             value={searchSensor}
+                                            onChange={handleSearchChange}
                                         />
                                     </div>
                                 </div>
@@ -1281,161 +1275,71 @@ const IndividualPassiveDevice = () => {
                                 </div>
                             ) : (
                                 <>
-                                    {getSearchValue?.length === 0 && (
-                                        <>
-                                            {sensors.map((record, index) => {
-                                                return (
-                                                    <>
-                                                        {record.equipment_id === '' ? (
-                                                            <div className="sensor-container-style-notAttached mt-3">
-                                                                <div className="sensor-data-style">
-                                                                    <span className="sensor-data-no">{index + 1}</span>
-                                                                    <span className="sensor-data-title">
-                                                                        Not Attached
-                                                                    </span>
-                                                                </div>
-                                                                <div className="sensor-data-style-right">
-                                                                    <FontAwesomeIcon
-                                                                        icon={faChartMixed}
-                                                                        size="md"
-                                                                        onClick={() => {
-                                                                            handleChartShow(record.id);
-                                                                        }}
-                                                                    />
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-default passive-edit-style"
-                                                                        onClick={() => {
-                                                                            handleBreakerShow();
-                                                                            setCurrentRecord(record);
-                                                                            setCurrentIndex(index);
-                                                                            setEquipmentId(record.equipment_id);
-                                                                        }}>
-                                                                        Edit
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="sensor-container-style mt-3">
-                                                                <div className="sensor-data-style">
-                                                                    <span className="sensor-data-no">{index + 1}</span>
-                                                                    <span className="sensor-data-title">
-                                                                        {record.breaker_link}
-                                                                    </span>
-                                                                    <span className="sensor-data-device">
-                                                                        {record.equipment}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="sensor-data-style-right">
-                                                                    <FontAwesomeIcon
-                                                                        icon={faChartMixed}
-                                                                        size="md"
-                                                                        onClick={() => {
-                                                                            handleChartShow(record.id);
-                                                                        }}
-                                                                    />
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-default passive-edit-style"
-                                                                        onClick={() => {
-                                                                            setEditSenorModelRefresh(true);
-                                                                            setCurrentSensorObj(record);
-                                                                            openEditSensorPanelModel();
-                                                                        }}>
-                                                                        Edit
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                );
-                                            })}
-                                        </>
-                                    )}
-                                    {getSearchValue?.length > 0 && (
-                                        <>
-                                            {sensors
-                                                ?.filter((item) => {
-                                                    return (
-                                                        item?.breaker_link?.includes(getSearchValue) ||
-                                                        item?.breaker_id?.includes(getSearchValue) ||
-                                                        item?.equipment?.includes(getSearchValue) ||
-                                                        item?.name?.includes(getSearchValue)
-                                                    );
-                                                })
-                                                ?.map((record, index) => {
-                                                    return (
-                                                        <>
-                                                            {record.equipment_id === '' ? (
-                                                                <div className="sensor-container-style-notAttached mt-3">
-                                                                    <div className="sensor-data-style">
-                                                                        <span className="sensor-data-no">
-                                                                            {index + 1}
-                                                                        </span>
-                                                                        <span className="sensor-data-title">
-                                                                            Not Attached
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="sensor-data-style-right">
-                                                                        <FontAwesomeIcon
-                                                                            icon={faChartMixed}
-                                                                            size="md"
-                                                                            onClick={() => {
-                                                                                handleChartShow(record.id);
-                                                                            }}
-                                                                        />
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-default passive-edit-style"
-                                                                            onClick={() => {
-                                                                                handleBreakerShow();
-                                                                                setCurrentRecord(record);
-                                                                                setCurrentIndex(index);
-                                                                                setEquipmentId(record.equipment_id);
-                                                                            }}>
-                                                                            Edit
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="sensor-container-style mt-3">
-                                                                    <div className="sensor-data-style">
-                                                                        <span className="sensor-data-no">
-                                                                            {index + 1}
-                                                                        </span>
-                                                                        <span className="sensor-data-title">
-                                                                            {record.breaker_link}
-                                                                        </span>
-                                                                        <span className="sensor-data-device">
-                                                                            {record.equipment}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="sensor-data-style-right">
-                                                                        <FontAwesomeIcon
-                                                                            icon={faChartMixed}
-                                                                            size="md"
-                                                                            onClick={() => {
-                                                                                handleChartShow(record.id);
-                                                                            }}
-                                                                        />
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-default passive-edit-style"
-                                                                            onClick={() => {
-                                                                                setEditSenorModelRefresh(true);
-                                                                                setCurrentSensorObj(record);
-                                                                                openEditSensorPanelModel();
-                                                                            }}>
-                                                                            Edit
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    );
-                                                })}
-                                        </>
-                                    )}
+                                    {filtered.map((record, index) => {
+                                        return (
+                                            <>
+                                                {record.equipment_id === '' ? (
+                                                    <div className="sensor-container-style-notAttached mt-3">
+                                                        <div className="sensor-data-style">
+                                                            <span className="sensor-data-no">{record.index}</span>
+                                                            <span className="sensor-data-title">Not Attached</span>
+                                                        </div>
+                                                        <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-default passive-edit-style"
+                                                                onClick={() => {
+                                                                    handleBreakerShow();
+                                                                    setCurrentRecord(record);
+                                                                    setCurrentIndex(index);
+                                                                    setEquipmentId(record.equipment_id);
+                                                                }}>
+                                                                Edit
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="sensor-container-style mt-3">
+                                                        <div className="sensor-data-style">
+                                                            <span className="sensor-data-no">{record.index}</span>
+                                                            <span className="sensor-data-title">
+                                                                {record.breaker_link}
+                                                            </span>
+                                                            <span className="sensor-data-device">
+                                                                {record.equipment}
+                                                            </span>
+                                                        </div>
+                                                        <div className="sensor-data-style-right">
+                                                            <FontAwesomeIcon
+                                                                icon={faChartMixed}
+                                                                size="md"
+                                                                onClick={() => {
+                                                                    handleChartShow(record.id);
+                                                                }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-default passive-edit-style"
+                                                                onClick={() => {
+                                                                    setEditSenorModelRefresh(true);
+                                                                    setCurrentSensorObj(record);
+                                                                    openEditSensorPanelModel();
+                                                                }}>
+                                                                Edit
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })}
                                 </>
                             )}
                         </div>
