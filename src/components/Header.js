@@ -6,7 +6,7 @@ import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/free-solid-svg-icons';
-import '../pages/portfolio/style.css';
+import '../pages/portfolio/style.scss';
 import Select from '../sharedComponents/form/select';
 
 const Header = (props) => {

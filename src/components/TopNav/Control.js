@@ -9,11 +9,11 @@ import { isUserAuthenticated } from '../../helpers/authUtils';
 import { logoutUser } from '../../redux/actions';
 import { faGear, faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 
-import {ReactComponent as LogoutIcon} from '../../assets/images/logout.svg'
+import { ReactComponent as LogoutIcon } from '../../assets/images/logout.svg';
 
 const Control = () => {
     const location = useLocation();
-    
+
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
     let history = useHistory();
     let cookies = new Cookies();
@@ -31,7 +31,6 @@ const Control = () => {
         }
     };
 
-    
     const setSideNavBar = (componentName) => {
         if (componentName === 'Energy') {
             ComponentStore.update((s) => {
@@ -62,74 +61,71 @@ const Control = () => {
         }
     };
 
-    
     return (
         <>
-            <div className='topbar-buttons-wrapper'>
-            {currentParentRoute === 'buildings' ? (
-                <Link to="/settings/general" class="topbar-buttons">
-                    {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
-                    <div
-                        className={`${
-                            location.pathname.split('/')[1] === 'settings'
-                                ? 'navbar-icon-container-active float-right'
-                                : 'navbar-icon-container float-right'
-                        }`}
-                        style={{ height: '100%' }}>
-                        <button
-                            // className="btn btn-sm float-right font-icon-style"
+            <div className="topbar-buttons-wrapper">
+                {currentParentRoute === 'buildings' ? (
+                    <Link to="/settings/general" className="topbar-buttons">
+                        {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
+                        <div
                             className={`${
                                 location.pathname.split('/')[1] === 'settings'
-                                    ? 'btn btn-sm float-right other-font-icon-style-active'
-                                    : 'btn btn-sm float-right other-font-icon-style'
+                                    ? 'navbar-icon-container-active float-right'
+                                    : 'navbar-icon-container float-right'
                             }`}
-                            onClick={() => {
-                                setSideNavBar('building-settings');
-                            }}>
-                            <FontAwesomeIcon icon={faGear} size="lg" />
-                        </button>
-                    </div>
-                </Link>
-            ) : (
-                <Link to="/settings/account" className='topbar-buttons'>
-                    <div
-                        className={`${
-                            location.pathname.split('/')[1] === 'settings'
-                                ? 'navbar-icon-container-active'
-                                : 'navbar-icon-container'
-                        }`}>
-                        <button
+                            style={{ height: '100%' }}>
+                            <button
+                                // className="btn btn-sm float-right font-icon-style"
+                                className={`${
+                                    location.pathname.split('/')[1] === 'settings'
+                                        ? 'btn btn-sm float-right other-font-icon-style-active'
+                                        : 'btn btn-sm float-right other-font-icon-style'
+                                }`}
+                                onClick={() => {
+                                    setSideNavBar('building-settings');
+                                }}>
+                                <FontAwesomeIcon icon={faGear} size="lg" />
+                            </button>
+                        </div>
+                    </Link>
+                ) : (
+                    <Link to="/settings/account" className="topbar-buttons">
+                        <div
                             className={`${
                                 location.pathname.split('/')[1] === 'settings'
-                                    ? 'btn btn-sm other-font-icon-style-active p-0'
-                                    : 'btn btn-sm other-font-icon-style'
-                            }`}
-                            onClick={() => {
-                                setSideNavBar('account');
-                            }}>
-                            <FontAwesomeIcon icon={faGear} size="lg" />
-                        </button>
-                    </div>
-                </Link>
-            )}
+                                    ? 'navbar-icon-container-active'
+                                    : 'navbar-icon-container'
+                            }`}>
+                            <button
+                                className={`${
+                                    location.pathname.split('/')[1] === 'settings'
+                                        ? 'btn btn-sm other-font-icon-style-active p-0'
+                                        : 'btn btn-sm other-font-icon-style'
+                                }`}
+                                onClick={() => {
+                                    setSideNavBar('account');
+                                }}>
+                                <FontAwesomeIcon icon={faGear} size="lg" />
+                            </button>
+                        </div>
+                    </Link>
+                )}
 
-            <SearchModal />
+                <SearchModal />
 
-            <div className="navbar-icon-container float-right topbar-buttons">
-                <button className="btn btn-sm float-right other-font-icon-style">
-                    <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
-                </button>
+                <div className="navbar-icon-container float-right topbar-buttons">
+                    <button className="btn btn-sm float-right other-font-icon-style">
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
+                    </button>
+                </div>
             </div>
-            </div>
 
-            <button
-                className="btn topbar-logout-btn"
-                onClick={handleLogout}>
-                    <LogoutIcon />
-                    Sign Out
+            <button className="btn topbar-logout-btn" onClick={handleLogout}>
+                <LogoutIcon />
+                Sign Out
             </button>
         </>
-    )
-}
+    );
+};
 
 export default Control;
