@@ -1,0 +1,38 @@
+@import '../../assets/scss/colors';
+
+.typography-wrapper {
+    &.subheader {
+        margin: 0;
+        padding: 0;
+
+        &.md {
+            font-weight: 400;
+            margin: 0 0 0.125rem 0;
+            font-style: normal;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: $primary-gray-800;
+        }
+
+        &.sm {
+            font-weight: 400;
+            font-size: 0.75rem;
+            line-height: 1.125rem;
+            color: $primary-gray-500;
+            margin-top: 0;
+        }
+
+        &.Regular {
+            font-weight: 400;
+        }
+        &.Medium {
+            font-weight: 500;
+        }
+        &.SemiBold {
+            font-weight: 600;
+        }
+        &.Bold {
+            font-weight: 700;
+        }
+    }
+}
