@@ -365,8 +365,8 @@ const DeviceChartModel = ({
     // }
     const getCSVLinkData = () => {
         // console.log("csv entered");
-        // let arr=seriesData.length > 0 ? seriesData[0].data : [];
-        // TimeZoneConvert(arr);
+        let arr = seriesData.length > 0 ? seriesData[0].data : [];
+        let sData = removeDuplicates(arr);
         // console.log(arr);
         // console.log(sData);
         let streamData = seriesData.length > 0 ? seriesData[0].data : [];
@@ -413,6 +413,7 @@ const DeviceChartModel = ({
                         size="lg"
                         onClick={() => {
                             handleChartClose();
+
                             handleRefresh();
                         }}
                     />

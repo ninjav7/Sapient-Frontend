@@ -12,7 +12,7 @@ import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, 
 import '../style.css';
 import './panel-style.css';
 
-const DisconnectedBreakerFlow = ({ data, id }) => {
+const BreakersComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -25,7 +25,7 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    const [currentBreakerData, setCurrentBreakerData] = useState({});
+    // const [currentBreakerObj, setCurrentBreakerObj] = useState({});
 
     const fetchDeviceSensorData = async (deviceId) => {
         try {
@@ -89,25 +89,41 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
         return equip.label;
     };
 
-    useEffect(() => {
-        let currentBreakerObj = Object.assign({}, data);
-        setCurrentBreakerData(currentBreakerObj);
-    }, []);
-
     return (
-        <>
-            <Handle
-                type="source"
-                position="left"
-                id="a"
-                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
-            <Handle
-                type="target"
-                position="left"
-                id="b"
-                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-            />
+        <React.Fragment>
+            {data.breaker_number % 2 === 1 && (
+                <>
+                    <Handle
+                        type="source"
+                        position="left"
+                        id="a"
+                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                    <Handle
+                        type="target"
+                        position="left"
+                        id="b"
+                        style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                </>
+            )}
+
+            {data.breaker_number % 2 === 0 && (
+                <>
+                    <Handle
+                        type="source"
+                        position="right"
+                        id="a"
+                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                    <Handle
+                        type="target"
+                        position="right"
+                        id="b"
+                        style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                </>
+            )}
 
             <FormGroup className="form-group row m-1 mb-4">
                 <div className="breaker-container">
@@ -124,7 +140,7 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                                 <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
                             </div>
                         </div>
-                        {data.equipment_link && data.equipment_link.length !== 0 && (
+                        {!(data.equipment_link.length === 0) ? (
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
@@ -138,7 +154,8 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // setCurrentBreakerObj(element);
+                                            // console.log('Breaker data => ', data);
+                                            // setCurrentBreakerObj(data);
                                             // setCurrentBreakerIndex(index);
                                             // setCurrentEquipIds(element.equipment_link);
                                             // handleCurrentLinkedBreaker(index);
@@ -154,9 +171,7 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                                     </div>
                                 )}
                             </>
-                        )}
-
-                        {data.equipment_link && data.equipment_link.length === 0 && (
+                        ) : (
                             <>
                                 {!(
                                     (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
@@ -165,7 +180,8 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // setCurrentBreakerObj(element);
+                                            // console.log('Breaker data => ', data);
+                                            // setCurrentBreakerObj(data);
                                             // setCurrentBreakerIndex(index);
                                             // setCurrentEquipIds(element.equipment_link);
                                             // handleCurrentLinkedBreaker(index);
@@ -328,7 +344,7 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                                             addSelectedBreakerEquip(e.target.value);
                                             data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        value={data?.equipment_link?.[0]}>
+                                        value={data.equipment_link[0]}>
                                         <option>Select Equipment</option>
                                         {data.equipment_data.map((record) => {
                                             return <option value={record.value}>{record.label}</option>;
@@ -664,8 +680,8 @@ const DisconnectedBreakerFlow = ({ data, id }) => {
                     )} */}
                 </Modal.Footer>
             </Modal>
-        </>
+        </React.Fragment>
     );
 };
 
-export default DisconnectedBreakerFlow;
+export default BreakersComponent;

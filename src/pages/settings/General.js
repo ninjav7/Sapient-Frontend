@@ -503,6 +503,10 @@ const General = () => {
         };
     };
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     // update section end
     return (
         <React.Fragment>
