@@ -19,6 +19,7 @@ import {
     generalEquipments,
     getLocation,
     equipmentType,
+    getEquipmentType,
     addEquipmentType,
     updateEquipmentType,
     getEndUseId,
@@ -92,6 +93,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
                                     placeholder="Enter Name"
                                     readOnly
                                     className="font-weight-bold"
+                                    disabled={true}
                                     defaultValue={equipData.equipment_type}
                                     onChange={(e) => {
                                         handleChange('name', e.target.value);
@@ -108,6 +110,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
                                     id="exampleSelect"
                                     className="font-weight-bold"
                                     defaultValue={equipData.end_use_id}
+                                    disabled={true}
                                     onChange={(e) => {
                                         handleChange('end_use', e.target.value);
                                     }}>
@@ -299,6 +302,7 @@ const EquipmentTypes = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [search, setSearch] = useState('');
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -311,6 +315,36 @@ const EquipmentTypes = () => {
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+
+    const handleSearch = async (e) => {
+        var txt = e.target.value;
+        // console.log(e.target.value);
+        if (txt === '') {
+            setGeneralEquipmentTypeData(equipmentTypeData);
+        } else {
+            if (txt.length > 0) {
+                // console.log(txt)
+                try {
+                    setIsDeviceProcessing(true);
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    let params = `?eqt_name=${txt}`;
+                    await axios.get(`${BaseUrl}${getEquipmentType}${params}`, { headers }).then((res) => {
+                        // console.log('setGeneralEquipmentTypeData => ', res.data);
+                        setGeneralEquipmentTypeData(res.data);
+                        setIsDeviceProcessing(false);
+                    });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Failed to fetch Equipment Type Data');
+                    setIsDeviceProcessing(false);
+                }
+            }
+        }
+    };
 
     const handleChange = (key, value) => {
         // let endUseId=""
@@ -379,6 +413,7 @@ const EquipmentTypes = () => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
+                setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
@@ -404,6 +439,7 @@ const EquipmentTypes = () => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
+                setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
@@ -444,6 +480,7 @@ const EquipmentTypes = () => {
                 // console.log('setGeneralEquipmentTypeData => ', res.data);
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);
+                setEquipmentTypeData(res.data.data);
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
@@ -507,7 +544,15 @@ const EquipmentTypes = () => {
                 <Col xl={3}>
                     <div className="search-container ml-4">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                        <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
+                        <input
+                            className="search-box ml-2"
+                            type="search"
+                            name="search"
+                            placeholder="Search"
+                            onChange={(e) => {
+                                handleSearch(e);
+                            }}
+                        />
                     </div>
                 </Col>
             </Row>
