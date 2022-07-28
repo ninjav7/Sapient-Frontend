@@ -629,7 +629,7 @@ const EditPanel = () => {
                 let newList = [
                     {
                         label: 'Create Panel',
-                        path: '/settings/panels/createPanel',
+                        path: '/settings/panels/create-panel',
                         active: true,
                     },
                 ];

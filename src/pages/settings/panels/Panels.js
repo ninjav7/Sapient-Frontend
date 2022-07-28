@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import { ChevronDown, Search } from 'react-feather';
 import axios from 'axios';
-import { BaseUrl, generalPanels } from '../../../services/Network';
+import { BaseUrl, generalPanels, getLocation } from '../../../services/Network';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
@@ -23,6 +23,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import AddPanelModel from './AddPanelModel';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 
@@ -115,6 +116,11 @@ const Panels = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    // Edit Sensor Panel model state
+    const [showPanelModel, setShowPanelModel] = useState(false);
+    const closeAddPanelModel = () => setShowPanelModel(false);
+    const openAddPanelModel = () => setShowPanelModel(true);
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const tableColumnOptions = [
@@ -125,9 +131,10 @@ const Panels = () => {
     ];
     const [selectedOptions, setSelectedOptions] = useState([]);
 
-    const [generalPanelData, setGeneralPanelData] = useState([]);
-
+    const [panelData, setPanelData] = useState([]);
     const [isPanelDataFetched, setIsPanelDataFetched] = useState(true);
+
+    const [locationData, setLocationData] = useState([]);
 
     useEffect(() => {
         const fetchPanelsData = async () => {
@@ -140,7 +147,7 @@ const Panels = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
-                    setGeneralPanelData(res.data);
+                    setPanelData(res.data);
                     setIsPanelDataFetched(false);
                     console.log(res.data);
                 });
@@ -150,7 +157,26 @@ const Panels = () => {
                 console.log('Failed to fetch Panels Data List');
             }
         };
+
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `${bldgId}`;
+                await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
         fetchPanelsData();
+        fetchLocationData();
     }, [bldgId]);
 
     useEffect(() => {
@@ -190,12 +216,13 @@ const Panels = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <Link to="/settings/panels/createPanel">
-                                <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                    <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
-                                    Add Panel
-                                </button>
-                            </Link>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-primary font-weight-bold"
+                                onClick={openAddPanelModel}>
+                                <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
+                                Add Panel
+                            </button>
                         </div>
                     </div>
                 </Col>
@@ -246,12 +273,19 @@ const Panels = () => {
             <Row>
                 <Col lg={12}>
                     <PanelsTable
-                        generalPanelData={generalPanelData}
+                        generalPanelData={panelData}
                         selectedOptions={selectedOptions}
                         isPanelDataFetched={isPanelDataFetched}
                     />
                 </Col>
             </Row>
+
+            <AddPanelModel
+                showPanelModel={showPanelModel}
+                closeAddPanelModel={closeAddPanelModel}
+                panelData={panelData}
+                locationData={locationData}
+            />
         </React.Fragment>
     );
 };
