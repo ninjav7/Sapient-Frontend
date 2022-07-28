@@ -47,8 +47,8 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
         let obj = Object.assign({}, editEqipmentData);
         obj[key] = value;
         setEditEqipmentData(obj);
-     };
-     // console.log(equipData);
+    };
+    // console.log(equipData);
     //  console.log(endUseData);
     const editDeviceData = async () => {
         let obj = Object.assign({}, editEqipmentData);
@@ -80,61 +80,60 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
     return (
         <>
             {show ? (
-                 <Modal show={show} onHide={close} centered>
-                 <Modal.Header>
-                     <Modal.Title>Edit Equipment Type</Modal.Title>
-                 </Modal.Header>
-                 <Modal.Body>
-                     <Form>
-                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                             <Form.Label>Name</Form.Label>
-                             <Form.Control
-                                 type="text"
-                                 placeholder="Enter Name"
-                                 readOnly
-                                 className="font-weight-bold"
-                                 disabled={true}
-                                defaultValue={equipData.equipment_type}
-                                 onChange={(e) => {
-                                     handleChange('name', e.target.value);
-                                 }}
-                                 autoFocus
-                             />
-                         </Form.Group>
- 
-                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                             <Form.Label>End Use</Form.Label>
-                             <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                defaultValue={equipData.end_use_id}
-                                disabled={true}
-                                onChange={(e) => {
-                                    handleChange('end_use', e.target.value);
-                                }}>
+                <Modal show={show} onHide={close} centered>
+                    <Modal.Header>
+                        <Modal.Title>Edit Equipment Type</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                <Form.Label>Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter Name"
+                                    readOnly
+                                    className="font-weight-bold"
+                                    disabled={true}
+                                    defaultValue={equipData.equipment_type}
+                                    onChange={(e) => {
+                                        handleChange('name', e.target.value);
+                                    }}
+                                    autoFocus
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                <Form.Label>End Use</Form.Label>
+                                <Input
+                                    type="select"
+                                    name="select"
+                                    id="exampleSelect"
+                                    className="font-weight-bold"
+                                    defaultValue={equipData.end_use_id}
+                                    disabled={true}
+                                    onChange={(e) => {
+                                        handleChange('end_use', e.target.value);
+                                    }}>
                                     <option selected>Select End Use</option>
-                                {endUseData.map((record) => {
-                                    return <option value={record.end_user_id}>{record.name}</option>;
-                                })}
-                            </Input>
-                         </Form.Group>
-                     </Form>
-                 </Modal.Body>
-                 <Modal.Footer>
-                     <Button variant="light" onClick={close}>
-                         Cancel
-                     </Button>
-                     <Button
-                         variant="primary"
-                        //  onClick={()=>{editDeviceData();}}
-                         >
-                         Update
-                     </Button>
-                 </Modal.Footer>
-             </Modal>
-               
+                                    {endUseData.map((record) => {
+                                        return <option value={record.end_user_id}>{record.name}</option>;
+                                    })}
+                                </Input>
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="light" onClick={close}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="primary"
+                            //  onClick={()=>{editDeviceData();}}
+                        >
+                            Update
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             ) : null}
         </>
     );
@@ -303,7 +302,7 @@ const EquipmentTypes = () => {
     const handleShow = () => setShow(true);
 
     const [isProcessing, setIsProcessing] = useState(false);
-    const [search,setSearch]=useState('');
+    const [search, setSearch] = useState('');
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -317,14 +316,13 @@ const EquipmentTypes = () => {
     const [pageNo, setPageNo] = useState(1);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
-    const handleSearch=async(e)=>{
-        var txt=e.target.value;
+    const handleSearch = async (e) => {
+        var txt = e.target.value;
         // console.log(e.target.value);
-        if(txt===""){
+        if (txt === '') {
             setGeneralEquipmentTypeData(equipmentTypeData);
-        }
-        else{
-            if(txt.length>0){
+        } else {
+            if (txt.length > 0) {
                 // console.log(txt)
                 try {
                     setIsDeviceProcessing(true);
@@ -344,10 +342,9 @@ const EquipmentTypes = () => {
                     console.log('Failed to fetch Equipment Type Data');
                     setIsDeviceProcessing(false);
                 }
-
             }
         }
-    }
+    };
 
     const handleChange = (key, value) => {
         // let endUseId=""
@@ -416,7 +413,7 @@ const EquipmentTypes = () => {
                 let response = res.data;
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(response.data);
-                setEquipmentTypeData(response.data)
+                setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
@@ -483,7 +480,7 @@ const EquipmentTypes = () => {
                 // console.log('setGeneralEquipmentTypeData => ', res.data);
                 setPaginationData(res.data);
                 setGeneralEquipmentTypeData(res.data.data);
-                setEquipmentTypeData(res.data.data)
+                setEquipmentTypeData(res.data.data);
                 setIsDeviceProcessing(false);
             });
         } catch (error) {
@@ -547,7 +544,15 @@ const EquipmentTypes = () => {
                 <Col xl={3}>
                     <div className="search-container ml-4">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                        <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleSearch(e)}}/>
+                        <input
+                            className="search-box ml-2"
+                            type="search"
+                            name="search"
+                            placeholder="Search"
+                            onChange={(e) => {
+                                handleSearch(e);
+                            }}
+                        />
                     </div>
                 </Col>
             </Row>

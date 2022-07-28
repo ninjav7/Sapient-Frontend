@@ -484,3 +484,9 @@
     width: 50px !important;
     height: 50px !important;
 }
+
+.search-box {
+    font-family: 'Inter' !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+}
