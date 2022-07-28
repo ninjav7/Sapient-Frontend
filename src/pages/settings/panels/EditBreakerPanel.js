@@ -653,24 +653,30 @@ const EditBreakerPanel = () => {
 
     // ReactFlow Code starting!
 
-    const handleBreakerChange = (id, key, value) => {
-        let elementsList = Object.assign([], elements);
+    // const handleBreakerChange = (id, key, value) => {
+    //     let elementsList = Object.assign([], elements);
 
-        elementsList.forEach((el) => {
-            if (el.id === id) {
-                if (key === 'equipment_link') {
-                    let arr = [];
-                    arr.push(value);
-                    value = arr;
-                }
-                if (value === 'Select Volts') {
-                    value = '';
-                }
-                el.data[key] = value;
-            }
-        });
+    //     elementsList.forEach((el) => {
+    //         if (el.id === id) {
+    //             if (key === 'equipment_link') {
+    //                 let arr = [];
+    //                 arr.push(value);
+    //                 value = arr;
+    //             }
+    //             if (value === 'Select Volts') {
+    //                 value = '';
+    //             }
+    //             el.data[key] = value;
+    //         }
+    //     });
 
-        setElements(elementsList);
+    //     setElements(elementsList);
+    // };
+
+    const handleBreakerChange = (id, breakerObj) => {
+        console.log('handleBreakerChange id => ', id);
+        console.log('handleBreakerChange breakerObj => ', breakerObj);
+        console.log('handleBreakerChange elements => ', elements);
     };
 
     const handleDisconnectedBreakerChange = (id, key, value) => {
@@ -952,8 +958,9 @@ const EditBreakerPanel = () => {
     ];
 
     // const [elements, setElements] = useState(initialElements);
-    const [elements, setElements] = useState(initialElements);
-    // const [elements, setElements] = useState([]);
+    const [elements, setElements] = useState();
+    console.log('elements typeof => ', typeof elements);
+
     const [edges, setEdges] = useState(initialEdges);
 
     const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
