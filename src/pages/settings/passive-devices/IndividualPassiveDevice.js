@@ -535,7 +535,7 @@ const IndividualPassiveDevice = () => {
                                                 {record.equipment_id === '' ? (
                                                     <div className="sensor-container-style-notAttached mt-3">
                                                         <div className="sensor-data-style">
-                                                            <span className="sensor-data-no">{index + 1}</span>
+                                                            <span className="sensor-data-no">{record.index}</span>
                                                             <span className="sensor-data-title">Not Attached</span>
                                                         </div>
                                                         <div className="sensor-data-style-right">
@@ -562,7 +562,7 @@ const IndividualPassiveDevice = () => {
                                                 ) : (
                                                     <div className="sensor-container-style mt-3">
                                                         <div className="sensor-data-style">
-                                                            <span className="sensor-data-no">{index + 1}</span>
+                                                            <span className="sensor-data-no">{record.index}</span>
                                                             <span className="sensor-data-title">
                                                                 {record.breaker_link}
                                                             </span>
