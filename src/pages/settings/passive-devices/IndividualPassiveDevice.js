@@ -31,7 +31,6 @@ const IndividualPassiveDevice = () => {
     let history = useHistory();
 
     const { deviceId } = useParams();
-    console.log(deviceId);
     const [sensorId, setSensorId] = useState('');
     // Chart states
     const [showChart, setShowChart] = useState(false);

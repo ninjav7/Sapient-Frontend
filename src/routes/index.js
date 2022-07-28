@@ -491,7 +491,7 @@ const settingsRoutes = {
             parent: 'building-settings',
         },
         {
-            path: '/settings/panels/createPanel',
+            path: '/settings/panels/create-panel/:panelId',
             name: 'Create Panel',
             component: CreatePanel,
             route: PrivateRoute,
