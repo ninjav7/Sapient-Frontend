@@ -23,13 +23,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import BreakersComponent from './Breakers';
-import DisconnectedBreakerComponent from './DisconnectedBreaker';
-import BreakerLink from './BreakerLink';
+import BreakersComponent from './BreakersFlow';
+import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
+import BreakerLink from './BreakerLinkFlow';
 import '../style.css';
 import './panel-style.css';
 
-const CreatePanel = () => {
+const EditBreakerPanel = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -47,11 +47,6 @@ const CreatePanel = () => {
     const [showMain, setShowMain] = useState(false);
     const handleMainClose = () => setShowMain(false);
     const handleMainShow = () => setShowMain(true);
-
-    // JSON Modal
-    const [showJSON, setShowJSON] = useState(false);
-    const handleJsonModelClose = () => setShowJSON(false);
-    const handleJsonModelShow = () => setShowJSON(true);
 
     const [updateData, setUpdateData] = useState({});
     const [equipmentData, setEquipmentData] = useState([]);
@@ -83,9 +78,9 @@ const CreatePanel = () => {
     const [disconnectBreakerCount, setDisconnectBreakerCount] = useState(3);
     const [disconnectBreakerConfig, setDisconnectBreakerConfig] = useState([]);
 
-    const [locationData, setLocationData] = useState([]);
+    const [locationDataList, setLocationDataList] = useState([]);
 
-    const [panelType, setPanelType] = useState([
+    const panelType = [
         {
             name: 'Distribution',
             value: 'distribution',
@@ -94,7 +89,7 @@ const CreatePanel = () => {
             name: 'Disconnect',
             value: 'disconnect',
         },
-    ]);
+    ];
 
     const [disconnectBreaker, setDisconnectBreaker] = useState([
         {
@@ -139,7 +134,7 @@ const CreatePanel = () => {
     const [tripleLinkedBreaker, setTripleLinkedBreaker] = useState([]);
 
     const [activePanelType, setActivePanelType] = useState('distribution');
-    const [generalPanelData, setGeneralPanelData] = useState([]);
+    const [panelsDataList, setPanelsDataList] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
@@ -1268,7 +1263,7 @@ const CreatePanel = () => {
                 let newList = [
                     {
                         label: 'New Panel',
-                        path: '/settings/panels/create-panel',
+                        path: '/settings/panels/edit-panel',
                         active: true,
                     },
                 ];
@@ -1293,6 +1288,7 @@ const CreatePanel = () => {
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPanel(response);
+                    setActivePanelType(response.panel_type);
                 });
             } catch (error) {
                 console.log(error);
@@ -1309,7 +1305,8 @@ const CreatePanel = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    setGeneralPanelData(res.data);
+                    let response = res.data;
+                    setPanelsDataList(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1376,14 +1373,9 @@ const CreatePanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setLocationDataList(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1392,8 +1384,8 @@ const CreatePanel = () => {
         };
 
         fetchSinglePanelData();
-        // fetchLocationData();
-        // fetchPanelsData();
+        fetchPanelsData();
+        fetchLocationData();
         fetchPassiveDeviceData();
         fetchEquipmentData();
     }, [panelId]);
@@ -1634,7 +1626,7 @@ const CreatePanel = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container ml-2" xl={10}>
-                    <span className="heading-style">New Panel</span>
+                    <span className="heading-style">Edit Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="ml-2">
@@ -1649,7 +1641,6 @@ const CreatePanel = () => {
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
-                                    // handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
@@ -1691,7 +1682,7 @@ const CreatePanel = () => {
                                 }}
                                 value={panel.parent_id}>
                                 <option>None</option>
-                                {generalPanelData.map((record) => {
+                                {panelsDataList.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
                             </Input>
@@ -1711,9 +1702,11 @@ const CreatePanel = () => {
                                         return;
                                     }
                                     handleChange('space_id', e.target.value);
-                                }}>
+                                }}
+                                // value={panel.space_id}
+                                value={panel.location}>
                                 <option>Select Location</option>
-                                {locationData.map((record) => {
+                                {locationDataList.map((record) => {
                                     return <option value={record.location_id}>{record.location_name}</option>;
                                 })}
                             </Input>
@@ -1736,10 +1729,11 @@ const CreatePanel = () => {
                                             type="select"
                                             name="state"
                                             id="userState"
-                                            className="font-weight-bold"
+                                            className="fields-disabled-style"
                                             onChange={(e) => {
                                                 setActivePanelType(e.target.value);
-                                            }}>
+                                            }}
+                                            disabled={true}>
                                             {panelType.map((record) => {
                                                 return <option value={record.value}>{record.name}</option>;
                                             })}
@@ -1766,14 +1760,15 @@ const CreatePanel = () => {
                                                     }
                                                     setNormalCount(parseInt(e.target.value));
                                                 }}
-                                                className="breaker-no-width font-weight-bold"
+                                                className="breaker-no-width fields-disabled-style"
+                                                disabled={true}
                                             />
                                         ) : (
                                             <Input
                                                 type="select"
                                                 name="state"
                                                 id="userState"
-                                                className="font-weight-bold breaker-no-width"
+                                                className="font-weight-bold breaker-no-width fields-disabled-style"
                                                 defaultValue={disconnectBreakerCount}
                                                 onChange={(e) => {
                                                     handleDisconnectBreakers(
@@ -1781,7 +1776,8 @@ const CreatePanel = () => {
                                                         parseInt(e.target.value)
                                                     );
                                                     setDisconnectBreakerCount(parseInt(e.target.value));
-                                                }}>
+                                                }}
+                                                disabled={true}>
                                                 {disconnectBreaker.map((record) => {
                                                     return <option value={record.value}>{record.name}</option>;
                                                 })}
@@ -1828,7 +1824,7 @@ const CreatePanel = () => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <div
+                                                {/* <div
                                                     className="breaker-content-middle"
                                                     onClick={() => {
                                                         handleMainShow();
@@ -1837,7 +1833,7 @@ const CreatePanel = () => {
                                                         <i className="uil uil-pen"></i>
                                                     </div>
                                                     <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </FormGroup>
@@ -2081,24 +2077,6 @@ const CreatePanel = () => {
                             handleMainClose();
                         }}>
                         Save
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showJSON} onHide={handleJsonModelClose} centered backdrop="static" keyboard={false}>
-                <Modal.Body>
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                        <Form.Label>Panel JSON Data:</Form.Label>
-                        <Form.Control as="textarea" rows={10} value={jsonPanelData} />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                        <Form.Label>Breakers JSON Data:</Form.Label>
-                        <Form.Control as="textarea" rows={15} value={jsonBreakerData} />
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleJsonModelClose}>
-                        Close
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -2588,4 +2566,4 @@ const CreatePanel = () => {
     );
 };
 
-export default CreatePanel;
+export default EditBreakerPanel;
