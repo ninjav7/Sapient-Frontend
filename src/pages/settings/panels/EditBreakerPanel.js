@@ -23,9 +23,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import BreakersComponent from './Breakers';
-import DisconnectedBreakerComponent from './DisconnectedBreaker';
-import BreakerLink from './BreakerLink';
+import BreakersComponent from './BreakersFlow';
+import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
+import BreakerLink from './BreakerLinkFlow';
 import '../style.css';
 import './panel-style.css';
 
@@ -1311,7 +1311,7 @@ const EditBreakerPanel = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    setGeneralPanelData(res.data);
+                    setPanelsDataList(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1385,7 +1385,7 @@ const EditBreakerPanel = () => {
                     requestedBldgId = bldgId;
                 }
                 await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
+                    setLocationDataList(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1693,7 +1693,7 @@ const EditBreakerPanel = () => {
                                 }}
                                 value={panel.parent_id}>
                                 <option>None</option>
-                                {generalPanelData.map((record) => {
+                                {panelsDataList.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
                             </Input>
