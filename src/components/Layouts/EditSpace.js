@@ -35,7 +35,6 @@ const EditSpace = (props) => {
     const [space, setSpace] = useAtom(spacesList);
     const [typeName, setTypeName] = useState('Room');
     const [closeModal, setCloseModal] = useAtom(closeEditSpaceModal);
-    const [disableButton, setDisableButton] = useState(true);
 
     const [spaceBody, setSpaceBody] = useState({
         building_id: bldgId,
