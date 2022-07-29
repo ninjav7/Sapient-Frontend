@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Input,FormGroup} from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment,listSensor } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment, getEndUseId, updateEquipment, listSensor, searchEquipment} from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -1208,6 +1208,7 @@ const Equipment = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
+    const [DuplicateGeneralEquipmentData, setDuplicateGeneralEquipmentData] = useState([]);
     const [onlineEquipData, setOnlineEquipData] = useState([]);
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
@@ -1228,6 +1229,41 @@ const Equipment = () => {
     ];
 
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [search, setSearch] = useState('');
+
+    // search_by_equipment
+const handleSearchtxt = (e) => {
+    if (e.target.value !== '') {
+        setSearch(e.target.value);
+    } else {
+        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+    }
+};
+
+const handleSearch = async () => {
+    if (search !== '') {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&name=${search}`;
+            await axios.post(`${BaseUrl}${searchEquipment}${params}`,{}, { headers }).then((res) => {
+                let response = res.data;
+                setGeneralEquipmentData(res.data);
+            });
+            setIsEquipDataFetched(false);
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipment Data');
+        }
+    } else {
+        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+    }
+};
 
 
     const handleChange = (key, value) => {
@@ -1303,6 +1339,7 @@ const Equipment = () => {
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData);
+                setDuplicateGeneralEquipmentData(responseData);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
@@ -1335,6 +1372,7 @@ const Equipment = () => {
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData);
+                setDuplicateGeneralEquipmentData(responseData);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
@@ -1513,10 +1551,13 @@ const Equipment = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e) => {
+                                handleSearchtxt(e);
+                            }}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
+                        <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
-                        </span>
+                        </button>
                     </div>
                 </Col>
                 <Col xl={9}>
