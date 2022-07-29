@@ -8,7 +8,9 @@ import {
     floorid,
     flooridNew,
     floorState,
+    floorStaticId,
     reloadSpaces,
+    spaceName2,
     spacesList,
 } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
@@ -23,8 +25,8 @@ const EditSpace = (props) => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
-    const [currentFloorId] = useAtom(flooridNew);
-    console.log('currentFloorId', currentFloorId);
+    const [floorIdNow] = useAtom(floorStaticId);
+    console.log('floorIdNow', floorIdNow);
 
     const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
 
@@ -33,18 +35,28 @@ const EditSpace = (props) => {
     const [space, setSpace] = useAtom(spacesList);
     const [typeName, setTypeName] = useState('Room');
     const [closeModal, setCloseModal] = useAtom(closeEditSpaceModal);
+    const [disableButton, setDisableButton] = useState(true);
+
     const [spaceBody, setSpaceBody] = useState({
         building_id: bldgId,
     });
+    console.log('props.currentFloorId', props.currentFloorId);
+
+    useEffect(() => {
+        if (props.currentFloorId) {
+            setSpaceBody({ ...spaceBody, parent_space: props.currentFloorId });
+        }
+    }, [props.currentFloorId]);
 
     console.log('spaceBody', spaceBody);
-    console.log('currentFloorId', currentFloorId);
 
     console.log('floor2', floor2);
 
     useEffect(() => {
-        setSpaceBody({ ...spaceBody, parent_id: currentFloorId });
-    }, [currentFloorId]);
+        if (floorIdNow) {
+            setSpaceBody({ ...spaceBody, parents: floorIdNow });
+        }
+    }, [floorIdNow]);
 
     const createSpacesAPI = () => {
         const headers = {

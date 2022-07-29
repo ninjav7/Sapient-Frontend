@@ -23,9 +23,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import BreakersComponent from './BreakersFlow';
-import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
-import BreakerLink from './BreakerLinkFlow';
+import BreakersComponent from './Breakers';
+import DisconnectedBreakerComponent from './DisconnectedBreaker';
+import BreakerLink from './BreakerLink';
 import '../style.css';
 import './panel-style.css';
 
@@ -1270,7 +1270,7 @@ const EditBreakerPanel = () => {
                 let newList = [
                     {
                         label: 'New Panel',
-                        path: '/settings/panels/edit-panel',
+                        path: '/settings/panels/create-panel',
                         active: true,
                     },
                 ];
@@ -1295,7 +1295,6 @@ const EditBreakerPanel = () => {
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPanel(response);
-                    setActivePanelType(response.panel_type);
                 });
             } catch (error) {
                 console.log(error);
@@ -1312,8 +1311,7 @@ const EditBreakerPanel = () => {
                 };
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPanelsDataList(response);
+                    setGeneralPanelData(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1380,9 +1378,14 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setLocationDataList(response);
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
+                    setLocationData(res.data);
                 });
             } catch (error) {
                 console.log(error);
@@ -1391,8 +1394,8 @@ const EditBreakerPanel = () => {
         };
 
         fetchSinglePanelData();
-        fetchPanelsData();
-        fetchLocationData();
+        // fetchLocationData();
+        // fetchPanelsData();
         fetchPassiveDeviceData();
         fetchEquipmentData();
     }, [panelId]);
@@ -1633,7 +1636,7 @@ const EditBreakerPanel = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container ml-2" xl={10}>
-                    <span className="heading-style">Edit Panel</span>
+                    <span className="heading-style">New Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="ml-2">
@@ -1648,6 +1651,7 @@ const EditBreakerPanel = () => {
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
+                                    // handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
@@ -1689,7 +1693,7 @@ const EditBreakerPanel = () => {
                                 }}
                                 value={panel.parent_id}>
                                 <option>None</option>
-                                {panelsDataList.map((record) => {
+                                {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
                             </Input>

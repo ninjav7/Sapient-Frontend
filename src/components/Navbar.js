@@ -7,7 +7,7 @@ import logo from '../assets/images/logo.png';
 import sapientLogo from '../assets/images/Sapient_Logo.png';
 import { Settings, User, Search } from 'react-feather';
 import SearchModal from './SearchModal';
-import '../pages/portfolio/style.css';
+import '../pages/portfolio/style.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import './style.css';
