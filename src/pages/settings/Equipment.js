@@ -15,6 +15,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
 import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import { MultiSelect } from 'react-multi-select-component';
+import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
@@ -849,9 +851,78 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
+    const [nameOrder, setNameOrder] = useState(false);
+    const [equipTypeOrder, setEquipTypeOrder] = useState(false);
+    const [locationOrder, setLocationOrder] = useState(false);
+    const [TagsOrder, setTagsOrder] = useState(false);
+    const [sensorOrder, setSensorOrder] = useState(false);
+    const [lastDataOrder, setLastDataOrder] = useState(false);
+    const [deviceIdOrder, setDeviceIdOrder] = useState(false);
+
+    const handleColumnSort = (order, columnName) => {
+        if (columnName === 'name') {
+            setEquipTypeOrder(false);
+            setLocationOrder(false);
+            setTagsOrder(false);
+            setSensorOrder(false);
+            setLastDataOrder(false);
+            setDeviceIdOrder(false);
+        }
+        if (columnName === 'typee.name') {
+            setNameOrder(false);
+            setLocationOrder(false);
+            setTagsOrder(false);
+            setSensorOrder(false);
+            setLastDataOrder(false);
+            setDeviceIdOrder(false);
+        }
+        if (columnName === 'tag') {
+            setEquipTypeOrder(false);
+            setLocationOrder(false);
+            setNameOrder(false);
+            setSensorOrder(false);
+            setLastDataOrder(false);
+            setDeviceIdOrder(false);
+        }
+        if (columnName === 'location') {
+            setEquipTypeOrder(false);
+            setNameOrder(false);
+            setTagsOrder(false);
+            setSensorOrder(false);
+            setLastDataOrder(false);
+            setDeviceIdOrder(false);
+        }
+        if (columnName === 'sensor_link') {
+            setEquipTypeOrder(false);
+            setLocationOrder(false);
+            setTagsOrder(false);
+            setNameOrder(false);
+            setLastDataOrder(false);
+            setDeviceIdOrder(false);
+        }
+        if (columnName === 'device_mac') {
+            setEquipTypeOrder(false);
+            setLocationOrder(false);
+            setTagsOrder(false);
+            setSensorOrder(false);
+            setLastDataOrder(false);
+            setNameOrder(false);
+        }
+        // if (columnName === 'hardware_version') {
+        //     setEquipTypeOrder(false);
+        //     setLocationOrder(false);
+        //     setTagsOrder(false);
+        //     setSensorOrder(false);
+        //     setLastDataOrder(false);
+        //     setDeviceIdOrder(false);
+        // }
+        equipmentDataWithFilter(order, columnName);
+    };
+
+
     const Close1 = () => {
         setModal1(false);
     };
@@ -876,14 +947,142 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                     <Table className="mb-0 bordered table-hover">
                         <thead>
                             <tr>
-                                <th>Status</th>
-                                <th>Name</th>
-                                <th>Equipment Type</th>
-                                <th>Location</th>
-                                <th>Tags</th>
-                                <th>Sensor Number</th>
-                                <th>Last Data</th>
-                                <th>Device ID</th>
+                            {selectedOptions.some((record) => record.value === 'status') && (
+                                <th >Status</th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'name') && (
+                                <th className="active-device-header"
+                                    onClick={() => setNameOrder(!nameOrder)}>
+                                <div className="active-device-flex">
+                                        <div>Name</div>
+                                        {nameOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('ace', 'name')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort('dce', 'name')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </th>
+                                 )}
+                                 {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                <th className="active-device-header"
+                                onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
+                            <div className="active-device-flex">
+                                    <div>Equipment Type</div>
+                                    {equipTypeOrder ? (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('ace', 'typee.name')}>
+                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('dce', 'typee.name')}>
+                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                        </div>
+                                    )}
+                                </div>
+                                </th>
+                                 )}
+                                 {selectedOptions.some((record) => record.value === 'location') && (
+                                <th className="active-device-header"
+                                onClick={() => setLocationOrder(!locationOrder)}>
+                            <div className="active-device-flex">
+                                    <div>Location</div>
+                                    {locationOrder ? (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('ace', 'location')}>
+                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('dce', 'location')}>
+                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                        </div>
+                                    )}
+                                </div>
+                                </th>
+                                 )}
+                                 {selectedOptions.some((record) => record.value === 'tags') && (
+                                <th className="active-device-header"
+                                onClick={() => setTagsOrder(!TagsOrder)}>
+                            <div className="active-device-flex">
+                                    <div>Tags</div>
+                                    {TagsOrder ? (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('ace', 'tag')}>
+                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('dce', 'tag')}>
+                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                        </div>
+                                    )}
+                                </div>
+                                </th>
+                                 )}
+                                {selectedOptions.some((record) => record.value === 'sensor_number') && (
+                                <th className="active-device-header"
+                                onClick={() => setSensorOrder(!sensorOrder)}>
+                            <div className="active-device-flex">
+                                    <div>Sensor Number</div>
+                                    {sensorOrder ? (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('ace', 'sensor_link')}>
+                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('dce', 'sensor_link')}>
+                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                        </div>
+                                    )}
+                                </div>
+                                </th>
+                                 )}
+                                {selectedOptions.some((record) => record.value === 'last_data') && (
+                                <th className="active-device-header">
+                            <div className="active-device-flex">
+                                    <div>Last Data</div>
+                                </div>
+                                </th>
+                                 )}
+                                {selectedOptions.some((record) => record.value === 'device_id') && (
+                                <th className="active-device-header"
+                                onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
+                            <div className="active-device-flex">
+                                    <div>Device ID</div>
+                                    {deviceIdOrder ? (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('ace', 'device_mac')}>
+                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="ml-2"
+                                            onClick={() => handleColumnSort('dce', 'device_mac')}>
+                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                        </div>
+                                    )}
+                                </div>
+                                </th>
+                                 )}
                             </tr>
                         </thead>
                         {isEquipDataFetched ? (
@@ -1003,6 +1202,19 @@ const Equipment = () => {
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
+    const tableColumnOptions = [
+        { label: 'Status', value: 'status' },
+        { label: 'Name', value: 'name' },
+        { label: 'Equipment Type', value: 'equip_type' },
+        { label: 'Location', value: 'location' },
+        { label: 'Tags', value: 'tags' },
+        { label: 'Sensor Number', value: 'sensor_number' },
+        { label: 'Last Data', value: 'last_data' },
+        { label: 'Device Id', value: 'device_id' },
+    ];
+
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
@@ -1063,6 +1275,38 @@ const Equipment = () => {
         } catch (error) {
             setIsProcessing(false);
             console.log('Failed to create Passive device data');
+        }
+    };
+    const equipmentDataWithFilter = async (order, filterBy) => {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&ordered_by=${filterBy}&sort_by=${order}`;
+            await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                let responseData = res.data;
+                setGeneralEquipmentData(responseData);
+                let onlineEquip = [];
+                let offlineEquip = [];
+                responseData.forEach((record) => {
+                    if (record.status === 'Online') {
+                        onlineEquip.push(record);
+                    }
+                    if (record.status === 'Offline') {
+                        offlineEquip.push(record);
+                    }
+                });
+                setOnlineEquipData(onlineEquip);
+                setOfflineEquipData(offlineEquip);
+                setIsEquipDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipments Data');
         }
     };
     const fetchEquipmentData = async () => {
@@ -1211,6 +1455,17 @@ const Equipment = () => {
                 s.parent = 'building-settings';
             });
         };
+        let arr = [
+            { label: 'Status', value: 'status' },
+            { label: 'Name', value: 'name' },
+            { label: 'Equipment Type', value: 'equip_type' },
+            { label: 'Location', value: 'location' },
+            { label: 'Tags', value: 'tags' },
+            { label: 'Sensor Number', value: 'sensor_number' },
+            { label: 'Last Data', value: 'last_data' },
+            { label: 'Device Id', value: 'device_id' },
+        ];
+        setSelectedOptions(arr);
         updateBreadcrumbStore();
     }, []);
 
@@ -1296,32 +1551,35 @@ const Equipment = () => {
                     </button>
 
                     {/* ---------------------------------------------------------------------- */}
-                    <UncontrolledDropdown className="d-inline float-right mr-3">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem>Olivia Rhye</DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
+                    <div className="float-right">
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return 'Columns';
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={11}>
                     {selectedTab === 0 && (
-                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
+                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
+                        equipmentDataWithFilter={equipmentDataWithFilter}/>
                     )}
                     {selectedTab === 1 && (
-                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
+                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
+                        equipmentDataWithFilter={equipmentDataWithFilter}/>
                     )}
                     {selectedTab === 2 && (
-                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData}/>
+                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
+                        equipmentDataWithFilter={equipmentDataWithFilter}/>
                     )}
                 </Col>
             </Row>
