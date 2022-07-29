@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import {
@@ -23,7 +23,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
-import CustomNodeSelector from './panel-breaker-poc/CustomNodeSelector';
 import BreakersComponent from './Breakers';
 import DisconnectedBreakerComponent from './DisconnectedBreaker';
 import BreakerLink from './BreakerLink';
@@ -33,6 +32,8 @@ import './panel-style.css';
 const CreatePanel = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const { panelId } = useParams();
 
     const { v4: uuidv4 } = require('uuid');
     const generateBreakerLinkId = () => uuidv4();
@@ -68,16 +69,7 @@ const CreatePanel = () => {
 
     const [linkedSensors, setLinkedSensors] = useState([]);
 
-    const [panel, setPanel] = useState({
-        name: 'Panel Name',
-        parent_panel: '',
-        device_id: '',
-        space_id: '',
-        voltage: '',
-        phase_config: 1,
-        rated_amps: 0,
-        breaker_count: 48,
-    });
+    const [panel, setPanel] = useState({});
 
     const [panelConfig, setPanelConfig] = useState({
         voltage: '',
@@ -426,67 +418,6 @@ const CreatePanel = () => {
         }
     };
 
-    const getJSONFormatedData = () => {
-        let newPanel = Object.assign({}, panel);
-        if (activePanelType === 'distribution') {
-            newPanel.breaker_count = normalCount;
-        }
-        if (activePanelType === 'disconnect') {
-            newPanel.breaker_count = disconnectBreakerCount;
-        }
-        newPanel.panel_type = activePanelType;
-        setJsonPanelData(JSON.stringify(newPanel, undefined, 4));
-
-        let panelBreakerObjs = [];
-
-        if (activePanelType === 'distribution') {
-            elements.forEach((el) => {
-                if (el.type === 'breakerLink') {
-                    return;
-                }
-
-                let obj = {
-                    id: el.id,
-                    name: `Breaker ${el.data.breaker_number}`,
-                    breaker_number: +el.data.breaker_number,
-                    phase_configuration: el.data.phase_configuration,
-                    rated_amps: el.data.rated_amps,
-                    voltage: +el.data.voltage,
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: el.data.equipment_link,
-                    sensor_id: el.data.sensor_id,
-                    device_id: el.data.device_id,
-                };
-                panelBreakerObjs.push(obj);
-            });
-        }
-
-        if (activePanelType === 'disconnect') {
-            disconnectBreakersNodes.forEach((el) => {
-                if (el.type === 'breakerLink') {
-                    return;
-                }
-
-                let obj = {
-                    id: el.id,
-                    name: `Breaker ${el.data.breaker_number}`,
-                    breaker_number: +el.data.breaker_number,
-                    phase_configuration: el.data.phase_configuration,
-                    rated_amps: el.data.rated_amps,
-                    voltage: +el.data.voltage,
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: el.data.equipment_link,
-                    sensor_id: el.data.sensor_id,
-                    device_id: el.data.device_id,
-                };
-                panelBreakerObjs.push(obj);
-            });
-        }
-        setJsonBreakerData(JSON.stringify(panelBreakerObjs, undefined, 4));
-    };
-
     const mainVoltageChange = (voltageValue) => {
         // let newArray = normalStruct;
 
@@ -790,6 +721,8 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                savePanelData: savePanelData,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 70 },
             draggable: false,
@@ -815,6 +748,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 140 },
             draggable: false,
@@ -839,6 +773,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 70 },
@@ -864,6 +799,7 @@ const CreatePanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 140 },
@@ -1043,7 +979,6 @@ const CreatePanel = () => {
 
     // ************* added node and egde types ********************
     const nodeTypes = {
-        customnode: CustomNodeSelector,
         breakerComponent: BreakersComponent,
         disconnectedBreakerComponent: DisconnectedBreakerComponent,
         breakerLink: BreakerLink,
@@ -1111,6 +1046,88 @@ const CreatePanel = () => {
             ),
         []
     );
+
+    const updateBreakerWithPanelId = (panelId) => {
+        let newArray = elements;
+        newArray.forEach((obj) => {
+            if (obj.type === 'breakerLink') {
+                return;
+            }
+            obj.data.panelId = panelId;
+        });
+        setElements(newArray);
+    };
+
+    const saveBreakersData = async (panelID) => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let panelBreakerObjs = [];
+
+            if (activePanelType === 'distribution') {
+                elements.forEach((el) => {
+                    if (el.type === 'breakerLink') {
+                        return;
+                    }
+                    let obj = {
+                        id: el.id,
+                        name: `Breaker ${el.data.breaker_number}`,
+                        breaker_number: +el.data.breaker_number,
+                        phase_configuration: el.data.phase_configuration,
+                        rated_amps: el.data.rated_amps,
+                        voltage: +el.data.voltage,
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: el.data.equipment_link,
+                        sensor_id: el.data.sensor_id,
+                        device_id: el.data.device_id,
+                    };
+                    panelBreakerObjs.push(obj);
+                });
+            }
+
+            if (activePanelType === 'disconnect') {
+                disconnectBreakersNodes.forEach((el) => {
+                    if (el.type === 'breakerLink') {
+                        return;
+                    }
+
+                    let obj = {
+                        id: el.id,
+                        name: `Breaker ${el.data.breaker_number}`,
+                        breaker_number: +el.data.breaker_number,
+                        phase_configuration: el.data.phase_configuration,
+                        rated_amps: 0,
+                        voltage: '',
+                        link_type: 'unlinked',
+                        link_id: '',
+                        equipment_link: el.data.equipment_link,
+                        sensor_id: el.data.sensor_id,
+                        device_id: el.data.device_id,
+                    };
+                    panelBreakerObjs.push(obj);
+                });
+            }
+
+            let params = `?panel_id=${panelID}`;
+            await axios
+                .post(`${BaseUrl}${createBreaker}${params}`, panelBreakerObjs, {
+                    headers: header,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                });
+
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            console.log('Failed to save Breakers');
+        }
+    };
 
     // Trigers Breaker API to save
     useEffect(() => {
@@ -1188,6 +1205,7 @@ const CreatePanel = () => {
             }
         };
         saveBreakersData(generatedPanelId);
+        updateBreakerWithPanelId(generatedPanelId);
     }, [generatedPanelId]);
 
     useEffect(() => {
@@ -1249,8 +1267,8 @@ const CreatePanel = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Create Panel',
-                        path: '/settings/panels/createPanel',
+                        label: 'New Panel',
+                        path: '/settings/panels/create-panel',
                         active: true,
                     },
                 ];
@@ -1264,6 +1282,41 @@ const CreatePanel = () => {
     }, []);
 
     useEffect(() => {
+        const fetchSinglePanelData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&panel_id=${panelId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setPanel(response);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Panels Data List');
+            }
+        };
+
+        const fetchPanelsData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
+                    setGeneralPanelData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Panels Data List');
+            }
+        };
+
         const fetchEquipmentData = async () => {
             try {
                 let headers = {
@@ -1287,45 +1340,6 @@ const CreatePanel = () => {
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch all Equipments Data');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let requestedBldgId;
-                if (bldgId === null || bldgId === 1) {
-                    requestedBldgId = localStorage.getItem('buildingId');
-                } else {
-                    requestedBldgId = bldgId;
-                }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
-        const fetchPanelsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    setGeneralPanelData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Panels Data List');
             }
         };
 
@@ -1355,11 +1369,34 @@ const CreatePanel = () => {
             }
         };
 
-        fetchLocationData();
-        fetchPanelsData();
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let requestedBldgId;
+                if (bldgId === null || bldgId === 1) {
+                    requestedBldgId = localStorage.getItem('buildingId');
+                } else {
+                    requestedBldgId = bldgId;
+                }
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
+        fetchSinglePanelData();
+        // fetchLocationData();
+        // fetchPanelsData();
         fetchPassiveDeviceData();
         fetchEquipmentData();
-    }, [bldgId]);
+    }, [panelId]);
 
     useEffect(() => {
         if (disconnectBreakerCount === 3) {
@@ -1595,8 +1632,8 @@ const CreatePanel = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title" style={{ marginLeft: '20px' }}>
-                <Col className="header-container" xl={10}>
+            <Row className="page-title">
+                <Col className="header-container ml-2" xl={10}>
                     <span className="heading-style">New Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
@@ -1606,19 +1643,16 @@ const CreatePanel = () => {
                                     Cancel
                                 </button>
                             </Link>
-                            {/* <Link to="/settings/panels"> */}
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
                                 disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                 onClick={() => {
                                     savePanelData();
-                                    // getJSONFormatedData();
                                     // handleJsonModelShow();
                                 }}>
                                 {isProcessing ? 'Saving...' : 'Save'}
                             </button>
-                            {/* </Link> */}
                         </div>
                     </div>
                 </Col>
@@ -1639,6 +1673,7 @@ const CreatePanel = () => {
                                     handleChange('name', e.target.value);
                                 }}
                                 className="font-weight-bold"
+                                value={panel.panel_name}
                             />
                         </FormGroup>
 
@@ -1653,12 +1688,9 @@ const CreatePanel = () => {
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('parent_panel', e.target.value);
-                                }}>
-                                {/* {panel.parent_id !== null ? (
-                                    <option value={panel.parent_id}>{panel.parent}</option>
-                                ) : ( */}
+                                }}
+                                value={panel.parent_id}>
                                 <option>None</option>
-                                {/* )} */}
                                 {generalPanelData.map((record) => {
                                     return <option value={record.panel_id}>{record.panel_name}</option>;
                                 })}
@@ -1675,6 +1707,9 @@ const CreatePanel = () => {
                                 id="userState"
                                 className="font-weight-bold"
                                 onChange={(e) => {
+                                    if (e.target.value === 'Select Location') {
+                                        return;
+                                    }
                                     handleChange('space_id', e.target.value);
                                 }}>
                                 <option>Select Location</option>

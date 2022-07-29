@@ -31,7 +31,8 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { TailSpin } from 'react-loader-spinner';
 // import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import './style.css';
+import './style.scss';
+import PortfolioKPIs from './PortfolioKPIs';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -276,29 +277,26 @@ const PortfolioOverview = () => {
 
     let [color, setColor] = useState('#ffffff');
 
-    const handleChange=(e,value)=>{
+    const handleChange = (e, value) => {
         // console.log("Selected Item ",value);
-        if(value==="HVAC"){
+        if (value === 'HVAC') {
             const seriesIndex = 0;
             const dataPointIndex = 0;
             ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
-        }
-        else if(value==="Lighting"){
+        } else if (value === 'Lighting') {
             const seriesIndex = 0;
             const dataPointIndex = 1;
             ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
-        }
-        else if(value==="Process"){
+        } else if (value === 'Process') {
             const seriesIndex = 0;
             const dataPointIndex = 2;
             ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
-        }
-        else if(value==="Plug"){
+        } else if (value === 'Plug') {
             const seriesIndex = 0;
             const dataPointIndex = 3;
             ApexCharts.exec('genderplot', 'toggleDataPointSelection', seriesIndex, dataPointIndex);
         }
-    }
+    };
     // const [series, setSeries] = useState([44, 55, 41, 17]);
     const [series, setSeries] = useState([0, 0, 0, 0]);
 
@@ -307,10 +305,10 @@ const PortfolioOverview = () => {
             type: 'donut',
             id: 'genderplot',
             events: {
-                mounted: function(chartContext, config) {
-                   chartContext.toggleDataPointSelection(0,0)
-                 },
-              }
+                mounted: function (chartContext, config) {
+                    chartContext.toggleDataPointSelection(0, 0);
+                },
+            },
         },
         labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
         colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
@@ -583,6 +581,8 @@ const PortfolioOverview = () => {
         setTopEnergyDensity(topVal);
     }, [buildingsEnergyConsume]);
 
+    console.log(buildingsEnergyConsume, 'buildingsEnergyConsume');
+
     return (
         <React.Fragment>
             {/* {!isLoading && (
@@ -599,77 +599,18 @@ const PortfolioOverview = () => {
                         <Skeleton width={80} height={20} />
                     </Row> */}
                 <Row className="mt-2">
-                    <div className="energy-summary-alignment">
-                        <div className="card-box-style button-style">
-                            <div className="card-body">
-                                <h5 className="card-title subtitle-style">Total Buildings</h5>
-                                <p className="card-text card-content-style">{buildingsEnergyConsume.length}</p>
-                            </div>
-                        </div>
-
-                        <div className="card-box-style button-style">
-                            <div className="card-body">
-                                <DetailedButton
-                                    title="Total Consumption"
-                                    description={overalldata.total_consumption.now / 1000}
-                                    unit="kWh"
-                                    value={percentageHandler(
-                                        overalldata.total_consumption.now,
-                                        overalldata.total_consumption.old
-                                    )}
-                                    consumptionNormal={
-                                        overalldata.total_consumption.now >= overalldata.total_consumption.old
-                                    }
-                                    infoText={`Total energy consumption accross all your buildings for the past ${daysCount} days.`}
-                                    infoType={`total-eng-cnsmp`}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="card-box-style button-style">
-                            <div className="card-body">
-                                <DetailedButton
-                                    title="Average Energy Density"
-                                    description={overalldata.average_energy_density.now / 1000}
-                                    unit="kWh/sq.ft."
-                                    value={percentageHandler(
-                                        overalldata.average_energy_density.now,
-                                        overalldata.average_energy_density.old
-                                    )}
-                                    consumptionNormal={
-                                        overalldata.average_energy_density.now >= overalldata.average_energy_density.old
-                                    }
-                                    infoText={`Average energy density (kWh / sq.ft.) accross all your buildings for the past ${daysCount} days.`}
-                                    infoType={`avg-eng-dnty`}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="card-box-style button-style">
-                            <div className="card-body">
-                                <DetailedButton
-                                    title="12 Mo. Electric EUI"
-                                    description={overalldata.yearly_electric_eui.now / 1000}
-                                    unit="kBtu/ft/yr"
-                                    value={percentageHandler(
-                                        overalldata.yearly_electric_eui.now,
-                                        overalldata.yearly_electric_eui.old
-                                    )}
-                                    consumptionNormal={
-                                        overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
-                                    }
-                                    // infoText={`Total EUI (Energy Use Intensity) accross all your buildings for the past ${daysCount} days.`}
-                                    infoText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
-                                    infoType={`total-eui`}
-                                />
-                            </div>
-                        </div>
+                    <div className="col">
+                        <PortfolioKPIs
+                            daysCount={daysCount}
+                            totalBuilding={buildingsEnergyConsume.length}
+                            overalldata={overalldata}
+                        />
                     </div>
                 </Row>
 
                 <Row className="mt-2">
                     <Col xl={5}>
-                        <div className="card-body mt-2">
+                        <div className="mt-2">
                             <h6 className="custom-title">Energy Density Top Buildings</h6>
                             <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
                             <div className="portfolio-map-widget">
@@ -798,7 +739,9 @@ const PortfolioOverview = () => {
                                     {energyConsumption.map((record, index) => {
                                         return (
                                             <div>
-                                                <div className="custom-enduse-table-style consumption-style m-2 p-1" onMouseOver={(e)=>handleChange(e,record.device)}>
+                                                <div
+                                                    className="custom-enduse-table-style consumption-style m-2 p-1"
+                                                    onMouseOver={(e) => handleChange(e, record.device)}>
                                                     <div className="ml-2">
                                                         {record.device === 'HVAC' && (
                                                             <div
@@ -949,7 +892,7 @@ const PortfolioOverview = () => {
                                                                 {record.energy_consumption.now <=
                                                                     record.energy_consumption.old && (
                                                                     <button
-                                                                        className="button-success text-success btn-font-style"
+                                                                        className="button-success value-success btn-font-style"
                                                                         style={{ width: '100px' }}>
                                                                         <i className="uil uil-chart-down">
                                                                             <strong>
@@ -965,7 +908,7 @@ const PortfolioOverview = () => {
                                                                 {record.energy_consumption.now >
                                                                     record.energy_consumption.old && (
                                                                     <button
-                                                                        className="button-danger text-danger btn-font-style"
+                                                                        className="button-danger value-danger btn-font-style"
                                                                         style={{ width: '100px' }}>
                                                                         <i className="uil uil-arrow-growth">
                                                                             <strong>

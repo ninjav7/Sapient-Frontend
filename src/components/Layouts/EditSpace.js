@@ -3,7 +3,16 @@ import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 
 import { Button, Input, Label } from 'reactstrap';
-import { closeEditSpaceModal, floorid, floorState, spacesList } from '../../store/globalState';
+import {
+    closeEditSpaceModal,
+    floorid,
+    flooridNew,
+    floorState,
+    floorStaticId,
+    reloadSpaces,
+    spaceName2,
+    spacesList,
+} from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BaseUrl, createSpace, getSpaceTypes } from '../../services/Network';
@@ -16,42 +25,49 @@ const EditSpace = (props) => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
-    const [currentFloorId] = useAtom(floorid);
-    console.log('currentFloorId', currentFloorId);
+    const [floorIdNow] = useAtom(floorStaticId);
+    console.log('floorIdNow', floorIdNow);
+
+    const [reloadSpace, setReloadSpace] = useAtom(reloadSpaces);
 
     const [spaceName, setSpaceName] = useState('');
     const [floor2, setFloor1] = useAtom(floorState);
     const [space, setSpace] = useAtom(spacesList);
     const [typeName, setTypeName] = useState('Room');
     const [closeModal, setCloseModal] = useAtom(closeEditSpaceModal);
+    const [disableButton, setDisableButton] = useState(true);
+
     const [spaceBody, setSpaceBody] = useState({
-        floor_id: currentFloorId,
         building_id: bldgId,
     });
+    console.log('props.currentFloorId', props.currentFloorId);
+
+    useEffect(() => {
+        if (props.currentFloorId) {
+            setSpaceBody({ ...spaceBody, parent_space: props.currentFloorId });
+        }
+    }, [props.currentFloorId]);
 
     console.log('spaceBody', spaceBody);
 
+    console.log('floor2', floor2);
+
     useEffect(() => {
+        if (floorIdNow) {
+            setSpaceBody({ ...spaceBody, parents: floorIdNow });
+        }
+    }, [floorIdNow]);
+
+    const createSpacesAPI = () => {
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
-            setFloor1(res?.data);
+        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {
+            setReloadSpace('true');
         });
-    }, []);
-
-    // const createSpacesAPI = () => {
-    //     const headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //         Authorization: `Bearer ${userdata.token}`,
-    //     };
-    //     axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {
-    //         setFloor1(res?.data);
-    //     });
-    // };
+    };
 
     return (
         <>
@@ -78,6 +94,7 @@ const EditSpace = (props) => {
                             setTypeName(e.target.value);
                             setSpaceBody({ ...spaceBody, type_id: e.target.value });
                         }}>
+                        <option>--Select any type--</option>
                         {floor2?.map((item) => {
                             return (
                                 <option key={item.id} value={item.id}>
@@ -95,7 +112,7 @@ const EditSpace = (props) => {
                             setSpace((el) => [...el, { floorIndex: props.floorIndex, spaceName, typeName }]);
                             props.onHide();
                             setCloseModal(true);
-                            // createSpacesAPI();
+                            createSpacesAPI();
                         }}>
                         Save
                     </Button>
