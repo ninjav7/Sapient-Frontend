@@ -63,7 +63,7 @@ const EditBreakerPanel = () => {
     const [generatedPanelId, setGeneratedPanelId] = useState('');
 
     const [linkedSensors, setLinkedSensors] = useState([]);
-
+    const newBreakers = [];
     const [panel, setPanel] = useState({});
 
     const [panelConfig, setPanelConfig] = useState({
@@ -1231,7 +1231,6 @@ const EditBreakerPanel = () => {
     }, []);
 
     useEffect(() => {
-        let newBreakers = [];
         for (let index = 1; index <= normalCount; index++) {
             let obj = {
                 id: `breaker-${index}`,
@@ -1254,6 +1253,7 @@ const EditBreakerPanel = () => {
                     equipment_data: [],
                     passive_data: [],
                     onChange: handleBreakerChange,
+                    elements: elements,
                 },
                 position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
                 draggable: false,
@@ -1269,7 +1269,7 @@ const EditBreakerPanel = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'New Panel',
+                        label: 'Edit Panel',
                         path: '/settings/panels/create-panel',
                         active: true,
                     },
@@ -1593,50 +1593,54 @@ const EditBreakerPanel = () => {
     }, [disconnectBreakerCount]);
 
     useEffect(() => {
-        let newArray = elements;
-        newArray.forEach((obj) => {
-            if (obj.type === 'breakerLink') {
-                return;
-            }
-            obj.data.equipment_data = equipmentData;
-        });
-        setElements(newArray);
+        if (elements) {
+            let newArray = elements;
+            newArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.equipment_data = equipmentData;
+            });
+            setElements(newArray);
 
-        let newDisconnectedArray = disconnectBreakersNodes;
-        newDisconnectedArray.forEach((obj) => {
-            if (obj.type === 'breakerLink') {
-                return;
-            }
-            obj.data.equipment_data = equipmentData;
-        });
-        setDisconnectBreakersNodes(newDisconnectedArray);
+            let newDisconnectedArray = disconnectBreakersNodes;
+            newDisconnectedArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.equipment_data = equipmentData;
+            });
+            setDisconnectBreakersNodes(newDisconnectedArray);
+        }
     }, [equipmentData]);
 
     useEffect(() => {
-        let newArray = elements;
-        newArray.forEach((obj) => {
-            if (obj.type === 'breakerLink') {
-                return;
-            }
-            obj.data.passive_data = passiveDeviceData;
-        });
-        setElements(newArray);
+        if (elements) {
+            let newArray = elements;
+            newArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.passive_data = passiveDeviceData;
+            });
+            setElements(newArray);
 
-        let newDisconnectedArray = disconnectBreakersNodes;
-        newDisconnectedArray.forEach((obj) => {
-            if (obj.type === 'breakerLink') {
-                return;
-            }
-            obj.data.passive_data = passiveDeviceData;
-        });
-        setDisconnectBreakersNodes(newDisconnectedArray);
+            let newDisconnectedArray = disconnectBreakersNodes;
+            newDisconnectedArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.passive_data = passiveDeviceData;
+            });
+            setDisconnectBreakersNodes(newDisconnectedArray);
+        }
     }, [passiveDeviceData]);
 
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container ml-2" xl={10}>
-                    <span className="heading-style">New Panel</span>
+                    <span className="heading-style">Edit Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="ml-2">
