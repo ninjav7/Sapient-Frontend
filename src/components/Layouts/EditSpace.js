@@ -33,8 +33,7 @@ const EditSpace = (props) => {
     const [spaceName, setSpaceName] = useState('');
     const [floor2, setFloor1] = useAtom(floorState);
     const [space, setSpace] = useAtom(spacesList);
-    const [typeName, setTypeName] = useState('');
-    console.log('typeName', typeName);
+    const [typeName, setTypeName] = useState('Room');
     const [closeModal, setCloseModal] = useAtom(closeEditSpaceModal);
     const [disableButton, setDisableButton] = useState(true);
 
@@ -48,13 +47,6 @@ const EditSpace = (props) => {
             setSpaceBody({ ...spaceBody, parent_space: props.currentFloorId });
         }
     }, [props.currentFloorId]);
-
-    useEffect(() => {
-        console.log('typeNameLength', typeName?.length, 'spaceNamelength', spaceName?.length);
-        if (typeName?.length > 0 && spaceName?.length > 0) {
-            setDisableButton(false);
-        }
-    }, [typeName]);
 
     console.log('spaceBody', spaceBody);
 
@@ -116,14 +108,11 @@ const EditSpace = (props) => {
                 <Modal.Footer>
                     <Button onClick={props.onHide}>Cancel</Button>
                     <Button
-                        disabled={disableButton}
                         onClick={() => {
-                            if (!disableButton) {
-                                setSpace((el) => [...el, { floorIndex: props.floorIndex, spaceName, typeName }]);
-                                props.onHide();
-                                setCloseModal(true);
-                                createSpacesAPI();
-                            }
+                            setSpace((el) => [...el, { floorIndex: props.floorIndex, spaceName, typeName }]);
+                            props.onHide();
+                            setCloseModal(true);
+                            createSpacesAPI();
                         }}>
                         Save
                     </Button>
