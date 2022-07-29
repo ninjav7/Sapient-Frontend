@@ -979,13 +979,13 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                     {equipTypeOrder ? (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'typee.name')}>
+                                            onClick={() => handleColumnSort('ace', 'equipments_type')}>
                                             <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                         </div>
                                     ) : (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'typee.name')}>
+                                            onClick={() => handleColumnSort('dce', 'equipments_type')}>
                                             <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                         </div>
                                     )}
@@ -1131,6 +1131,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                 setEquipData(record);
                                                 Toggle(record);
                                             }}>
+                                                 {selectedOptions.some((record) => record.value === 'status') && (
                                             <td className="text-center">
                                                 <div>
                                                     {record.status === 'Online' && (
@@ -1145,15 +1146,21 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                     )}
                                                 </div>
                                             </td>
+                                                 )}
+                                                  {selectedOptions.some((record) => record.value === 'name') && (
                                             <td className="font-weight-bold">
                                                 {!(record.equipments_name === '') ? record.equipments_name : '-'}
                                             </td>
-                                            <td className="font-weight-bold">{record.equipments_type}</td>
+                                                  )}
+                                                  {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                            <td className="font-weight-bold">{record.equipments_type}</td>)}
+                                            {selectedOptions.some((record) => record.value === 'location') && (
                                             <td>
                                                 {record.location === ' > '
                                                     ? ' - '
                                                     : record.location.split('>').reverse().join(' > ')}
-                                            </td>
+                                            </td>)}
+                                            {selectedOptions.some((record) => record.value === 'tags') && (
                                             <td>
                                                 {
                                                     <div className="badge badge-light mr-2 font-weight-bold week-day-style">
@@ -1161,9 +1168,16 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                     </div>
                                                 }
                                             </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'sensor_number') && (
                                             <td>{record.sensor_number}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'last_data') && (
                                             <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'device_id') && (
                                             <td className="font-weight-bold">{record.device_mac}</td>
+                                            )}
                                         </tr>
                                     );
                                 })}
