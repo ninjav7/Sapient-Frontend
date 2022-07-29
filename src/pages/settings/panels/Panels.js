@@ -79,7 +79,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                                             <td className="font-weight-bold panel-name">
                                                 <Link
                                                     to={{
-                                                        pathname: `/settings/panels/editPanel/${record.panel_id}`,
+                                                        pathname: `/settings/panels/edit-panel/${record.panel_id}`,
                                                     }}>
                                                     <a>{record.panel_name}</a>
                                                 </Link>

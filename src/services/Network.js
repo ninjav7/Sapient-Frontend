@@ -59,6 +59,7 @@ export const generalGateway = '/api/config/gateway';
 // panel
 export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
+export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 
