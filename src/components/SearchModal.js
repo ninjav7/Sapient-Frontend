@@ -57,7 +57,7 @@ const SearchModal = () => {
     return (
         <>
             <div className="navbar-icon-container float-right topbar-buttons">
-                <button className="btn btn-sm float-right other-font-icon-style" onClick={() => searchModalOpen()} >
+                <button className="btn btn-sm float-right other-font-icon-style" onClick={() => searchModalOpen()}>
                     <FontAwesomeIcon icon={faBellOn} size="lg" />
                 </button>
             </div>
@@ -79,7 +79,11 @@ const SearchModal = () => {
                                         All Buildings
                                     </option>
                                     {buildings.map((building, index) => {
-                                        return <option value={building.value}>{building.label}</option>;
+                                        return (
+                                            <option key={index} value={building.value}>
+                                                {building.label}
+                                            </option>
+                                        );
                                     })}
                                 </Input>
                             </div>

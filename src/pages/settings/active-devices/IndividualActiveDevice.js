@@ -650,7 +650,7 @@ const IndividualActiveDevice = () => {
                                         return (
                                             <div className="sensor-container-style mt-3">
                                                 <div className="sensor-data-style">
-                                                    <span className="sensor-data-no">{index + 1}</span>
+                                                    <span className="sensor-data-no">{record.index}</span>
                                                     <span className="sensor-data-title">
                                                         {record.equipment_type_name
                                                             ? record.equipment_type_name
