@@ -1,0 +1,107 @@
+@import '../../assets/scss/colors';
+
+.KPI-component {
+    &-wrapper {
+        font-family: 'Inter';
+        background: $primary-gray-50;
+        display: inline-flex;
+        box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625 0.125rem rgba(0, 0, 0, 0.06);
+        border-radius: 0.625rem;
+
+        .trends-badge {
+            margin: 0 0 0.0625rem 0.5rem;
+        }
+    }
+
+    &-title {
+        margin: 0 0 0.3125rem 0;
+        color: $primary-gray-700;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 0.9375rem;
+    }
+
+    &-body {
+        padding: 0.5rem 0.625rem;
+    }
+
+    &-date-wrapper {
+        background: $primary-gray-100;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        margin: 0.4375rem 0.5625rem 0.4375rem 0.625rem;
+    }
+
+    &-date {
+        color: $primary-gray-700;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 0.9375rem;
+    }
+
+    &-time {
+        color: $primary-gray-800;
+        font-weight: 700;
+        font-size: 12px;
+        line-height: 15px;
+    }
+
+    &-text {
+        font-family: 'Space Grotesk' !important;
+        margin: 0;
+        font-style: normal;
+        font-weight: 700;
+        font-size: 1.25rem;
+        line-height: 1.625rem;
+        color: $primary-gray-800;
+    }
+
+    &-unit {
+        font-weight: 600;
+        font-size: 0.75rem;
+        line-height: 0.75rem;
+        color: $primary-gray-700;
+        margin: auto 0 0.29rem 0.25rem;
+    }
+
+    &-tooltip-button {
+        padding: 0;
+        background: none;
+        outline: none;
+        box-shadow: none;
+        border: 0;
+        margin: 0 0 0 0.25rem;
+        cursor: pointer;
+        height: 0.9375rem;
+
+        svg {
+            margin-top: -0.875rem;
+        }
+    }
+
+    &-tooltip-icon {
+        &:hover {
+            path {
+                fill: $primary-gray-800;
+            }
+        }
+    }
+
+    &-row {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.tooltip-inner {
+    background-color: $primary-gray-800;
+    padding: 1rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    max-width: 16.188rem;
+    text-align: left;
+}
+.tooltip.show {
+    opacity: 1;
+}
