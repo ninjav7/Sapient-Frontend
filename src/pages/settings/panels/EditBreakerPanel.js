@@ -12,6 +12,7 @@ import {
     generalPanels,
     generalPassiveDevices,
     createPanel,
+    updatePanel,
     createBreaker,
     generalEquipments,
     listSensor,
@@ -34,6 +35,7 @@ import './panel-style.css';
 const EditBreakerPanel = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const history = useHistory();
 
     const { panelId } = useParams();
 
@@ -66,6 +68,7 @@ const EditBreakerPanel = () => {
     const [linkedSensors, setLinkedSensors] = useState([]);
     const newBreakers = [];
     const [panel, setPanel] = useState({});
+    const [fetchedPanelResponse, setFetchedPanelResponse] = useState({});
     const [panelDataFetched, setIsPanelDataFetched] = useState(false);
 
     const [panelConfig, setPanelConfig] = useState({
@@ -165,12 +168,6 @@ const EditBreakerPanel = () => {
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
-        if (key === 'breaker_count') {
-            value = parseInt(value);
-        }
-        if (key === 'rated_amps') {
-            value = parseInt(value);
-        }
         obj[key] = value;
         setPanel(obj);
     };
@@ -1021,6 +1018,38 @@ const EditBreakerPanel = () => {
     //     setElements(newArray);
     // };
 
+    const comparePanelData = (obj1, obj2) => {
+        return JSON.stringify(obj1) === JSON.stringify(obj2);
+    };
+
+    const savePanelData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let panelObj = {
+                name: panel.panel_name,
+                parent_panel: panel.location_id,
+                space_id: panel.parent_id,
+            };
+            setIsProcessing(true);
+            let params = `?panel_id=${panelId}`;
+            await axios
+                .post(`${BaseUrl}${updatePanel}${params}`, panelObj, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                });
+            setIsProcessing(false);
+        } catch (error) {
+            setIsProcessing(false);
+            console.log('Failed to update Panel');
+        }
+    };
+
     const saveBreakersData = async (panelID) => {
         try {
             setIsProcessing(true);
@@ -1181,6 +1210,7 @@ const EditBreakerPanel = () => {
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
                     setPanel(response);
+                    setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
                 });
             } catch (error) {
@@ -1531,22 +1561,30 @@ const EditBreakerPanel = () => {
                     <span className="heading-style">Edit Panel</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="ml-2">
-                            <Link to="/settings/panels">
-                                <button type="button" className="btn btn-md btn-light font-weight-bold mr-2">
-                                    Cancel
+                        {panelDataFetched ? (
+                            <Skeleton count={1} height={40} width={150} />
+                        ) : (
+                            <div className="ml-2">
+                                <Link to="/settings/panels">
+                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-2">
+                                        Cancel
+                                    </button>
+                                </Link>
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    // disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
+                                    disabled={comparePanelData(panel, fetchedPanelResponse)}
+                                    onClick={() => {
+                                        savePanelData();
+                                        history.push({
+                                            pathname: `/settings/panels`,
+                                        });
+                                    }}>
+                                    {isProcessing ? 'Saving...' : 'Save'}
                                 </button>
-                            </Link>
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
-                                onClick={() => {
-                                    saveBreakersData(panel.panel_id);
-                                }}>
-                                {isProcessing ? 'Saving...' : 'Save'}
-                            </button>
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </Col>
             </Row>
@@ -1568,7 +1606,7 @@ const EditBreakerPanel = () => {
                                     id="panelName"
                                     placeholder="Panel Name"
                                     onChange={(e) => {
-                                        handleChange('name', e.target.value);
+                                        handleChange('panel_name', e.target.value);
                                     }}
                                     className="font-weight-bold"
                                     value={panel.panel_name}
@@ -1591,7 +1629,7 @@ const EditBreakerPanel = () => {
                                     id="userState"
                                     className="font-weight-bold"
                                     onChange={(e) => {
-                                        handleChange('parent_panel', e.target.value);
+                                        handleChange('parent_id', e.target.value);
                                     }}
                                     value={panel.parent_id}>
                                     <option>None</option>
@@ -1620,7 +1658,7 @@ const EditBreakerPanel = () => {
                                         if (e.target.value === 'Select Location') {
                                             return;
                                         }
-                                        handleChange('space_id', e.target.value);
+                                        handleChange('location_id', e.target.value);
                                     }}
                                     value={panel.location_id}>
                                     <option>Select Location</option>
@@ -1720,14 +1758,20 @@ const EditBreakerPanel = () => {
                                 </div>
                             </div>
                             <div className="float-right m-4">
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-secondary font-weight-bold"
-                                    onClick={() => {
-                                        setIsEditing(!isEditing);
-                                    }}>
-                                    {isEditing ? 'Done Editing' : 'Edit Layout'}
-                                </button>
+                                {panelDataFetched ? (
+                                    <Form>
+                                        <Skeleton count={1} height={40} width={150} />
+                                    </Form>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="btn btn-md btn-secondary font-weight-bold"
+                                        onClick={() => {
+                                            setIsEditing(!isEditing);
+                                        }}>
+                                        {isEditing ? 'Done Editing' : 'Edit Layout'}
+                                    </button>
+                                )}
                             </div>
                         </Row>
 
@@ -1971,7 +2015,7 @@ const EditBreakerPanel = () => {
                     </div>
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label className="font-weight-bold">Rated Apms</Form.Label>
+                            <Form.Label className="font-weight-bold">Rated Amps</Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder="Enter Amps"
@@ -2054,7 +2098,7 @@ const EditBreakerPanel = () => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
@@ -2227,7 +2271,7 @@ const EditBreakerPanel = () => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
