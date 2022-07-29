@@ -13,7 +13,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
     const cookies = new Cookies();
     const userdata = cookies.get('user');
     const history = useHistory();
-    // const navigate = useNavigate();
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -73,9 +72,11 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     let response = res.data;
                     panelId = response.id;
                 });
+
             setIsProcessing(false);
+
             history.push({
-                pathname: `/settings/panels/create-panel/${panelId}`,
+                pathname: `/settings/panels/edit-panel/${panelId}`,
             });
         } catch (error) {
             setIsProcessing(false);
