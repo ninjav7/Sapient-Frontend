@@ -1,10 +1,11 @@
 import React from 'react';
 import { percentageHandler } from '../../utils/helper';
 
-import './PortfolioKPIs.scss';
-import { KPIBasic, KPILabeled, KPI_UNITS, KPIPrecentage, KPIWithDate } from '../../sharedComponents/KPIs';
+import { KPIBasic, KPILabeled, KPI_UNITS } from '../../sharedComponents/KPIs';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
-import KPIRank from '../../sharedComponents/KPIs/KPIRank';
+import { formatConsumptionValue } from '../../helpers/helpers';
+
+import './PortfolioKPIs.scss';
 
 const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) => {
     return (
@@ -13,7 +14,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
 
             <KPILabeled
                 title="Total Consumption"
-                value={overalldata.total_consumption.now / 1000}
+                value={formatConsumptionValue(overalldata.total_consumption.now / 1000)}
                 badgePrecentage={percentageHandler(
                     overalldata.total_consumption.now,
                     overalldata.total_consumption.old
@@ -30,7 +31,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
 
             <KPILabeled
                 title="Average Energy Density"
-                value={overalldata.average_energy_density.now / 1000}
+                value={formatConsumptionValue(overalldata.average_energy_density.now / 1000)}
                 badgePrecentage={percentageHandler(
                     overalldata.average_energy_density.now,
                     overalldata.average_energy_density.old
@@ -47,7 +48,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
 
             <KPILabeled
                 title="12 Mo. Electric EUI"
-                value={overalldata.yearly_electric_eui.now / 1000}
+                value={formatConsumptionValue(overalldata.yearly_electric_eui.now / 1000)}
                 badgePrecentage={percentageHandler(
                     overalldata.yearly_electric_eui.now,
                     overalldata.yearly_electric_eui.old
