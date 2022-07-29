@@ -5,7 +5,7 @@ import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, 
 import '../style.css';
 import './panel-style.css';
 
-const BreakerLink = () => {
+const BreakerLinkFlow = () => {
     return (
         <>
             <Handle
@@ -28,4 +28,4 @@ const BreakerLink = () => {
     );
 };
 
-export default BreakerLink;
+export default BreakerLinkFlow;
