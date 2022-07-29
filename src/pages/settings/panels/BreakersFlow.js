@@ -9,7 +9,7 @@ import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, 
 import '../style.css';
 import './panel-style.css';
 
-const BreakersFlow = ({ data, id }) => {
+const BreakersComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -91,7 +91,6 @@ const BreakersFlow = ({ data, id }) => {
 
     const handleChange = (id, key, value) => {
         let breaker = Object.assign({}, breakerData);
-
         if (key === 'equipment_link') {
             let arr = [];
             arr.push(value);
@@ -100,15 +99,9 @@ const BreakersFlow = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
-
         breaker[key] = value;
         setBreakerData(breaker);
     };
-
-    useEffect(() => {
-        console.log('SSR breakerData => ', breakerData);
-        console.log('SSR breakerData.elements => ', breakerData.elements);
-    });
 
     return (
         <React.Fragment>
@@ -150,7 +143,7 @@ const BreakersFlow = ({ data, id }) => {
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
                         <div className="breaker-content-middle">
-                            <div className="breaker-index">{breakerData.breaker_number}</div>
+                            <div className="breaker-index">{data.breaker_number}</div>
                         </div>
                         <div className="breaker-content-middle">
                             <div className="dot-status"></div>
@@ -240,7 +233,7 @@ const BreakersFlow = ({ data, id }) => {
                             <Modal.Title className="edit-breaker-no mt-0">
                                 {breakerData.breaker_level === 'single-breaker' &&
                                     `Breaker ${breakerData.breaker_number}`}
-                                {/* {breakerData.breaker_level === 'double-breaker' &&
+                                {/* {data.breaker_level === 'double-breaker' &&
                                     `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
                             </Modal.Title>
                         </div>
@@ -327,6 +320,7 @@ const BreakersFlow = ({ data, id }) => {
                                                 {breakerData.passive_data.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
+                                                <option value="unlink">None</option>
                                             </Input>
                                         </Form.Group>
 
@@ -346,11 +340,14 @@ const BreakersFlow = ({ data, id }) => {
                                                 <option>Select Sensor</option>
                                                 {sensorData.map((record) => {
                                                     return (
-                                                        <option value={record.id} disabled={record.breaker_id !== ''}>
+                                                        <option
+                                                            value={record.id}
+                                                            disabled={linkedSensors.includes(record.id)}>
                                                             {record.name}
                                                         </option>
                                                     );
                                                 })}
+                                                <option value="unlink">None</option>
                                             </Input>
                                         </Form.Group>
                                     </div>
@@ -373,13 +370,7 @@ const BreakersFlow = ({ data, id }) => {
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
                                         {breakerData.equipment_data.map((record) => {
-                                            return (
-                                                record.equipments_name !== '' && (
-                                                    <option value={record.value} disabled={record.breaker_id !== ''}>
-                                                        {record.label}
-                                                    </option>
-                                                )
-                                            );
+                                            return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
                                     {/* <MultiSelect
@@ -681,7 +672,7 @@ const BreakersFlow = ({ data, id }) => {
                                 updateSingleBreakerData();
                                 handleEditBreakerClose();
                             }}>
-                            Update
+                            Save
                         </Button>
                     )}
 
@@ -716,4 +707,4 @@ const BreakersFlow = ({ data, id }) => {
     );
 };
 
-export default BreakersFlow;
+export default BreakersComponent;

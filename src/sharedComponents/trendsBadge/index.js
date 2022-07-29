@@ -29,7 +29,7 @@ const valueMap = {
     [TRENDS_BADGE_TYPES.NEUTRAL_UP_TREND]: 1,
 };
 
-const TrendsBadge = ({ value = null, type = TRENDS_BADGE_TYPES.INCREASE }) => {
+const TrendsBadge = ({ value = null, type = TRENDS_BADGE_TYPES.UPWARD_TREND }) => {
     const Icon = iconMap[type];
     const renderValue = value === null ? valueMap[type] : value;
 

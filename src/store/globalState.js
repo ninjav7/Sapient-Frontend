@@ -39,7 +39,6 @@ export const spaceName20 = atom('');
 export const spacesList = atom([]);
 export const areaList = atom([]);
 export const iterationNumber = atom(0);
-export const flooridNew = atom('');
 export const iterationDataList = atom([]);
 export const floorState = atom([]);
 
@@ -47,5 +46,17 @@ export const spaceNameList = atom([]);
 export const floorIdState = atom('');
 
 export const reloadSpaces = atom('false');
+export const floorStaticId = atom('');
+
+export const flooridNew = atom('');
+
+export const currentFloorIdNow2 = atom('');
+export const currentFloorIdNow3 = atom('');
+export const currentFloorIdNow4 = atom('');
+export const currentFloorIdNow5 = atom('');
+export const currentFloorIdNow6 = atom('');
+export const currentFloorIdNow7 = atom('');
+export const currentFloorIdNow8 = atom('');
+export const currentFloorIdNow9 = atom('');
 
 // export const floor1 = atom(['Room', 'Area']);

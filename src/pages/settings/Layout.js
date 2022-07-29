@@ -8,14 +8,24 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import Skeleton from 'react-loading-skeleton';
 import EditFloorModal from '../../components/Layouts/EditFloorModal';
 import {
     closedEditFloorModal,
     closeEditSpaceModal,
+    currentFloorIdNow2,
+    currentFloorIdNow3,
+    currentFloorIdNow4,
+    currentFloorIdNow5,
+    currentFloorIdNow6,
+    currentFloorIdNow7,
+    currentFloorIdNow8,
+    currentFloorIdNow9,
     floorid,
     flooridNew,
     floorIdState,
     floorState,
+    floorStaticId,
     iterationDataList,
     iterationNumber,
     reloadSpaces,
@@ -57,30 +67,34 @@ const Layout = () => {
     // Saving API data
     const [floorListAPI, setFloorListAPI] = useState([]);
     const [spaceListAPI, setSpaceListAPI] = useState([]);
-    const [spaceListAPI2, setSpaceListAPI2] = useState([]);
-    const [spaceListAPI3, setSpaceListAPI3] = useState([]);
-    const [spaceListAPI4, setSpaceListAPI4] = useState([]);
-    const [spaceListAPI5, setSpaceListAPI5] = useState([]);
-    const [spaceListAPI6, setSpaceListAPI6] = useState([]);
-    const [spaceListAPI7, setSpaceListAPI7] = useState([]);
-    const [spaceListAPI8, setSpaceListAPI8] = useState([]);
-    const [spaceListAPI9, setSpaceListAPI9] = useState([]);
-    const [spaceListAPI10, setSpaceListAPI10] = useState([]);
-    const [spaceListAPI11, setSpaceListAPI11] = useState([]);
-    const [spaceListAPI12, setSpaceListAPI12] = useState([]);
-    const [spaceListAPI13, setSpaceListAPI13] = useState([]);
-    const [spaceListAPI14, setSpaceListAPI14] = useState([]);
-    const [spaceListAPI15, setSpaceListAPI15] = useState([]);
-    const [spaceListAPI16, setSpaceListAPI16] = useState([]);
-    const [spaceListAPI17, setSpaceListAPI17] = useState([]);
-    const [spaceListAPI18, setSpaceListAPI18] = useState([]);
-    const [spaceListAPI19, setSpaceListAPI19] = useState([]);
-    const [spaceListAPI20, setSpaceListAPI20] = useState([]);
+
     console.log('floorListAPI', floorListAPI);
 
     const [modalShow, setModalShow] = useState(false);
     const [floorId, setFloorId] = useState('');
     const [floorid, setFloorid] = useAtom(floorIdState);
+
+    const [currentFloorId2, setCurrentFloorId2] = useAtom(currentFloorIdNow2);
+    const [currentFloorId3, setCurrentFloorId3] = useAtom(currentFloorIdNow3);
+    const [currentFloorId4, setCurrentFloorId4] = useAtom(currentFloorIdNow4);
+    const [currentFloorId5, setCurrentFloorId5] = useAtom(currentFloorIdNow5);
+    const [currentFloorId6, setCurrentFloorId6] = useAtom(currentFloorIdNow6);
+    const [currentFloorId7, setCurrentFloorId7] = useAtom(currentFloorIdNow7);
+    const [currentFloorId8, setCurrentFloorId8] = useAtom(currentFloorIdNow8);
+    const [currentFloorId9, setCurrentFloorId9] = useAtom(currentFloorIdNow9);
+    const [currentFloorId10, setCurrentFloorId10] = useState('');
+    const [currentFloorId11, setCurrentFloorId11] = useState('');
+    const [currentFloorId12, setCurrentFloorId12] = useState('');
+    const [currentFloorId13, setCurrentFloorId13] = useState('');
+    const [currentFloorId14, setCurrentFloorId14] = useState('');
+    const [currentFloorId15, setCurrentFloorId15] = useState('');
+    const [currentFloorId16, setCurrentFloorId16] = useState('');
+    const [currentFloorId17, setCurrentFloorId17] = useState('');
+    const [currentFloorId18, setCurrentFloorId18] = useState('');
+    const [currentFloorId19, setCurrentFloorId19] = useState('');
+    const [currentFloorId20, setCurrentFloorId20] = useState('');
+
+    console.log('currentFloorId3', currentFloorId3);
 
     const [floorModal] = useAtom(closedEditFloorModal);
 
@@ -88,32 +102,27 @@ const Layout = () => {
     const [getSpaceName, setGetSpaceName] = useAtom(spaceName);
     const [getSpaceName2, setGetSpaceName2] = useAtom(spaceName2);
     const [getSpaceName3, setGetSpaceName3] = useAtom(spaceName3);
-    const [getSpaceName4, setGetSpaceName4] = useAtom(spaceName3);
-    const [getSpaceName5, setGetSpaceName5] = useAtom(spaceName4);
-    const [getSpaceName6, setGetSpaceName6] = useAtom(spaceName5);
-    const [getSpaceName7, setGetSpaceName7] = useAtom(spaceName6);
-    const [getSpaceName8, setGetSpaceName8] = useAtom(spaceName7);
-    const [getSpaceName9, setGetSpaceName9] = useAtom(spaceName8);
-    const [getSpaceName10, setGetSpaceName10] = useAtom(spaceName9);
-    const [getSpaceName11, setGetSpaceName11] = useAtom(spaceName10);
-    const [getSpaceName12, setGetSpaceName12] = useAtom(spaceName11);
-    const [getSpaceName13, setGetSpaceName13] = useAtom(spaceName12);
-    const [getSpaceName14, setGetSpaceName14] = useAtom(spaceName13);
-    const [getSpaceName15, setGetSpaceName15] = useAtom(spaceName14);
-    const [getSpaceName16, setGetSpaceName16] = useAtom(spaceName15);
-    const [getSpaceName17, setGetSpaceName17] = useAtom(spaceName16);
-    const [getSpaceName18, setGetSpaceName18] = useAtom(spaceName17);
-    const [getSpaceName19, setGetSpaceName19] = useAtom(spaceName18);
-    const [getSpaceName20, setGetSpaceName20] = useAtom(spaceName19);
-    const [getSpaceName21, setGetSpaceName21] = useAtom(spaceName20);
+    const [getSpaceName4, setGetSpaceName4] = useAtom(spaceName4);
+    const [getSpaceName5, setGetSpaceName5] = useAtom(spaceName5);
+    const [getSpaceName6, setGetSpaceName6] = useAtom(spaceName6);
+    const [getSpaceName7, setGetSpaceName7] = useAtom(spaceName7);
+    const [getSpaceName8, setGetSpaceName8] = useAtom(spaceName8);
+    const [getSpaceName9, setGetSpaceName9] = useAtom(spaceName9);
+    const [getSpaceName10, setGetSpaceName10] = useAtom(spaceName10);
+    const [getSpaceName11, setGetSpaceName11] = useAtom(spaceName11);
+    const [getSpaceName12, setGetSpaceName12] = useAtom(spaceName12);
+    const [getSpaceName13, setGetSpaceName13] = useAtom(spaceName13);
+    const [getSpaceName14, setGetSpaceName14] = useAtom(spaceName14);
+    const [getSpaceName15, setGetSpaceName15] = useAtom(spaceName15);
+    const [getSpaceName16, setGetSpaceName16] = useAtom(spaceName16);
+    const [getSpaceName17, setGetSpaceName17] = useAtom(spaceName17);
+    const [getSpaceName18, setGetSpaceName18] = useAtom(spaceName18);
+    const [getSpaceName19, setGetSpaceName19] = useAtom(spaceName19);
+    const [getSpaceName20, setGetSpaceName20] = useAtom(spaceName20);
     // TODO:
-    const [spaceNames, setSpaceNames] = useAtom(spaceNameList);
-    // const [spaceID, setSpaceID] = useAtom(spaceId);
-
-    const [iterationValue, setInterationValue] = useAtom(iterationDataList);
-    const [iteratingNumber, setIteratingNumber] = useAtom(iterationNumber);
 
     const [modelToShow, setModelToShow] = useState(1);
+    const [floorIdNow, setFloorIdNow] = useAtom(floorStaticId);
 
     // Modal to show
     const [modalSpaceShow, setModalSpaceShow] = useState(false);
@@ -141,7 +150,6 @@ const Layout = () => {
 
     const [currentFloorId, setCurrentFloorId] = useAtom(flooridNew);
 
-    console.log('iterationValue', iterationValue, iteratingNumber);
     const [floor2, setFloor1] = useAtom(floorState);
     console.log('floor2', floor2);
     const [spaceBody, setSpaceBody] = useState({
@@ -207,60 +215,9 @@ const Layout = () => {
             };
             const params = `?floor_id=${floorid}`;
             axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
-                if (modelToShow === 2) {
+                if (modelToShow >= 2) {
                     setSpaceListAPI(res.data.data);
                     setReloadSpace('false');
-                }
-                if (modelToShow === 3) {
-                    setSpaceListAPI2(res.data.data);
-                }
-                if (modelToShow === 4) {
-                    setSpaceListAPI3(res.data.data);
-                }
-                if (modelToShow === 5) {
-                    setSpaceListAPI4(res.data.data);
-                }
-                if (modelToShow === 6) {
-                    setSpaceListAPI5(res.data.data);
-                }
-                if (modelToShow === 7) {
-                    setSpaceListAPI6(res.data.data);
-                }
-                if (modelToShow === 8) {
-                    setSpaceListAPI7(res.data.data);
-                }
-                if (modelToShow === 9) {
-                    setSpaceListAPI8(res.data.data);
-                }
-                if (modelToShow === 10) {
-                    setSpaceListAPI9(res.data.data);
-                }
-                if (modelToShow === 11) {
-                    setSpaceListAPI10(res.data.data);
-                }
-                if (modelToShow === 12) {
-                    setSpaceListAPI11(res.data.data);
-                }
-                if (modelToShow === 13) {
-                    setSpaceListAPI12(res.data.data);
-                }
-                if (modelToShow === 14) {
-                    setSpaceListAPI13(res.data.data);
-                }
-                if (modelToShow === 15) {
-                    setSpaceListAPI14(res.data.data);
-                }
-                if (modelToShow === 16) {
-                    setSpaceListAPI15(res.data.data);
-                }
-                if (modelToShow === 17) {
-                    setSpaceListAPI16(res.data.data);
-                }
-                if (modelToShow === 18) {
-                    setSpaceListAPI17(res.data.data);
-                }
-                if (modelToShow === 19) {
-                    setSpaceListAPI18(res.data.data);
                 }
             });
         }
@@ -295,50 +252,96 @@ const Layout = () => {
     return (
         <React.Fragment>
             <EditFloorModal show={modalShow} onHide={() => setModalShow(false)} />
-            <EditSpace show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
-            <EditSpace show={modalSpaceShow2} onHide={() => setModalSpaceShow2(false)} />
-            <EditSpace show={modalSpaceShow3} onHide={() => setModalSpaceShow3(false)} />
-            <EditSpace show={modalSpaceShow4} onHide={() => setModalSpaceShow4(false)} />
-            <EditSpace show={modalSpaceShow5} onHide={() => setModalSpaceShow5(false)} />
-            <EditSpace show={modalSpaceShow6} onHide={() => setModalSpaceShow6(false)} />
-            <EditSpace show={modalSpaceShow7} onHide={() => setModalSpaceShow7(false)} />
-            <EditSpace show={modalSpaceShow8} onHide={() => setModalSpaceShow8(false)} />
-            <EditSpace show={modalSpaceShow9} onHide={() => setModalSpaceShow9(false)} />
-            <EditSpace show={modalSpaceShow10} onHide={() => setModalSpaceShow10(false)} />
-            <EditSpace show={modalSpaceShow11} onHide={() => setModalSpaceShow11(false)} />
-            <EditSpace show={modalSpaceShow12} onHide={() => setModalSpaceShow12(false)} />
-            <EditSpace show={modalSpaceShow13} onHide={() => setModalSpaceShow13(false)} />
-            <EditSpace show={modalSpaceShow14} onHide={() => setModalSpaceShow14(false)} />
-            <EditSpace show={modalSpaceShow15} onHide={() => setModalSpaceShow15(false)} />
-            <EditSpace show={modalSpaceShow16} onHide={() => setModalSpaceShow16(false)} />
-            <EditSpace show={modalSpaceShow17} onHide={() => setModalSpaceShow17(false)} />
-            <EditSpace show={modalSpaceShow18} onHide={() => setModalSpaceShow18(false)} />
-            <EditSpace show={modalSpaceShow19} onHide={() => setModalSpaceShow19(false)} />
-            <EditSpace show={modalSpaceShow20} onHide={() => setModalSpaceShow20(false)} />
+            <EditSpace currentFloorId={currentFloorId} show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
+            <EditSpace
+                show={modalSpaceShow2}
+                currentFloorId={currentFloorId2}
+                onHide={() => setModalSpaceShow2(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow3}
+                currentFloorId={currentFloorId3}
+                onHide={() => setModalSpaceShow3(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow4}
+                currentFloorId={currentFloorId4}
+                onHide={() => setModalSpaceShow4(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow5}
+                currentFloorId={currentFloorId5}
+                onHide={() => setModalSpaceShow5(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow6}
+                currentFloorId={currentFloorId6}
+                onHide={() => setModalSpaceShow6(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow7}
+                currentFloorId={currentFloorId7}
+                onHide={() => setModalSpaceShow7(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow8}
+                currentFloorId={currentFloorId8}
+                onHide={() => setModalSpaceShow8(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow9}
+                currentFloorId={currentFloorId9}
+                onHide={() => setModalSpaceShow9(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow10}
+                currentFloorId={currentFloorId10}
+                onHide={() => setModalSpaceShow10(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow11}
+                currentFloorId={currentFloorId11}
+                onHide={() => setModalSpaceShow11(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow12}
+                currentFloorId={currentFloorId12}
+                onHide={() => setModalSpaceShow12(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow13}
+                currentFloorId={currentFloorId13}
+                onHide={() => setModalSpaceShow13(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow14}
+                currentFloorId={currentFloorId14}
+                onHide={() => setModalSpaceShow14(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow15}
+                currentFloorId={currentFloorId15}
+                onHide={() => setModalSpaceShow15(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow16}
+                currentFloorId={currentFloorId16}
+                onHide={() => setModalSpaceShow16(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow17}
+                currentFloorId={currentFloorId17}
+                onHide={() => setModalSpaceShow17(false)}
+            />
+            <EditSpace
+                show={modalSpaceShow18}
+                currentFloorId={currentFloorId18}
+                onHide={() => setModalSpaceShow18(false)}
+            />
+
             <Row className="page-title">
                 <Col className="header-container">
                     <span className="heading-style">Layout</span>
-
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
-                        <div className="mt-2 mr-2">
-                            <span className="text-warning font-weight-bold">3 Unsaved Changes</span>
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-light font-weight-bold">
-                                Revert Changes
-                            </button>
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-light font-weight-bold">
-                                Save Draft
-                            </button>
-                        </div>
-                        <div className="float-right ml-2">
-                            <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                Publish
-                            </button>
-                        </div>
-                    </div>
                 </Col>
             </Row>
 
@@ -371,24 +374,31 @@ const Layout = () => {
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floorListAPI.map((floorName, i) => (
-                                    <div
-                                        className="container-single-content "
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                            // setFloorId(floorName?.floor_id);
-                                            setFloorid(floorName?.floor_id);
-                                            // setSpaceID(floorName?.floor_id);
-                                            setCurrentFloorId(floorName?.floor_id);
-                                            setGetSpaceName(floorName?.name);
-                                            setModelToShow(2);
-                                        }}>
-                                        <span> {floorName?.name}</span>
-                                        <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                            {spaceName?.type}
-                                        </span>
-                                    </div>
-                                ))}
+                                {floorListAPI?.length === 0 || floor2?.length === 0 ? (
+                                    <Skeleton count={10} height={40} width={250} />
+                                ) : (
+                                    <>
+                                        {floorListAPI.map((floorName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    // setFloorId(floorName?.floor_id);
+                                                    setFloorid(floorName?.floor_id);
+                                                    // setSpaceID(floorName?.floor_id);
+                                                    setCurrentFloorId(floorName?.floor_id);
+                                                    setGetSpaceName(floorName?.name);
+                                                    setFloorIdNow(floorName?.floor_id);
+                                                    setModelToShow(2);
+                                                }}>
+                                                <span> {floorName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -417,23 +427,30 @@ const Layout = () => {
                                         </UncontrolledDropdown>
                                     </div>
                                 </div>
-                                <div className="container-content-group">
-                                    {spaceListAPI.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setFloorid(spaceName?.id);
-                                                setGetSpaceName2(spaceName?.name);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(3);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                <div className="container-conte nt-group">
+                                    {spaceListAPI?.length === 0 ? (
+                                        <Skeleton count={10} height={40} width={250} />
+                                    ) : (
+                                        <>
+                                            {spaceListAPI
+                                                ?.filter((item) => item?.parent_space === null)
+                                                ?.map((spaceName, i) => (
+                                                    <div
+                                                        className="container-single-content"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => {
+                                                            setGetSpaceName2(spaceName?.name);
+                                                            setCurrentFloorId2(spaceName?._id);
+                                                            setModelToShow(3);
+                                                        }}>
+                                                        <span> {spaceName?.name}</span>
+                                                        <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                            {spaceName?.type_name?.[0]}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -464,22 +481,23 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI2.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setGetSpaceName3(spaceName?.name);
-                                                setModelToShow(4);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId2)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setCurrentFloorId3(spaceName?._id);
+                                                    setGetSpaceName3(spaceName?.name);
+                                                    setModelToShow(4);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -501,7 +519,7 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalSpaceShow4(true);
+                                                        setModalSpaceShow3(true);
                                                     }}>
                                                     Add Space
                                                 </DropdownItem>
@@ -510,22 +528,24 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI3.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName4(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(5);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId3)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName4(spaceName?.name);
+
+                                                    setCurrentFloorId4(spaceName?._id);
+                                                    setModelToShow(5);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -547,7 +567,7 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalSpaceShow5(true);
+                                                        setModalSpaceShow4(true);
                                                     }}>
                                                     Add Space
                                                 </DropdownItem>
@@ -556,22 +576,24 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI4.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName5(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(6);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId4)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName5(spaceName?.name);
+
+                                                    setCurrentFloorId5(spaceName?._id);
+                                                    setModelToShow(6);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -593,7 +615,7 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalSpaceShow6(true);
+                                                        setModalSpaceShow5(true);
                                                     }}>
                                                     Add Space
                                                 </DropdownItem>
@@ -602,22 +624,26 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI5.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName6(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(7);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId5)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName6(spaceName?.name);
+
+                                                    setCurrentFloorId6(spaceName?._id);
+                                                    setModelToShow(7);
+
+                                                    localStorage.setItem('parent_space', currentFloorId6);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -639,7 +665,7 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalSpaceShow7(true);
+                                                        setModalSpaceShow6(true);
                                                     }}>
                                                     Add Space
                                                 </DropdownItem>
@@ -648,22 +674,26 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI6.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName7(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(8);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId6)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName7(spaceName?.name);
+
+                                                    setCurrentFloorId7(spaceName?._id);
+                                                    setModelToShow(8);
+
+                                                    localStorage.setItem('parent_space', currentFloorId7);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -685,7 +715,7 @@ const Layout = () => {
                                             <DropdownMenu right>
                                                 <DropdownItem
                                                     onClick={() => {
-                                                        setModalSpaceShow8(true);
+                                                        setModalSpaceShow7(true);
                                                     }}>
                                                     Add Space
                                                 </DropdownItem>
@@ -694,22 +724,26 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI7.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName8(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(9);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId7)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName8(spaceName?.name);
+
+                                                    setCurrentFloorId8(spaceName?._id);
+                                                    setModelToShow(9);
+
+                                                    localStorage.setItem('parent_space', currentFloorId8);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -740,22 +774,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI8.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName9(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(10);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId8)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName9(spaceName?.name);
+
+                                                    setCurrentFloorId9(spaceName?._id);
+                                                    setModelToShow(10);
+                                                    localStorage.setItem('parent_space', currentFloorId9);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -786,22 +823,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI9.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName10(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(11);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId9)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName10(spaceName?.name);
+
+                                                    setCurrentFloorId10(spaceName?._id);
+                                                    setModelToShow(11);
+                                                    localStorage.setItem('parent_space', currentFloorId10);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -832,22 +872,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI10.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName11(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(12);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId10)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName11(spaceName?.name);
+
+                                                    setCurrentFloorId10(spaceName?._id);
+                                                    setModelToShow(12);
+                                                    localStorage.setItem('parent_space', currentFloorId11);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -878,22 +921,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI11.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName12(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(13);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId11)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName12(spaceName?.name);
+
+                                                    setCurrentFloorId11(spaceName?._id);
+                                                    setModelToShow(13);
+                                                    localStorage.setItem('parent_space', currentFloorId12);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -924,22 +970,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI12.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName13(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(14);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId12)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName13(spaceName?.name);
+
+                                                    setCurrentFloorId12(spaceName?._id);
+                                                    setModelToShow(14);
+                                                    localStorage.setItem('parent_space', currentFloorId13);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -970,22 +1019,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI13.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName14(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(15);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId13)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName14(spaceName?.name);
+
+                                                    setCurrentFloorId13(spaceName?._id);
+                                                    setModelToShow(15);
+                                                    localStorage.setItem('parent_space', currentFloorId14);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1016,22 +1068,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI14.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName15(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(16);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId14)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName15(spaceName?.name);
+
+                                                    setCurrentFloorId14(spaceName?._id);
+                                                    setModelToShow(16);
+                                                    localStorage.setItem('parent_space', currentFloorId15);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1062,22 +1117,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI15.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName16(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(17);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId15)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName16(spaceName?.name);
+
+                                                    setCurrentFloorId15(spaceName?._id);
+                                                    setModelToShow(17);
+                                                    localStorage.setItem('parent_space', currentFloorId16);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1108,22 +1166,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI16.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName17(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(18);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId16)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName16(spaceName?.name);
+
+                                                    setCurrentFloorId16(spaceName?._id);
+                                                    setModelToShow(18);
+                                                    localStorage.setItem('parent_space', currentFloorId17);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1154,22 +1215,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI17.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName18(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(19);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId17)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName18(spaceName?.name);
+
+                                                    setCurrentFloorId17(spaceName?._id);
+                                                    setModelToShow(19);
+                                                    localStorage.setItem('parent_space', currentFloorId18);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1200,22 +1264,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI18.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName19(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(20);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId18)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName19(spaceName?.name);
+
+                                                    setCurrentFloorId18(spaceName?._id);
+                                                    setModelToShow(20);
+                                                    localStorage.setItem('parent_space', currentFloorId19);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}
@@ -1246,22 +1313,25 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-content-group">
-                                    {spaceListAPI19.map((spaceName, i) => (
-                                        <div
-                                            className="container-single-content "
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => {
-                                                setGetSpaceName20(spaceName?.name);
-                                                setFloorid(spaceName?.id);
-                                                setCurrentFloorId(spaceName?.id);
-                                                setModelToShow(21);
-                                            }}>
-                                            <span> {spaceName?.name}</span>
-                                            <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                {spaceName?.type}
-                                            </span>
-                                        </div>
-                                    ))}
+                                    {spaceListAPI
+                                        ?.filter((item) => item?.parent_space === currentFloorId19)
+                                        .map((spaceName, i) => (
+                                            <div
+                                                className="container-single-content "
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => {
+                                                    setGetSpaceName20(spaceName?.name);
+
+                                                    setCurrentFloorId19(spaceName?._id);
+                                                    setModelToShow(21);
+                                                    localStorage.setItem('parent_space', currentFloorId20);
+                                                }}>
+                                                <span> {spaceName?.name}</span>
+                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                    {spaceName?.type_name?.[0]}
+                                                </span>
+                                            </div>
+                                        ))}
                                 </div>
                             </div>
                         )}

@@ -485,6 +485,7 @@ const ActiveDevices = () => {
             await axios.get(`${BaseUrl}${generalActiveDevices}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setActiveDeviceData(response.data);
+                setduplicateActiveDeviceData(response.data);
                 setPaginationData(res.data);
 
                 let onlineData = [];
