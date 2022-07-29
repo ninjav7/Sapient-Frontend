@@ -21,18 +21,31 @@
             color: $primary-gray-500;
             margin-top: 0;
         }
+    }
 
-        &.Regular {
+    &.body {
+        margin: 0;
+        padding: 0;
+
+        &.xs {
             font-weight: 400;
+            font-size: 0.75rem;
+            line-height: 1.125rem;
+            color: $primary-gray-500;
+            margin-top: 0;
         }
-        &.Medium {
-            font-weight: 500;
-        }
-        &.SemiBold {
-            font-weight: 600;
-        }
-        &.Bold {
-            font-weight: 700;
-        }
+    }
+
+    &.Regular {
+        font-weight: 400 !important;
+    }
+    &.Medium {
+        font-weight: 500 !important;
+    }
+    &.SemiBold {
+        font-weight: 600 !important;
+    }
+    &.Bold {
+        font-weight: 700 !important;
     }
 }

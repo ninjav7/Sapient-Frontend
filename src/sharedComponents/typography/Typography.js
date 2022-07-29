@@ -2,6 +2,7 @@ import React from 'react';
 import cx from 'classnames';
 
 import TypographySubheader from './TypographySubheader';
+import { TypographyBody } from './TypographyBody';
 
 import './style.scss';
 
@@ -13,10 +14,12 @@ const FONT_WEIGHT_TYPES = Object.freeze({
 });
 
 const SIZES = Object.freeze({
+    xxl: 'xxl',
     xl: 'xl',
     lg: 'lg',
     md: 'md',
     sm: 'sm',
+    xs: 'xs',
 });
 
 const Typography = ({ children, variant, size, fontWeight, className, noPadding, as = 'div', innerRef, ...props }) => {
@@ -44,5 +47,6 @@ Typography.Types = FONT_WEIGHT_TYPES;
 Typography.Sizes = SIZES;
 
 Typography.Subheader = TypographySubheader;
+Typography.Body = TypographyBody;
 
 export default Typography;

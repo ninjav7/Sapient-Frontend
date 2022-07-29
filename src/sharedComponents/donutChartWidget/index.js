@@ -20,9 +20,9 @@ const Titles = ({ sizeBrick, title, subtitle }) => {
             <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
                 {title}
             </Typography.Subheader>
-            <Typography.Subheader size={Typography.Sizes.sm} as="h6">
+            <Typography.Body size={Typography.Sizes.xs} as="h6">
                 {subtitle}
-            </Typography.Subheader>
+            </Typography.Body>
             <Brick sizeInRem={sizeBrick} />
         </>
     );
