@@ -1281,7 +1281,7 @@ const EditPanel = () => {
                     </div>
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label className="font-weight-bold">Rated Apms</Form.Label>
+                            <Form.Label className="font-weight-bold">Rated Amps</Form.Label>
                             <Form.Control
                                 type="number"
                                 placeholder="Enter Amps"
@@ -1368,7 +1368,7 @@ const EditPanel = () => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
@@ -1541,7 +1541,7 @@ const EditPanel = () => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"

@@ -13,7 +13,7 @@ import Equipment from '../pages/settings/Equipment';
 import EquipmentTypes from '../pages/settings/EquipmentTypes';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
-import EditPanel from '../pages/settings/panels/EditPanel';
+// import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
 import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
@@ -482,14 +482,14 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        {
-            path: '/settings/panels/editPanel/:panelId',
-            name: 'Edit Panel',
-            component: EditPanel,
-            route: PrivateRoute,
-            visibility: false,
-            parent: 'building-settings',
-        },
+        // {
+        //     path: '/settings/panels/editPanel/:panelId',
+        //     name: 'Edit Panel',
+        //     component: EditPanel,
+        //     route: PrivateRoute,
+        //     visibility: false,
+        //     parent: 'building-settings',
+        // },
         {
             path: '/settings/panels/edit-panel/:panelId',
             name: 'Edit Breaker-Panel',

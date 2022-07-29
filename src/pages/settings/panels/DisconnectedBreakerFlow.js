@@ -3,10 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import {
-    BaseUrl,
-    listSensor,
-} from '../../../services/Network';
+import { BaseUrl, listSensor } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
@@ -220,7 +217,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
@@ -330,9 +327,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         }}
                                         value={data?.equipment_link?.[0]}>
                                         <option>Select Equipment</option>
-                                        {data.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
-                                        })}
+                                        {data.equipment_data &&
+                                            data.equipment_data.map((record) => {
+                                                return <option value={record.value}>{record.label}</option>;
+                                            })}
                                     </Input>
                                     {/* <MultiSelect
                                         options={equipmentData}
@@ -390,7 +388,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     //                 </Form.Group>
 
                     //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
+                    //                     <Form.Label>Amps</Form.Label>
                     //                     <Form.Control
                     //                         type="number"
                     //                         placeholder="Enter Amps"

@@ -103,7 +103,7 @@ const Buildings = () => {
         { value: 'Office Building', label: 'Office Building' },
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
-    const [buildingName,setBuildingName]=useState("");
+    const [buildingName, setBuildingName] = useState('');
     const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
@@ -126,19 +126,13 @@ const Buildings = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let buildingData={
-                'building_name':buildingName,
-                'building_type':buildingTypeSelected
-            }
+            let buildingData = {
+                building_name: buildingName,
+                building_type: buildingTypeSelected,
+            };
             setIsProcessing(true);
             console.log(createBuildingData);
-            await axios
-            .post(
-                `${BaseUrl}${createBuilding}`,
-                buildingData,
-                { headers }
-            )
-            .then((res) => {
+            await axios.post(`${BaseUrl}${createBuilding}`, buildingData, { headers }).then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
                 // console.log('setOverview => ', res.data);
                 handleClose();
@@ -146,7 +140,7 @@ const Buildings = () => {
             });
             // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
             //     console.log('createBuilding sending data to API => ', res.data);
-            
+
             // });
 
             setIsProcessing(false);
@@ -200,7 +194,6 @@ const Buildings = () => {
     };
 
     useEffect(() => {
-      
         fetchBuildingData();
     }, [bldgId]);
 
@@ -208,9 +201,7 @@ const Buildings = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Buildings
-                    </span>
+                    <span className="heading-style">Buildings</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -314,10 +305,7 @@ const Buildings = () => {
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button
-                        variant="primary"
-                        disabled={isProcessing}
-                        onClick={saveBuilding}>
+                    <Button variant="primary" disabled={isProcessing} onClick={saveBuilding}>
                         {isProcessing ? 'Adding...' : 'Add Building'}
                     </Button>
                 </Modal.Footer>
