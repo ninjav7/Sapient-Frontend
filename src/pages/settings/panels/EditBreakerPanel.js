@@ -1037,7 +1037,7 @@ const EditBreakerPanel = () => {
             setIsProcessing(true);
             let params = `?panel_id=${panelId}`;
             await axios
-                .post(`${BaseUrl}${updatePanel}${params}`, panelObj, {
+                .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -1554,6 +1554,10 @@ const EditBreakerPanel = () => {
         }
     }, [passiveDeviceData]);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -1634,6 +1638,9 @@ const EditBreakerPanel = () => {
                                     value={panel.parent_id}>
                                     <option>None</option>
                                     {panelsDataList.map((record) => {
+                                        if (record.panel_id === panelId) {
+                                            return;
+                                        }
                                         return <option value={record.panel_id}>{record.panel_name}</option>;
                                     })}
                                 </Input>
