@@ -7,7 +7,7 @@ import { UNITS } from '../../constants/units';
 import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
 
 // MOCK
-const donutChartData = [
+const donutChartDataMock = [
     {
         label: 'HVAC',
         color: '#66A4CE',
@@ -22,31 +22,30 @@ const donutChartData = [
 ];
 
 const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
-    series = [44, 55, 41, 17];
 
-    // const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-    //     const value = (energy_consumption.now / 1000).toLocaleString(undefined, {
-    //         maximumFractionDigits: 2,
-    //     });
+    const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
+        const value = (energy_consumption.now / 1000).toLocaleString(undefined, {
+            maximumFractionDigits: 2,
+        });
 
-    //     const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
-    //     const trendType =
-    //         energy_consumption.now <= energy_consumption.old
-    //             ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
-    //             : TRENDS_BADGE_TYPES.UPWARD_TREND;
+        const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
+        const trendType =
+            energy_consumption.now <= energy_consumption.old
+                ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
+                : TRENDS_BADGE_TYPES.UPWARD_TREND;
 
-    //     return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType };
-    // });
+        return { unit: UNITS.KWH, color: COLOR_SCHEME_BY_DEVICE[label], label, value, trendValue, trendType };
+    });
 
     return (
-        <Col xl={7}>
+        <div>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
                 title="Energy Consumption by End Use"
                 subtitle="Energy Totals"
                 items={donutChartData}
             />
-        </Col>
+        </div>
     );
 };
 

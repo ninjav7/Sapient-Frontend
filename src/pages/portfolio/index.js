@@ -33,6 +33,9 @@ import { TailSpin } from 'react-loader-spinner';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.scss';
 import PortfolioKPIs from './PortfolioKPIs';
+import EnergyDensityMap from './EnergyDensityMap';
+import EnergyConsumptionTotals from './EnergyConsumptionTotals';
+import EnergyConsumptionHistory from './EnergyConsumptionHistory';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -79,6 +82,9 @@ const PortfolioOverview = () => {
 
     const [lineChartOptions, setLineChartOptions] = useState({
         chart: {
+            toolbar: {
+                show: false,
+            },
             type: 'line',
             zoom: {
                 enabled: false,
@@ -90,7 +96,7 @@ const PortfolioOverview = () => {
         toolbar: {
             show: true,
         },
-        colors: ['#87AADE'],
+        colors: ['#5E94E4'],
         stroke: {
             curve: 'straight',
         },
@@ -133,6 +139,7 @@ const PortfolioOverview = () => {
             // },
             labels: {
                 formatter: function (val, timestamp) {
+                    return moment(timestamp).format('MMM DD');
                     return moment(timestamp).format('DD/MMM - hh:mm');
                 },
             },
@@ -545,11 +552,13 @@ const PortfolioOverview = () => {
 
         // setIsProcessing(true);
         // setLoading();
+
         portfolioBuilidingsData();
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
         calculateDays();
+
         // setLoading();
         // setIsProcessing(false);
     }, [startDate]);
@@ -580,370 +589,31 @@ const PortfolioOverview = () => {
         let topVal = buildingsEnergyConsume[0].density;
         setTopEnergyDensity(topVal);
     }, [buildingsEnergyConsume]);
-
-    console.log(buildingsEnergyConsume, 'buildingsEnergyConsume');
-
+    
     return (
-        <React.Fragment>
-            {/* {!isLoading && (
-                <div className="custom-loading-style"> */}
-            {/* <TailSpin color="#4A4A4A" height={80} width={80} /> */}
-            {/* <Spinner className="m-2" color={'primary'} />
+        <>
+            <Header title="Portfolio Overview" />
+            <Row className="mt-2">
+                <div className="col">
+                    <PortfolioKPIs
+                        daysCount={daysCount}
+                        totalBuilding={buildingsEnergyConsume.length}
+                        overalldata={overalldata}
+                    />
                 </div>
-            )} */}
+            </Row>
 
-            {/* {isLoading && ( */}
-            <>
-                <Header title="Portfolio Overview" />
-                {/* <Row>
-                        <Skeleton width={80} height={20} />
-                    </Row> */}
-                <Row className="mt-2">
-                    <div className="col">
-                        <PortfolioKPIs
-                            daysCount={daysCount}
-                            totalBuilding={buildingsEnergyConsume.length}
-                            overalldata={overalldata}
-                        />
-                    </div>
-                </Row>
+            <EnergyDensityMap
+                topEnergyDensity={topEnergyDensity}
+                markers={markers}
+                buildingsEnergyConsume={buildingsEnergyConsume}
+            />
 
-                <Row className="mt-2">
-                    <Col xl={5}>
-                        <div className="mt-2">
-                            <h6 className="custom-title">Energy Density Top Buildings</h6>
-                            <h6 className="mb-2 custom-subtitle-style">Energy Consumption / Sq. Ft. Average</h6>
-                            <div className="portfolio-map-widget">
-                                <SimpleMaps markers={markers} />
-                                {/* <EnergyMap /> */}
-                            </div>
-                        </div>
-                    </Col>
-
-                    <Col xl={7} className="mt-5">
-                        <div className="card-body mt-4">
-                            <span className="font-weight-bold text-muted float-left store-value-style">Store Name</span>
-                            <span className="font-weight-bold text-muted float-right store-value-style">
-                                Energy Density
-                            </span>
-
-                            {buildingsEnergyConsume.slice(0, 6).map((item, index) => (
-                                <Col md={6} xl={12}>
-                                    <Link
-                                        to={{
-                                            pathname: `/energy/building/overview/${item.buildingID}`,
-                                        }}>
-                                        <div
-                                            className="progress-bar-container mt-4"
-                                            onClick={() => {
-                                                localStorage.setItem('buildingId', item.buildingID);
-                                                localStorage.setItem('buildingName', item.buildingName);
-                                                BuildingStore.update((s) => {
-                                                    s.BldgId = item.buildingID;
-                                                    s.BldgName = item.buildingName;
-                                                    s.timeZone = item.timeZone;
-                                                });
-                                                ComponentStore.update((s) => {
-                                                    s.parent = 'buildings';
-                                                });
-                                            }}>
-                                            {index === 0 && item.density === 0 && (
-                                                <ProgressBar
-                                                    colors={`#D14065`}
-                                                    progressValue={0}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container custom-progress-bar"
-                                                />
-                                            )}
-                                            {index === 0 && item.density > 0 && (
-                                                <ProgressBar
-                                                    colors={`#D14065`}
-                                                    progressValue={100}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container custom-progress-bar"
-                                                />
-                                            )}
-                                            {index === 1 && (
-                                                <ProgressBar
-                                                    colors={`#DF5775`}
-                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container"
-                                                />
-                                            )}
-                                            {index === 2 && (
-                                                <ProgressBar
-                                                    colors={`#EB6E87`}
-                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container"
-                                                />
-                                            )}
-                                            {index === 3 && (
-                                                <ProgressBar
-                                                    colors={`#EB6E87`}
-                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container"
-                                                />
-                                            )}
-                                            {index === 4 && (
-                                                <ProgressBar
-                                                    colors={`#FC9EAC`}
-                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container"
-                                                />
-                                            )}
-                                            {index === 5 && (
-                                                <ProgressBar
-                                                    colors={`#FFCFD6`}
-                                                    progressValue={((item.density / topEnergyDensity) * 100).toFixed(2)}
-                                                    progressTitle={item.buildingName}
-                                                    progressUnit={(item.density / 1000).toFixed(2) + ' kWh /Sq. Ft.'}
-                                                    className="progress-bar-container"
-                                                />
-                                            )}
-                                        </div>
-                                    </Link>
-                                </Col>
-                            ))}
-                        </div>
-                    </Col>
-                </Row>
-
-                <Row className="mt-2 ml-2">
-                    <Col xl={7}>
-                        <div className="mt-4">
-                            <div>
-                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            </div>
-                            <div className="custom-enduse-style">
-                                <div>
-                                    {/* <DonutChart
-                                        donutChartOpts={donutChartOpts}
-                                        donutChartData={donutChartData}
-                                        height={185}
-                                        id={Date.now()}
-                                    /> */}
-                                    <ApexDonutChart series={series} options={options} />
-                                </div>
-                                <div className="mt-3">
-                                    {energyConsumption.map((record, index) => {
-                                        return (
-                                            <div>
-                                                <div
-                                                    className="custom-enduse-table-style consumption-style m-2 p-1"
-                                                    onMouseOver={(e) => handleChange(e, record.device)}>
-                                                    <div className="ml-2">
-                                                        {record.device === 'HVAC' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3094B9',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Lighting' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#2C4A5E',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Plug' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#66D6BC',
-                                                                }}></div>
-                                                        )}
-                                                        {record.device === 'Process' && (
-                                                            <div
-                                                                className="dot"
-                                                                style={{
-                                                                    background: '#3B8554',
-                                                                }}></div>
-                                                        )}
-                                                    </div>
-                                                    <div className="custom-equip-style record-style font-weight-bold">
-                                                        {record.device}
-                                                    </div>
-                                                    <div className="custom-usage-style muted table-font-style">
-                                                        {(record.energy_consumption.now / 1000).toLocaleString(
-                                                            undefined,
-                                                            {
-                                                                maximumFractionDigits: 2,
-                                                            }
-                                                        )}
-                                                        kWh
-                                                    </div>
-                                                    <div className="mr-2">
-                                                        {record.energy_consumption.now <=
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-success text-success custom-btn-style">
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {record.energy_consumption.now >
-                                                            record.energy_consumption.old && (
-                                                            <button className="button-danger text-danger custom-btn-style">
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record.energy_consumption.now,
-                                                                            record.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* <Row>
-                            <Col xl={5} className="mt-4">
-                                <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-
-                                <div className="card-body mt-2">
-                                    <div className="mt-4" id={Date.now()}>
-                                        <DonutChart
-                                            donutChartOpts={donutChartOpts}
-                                            donutChartData={donutChartData}
-                                            height={185}
-                                            id={Date.now()}
-                                        />
-                                    </div>
-                                </div>
-                            </Col>
-                            <Col xl={7} className="mt-4">
-                                <Card style={{ marginTop: '80px' }}>
-                                    <CardBody>
-                                        <Table className="table-font-style" borderless>
-                                            <tbody>
-                                                {energyConsumption.map((record, index) => {
-                                                    return (
-                                                        <tr key={index} className="consumption-style">
-                                                            <td>
-                                                                {record.device === 'HVAC' && (
-                                                                    <div
-                                                                        className="dot"
-                                                                        style={{
-                                                                            background: '#3094B9',
-                                                                        }}></div>
-                                                                )}
-                                                                {record.device === 'Lighting' && (
-                                                                    <div
-                                                                        className="dot"
-                                                                        style={{
-                                                                            background: '#2C4A5E',
-                                                                        }}></div>
-                                                                )}
-                                                                {record.device === 'Plug' && (
-                                                                    <div
-                                                                        className="dot"
-                                                                        style={{
-                                                                            background: '#66D6BC',
-                                                                        }}></div>
-                                                                )}
-                                                                {record.device === 'Process' && (
-                                                                    <div
-                                                                        className="dot"
-                                                                        style={{
-                                                                            background: '#3B8554',
-                                                                        }}></div>
-                                                                )}
-                                                            </td>
-                                                            <td className="custom-equip-style record-style font-weight-bold">
-                                                                {record.device}
-                                                            </td>
-                                                            <td className="custom-usage-style muted table-font-style">
-                                                                {record.energy_consumption.now.toLocaleString(
-                                                                    undefined,
-                                                                    {
-                                                                        maximumFractionDigits: 2,
-                                                                    }
-                                                                )}
-                                                                kWh
-                                                            </td>
-                                                            <td>
-                                                                {record.energy_consumption.now <=
-                                                                    record.energy_consumption.old && (
-                                                                    <button
-                                                                        className="button-success value-success btn-font-style"
-                                                                        style={{ width: '100px' }}>
-                                                                        <i className="uil uil-chart-down">
-                                                                            <strong>
-                                                                                {percentageHandler(
-                                                                                    record.energy_consumption.now,
-                                                                                    record.energy_consumption.old
-                                                                                )}{' '}
-                                                                                %
-                                                                            </strong>
-                                                                        </i>
-                                                                    </button>
-                                                                )}
-                                                                {record.energy_consumption.now >
-                                                                    record.energy_consumption.old && (
-                                                                    <button
-                                                                        className="button-danger value-danger btn-font-style"
-                                                                        style={{ width: '100px' }}>
-                                                                        <i className="uil uil-arrow-growth">
-                                                                            <strong>
-                                                                                {percentageHandler(
-                                                                                    record.energy_consumption.now,
-                                                                                    record.energy_consumption.old
-                                                                                )}{' '}
-                                                                                %
-                                                                            </strong>
-                                                                        </i>
-                                                                    </button>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </Table>
-                                    </CardBody>
-                                </Card>
-                            </Col>
-                        </Row> */}
-                    </Col>
-
-                    <Col xl={5}>
-                        <div className="card-body">
-                            <h6 className="card-title custom-title">Energy Consumption History</h6>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals by Day</h6>
-                            <LineChart options={lineChartOptions} series={energyConsumptionChart} />
-                        </div>
-                    </Col>
-                </Row>
-            </>
-            {/* )} */}
-        </React.Fragment>
+            <div className="portfolio-consume-widget-wrapper">
+                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
+                <EnergyConsumptionHistory series={energyConsumptionChart} />
+            </div>
+        </>
     );
 };
 

@@ -11,7 +11,7 @@ const SimpleMaps = ({ markers }) => {
     //     { markerOffset: 25, name: 'Quito', coordinates: [-78.4678, -0.1807] },
     //     { markerOffset: -15, name: 'Georgetown', coordinates: [-58.1551, 6.8013] },
     //     { markerOffset: 25, name: 'Paramaribo', coordinates: [-55.2038, 5.852] },
-    //     { markerOffset: -15, name: 'Caracas', coordinates: [-66.9036, 10.4806] },
+    //     { markerOffset: -15, name: 'Car  acas', coordinates: [-66.9036, 10.4806] },
     //     { markerOffset: -15, name: 'Lima', coordinates: [-77.0428, -12.0464] },
     // ];
 
