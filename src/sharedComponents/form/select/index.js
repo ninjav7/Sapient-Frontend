@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactSelect, { components } from 'react-select';
 import cx from 'classnames';
+import PropTypes from 'prop-types';
+
 import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
 
 import './style.scss';
@@ -49,5 +51,20 @@ const Select = ({ selectClassName = '', className = '', defaultValue, ...props }
         </div>
     );
 };
+
+Select.propTypes = {
+    defaultValue: PropTypes.string,
+    options: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                label: PropTypes.string.isRequired,
+                value: PropTypes.oneOfType([
+                    PropTypes.string,
+                    PropTypes.number,
+                ])
+            }
+        )
+    )
+}
 
 export default Select;

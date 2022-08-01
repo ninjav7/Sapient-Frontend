@@ -5,6 +5,7 @@ import TypographySubheader from './TypographySubheader';
 import { TypographyBody } from './TypographyBody';
 
 import './style.scss';
+import PropTypes from "prop-types";
 
 const FONT_WEIGHT_TYPES = Object.freeze({
     SemiBold: 'SemiBold',
@@ -48,5 +49,13 @@ Typography.Sizes = SIZES;
 
 Typography.Subheader = TypographySubheader;
 Typography.Body = TypographyBody;
+
+
+Typography.propTypes = {
+    variant: PropTypes.string.isRequired,
+    size: PropTypes.oneOf(Object.values(SIZES)),
+    fontWeight: PropTypes.oneOf(Object.values(FONT_WEIGHT_TYPES)),
+    as: PropTypes.string,
+};
 
 export default Typography;

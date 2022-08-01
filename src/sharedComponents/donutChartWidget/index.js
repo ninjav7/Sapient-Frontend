@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
+import PropTypes from 'prop-types';
 
 import Typography from '../typography';
 import Brick from '../brick';
@@ -69,4 +70,21 @@ const DonutChartWidget = ({
         </>
     );
 };
+
+DonutChartWidget.propTypes = {
+    color: PropTypes.arrayOf(PropTypes.string).isRequired,
+    id: PropTypes.string.isRequired,
+    type: PropTypes.oneOf(Object.values(DONUT_CHART_TYPES)),
+    items: PropTypes.arrayOf(
+        PropTypes.shape({ 
+            label: PropTypes.string.isRequired, 
+            color: PropTypes.string.isRequired, 
+            value: PropTypes.string.isRequired, 
+            unit: PropTypes.string.isRequired, 
+            trendValue: PropTypes.number, 
+            link: PropTypes.string, 
+        })
+    )
+}
+
 export default DonutChartWidget;

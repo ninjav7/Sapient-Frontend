@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const KPIBasic = ({ title, value, className = '', classNameBody = '' }) => {
     return (
@@ -10,5 +11,13 @@ const KPIBasic = ({ title, value, className = '', classNameBody = '' }) => {
         </div>
     );
 };
+
+KPIBasic.propTypes = {
+    title: PropTypes.string,
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+    ]),
+}
 
 export default KPIBasic;

@@ -4,6 +4,7 @@ import { UncontrolledTooltip } from 'reactstrap';
 import { ReactComponent as TooltipIcon } from '../assets/icons/tooltip.svg';
 import { generateID } from '../helpers/helper';
 import { TrendsBadge } from '../trendsBadge';
+import PropTypes from "prop-types";
 
 const KPIWithDate = ({
     className = '',
@@ -50,5 +51,19 @@ const KPIWithDate = ({
         </div>
     );
 };
+
+KPIWithDate.propTypes = {
+    title: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+    ]).isRequired,
+    tooltipText: PropTypes.string,
+    tooltipId: PropTypes.string,
+    date: PropTypes.string.isRequired,
+    time: PropTypes.string.isRequired,
+    badgePrecentage: PropTypes.string.isRequired,
+    unit: PropTypes.string.isRequired,
+}
 
 export default KPIWithDate;

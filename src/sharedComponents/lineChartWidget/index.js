@@ -6,6 +6,7 @@ import Chart from 'react-apexcharts';
 import { configLineChartWidget } from './config';
 
 import './style.scss';
+import PropTypes from 'prop-types';
 
 const LineChartWidget = ({ className = '', series, title, subtitle, height, width }) => {
     return (
@@ -27,6 +28,24 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height, widt
             />
         </div>
     );
+};
+
+LineChartWidget.propTypes = {
+    title: PropTypes.string,
+    subtitle: PropTypes.string,
+    height: PropTypes.string,
+    width: PropTypes.string,
+    series: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            data: PropTypes.arrayOf(
+                PropTypes.shape({
+                    x: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+                    y: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+                }).isRequired
+            ),
+        })
+    ),
 };
 
 export default LineChartWidget;
