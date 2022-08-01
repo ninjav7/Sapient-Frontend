@@ -52,6 +52,7 @@ const EditPlugRule = ({
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
     const [allData, setAllData] = useState([]);
+    console.log('allData', allData);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
@@ -59,6 +60,10 @@ const EditPlugRule = ({
     const [paginationData, setPaginationData] = useState({});
     const [checkedAll, setCheckedAll] = useState(false);
     const [options, setOptions] = useState([]);
+    const [locationFilter, setLocationFilter] = useState('');
+
+    console.log('locationFilter', locationFilter);
+    console.log('locationFilter?.length', locationFilter?.length);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -987,8 +992,17 @@ const EditPlugRule = ({
                                                     type="select"
                                                     name="state"
                                                     id="userState"
-                                                    className="font-weight-bold socket-filter-width">
+                                                    className="font-weight-bold socket-filter-width"
+                                                    onChange={(e) => {
+                                                        setLocationFilter(e.target.value);
+                                                        console.log('e.target.value', e.target.value);
+                                                    }}>
                                                     <option>Filtered</option>
+                                                    {allData
+                                                        ?.filter((item) => item?.equipment_link_location?.length > 0)
+                                                        ?.map((items) => {
+                                                            return <option>{items?.equipment_link_location}</option>;
+                                                        })}
                                                     {/* <option>Filtered</option> */}
                                                     {/* <option>Option 1</option> */}
                                                 </Input>
@@ -1108,6 +1122,77 @@ const EditPlugRule = ({
                                                         </tr>
                                                     );
                                                 })}
+                                            </tbody>
+                                        )}
+
+                                        {selectedRuleFilter === 0 && locationFilter?.length > 0 && (
+                                            <tbody>
+                                                {allLinkedRuleData
+                                                    ?.filter((item) => {
+                                                        console.log(
+                                                            'item?.equipment_link_location',
+                                                            item?.equipment_link_location
+                                                        );
+                                                        return locationFilter === item?.equipment_link_location;
+                                                    })
+                                                    .map((record, index) => {
+                                                        return (
+                                                            <tr key={index}>
+                                                                <td>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        id="socket_rule"
+                                                                        name="socket_rule"
+                                                                        checked={record.linked_rule || checkedAll}
+                                                                        value={
+                                                                            record.linked_rule || checkedAll
+                                                                                ? true
+                                                                                : false
+                                                                        }
+                                                                        onChange={(e) => {
+                                                                            handleRuleStateChange(
+                                                                                e.target.value,
+                                                                                record
+                                                                            );
+                                                                        }}
+                                                                    />
+                                                                </td>
+
+                                                                {/* Just added */}
+                                                                {/* <td className="font-weight-bold">{record.name}</td> */}
+
+                                                                {record.equipment_link_type === '' ? (
+                                                                    <td className="font-weight-bold panel-name">-</td>
+                                                                ) : (
+                                                                    <td className="font-weight-bold panel-name">
+                                                                        <div className="plug-equip-container">
+                                                                            {`${record.equipment_link_type}`}
+                                                                        </div>
+                                                                    </td>
+                                                                )}
+
+                                                                <td className="font-weight-bold">
+                                                                    {record.equipment_link_location}
+                                                                </td>
+
+                                                                <td className="font-weight-bold">
+                                                                    {record.device_link}
+                                                                </td>
+
+                                                                <td className="font-weight-bold">-</td>
+
+                                                                <td className="font-weight-bold">
+                                                                    {record.assigned_rules.length === 0
+                                                                        ? 'None'
+                                                                        : record.assigned_rules}
+                                                                </td>
+
+                                                                <td className="font-weight-bold">{record.tag}</td>
+
+                                                                <td className="font-weight-bold">{record.last_data}</td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                             </tbody>
                                         )}
 
