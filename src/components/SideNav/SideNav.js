@@ -37,7 +37,7 @@ const SideNav = () => {
                     let active = str1.localeCompare(str2);
 
                     return (
-                        <Link to={item.path}>
+                        <Link to={item.path} key={index}>
                             {active === 0 ? (
                                 <div
                                     // className="side-nav-content"

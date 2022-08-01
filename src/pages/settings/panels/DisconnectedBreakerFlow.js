@@ -3,16 +3,13 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import {
-    BaseUrl,
-    listSensor,
-} from '../../../services/Network';
+import { BaseUrl, listSensor } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
 
-const BreakersComponent = ({ data, id }) => {
+const DisconnectedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -25,7 +22,7 @@ const BreakersComponent = ({ data, id }) => {
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    // const [currentBreakerObj, setCurrentBreakerObj] = useState({});
+    const [currentBreakerData, setCurrentBreakerData] = useState({});
 
     const fetchDeviceSensorData = async (deviceId) => {
         try {
@@ -89,41 +86,25 @@ const BreakersComponent = ({ data, id }) => {
         return equip.label;
     };
 
-    return (
-        <React.Fragment>
-            {data.breaker_number % 2 === 1 && (
-                <>
-                    <Handle
-                        type="source"
-                        position="left"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
-                        position="left"
-                        id="b"
-                        style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                </>
-            )}
+    useEffect(() => {
+        let currentBreakerObj = Object.assign({}, data);
+        setCurrentBreakerData(currentBreakerObj);
+    }, []);
 
-            {data.breaker_number % 2 === 0 && (
-                <>
-                    <Handle
-                        type="source"
-                        position="right"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
-                        position="right"
-                        id="b"
-                        style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                </>
-            )}
+    return (
+        <>
+            <Handle
+                type="source"
+                position="left"
+                id="a"
+                style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
+            <Handle
+                type="target"
+                position="left"
+                id="b"
+                style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+            />
 
             <FormGroup className="form-group row m-1 mb-4">
                 <div className="breaker-container">
@@ -140,7 +121,7 @@ const BreakersComponent = ({ data, id }) => {
                                 <span>{data.voltage === '' ? '' : `${data.voltage}V`}</span>
                             </div>
                         </div>
-                        {!(data.equipment_link.length === 0) ? (
+                        {data.equipment_link && data.equipment_link.length !== 0 && (
                             <>
                                 <div className="breaker-equipName-style">
                                     <h6 className=" ml-3 breaker-equip-name">
@@ -154,8 +135,7 @@ const BreakersComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
+                                            // setCurrentBreakerObj(element);
                                             // setCurrentBreakerIndex(index);
                                             // setCurrentEquipIds(element.equipment_link);
                                             // handleCurrentLinkedBreaker(index);
@@ -171,7 +151,9 @@ const BreakersComponent = ({ data, id }) => {
                                     </div>
                                 )}
                             </>
-                        ) : (
+                        )}
+
+                        {data.equipment_link && data.equipment_link.length === 0 && (
                             <>
                                 {!(
                                     (data.breaker_level === 'triple-breaker' && data.panel_voltage === '120/240') ||
@@ -180,8 +162,7 @@ const BreakersComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
+                                            // setCurrentBreakerObj(element);
                                             // setCurrentBreakerIndex(index);
                                             // setCurrentEquipIds(element.equipment_link);
                                             // handleCurrentLinkedBreaker(index);
@@ -236,7 +217,7 @@ const BreakersComponent = ({ data, id }) => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
@@ -344,11 +325,12 @@ const BreakersComponent = ({ data, id }) => {
                                             addSelectedBreakerEquip(e.target.value);
                                             data.onChange(id, 'equipment_link', e.target.value);
                                         }}
-                                        value={data.equipment_link[0]}>
+                                        value={data?.equipment_link?.[0]}>
                                         <option>Select Equipment</option>
-                                        {data.equipment_data.map((record) => {
-                                            return <option value={record.value}>{record.label}</option>;
-                                        })}
+                                        {data.equipment_data &&
+                                            data.equipment_data.map((record) => {
+                                                return <option value={record.value}>{record.label}</option>;
+                                            })}
                                     </Input>
                                     {/* <MultiSelect
                                         options={equipmentData}
@@ -406,7 +388,7 @@ const BreakersComponent = ({ data, id }) => {
                     //                 </Form.Group>
 
                     //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
+                    //                     <Form.Label>Amps</Form.Label>
                     //                     <Form.Control
                     //                         type="number"
                     //                         placeholder="Enter Amps"
@@ -680,8 +662,8 @@ const BreakersComponent = ({ data, id }) => {
                     )} */}
                 </Modal.Footer>
             </Modal>
-        </React.Fragment>
+        </>
     );
 };
 
-export default BreakersComponent;
+export default DisconnectedBreakerComponent;
