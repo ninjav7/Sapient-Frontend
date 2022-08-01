@@ -548,7 +548,7 @@ const EditBreakerPanel = () => {
         console.log('handleBreakerChange elements => ', elements);
     };
 
-    console.log('SSR disconnectBreakersNodes outside => ', disconnectBreakersNodes);
+    // console.log('SSR disconnectBreakersNodes outside => ', disconnectBreakersNodes);
 
     const handleDiscBreakerChange = (id, discBreakerData) => {
         console.log('SSR id => ', id);
