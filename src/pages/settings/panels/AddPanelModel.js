@@ -223,7 +223,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                         headers: header,
                     })
                     .then((res) => {
-                        console.log(res.data);
+                        let response = res.data;
                     });
 
                 setIsProcessing(false);

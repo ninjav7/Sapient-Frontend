@@ -11,7 +11,7 @@ import {
     getLocation,
     generalPanels,
     generalPassiveDevices,
-    createPanel,
+    getBreakers,
     updatePanel,
     createBreaker,
     generalEquipments,
@@ -67,7 +67,11 @@ const EditBreakerPanel = () => {
 
     const [linkedSensors, setLinkedSensors] = useState([]);
     const newBreakers = [];
+
     const [panel, setPanel] = useState({});
+    const [breakersData, setBreakersData] = useState([]);
+    const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
+
     const [fetchedPanelResponse, setFetchedPanelResponse] = useState({});
     const [panelDataFetched, setIsPanelDataFetched] = useState(false);
 
@@ -1221,6 +1225,30 @@ const EditBreakerPanel = () => {
             }
         };
 
+        const fetchBreakersData = async () => {
+            try {
+                setBreakerDataFetched(true);
+
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?panel_id=${panelId}`;
+
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
+                    let response = res.data.data;
+                    setBreakersData(response);
+                });
+                setBreakerDataFetched(false);
+            } catch (error) {
+                console.log(error);
+                setBreakerDataFetched(false);
+                console.log('Failed to fetch Breakers Data List');
+            }
+        };
+
         const fetchPanelsData = async () => {
             try {
                 let headers = {
@@ -1313,6 +1341,7 @@ const EditBreakerPanel = () => {
         };
 
         fetchSinglePanelData();
+        fetchBreakersData();
         fetchPanelsData();
         fetchPassiveDeviceData();
         fetchLocationData();
@@ -1991,7 +2020,7 @@ const EditBreakerPanel = () => {
                             </>
                         )}
 
-                        {activePanelType === 'disconnect' && (
+                        {activePanelType === 'disconnect' && !isBreakerDataFetched && (
                             <div className="row" style={{ width: '100%', height: '40vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
