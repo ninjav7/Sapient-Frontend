@@ -536,7 +536,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName4(spaceName?.name);
-
                                                     setCurrentFloorId4(spaceName?._id);
                                                     setModelToShow(5);
                                                 }}>
@@ -584,7 +583,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName5(spaceName?.name);
-
                                                     setCurrentFloorId5(spaceName?._id);
                                                     setModelToShow(6);
                                                 }}>
@@ -632,7 +630,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName6(spaceName?.name);
-
                                                     setCurrentFloorId6(spaceName?._id);
                                                     setModelToShow(7);
 
@@ -682,7 +679,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName7(spaceName?.name);
-
                                                     setCurrentFloorId7(spaceName?._id);
                                                     setModelToShow(8);
 
@@ -732,7 +728,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName8(spaceName?.name);
-
                                                     setCurrentFloorId8(spaceName?._id);
                                                     setModelToShow(9);
 
@@ -782,7 +777,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName9(spaceName?.name);
-
                                                     setCurrentFloorId9(spaceName?._id);
                                                     setModelToShow(10);
                                                     localStorage.setItem('parent_space', currentFloorId9);
@@ -831,7 +825,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName10(spaceName?.name);
-
                                                     setCurrentFloorId10(spaceName?._id);
                                                     setModelToShow(11);
                                                     localStorage.setItem('parent_space', currentFloorId10);
@@ -880,7 +873,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName11(spaceName?.name);
-
                                                     setCurrentFloorId10(spaceName?._id);
                                                     setModelToShow(12);
                                                     localStorage.setItem('parent_space', currentFloorId11);
@@ -929,7 +921,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName12(spaceName?.name);
-
                                                     setCurrentFloorId11(spaceName?._id);
                                                     setModelToShow(13);
                                                     localStorage.setItem('parent_space', currentFloorId12);
@@ -978,7 +969,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName13(spaceName?.name);
-
                                                     setCurrentFloorId12(spaceName?._id);
                                                     setModelToShow(14);
                                                     localStorage.setItem('parent_space', currentFloorId13);
@@ -1027,7 +1017,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName14(spaceName?.name);
-
                                                     setCurrentFloorId13(spaceName?._id);
                                                     setModelToShow(15);
                                                     localStorage.setItem('parent_space', currentFloorId14);
@@ -1076,7 +1065,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName15(spaceName?.name);
-
                                                     setCurrentFloorId14(spaceName?._id);
                                                     setModelToShow(16);
                                                     localStorage.setItem('parent_space', currentFloorId15);
@@ -1125,7 +1113,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName16(spaceName?.name);
-
                                                     setCurrentFloorId15(spaceName?._id);
                                                     setModelToShow(17);
                                                     localStorage.setItem('parent_space', currentFloorId16);
@@ -1174,7 +1161,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName16(spaceName?.name);
-
                                                     setCurrentFloorId16(spaceName?._id);
                                                     setModelToShow(18);
                                                     localStorage.setItem('parent_space', currentFloorId17);
@@ -1223,7 +1209,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName18(spaceName?.name);
-
                                                     setCurrentFloorId17(spaceName?._id);
                                                     setModelToShow(19);
                                                     localStorage.setItem('parent_space', currentFloorId18);
@@ -1272,7 +1257,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName19(spaceName?.name);
-
                                                     setCurrentFloorId18(spaceName?._id);
                                                     setModelToShow(20);
                                                     localStorage.setItem('parent_space', currentFloorId19);
@@ -1321,7 +1305,6 @@ const Layout = () => {
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     setGetSpaceName20(spaceName?.name);
-
                                                     setCurrentFloorId19(spaceName?._id);
                                                     setModelToShow(21);
                                                     localStorage.setItem('parent_space', currentFloorId20);

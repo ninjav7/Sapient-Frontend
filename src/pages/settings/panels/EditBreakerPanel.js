@@ -39,6 +39,8 @@ const EditBreakerPanel = () => {
 
     const { panelId } = useParams();
 
+    const { panelId } = useParams();
+
     const { v4: uuidv4 } = require('uuid');
     const generateBreakerLinkId = () => uuidv4();
 
@@ -685,6 +687,8 @@ const EditBreakerPanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                savePanelData: savePanelData,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 70 },
             draggable: false,
@@ -710,6 +714,7 @@ const EditBreakerPanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             position: { x: 250, y: 140 },
             draggable: false,
@@ -734,6 +739,7 @@ const EditBreakerPanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 70 },
@@ -759,6 +765,7 @@ const EditBreakerPanel = () => {
                 equipment_data: [],
                 passive_data: [],
                 onChange: handleBreakerChange,
+                panelId: generatedPanelId,
             },
             type: 'breakerComponent',
             position: { x: 700, y: 140 },

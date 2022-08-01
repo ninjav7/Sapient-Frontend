@@ -62,6 +62,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         //     newArray[currentBreakerIndex] = currentBreakerObj;
         //     setDisconnectBreakerConfig(newArray);
         // }
+        if (data.panelId === '') {
+            console.log('data => ', data);
+            data.savePanelData();
+        }
+        console.log('Breaker Update API trigerred!');
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
@@ -272,6 +277,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
+                                                    if (e.target.value === 'Select Device') {
+                                                        return;
+                                                    }
                                                     fetchDeviceSensorData(e.target.value);
                                                     data.onChange(id, 'device_id', e.target.value);
                                                 }}
@@ -280,6 +288,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {data.passive_data.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
+                                                <option value="unlink">None</option>
                                             </Input>
                                         </Form.Group>
 
@@ -292,6 +301,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Sensor"
                                                 onChange={(e) => {
+                                                    if (e.target.value === 'Select Sensor') {
+                                                        return;
+                                                    }
                                                     data.onChange(id, 'sensor_id', e.target.value);
                                                     handleLinkedSensor(data.sensor_id, e.target.value);
                                                 }}
@@ -306,6 +318,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         </option>
                                                     );
                                                 })}
+                                                <option value="unlink">None</option>
                                             </Input>
                                         </Form.Group>
                                     </div>
@@ -322,6 +335,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
+                                            if (e.target.value === 'Select Equipment') {
+                                                return;
+                                            }
                                             addSelectedBreakerEquip(e.target.value);
                                             data.onChange(id, 'equipment_link', e.target.value);
                                         }}
@@ -631,7 +647,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                 updateSingleBreakerData();
                                 handleEditBreakerClose();
                             }}>
-                            Update
+                            Save
                         </Button>
                     )}
 
