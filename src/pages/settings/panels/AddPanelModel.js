@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, createPanel } from '../../../services/Network';
+import { BaseUrl, createPanel, createBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import '../style.css';
@@ -28,6 +28,10 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         panel_type: 'distribution',
     });
 
+    const [breakersData, setBreakersData] = useState([]);
+
+    const [generatedPanelId, setGeneratedPanelId] = useState('');
+
     const panelType = [
         {
             name: 'Distribution',
@@ -39,6 +43,56 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         },
     ];
 
+    const disconnectBreaker = [
+        {
+            name: '1',
+            value: 1,
+        },
+        {
+            name: '2',
+            value: 2,
+        },
+        {
+            name: '3',
+            value: 3,
+        },
+    ];
+
+    const handleVoltageChange = (voltageValue) => {
+        if (panelObj.panel_type === 'disconnect') {
+            return;
+        }
+
+        if (breakersData?.length === 0) {
+            return;
+        }
+
+        let newArray = breakersData;
+        newArray.forEach((obj) => {
+            if (voltageValue === '120/240') {
+                obj.voltage = '120';
+                obj.phase_configuration = 1;
+            }
+            if (voltageValue === '208/120') {
+                obj.voltage = '120';
+                obj.phase_configuration = 1;
+            }
+            if (voltageValue === '480') {
+                obj.voltage = '277';
+                obj.phase_configuration = 1;
+            }
+            if (voltageValue === '600') {
+                obj.voltage = '347';
+                obj.phase_configuration = 1;
+            }
+            if (voltageValue === 'Select Volts') {
+                obj.voltage = '';
+                obj.phase_configuration = 1;
+            }
+        });
+        setBreakersData(newArray);
+    };
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panelObj);
         if (value === 'Select Location') {
@@ -47,12 +101,86 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         if (value === 'None') {
             value = '';
         }
+        if (value === 'disconnect') {
+            obj.breaker_count = 3;
+            handleBreakerChange('disconnect', 3);
+        }
+        if (value === 'distribution') {
+            obj.breaker_count = 0;
+            handleBreakerChange('distribution', 0);
+        }
+        if (key === 'voltage') {
+            handleVoltageChange(value);
+        }
         obj[key] = value;
         setPanelObj(obj);
     };
 
+    const handleBreakerChange = (panelType, breakerCount) => {
+        let newArray = [];
+        if (panelType === 'distribution') {
+            for (let index = 1; index <= breakerCount; index++) {
+                let obj = {
+                    name: `Breaker ${index}`,
+                    breaker_number: index,
+                    phase_configuration: 0,
+                    rated_amps: 0,
+                    voltage: '',
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: [],
+                    sensor_id: '',
+                    device_id: '',
+                };
+
+                if (panelObj.voltage === '120/240') {
+                    obj.voltage = '120';
+                    obj.phase_configuration = 1;
+                }
+
+                if (panelObj.voltage === '208/120') {
+                    obj.voltage = '120';
+                    obj.phase_configuration = 1;
+                }
+
+                if (panelObj.voltage === '480') {
+                    obj.voltage = '277';
+                    obj.phase_configuration = 1;
+                }
+
+                if (panelObj.voltage === '600') {
+                    obj.voltage = '347';
+                    obj.phase_configuration = 1;
+                }
+
+                newArray.push(obj);
+            }
+        }
+
+        if (panelType === 'disconnect') {
+            for (let index = 1; index <= breakerCount; index++) {
+                let obj = {
+                    name: `Breaker ${index}`,
+                    breaker_number: index,
+                    phase_configuration: 1,
+                    rated_amps: 0,
+                    voltage: '120',
+                    link_type: 'unlinked',
+                    link_id: '',
+                    equipment_link: [],
+                    sensor_id: '',
+                    device_id: '',
+                };
+                newArray.push(obj);
+            }
+        }
+        setBreakersData(newArray);
+    };
+
     const savePanelData = async () => {
         try {
+            setIsProcessing(true);
+
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -60,9 +188,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             };
 
             let newPanel = Object.assign({}, panelObj);
-            let panelId;
-
-            setIsProcessing(true);
 
             await axios
                 .post(`${BaseUrl}${createPanel}`, newPanel, {
@@ -70,19 +195,49 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 })
                 .then((res) => {
                     let response = res.data;
-                    panelId = response.id;
+                    setGeneratedPanelId(response.id);
                 });
-
-            setIsProcessing(false);
-
-            history.push({
-                pathname: `/settings/panels/edit-panel/${panelId}`,
-            });
         } catch (error) {
             setIsProcessing(false);
             console.log('Failed to Create Panel');
         }
     };
+
+    useEffect(() => {
+        if (generatedPanelId === '') {
+            return;
+        }
+
+        const saveBreakersData = async (panelID) => {
+            try {
+                let header = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?panel_id=${panelID}`;
+
+                await axios
+                    .post(`${BaseUrl}${createBreaker}${params}`, breakersData, {
+                        headers: header,
+                    })
+                    .then((res) => {
+                        console.log(res.data);
+                    });
+
+                setIsProcessing(false);
+
+                history.push({
+                    pathname: `/settings/panels/edit-panel/${panelID}`,
+                });
+            } catch (error) {
+                setIsProcessing(false);
+                console.log('Failed to save Breakers');
+            }
+        };
+        saveBreakersData(generatedPanelId);
+    }, [generatedPanelId]);
 
     return (
         <>
@@ -170,15 +325,40 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Number of Breakers</Form.Label>
-                            <Form.Control
-                                type="number"
-                                placeholder="Enter Amps"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('breaker_count', +e.target.value);
-                                }}
-                                value={panelObj.breaker_count}
-                            />
+
+                            {panelObj.panel_type === 'distribution' && (
+                                <Form.Control
+                                    type="number"
+                                    placeholder="Enter Amps"
+                                    className="font-weight-bold"
+                                    onChange={(e) => {
+                                        handleChange('breaker_count', +e.target.value);
+                                    }}
+                                    onBlur={(e) => {
+                                        handleBreakerChange('distribution', +e.target.value);
+                                    }}
+                                    value={panelObj.breaker_count}
+                                />
+                            )}
+
+                            {panelObj.panel_type === 'disconnect' && (
+                                <Input
+                                    type="select"
+                                    name="state"
+                                    id="userState"
+                                    className="font-weight-bold breaker-no-width"
+                                    value={panelObj.breaker_count}
+                                    onChange={(e) => {
+                                        handleChange('breaker_count', +e.target.value);
+                                    }}
+                                    onBlur={(e) => {
+                                        handleBreakerChange('disconnect', +e.target.value);
+                                    }}>
+                                    {disconnectBreaker.map((record) => {
+                                        return <option value={record.value}>{record.name}</option>;
+                                    })}
+                                </Input>
+                            )}
                         </Form.Group>
                     </div>
 

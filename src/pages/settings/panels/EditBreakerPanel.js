@@ -1209,6 +1209,7 @@ const EditBreakerPanel = () => {
                     let response = res.data;
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
+                    console.log('setPanel response => ', response);
                     setPanel(response);
                     setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
@@ -1702,7 +1703,8 @@ const EditBreakerPanel = () => {
                                                 onChange={(e) => {
                                                     setActivePanelType(e.target.value);
                                                 }}
-                                                disabled={true}>
+                                                disabled={true}
+                                                value={panel.panel_type}>
                                                 {panelType.map((record) => {
                                                     return <option value={record.value}>{record.name}</option>;
                                                 })}
@@ -1745,7 +1747,7 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        defaultValue={disconnectBreakerCount}
+                                                        value={panel.breakers}
                                                         onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,
