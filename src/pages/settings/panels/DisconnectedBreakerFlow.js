@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
@@ -67,6 +67,40 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         data.onChange(id, breakerData);
     };
 
+    const saveBreakerData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let breakerObj = {
+                name: data.panel_name,
+                breaker_number: 0,
+                phase_configuration: 0,
+                rated_amps: 0,
+                voltage: 0,
+                link_type: 'linked',
+                link_id: 'string',
+                sensor_id: 'string',
+                device_id: 'string',
+            };
+
+            let params = `?breaker_id=${id}`;
+
+            await axios
+                .patch(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                });
+        } catch (error) {
+            console.log('Failed to update Breaker');
+        }
+    };
+
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
         if (previousSensorId === '') {
             let newSensorList = linkedSensors;
@@ -102,6 +136,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         breaker[key] = value;
         setBreakerData(breaker);
     };
+
+    console.log('Sudhanshu => ', data);
 
     return (
         <React.Fragment>
@@ -371,6 +407,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
+                            // saveBreakerData();
                             handleEditBreakerClose();
                         }}>
                         Save

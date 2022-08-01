@@ -132,6 +132,8 @@ const EditBreakerPanel = () => {
         related_amps: 200,
     });
 
+    const [updatePanelObj, setUpdatePanelObj] = useState({});
+
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
     const [selectedEquipOptions, setSelectedEquipOptions] = useState([]);
@@ -941,11 +943,25 @@ const EditBreakerPanel = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+
+            // if (!comparePanelData(panel.panel_name, fetchedPanelResponse.panel_name)) {
+            //     setUpdatePanelObj({ ...updatePanelObj, name: panel.panel_name });
+            // }
+
+            // if (!comparePanelData(panel.parent_panel, fetchedPanelResponse.parent_panel)) {
+            //     setUpdatePanelObj({ ...updatePanelObj, parent_panel: panel.parent_panel });
+            // }
+
+            // if (!comparePanelData(panel.space_id, fetchedPanelResponse.space_id)) {
+            //     setUpdatePanelObj({ ...updatePanelObj, space_id: panel.location_id });
+            // }
+
             let panelObj = {
                 name: panel.panel_name,
-                parent_panel: panel.location_id,
-                space_id: panel.parent_id,
+                // parent_panel: panel.parent_id,
+                // space_id: panel.location_id,
             };
+
             setIsProcessing(true);
             let params = `?panel_id=${panelId}`;
             await axios
@@ -1185,8 +1201,12 @@ const EditBreakerPanel = () => {
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
+                    console.log('responseData => ', responseData);
                     let equipArray = [];
                     responseData.forEach((record) => {
+                        if (record.equipments_name === '') {
+                            return;
+                        }
                         let obj = {
                             label: record.equipments_name,
                             value: record.equipments_id,
