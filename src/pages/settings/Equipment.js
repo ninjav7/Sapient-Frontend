@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Input,FormGroup} from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment,getEndUseId,updateEquipment,listSensor } from '../../services/Network';
+import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment, getEndUseId, updateEquipment, listSensor, searchEquipment} from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -979,13 +979,13 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                     {equipTypeOrder ? (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'typee.name')}>
+                                            onClick={() => handleColumnSort('ace', 'equipments_type')}>
                                             <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                         </div>
                                     ) : (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'typee.name')}>
+                                            onClick={() => handleColumnSort('dce', 'equipments_type')}>
                                             <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                         </div>
                                     )}
@@ -1131,6 +1131,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                 setEquipData(record);
                                                 Toggle(record);
                                             }}>
+                                                 {selectedOptions.some((record) => record.value === 'status') && (
                                             <td className="text-center">
                                                 <div>
                                                     {record.status === 'Online' && (
@@ -1145,15 +1146,21 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                     )}
                                                 </div>
                                             </td>
+                                                 )}
+                                                  {selectedOptions.some((record) => record.value === 'name') && (
                                             <td className="font-weight-bold">
                                                 {!(record.equipments_name === '') ? record.equipments_name : '-'}
                                             </td>
-                                            <td className="font-weight-bold">{record.equipments_type}</td>
+                                                  )}
+                                                  {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                            <td className="font-weight-bold">{record.equipments_type}</td>)}
+                                            {selectedOptions.some((record) => record.value === 'location') && (
                                             <td>
                                                 {record.location === ' > '
                                                     ? ' - '
                                                     : record.location.split('>').reverse().join(' > ')}
-                                            </td>
+                                            </td>)}
+                                            {selectedOptions.some((record) => record.value === 'tags') && (
                                             <td>
                                                 {
                                                     <div className="badge badge-light mr-2 font-weight-bold week-day-style">
@@ -1161,9 +1168,16 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                                     </div>
                                                 }
                                             </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'sensor_number') && (
                                             <td>{record.sensor_number}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'last_data') && (
                                             <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'device_id') && (
                                             <td className="font-weight-bold">{record.device_mac}</td>
+                                            )}
                                         </tr>
                                     );
                                 })}
@@ -1194,6 +1208,7 @@ const Equipment = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentData, setGeneralEquipmentData] = useState([]);
+    const [DuplicateGeneralEquipmentData, setDuplicateGeneralEquipmentData] = useState([]);
     const [onlineEquipData, setOnlineEquipData] = useState([]);
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
@@ -1214,6 +1229,41 @@ const Equipment = () => {
     ];
 
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [search, setSearch] = useState('');
+
+    // search_by_equipment
+const handleSearchtxt = (e) => {
+    if (e.target.value !== '') {
+        setSearch(e.target.value);
+    } else {
+        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+    }
+};
+
+const handleSearch = async () => {
+    if (search !== '') {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&name=${search}`;
+            await axios.post(`${BaseUrl}${searchEquipment}${params}`,{}, { headers }).then((res) => {
+                let response = res.data;
+                setGeneralEquipmentData(res.data);
+            });
+            setIsEquipDataFetched(false);
+        } catch (error) {
+            console.log(error);
+            setIsEquipDataFetched(false);
+            console.log('Failed to fetch all Equipment Data');
+        }
+    } else {
+        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+    }
+};
 
 
     const handleChange = (key, value) => {
@@ -1289,6 +1339,7 @@ const Equipment = () => {
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData);
+                setDuplicateGeneralEquipmentData(responseData);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
@@ -1321,6 +1372,7 @@ const Equipment = () => {
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData);
+                setDuplicateGeneralEquipmentData(responseData);
                 let onlineEquip = [];
                 let offlineEquip = [];
                 responseData.forEach((record) => {
@@ -1499,10 +1551,13 @@ const Equipment = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e) => {
+                                handleSearchtxt(e);
+                            }}
                         />
-                        <span class="input-group-text border-0" id="search-addon">
+                        <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>
                             <Search className="icon-sm" />
-                        </span>
+                        </button>
                     </div>
                 </Col>
                 <Col xl={9}>

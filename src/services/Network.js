@@ -38,6 +38,7 @@ export const addEquipmentType = '/api/config/create_equipment_type';
 export const updateEquipmentType = '/api/config/update_equipment_type';
 export const createEquipment = '/api/config/equipments_details/create_equipment';
 export const updateEquipment = '/api/config/equipments_details/update_equipment';
+export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
 
@@ -59,6 +60,7 @@ export const generalGateway = '/api/config/gateway';
 // panel
 export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
+export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 

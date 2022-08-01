@@ -257,7 +257,7 @@ const BreakersComponent = ({ data, id }) => {
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                        <Form.Label>Apms</Form.Label>
+                                        <Form.Label>Amps</Form.Label>
                                         <Form.Control
                                             type="number"
                                             placeholder="Enter Amps"
@@ -429,7 +429,7 @@ const BreakersComponent = ({ data, id }) => {
                     //                 </Form.Group>
 
                     //                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                    //                     <Form.Label>Apms</Form.Label>
+                    //                     <Form.Label>Amps</Form.Label>
                     //                     <Form.Control
                     //                         type="number"
                     //                         placeholder="Enter Amps"
