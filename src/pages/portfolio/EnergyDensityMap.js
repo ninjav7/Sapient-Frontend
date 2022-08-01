@@ -181,6 +181,7 @@ const EnergyDensityMap = ({ markers, buildingsEnergyConsume, topEnergyDensity })
                     </div>
                 </Col>
             </Row>
+            <Brick sizeInPixels={32} />
         </>
     );
 };
