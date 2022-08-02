@@ -76,21 +76,21 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             };
 
             let breakerObj = {
-                name: data.panel_name,
-                breaker_number: 0,
-                phase_configuration: 0,
-                rated_amps: 0,
-                voltage: 0,
-                link_type: 'linked',
-                link_id: 'string',
-                sensor_id: 'string',
-                device_id: 'string',
+                name: breakerData.name,
+                breaker_number: breakerData.breaker_number,
+                phase_configuration: breakerData.phase_configuration,
+                rated_amps: breakerData.rated_amps,
+                voltage: breakerData.voltage,
+                link_type: breakerData.link_type,
+                link_id: breakerData.link_id,
+                sensor_id: breakerData.sensor_id,
+                device_id: breakerData.device_id,
             };
 
             let params = `?breaker_id=${id}`;
 
             await axios
-                .patch(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
+                .post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -137,7 +137,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         setBreakerData(breaker);
     };
 
-    console.log('Sudhanshu => ', data);
+    console.log('breakerData => ', breakerData);
 
     return (
         <React.Fragment>
@@ -407,7 +407,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            // saveBreakerData();
+                            saveBreakerData();
                             handleEditBreakerClose();
                         }}>
                         Save
