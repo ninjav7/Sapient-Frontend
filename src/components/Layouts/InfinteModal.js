@@ -51,11 +51,11 @@ const EditFloorModal = (props) => {
                         }}
                         autoFocus
                     />
-                    <Label>Type</Label>
+                    {/* <Label>Type</Label>
                     <Input id="font-weight-bold mb-3" name="select" type="select" disabled>
                         <option>Floors</option>
                     </Input>
-                    <span>Only floors can be at the building root</span>
+                    <span>Only floors can be at the building root</span> */}
                 </Modal.Body>
 
                 <Modal.Footer>
