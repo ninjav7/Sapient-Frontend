@@ -1236,29 +1236,29 @@ const EditBreakerPanel = () => {
         fetchEquipmentData();
     }, [panelId]);
 
-    // useEffect(() => {
-    //     if (distributedBreakersNodes.length !== 0) {
-    //         let newArray = distributedBreakersNodes;
-    //         newArray.forEach((obj) => {
-    //             if (obj.type === 'breakerLink') {
-    //                 return;
-    //             }
-    //             obj.equipment_data = equipmentData;
-    //         });
-    //         setDistributedBreakersNodes(newArray);
-    //     }
+    useEffect(() => {
+        if (distributedBreakersNodes.length !== 0) {
+            let newArray = distributedBreakersNodes;
+            newArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.equipment_data = equipmentData;
+            });
+            setDistributedBreakersNodes(newArray);
+        }
 
-    //     if (disconnectBreakersNodes.length !== 0) {
-    //         let newDisconnectedArray = disconnectBreakersNodes;
-    //         newDisconnectedArray.forEach((obj) => {
-    //             if (obj.type === 'breakerLink') {
-    //                 return;
-    //             }
-    //             obj.equipment_data = equipmentData;
-    //         });
-    //         setDisconnectBreakersNodes(newDisconnectedArray);
-    //     }
-    // }, [equipmentData]);
+        if (disconnectBreakersNodes.length !== 0) {
+            let newDisconnectedArray = disconnectBreakersNodes;
+            newDisconnectedArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.equipment_data = equipmentData;
+            });
+            setDisconnectBreakersNodes(newDisconnectedArray);
+        }
+    }, [equipmentData]);
 
     useEffect(() => {
         if (distributedBreakersNodes.length !== 0) {
@@ -1269,7 +1269,7 @@ const EditBreakerPanel = () => {
                 }
                 obj.data.passive_data = passiveDeviceData;
             });
-            console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
+            // console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
             setDistributedBreakersNodes(newArray);
         }
 
@@ -1282,7 +1282,7 @@ const EditBreakerPanel = () => {
                 obj.data.passive_data = passiveDeviceData;
                 newDisconnectedArray.push(obj);
             });
-            console.log('SSR newDisconnectedArray => ', newDisconnectedArray);
+            // console.log('SSR newDisconnectedArray => ', newDisconnectedArray);
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [passiveDeviceData]);
