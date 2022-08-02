@@ -78,6 +78,8 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         };
         const handleSave=()=>{
         try {
+            let obj = Object.assign({}, updateEqipmentData);
+            obj['tag']=selected;
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -85,7 +87,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
             };
             let params=`?equipment_id=${equipData.equipments_id}`
             axios
-                .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
+                .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -235,7 +237,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
                                             <TagsInput
-                                                value={selected}
+                                                 value={equipData.tags}
                                                 onChange={setSelected}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
@@ -385,17 +387,22 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         </>
     );
 };
-const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
+const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData, locationData }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [selectedTags,setSelectedTags]=useState([]);
     const [selectedZones,setSelectedZones]=useState([]);
     const [endUseName,setEndUseName]=useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
-
+    
     var result=[];
+    var loc=[];
+        console.log(locationData)
         if(equipData!==null){
+            console.log(equipData.location)
             result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
+            // loc = locationData.find(({location_name})=>location_name===equipData.location)
+            // console.log(loc)
             // var x=document.getElementById('endUsePop');
             // console.log(x);
             // if(x!==null)
@@ -420,6 +427,9 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
         };
         const handleSave=()=>{
         try {
+            let obj = Object.assign({}, updateEqipmentData);
+            obj['tag']=selectedTags;
+            console.log(obj);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -427,7 +437,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
             };
             let params=`?equipment_id=${equipData.equipments_id}`
             axios
-                .post(`${BaseUrl}${updateEquipment}${params}`, updateEqipmentData, {
+                .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -546,13 +556,22 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                     <Col lg={12}>
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Equipment Location</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                readOnly
-                                                placeholder="Enter Location"
-                                                className="font-weight-bold"
-                                                value={equipData.location}
-                                            />
+                                            <Input
+                                type="select"
+                                name="select"
+                                id="exampleSelect"
+                                className="font-weight-bold"
+                                // defaultValue={loc.length===0?"":loc.location_id}
+                                onChange={(e) => {
+                                    handleChange('space_id', e.target.value);
+                                }}>
+                                <option value="" selected>
+                                    Select Location
+                                </option>
+                                {locationData.map((record) => {
+                                    return <option value={record.location_id}>{record.location_name}</option>;
+                                })}
+                            </Input>
                                             <Form.Label>Location this equipment is installed in.</Form.Label>
                                         </Form.Group>
                                     </Col>
@@ -576,7 +595,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
                                             <TagsInput
-                                                value={selectedTags}
+                                                value={equipData.tags}
                                                 onChange={setSelectedTags}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
@@ -851,7 +870,7 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter,locationData }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
     const [nameOrder, setNameOrder] = useState(false);
@@ -1188,7 +1207,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
             </Card>
             <div>
                 <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
-                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
+                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/>
             </div>
         </>
     );
@@ -1626,15 +1645,15 @@ const handleSearch = async () => {
                 <Col lg={11}>
                     {selectedTab === 0 && (
                         <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
                     )}
                     {selectedTab === 1 && (
                         <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
                     )}
                     {selectedTab === 2 && (
                         <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
                     )}
                 </Col>
             </Row>
