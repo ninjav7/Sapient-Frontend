@@ -1170,7 +1170,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                             </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                            <td>{record.sensor_number}</td>
+                                            <td>{record.sensor_number===0?'-':record.sensor_number}</td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'last_data') && (
                                             <td>{record.last_data === '' ? '-' : record.last_data}</td>
