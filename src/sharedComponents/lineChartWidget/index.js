@@ -2,13 +2,14 @@ import React from 'react';
 import Typography from '../typography';
 import Brick from '../brick';
 import Chart from 'react-apexcharts';
+import PropTypes from 'prop-types';
 
 import { configLineChartWidget } from './config';
 
 import './style.scss';
-import PropTypes from 'prop-types';
 
-const LineChartWidget = ({ className = '', series, title, subtitle, height, width }) => {
+
+const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
             <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
@@ -31,8 +32,8 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height, widt
 };
 
 LineChartWidget.propTypes = {
-    title: PropTypes.string,
-    subtitle: PropTypes.string,
+    title: PropTypes.string.isRequired,
+    subtitle: PropTypes.string.isRequired,
     height: PropTypes.string,
     width: PropTypes.string,
     series: PropTypes.arrayOf(
@@ -45,7 +46,7 @@ LineChartWidget.propTypes = {
                 }).isRequired
             ),
         })
-    ),
+    ).isRequired,
 };
 
 export default LineChartWidget;

@@ -3,7 +3,7 @@ import { UncontrolledTooltip } from 'reactstrap';
 
 import { ReactComponent as TooltipIcon } from '../assets/icons/tooltip.svg';
 import { generateID } from '../helpers/helper';
-import { TrendsBadge } from '../trendsBadge';
+import {TRENDS_BADGE_TYPES, TrendsBadge} from '../trendsBadge';
 import PropTypes from "prop-types";
 
 const KPILabeled = ({
@@ -57,7 +57,7 @@ KPILabeled.propTypes = {
     tooltipText: PropTypes.string,
     tooltipId: PropTypes.string,
     unit: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired
+    type: PropTypes.oneOf(Object.values(TRENDS_BADGE_TYPES))
 }
 
 export default KPILabeled;

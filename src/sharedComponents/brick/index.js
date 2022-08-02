@@ -21,4 +21,8 @@ Brick.propTypes = {
     sizeInPixels: PropTypes.number,
 }
 
+Brick.defaultProps = {
+    sizeInPixels: 16,
+}
+
 export default Brick;

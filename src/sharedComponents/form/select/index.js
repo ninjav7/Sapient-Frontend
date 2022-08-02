@@ -37,13 +37,14 @@ const Option = (props) => {
     ) : null;
 };
 
-const Select = ({ selectClassName = '', className = '', defaultValue, ...props }) => {
-    const selectedOption = props.options.find(({ value }) => value === defaultValue);
-
+const Select = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+    const selectedOption = options.find(({ value }) => value === defaultValue);
+    
     return (
         <div className={`react-select-wrapper ${className}`}>
             <ReactSelect
                 {...props}
+                options={options}
                 defaultValue={selectedOption}
                 components={{ DropdownIndicator, Control, Option }}
                 className={selectClassName}
@@ -64,7 +65,7 @@ Select.propTypes = {
                 ])
             }
         )
-    )
+    ).isRequired
 }
 
 export default Select;

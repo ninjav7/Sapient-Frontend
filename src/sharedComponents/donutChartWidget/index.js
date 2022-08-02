@@ -31,7 +31,6 @@ const Titles = ({ sizeBrick, title, subtitle }) => {
 
 const DonutChartWidget = ({
     className = '',
-    color = [],
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
     items,
@@ -61,8 +60,8 @@ const DonutChartWidget = ({
                 <div className="chart-labels">
                     <DonutChartLabels
                         className={type}
-                        isShowTrend={type == DONUT_CHART_TYPES.HORIZONTAL}
-                        isShowValue={type != DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
+                        isShowTrend={type === DONUT_CHART_TYPES.HORIZONTAL}
+                        isShowValue={type !== DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
                         labels={items}
                     />
                 </div>
@@ -72,8 +71,7 @@ const DonutChartWidget = ({
 };
 
 DonutChartWidget.propTypes = {
-    color: PropTypes.arrayOf(PropTypes.string).isRequired,
-    id: PropTypes.string.isRequired,
+    id: PropTypes.string,
     type: PropTypes.oneOf(Object.values(DONUT_CHART_TYPES)),
     items: PropTypes.arrayOf(
         PropTypes.shape({ 
@@ -83,8 +81,8 @@ DonutChartWidget.propTypes = {
             unit: PropTypes.string.isRequired, 
             trendValue: PropTypes.number, 
             link: PropTypes.string, 
-        })
-    )
+        }).isRequired
+    ).isRequired
 }
 
 export default DonutChartWidget;

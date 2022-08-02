@@ -1,11 +1,12 @@
 import React from 'react';
 import cx from 'classnames';
+import PropTypes from "prop-types";
 
 import TypographySubheader from './TypographySubheader';
 import { TypographyBody } from './TypographyBody';
 
 import './style.scss';
-import PropTypes from "prop-types";
+
 
 const FONT_WEIGHT_TYPES = Object.freeze({
     SemiBold: 'SemiBold',
