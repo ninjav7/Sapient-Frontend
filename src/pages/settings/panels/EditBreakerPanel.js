@@ -357,35 +357,7 @@ const EditBreakerPanel = () => {
             ...panel,
             ...panelConfig,
         };
-        mainVoltageChange(obj.voltage === 'Select Volts' ? '' : obj.voltage);
         setPanel(obj);
-    };
-
-    const mainVoltageChange = (voltageValue) => {
-        let newArray = elements;
-        newArray.forEach((obj) => {
-            if (voltageValue === '120/240') {
-                obj.data.voltage = '120';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '208/120') {
-                obj.data.voltage = '120';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '480') {
-                obj.data.voltage = '277';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '600') {
-                obj.data.voltage = '347';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === 'Select Volts') {
-                obj.data.voltage = '';
-                obj.data.phase_configuration = 1;
-            }
-        });
-        setElements(newArray);
     };
 
     const fetchDeviceSensorData = async (deviceId) => {
@@ -544,35 +516,36 @@ const EditBreakerPanel = () => {
     //     setElements(elementsList);
     // };
 
+    // const handleDiscBreakerChange = (id, key, value) => {
+    // let disconnectedBreakerList = Object.assign([], disconnectBreakersNodes);
+
+    // disconnectedBreakerList.forEach((el) => {
+    //     if (el.id === id) {
+    //         if (key === 'equipment_link') {
+    //             let arr = [];
+    //             arr.push(value);
+    //             value = arr;
+    //         }
+    //         if (value === 'Select Volts') {
+    //             value = '';
+    //         }
+    //         el.data[key] = value;
+    //     }
+    // });
+
+    // setDisconnectBreaker(disconnectedBreakerList);
+    // };
+
     const handleBreakerChange = (id, breakerObj) => {
         console.log('handleBreakerChange id => ', id);
         console.log('handleBreakerChange breakerObj => ', breakerObj);
-        console.log('handleBreakerChange elements => ', elements);
+        console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
     };
 
-    // console.log('SSR disconnectBreakersNodes outside => ', disconnectBreakersNodes);
-
-    const handleDiscBreakerChange = (id, discBreakerData) => {
-        console.log('SSR id => ', id);
-        console.log('SSR discBreakerData => ', discBreakerData);
-        console.log('SSR disconnectBreakersNodes => ', disconnectBreakersNodes);
-        // let disconnectedBreakerList = Object.assign([], disconnectBreakersNodes);
-
-        // disconnectedBreakerList.forEach((el) => {
-        //     if (el.id === id) {
-        //         if (key === 'equipment_link') {
-        //             let arr = [];
-        //             arr.push(value);
-        //             value = arr;
-        //         }
-        //         if (value === 'Select Volts') {
-        //             value = '';
-        //         }
-        //         el.data[key] = value;
-        //     }
-        // });
-
-        // setDisconnectBreaker(disconnectedBreakerList);
+    const handleDiscBreakerChange = (id, discBreakerObj) => {
+        console.log('handleDiscBreakerChange id => ', id);
+        console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
+        console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
     };
 
     // ************* distributed initial elements & edges ********************
@@ -828,13 +801,10 @@ const EditBreakerPanel = () => {
         },
     ];
 
-    // const [elements, setElements] = useState(initialElements);
-    const [elements, setElements] = useState();
-    console.log('elements typeof => ', typeof elements);
-
-    const [edges, setEdges] = useState(initialEdges);
-
+    const [distributedBreakersNodes, setDistributedBreakersNodes] = useState([]);
     const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState([]);
+
+    const [distributedBreakersEdges, setDistributedBreakersEdges] = useState(initialEdges);
     const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -864,14 +834,16 @@ const EditBreakerPanel = () => {
     };
 
     const getYaxisCordinates = (index) => {
-        if (index === 1 || index === 2) {
+        let num = index;
+
+        if (num === 1 || num === 2) {
             return 70;
         }
-        if (index === 3 || index === 4) {
-            return 70 * 2;
+        if (num % 2 === 0) {
+            return (num / 2) * 70;
         }
-        if (index === 5 || index === 6) {
-            return 70 * 3;
+        if (num % 2 !== 0) {
+            return ((num + 1) / 2) * 70;
         }
     };
 
@@ -892,24 +864,23 @@ const EditBreakerPanel = () => {
         setnodeData(node);
     };
 
-    const onConnect = useCallback(
-        (params) =>
-            setElements((els) =>
-                addEdge(
-                    {
-                        ...params,
-                        id: `edge_${elements.length + 1}`,
-                        animated: false,
-                        type: 'step',
-                        style: { stroke: '#bababa' },
-                        data: { type: 'edge', label: 'dhvsdhvd' },
-                        // arrowHeadType: 'arrowclosed',
-                    },
-                    els
-                )
-            ),
-        []
-    );
+    // const onConnect = useCallback(
+    //     (params) =>
+    //         setElements((els) =>
+    //             addEdge(
+    //                 {
+    //                     ...params,
+    //                     id: `edge_${elements.length + 1}`,
+    //                     animated: false,
+    //                     type: 'step',
+    //                     style: { stroke: '#bababa' },
+    //                     data: { type: 'edge', label: 'dhvsdhvd' },
+    //                 },
+    //                 els
+    //             )
+    //         ),
+    //     []
+    // );
 
     // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
@@ -944,22 +915,10 @@ const EditBreakerPanel = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            // if (!comparePanelData(panel.panel_name, fetchedPanelResponse.panel_name)) {
-            //     setUpdatePanelObj({ ...updatePanelObj, name: panel.panel_name });
-            // }
-
-            // if (!comparePanelData(panel.parent_panel, fetchedPanelResponse.parent_panel)) {
-            //     setUpdatePanelObj({ ...updatePanelObj, parent_panel: panel.parent_panel });
-            // }
-
-            // if (!comparePanelData(panel.space_id, fetchedPanelResponse.space_id)) {
-            //     setUpdatePanelObj({ ...updatePanelObj, space_id: panel.location_id });
-            // }
-
             let panelObj = {
                 name: panel.panel_name,
-                // parent_panel: panel.parent_id,
-                // space_id: panel.location_id,
+                parent_panel: panel.parent_id,
+                space_id: panel.location_id,
             };
 
             setIsProcessing(true);
@@ -990,7 +949,7 @@ const EditBreakerPanel = () => {
             let panelBreakerObjs = [];
 
             if (activePanelType === 'distribution') {
-                elements.forEach((el) => {
+                distributedBreakersNodes.forEach((el) => {
                     if (el.type === 'breakerLink') {
                         return;
                     }
@@ -1051,59 +1010,59 @@ const EditBreakerPanel = () => {
     };
 
     // Initial Elements set for Disconnected ReactFlow
-    useEffect(() => {
-        let newBreakers = [];
-        for (let index = 1; index <= disconnectBreakerCount; index++) {
-            let obj = {
-                name: `Breaker ${index}`,
-                breaker_number: index,
-                phase_configuration: 1,
-                rated_amps: 0,
-                voltage: '120',
-                link_type: 'unlinked',
-                link_id: '',
-                equipment_link: [],
-                sensor_id: '',
-                device_id: '',
-            };
-            newBreakers.push(obj);
-        }
-        setDisconnectBreakerConfig(newBreakers);
-    }, []);
+    // useEffect(() => {
+    //     let newBreakers = [];
+    //     for (let index = 1; index <= disconnectBreakerCount; index++) {
+    //         let obj = {
+    //             name: `Breaker ${index}`,
+    //             breaker_number: index,
+    //             phase_configuration: 1,
+    //             rated_amps: 0,
+    //             voltage: '120',
+    //             link_type: 'unlinked',
+    //             link_id: '',
+    //             equipment_link: [],
+    //             sensor_id: '',
+    //             device_id: '',
+    //         };
+    //         newBreakers.push(obj);
+    //     }
+    //     setDisconnectBreakerConfig(newBreakers);
+    // }, []);
 
-    useEffect(() => {
-        for (let index = 1; index <= normalCount; index++) {
-            let obj = {
-                id: `breaker-${index}`,
-                targetPosition: index % 2 === 0 ? 'right' : 'left',
-                sourcePosition: index % 2 === 0 ? 'left' : 'right',
-                type: 'breakerComponent',
-                data: {
-                    name: '',
-                    breaker_number: index,
-                    phase_configuration: 1,
-                    rated_amps: 0,
-                    voltage: '',
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_level: 'single-breaker',
-                    panel_voltage: '',
-                    equipment_data: [],
-                    passive_data: [],
-                    onChange: handleBreakerChange,
-                    elements: elements,
-                },
-                position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
-                draggable: false,
-            };
-            newBreakers.push(obj);
-        }
-        console.log('ReactFlow Breakers => ', newBreakers);
-        setElements(newBreakers);
-    }, []);
+    // Initial Elements set for Distributed ReactFlow
+    // useEffect(() => {
+    //     for (let index = 1; index <= normalCount; index++) {
+    //         let obj = {
+    //             id: `breaker-${index}`,
+    //             targetPosition: index % 2 === 0 ? 'right' : 'left',
+    //             sourcePosition: index % 2 === 0 ? 'left' : 'right',
+    //             type: 'breakerComponent',
+    //             data: {
+    //                 name: '',
+    //                 breaker_number: index,
+    //                 phase_configuration: 1,
+    //                 rated_amps: 0,
+    //                 voltage: '',
+    //                 link_type: 'unlinked',
+    //                 link_id: '',
+    //                 equipment_link: [],
+    //                 sensor_id: '',
+    //                 device_id: '',
+    //                 breaker_level: 'single-breaker',
+    //                 panel_voltage: '',
+    //                 equipment_data: [],
+    //                 passive_data: [],
+    //                 onChange: handleBreakerChange,
+    //                 elements: elements,
+    //             },
+    //             position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
+    //             draggable: false,
+    //         };
+    //         newBreakers.push(obj);
+    //     }
+    //     setElements(newBreakers);
+    // }, []);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1135,10 +1094,23 @@ const EditBreakerPanel = () => {
                 };
                 let params = `?building_id=${bldgId}&panel_id=${panelId}`;
                 await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
-                    let response = res.data;
+                    // let response = res.data;
+                    let response = {
+                        panel_id: '62e8dd920a43c561908d74cf',
+                        panel_name: 'Panel Distribution 2',
+                        location_id: '62e3ffad070c33932e9c93ff',
+                        location: 'Computer Zone 1',
+                        breakers: 48,
+                        parent: null,
+                        parent_id: null,
+                        breakers_linked: 48,
+                        panel_type: 'distribution',
+                        rated_amps: 100,
+                        voltage: '208/120',
+                        phase_config: 1,
+                    };
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
-                    console.log('setPanel response => ', response);
                     setPanel(response);
                     setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
@@ -1163,7 +1135,633 @@ const EditBreakerPanel = () => {
                 let params = `?panel_id=${panelId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
-                    let response = res.data.data;
+                    // let response = res.data.data;
+                    let response = [
+                        {
+                            id: '62e8dd930a43c561908d74d0',
+                            name: 'Breaker 1',
+                            breaker_number: 1,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd930a43c561908d74d1',
+                            name: 'Breaker 2',
+                            breaker_number: 2,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd930a43c561908d74d2',
+                            name: 'Breaker 3',
+                            breaker_number: 3,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd940a43c561908d74d3',
+                            name: 'Breaker 4',
+                            breaker_number: 4,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd940a43c561908d74d4',
+                            name: 'Breaker 5',
+                            breaker_number: 5,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd940a43c561908d74d5',
+                            name: 'Breaker 6',
+                            breaker_number: 6,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd940a43c561908d74d6',
+                            name: 'Breaker 7',
+                            breaker_number: 7,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd950a43c561908d74d7',
+                            name: 'Breaker 8',
+                            breaker_number: 8,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd950a43c561908d74d8',
+                            name: 'Breaker 9',
+                            breaker_number: 9,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd950a43c561908d74d9',
+                            name: 'Breaker 10',
+                            breaker_number: 10,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd950a43c561908d74da',
+                            name: 'Breaker 11',
+                            breaker_number: 11,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd950a43c561908d74db',
+                            name: 'Breaker 12',
+                            breaker_number: 12,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd960a43c561908d74dc',
+                            name: 'Breaker 13',
+                            breaker_number: 13,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd960a43c561908d74dd',
+                            name: 'Breaker 14',
+                            breaker_number: 14,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd960a43c561908d74de',
+                            name: 'Breaker 15',
+                            breaker_number: 15,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd960a43c561908d74df',
+                            name: 'Breaker 16',
+                            breaker_number: 16,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd970a43c561908d74e0',
+                            name: 'Breaker 17',
+                            breaker_number: 17,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd970a43c561908d74e1',
+                            name: 'Breaker 18',
+                            breaker_number: 18,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd970a43c561908d74e2',
+                            name: 'Breaker 19',
+                            breaker_number: 19,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd970a43c561908d74e3',
+                            name: 'Breaker 20',
+                            breaker_number: 20,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd980a43c561908d74e4',
+                            name: 'Breaker 21',
+                            breaker_number: 21,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd980a43c561908d74e5',
+                            name: 'Breaker 22',
+                            breaker_number: 22,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd980a43c561908d74e6',
+                            name: 'Breaker 23',
+                            breaker_number: 23,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd980a43c561908d74e7',
+                            name: 'Breaker 24',
+                            breaker_number: 24,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd980a43c561908d74e8',
+                            name: 'Breaker 25',
+                            breaker_number: 25,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd990a43c561908d74e9',
+                            name: 'Breaker 26',
+                            breaker_number: 26,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd990a43c561908d74ea',
+                            name: 'Breaker 27',
+                            breaker_number: 27,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd990a43c561908d74eb',
+                            name: 'Breaker 28',
+                            breaker_number: 28,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd990a43c561908d74ec',
+                            name: 'Breaker 29',
+                            breaker_number: 29,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9a0a43c561908d74ed',
+                            name: 'Breaker 30',
+                            breaker_number: 30,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9a0a43c561908d74ee',
+                            name: 'Breaker 31',
+                            breaker_number: 31,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9a0a43c561908d74ef',
+                            name: 'Breaker 32',
+                            breaker_number: 32,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9a0a43c561908d74f0',
+                            name: 'Breaker 33',
+                            breaker_number: 33,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9b0a43c561908d74f1',
+                            name: 'Breaker 34',
+                            breaker_number: 34,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9b0a43c561908d74f2',
+                            name: 'Breaker 35',
+                            breaker_number: 35,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9b0a43c561908d74f3',
+                            name: 'Breaker 36',
+                            breaker_number: 36,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9b0a43c561908d74f4',
+                            name: 'Breaker 37',
+                            breaker_number: 37,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9b0a43c561908d74f5',
+                            name: 'Breaker 38',
+                            breaker_number: 38,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9c0a43c561908d74f6',
+                            name: 'Breaker 39',
+                            breaker_number: 39,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9c0a43c561908d74f7',
+                            name: 'Breaker 40',
+                            breaker_number: 40,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9c0a43c561908d74f8',
+                            name: 'Breaker 41',
+                            breaker_number: 41,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9c0a43c561908d74f9',
+                            name: 'Breaker 42',
+                            breaker_number: 42,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9d0a43c561908d74fa',
+                            name: 'Breaker 43',
+                            breaker_number: 43,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9d0a43c561908d74fb',
+                            name: 'Breaker 44',
+                            breaker_number: 44,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9d0a43c561908d74fc',
+                            name: 'Breaker 45',
+                            breaker_number: 45,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9d0a43c561908d74fd',
+                            name: 'Breaker 46',
+                            breaker_number: 46,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9e0a43c561908d74fe',
+                            name: 'Breaker 47',
+                            breaker_number: 47,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                        {
+                            id: '62e8dd9e0a43c561908d74ff',
+                            name: 'Breaker 48',
+                            breaker_number: 48,
+                            phase_configuration: 1,
+                            rated_amps: 0,
+                            voltage: 120,
+                            link_type: 'unlinked',
+                            link_id: 'None',
+                            equipment_link: [],
+                            sensor_link: '',
+                            device_link: '',
+                        },
+                    ];
                     setBreakersData(response);
                 });
                 setBreakerDataFetched(false);
@@ -1278,44 +1876,48 @@ const EditBreakerPanel = () => {
     }, [panelId]);
 
     useEffect(() => {
-        if (elements) {
-            let newArray = elements;
+        if (distributedBreakersNodes.length !== 0) {
+            let newArray = distributedBreakersNodes;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.equipment_data = equipmentData;
+                obj.equipment_data = equipmentData;
             });
-            setElements(newArray);
+            setDistributedBreakersNodes(newArray);
+        }
 
+        if (disconnectBreakersNodes.length !== 0) {
             let newDisconnectedArray = disconnectBreakersNodes;
             newDisconnectedArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.equipment_data = equipmentData;
+                obj.equipment_data = equipmentData;
             });
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [equipmentData]);
 
     useEffect(() => {
-        if (elements) {
-            let newArray = elements;
+        if (distributedBreakersNodes.length !== 0) {
+            let newArray = distributedBreakersNodes;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.passive_data = passiveDeviceData;
+                obj.passive_data = passiveDeviceData;
             });
-            setElements(newArray);
+            setDistributedBreakersNodes(newArray);
+        }
 
+        if (disconnectBreakersNodes.length !== 0) {
             let newDisconnectedArray = disconnectBreakersNodes;
             newDisconnectedArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.passive_data = passiveDeviceData;
+                obj.passive_data = passiveDeviceData;
             });
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
@@ -1326,8 +1928,10 @@ const EditBreakerPanel = () => {
             return;
         }
 
-        let newArray = Object.assign([], disconnectBreakersNodes);
+        let distributedBreakerArray = Object.assign([], distributedBreakersNodes);
+        let disconnectBreakerArray = Object.assign([], disconnectBreakersNodes);
 
+        // If Breakers are of Disconnected Panels
         breakersData.forEach((record) => {
             let obj = {
                 id: record.id,
@@ -1352,12 +1956,45 @@ const EditBreakerPanel = () => {
                 position: { x: 450, y: getDiscYaxisCordinates(record.breaker_number) },
                 draggable: false,
             };
-            newArray.push(obj);
+            disconnectBreakerArray.push(obj);
         });
 
-        console.log('Disconnected ReactFlow Elements => ', newArray);
+        // If Breakers are of Distributed Panels
+        breakersData.forEach((record) => {
+            let obj = {
+                id: record.id,
+                type: 'breakerComponent',
+                targetPosition: record.breaker_number % 2 === 0 ? 'right' : 'left',
+                sourcePosition: record.breaker_number % 2 === 0 ? 'left' : 'right',
+                data: {
+                    name: record.name,
+                    breaker_number: record.breaker_number,
+                    phase_configuration: record.phase_configuration,
+                    rated_amps: record.rated_amps,
+                    voltage: record.voltage,
+                    link_type: record.link_type,
+                    link_id: '',
+                    equipment_link: record.equipment_link,
+                    sensor_id: record.sensor_link,
+                    device_id: record.device_link,
+                    equipment_data: [],
+                    passive_data: [],
+                    onChange: handleBreakerChange,
+                },
+                position: {
+                    x: record.breaker_number % 2 === 0 ? 700 : 250,
+                    y: getYaxisCordinates(record.breaker_number),
+                },
+                draggable: false,
+            };
+            distributedBreakerArray.push(obj);
+        });
 
-        setDisconnectBreakersNodes(newArray);
+        console.log('Distributed ReactFlow Elements => ', distributedBreakerArray);
+        console.log('Disconnected ReactFlow Elements => ', disconnectBreakerArray);
+
+        setDistributedBreakersNodes(distributedBreakerArray);
+        setDisconnectBreakersNodes(disconnectBreakerArray);
     }, [breakersData]);
 
     useEffect(() => {
@@ -1634,13 +2271,13 @@ const EditBreakerPanel = () => {
                                     )}
                                 </Row>
 
-                                <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
+                                <div className="row" style={{ width: '100%', height: '200vh', position: 'relative' }}>
                                     {!panelDataFetched && (
                                         <div className="col-sm">
                                             <ReactFlow
-                                                elements={elements}
-                                                edges={edges}
-                                                onConnect={onConnect}
+                                                elements={distributedBreakersNodes}
+                                                // edges={distributedBreakersEdges}
+                                                // onConnect={onConnect}
                                                 onLoad={onLoad}
                                                 nodeTypes={nodeTypes}
                                                 style={{ background: '#fafbfc' }}
@@ -1663,9 +2300,9 @@ const EditBreakerPanel = () => {
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
-                                        edges={disconnectBreakersEdges}
+                                        // edges={disconnectBreakersEdges}
+                                        // onConnect={onConnectDisconnectedBreakers}
                                         nodeTypes={nodeTypes}
-                                        onConnect={onConnectDisconnectedBreakers}
                                         style={{ background: '#fafbfc' }}
                                         onLoad={onLoad}
                                         onNodeContextMenu={onContextMenu}
