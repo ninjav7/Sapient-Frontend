@@ -916,8 +916,8 @@ const EditBreakerPanel = () => {
 
             let panelObj = {
                 name: panel.panel_name,
-                // parent_panel: panel.parent_id ? panel.parent_id : '',
-                // space_id: panel.location_id ? panel.location_id : '',
+                parent_panel: panel.parent_id,
+                space_id: panel.location_id,
             };
 
             setIsProcessing(true);
@@ -1197,6 +1197,7 @@ const EditBreakerPanel = () => {
                         };
                         newArray.push(obj);
                     });
+                    console.log('passiveDeviceData API response => ', newArray);
                     setPassiveDeviceData(newArray);
                 });
             } catch (error) {
@@ -1268,17 +1269,20 @@ const EditBreakerPanel = () => {
                 }
                 obj.passive_data = passiveDeviceData;
             });
+            // console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
             setDistributedBreakersNodes(newArray);
         }
 
         if (disconnectBreakersNodes.length !== 0) {
-            let newDisconnectedArray = disconnectBreakersNodes;
-            newDisconnectedArray.forEach((obj) => {
+            let newDisconnectedArray = [];
+            disconnectBreakersNodes.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.passive_data = passiveDeviceData;
+                obj.data.passive_data = passiveDeviceData;
+                newDisconnectedArray.push(obj);
             });
+            // console.log('SSR newDisconnectedArray => ', newDisconnectedArray);
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [passiveDeviceData]);
