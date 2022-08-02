@@ -1267,7 +1267,7 @@ const EditBreakerPanel = () => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.passive_data = passiveDeviceData;
+                obj.passive_data = passiveDeviceData;
             });
             // console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
             setDistributedBreakersNodes(newArray);
