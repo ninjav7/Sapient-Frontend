@@ -1096,6 +1096,7 @@ const EditBreakerPanel = () => {
                     let response = res.data;
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
+                    console.log('setPanel response => ', response);
                     setPanel(response);
                     setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
