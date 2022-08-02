@@ -916,8 +916,8 @@ const EditBreakerPanel = () => {
 
             let panelObj = {
                 name: panel.panel_name,
-                // parent_panel: panel.parent_id ? panel.parent_id : '',
-                // space_id: panel.location_id ? panel.location_id : '',
+                parent_panel: panel.parent_id,
+                space_id: panel.location_id,
             };
 
             setIsProcessing(true);
@@ -1197,6 +1197,7 @@ const EditBreakerPanel = () => {
                         };
                         newArray.push(obj);
                     });
+                    console.log('passiveDeviceData API response => ', newArray);
                     setPassiveDeviceData(newArray);
                 });
             } catch (error) {
@@ -1235,6 +1236,30 @@ const EditBreakerPanel = () => {
         fetchEquipmentData();
     }, [panelId]);
 
+    // useEffect(() => {
+    //     if (distributedBreakersNodes.length !== 0) {
+    //         let newArray = distributedBreakersNodes;
+    //         newArray.forEach((obj) => {
+    //             if (obj.type === 'breakerLink') {
+    //                 return;
+    //             }
+    //             obj.equipment_data = equipmentData;
+    //         });
+    //         setDistributedBreakersNodes(newArray);
+    //     }
+
+    //     if (disconnectBreakersNodes.length !== 0) {
+    //         let newDisconnectedArray = disconnectBreakersNodes;
+    //         newDisconnectedArray.forEach((obj) => {
+    //             if (obj.type === 'breakerLink') {
+    //                 return;
+    //             }
+    //             obj.equipment_data = equipmentData;
+    //         });
+    //         setDisconnectBreakersNodes(newDisconnectedArray);
+    //     }
+    // }, [equipmentData]);
+
     useEffect(() => {
         if (distributedBreakersNodes.length !== 0) {
             let newArray = distributedBreakersNodes;
@@ -1242,43 +1267,22 @@ const EditBreakerPanel = () => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.equipment_data = equipmentData;
+                obj.data.passive_data = passiveDeviceData;
             });
+            console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
             setDistributedBreakersNodes(newArray);
         }
 
         if (disconnectBreakersNodes.length !== 0) {
-            let newDisconnectedArray = disconnectBreakersNodes;
-            newDisconnectedArray.forEach((obj) => {
+            let newDisconnectedArray = [];
+            disconnectBreakersNodes.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.equipment_data = equipmentData;
+                obj.data.passive_data = passiveDeviceData;
+                newDisconnectedArray.push(obj);
             });
-            setDisconnectBreakersNodes(newDisconnectedArray);
-        }
-    }, [equipmentData]);
-
-    useEffect(() => {
-        if (distributedBreakersNodes.length !== 0) {
-            let newArray = distributedBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.passive_data = passiveDeviceData;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakersNodes.length !== 0) {
-            let newDisconnectedArray = disconnectBreakersNodes;
-            newDisconnectedArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.passive_data = passiveDeviceData;
-            });
+            console.log('SSR newDisconnectedArray => ', newDisconnectedArray);
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [passiveDeviceData]);
