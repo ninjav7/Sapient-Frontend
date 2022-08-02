@@ -665,16 +665,16 @@ const BreakersComponent = ({ data, id }) => {
                     <Button variant="light" onClick={handleEditBreakerClose}>
                         Cancel
                     </Button>
-                    {breakerData.breaker_level === 'single-breaker' && (
-                        <Button
-                            variant="primary"
-                            onClick={() => {
-                                updateSingleBreakerData();
-                                handleEditBreakerClose();
-                            }}>
-                            Save
-                        </Button>
-                    )}
+                    {/* {breakerData.breaker_level === 'single-breaker' && ( */}
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            updateSingleBreakerData();
+                            handleEditBreakerClose();
+                        }}>
+                        Save
+                    </Button>
+                    {/* )} */}
 
                     {/* {data.breaker_level === 'double-breaker' && (
                         <Button

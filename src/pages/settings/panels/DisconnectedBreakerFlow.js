@@ -407,7 +407,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            saveBreakerData();
+                            // saveBreakerData();
                             handleEditBreakerClose();
                         }}>
                         Save
