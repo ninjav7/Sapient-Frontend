@@ -365,6 +365,7 @@ const Provision = () => {
                 let kasadata=[];
                 res.data.data.forEach(ele => {
                     let a={
+                        id:ele.id,
                         email:ele.email,
                         HS110s:ele.HS110s,
                         KP115s:ele.KP115s,
