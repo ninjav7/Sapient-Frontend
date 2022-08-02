@@ -71,23 +71,18 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         newArray.forEach((obj) => {
             if (voltageValue === '120/240') {
                 obj.voltage = '120';
-                obj.phase_configuration = 1;
             }
             if (voltageValue === '208/120') {
                 obj.voltage = '120';
-                obj.phase_configuration = 1;
             }
             if (voltageValue === '480') {
                 obj.voltage = '277';
-                obj.phase_configuration = 1;
             }
             if (voltageValue === '600') {
                 obj.voltage = '347';
-                obj.phase_configuration = 1;
             }
             if (voltageValue === 'Select Volts') {
                 obj.voltage = '';
-                obj.phase_configuration = 1;
             }
         });
         setBreakersData(newArray);
@@ -123,7 +118,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 let obj = {
                     name: `Breaker ${index}`,
                     breaker_number: index,
-                    phase_configuration: 0,
+                    phase_configuration: 1,
                     rated_amps: 0,
                     voltage: '',
                     link_type: 'unlinked',
@@ -132,27 +127,18 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     sensor_id: '',
                     device_id: '',
                 };
-
                 if (panelObj.voltage === '120/240') {
                     obj.voltage = '120';
-                    obj.phase_configuration = 1;
                 }
-
                 if (panelObj.voltage === '208/120') {
                     obj.voltage = '120';
-                    obj.phase_configuration = 1;
                 }
-
                 if (panelObj.voltage === '480') {
                     obj.voltage = '277';
-                    obj.phase_configuration = 1;
                 }
-
                 if (panelObj.voltage === '600') {
                     obj.voltage = '347';
-                    obj.phase_configuration = 1;
                 }
-
                 newArray.push(obj);
             }
         }
