@@ -1,6 +1,6 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-// export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
-// export const BaseUrl = 'http://122.175.198.21:8000';
+//export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
+//export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -62,6 +62,7 @@ export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
+export const updateBreaker = '/api/config/panels/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 
 // getBuilding

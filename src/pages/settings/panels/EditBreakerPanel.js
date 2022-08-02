@@ -11,7 +11,7 @@ import {
     getLocation,
     generalPanels,
     generalPassiveDevices,
-    createPanel,
+    getBreakers,
     updatePanel,
     createBreaker,
     generalEquipments,
@@ -20,7 +20,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
-import { v4 as uuidv4 } from 'uuid';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
@@ -67,7 +66,11 @@ const EditBreakerPanel = () => {
 
     const [linkedSensors, setLinkedSensors] = useState([]);
     const newBreakers = [];
+
     const [panel, setPanel] = useState({});
+    const [breakersData, setBreakersData] = useState([]);
+    const [isBreakerDataFetched, setBreakerDataFetched] = useState(false);
+
     const [fetchedPanelResponse, setFetchedPanelResponse] = useState({});
     const [panelDataFetched, setIsPanelDataFetched] = useState(false);
 
@@ -111,28 +114,7 @@ const EditBreakerPanel = () => {
         },
     ]);
 
-    const [breakerLevel, setBreakerLevel] = useState([
-        {
-            name: 'Single-Breaker',
-            value: 'single-breaker',
-        },
-        {
-            name: 'Double-Breaker',
-            value: 'double-breaker',
-        },
-        {
-            name: 'Triple-Breaker',
-            value: 'triple-breaker',
-        },
-    ]);
-
     const [currentBreakerLevel, setCurrentBreakerLevel] = useState('single-breaker');
-
-    // const [activeLinkedBreakers, setActiveLinkedBreakers] = useState([
-    //     [1, 3],
-    //     [2, 4, 6],
-    //     [5, 7, 9],
-    // ]);
 
     const [activeLinkedBreakers, setActiveLinkedBreakers] = useState([]);
     const [doubleLinkedBreaker, setDoubleLinkedBreaker] = useState([]);
@@ -148,6 +130,8 @@ const EditBreakerPanel = () => {
     const [normalData, setNormalData] = useState({
         related_amps: 200,
     });
+
+    const [updatePanelObj, setUpdatePanelObj] = useState({});
 
     const [normalDataIndex, setNormalDataIndex] = useState(0);
 
@@ -372,114 +356,7 @@ const EditBreakerPanel = () => {
             ...panel,
             ...panelConfig,
         };
-        mainVoltageChange(obj.voltage === 'Select Volts' ? '' : obj.voltage);
         setPanel(obj);
-    };
-
-    const mainVoltageChange = (voltageValue) => {
-        // let newArray = normalStruct;
-
-        // if (currentBreakerLevel === 'single-breaker') {
-        //     newArray.forEach((obj) => {
-        //         if (voltageValue === '120/240') {
-        //             obj.voltage = '120';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === '208/120') {
-        //             obj.voltage = '120';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === '480') {
-        //             obj.voltage = '277';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === '600') {
-        //             obj.voltage = '347';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === 'Select Volts') {
-        //             obj.voltage = '';
-        //             obj.phase_configuration = 1;
-        //         }
-        //     });
-        // }
-
-        // if (currentBreakerLevel === 'double-breaker') {
-        //     newArray.forEach((obj) => {
-        //         if (voltageValue === '120/240') {
-        //             obj.voltage = '240';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === '208/120') {
-        //             obj.voltage = '208';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         if (voltageValue === '480') {
-        //             obj.voltage = '480';
-        //             obj.phase_configuration = 1;
-        //         }
-        //         // if (voltageValue === '600') {
-        //         //     obj.voltage = '347';
-        //         //     obj.phase_configuration = 1;
-        //         // }
-        //         if (voltageValue === 'Select Volts') {
-        //             obj.voltage = '';
-        //             obj.phase_configuration = 1;
-        //         }
-        //     });
-        // }
-
-        // if (currentBreakerLevel === 'triple-breaker') {
-        //     newArray.forEach((obj) => {
-        //         // if (voltageValue === '120/240') {
-        //         //     obj.voltage = '120';
-        //         //     obj.phase_configuration = 1;
-        //         // }
-        //         if (voltageValue === '208/120') {
-        //             obj.voltage = '208';
-        //             obj.phase_configuration = 3;
-        //         }
-        //         if (voltageValue === '480') {
-        //             obj.voltage = '480';
-        //             obj.phase_configuration = 3;
-        //         }
-        //         if (voltageValue === '600') {
-        //             obj.voltage = '600';
-        //             obj.phase_configuration = 3;
-        //         }
-        //         if (voltageValue === 'Select Volts') {
-        //             obj.voltage = '';
-        //             obj.phase_configuration = 1;
-        //         }
-        //     });
-        // }
-
-        // setNormalStruct(newArray);
-
-        let newArray = elements;
-        newArray.forEach((obj) => {
-            if (voltageValue === '120/240') {
-                obj.data.voltage = '120';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '208/120') {
-                obj.data.voltage = '120';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '480') {
-                obj.data.voltage = '277';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === '600') {
-                obj.data.voltage = '347';
-                obj.data.phase_configuration = 1;
-            }
-            if (voltageValue === 'Select Volts') {
-                obj.data.voltage = '';
-                obj.data.phase_configuration = 1;
-            }
-        });
-        setElements(newArray);
     };
 
     const fetchDeviceSensorData = async (deviceId) => {
@@ -555,6 +432,8 @@ const EditBreakerPanel = () => {
     };
 
     const handleDisconnectBreakers = (previousBreakerCount, newBreakerCount) => {
+        console.log();
+
         let newBreakersArray = disconnectBreakerConfig;
         if (newBreakerCount === 1) {
             let arr = [];
@@ -636,30 +515,36 @@ const EditBreakerPanel = () => {
     //     setElements(elementsList);
     // };
 
+    // const handleDiscBreakerChange = (id, key, value) => {
+    // let disconnectedBreakerList = Object.assign([], disconnectBreakersNodes);
+
+    // disconnectedBreakerList.forEach((el) => {
+    //     if (el.id === id) {
+    //         if (key === 'equipment_link') {
+    //             let arr = [];
+    //             arr.push(value);
+    //             value = arr;
+    //         }
+    //         if (value === 'Select Volts') {
+    //             value = '';
+    //         }
+    //         el.data[key] = value;
+    //     }
+    // });
+
+    // setDisconnectBreaker(disconnectedBreakerList);
+    // };
+
     const handleBreakerChange = (id, breakerObj) => {
         console.log('handleBreakerChange id => ', id);
         console.log('handleBreakerChange breakerObj => ', breakerObj);
-        console.log('handleBreakerChange elements => ', elements);
+        console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
     };
 
-    const handleDisconnectedBreakerChange = (id, key, value) => {
-        let disconnectedBreakerList = Object.assign([], disconnectBreakersNodes);
-
-        disconnectedBreakerList.forEach((el) => {
-            if (el.id === id) {
-                if (key === 'equipment_link') {
-                    let arr = [];
-                    arr.push(value);
-                    value = arr;
-                }
-                if (value === 'Select Volts') {
-                    value = '';
-                }
-                el.data[key] = value;
-            }
-        });
-
-        setDisconnectBreaker(disconnectedBreakerList);
+    const handleDiscBreakerChange = (id, discBreakerObj) => {
+        console.log('handleDiscBreakerChange id => ', id);
+        console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
+        console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
     };
 
     // ************* distributed initial elements & edges ********************
@@ -823,7 +708,7 @@ const EditBreakerPanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleDisconnectedBreakerChange,
+                onChange: handleDiscBreakerChange,
             },
             position: { x: 450, y: 60 },
             draggable: false,
@@ -848,7 +733,7 @@ const EditBreakerPanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleDisconnectedBreakerChange,
+                onChange: handleDiscBreakerChange,
             },
             position: { x: 450, y: 140 },
             draggable: false,
@@ -873,7 +758,7 @@ const EditBreakerPanel = () => {
                 panel_voltage: '',
                 equipment_data: [],
                 passive_data: [],
-                onChange: handleDisconnectedBreakerChange,
+                onChange: handleDiscBreakerChange,
             },
             position: { x: 450, y: 220 },
             draggable: false,
@@ -915,13 +800,10 @@ const EditBreakerPanel = () => {
         },
     ];
 
-    // const [elements, setElements] = useState(initialElements);
-    const [elements, setElements] = useState();
-    console.log('elements typeof => ', typeof elements);
+    const [distributedBreakersNodes, setDistributedBreakersNodes] = useState([]);
+    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState([]);
 
-    const [edges, setEdges] = useState(initialEdges);
-
-    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState(initialDisconnetNodes);
+    const [distributedBreakersEdges, setDistributedBreakersEdges] = useState(initialEdges);
     const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -951,14 +833,28 @@ const EditBreakerPanel = () => {
     };
 
     const getYaxisCordinates = (index) => {
-        if (index === 1 || index === 2) {
+        let num = index;
+
+        if (num === 1 || num === 2) {
             return 70;
         }
-        if (index === 3 || index === 4) {
-            return 70 * 2;
+        if (num % 2 === 0) {
+            return (num / 2) * 70;
         }
-        if (index === 5 || index === 6) {
-            return 70 * 3;
+        if (num % 2 !== 0) {
+            return ((num + 1) / 2) * 70;
+        }
+    };
+
+    const getDiscYaxisCordinates = (index) => {
+        if (index === 1) {
+            return 60;
+        }
+        if (index === 2) {
+            return 140;
+        }
+        if (index === 3) {
+            return 220;
         }
     };
 
@@ -969,16 +865,15 @@ const EditBreakerPanel = () => {
 
     const onConnect = useCallback(
         (params) =>
-            setElements((els) =>
+            setDistributedBreakersNodes((els) =>
                 addEdge(
                     {
                         ...params,
-                        id: `edge_${elements.length + 1}`,
+                        id: `edge_${distributedBreakersNodes.length + 1}`,
                         animated: false,
                         type: 'step',
                         style: { stroke: '#bababa' },
                         data: { type: 'edge', label: 'dhvsdhvd' },
-                        // arrowHeadType: 'arrowclosed',
                     },
                     els
                 )
@@ -1007,17 +902,6 @@ const EditBreakerPanel = () => {
         []
     );
 
-    // const updateBreakerWithPanelId = (panelId) => {
-    //     let newArray = elements;
-    //     newArray.forEach((obj) => {
-    //         if (obj.type === 'breakerLink') {
-    //             return;
-    //         }
-    //         obj.data.panelId = panelId;
-    //     });
-    //     setElements(newArray);
-    // };
-
     const comparePanelData = (obj1, obj2) => {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
     };
@@ -1029,15 +913,17 @@ const EditBreakerPanel = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
+
             let panelObj = {
                 name: panel.panel_name,
-                parent_panel: panel.location_id,
-                space_id: panel.parent_id,
+                parent_panel: panel.parent_id,
+                space_id: panel.location_id,
             };
+
             setIsProcessing(true);
             let params = `?panel_id=${panelId}`;
             await axios
-                .post(`${BaseUrl}${updatePanel}${params}`, panelObj, {
+                .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
                     headers: header,
                 })
                 .then((res) => {
@@ -1062,7 +948,7 @@ const EditBreakerPanel = () => {
             let panelBreakerObjs = [];
 
             if (activePanelType === 'distribution') {
-                elements.forEach((el) => {
+                distributedBreakersNodes.forEach((el) => {
                     if (el.type === 'breakerLink') {
                         return;
                     }
@@ -1122,59 +1008,60 @@ const EditBreakerPanel = () => {
         }
     };
 
-    useEffect(() => {
-        let newBreakers = [];
-        for (let index = 1; index <= disconnectBreakerCount; index++) {
-            let obj = {
-                name: `Breaker ${index}`,
-                breaker_number: index,
-                phase_configuration: 1,
-                rated_amps: 0,
-                voltage: '120',
-                link_type: 'unlinked',
-                link_id: '',
-                equipment_link: [],
-                sensor_id: '',
-                device_id: '',
-            };
-            newBreakers.push(obj);
-        }
-        setDisconnectBreakerConfig(newBreakers);
-    }, []);
+    // Initial Elements set for Disconnected ReactFlow
+    // useEffect(() => {
+    //     let newBreakers = [];
+    //     for (let index = 1; index <= disconnectBreakerCount; index++) {
+    //         let obj = {
+    //             name: `Breaker ${index}`,
+    //             breaker_number: index,
+    //             phase_configuration: 1,
+    //             rated_amps: 0,
+    //             voltage: '120',
+    //             link_type: 'unlinked',
+    //             link_id: '',
+    //             equipment_link: [],
+    //             sensor_id: '',
+    //             device_id: '',
+    //         };
+    //         newBreakers.push(obj);
+    //     }
+    //     setDisconnectBreakerConfig(newBreakers);
+    // }, []);
 
-    useEffect(() => {
-        for (let index = 1; index <= normalCount; index++) {
-            let obj = {
-                id: `breaker-${index}`,
-                targetPosition: index % 2 === 0 ? 'right' : 'left',
-                sourcePosition: index % 2 === 0 ? 'left' : 'right',
-                type: 'breakerComponent',
-                data: {
-                    name: '',
-                    breaker_number: index,
-                    phase_configuration: 1,
-                    rated_amps: 0,
-                    voltage: '',
-                    link_type: 'unlinked',
-                    link_id: '',
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_level: 'single-breaker',
-                    panel_voltage: '',
-                    equipment_data: [],
-                    passive_data: [],
-                    onChange: handleBreakerChange,
-                    elements: elements,
-                },
-                position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
-                draggable: false,
-            };
-            newBreakers.push(obj);
-        }
-        console.log('ReactFlow Breakers => ', newBreakers);
-        setElements(newBreakers);
-    }, []);
+    // Initial Elements set for Distributed ReactFlow
+    // useEffect(() => {
+    //     for (let index = 1; index <= normalCount; index++) {
+    //         let obj = {
+    //             id: `breaker-${index}`,
+    //             targetPosition: index % 2 === 0 ? 'right' : 'left',
+    //             sourcePosition: index % 2 === 0 ? 'left' : 'right',
+    //             type: 'breakerComponent',
+    //             data: {
+    //                 name: '',
+    //                 breaker_number: index,
+    //                 phase_configuration: 1,
+    //                 rated_amps: 0,
+    //                 voltage: '',
+    //                 link_type: 'unlinked',
+    //                 link_id: '',
+    //                 equipment_link: [],
+    //                 sensor_id: '',
+    //                 device_id: '',
+    //                 breaker_level: 'single-breaker',
+    //                 panel_voltage: '',
+    //                 equipment_data: [],
+    //                 passive_data: [],
+    //                 onChange: handleBreakerChange,
+    //                 elements: elements,
+    //             },
+    //             position: { x: index % 2 === 0 ? 700 : 250, y: getYaxisCordinates(index) },
+    //             draggable: false,
+    //         };
+    //         newBreakers.push(obj);
+    //     }
+    //     setElements(newBreakers);
+    // }, []);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1209,6 +1096,7 @@ const EditBreakerPanel = () => {
                     let response = res.data;
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
+                    console.log('setPanel response => ', response);
                     setPanel(response);
                     setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
@@ -1217,6 +1105,30 @@ const EditBreakerPanel = () => {
                 setIsPanelDataFetched(false);
                 console.log(error);
                 console.log('Failed to fetch Panels Data List');
+            }
+        };
+
+        const fetchBreakersData = async () => {
+            try {
+                setBreakerDataFetched(true);
+
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?panel_id=${panelId}`;
+
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
+                    let response = res.data.data;
+                    setBreakersData(response);
+                });
+                setBreakerDataFetched(false);
+            } catch (error) {
+                console.log(error);
+                setBreakerDataFetched(false);
+                console.log('Failed to fetch Breakers Data List');
             }
         };
 
@@ -1247,8 +1159,12 @@ const EditBreakerPanel = () => {
                 let params = `?building_id=${bldgId}`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
+                    console.log('responseData => ', responseData);
                     let equipArray = [];
                     responseData.forEach((record) => {
+                        if (record.equipments_name === '') {
+                            return;
+                        }
                         let obj = {
                             label: record.equipments_name,
                             value: record.equipments_id,
@@ -1281,6 +1197,7 @@ const EditBreakerPanel = () => {
                         };
                         newArray.push(obj);
                     });
+                    console.log('passiveDeviceData API response => ', newArray);
                     setPassiveDeviceData(newArray);
                 });
             } catch (error) {
@@ -1312,6 +1229,7 @@ const EditBreakerPanel = () => {
         };
 
         fetchSinglePanelData();
+        fetchBreakersData();
         fetchPanelsData();
         fetchPassiveDeviceData();
         fetchLocationData();
@@ -1319,240 +1237,133 @@ const EditBreakerPanel = () => {
     }, [panelId]);
 
     useEffect(() => {
-        if (disconnectBreakerCount === 3) {
-            let disconnectedNodes = [
-                {
-                    id: 'dis-breaker-1',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'left',
-                    sourcePosition: 'right',
-                    data: {
-                        name: '',
-                        breaker_number: 1,
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    position: { x: 450, y: 60 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breaker-2',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'right',
-                    sourcePosition: 'left',
-                    data: {
-                        name: '',
-                        breaker_number: 2,
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    position: { x: 450, y: 140 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breaker-3',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'left',
-                    sourcePosition: 'right',
-                    data: {
-                        name: '',
-                        breaker_number: 3,
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    data: { label: 'Breaker 3', index: '3' },
-                    position: { x: 450, y: 220 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breakerslink-12',
-                    type: 'breakerLink',
-                    data: { label: 'Link' },
-                    position: { x: 400, y: 120 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breakerslink-23',
-                    type: 'breakerLink',
-                    data: { label: 'Link' },
-                    position: { x: 400, y: 200 },
-                    draggable: false,
-                },
-            ];
-            setDisconnectBreakersNodes(disconnectedNodes);
-        }
-
-        if (disconnectBreakerCount === 2) {
-            let disconnectedNodes = [
-                {
-                    id: 'dis-breaker-1',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'left',
-                    sourcePosition: 'right',
-                    data: {
-                        name: '',
-                        breaker_number: '1',
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    position: { x: 450, y: 60 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breaker-2',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'right',
-                    sourcePosition: 'left',
-                    data: {
-                        name: '',
-                        breaker_number: '2',
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    position: { x: 450, y: 140 },
-                    draggable: false,
-                },
-                {
-                    id: 'dis-breakerslink-12',
-                    type: 'breakerLink',
-                    data: { label: 'Link' },
-                    position: { x: 400, y: 120 },
-                    draggable: false,
-                },
-            ];
-            setDisconnectBreakersNodes(disconnectedNodes);
-        }
-
-        if (disconnectBreakerCount === 1) {
-            let disconnectedNodes = [
-                {
-                    id: 'dis-breaker-1',
-                    type: 'disconnectedBreakerComponent',
-                    targetPosition: 'left',
-                    sourcePosition: 'right',
-                    data: {
-                        name: '',
-                        breaker_number: '1',
-                        phase_configuration: 1,
-                        rated_amps: 0,
-                        voltage: '',
-                        link_type: 'unlinked',
-                        link_id: '',
-                        equipment_link: [],
-                        sensor_id: '',
-                        device_id: '',
-                        breaker_level: 'single-breaker',
-                        panel_voltage: '',
-                        equipment_data: [],
-                        passive_data: [],
-                        onChange: handleBreakerChange,
-                    },
-                    position: { x: 450, y: 60 },
-                    draggable: false,
-                },
-            ];
-            setDisconnectBreakersNodes(disconnectedNodes);
-        }
-    }, [disconnectBreakerCount]);
-
-    useEffect(() => {
-        if (elements) {
-            let newArray = elements;
+        if (distributedBreakersNodes.length !== 0) {
+            let newArray = distributedBreakersNodes;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.equipment_data = equipmentData;
+                obj.equipment_data = equipmentData;
             });
-            setElements(newArray);
+            setDistributedBreakersNodes(newArray);
+        }
 
+        if (disconnectBreakersNodes.length !== 0) {
             let newDisconnectedArray = disconnectBreakersNodes;
             newDisconnectedArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.equipment_data = equipmentData;
+                obj.equipment_data = equipmentData;
             });
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [equipmentData]);
 
     useEffect(() => {
-        if (elements) {
-            let newArray = elements;
+        if (distributedBreakersNodes.length !== 0) {
+            let newArray = distributedBreakersNodes;
             newArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
-                obj.data.passive_data = passiveDeviceData;
+                obj.passive_data = passiveDeviceData;
             });
-            setElements(newArray);
+            // console.log('passiveDeviceData distributedBreakersNodes =>', newArray);
+            setDistributedBreakersNodes(newArray);
+        }
 
-            let newDisconnectedArray = disconnectBreakersNodes;
-            newDisconnectedArray.forEach((obj) => {
+        if (disconnectBreakersNodes.length !== 0) {
+            let newDisconnectedArray = [];
+            disconnectBreakersNodes.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
                 }
                 obj.data.passive_data = passiveDeviceData;
+                newDisconnectedArray.push(obj);
             });
+            // console.log('SSR newDisconnectedArray => ', newDisconnectedArray);
             setDisconnectBreakersNodes(newDisconnectedArray);
         }
     }, [passiveDeviceData]);
+
+    useEffect(() => {
+        if (breakersData.length === 0) {
+            return;
+        }
+
+        let distributedBreakerArray = Object.assign([], distributedBreakersNodes);
+        let disconnectBreakerArray = Object.assign([], disconnectBreakersNodes);
+
+        // If Breakers are of Disconnected Panels
+        breakersData.forEach((record) => {
+            let obj = {
+                id: record.id,
+                type: 'disconnectedBreakerComponent',
+                targetPosition: 'left',
+                sourcePosition: 'right',
+                data: {
+                    name: record.name,
+                    breaker_number: record.breaker_number,
+                    phase_configuration: record.phase_configuration,
+                    rated_amps: record.rated_amps,
+                    voltage: record.voltage,
+                    link_type: record.link_type,
+                    link_id: '',
+                    equipment_link: record.equipment_link,
+                    sensor_id: record.sensor_link,
+                    device_id: record.device_link,
+                    equipment_data: [],
+                    passive_data: [],
+                    onChange: handleDiscBreakerChange,
+                },
+                position: { x: 450, y: getDiscYaxisCordinates(record.breaker_number) },
+                draggable: false,
+            };
+            disconnectBreakerArray.push(obj);
+        });
+
+        // If Breakers are of Distributed Panels
+        breakersData.forEach((record) => {
+            let obj = {
+                id: record.id,
+                type: 'breakerComponent',
+                targetPosition: record.breaker_number % 2 === 0 ? 'right' : 'left',
+                sourcePosition: record.breaker_number % 2 === 0 ? 'left' : 'right',
+                data: {
+                    name: record.name,
+                    breaker_number: record.breaker_number,
+                    phase_configuration: record.phase_configuration,
+                    rated_amps: record.rated_amps,
+                    voltage: record.voltage,
+                    link_type: record.link_type,
+                    link_id: '',
+                    equipment_link: record.equipment_link,
+                    sensor_id: record.sensor_link,
+                    device_id: record.device_link,
+                    equipment_data: [],
+                    passive_data: [],
+                    onChange: handleBreakerChange,
+                },
+                position: {
+                    x: record.breaker_number % 2 === 0 ? 700 : 250,
+                    y: getYaxisCordinates(record.breaker_number),
+                },
+                draggable: false,
+            };
+            distributedBreakerArray.push(obj);
+        });
+
+        console.log('Distributed ReactFlow Elements => ', distributedBreakerArray);
+        console.log('Disconnected ReactFlow Elements => ', disconnectBreakerArray);
+
+        setDistributedBreakersNodes(distributedBreakerArray);
+        setDisconnectBreakersNodes(disconnectBreakerArray);
+    }, [breakersData]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     return (
         <React.Fragment>
@@ -1573,7 +1384,6 @@ const EditBreakerPanel = () => {
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
-                                    // disabled={activePanelType === 'distribution' && panel.voltage === '' ? true : false}
                                     disabled={comparePanelData(panel, fetchedPanelResponse)}
                                     onClick={() => {
                                         savePanelData();
@@ -1634,6 +1444,9 @@ const EditBreakerPanel = () => {
                                     value={panel.parent_id}>
                                     <option>None</option>
                                     {panelsDataList.map((record) => {
+                                        if (record.panel_id === panelId) {
+                                            return;
+                                        }
                                         return <option value={record.panel_id}>{record.panel_name}</option>;
                                     })}
                                 </Input>
@@ -1695,7 +1508,8 @@ const EditBreakerPanel = () => {
                                                 onChange={(e) => {
                                                     setActivePanelType(e.target.value);
                                                 }}
-                                                disabled={true}>
+                                                disabled={true}
+                                                value={panel.panel_type}>
                                                 {panelType.map((record) => {
                                                     return <option value={record.value}>{record.name}</option>;
                                                 })}
@@ -1738,7 +1552,7 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        defaultValue={disconnectBreakerCount}
+                                                        value={panel.breakers}
                                                         onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,
@@ -1775,7 +1589,7 @@ const EditBreakerPanel = () => {
                             </div>
                         </Row>
 
-                        {activePanelType === 'distribution' && (
+                        {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
                                 <Row className="main-breaker-styling">
                                     {panelDataFetched ? (
@@ -1820,150 +1634,12 @@ const EditBreakerPanel = () => {
                                     )}
                                 </Row>
 
-                                {/* Working Breakers without Linking  */}
-                                {/* <Row>
-                                    <Col lg={12}>
-                                        <div>
-                                            <div className="breakers-list-style">
-                                                {normalStruct.map((element, index) => {
-                                                    return (
-                                                        <>
-                                                            <FormGroup className="form-group row m-2 ml-4 mb-4">
-                                                                <div className="breaker-container">
-                                                                    <div className="sub-breaker-style">
-                                                                        <div className="breaker-content-middle">
-                                                                            <div className="breaker-index">
-                                                                                {element.breaker_number}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="breaker-content-middle">
-                                                                            <div className="dot-status"></div>
-                                                                        </div>
-                                                                        <div className="breaker-content-middle">
-                                                                            <div className="breaker-content">
-                                                                                <span>
-                                                                                    {element.rated_amps === 0
-                                                                                        ? ''
-                                                                                        : `${element.rated_amps}A`}
-                                                                                </span>
-                                                                                <span>
-                                                                                    {element.voltage === ''
-                                                                                        ? ''
-                                                                                        : `${element.voltage}V`}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                        {!(element.equipment_link.length === 0) ? (
-                                                                            <>
-                                                                                <div className="breaker-equipName-style">
-                                                                                    <h6 className=" ml-3 breaker-equip-name">
-                                                                                        {findEquipmentName(
-                                                                                            element.equipment_link[0]
-                                                                                        )}
-                                                                                    </h6>
-                                                                                </div>
-                                                                                {!(
-                                                                                    (currentBreakerLevel ===
-                                                                                        'triple-breaker' &&
-                                                                                        panel.voltage === '120/240') ||
-                                                                                    (currentBreakerLevel ===
-                                                                                        'double-breaker' &&
-                                                                                        panel.voltage === '600')
-                                                                                ) && (
-                                                                                    <div
-                                                                                        className="breaker-content-middle"
-                                                                                        onClick={() => {
-                                                                                            setCurrentBreakerObj(
-                                                                                                element
-                                                                                            );
-                                                                                            setCurrentBreakerIndex(
-                                                                                                index
-                                                                                            );
-                                                                                            setCurrentEquipIds(
-                                                                                                element.equipment_link
-                                                                                            );
-                                                                                            handleCurrentLinkedBreaker(
-                                                                                                index
-                                                                                            );
-                                                                                            if (
-                                                                                                element.device_id !== ''
-                                                                                            ) {
-                                                                                                fetchDeviceSensorData(
-                                                                                                    element.device_id
-                                                                                                );
-                                                                                            }
-                                                                                            handleEditBreakerShow();
-                                                                                        }}>
-                                                                                        <div className="edit-icon-bg-styling mr-2">
-                                                                                            <i className="uil uil-pen"></i>
-                                                                                        </div>
-                                                                                        <span className="font-weight-bold edit-btn-styling">
-                                                                                            Edit
-                                                                                        </span>
-                                                                                    </div>
-                                                                                )}
-                                                                            </>
-                                                                        ) : (
-                                                                            <>
-                                                                                {!(
-                                                                                    (currentBreakerLevel ===
-                                                                                        'triple-breaker' &&
-                                                                                        panel.voltage === '120/240') ||
-                                                                                    (currentBreakerLevel ===
-                                                                                        'double-breaker' &&
-                                                                                        panel.voltage === '600')
-                                                                                ) && (
-                                                                                    <div
-                                                                                        className="breaker-content-middle"
-                                                                                        onClick={() => {
-                                                                                            setCurrentBreakerObj(
-                                                                                                element
-                                                                                            );
-                                                                                            setCurrentBreakerIndex(
-                                                                                                index
-                                                                                            );
-                                                                                            setCurrentEquipIds(
-                                                                                                element.equipment_link
-                                                                                            );
-                                                                                            handleCurrentLinkedBreaker(
-                                                                                                index
-                                                                                            );
-                                                                                            if (
-                                                                                                element.device_id !== ''
-                                                                                            ) {
-                                                                                                fetchDeviceSensorData(
-                                                                                                    element.device_id
-                                                                                                );
-                                                                                            }
-                                                                                            handleEditBreakerShow();
-                                                                                        }}>
-                                                                                        <div className="edit-icon-bg-styling mr-2">
-                                                                                            <i className="uil uil-pen"></i>
-                                                                                        </div>
-                                                                                        <span className="font-weight-bold edit-btn-styling">
-                                                                                            Edit
-                                                                                        </span>
-                                                                                    </div>
-                                                                                )}
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </FormGroup>
-                                                        </>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    </Col>
-                                </Row> */}
-
-                                <div className="row" style={{ width: '100%', height: '35vh', position: 'relative' }}>
+                                <div className="row" style={{ width: '100%', height: '200vh', position: 'relative' }}>
                                     {!panelDataFetched && (
                                         <div className="col-sm">
                                             <ReactFlow
-                                                elements={elements}
-                                                edges={edges}
+                                                elements={distributedBreakersNodes}
+                                                // edges={distributedBreakersEdges}
                                                 onConnect={onConnect}
                                                 onLoad={onLoad}
                                                 nodeTypes={nodeTypes}
@@ -1982,14 +1658,14 @@ const EditBreakerPanel = () => {
                             </>
                         )}
 
-                        {activePanelType === 'disconnect' && (
+                        {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
                             <div className="row" style={{ width: '100%', height: '40vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
-                                        edges={disconnectBreakersEdges}
+                                        // edges={disconnectBreakersEdges}
+                                        // onConnect={onConnectDisconnectedBreakers}
                                         nodeTypes={nodeTypes}
-                                        onConnect={onConnectDisconnectedBreakers}
                                         style={{ background: '#fafbfc' }}
                                         onLoad={onLoad}
                                         onNodeContextMenu={onContextMenu}
