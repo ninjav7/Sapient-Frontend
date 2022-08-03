@@ -103,8 +103,10 @@ const BreakersComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                 });
+            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
+            handleEditBreakerClose();
         }
     };
 
@@ -711,9 +713,8 @@ const BreakersComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            // saveBreakerData();
+                            saveBreakerData();
                             triggerBreakerAPI();
-                            handleEditBreakerClose();
                         }}>
                         Save
                     </Button>

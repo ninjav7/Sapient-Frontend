@@ -494,6 +494,17 @@ const EditBreakerPanel = () => {
     };
 
     useEffect(() => {
+        if (activePanelType === 'disconnect') {
+            if (normalCount === 1) {
+            }
+            if (normalCount === 2) {
+            }
+            if (normalCount === 3) {
+            }
+        }
+    }, [normalCount]);
+
+    useEffect(() => {
         if (!isBreakerApiTrigerred) {
             return;
         }
@@ -716,7 +727,6 @@ const EditBreakerPanel = () => {
                         type: 'step',
                         style: { stroke: '#bababa' },
                         data: { type: 'edge', label: 'dhvsdhvd' },
-                        // arrowHeadType: 'arrowclosed',
                     },
                     els
                 )
@@ -1452,7 +1462,7 @@ const EditBreakerPanel = () => {
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}
                                         // edges={disconnectBreakersEdges}
-                                        // onConnect={onConnectDisconnectedBreakers}
+                                        onConnect={onConnectDisconnectedBreakers}
                                         nodeTypes={nodeTypes}
                                         style={{ background: '#fafbfc' }}
                                         onLoad={onLoad}

@@ -103,8 +103,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                 });
+            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
+            handleEditBreakerClose();
         }
     };
 
@@ -414,9 +416,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            // saveBreakerData();
+                            saveBreakerData();
                             triggerBreakerAPI();
-                            handleEditBreakerClose();
                         }}>
                         Save
                     </Button>
