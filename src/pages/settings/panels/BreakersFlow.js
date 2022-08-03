@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
@@ -65,6 +65,40 @@ const BreakersComponent = ({ data, id }) => {
         //     setDisconnectBreakerConfig(newArray);
         // }
         data.onChange(id, breakerData);
+    };
+
+    const saveBreakerData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let breakerObj = {
+                name: breakerData.name,
+                breaker_number: breakerData.breaker_number,
+                phase_configuration: breakerData.phase_configuration,
+                rated_amps: breakerData.rated_amps,
+                voltage: breakerData.voltage,
+                link_type: breakerData.link_type,
+                link_id: breakerData.link_id,
+                sensor_id: breakerData.sensor_id,
+                device_id: breakerData.device_id,
+            };
+
+            let params = `?breaker_id=${id}`;
+
+            await axios
+                .post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                });
+        } catch (error) {
+            console.log('Failed to update Breaker');
+        }
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
@@ -670,6 +704,7 @@ const BreakersComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
+                            saveBreakerData();
                             handleEditBreakerClose();
                         }}>
                         Save
