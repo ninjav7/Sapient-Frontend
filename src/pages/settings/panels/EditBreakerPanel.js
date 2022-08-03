@@ -432,8 +432,6 @@ const EditBreakerPanel = () => {
     };
 
     const handleDisconnectBreakers = (previousBreakerCount, newBreakerCount) => {
-        console.log();
-
         let newBreakersArray = disconnectBreakerConfig;
         if (newBreakerCount === 1) {
             let arr = [];
@@ -835,7 +833,7 @@ const EditBreakerPanel = () => {
                     headers: header,
                 })
                 .then((res) => {
-                    console.log(res.data);
+                    let response = res.data;
                 });
 
             setIsProcessing(false);
