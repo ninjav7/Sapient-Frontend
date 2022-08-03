@@ -15,6 +15,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [breakerData, setBreakerData] = useState(data);
 
+    console.log('breakerData => ', breakerData);
+
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
     const handleEditBreakerClose = () => setShowEditBreaker(false);
