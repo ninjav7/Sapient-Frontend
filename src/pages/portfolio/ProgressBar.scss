@@ -1,0 +1,21 @@
+@import '../../assets/scss/colors';
+
+
+.progress-bar {
+  &-wrapper {
+    
+  }
+    &-title {
+        font-weight: 600;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        color: $primary-gray-800;
+    }
+
+    &-value {
+        font-weight: 400;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      color: $primary-gray-500;
+    }
+}

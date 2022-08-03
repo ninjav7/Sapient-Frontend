@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
+import PropTypes from 'prop-types';
 
 import Typography from '../typography';
 import Brick from '../brick';
@@ -30,7 +31,6 @@ const Titles = ({ sizeBrick, title, subtitle }) => {
 
 const DonutChartWidget = ({
     className = '',
-    color = [],
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
     items,
@@ -51,7 +51,7 @@ const DonutChartWidget = ({
 
     return (
         <>
-            {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={0.875} {...{ title, subtitle }} />}
+            {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
             <div className={`donut-chart-widget-wrapper ${className} ${type}`}>
                 {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
                 <div className={`chart-wrapper ${type}`}>
@@ -60,8 +60,8 @@ const DonutChartWidget = ({
                 <div className="chart-labels">
                     <DonutChartLabels
                         className={type}
-                        isShowTrend={type == DONUT_CHART_TYPES.HORIZONTAL}
-                        isShowValue={type != DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
+                        isShowTrend={type === DONUT_CHART_TYPES.HORIZONTAL}
+                        isShowValue={type !== DONUT_CHART_TYPES.VERTICAL_NO_TOTAL}
                         labels={items}
                     />
                 </div>
@@ -69,4 +69,20 @@ const DonutChartWidget = ({
         </>
     );
 };
+
+DonutChartWidget.propTypes = {
+    id: PropTypes.string,
+    type: PropTypes.oneOf(Object.values(DONUT_CHART_TYPES)),
+    items: PropTypes.arrayOf(
+        PropTypes.shape({ 
+            label: PropTypes.string.isRequired, 
+            color: PropTypes.string.isRequired, 
+            value: PropTypes.string.isRequired, 
+            unit: PropTypes.string.isRequired, 
+            trendValue: PropTypes.number, 
+            link: PropTypes.string, 
+        }).isRequired
+    ).isRequired
+}
+
 export default DonutChartWidget;
