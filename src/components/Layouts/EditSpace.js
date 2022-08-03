@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 
-import { Button, Input, Label } from 'reactstrap';
+import { Button, Input, Label, Spinner } from 'reactstrap';
 import {
     closeEditSpaceModal,
     floorid,
@@ -35,6 +35,7 @@ const EditSpace = (props) => {
     const [space, setSpace] = useAtom(spacesList);
     const [typeName, setTypeName] = useState('Room');
     const [closeModal, setCloseModal] = useAtom(closeEditSpaceModal);
+    const [loading, setLoading] = useState(false);
 
     const [spaceBody, setSpaceBody] = useState({
         building_id: bldgId,
@@ -64,7 +65,9 @@ const EditSpace = (props) => {
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {
+            setLoading(false);
             setReloadSpace('true');
+            props.onHide();
         });
     };
 
@@ -106,15 +109,22 @@ const EditSpace = (props) => {
 
                 <Modal.Footer>
                     <Button onClick={props.onHide}>Cancel</Button>
-                    <Button
-                        onClick={() => {
-                            setSpace((el) => [...el, { floorIndex: props.floorIndex, spaceName, typeName }]);
-                            props.onHide();
-                            setCloseModal(true);
-                            createSpacesAPI();
-                        }}>
-                        Save
-                    </Button>
+                    {loading ? (
+                        <Button color="primary" disabled>
+                            <Spinner size="sm">Loading...</Spinner>
+                            <span> Loading</span>
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => {
+                                setSpace((el) => [...el, { floorIndex: props.floorIndex, spaceName, typeName }]);
+                                setLoading(true);
+                                createSpacesAPI();
+                                setCloseModal(true);
+                            }}>
+                            Save
+                        </Button>
+                    )}
                 </Modal.Footer>
             </Modal>
         </>
