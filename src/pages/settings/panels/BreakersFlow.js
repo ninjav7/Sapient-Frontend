@@ -92,6 +92,7 @@ const BreakersComponent = ({ data, id }) => {
                 link_id: breakerData.link_id,
                 sensor_id: breakerData.sensor_id,
                 device_id: breakerData.device_id,
+                equipment_link: breakerData.equipment_link,
             };
 
             let params = `?breaker_id=${id}`;
