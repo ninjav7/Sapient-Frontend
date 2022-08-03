@@ -5,6 +5,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
+import { LoadingStore } from '../../../store/LoadingStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
@@ -14,8 +15,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     let userdata = cookies.get('user');
 
     const [breakerData, setBreakerData] = useState(data);
-
-    console.log('breakerData => ', breakerData);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
@@ -67,6 +66,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         //     setDisconnectBreakerConfig(newArray);
         // }
         data.onChange(id, breakerData);
+    };
+
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
     };
 
     const saveBreakerData = async () => {
@@ -409,7 +414,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            saveBreakerData();
+                            // saveBreakerData();
+                            triggerBreakerAPI();
                             handleEditBreakerClose();
                         }}>
                         Save

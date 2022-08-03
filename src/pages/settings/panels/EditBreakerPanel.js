@@ -22,6 +22,7 @@ import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regula
 import { Cookies } from 'react-cookie';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
+import { LoadingStore } from '../../../store/LoadingStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import BreakersComponent from './BreakersFlow';
 import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
@@ -58,10 +59,9 @@ const EditBreakerPanel = () => {
     const [currentBreakerObj, setCurrentBreakerObj] = useState({});
     const [currentBreakerIndex, setCurrentBreakerIndex] = useState(0);
 
-    const [jsonPanelData, setJsonPanelData] = useState('');
-    const [jsonBreakerData, setJsonBreakerData] = useState('');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
+
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [linkedSensors, setLinkedSensors] = useState([]);
@@ -492,6 +492,42 @@ const EditBreakerPanel = () => {
             }
         }
     };
+
+    useEffect(() => {
+        if (!isBreakerApiTrigerred) {
+            return;
+        }
+        const fetchBreakersData = async () => {
+            try {
+                setBreakerDataFetched(true);
+
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?panel_id=${panelId}`;
+
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
+                    let response = res.data.data;
+                    setBreakersData(response);
+                });
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                });
+            } catch (error) {
+                console.log(error);
+                setBreakerDataFetched(false);
+                LoadingStore.update((s) => {
+                    s.isBreakerDataFetched = false;
+                });
+                console.log('Failed to fetch Breakers Data List');
+            }
+        };
+        fetchBreakersData();
+    }, [isBreakerApiTrigerred]);
 
     // ReactFlow Code starting!
 

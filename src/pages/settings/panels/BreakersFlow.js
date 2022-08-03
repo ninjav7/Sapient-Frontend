@@ -6,6 +6,7 @@ import axios from 'axios';
 import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
+import { LoadingStore } from '../../../store/LoadingStore';
 import '../style.css';
 import './panel-style.css';
 
@@ -65,6 +66,12 @@ const BreakersComponent = ({ data, id }) => {
         //     setDisconnectBreakerConfig(newArray);
         // }
         data.onChange(id, breakerData);
+    };
+
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
     };
 
     const saveBreakerData = async () => {
@@ -704,7 +711,8 @@ const BreakersComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            saveBreakerData();
+                            // saveBreakerData();
+                            triggerBreakerAPI();
                             handleEditBreakerClose();
                         }}>
                         Save
