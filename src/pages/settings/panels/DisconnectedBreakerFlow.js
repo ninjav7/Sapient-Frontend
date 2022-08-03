@@ -5,6 +5,7 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
+import { LoadingStore } from '../../../store/LoadingStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
@@ -67,6 +68,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         data.onChange(id, breakerData);
     };
 
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
+    };
+
     const saveBreakerData = async () => {
         try {
             let header = {
@@ -85,6 +92,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 link_id: breakerData.link_id,
                 sensor_id: breakerData.sensor_id,
                 device_id: breakerData.device_id,
+                equipment_link: breakerData.equipment_link,
             };
 
             let params = `?breaker_id=${id}`;
@@ -96,8 +104,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                 });
+            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
+            handleEditBreakerClose();
         }
     };
 
@@ -407,8 +417,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            // saveBreakerData();
-                            handleEditBreakerClose();
+                            saveBreakerData();
+                            triggerBreakerAPI();
                         }}>
                         Save
                     </Button>

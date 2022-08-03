@@ -99,7 +99,7 @@ export const getLocation = '/api/config/get_location';
 export const getEnergyConsumption = '/api/energy/chart';
 
 // explore
-export const getExplore = '/api/energy/explorer/chart';
+export const getExplore = '/api/explorer/chart';
 
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
