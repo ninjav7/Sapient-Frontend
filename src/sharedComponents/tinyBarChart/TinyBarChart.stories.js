@@ -7,7 +7,12 @@ export default {
 };
 
 export const Default = (arg) => {
-    return <TinyBarChart {...arg} />;
+    return (
+        <>
+            Percent {arg.percent}
+            <TinyBarChart {...arg} />
+        </>
+    );
 };
 
 Default.args = {
