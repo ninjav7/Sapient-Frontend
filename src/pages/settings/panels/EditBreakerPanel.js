@@ -1312,36 +1312,52 @@ const EditBreakerPanel = () => {
                             </div>
                         </Row>
 
+                        {isBreakerDataFetched && (
+                            <Row>
+                                <div
+                                    style={{ width: '50%', height: '30vh', position: 'relative' }}
+                                    className="breaker-loader-styling">
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                </div>
+                            </Row>
+                        )}
+
                         {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
                                 <Row className="main-breaker-styling">
-                                    {panelDataFetched ? (
-                                        <Skeleton count={1} height={50} width={200} />
-                                    ) : (
-                                        <FormGroup className="form-group row m-4">
-                                            <div className="breaker-container">
-                                                <div className="breaker-style">
-                                                    <div className="breaker-content-middle">
-                                                        <div className="breaker-index font-weight-bold">M</div>
+                                    <FormGroup className="form-group row m-4">
+                                        <div className="breaker-container">
+                                            <div className="breaker-style">
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-index font-weight-bold">M</div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="dot-status"></div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-content">
+                                                        <span>
+                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
+                                                        </span>
+                                                        <span>
+                                                            {panel.voltage === '' && ''}
+                                                            {panel.voltage === '120/240' && '240V'}
+                                                            {panel.voltage === '208/120' && '120V'}
+                                                            {panel.voltage === '480' && '480V'}
+                                                            {panel.voltage === '600' && '600V'}
+                                                        </span>
                                                     </div>
-                                                    <div className="breaker-content-middle">
-                                                        <div className="dot-status"></div>
-                                                    </div>
-                                                    <div className="breaker-content-middle">
-                                                        <div className="breaker-content">
-                                                            <span>
-                                                                {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
-                                                            </span>
-                                                            <span>
-                                                                {panel.voltage === '' && ''}
-                                                                {panel.voltage === '120/240' && '240V'}
-                                                                {panel.voltage === '208/120' && '120V'}
-                                                                {panel.voltage === '480' && '480V'}
-                                                                {panel.voltage === '600' && '600V'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    {/* <div
+                                                </div>
+                                                {/* <div
                                             className="breaker-content-middle"
                                             onClick={() => {
                                                 handleMainShow();
@@ -1351,10 +1367,9 @@ const EditBreakerPanel = () => {
                                             </div>
                                             <span className="font-weight-bold edit-btn-styling">Edit</span>
                                         </div> */}
-                                                </div>
                                             </div>
-                                        </FormGroup>
-                                    )}
+                                        </div>
+                                    </FormGroup>
                                 </Row>
 
                                 <div className="row" style={{ width: '100%', height: '200vh', position: 'relative' }}>

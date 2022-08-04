@@ -7,6 +7,7 @@ import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
+import Skeleton from 'react-loading-skeleton';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
@@ -26,6 +27,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const handleEditBreakerShow = () => setShowEditBreaker(true);
 
     const [sensorData, setSensorData] = useState([]);
+    const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
@@ -35,6 +37,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             return;
         }
         try {
+            setIsSensorDataFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -44,9 +47,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
+                setIsSensorDataFetched(false);
             });
         } catch (error) {
             console.log(error);
+            setIsSensorDataFetched(false);
             console.log('Failed to fetch Sensor Data');
         }
     };
@@ -346,29 +351,33 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    handleChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                }}
-                                                value={breakerData.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                                <option value="unlink">None</option>
-                                            </Input>
+                                            {isSensorDataFetched ? (
+                                                <Skeleton count={1} height={35} />
+                                            ) : (
+                                                <Input
+                                                    type="select"
+                                                    name="state"
+                                                    id="userState"
+                                                    className="font-weight-bold breaker-phase-selection"
+                                                    placeholder="Select Sensor"
+                                                    onChange={(e) => {
+                                                        handleChange(id, 'sensor_id', e.target.value);
+                                                        handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    }}
+                                                    value={breakerData.sensor_id}>
+                                                    <option>Select Sensor</option>
+                                                    {sensorData.map((record) => {
+                                                        return (
+                                                            <option
+                                                                value={record.id}
+                                                                disabled={linkedSensors.includes(record.id)}>
+                                                                {record.name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                    <option value="unlink">None</option>
+                                                </Input>
+                                            )}
                                         </Form.Group>
                                     </div>
                                 </>
