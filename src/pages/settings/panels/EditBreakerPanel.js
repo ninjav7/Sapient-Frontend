@@ -1085,6 +1085,32 @@ const EditBreakerPanel = () => {
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
+
+        if (distributedBreakerArray.length !== 0) {
+            let newArray = [];
+            distributedBreakerArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.passive_data = passiveDeviceData;
+                obj.data.equipment_data = equipmentData;
+                newArray.push(obj);
+            });
+            setDistributedBreakersNodes(newArray);
+        }
+
+        if (disconnectBreakerArray.length !== 0) {
+            let newArray = [];
+            disconnectBreakerArray.forEach((obj) => {
+                if (obj.type === 'breakerLink') {
+                    return;
+                }
+                obj.data.passive_data = passiveDeviceData;
+                obj.data.equipment_data = equipmentData;
+                newArray.push(obj);
+            });
+            setDisconnectBreakersNodes(newArray);
+        }
     }, [breakersData]);
 
     useEffect(() => {
