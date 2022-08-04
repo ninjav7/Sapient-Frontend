@@ -7,6 +7,8 @@ import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
+import { BreakersStore } from '../../../store/BreakersStore';
+import Skeleton from 'react-loading-skeleton';
 import '../style.css';
 import './panel-style.css';
 
@@ -15,6 +17,7 @@ const BreakersComponent = ({ data, id }) => {
     let userdata = cookies.get('user');
 
     const [breakerData, setBreakerData] = useState(data);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
@@ -22,16 +25,21 @@ const BreakersComponent = ({ data, id }) => {
     const handleEditBreakerShow = () => setShowEditBreaker(true);
 
     const [sensorData, setSensorData] = useState([]);
+    const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
     // const [currentBreakerObj, setCurrentBreakerObj] = useState({});
 
+    const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
+    const equipmentData = BreakersStore.useState((s) => s.equipmentData);
+
     const fetchDeviceSensorData = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
         try {
-            if (deviceId === null) {
-                return;
-            }
+            setIsSensorDataFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -41,9 +49,11 @@ const BreakersComponent = ({ data, id }) => {
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
+                setIsSensorDataFetched(false);
             });
         } catch (error) {
             console.log(error);
+            setIsSensorDataFetched(false);
             console.log('Failed to fetch Sensor Data');
         }
     };
@@ -76,6 +86,7 @@ const BreakersComponent = ({ data, id }) => {
 
     const saveBreakerData = async () => {
         try {
+            setIsProcessing(true);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -90,8 +101,8 @@ const BreakersComponent = ({ data, id }) => {
                 voltage: breakerData.voltage,
                 link_type: breakerData.link_type,
                 link_id: breakerData.link_id,
-                sensor_id: breakerData.sensor_id,
-                device_id: breakerData.device_id,
+                sensor_link: breakerData.sensor_id,
+                device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
@@ -103,10 +114,13 @@ const BreakersComponent = ({ data, id }) => {
                 })
                 .then((res) => {
                     let response = res.data;
+                    setIsProcessing(false);
+                    triggerBreakerAPI();
+                    handleEditBreakerClose();
                 });
-            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
+            setIsProcessing(false);
             handleEditBreakerClose();
         }
     };
@@ -129,8 +143,8 @@ const BreakersComponent = ({ data, id }) => {
     };
 
     const findEquipmentName = (equipId) => {
-        let equip = breakerData.equipment_data.find((record) => record.value === equipId);
-        return equip.label;
+        let equip = breakerData?.equipment_data?.find((record) => record?.value === equipId);
+        return equip?.label;
     };
 
     const handleChange = (id, key, value) => {
@@ -187,7 +201,7 @@ const BreakersComponent = ({ data, id }) => {
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
                         <div className="breaker-content-middle">
-                            <div className="breaker-index">{data.breaker_number}</div>
+                            <div className="breaker-index">{breakerData.breaker_number}</div>
                         </div>
                         <div className="breaker-content-middle">
                             <div className="dot-status"></div>
@@ -214,15 +228,11 @@ const BreakersComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
                                             handleEditBreakerShow();
+                                            if (data?.sensor_id === '') {
+                                                return;
+                                            }
+                                            fetchDeviceSensorData(data?.device_id);
                                         }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
@@ -242,15 +252,11 @@ const BreakersComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
                                             handleEditBreakerShow();
+                                            if (data?.sensor_id === '') {
+                                                return;
+                                            }
+                                            fetchDeviceSensorData(data?.device_id);
                                         }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
@@ -361,7 +367,7 @@ const BreakersComponent = ({ data, id }) => {
                                                 }}
                                                 value={breakerData.device_id}>
                                                 <option>Select Device</option>
-                                                {breakerData.passive_data.map((record) => {
+                                                {passiveDeviceData.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
                                                 <option value="unlink">None</option>
@@ -370,29 +376,33 @@ const BreakersComponent = ({ data, id }) => {
 
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    handleChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                }}
-                                                value={breakerData.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                                <option value="unlink">None</option>
-                                            </Input>
+                                            {isSensorDataFetched ? (
+                                                <Skeleton count={1} height={35} />
+                                            ) : (
+                                                <Input
+                                                    type="select"
+                                                    name="state"
+                                                    id="userState"
+                                                    className="font-weight-bold breaker-phase-selection"
+                                                    placeholder="Select Sensor"
+                                                    onChange={(e) => {
+                                                        handleChange(id, 'sensor_id', e.target.value);
+                                                        handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    }}
+                                                    value={breakerData.sensor_id}>
+                                                    <option>Select Sensor</option>
+                                                    {sensorData.map((record) => {
+                                                        return (
+                                                            <option
+                                                                value={record.id}
+                                                                disabled={linkedSensors.includes(record.id)}>
+                                                                {record.name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                    <option value="unlink">None</option>
+                                                </Input>
+                                            )}
                                         </Form.Group>
                                     </div>
                                 </>
@@ -413,7 +423,7 @@ const BreakersComponent = ({ data, id }) => {
                                         }}
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
-                                        {breakerData.equipment_data.map((record) => {
+                                        {equipmentData.map((record) => {
                                             return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
@@ -715,9 +725,8 @@ const BreakersComponent = ({ data, id }) => {
                         onClick={() => {
                             updateSingleBreakerData();
                             saveBreakerData();
-                            triggerBreakerAPI();
                         }}>
-                        Save
+                        {isProcessing ? 'Saving...' : 'Save'}
                     </Button>
                     {/* )} */}
 
