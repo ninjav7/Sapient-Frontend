@@ -42,6 +42,8 @@ const TrendsBadge = ({ value = null, type = TRENDS_BADGE_TYPES.UPWARD_TREND }) =
     );
 };
 
+TrendsBadge.Type = TRENDS_BADGE_TYPES;
+
 TrendsBadge.propTypes = {
     value: PropTypes.string,
     type: PropTypes.oneOf(Object.values(TRENDS_BADGE_TYPES)),
