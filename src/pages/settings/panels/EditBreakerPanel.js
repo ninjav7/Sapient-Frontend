@@ -23,6 +23,7 @@ import { Cookies } from 'react-cookie';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { LoadingStore } from '../../../store/LoadingStore';
+import { BreakersStore } from '../../../store/BreakersStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import BreakersComponent from './BreakersFlow';
 import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
@@ -65,7 +66,6 @@ const EditBreakerPanel = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [linkedSensors, setLinkedSensors] = useState([]);
-    const newBreakers = [];
 
     const [panel, setPanel] = useState({});
     const [breakersData, setBreakersData] = useState([]);
@@ -951,6 +951,9 @@ const EditBreakerPanel = () => {
                         equipArray.push(obj);
                     });
                     setEquipmentData(equipArray);
+                    BreakersStore.update((s) => {
+                        s.equipmentData = equipArray;
+                    });
                 });
             } catch (error) {
                 console.log(error);
@@ -976,8 +979,10 @@ const EditBreakerPanel = () => {
                         };
                         newArray.push(obj);
                     });
-                    console.log('passiveDeviceData API response => ', newArray);
                     setPassiveDeviceData(newArray);
+                    BreakersStore.update((s) => {
+                        s.passiveDeviceData = newArray;
+                    });
                 });
             } catch (error) {
                 console.log(error);
@@ -1016,54 +1021,6 @@ const EditBreakerPanel = () => {
     }, [panelId]);
 
     useEffect(() => {
-        if (distributedBreakersNodes.length !== 0) {
-            let newArray = distributedBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.equipment_data = equipmentData;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakersNodes.length !== 0) {
-            let newArray = disconnectBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.equipment_data = equipmentData;
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
-    }, [equipmentData]);
-
-    useEffect(() => {
-        if (distributedBreakersNodes.length !== 0) {
-            let newArray = distributedBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakersNodes.length !== 0) {
-            let newArray = disconnectBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
-    }, [passiveDeviceData]);
-
-    useEffect(() => {
         if (breakersData.length === 0) {
             return;
         }
@@ -1089,8 +1046,6 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
-                    equipment_data: [],
-                    passive_data: [],
                     onChange: handleDiscBreakerChange,
                 },
                 position: { x: 450, y: getDiscYaxisCordinates(record.breaker_number) },
@@ -1117,8 +1072,6 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
-                    equipment_data: [],
-                    passive_data: [],
                     onChange: handleBreakerChange,
                 },
                 position: {
@@ -1132,32 +1085,6 @@ const EditBreakerPanel = () => {
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
-
-        if (distributedBreakerArray.length !== 0) {
-            let newArray = [];
-            distributedBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakerArray.length !== 0) {
-            let newArray = [];
-            disconnectBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
     }, [breakersData]);
 
     useEffect(() => {
