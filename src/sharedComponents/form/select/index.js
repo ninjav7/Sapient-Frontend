@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactSelect, { components } from 'react-select';
 import cx from 'classnames';
+import PropTypes from 'prop-types';
+
 import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
 
 import './style.scss';
@@ -35,13 +37,14 @@ const Option = (props) => {
     ) : null;
 };
 
-const Select = ({ selectClassName = '', className = '', defaultValue, ...props }) => {
-    const selectedOption = props.options.find(({ value }) => value === defaultValue);
-
+const Select = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+    const selectedOption = options.find(({ value }) => value === defaultValue);
+    
     return (
         <div className={`react-select-wrapper ${className}`}>
             <ReactSelect
                 {...props}
+                options={options}
                 defaultValue={selectedOption}
                 components={{ DropdownIndicator, Control, Option }}
                 className={selectClassName}
@@ -49,5 +52,20 @@ const Select = ({ selectClassName = '', className = '', defaultValue, ...props }
         </div>
     );
 };
+
+Select.propTypes = {
+    defaultValue: PropTypes.string,
+    options: PropTypes.arrayOf(
+        PropTypes.shape(
+            {
+                label: PropTypes.string.isRequired,
+                value: PropTypes.oneOfType([
+                    PropTypes.string,
+                    PropTypes.number,
+                ])
+            }
+        )
+    ).isRequired
+}
 
 export default Select;

@@ -239,7 +239,11 @@ const Layout = () => {
             Authorization: `Bearer ${userdata.token}`,
         };
         axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
-            setFloor1(res?.data?.data?.[0]?.generic_spacetypes);
+            let response = res?.data?.data?.[0]?.generic_spacetypes;
+            response.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+            setFloor1(response);
         });
     }, []);
 

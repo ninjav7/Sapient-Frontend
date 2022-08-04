@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Alert, Input} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Alert, Input, Spinner} from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
@@ -23,6 +23,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { AvForm, AvGroup, AvInput, AvCheckboxGroup, AvCheckbox } from 'availity-reactstrap-validation';
 import { Container, Label, FormGroup, InputGroup, InputGroupAddon } from 'reactstrap';
 import { Mail, Lock } from 'react-feather';
+import { TailSpin } from 'react-loader-spinner';
 import { ConsoleView } from 'react-device-detect';
 
 
@@ -149,8 +150,8 @@ const Provision = () => {
         }
 
     }
-
     const handleFindDevices=()=>{
+
         if(checkedEmailFind.length===0){
             setShowFind(true);
             setCheckFind(true);
@@ -160,9 +161,8 @@ const Provision = () => {
             "kasa_account_ids": checkedEmailFind,
               "find_new": true
         }
-        getKasaDevices(arr);
+        getKasaDevices(arr,true);
         setShowFind(false);
-        setCheckFind(false);
     }
     }
 
@@ -229,10 +229,14 @@ const Provision = () => {
         setShowEmail(false);
         setShowDone(true);
     }
+    const [showAddMsg,setShowAddMsg]=useState(false);
+    const [isLoading,setIsLoading]=useState(false);
     const handleDone=()=>{
         // console.log(selectedKasaId);
         // console.log(selectedKasaEmail);
         try {
+            setIsLoading(true);
+            setCheckFind(true);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -248,16 +252,24 @@ const Provision = () => {
                     headers: header,
                 })
                 .then((res) => {
+                    console.log(res.data.success)
+                    if(res.data.success===true)
+                        setShowAddMsg(true)
+
+                    setIsLoading(false);
+                    // setCheckFind(false);
                     setShowDone(false);
                     let arr={
                         "kasa_account_ids": checkedEmailFind,
                           "find_new": true
                     }
-                    getKasaDevices(arr);
+                    getKasaDevices(arr,false);
                 });
 
             } catch (error) {
                 setError(true);
+                setIsLoading(false);
+                setCheckFind(false);
                 console.log('Failed to Provision');
             }
     }
@@ -344,22 +356,34 @@ const Provision = () => {
             .then((res) => {
                 let kDevices=[];
                 // console.log(res.data.data);
-                setLinkedAccount(res.data.data);
+                
                 let Hs=0;
                 let kp=0;
                 let Hs1=0;
                 let socket=0;
                 let capy=0;
+                let kasadata=[];
                 res.data.data.forEach(ele => {
+                    let a={
+                        id:ele.id,
+                        email:ele.email,
+                        HS110s:ele.HS110s,
+                        KP115s:ele.KP115s,
+                        HS300s:ele.HS300s,
+                        Socket:ele.KP115s+(ele.HS300s*ele.Socket),
+                        Remaining_Capacity:256 -(ele.KP115s+(ele.HS300s*ele.Socket))
+                    }
+                    kasadata.push(a)
                     if(ele.is_provisioned===false){
                         kDevices.push(ele.id)
                     }
                     Hs=Hs+ele.HS110s;
                     kp=kp+ele.KP115s;
                     Hs1=Hs1+ele.HS300s;
-                    socket=socket+ele.Socket;
-                    capy=capy+ele.Remaining_Capacity;
+                    socket=socket+(ele.KP115s+(ele.HS300s*ele.Socket));
+                    capy=capy+(256 -(ele.KP115s+(ele.HS300s*ele.Socket)));
                 });
+                setLinkedAccount(kasadata);
                 let arr={
                     HS110s:Hs,
                     KP115s:kp,
@@ -378,7 +402,7 @@ const Provision = () => {
             setIsProcessing(false);
         }
 }
-const getKasaDevices=(details)=>{
+const getKasaDevices=(details,path)=>{
 try {
     setIsAddProcessing(true);
     let ready=[];
@@ -403,6 +427,8 @@ try {
                 progress.push(ele);
             }
          });
+         if(path===true)
+            setCheckFind(false);
          setReadyData(ready);
          setProgressData(progress);
         setProvisioningData(res.data.data);
@@ -431,7 +457,7 @@ useEffect(()=>{
           }
           
       getKasaAccount();
-      getKasaDevices(arr);
+      //getKasaDevices(arr,false);
 
     },[])
     // useEffect(() => {
@@ -462,6 +488,7 @@ useEffect(()=>{
                               className="btn btn-md btn-outline-secondary font-weight-bold"
                               onClick={() => {
                                 setShowUnLink(true);
+                                setShowAddMsg(false);
                             }}>
                                 <FontAwesomeIcon icon={faLinkSlash} size="md" style={{marginRight:"0.5rem"}}/>UnLink Account
                           </button>
@@ -472,6 +499,7 @@ useEffect(()=>{
                               className="btn btn-md btn-outline-secondary font-weight-bold"
                               onClick={() => {
                                 setShowLink(true);
+                                setShowAddMsg(false);
                             }}>
                                 <FontAwesomeIcon icon={faLink} size="md" style={{marginRight:"0.5rem"}}/>Link Account
                           </button>
@@ -669,7 +697,7 @@ useEffect(()=>{
                                 className="btn btn-md btn-outline-secondary font-weight-bold"
                                 onClick={() => {
                                     setShowFind(true);
-                                    setCheckFind(false);
+                                    setShowAddMsg(false);
                                 }}
                                 >
                                 <FontAwesomeIcon icon={faMagnifyingGlass} size="md" style={{marginRight:"0.5rem"}}/>
@@ -683,8 +711,14 @@ useEffect(()=>{
                                 onClick={handleDone}
                                 disabled={checkFind}
                                 >
+                                {isLoading? <Spinner color={'white'} size="sm" style={{marginRight:"0.5rem"}}/>
+                                // <TailSpin color="#ffffff" height={20} width={20} className="loader-design" />
+                                :
                                 <FontAwesomeIcon icon={faSignalStream} size="md" style={{marginRight:"0.5rem"}}/>
+                                }
+                                <div style={{display:"inline-block"}}>
                                 Add to System
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -841,6 +875,14 @@ useEffect(()=>{
                     )}
                 </Table>:""}
 
+                </Col>
+            </Row>
+            <Row>
+                <Col lg={1}></Col>
+                <Col lg={10}>
+                <Alert variant="success" isOpen={showAddMsg}>
+                                                    <div> <FontAwesomeIcon icon={faCircleCheck} size="lg" className="ml-2" style={{marginRight:"4px", color:"white"}}/>Devices Added to system</div>
+                                                </Alert>
                 </Col>
             </Row>
 

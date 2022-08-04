@@ -61,6 +61,7 @@ export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
+export const updateBreaker = '/api/config/panels/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 
 // getBuilding
@@ -97,7 +98,7 @@ export const getLocation = '/api/config/get_location';
 export const getEnergyConsumption = '/api/energy/chart';
 
 // explore
-export const getExplore = '/api/energy/explorer/chart';
+export const getExplore = '/api/explorer/chart';
 
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';

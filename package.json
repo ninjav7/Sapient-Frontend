@@ -4,6 +4,8 @@
     "private": true,
     "dependencies": {
         "@amcharts/amcharts4": "^4.10.24",
+        "@emotion/react": "^11.9.0",
+        "@emotion/styled": "^11.8.1",
         "@fortawesome/fontawesome-pro": "^6.1.1",
         "@fortawesome/fontawesome-svg-core": "^6.1.1",
         "@fortawesome/free-solid-svg-icons": "^6.1.1",
@@ -20,6 +22,9 @@
         "@fullcalendar/list": "^4.3.0",
         "@fullcalendar/react": "^4.3.0",
         "@fullcalendar/timegrid": "^4.3.0",
+        "@mui/icons-material": "^5.8.0",
+        "@mui/material": "^5.8.1",
+        "@mui/styled-engine-sc": "^5.8.0",
         "@react-google-maps/api": "^2.11.8",
         "@react-google-maps/marker-clusterer": "^2.11.8",
         "antd": "^4.21.7",
@@ -96,7 +101,9 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "storybook": "start-storybook -p 6006 -s public",
+        "build-storybook": "build-storybook -s public"
     },
     "browserslist": [
         ">0.2%",
@@ -105,6 +112,28 @@
         "not op_mini all"
     ],
     "devDependencies": {
+        "@storybook/addon-actions": "^6.5.9",
+        "@storybook/addon-essentials": "^6.5.9",
+        "@storybook/addon-interactions": "^6.5.9",
+        "@storybook/addon-links": "^6.5.9",
+        "@storybook/builder-webpack4": "^6.5.9",
+        "@storybook/manager-webpack4": "^6.5.9",
+        "@storybook/node-logger": "^6.5.9",
+        "@storybook/preset-create-react-app": "^3.2.0",
+        "@storybook/react": "^6.5.9",
+        "@storybook/testing-library": "^0.0.13",
         "sass": "^1.49.9"
+    },
+    "eslintConfig": {
+        "overrides": [
+            {
+                "files": [
+                    "**/*.stories.*"
+                ],
+                "rules": {
+                    "import/no-anonymous-default-export": "off"
+                }
+            }
+        ]
     }
 }

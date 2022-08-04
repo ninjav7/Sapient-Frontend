@@ -49,6 +49,14 @@
     align-content: stretch !important;
 }
 
+.breaker-loader-styling {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: center;
+    align-items: center;
+    margin-left: 350px;
+}
+
 .panel-first-row-style {
     display: grid;
     /* grid-template-columns: 1fr 1fr 1fr 2fr; */
