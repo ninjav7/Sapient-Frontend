@@ -40,8 +40,6 @@ const EditBreakerPanel = () => {
 
     const { panelId } = useParams();
 
-    const { panelId } = useParams();
-
     const { v4: uuidv4 } = require('uuid');
     const generateBreakerLinkId = () => uuidv4();
 
