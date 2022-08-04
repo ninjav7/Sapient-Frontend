@@ -23,6 +23,7 @@ import { Cookies } from 'react-cookie';
 import { MultiSelect } from 'react-multi-select-component';
 import { ComponentStore } from '../../../store/ComponentStore';
 import { LoadingStore } from '../../../store/LoadingStore';
+import { BreakersStore } from '../../../store/BreakersStore';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import BreakersComponent from './BreakersFlow';
 import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
@@ -65,7 +66,6 @@ const EditBreakerPanel = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const [linkedSensors, setLinkedSensors] = useState([]);
-    const newBreakers = [];
 
     const [panel, setPanel] = useState({});
     const [breakersData, setBreakersData] = useState([]);
@@ -951,6 +951,9 @@ const EditBreakerPanel = () => {
                         equipArray.push(obj);
                     });
                     setEquipmentData(equipArray);
+                    BreakersStore.update((s) => {
+                        s.equipmentData = equipArray;
+                    });
                 });
             } catch (error) {
                 console.log(error);
@@ -976,8 +979,10 @@ const EditBreakerPanel = () => {
                         };
                         newArray.push(obj);
                     });
-                    console.log('passiveDeviceData API response => ', newArray);
                     setPassiveDeviceData(newArray);
+                    BreakersStore.update((s) => {
+                        s.passiveDeviceData = newArray;
+                    });
                 });
             } catch (error) {
                 console.log(error);
@@ -1016,54 +1021,6 @@ const EditBreakerPanel = () => {
     }, [panelId]);
 
     useEffect(() => {
-        if (distributedBreakersNodes.length !== 0) {
-            let newArray = distributedBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.equipment_data = equipmentData;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakersNodes.length !== 0) {
-            let newArray = disconnectBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.equipment_data = equipmentData;
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
-    }, [equipmentData]);
-
-    useEffect(() => {
-        if (distributedBreakersNodes.length !== 0) {
-            let newArray = distributedBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakersNodes.length !== 0) {
-            let newArray = disconnectBreakersNodes;
-            newArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
-    }, [passiveDeviceData]);
-
-    useEffect(() => {
         if (breakersData.length === 0) {
             return;
         }
@@ -1089,8 +1046,6 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
-                    equipment_data: [],
-                    passive_data: [],
                     onChange: handleDiscBreakerChange,
                 },
                 position: { x: 450, y: getDiscYaxisCordinates(record.breaker_number) },
@@ -1117,8 +1072,6 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
-                    equipment_data: [],
-                    passive_data: [],
                     onChange: handleBreakerChange,
                 },
                 position: {
@@ -1385,36 +1338,52 @@ const EditBreakerPanel = () => {
                             </div>
                         </Row>
 
+                        {isBreakerDataFetched && (
+                            <Row>
+                                <div
+                                    style={{ width: '50%', height: '30vh', position: 'relative' }}
+                                    className="breaker-loader-styling">
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                    <Skeleton count={1} height={50} width={200} />
+                                </div>
+                            </Row>
+                        )}
+
                         {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
                                 <Row className="main-breaker-styling">
-                                    {panelDataFetched ? (
-                                        <Skeleton count={1} height={50} width={200} />
-                                    ) : (
-                                        <FormGroup className="form-group row m-4">
-                                            <div className="breaker-container">
-                                                <div className="breaker-style">
-                                                    <div className="breaker-content-middle">
-                                                        <div className="breaker-index font-weight-bold">M</div>
+                                    <FormGroup className="form-group row m-4">
+                                        <div className="breaker-container">
+                                            <div className="breaker-style">
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-index font-weight-bold">M</div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="dot-status"></div>
+                                                </div>
+                                                <div className="breaker-content-middle">
+                                                    <div className="breaker-content">
+                                                        <span>
+                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
+                                                        </span>
+                                                        <span>
+                                                            {panel.voltage === '' && ''}
+                                                            {panel.voltage === '120/240' && '240V'}
+                                                            {panel.voltage === '208/120' && '120V'}
+                                                            {panel.voltage === '480' && '480V'}
+                                                            {panel.voltage === '600' && '600V'}
+                                                        </span>
                                                     </div>
-                                                    <div className="breaker-content-middle">
-                                                        <div className="dot-status"></div>
-                                                    </div>
-                                                    <div className="breaker-content-middle">
-                                                        <div className="breaker-content">
-                                                            <span>
-                                                                {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
-                                                            </span>
-                                                            <span>
-                                                                {panel.voltage === '' && ''}
-                                                                {panel.voltage === '120/240' && '240V'}
-                                                                {panel.voltage === '208/120' && '120V'}
-                                                                {panel.voltage === '480' && '480V'}
-                                                                {panel.voltage === '600' && '600V'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    {/* <div
+                                                </div>
+                                                {/* <div
                                             className="breaker-content-middle"
                                             onClick={() => {
                                                 handleMainShow();
@@ -1424,10 +1393,9 @@ const EditBreakerPanel = () => {
                                             </div>
                                             <span className="font-weight-bold edit-btn-styling">Edit</span>
                                         </div> */}
-                                                </div>
                                             </div>
-                                        </FormGroup>
-                                    )}
+                                        </div>
+                                    </FormGroup>
                                 </Row>
 
                                 <div className="row" style={{ width: '100%', height: '200vh', position: 'relative' }}>
