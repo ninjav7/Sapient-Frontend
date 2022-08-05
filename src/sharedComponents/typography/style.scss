@@ -27,6 +27,13 @@
         margin: 0;
         padding: 0;
 
+        &.xxs {
+            font-weight: 500;
+            font-size: 0.625rem;
+            line-height: 1rem;
+            color: $primary-gray-800;
+        }
+
         &.xs {
             font-weight: 400;
             font-size: 0.75rem;
