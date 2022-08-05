@@ -115,7 +115,9 @@ const BreakersComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                     setIsProcessing(false);
-                    triggerBreakerAPI();
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
                     handleEditBreakerClose();
                 });
         } catch (error) {
