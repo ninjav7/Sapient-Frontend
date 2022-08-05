@@ -92,13 +92,13 @@ const IndividualActiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'energy', label: 'Consumed Energy (Wh)' },
+        { value: 'energy', label: 'Energy Consumed (Wh)' },
 
         { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
 
-        { value: 'mV', label: 'Voltage (V)' },
+        { value: 'mV', label: 'Voltage (mV)' },
 
-        { value: 'mAh', label: 'Amperage (A)' },
+        { value: 'mAh', label: 'Current (mA)' },
 
         { value: 'power', label: 'Real Power (W)' },
     ]);
