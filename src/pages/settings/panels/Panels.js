@@ -35,6 +35,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                     <thead>
                         <tr>
                             {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
+                            {selectedOptions.some((record) => record.value === 'type') && <th>Type</th>}
                             {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
                             {selectedOptions.some((record) => record.value === 'breakers') && <th>Breakers</th>}
                             {selectedOptions.some((record) => record.value === 'parent') && <th>Parent</th>}
@@ -52,6 +53,10 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
                                 <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
@@ -85,7 +90,11 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                                                 </Link>
                                             </td>
                                         )}
-
+                                        {selectedOptions.some((record) => record.value === 'type') && (
+                                            <td className="">
+                                                {record.panel_type.charAt(0).toUpperCase() + record.panel_type.slice(1)}
+                                            </td>
+                                        )}
                                         {selectedOptions.some((record) => record.value === 'location') && (
                                             <td className="">{record.location}</td>
                                         )}
@@ -199,6 +208,7 @@ const Panels = () => {
 
         let arr = [
             { label: 'Name', value: 'name' },
+            { label: 'Type', value: 'type' },
             { label: 'Location', value: 'location' },
             { label: 'Breakers', value: 'breakers' },
             { label: 'Parent', value: 'parent' },
