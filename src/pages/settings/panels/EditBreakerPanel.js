@@ -1048,7 +1048,7 @@ const EditBreakerPanel = () => {
                     device_id: record.device_link,
                     onChange: handleDiscBreakerChange,
                 },
-                position: { x: 450, y: getDiscYaxisCordinates(record.breaker_number) },
+                position: { x: 250, y: getDiscYaxisCordinates(record.breaker_number) },
                 draggable: false,
             };
             disconnectBreakerArray.push(obj);
@@ -1075,7 +1075,7 @@ const EditBreakerPanel = () => {
                     onChange: handleBreakerChange,
                 },
                 position: {
-                    x: record.breaker_number % 2 === 0 ? 700 : 250,
+                    x: record.breaker_number % 2 === 0 ? 475 : 50,
                     y: getYaxisCordinates(record.breaker_number),
                 },
                 draggable: false,
@@ -1246,7 +1246,7 @@ const EditBreakerPanel = () => {
                                         </Label>
                                         {panelDataFetched ? (
                                             <Form>
-                                                <Skeleton count={1} height={40} width={200} />
+                                                <Skeleton count={1} height={40} width={150} />
                                             </Form>
                                         ) : (
                                             <Input
@@ -1423,7 +1423,7 @@ const EditBreakerPanel = () => {
                         )}
 
                         {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
-                            <div className="row" style={{ width: '100%', height: '40vh', position: 'relative' }}>
+                            <div className="row" style={{ width: '100%', height: '50vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
                                         elements={disconnectBreakersNodes}

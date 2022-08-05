@@ -26,7 +26,7 @@ const BreakersComponent = ({ data, id }) => {
 
     const [sensorData, setSensorData] = useState([]);
     const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
-    const [linkedSensors, setLinkedSensors] = useState([]);
+    // const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
     // const [currentBreakerObj, setCurrentBreakerObj] = useState({});
@@ -115,7 +115,9 @@ const BreakersComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                     setIsProcessing(false);
-                    triggerBreakerAPI();
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
                     handleEditBreakerClose();
                 });
         } catch (error) {
@@ -125,22 +127,22 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        if (previousSensorId === '') {
-            let newSensorList = linkedSensors;
-            newSensorList.push(newSensorId);
-            setLinkedSensors(newSensorList);
-        } else {
-            let newSensorList = linkedSensors;
+    // const handleLinkedSensor = (previousSensorId, newSensorId) => {
+    //     if (previousSensorId === '') {
+    //         let newSensorList = linkedSensors;
+    //         newSensorList.push(newSensorId);
+    //         setLinkedSensors(newSensorList);
+    //     } else {
+    //         let newSensorList = linkedSensors;
 
-            let filteredList = newSensorList.filter((record) => {
-                return record !== previousSensorId;
-            });
+    //         let filteredList = newSensorList.filter((record) => {
+    //             return record !== previousSensorId;
+    //         });
 
-            filteredList.push(newSensorId);
-            setLinkedSensors(filteredList);
-        }
-    };
+    //         filteredList.push(newSensorId);
+    //         setLinkedSensors(filteredList);
+    //     }
+    // };
 
     const findEquipmentName = (equipId) => {
         let equip = breakerData?.equipment_data?.find((record) => record?.value === equipId);
@@ -387,7 +389,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     placeholder="Select Sensor"
                                                     onChange={(e) => {
                                                         handleChange(id, 'sensor_id', e.target.value);
-                                                        handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                        // handleLinkedSensor(breakerData.sensor_id, e.target.value);
                                                     }}
                                                     value={breakerData.sensor_id}>
                                                     <option>Select Sensor</option>
@@ -395,7 +397,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return (
                                                             <option
                                                                 value={record.id}
-                                                                disabled={linkedSensors.includes(record.id)}>
+                                                                disabled={record.equipment_id !== ''}>
                                                                 {record.name}
                                                             </option>
                                                         );
