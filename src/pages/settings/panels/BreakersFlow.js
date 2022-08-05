@@ -397,10 +397,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return (
                                                             <option
                                                                 value={record.id}
-                                                                disabled={
-                                                                    !record.equipment_id === '' ||
-                                                                    !record.breaker_id === ''
-                                                                }>
+                                                                disabled={record.equipment_id !== ''}>
                                                                 {record.name}
                                                             </option>
                                                         );
