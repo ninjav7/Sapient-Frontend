@@ -17,8 +17,6 @@ export const Default = () => {
                 <Typography.Subheader size={Typography.Sizes.sm}>The quick fox jumps over the dog. Size: SM</Typography.Subheader>
                 <Brick/>
                 <h2>Body</h2>
-                <Typography.Body size={Typography.Sizes.md}>The quick fox jumps over the dog. Size: MD</Typography.Body>
-                <Typography.Body size={Typography.Sizes.sm}>The quick fox jumps over the dog. Size: SM</Typography.Body>
                 <Typography.Body size={Typography.Sizes.xs}>The quick fox jumps over the dog. Size: XS</Typography.Body>
             </div>
         </div>

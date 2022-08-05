@@ -52,7 +52,7 @@ const DonutChartWidget = ({
     return (
         <>
             {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
-            <div className={`donut-chart-widget-wrapper ${type} ${className}`}>
+            <div className={`donut-chart-widget-wrapper ${className} ${type}`}>
                 {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
                 <div className={`chart-wrapper ${type}`}>
                     <ReactApexChart options={options} {...props} series={series} type="donut" />

@@ -8,6 +8,7 @@ import { configLineChartWidget } from './config';
 
 import './style.scss';
 
+
 const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
@@ -33,7 +34,7 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
 LineChartWidget.propTypes = {
     title: PropTypes.string.isRequired,
     subtitle: PropTypes.string.isRequired,
-    height: PropTypes.number,
+    height: PropTypes.string,
     width: PropTypes.string,
     series: PropTypes.arrayOf(
         PropTypes.shape({
