@@ -36,6 +36,7 @@ import PortfolioKPIs from './PortfolioKPIs';
 import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import Brick from '../../sharedComponents/brick';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -589,7 +590,7 @@ const PortfolioOverview = () => {
         let topVal = buildingsEnergyConsume[0].density;
         setTopEnergyDensity(topVal);
     }, [buildingsEnergyConsume]);
-    
+
     return (
         <>
             <Header title="Portfolio Overview" />
@@ -603,11 +604,7 @@ const PortfolioOverview = () => {
                 </div>
             </Row>
 
-            <EnergyDensityMap
-                topEnergyDensity={topEnergyDensity}
-                markers={markers}
-                buildingsEnergyConsume={buildingsEnergyConsume}
-            />
+            <Brick sizeInRem={2} />
 
             <div className="portfolio-consume-widget-wrapper">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
