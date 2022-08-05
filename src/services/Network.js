@@ -1,9 +1,6 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-// export const BaseUrl = 'https://energyapp-service-dev.stacksapien.com';
-// export const BaseUrl = 'https://sapient-energy-backend-service.azurewebsites.net';
 //export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
 //export const BaseUrl = 'http://122.175.198.21:8000';
-// export const BaseUrl = 'http://100.69.65.163:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -103,7 +100,7 @@ export const getLocation = '/api/config/get_location';
 export const getEnergyConsumption = '/api/energy/chart';
 
 // explore
-export const getExplore = '/api/energy/explorer/chart';
+export const getExplore = '/api/explorer/chart';
 
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';

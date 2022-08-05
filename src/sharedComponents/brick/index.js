@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from "prop-types"
 import cx from 'classnames';
 
 const defaultBrickSizeInPixels = 16;
@@ -14,5 +15,14 @@ const Brick = ({ sizeInRem = null, sizeInPixels = defaultBrickSizeInPixels, clas
         </>
     );
 };
+
+Brick.propTypes = {
+    sizeInRem: PropTypes.number,
+    sizeInPixels: PropTypes.number,
+}
+
+Brick.defaultProps = {
+    sizeInPixels: 16,
+}
 
 export default Brick;

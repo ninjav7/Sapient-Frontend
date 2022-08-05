@@ -1,27 +1,32 @@
 import React from 'react';
 import { Line } from 'rc-progress';
-import { Card, CardBody, Progress } from 'reactstrap';
 import classNames from 'classnames';
-import './style.css';
+import './ProgressBar.scss';
+
+const limit = 25;
+
+const getOpacity = (percentage) => {
+    const limitedPercentage =  percentage >= limit ? percentage : limit;
+    
+    return limitedPercentage / 100;
+}
 
 const ProgressBar = (props) => {
+    const opacity = getOpacity(props.progressValue);
+    
     return (
-        <Card className={classNames(props.bgClass)}>
-            <CardBody className="p-0">
-                <div className="p-1 m-1">
-                    <Line
-                        percent={props.progressValue}
-                        strokeWidth={1}
-                        strokeColor={props.colors}
-                        className="custom-progress-bar"
-                    />
-                    <span className="text-muted font-weight-bolder float-left progress-title">
-                        {props.progressTitle}
-                    </span>
-                    <span className="text-muted font-weight-semibold float-right">{props.progressUnit}</span>
-                </div>
-            </CardBody>
-        </Card>
+        <div className={classNames(props.className, 'progress-bar-wrapper')}>
+            <Line
+                style={{opacity}}
+                percent={props.progressValue}
+                strokeWidth={0.5}
+                strokeColor={props.colors}
+            />
+
+            <span className="progress-bar-title float-left">{props.progressTitle}</span>
+            <span className="progress-bar-value float-right">{props.progressUnit}</span>
+            <div className="clearfix"></div>
+        </div>
     );
 };
 

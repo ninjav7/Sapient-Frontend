@@ -328,10 +328,19 @@
 
 
 
-.energy-page-content {
+/* .energy-page-content {
     margin-top: 5.5625rem;
     position: relative;
     margin-left: 12.25rem;
+    height: 100%;
+    background-color: #ffffff;
+} */
+
+.energy-page-content {
+    margin-top: 5.5625rem;
+    margin-left: 12.25rem;
+    position: relative;
+    padding: 0 2rem;
     height: 100%;
     background-color: #ffffff;
 }

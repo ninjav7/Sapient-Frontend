@@ -446,3 +446,14 @@
 * {
     font-family: 'Inter', sans-serif !important;
 }
+
+.portfolio-consume-widget-wrapper {
+    display: grid;
+    grid-template-columns: max-content auto;
+    gap: 1.5rem;
+
+    .donut-chart-widget-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+}

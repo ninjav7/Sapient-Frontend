@@ -87,13 +87,14 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
         }
         const exploreDataFetch = async () => {
             try {
+                if (!sensorData?.eq_id) {
+                    return;
+                }
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                // let params = `?sensor_id=629f436216701186eff7b79b`;
                 let params = `?equipment_id=${sensorData.eq_id}&consumption=energy`;
                 await axios
                     .post(
@@ -120,7 +121,6 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                             name: 'AHUs',
                         };
                         exploreData.push(recordToInsert);
-                        // console.log('SSR Customized exploreData => ', exploreData);
                         setDeviceData(exploreData);
                         setSeriesData([
                             {
@@ -168,10 +168,12 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
     useEffect(() => {
         const exploreDataFetch = async () => {
             try {
+                if (!sensorData?.eq_id) {
+                    return;
+                }
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let endDate = new Date(); // today
@@ -220,6 +222,7 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
         };
         exploreDataFetch();
     }, []);
+
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
         var i = 0;
         var series = [];

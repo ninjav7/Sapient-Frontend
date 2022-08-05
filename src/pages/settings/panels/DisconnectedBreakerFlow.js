@@ -5,6 +5,9 @@ import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
+import { LoadingStore } from '../../../store/LoadingStore';
+import { BreakersStore } from '../../../store/BreakersStore';
+import Skeleton from 'react-loading-skeleton';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import '../style.css';
 import './panel-style.css';
@@ -15,22 +18,26 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [breakerData, setBreakerData] = useState(data);
 
+    const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
+    const equipmentData = BreakersStore.useState((s) => s.equipmentData);
+
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
     const handleEditBreakerClose = () => setShowEditBreaker(false);
     const handleEditBreakerShow = () => setShowEditBreaker(true);
 
     const [sensorData, setSensorData] = useState([]);
+    const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
-    // const [currentBreakerObj, setCurrentBreakerObj] = useState({});
 
     const fetchDeviceSensorData = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
         try {
-            if (deviceId === null) {
-                return;
-            }
+            setIsSensorDataFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -40,9 +47,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
+                setIsSensorDataFetched(false);
             });
         } catch (error) {
             console.log(error);
+            setIsSensorDataFetched(false);
             console.log('Failed to fetch Sensor Data');
         }
     };
@@ -67,6 +76,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         data.onChange(id, breakerData);
     };
 
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
+    };
+
     const saveBreakerData = async () => {
         try {
             let header = {
@@ -83,8 +98,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 voltage: breakerData.voltage,
                 link_type: breakerData.link_type,
                 link_id: breakerData.link_id,
-                sensor_id: breakerData.sensor_id,
-                device_id: breakerData.device_id,
+                sensor_link: breakerData.sensor_id,
+                device_link: breakerData.device_id,
+                equipment_link: breakerData.equipment_link,
             };
 
             let params = `?breaker_id=${id}`;
@@ -96,8 +112,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 .then((res) => {
                     let response = res.data;
                 });
+            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
+            handleEditBreakerClose();
         }
     };
 
@@ -119,8 +137,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const findEquipmentName = (equipId) => {
-        let equip = breakerData.equipment_data.find((record) => record.value === equipId);
-        return equip.label;
+        let equip = breakerData?.equipment_data?.find((record) => record?.value === equipId);
+        return equip?.label;
     };
 
     const handleChange = (id, key, value) => {
@@ -136,8 +154,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         breaker[key] = value;
         setBreakerData(breaker);
     };
-
-    console.log('breakerData => ', breakerData);
 
     return (
         <React.Fragment>
@@ -160,7 +176,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 <div className="breaker-container">
                     <div className="sub-breaker-style">
                         <div className="breaker-content-middle">
-                            <div className="breaker-index">{data.breaker_number}</div>
+                            <div className="breaker-index">{breakerData.breaker_number}</div>
                         </div>
                         <div className="breaker-content-middle">
                             <div className="dot-status"></div>
@@ -187,15 +203,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
                                             handleEditBreakerShow();
+                                            if (data?.sensor_id === '') {
+                                                return;
+                                            }
+                                            fetchDeviceSensorData(data?.device_id);
                                         }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
@@ -215,15 +227,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     <div
                                         className="breaker-content-middle"
                                         onClick={() => {
-                                            // console.log('Breaker data => ', data);
-                                            // setCurrentBreakerObj(data);
-                                            // setCurrentBreakerIndex(index);
-                                            // setCurrentEquipIds(element.equipment_link);
-                                            // handleCurrentLinkedBreaker(index);
-                                            // if (element.device_id !== '') {
-                                            //     fetchDeviceSensorData(element.device_id);
-                                            // }
                                             handleEditBreakerShow();
+                                            if (data?.sensor_id === '') {
+                                                return;
+                                            }
+                                            fetchDeviceSensorData(data?.device_id);
                                         }}>
                                         <div className="edit-icon-bg-styling mr-2">
                                             <i className="uil uil-pen"></i>
@@ -334,7 +342,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 }}
                                                 value={breakerData.device_id}>
                                                 <option>Select Device</option>
-                                                {breakerData.passive_data.map((record) => {
+                                                {passiveDeviceData.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
                                                 <option value="unlink">None</option>
@@ -343,29 +351,33 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Sensor #</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="state"
-                                                id="userState"
-                                                className="font-weight-bold breaker-phase-selection"
-                                                placeholder="Select Sensor"
-                                                onChange={(e) => {
-                                                    handleChange(id, 'sensor_id', e.target.value);
-                                                    handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                }}
-                                                value={breakerData.sensor_id}>
-                                                <option>Select Sensor</option>
-                                                {sensorData.map((record) => {
-                                                    return (
-                                                        <option
-                                                            value={record.id}
-                                                            disabled={linkedSensors.includes(record.id)}>
-                                                            {record.name}
-                                                        </option>
-                                                    );
-                                                })}
-                                                <option value="unlink">None</option>
-                                            </Input>
+                                            {isSensorDataFetched ? (
+                                                <Skeleton count={1} height={35} />
+                                            ) : (
+                                                <Input
+                                                    type="select"
+                                                    name="state"
+                                                    id="userState"
+                                                    className="font-weight-bold breaker-phase-selection"
+                                                    placeholder="Select Sensor"
+                                                    onChange={(e) => {
+                                                        handleChange(id, 'sensor_id', e.target.value);
+                                                        handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    }}
+                                                    value={breakerData.sensor_id}>
+                                                    <option>Select Sensor</option>
+                                                    {sensorData.map((record) => {
+                                                        return (
+                                                            <option
+                                                                value={record.id}
+                                                                disabled={linkedSensors.includes(record.id)}>
+                                                                {record.name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                    <option value="unlink">None</option>
+                                                </Input>
+                                            )}
                                         </Form.Group>
                                     </div>
                                 </>
@@ -386,7 +398,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         }}
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
-                                        {breakerData.equipment_data.map((record) => {
+                                        {equipmentData.map((record) => {
                                             return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
@@ -407,8 +419,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                         variant="primary"
                         onClick={() => {
                             updateSingleBreakerData();
-                            // saveBreakerData();
-                            handleEditBreakerClose();
+                            saveBreakerData();
+                            triggerBreakerAPI();
                         }}>
                         Save
                     </Button>
