@@ -397,7 +397,11 @@ const BreakersComponent = ({ data, id }) => {
                                                         return (
                                                             <option
                                                                 value={record.id}
-                                                                disabled={record.equipment_id !== ''}>
+                                                                disabled={record.equipment_id !== ''}
+                                                                className={
+                                                                    record.equipment_id !== '' &&
+                                                                    'fields-disabled-style'
+                                                                }>
                                                                 {record.name}
                                                             </option>
                                                         );
