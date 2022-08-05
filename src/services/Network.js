@@ -1,6 +1,9 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energyapp-service-dev.stacksapien.com';
+// export const BaseUrl = 'https://sapient-energy-backend-service.azurewebsites.net';
 //export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
 //export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'http://100.69.65.163:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -91,6 +94,7 @@ export const createFloors = '/api/config/layout/create-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
+export const updateSpace = '/api/config/layout/update-floor';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
