@@ -3,7 +3,7 @@ import { UncontrolledTooltip } from 'reactstrap';
 
 import { ReactComponent as TooltipIcon } from '../assets/icons/tooltip.svg';
 import { generateID } from '../helpers/helper';
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const KPIRank = ({
     className = '',
@@ -42,10 +42,13 @@ const KPIRank = ({
 
 KPIRank.propTypes = {
     title: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    value: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+    ]).isRequired,
     tooltipText: PropTypes.string,
     tooltipId: PropTypes.string,
-    rank: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-};
+    rank: PropTypes.string.isRequired,
+}
 
 export default KPIRank;
