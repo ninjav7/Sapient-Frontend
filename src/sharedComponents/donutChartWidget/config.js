@@ -59,7 +59,7 @@ export const configDonutChartWidget = (type) => {
                                     .reduce((a, b) => {
                                         return Number(a) + Number(b);
                                     }, 0)
-                                    .toFixed(3);
+                                    .toFixed(0);
                                 return `${sum} ${UNITS.KWH}`;
                             },
                         },
