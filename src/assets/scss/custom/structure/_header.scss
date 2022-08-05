@@ -29,6 +29,10 @@
     display: inline-flex;
     position: relative;
     z-index: 1;
+    .react-select-wrapper [class*='-control'],
+    .react-select-wrapper [class*='-control']:hover {
+        border: 0.0625rem solid $primary-gray-200;
+    }
 }
 
 .custom-button-group {

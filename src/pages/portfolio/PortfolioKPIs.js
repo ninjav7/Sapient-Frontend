@@ -45,23 +45,6 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }
             />
-
-            <KPILabeled
-                title="12 Mo. Electric EUI"
-                value={formatConsumptionValue(overalldata.yearly_electric_eui.now / 1000)}
-                badgePrecentage={percentageHandler(
-                    overalldata.yearly_electric_eui.now,
-                    overalldata.yearly_electric_eui.old
-                )}
-                unit={KPI_UNITS.KBTU_FT_YR}
-                tooltipText={`The Electric Energy Use Intensity across all of your buildings in the last calendar year.`}
-                tooltipId="total-eui"
-                type={
-                    overalldata.yearly_electric_eui.now >= overalldata.yearly_electric_eui.old
-                        ? TRENDS_BADGE_TYPES.UPWARD_TREND
-                        : TRENDS_BADGE_TYPES.DOWNWARD_TREND
-                }
-            />
         </div>
     );
 };
