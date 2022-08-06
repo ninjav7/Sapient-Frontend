@@ -43,7 +43,7 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
                 id="consumptionEnergyDonut"
                 title="Energy Consumption by End Use"
                 subtitle="Energy Totals"
-                items={donutChartData}
+                items={donutChartDataMock}
             />
         </div>
     );
