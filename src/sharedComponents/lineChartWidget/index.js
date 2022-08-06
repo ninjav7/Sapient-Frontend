@@ -8,15 +8,18 @@ import { configLineChartWidget } from './config';
 
 import './style.scss';
 
-const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width }) => {
+const LineChartWidget = ({ className = '', series, title, subtitle, height = 228, width }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
-                {subtitle}
-            </Typography.Body>
+            <div className='line-chart-widget-titles'>
+                <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
+            
             <Brick sizeInRem={1} />
 
             <Chart
