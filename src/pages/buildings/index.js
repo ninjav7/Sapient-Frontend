@@ -35,15 +35,15 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import './style.css';
-import KPIBuildings from "./KPIBuildings";
-import Brick from "../../sharedComponents/brick";
-import DonutChartWidget from "../../sharedComponents/donutChartWidget";
-import {TRENDS_BADGE_TYPES} from "../../sharedComponents/trendsBadge";
-import {UNITS} from "../../constants/units";
-import {COLOR_SCHEME_BY_DEVICE} from "../../constants/colors";
-import {TopConsumptionWidget} from "../../sharedComponents/TopConsumptionWidget";
-import LineChartWidget from "../../sharedComponents/lineChartWidget";
-import Typography from "../../sharedComponents/typography";
+import KPIBuildings from './KPIBuildings';
+import Brick from '../../sharedComponents/brick';
+import DonutChartWidget from '../../sharedComponents/donutChartWidget';
+import { TRENDS_BADGE_TYPES } from '../../sharedComponents/trendsBadge';
+import { UNITS } from '../../constants/units';
+import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
+import { TopConsumptionWidget } from '../../sharedComponents/TopConsumptionWidget';
+import LineChartWidget from '../../sharedComponents/lineChartWidget';
+import Typography from '../../sharedComponents/typography';
 
 export function useHover() {
     const [value, setValue] = useState(false);
@@ -1467,8 +1467,7 @@ const BuildingOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-
-    const donutChartDataWidget =  [
+    const donutChartDataWidget = [
         {
             label: 'HVAC',
             color: '#66A4CE',
@@ -1480,7 +1479,7 @@ const BuildingOverview = () => {
         { label: 'Lighting', color: '#FBE384', value: '11.553', unit: 'kWh', trendValue: 5, link: '#' },
         { label: 'Plug', color: '#59BAA4', value: '1.553', unit: 'kWh', trendValue: 2, link: '#' },
         { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 1, link: '#' },
-    ];;
+    ];
 
     return (
         <React.Fragment>
@@ -1492,12 +1491,15 @@ const BuildingOverview = () => {
             {/* <Row> */}
             <Brick sizeInRem={2} />
             <div className="bldg-page-grid-style">
-                
                 <div>
-                     {/*Energy Consumption by End Use  */}
-                    <DonutChartWidget 
-                        className='justify-content-center w-100'
-                        title='Energy Consumption by End Use' subtitle='Energy Totals' items={donutChartData} />
+                    {/*Energy Consumption by End Use  */}
+                    <DonutChartWidget
+                        classNameContainer="w-100"
+                        className="justify-content-center"
+                        title="Energy Consumption by End Use"
+                        subtitle="Energy Totals"
+                        items={donutChartData}
+                    />
                     {/* 
                     <div>
                         <div>
@@ -1623,7 +1625,7 @@ const BuildingOverview = () => {
                         </div>
                     </div>
 */}
-                    
+
                     {/* Top 3 Peak Demand Periods  */}
                     {/*<Row>*/}
                     {/*    <div className="card-body">*/}
@@ -1739,7 +1741,9 @@ const BuildingOverview = () => {
                     <Brick sizeInRem={2} />
                     <div>
                         <div className="hourly-average-consumption">
-                            <Typography.Subheader size={Typography.Sizes.md}>Hourly Average Consumption</Typography.Subheader>
+                            <Typography.Subheader size={Typography.Sizes.md}>
+                                Hourly Average Consumption
+                            </Typography.Subheader>
                             <Link
                                 to={{
                                     pathname: `/energy/time-of-day/${bldgId}`,
@@ -1775,128 +1779,134 @@ const BuildingOverview = () => {
 
                     {/* Total Energy Consumption  */}
                     <Brick sizeInRem={2} />
-                    <LineChartWidget subtitle='Totaled by Hour' series={buildingConsumptionChart} title='Total Energy Consumption' />
+                    <LineChartWidget
+                        subtitle="Totaled by Hour"
+                        series={buildingConsumptionChart}
+                        title="Total Energy Consumption"
+                    />
                 </div>
                 {/* </Col> */}
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
-{/*                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>*/}
-{/*                    <Row>*/}
-{/*                        <div>*/}
-{/*                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>*/}
-{/*                                Building Alerts*/}
-{/*                            </h6>*/}
-{/*                            <a*/}
-{/*                                rel="noopener noreferrer"*/}
-{/*                                className="link-primary mr-2"*/}
-{/*                                style={{*/}
-{/*                                    display: 'inline-block',*/}
-{/*                                    float: 'right',*/}
-{/*                                    textDecoration: 'none',*/}
-{/*                                    fontWeight: 'bold',*/}
-{/*                                }}></a>*/}
-{/*                            <span*/}
-{/*                                className="float-right mr-0 font-weight-bold"*/}
-{/*                                style={{ color: 'blue' }}*/}
-{/*                                onClick={() => setBuildingAlerts([])}>*/}
-{/*                                Clear*/}
-{/*                            </span>*/}
+                {/*                <div style={{ marginTop: '2rem', marginLeft: '23px' }}>*/}
+                {/*                    <Row>*/}
+                {/*                        <div>*/}
+                {/*                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>*/}
+                {/*                                Building Alerts*/}
+                {/*                            </h6>*/}
+                {/*                            <a*/}
+                {/*                                rel="noopener noreferrer"*/}
+                {/*                                className="link-primary mr-2"*/}
+                {/*                                style={{*/}
+                {/*                                    display: 'inline-block',*/}
+                {/*                                    float: 'right',*/}
+                {/*                                    textDecoration: 'none',*/}
+                {/*                                    fontWeight: 'bold',*/}
+                {/*                                }}></a>*/}
+                {/*                            <span*/}
+                {/*                                className="float-right mr-0 font-weight-bold"*/}
+                {/*                                style={{ color: 'blue' }}*/}
+                {/*                                onClick={() => setBuildingAlerts([])}>*/}
+                {/*                                Clear*/}
+                {/*                            </span>*/}
 
-{/*                            <div className="mt-2 alert-container">*/}
-{/*                                {buildingAlert.map((record) => {*/}
-{/*                                    return (*/}
-{/*                                        <>*/}
-{/*                                            {record.type === 'building-add' && (*/}
-{/*                                                <div className="alert-card mb-2">*/}
-{/*                                                    <div>*/}
-{/*                                                        <FontAwesomeIcon*/}
-{/*                                                            icon={faMountain}*/}
-{/*                                                            size="lg"*/}
-{/*                                                            className="ml-2"*/}
-{/*                                                            color="#B42318*/}
-{/*"*/}
-{/*                                                        />*/}
-{/*                                                    </div>*/}
-{/*                                                    <div>*/}
-{/*                                                        <span className="alert-heading">*/}
-{/*                                                            <b>New Building Peak</b>*/}
-{/*                                                        </span>*/}
-{/*                                                        <br />*/}
-{/*                                                        <span className="alert-content">*/}
-{/*                                                            225.3 kW &nbsp; 3/3/22 @ 3:20 PM*/}
-{/*                                                        </span>*/}
-{/*                                                    </div>*/}
-{/*                                                    <div className="float-right ml-4 alert-weekday">Today</div>*/}
-{/*                                                </div>*/}
-{/*                                            )}*/}
-{/*                                            {record.type === 'energy-trend' && (*/}
-{/*                                                <div className="alert-card mb-2">*/}
-{/*                                                    <div>*/}
-{/*                                                        <FontAwesomeIcon*/}
-{/*                                                            icon={faArrowTrendUp}*/}
-{/*                                                            size="lg"*/}
-{/*                                                            className="ml-2"*/}
-{/*                                                            color="#DC6803"*/}
-{/*                                                        />*/}
-{/*                                                    </div>*/}
-{/*                                                    <div>*/}
-{/*                                                        <span className="alert-heading">*/}
-{/*                                                            <b>Energy Trend Upward</b>*/}
-{/*                                                        </span>*/}
-{/*                                                        <br />*/}
-{/*                                                        <span className="alert-content">+25% from last 30 days</span>*/}
-{/*                                                    </div>*/}
-{/*                                                    <div className="float-right ml-4 alert-weekday">Yesterday</div>*/}
-{/*                                                </div>*/}
-{/*                                            )}*/}
-{/*                                            {record.type === 'notification' && (*/}
-{/*                                                <div className="alert-card">*/}
-{/*                                                    <div>*/}
-{/*                                                        <FontAwesomeIcon*/}
-{/*                                                            icon={faTriangleExclamation}*/}
-{/*                                                            size="lg"*/}
-{/*                                                            className="ml-2"*/}
-{/*                                                            color="#DC6803"*/}
-{/*                                                        />*/}
-{/*                                                    </div>*/}
-{/*                                                    <div>*/}
-{/*                                                        <span className="alert-heading">*/}
-{/*                                                            <b>Service Due Soon (AHU 1)</b>*/}
-{/*                                                        </span>*/}
-{/*                                                        <br />*/}
-{/*                                                        <span className="alert-content">*/}
-{/*                                                            40 Run Hours &nbsp; in 25 Days*/}
-{/*                                                        </span>*/}
-{/*                                                    </div>*/}
-{/*                                                    <div className="float-right ml-4 alert-weekday">Tuesday</div>*/}
-{/*                                                </div>*/}
-{/*                                            )}*/}
-{/*                                        </>*/}
-{/*                                    );*/}
-{/*                                })}*/}
-{/*                            </div>*/}
-{/*                        </div>*/}
-{/*                    </Row>*/}
-                    <div>
-                        <TopConsumptionWidget className="w-100" rows={topEnergyConsumption.map(({equipment_name, energy_consumption }) => {
+                {/*                            <div className="mt-2 alert-container">*/}
+                {/*                                {buildingAlert.map((record) => {*/}
+                {/*                                    return (*/}
+                {/*                                        <>*/}
+                {/*                                            {record.type === 'building-add' && (*/}
+                {/*                                                <div className="alert-card mb-2">*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <FontAwesomeIcon*/}
+                {/*                                                            icon={faMountain}*/}
+                {/*                                                            size="lg"*/}
+                {/*                                                            className="ml-2"*/}
+                {/*                                                            color="#B42318*/}
+                {/*"*/}
+                {/*                                                        />*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <span className="alert-heading">*/}
+                {/*                                                            <b>New Building Peak</b>*/}
+                {/*                                                        </span>*/}
+                {/*                                                        <br />*/}
+                {/*                                                        <span className="alert-content">*/}
+                {/*                                                            225.3 kW &nbsp; 3/3/22 @ 3:20 PM*/}
+                {/*                                                        </span>*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div className="float-right ml-4 alert-weekday">Today</div>*/}
+                {/*                                                </div>*/}
+                {/*                                            )}*/}
+                {/*                                            {record.type === 'energy-trend' && (*/}
+                {/*                                                <div className="alert-card mb-2">*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <FontAwesomeIcon*/}
+                {/*                                                            icon={faArrowTrendUp}*/}
+                {/*                                                            size="lg"*/}
+                {/*                                                            className="ml-2"*/}
+                {/*                                                            color="#DC6803"*/}
+                {/*                                                        />*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <span className="alert-heading">*/}
+                {/*                                                            <b>Energy Trend Upward</b>*/}
+                {/*                                                        </span>*/}
+                {/*                                                        <br />*/}
+                {/*                                                        <span className="alert-content">+25% from last 30 days</span>*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div className="float-right ml-4 alert-weekday">Yesterday</div>*/}
+                {/*                                                </div>*/}
+                {/*                                            )}*/}
+                {/*                                            {record.type === 'notification' && (*/}
+                {/*                                                <div className="alert-card">*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <FontAwesomeIcon*/}
+                {/*                                                            icon={faTriangleExclamation}*/}
+                {/*                                                            size="lg"*/}
+                {/*                                                            className="ml-2"*/}
+                {/*                                                            color="#DC6803"*/}
+                {/*                                                        />*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div>*/}
+                {/*                                                        <span className="alert-heading">*/}
+                {/*                                                            <b>Service Due Soon (AHU 1)</b>*/}
+                {/*                                                        </span>*/}
+                {/*                                                        <br />*/}
+                {/*                                                        <span className="alert-content">*/}
+                {/*                                                            40 Run Hours &nbsp; in 25 Days*/}
+                {/*                                                        </span>*/}
+                {/*                                                    </div>*/}
+                {/*                                                    <div className="float-right ml-4 alert-weekday">Tuesday</div>*/}
+                {/*                                                </div>*/}
+                {/*                                            )}*/}
+                {/*                                        </>*/}
+                {/*                                    );*/}
+                {/*                                })}*/}
+                {/*                            </div>*/}
+                {/*                        </div>*/}
+                {/*                    </Row>*/}
+                <div>
+                    <TopConsumptionWidget
+                        className="w-100"
+                        rows={topEnergyConsumption.map(({ equipment_name, energy_consumption }) => {
                             return {
                                 link: '#',
                                 label: equipment_name,
-                                value: (energy_consumption.now / 1000).toLocaleString(
-                                    undefined,
-                                    {
-                                        maximumFractionDigits: 2,
-                                    }
-                                ),
+                                value: (energy_consumption.now / 1000).toLocaleString(undefined, {
+                                    maximumFractionDigits: 2,
+                                }),
                                 unit: UNITS.KWH,
-                                badgePercentage: percentageHandler(
-                                    energy_consumption.now,
-                                    energy_consumption.old
-                                ),
-                                badgeType: energy_consumption.now < energy_consumption.old ? TRENDS_BADGE_TYPES.DOWNWARD_TREND : TRENDS_BADGE_TYPES.UPWARD_TREND
-                            }
-                        })} title='Top Equipment Consumption' heads={['Equipment', 'Energy', 'Change']}/>
-                        {/*
+                                badgePercentage: percentageHandler(energy_consumption.now, energy_consumption.old),
+                                badgeType:
+                                    energy_consumption.now < energy_consumption.old
+                                        ? TRENDS_BADGE_TYPES.DOWNWARD_TREND
+                                        : TRENDS_BADGE_TYPES.UPWARD_TREND,
+                            };
+                        })}
+                        title="Top Equipment Consumption"
+                        heads={['Equipment', 'Energy', 'Change']}
+                    />
+                    {/*
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
                             <table className="table table-borderless">
@@ -1991,8 +2001,8 @@ const BuildingOverview = () => {
                         </div>
                         
                         */}
-                    </div>
-{/*                </div>*/}
+                </div>
+                {/*                </div>*/}
                 {/* </Col> */}
             </div>
             {/* </Row> */}
