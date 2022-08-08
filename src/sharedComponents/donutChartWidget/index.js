@@ -29,6 +29,7 @@ const Titles = ({ sizeBrick, title, subtitle, className }) => {
 };
 
 const DonutChartWidget = ({
+    classNameContainer = '',
     className = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
@@ -49,7 +50,7 @@ const DonutChartWidget = ({
     };
 
     return (
-        <div className="donut-chart-widget-container">
+        <div className={`donut-chart-widget-container ${classNameContainer}`}>
             <Titles className="donut-chart-widget-titles" sizeBrick={1.5625} {...{ title, subtitle }} />
             <div className={`donut-chart-widget-wrapper ${type} ${className}`}>
                 <div className={`chart-wrapper ${type}`}>

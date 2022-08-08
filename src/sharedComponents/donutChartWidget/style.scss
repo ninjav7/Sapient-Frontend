@@ -5,7 +5,9 @@
         border: 0.0625rem solid $primary-gray-200;
         box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
         border-radius: 0.625rem;
-        display: inline-block;
+        display: inline-flex;
+        flex-direction: column;
+        justify-items: center;
         overflow: hidden;
     }
     &-titles {
@@ -18,7 +20,7 @@
         background: $base-white;
 
         &.horizontal {
-            padding: 1.875rem 2.625rem 1.5rem .875rem;
+            padding: 1.875rem 2.625rem 1.5rem 0.875rem;
         }
 
         &.vertical {
