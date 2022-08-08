@@ -64,10 +64,10 @@ const EditPlugRule = ({
     const [checkedAll, setCheckedAll] = useState(false);
     const [options, setOptions] = useState([]);
     const [macOptions, setMacOptions] = useState([]);
-    const [locationFilter, setLocationFilter] = useState('');
+    const [locationOptions, setLocationOptions] = useState([]);
+    // const [locationFilter, setLocationFilter] = useState('');
 
-    console.log('locationFilter', locationFilter);
-    console.log('locationFilter?.length', locationFilter?.length);
+    console.log('locationOptions', locationOptions);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -478,21 +478,76 @@ const EditPlugRule = ({
 
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
-    console.log('selectedOption', selectedOption);
-    const handleFilterEquipment = (e) => {
-        let activeId = e.target.value;
-        if (activeId === 'All') {
-            setAllLinkedRuleData(allData);
-            // console.log(allData);
-        } else {
-            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
-            // console.log(result);
-            let arr = [];
-            arr.push(result);
-            // console.log(arr)
-            setAllLinkedRuleData(arr);
-        }
+    const [selectedOptionLocation, setSelectedOptionLocation] = useState([]);
+    console.log('selectedOptionLocation', selectedOptionLocation);
+
+    const [selectedEqupimentOption, setSelectedEqupimentOption] = useState([]);
+    const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
+
+    const [selectedMacOption, setSelectedMacOption] = useState([]);
+    const [macTypeFilterString, setMacTypeFilterString] = useState('');
+
+    const [selectedLocationOption, setSelectedLocationOption] = useState([]);
+    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
+
+    const handleEqupimentTypeFilter = () => {
+        return selectedOption?.map((item) => {
+            setSelectedEqupimentOption((el) => [...el, item?.value]);
+        });
     };
+
+    const handleMacFilter = () => {
+        return selectedOptionMac?.map((item) => {
+            setSelectedMacOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleLocationFilter = () => {
+        return selectedOptionLocation?.map((item) => {
+            setSelectedLocationOption((el) => [...el, item?.value]);
+        });
+    };
+
+    console.log('selectedEqupimentOption', selectedEqupimentOption);
+
+    useEffect(() => {
+        setSelectedEqupimentOption([]);
+        handleEqupimentTypeFilter();
+    }, [selectedOption]);
+
+    useEffect(() => {
+        setSelectedMacOption([]);
+        handleMacFilter();
+    }, [selectedOptionMac]);
+
+    useEffect(() => {
+        setSelectedLocationOption([]);
+        handleLocationFilter();
+    }, [selectedOptionLocation]);
+
+    const equpimentTypeFilterStringFunc = () => {
+        return setEqupimentTypeFilterString(selectedEqupimentOption?.join('%2B'));
+    };
+
+    const macFilterStringFunc = () => {
+        return setMacTypeFilterString(selectedMacOption?.join('%2B'));
+    };
+
+    const locationFilterStringFunc = () => {
+        return setLocationTypeFilterString(selectedLocationOption?.join('%2B'));
+    };
+
+    useEffect(() => {
+        equpimentTypeFilterStringFunc();
+    }, [selectedEqupimentOption]);
+
+    useEffect(() => {
+        macFilterStringFunc();
+    }, [selectedMacOption]);
+
+    useEffect(() => {
+        locationFilterStringFunc();
+    }, [selectedLocationOption]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -678,11 +733,18 @@ const EditPlugRule = ({
         {
             console.log('manas');
         }
+
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
                 setOptions((el) => [...el, { value: record?.equipment_type, label: record?.name }]);
                 setMacOptions((el) => [...el, { value: record?.device_link, label: record?.device_link }]);
+                if (record?.equipment_link_location) {
+                    setLocationOptions((el) => [
+                        ...el,
+                        { value: record?.equipment_link_location_id, label: record?.equipment_link_location },
+                    ]);
+                }
             });
     };
 
@@ -727,7 +789,7 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     // console.log(response.total_data);
@@ -748,7 +810,7 @@ const EditPlugRule = ({
 
         fetchLinkedSocketRules();
         fetchUnLinkedSocketRules();
-    }, [activeRuleId]);
+    }, [activeRuleId, equpimentTypeFilterString, macTypeFilterString, locationTypeFilterString]);
 
     useEffect(() => {
         let arr1 = [];
@@ -1530,7 +1592,7 @@ const EditPlugRule = ({
                                                 <Form.Label for="userState" className="card-title">
                                                     Location
                                                 </Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1545,9 +1607,18 @@ const EditPlugRule = ({
                                                         ?.map((items) => {
                                                             return <option>{items?.equipment_link_location}</option>;
                                                         })}
-                                                    {/* <option>Filtered</option> */}
-                                                    {/* <option>Option 1</option> */}
-                                                </Input>
+                                                </Input> */}
+                                                <MultiSelect
+                                                    options={locationOptions}
+                                                    value={selectedOptionLocation}
+                                                    onChange={setSelectedOptionLocation}
+                                                    labelledBy="Location"
+                                                    className="column-filter-styling"
+                                                    valueRenderer={() => {
+                                                        return 'Location';
+                                                    }}
+                                                    ClearSelectedIcon={null}
+                                                />
                                             </Form.Group>
                                         </div>
 
@@ -1610,7 +1681,7 @@ const EditPlugRule = ({
                                             </tr>
                                         </thead>
 
-                                        {selectedRuleFilter === 0 && selectedOption?.length === 0 && (
+                                        {selectedRuleFilter === 0 && (
                                             <>
                                                 {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
                                                     <tbody>
@@ -1717,7 +1788,7 @@ const EditPlugRule = ({
                                             </>
                                         )}
 
-                                        {selectedRuleFilter === 1 && selectedOption?.length === 0 && (
+                                        {selectedRuleFilter === 1 && (
                                             <>
                                                 {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
                                                     <tbody>
@@ -1821,7 +1892,7 @@ const EditPlugRule = ({
                                             </>
                                         )}
 
-                                        {selectedRuleFilter === 2 && selectedOption?.length === 0 && (
+                                        {selectedRuleFilter === 2 && (
                                             <>
                                                 {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
                                                     <tbody>
