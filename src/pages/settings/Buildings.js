@@ -18,7 +18,7 @@ import './style.css';
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
         <Card>
-            <CardBody>
+            <CardBody className="px-0">
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
@@ -221,7 +221,7 @@ const Buildings = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
+                    <div class="input-group rounded">
                         <input
                             type="search"
                             class="form-control rounded"

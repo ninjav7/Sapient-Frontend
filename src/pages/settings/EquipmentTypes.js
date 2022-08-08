@@ -179,7 +179,7 @@ const EquipmentTable = ({
     return (
         <>
             <Card>
-                <CardBody>
+                <CardBody className="px-0">
                     <Table className="mb-0 bordered table-hover">
                         <thead>
                             <tr>
@@ -543,7 +543,7 @@ const EquipmentTypes = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div className="search-container ml-4">
+                    <div className="search-container">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                         <input
                             className="search-box ml-2"
