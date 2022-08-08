@@ -38,6 +38,9 @@ const BreakersComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
+        if (deviceId === 'unlink') {
+            return;
+        }
         try {
             setIsSensorDataFetched(true);
             let headers = {
@@ -364,6 +367,9 @@ const BreakersComponent = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
+                                                    if (e.target.value === 'Select Device') {
+                                                        return;
+                                                    }
                                                     fetchDeviceSensorData(e.target.value);
                                                     handleChange(id, 'device_id', e.target.value);
                                                 }}
@@ -372,7 +378,7 @@ const BreakersComponent = ({ data, id }) => {
                                                 {passiveDeviceData.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
-                                                <option value="unlink">None</option>
+                                                {breakerData.device_id !== '' && <option value="unlink">None</option>}
                                             </Input>
                                         </Form.Group>
 
@@ -388,8 +394,10 @@ const BreakersComponent = ({ data, id }) => {
                                                     className="font-weight-bold breaker-phase-selection"
                                                     placeholder="Select Sensor"
                                                     onChange={(e) => {
+                                                        if (e.target.value === 'Select Sensor') {
+                                                            return;
+                                                        }
                                                         handleChange(id, 'sensor_id', e.target.value);
-                                                        // handleLinkedSensor(breakerData.sensor_id, e.target.value);
                                                     }}
                                                     value={breakerData.sensor_id}>
                                                     <option>Select Sensor</option>
@@ -406,7 +414,9 @@ const BreakersComponent = ({ data, id }) => {
                                                             </option>
                                                         );
                                                     })}
-                                                    <option value="unlink">None</option>
+                                                    {breakerData.sensor_id !== '' && (
+                                                        <option value="unlink">None</option>
+                                                    )}
                                                 </Input>
                                             )}
                                         </Form.Group>
@@ -424,6 +434,9 @@ const BreakersComponent = ({ data, id }) => {
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
+                                            if (e.target.value === 'Select Equipment') {
+                                                return;
+                                            }
                                             addSelectedBreakerEquip(e.target.value);
                                             handleChange(id, 'equipment_link', e.target.value);
                                         }}
@@ -729,7 +742,7 @@ const BreakersComponent = ({ data, id }) => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            updateSingleBreakerData();
+                            // updateSingleBreakerData();
                             saveBreakerData();
                         }}>
                         {isProcessing ? 'Saving...' : 'Save'}
