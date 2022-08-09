@@ -517,15 +517,18 @@ const EditBreakerPanel = () => {
                 };
 
                 let params = `?panel_id=${panelId}`;
-
+                console.log('Step 1');
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                 });
+                console.log('Step 2');
                 setBreakerDataFetched(false);
+                console.log('Step 3');
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
+                console.log('Step 4');
             } catch (error) {
                 console.log(error);
                 setBreakerDataFetched(false);
@@ -1073,21 +1076,50 @@ const EditBreakerPanel = () => {
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
                     onChange: handleBreakerChange,
+                    breakerType: 1,
+                    parentBreaker: '',
+                    isLinked: false,
                 },
                 position: {
-                    x: record.breaker_number % 2 === 0 ? 475 : 50,
+                    x: record.breaker_number % 2 === 0 ? 700 : 250,
                     y: getYaxisCordinates(record.breaker_number),
                 },
                 draggable: false,
             };
+            if (record.breaker_number === 1) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+            }
+            if (record.breaker_number === 3) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f0b0958961e5eb76b72228';
+            }
+            if (record.breaker_number === 2) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+            }
+            if (record.breaker_number === 4) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f0b0958961e5eb76b72229';
+            }
             distributedBreakerArray.push(obj);
         });
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
 
+        // Inserting Passive & Equip data to Distributed Breakers
         if (distributedBreakerArray.length !== 0) {
             let newArray = [];
+            console.log('SSR newArray type1 => ', typeof newArray);
+            console.log('SSR newArray passiveDeviceData => ', typeof passiveDeviceData);
+            console.log('SSR newArray passiveDeviceData => ', Object.values(passiveDeviceData));
+            console.log('SSR newArray equipmentData => ', typeof equipmentData);
+            console.log('SSR newArray equipmentData => ', Object.values(equipmentData));
             distributedBreakerArray.forEach((obj) => {
                 if (obj.type === 'breakerLink') {
                     return;
@@ -1096,9 +1128,15 @@ const EditBreakerPanel = () => {
                 obj.data.equipment_data = equipmentData;
                 newArray.push(obj);
             });
+            console.log('SSR newArray type2 => ', typeof newArray);
+            console.log('SSR newArray type2 => ', newArray);
+            BreakersStore.update((s) => {
+                s.distributedBreakersData = newArray;
+            });
             setDistributedBreakersNodes(newArray);
         }
 
+        // Inserting Passive & Equip data to Disconnect Breakers
         if (disconnectBreakerArray.length !== 0) {
             let newArray = [];
             disconnectBreakerArray.forEach((obj) => {
@@ -1109,6 +1147,9 @@ const EditBreakerPanel = () => {
                 obj.data.equipment_data = equipmentData;
                 newArray.push(obj);
             });
+            // BreakersStore.update((s) => {
+            //     s.disconnectedBreakersData = newArray;
+            // });
             setDisconnectBreakersNodes(newArray);
         }
     }, [breakersData]);
@@ -1403,7 +1444,7 @@ const EditBreakerPanel = () => {
                                         <div className="col-sm">
                                             <ReactFlow
                                                 elements={distributedBreakersNodes}
-                                                // edges={distributedBreakersEdges}
+                                                edges={distributedBreakersEdges}
                                                 onConnect={onConnect}
                                                 onLoad={onLoad}
                                                 nodeTypes={nodeTypes}

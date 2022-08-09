@@ -17,6 +17,8 @@ const BreakersComponent = ({ data, id }) => {
     let userdata = cookies.get('user');
 
     const [breakerData, setBreakerData] = useState(data);
+    const [doubleBreakerData, setDoubleBreakerData] = useState({});
+    const [tripleBreakerData, setTripleBreakerData] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Edit Breaker Modal
@@ -33,6 +35,7 @@ const BreakersComponent = ({ data, id }) => {
 
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
+    const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
 
     const fetchDeviceSensorData = async (deviceId) => {
         if (deviceId === null) {
@@ -67,20 +70,6 @@ const BreakersComponent = ({ data, id }) => {
         setCurrentEquipIds(newArray);
     };
 
-    const updateSingleBreakerData = () => {
-        // if (activePanelType === 'distribution') {
-        //     let newArray = normalStruct;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setNormalStruct(newArray);
-        // }
-        // if (activePanelType === 'disconnect') {
-        //     let newArray = disconnectBreakerConfig;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setDisconnectBreakerConfig(newArray);
-        // }
-        data.onChange(id, breakerData);
-    };
-
     const triggerBreakerAPI = () => {
         LoadingStore.update((s) => {
             s.isBreakerDataFetched = true;
@@ -90,7 +79,8 @@ const BreakersComponent = ({ data, id }) => {
     const saveBreakerData = async () => {
         try {
             setIsProcessing(true);
-            let header = {
+
+            let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
@@ -111,18 +101,13 @@ const BreakersComponent = ({ data, id }) => {
 
             let params = `?breaker_id=${id}`;
 
-            await axios
-                .post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
-                    setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
-                    handleEditBreakerClose();
-                });
+            await axios.post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, headers).then((res) => {
+                setIsProcessing(false);
+                setTimeout(() => {
+                    triggerBreakerAPI();
+                }, 1000);
+                handleEditBreakerClose();
+            });
         } catch (error) {
             console.log('Failed to update Breaker');
             setIsProcessing(false);
@@ -130,22 +115,65 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    // const handleLinkedSensor = (previousSensorId, newSensorId) => {
-    //     if (previousSensorId === '') {
-    //         let newSensorList = linkedSensors;
-    //         newSensorList.push(newSensorId);
-    //         setLinkedSensors(newSensorList);
-    //     } else {
-    //         let newSensorList = linkedSensors;
+    const saveDoubleBreakerData = async () => {
+        try {
+            setIsProcessing(true);
 
-    //         let filteredList = newSensorList.filter((record) => {
-    //             return record !== previousSensorId;
-    //         });
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
 
-    //         filteredList.push(newSensorId);
-    //         setLinkedSensors(filteredList);
-    //     }
-    // };
+            let breakerObjOne = {
+                name: breakerData.name,
+                breaker_number: breakerData.breaker_number,
+                phase_configuration: breakerData.phase_configuration,
+                rated_amps: breakerData.rated_amps,
+                voltage: breakerData.voltage,
+                link_type: breakerData.link_type,
+                link_id: breakerData.link_id,
+                sensor_link: breakerData.sensor_id,
+                device_link: breakerData.device_id,
+                equipment_link: breakerData.equipment_link,
+            };
+
+            let breakerObjTwo = {
+                name: doubleBreakerData.data.name,
+                breaker_number: doubleBreakerData.data.breaker_number,
+                phase_configuration: breakerData.phase_configuration,
+                rated_amps: breakerData.rated_amps,
+                voltage: breakerData.voltage,
+                link_type: breakerData.link_type,
+                link_id: breakerData.link_id,
+                sensor_link: breakerData.sensor_id,
+                device_link: breakerData.device_id,
+                equipment_link: breakerData.equipment_link,
+            };
+
+            let paramsOne = `?breaker_id=${id}`;
+            let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
+
+            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
+            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
+
+            await axios.all([requestOne, requestTwo]).then(
+                axios.spread((...responses) => {
+                    const responseOne = responses[0];
+                    const responseTwo = responses[1];
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
+                })
+            );
+        } catch (error) {
+            console.log('Failed to update Breaker');
+            setIsProcessing(false);
+            handleEditBreakerClose();
+        }
+    };
 
     const findEquipmentName = (equipId) => {
         let equip = breakerData?.equipment_data?.find((record) => record?.value === equipId);
@@ -165,6 +193,20 @@ const BreakersComponent = ({ data, id }) => {
         breaker[key] = value;
         setBreakerData(breaker);
     };
+
+    useEffect(() => {
+        if (!breakerData.isLinked) {
+            return;
+        }
+        // if Breaker is a Parent Breaker
+        if (breakerData.parentBreaker === '') {
+            let obj = distributedBreakersData.find((obj) => obj.data.parentBreaker === id);
+            setDoubleBreakerData(obj);
+        } else {
+            let obj = distributedBreakersData.find((obj) => obj.id === breakerData.parentBreaker);
+            setDoubleBreakerData(obj);
+        }
+    }, [breakerData]);
 
     return (
         <React.Fragment>
@@ -281,15 +323,13 @@ const BreakersComponent = ({ data, id }) => {
                     <>
                         <div className="mt-4 ml-4 mb-0">
                             <Modal.Title className="edit-breaker-title mb-0">
-                                {breakerData.breaker_level === 'single-breaker'
-                                    ? 'Edit Breaker'
-                                    : 'Edit Linked Breaker'}
+                                {breakerData.breakerType === 1 ? 'Edit Breaker' : 'Edit Linked Breaker'}
                             </Modal.Title>
                             <Modal.Title className="edit-breaker-no mt-0">
-                                {breakerData.breaker_level === 'single-breaker' &&
-                                    `Breaker ${breakerData.breaker_number}`}
-                                {/* {data.breaker_level === 'double-breaker' &&
-                                    `Breaker ${doubleLinkedBreaker[0].map((number) => ` ${number}`)}`} */}
+                                {breakerData.breakerType === 1 && `Breaker ${breakerData.breaker_number}`}
+                                {breakerData.breakerType === 2 &&
+                                    // `Breaker ${breakerData.breaker_number} [${id}], ${doubleBreakerData?.data?.breaker_number} [${doubleBreakerData.id}]`}
+                                    `Breaker ${breakerData.breaker_number}, ${doubleBreakerData?.data?.breaker_number}`}
                             </Modal.Title>
                         </div>
                         <Modal.Body>
@@ -345,17 +385,18 @@ const BreakersComponent = ({ data, id }) => {
                                 <div className="edit-form-breaker ml-2 mr-2 mb-2" />
 
                                 <>
-                                    {breakerData.breaker_level === 'single-breaker' && (
+                                    {breakerData.breakerType === 1 && (
                                         <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
                                             Breaker {breakerData.breaker_number}
                                         </div>
                                     )}
 
-                                    {/* {currentBreakerLevel === 'double-breaker' && (
+                                    {breakerData.breakerType === 2 && (
                                         <div className="edit-breaker-subtitle mb-2 ml-2 mt-3">
-                                            Breaker {doubleLinkedBreaker[0][0]} & {doubleLinkedBreaker[0][1]}
+                                            Breaker {breakerData.breaker_number},{' '}
+                                            {doubleBreakerData?.data?.breaker_number}
                                         </div>
-                                    )} */}
+                                    )}
 
                                     <div className="panel-edit-grid ml-2 mr-2">
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -742,8 +783,12 @@ const BreakersComponent = ({ data, id }) => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            // updateSingleBreakerData();
-                            saveBreakerData();
+                            if (breakerData.breakerType === 1) {
+                                saveBreakerData();
+                            }
+                            if (breakerData.breakerType === 2) {
+                                saveDoubleBreakerData();
+                            }
                         }}>
                         {isProcessing ? 'Saving...' : 'Save'}
                     </Button>
