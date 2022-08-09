@@ -15,10 +15,11 @@ const SideNav = () => {
     const location = useLocation();
 
     useEffect(() => {
+        const hiddenPages = ['Utility Bills', 'Gateways', 'Users', 'Roles'];
         let activeSideRoutes = [];
         allFlattenRoutes.forEach((route) => {
             if (route.parent === parentRoute && route.visibility === true) {
-                activeSideRoutes.push(route);
+                !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
             }
         });
         setActiveRoute(activeSideRoutes);
