@@ -34,6 +34,7 @@ import EditPlugRule from './EditPlugRule';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 const PlugRuleTable = ({
     plugRuleData,
@@ -56,28 +57,55 @@ const PlugRuleTable = ({
                             <th>Socket Count</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {plugRuleData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <td
-                                        className="font-weight-bold panel-name"
-                                        onClick={() => {
-                                            setModelRefresh(!modelRefresh);
-                                            setCurrentData(record);
-                                            handleEditRuleShow();
-                                        }}>
-                                        {record.name}
-                                    </td>
-                                    <td className="font-weight-bold">
-                                        {record.description === '' ? '-' : record.description}
-                                    </td>
-                                    <td className="font-weight-bold">{record.days ? record.days : '-'}</td>
-                                    <td className="font-weight-bold">{record.socketCount ? record.socketCount : 0}</td>
+                    {console.log(plugRuleData, 'plugRuleData')}
+                    {plugRuleData?.length === 0 ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <th>
+                                        <Skeleton count={5} />
+                                    </th>
+
+                                    <th>
+                                        <Skeleton count={5} />
+                                    </th>
+
+                                    <th>
+                                        <Skeleton count={5} />
+                                    </th>
+
+                                    <th>
+                                        <Skeleton count={5} />
+                                    </th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {plugRuleData.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <td
+                                            className="font-weight-bold panel-name"
+                                            onClick={() => {
+                                                setModelRefresh(!modelRefresh);
+                                                setCurrentData(record);
+                                                handleEditRuleShow();
+                                            }}>
+                                            {record.name}
+                                        </td>
+                                        <td className="font-weight-bold">
+                                            {record.description === '' ? '-' : record.description}
+                                        </td>
+                                        <td className="font-weight-bold">{record.days ? record.days : '-'}</td>
+                                        <td className="font-weight-bold">
+                                            {record.socketCount ? record.socketCount : 0}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -87,7 +115,7 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    
+
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
     const handleAddRuleClose = () => setShowAddRule(false);
@@ -320,14 +348,14 @@ const PlugRules = () => {
                 await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
                     let data = res.data;
                     setBuildingRecord(data);
-                    console.log("Get Building",data);
+                    console.log('Get Building', data);
                     data.map((record, index) => {
-                        if(record.building_id===activeBuildingId){
-                            localStorage.setItem("timeZone",record.timezone);
+                        if (record.building_id === activeBuildingId) {
+                            localStorage.setItem('timeZone', record.timezone);
                             // console.log("timezone",record.timezone);
                         }
-                    })
-                });   
+                    });
+                });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Data');

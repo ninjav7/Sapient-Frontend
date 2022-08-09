@@ -1,5 +1,5 @@
-// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-export const BaseUrl = 'http://localhost:8000';
+export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'http://localhost:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -90,6 +90,7 @@ export const createFloors = '/api/config/layout/create-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
+export const updateSpace = '/api/config/layout/update-floor';
 
 // getLocation
 export const getLocation = '/api/config/get_location';

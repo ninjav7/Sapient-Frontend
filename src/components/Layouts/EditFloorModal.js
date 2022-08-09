@@ -5,9 +5,10 @@ import { useAtom } from 'jotai';
 import { Button, Input, Label } from 'reactstrap';
 import { closedEditFloorModal, floorList } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
+import { floorIdState } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import axios from 'axios';
-import { BaseUrl, createFloors, getFloors } from '../../services/Network';
+import { BaseUrl, createFloors, getFloors, updateSpace } from '../../services/Network';
 
 const EditFloorModal = (props) => {
     let cookies = new Cookies();
@@ -23,6 +24,12 @@ const EditFloorModal = (props) => {
     const [floorName, setFloorName] = useState('');
     const [floors, setFloors] = useAtom(floorList);
     const [floorModal, setFloorModal] = useAtom(closedEditFloorModal);
+    const [floorid] = useAtom(floorIdState);
+    const [floorNameApi, setFloorNameApi] = useState();
+
+    useEffect(() => {
+        setFloorNameApi({ name: floorName });
+    }, [floorName]);
 
     const createFloorsFunc = () => {
         const headers = {
@@ -35,11 +42,29 @@ const EditFloorModal = (props) => {
         });
     };
 
+    const updateFloorsFunc = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        const params = `${floorid}`;
+        axios.patch(`${BaseUrl}${updateSpace}?floor_id=${params}`, floorNameApi, { headers }).then((res) => {
+            console.log('resupdated', res);
+        });
+    };
+
+    console.log('editFloor', props.editFloor);
+
     return (
         <>
             <Modal {...props} centered>
                 <Modal.Header>
-                    <Modal.Title id="">Add Floor</Modal.Title>
+                    {props.editFloor ? (
+                        <Modal.Title id="">Edit Floor</Modal.Title>
+                    ) : (
+                        <Modal.Title id="">Add Floor</Modal.Title>
+                    )}
                 </Modal.Header>
                 <Modal.Body>
                     <Label>Name</Label>
@@ -63,7 +88,12 @@ const EditFloorModal = (props) => {
                     <Button
                         onClick={() => {
                             setFloors((el) => [...el, floorName]);
-                            createFloorsFunc();
+                            if (props.editFloor) {
+                                updateFloorsFunc();
+                            }
+                            if (!props.editFloor) {
+                                createFloorsFunc();
+                            }
                             props.onHide();
                             setFloorModal(true);
                         }}>
