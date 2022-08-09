@@ -593,7 +593,7 @@ const PortfolioOverview = () => {
     return (
         <>
             <Header title="Portfolio Overview" />
-            <Row className="mt-2">
+            <Row className="mt-2 mb-2">
                 <div className="col">
                     <PortfolioKPIs
                         daysCount={daysCount}
@@ -609,7 +609,7 @@ const PortfolioOverview = () => {
                 buildingsEnergyConsume={buildingsEnergyConsume}
             /> */}
 
-            <div className="portfolio-consume-widget-wrapper">
+            <div className="portfolio-consume-widget-wrapper mt-5">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
                 <EnergyConsumptionHistory series={energyConsumptionChart} />
             </div>
