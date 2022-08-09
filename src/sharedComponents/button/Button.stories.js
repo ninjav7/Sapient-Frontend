@@ -23,3 +23,9 @@ export const SecondaryGrey = () => (
         <Button label="Button CTA {MD}" size={Button.Sizes.md} type={Button.Type.SecondaryGrey} icon={<PlusSVG />} />
     </>
 );
+
+export const Primary = () => (
+    <>
+        <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.Primary} />
+    </>
+);

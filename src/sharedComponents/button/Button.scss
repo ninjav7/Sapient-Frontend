@@ -20,6 +20,17 @@
             }
         }
 
+        &.primary {
+            color: $base-white;
+            background: $primary-indigo-600;
+            border: 1px solid $primary-indigo-600;
+            box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+
+            &:hover {
+                background: $primary-indigo-700;
+            }
+        }
+
         &.sm {
             font-weight: 500;
             padding: 0.125rem 0.625rem;
@@ -28,6 +39,12 @@
         }
         &.md {
             padding: 0.375rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        &.lg {
+            padding: 10px 18px;
             font-weight: 500;
             font-size: 0.875rem;
             line-height: 1.25rem;

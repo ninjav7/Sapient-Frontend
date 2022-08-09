@@ -7,10 +7,12 @@ import './Button.scss';
 const SIZES = Object.freeze({
     sm: 'sm',
     md: 'md',
+    lg: 'lg',
 });
 
 const BUTTON_TYPES = Object.freeze({
     SecondaryGrey: 'secondary-grey',
+    Primary: 'primary'
 });
 
 const ButtonIconAlignment = Object.freeze({
