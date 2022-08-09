@@ -1,27 +1,70 @@
-@import "../../../assets/scss/colors";
+@import '../../../assets/scss/colors';
 
 .input-wrapper {
-  position: relative;
+    .input-inner-wrapper {
+        position: relative;
+    }
 
-  .input-icon {
-    position: absolute;
-    width: 1.25rem;
-    left: 0.625rem;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+    .input-icon {
+        position: absolute;
+        width: 1.25rem;
+        left: 0.625rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .input-control {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: 2.125rem;
+        border-color: $primary-gray-250;
+        box-shadow: 0px 1px 0px 0px #1018280d;
+        font-family: 'Inter';
+        font-weight: 300;
+        font-size: 0.875rem;
+        color: $primary-gray-500;
+        border-radius: 6px;
+    }
 
-  .input-control {
-    padding-left: 2.375rem;
-    padding-top: 0;
-    padding-bottom: 0;
-    height: 2.125rem;
-    border-color: $primary-gray-250;
-    box-shadow: 0px 1px 0px 0px #1018280D;
-    font-family: 'Inter';
-    font-weight: 300;
-    font-size: 0.875rem;
-    color: $primary-gray-500;
-  }
+    &.icon {
+        .input-control {
+            padding-left: 2.375rem;
+        }
+    }
+
+    &.element-end,
+    &.error {
+        .input-control {
+            padding-right: 36px;
+        }
+        .element-end-node {
+            position: absolute;
+            width: 1.25rem;
+            right: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+
+    &.error {
+        .input-control {
+            border: 1px solid $error-300;
+        }
+    }
+
+    .input-tooltip {
+        &-button {
+            padding: 0;
+            margin: 0;
+            border: 0;
+            background: none;
+            position: absolute;
+            width: 1.25rem;
+            right: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        &-icon {
+        }
+    }
 }
-
