@@ -314,12 +314,12 @@ const PassiveDevices = () => {
     const [duplicatePassiveDeviceData, setDuplicatePassiveDeviceData] = useState([]);
     const [passiveDeviceModel, setPassiveDeviceModel] = useState([
         {
-            value: 'HYDRA-1',
-            label: 'HYDRA-1',
+            value: 'hydra',
+            label: 'Hydra',
         },
         {
-            value: 'PR55-4A',
-            label: 'PR55-4A',
+            value: 'trident',
+            label: 'Trident',
         },
     ]);
     const [paginationData, setPaginationData] = useState({});
@@ -502,6 +502,10 @@ const PassiveDevices = () => {
             console.log('Failed to fetch all Active Devices');
         }
     };
+
+    useEffect(() => {
+        console.log('createDeviceData :>> ', createDeviceData);
+    });
 
     useEffect(() => {
         const fetchPassiveDeviceData = async () => {

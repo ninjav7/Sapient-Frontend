@@ -323,6 +323,8 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     onBlur={(e) => {
                                         handleBreakerChange('distribution', +e.target.value);
                                     }}
+                                    min={0}
+                                    step={5}
                                     value={panelObj.breaker_count}
                                 />
                             )}

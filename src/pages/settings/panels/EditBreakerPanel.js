@@ -1086,72 +1086,78 @@ const EditBreakerPanel = () => {
                 },
                 draggable: false,
             };
-            if (record.breaker_number === 1) {
+
+            // Two Level [5, 7]
+            if (record.breaker_number === 5) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
                 obj.data.parentBreaker = '';
             }
-            if (record.breaker_number === 3) {
+            if (record.breaker_number === 7) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62f0b0958961e5eb76b72228';
+                obj.data.parentBreaker = '62ece70893f90711430a8aa1';
             }
-            if (record.breaker_number === 2) {
+
+            // Two Level [12, 14]
+            if (record.breaker_number === 12) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
                 obj.data.parentBreaker = '';
             }
-            if (record.breaker_number === 4) {
+            if (record.breaker_number === 14) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62f0b0958961e5eb76b72229';
+                obj.data.parentBreaker = '62ece70893f90711430a8aa8';
+            }
+
+            // Three Level [9, 11, 13]
+            if (record.breaker_number === 9) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 11) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 13) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                obj.data.phase_configuration = 3;
+            }
+
+            // Three Level [6, 8, 10]
+            if (record.breaker_number === 6) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+            }
+            if (record.breaker_number === 8) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+            }
+            if (record.breaker_number === 10) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62ece70893f90711430a8aa2';
             }
             distributedBreakerArray.push(obj);
         });
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
-
-        // Inserting Passive & Equip data to Distributed Breakers
-        if (distributedBreakerArray.length !== 0) {
-            let newArray = [];
-            console.log('SSR newArray type1 => ', typeof newArray);
-            console.log('SSR newArray passiveDeviceData => ', typeof passiveDeviceData);
-            console.log('SSR newArray passiveDeviceData => ', Object.values(passiveDeviceData));
-            console.log('SSR newArray equipmentData => ', typeof equipmentData);
-            console.log('SSR newArray equipmentData => ', Object.values(equipmentData));
-            distributedBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            console.log('SSR newArray type2 => ', typeof newArray);
-            console.log('SSR newArray type2 => ', newArray);
-            BreakersStore.update((s) => {
-                s.distributedBreakersData = newArray;
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        // Inserting Passive & Equip data to Disconnect Breakers
-        if (disconnectBreakerArray.length !== 0) {
-            let newArray = [];
-            disconnectBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            // BreakersStore.update((s) => {
-            //     s.disconnectedBreakersData = newArray;
-            // });
-            setDisconnectBreakersNodes(newArray);
-        }
+        BreakersStore.update((s) => {
+            s.distributedBreakersData = distributedBreakerArray;
+        });
+        BreakersStore.update((s) => {
+            s.disconnectedBreakersData = disconnectBreakerArray;
+        });
     }, [breakersData]);
 
     useEffect(() => {
