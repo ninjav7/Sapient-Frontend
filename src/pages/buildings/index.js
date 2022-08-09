@@ -1739,7 +1739,7 @@ const BuildingOverview = () => {
 
                     {/* Hourly Average Consumption */}
                     <Brick sizeInRem={2} />
-                    <div>
+                    {/* <div>
                         <div className="hourly-average-consumption">
                             <Typography.Subheader size={Typography.Sizes.md}>
                                 Hourly Average Consumption
@@ -1775,7 +1775,7 @@ const BuildingOverview = () => {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Total Energy Consumption  */}
                     <Brick sizeInRem={2} />
