@@ -794,7 +794,7 @@ const allRoutes = [
     chartRoutes,
     portfolioRoutes,
     settingsRoutes,
-    // controlRoutes,
+    controlRoutes,
     // exploreRoutes,
     authRoutes,
     // ...appRoutes,
@@ -808,7 +808,7 @@ const authProtectedRoutes = [
     dashboardRoutes,
     portfolioRoutes,
     settingsRoutes,
-    //controlRoutes,
+    controlRoutes,
     // exploreRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes

@@ -47,7 +47,7 @@ const PlugRuleTable = ({
 }) => {
     return (
         <Card>
-            <CardBody>
+            <CardBody className="px-0">
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
@@ -425,7 +425,7 @@ const PlugRules = () => {
 
     return (
         <React.Fragment>
-            <div className="plug-rules-header-style mt-4 ml-4 mr-3">
+            <div className="plug-rules-header-style mt-4 ml-0 mr-0">
                 <div className="plug-left-header">
                     {/* <div className="plug-blg-name">NYPL</div> */}
                     <div className="plug-blg-name">
@@ -448,7 +448,7 @@ const PlugRules = () => {
                 </div>
             </div>
 
-            <div className="plug-rules-header-style mt-4 ml-4 mr-4">
+            <div className="plug-rules-header-style mt-4 ml-0 mr-0">
                 <div className="plug-search-tabs-style">
                     <div className="search-container mr-2">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
