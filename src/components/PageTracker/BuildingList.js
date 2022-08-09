@@ -12,53 +12,52 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
             <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
             {buildingList.length === 0 && 'No Buildings found.'}
             {buildingList.map((record) => {
-
                 const activeItem =
                     // eslint-disable-next-line no-restricted-globals
                     location.pathname !== '/energy/portfolio/overview' && record.building_id === bldStoreId;
 
                 return (
                     <div key={record.building_id}>
-
-                        {
-                            location.pathname === '/energy/portfolio/overview' ? (
-                                <Dropdown.Item
-                                    onClick={() => {
-                                        BuildingStore.update((s) => {
-                                            s.BldgId = record.building_id;
-                                            s.BldgName = record.building_name;
-                                        });
-                                        localStorage.setItem('buildingId', record.building_id);
-                                        localStorage.setItem('buildingName', record.building_name);
-                                    }}>
-                                    <Link
-                                        to={{
-                                            pathname: `/energy/building/overview/${record.building_id}`,
-                                        }}>
-                                        <div className="filter-bld-style">
-                                            <div className="portfolio-txt-style">{record.building_name}</div>
-                                            {location.pathname !== '/energy/portfolio/overview' &&
-                                                record.building_id === bldStoreId && <CheckIcon />}
-                                        </div>
-                                    </Link>
-                                </Dropdown.Item>
-                            ) : (
-                                <Dropdown.Item
-                                    className={activeItem && 'selected'}
-                                    onClick={() => {
-                                        BuildingStore.update((s) => {
-                                            s.BldgId = record.building_id;
-                                            s.BldgName = record.building_name;
-                                        });
-                                        localStorage.setItem('buildingId', record.building_id);
-                                        localStorage.setItem('buildingName', record.building_name);
+                        {location.pathname === '/energy/portfolio/overview' ? (
+                            <Dropdown.Item
+                                as="div"
+                                onClick={() => {
+                                    BuildingStore.update((s) => {
+                                        s.BldgId = record.building_id;
+                                        s.BldgName = record.building_name;
+                                    });
+                                    localStorage.setItem('buildingId', record.building_id);
+                                    localStorage.setItem('buildingName', record.building_name);
+                                }}>
+                                <Link
+                                    to={{
+                                        pathname: `/energy/building/overview/${record.building_id}`,
                                     }}>
                                     <div className="filter-bld-style">
                                         <div className="portfolio-txt-style">{record.building_name}</div>
-                                        {activeItem && <CheckIcon />}
+                                        {location.pathname !== '/energy/portfolio/overview' &&
+                                            record.building_id === bldStoreId && <CheckIcon />}
                                     </div>
-                                </Dropdown.Item>
-                            )}
+                                </Link>
+                            </Dropdown.Item>
+                        ) : (
+                            <Dropdown.Item
+                                as="div"
+                                className={activeItem && 'selected'}
+                                onClick={() => {
+                                    BuildingStore.update((s) => {
+                                        s.BldgId = record.building_id;
+                                        s.BldgName = record.building_name;
+                                    });
+                                    localStorage.setItem('buildingId', record.building_id);
+                                    localStorage.setItem('buildingName', record.building_name);
+                                }}>
+                                <div className="filter-bld-style">
+                                    <div className="portfolio-txt-style">{record.building_name}</div>
+                                    {activeItem && <CheckIcon />}
+                                </div>
+                            </Dropdown.Item>
+                        )}
                     </div>
                 );
             })}

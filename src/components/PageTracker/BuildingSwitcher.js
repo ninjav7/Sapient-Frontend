@@ -21,7 +21,7 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
     return (
         <div>
             {location.pathname === '/energy/portfolio/overview' ? (
-                <Dropdown.Item className="selected">
+                <Dropdown.Item className="selected" as="div">
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
@@ -42,7 +42,7 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                     </div>
                 </Dropdown.Item>
             ) : (
-                <Dropdown.Item>
+                <Dropdown.Item as="div">
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
                     <Link to="/energy/portfolio/overview">
                         <span

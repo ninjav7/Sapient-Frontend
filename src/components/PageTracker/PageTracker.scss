@@ -83,6 +83,13 @@
 
     &-content {
         padding: 0 1rem 0.625rem;
+
+        a {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
     }
 }
 .page-tracker-dropdown-btn {
