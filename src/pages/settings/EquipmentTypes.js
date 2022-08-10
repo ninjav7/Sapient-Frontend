@@ -128,6 +128,7 @@ const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }
                         </Button>
                         <Button
                             variant="primary"
+                            disabled={true}
                             //  onClick={()=>{editDeviceData();}}
                         >
                             Update

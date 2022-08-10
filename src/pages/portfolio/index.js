@@ -33,7 +33,7 @@ import { TailSpin } from 'react-loader-spinner';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.scss';
 import PortfolioKPIs from './PortfolioKPIs';
-import EnergyDensityMap from './EnergyDensityMap';
+// import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
 
@@ -49,7 +49,7 @@ const PortfolioOverview = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const [daysCount, setDaysCount] = useState(1);
-    const [topEnergyDensity, setTopEnergyDensity] = useState(1);
+    // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
@@ -582,18 +582,18 @@ const PortfolioOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-    useEffect(() => {
-        if (!buildingsEnergyConsume.length > 0) {
-            return;
-        }
-        let topVal = buildingsEnergyConsume[0].density;
-        setTopEnergyDensity(topVal);
-    }, [buildingsEnergyConsume]);
+    // useEffect(() => {
+    //     if (!buildingsEnergyConsume.length > 0) {
+    //         return;
+    //     }
+    //     let topVal = buildingsEnergyConsume[0].density;
+    //     setTopEnergyDensity(topVal);
+    // }, [buildingsEnergyConsume]);
     
     return (
         <>
             <Header title="Portfolio Overview" />
-            <Row className="mt-2">
+            <Row className="mt-2 mb-2">
                 <div className="col">
                     <PortfolioKPIs
                         daysCount={daysCount}
@@ -603,13 +603,13 @@ const PortfolioOverview = () => {
                 </div>
             </Row>
 
-            <EnergyDensityMap
+            {/* <EnergyDensityMap
                 topEnergyDensity={topEnergyDensity}
                 markers={markers}
                 buildingsEnergyConsume={buildingsEnergyConsume}
-            />
+            /> */}
 
-            <div className="portfolio-consume-widget-wrapper">
+            <div className="portfolio-consume-widget-wrapper mt-5">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
                 <EnergyConsumptionHistory series={energyConsumptionChart} />
             </div>
