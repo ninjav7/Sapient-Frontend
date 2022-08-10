@@ -462,17 +462,23 @@ const BreakersComponent = ({ data, id }) => {
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Phase</Form.Label>
                                         <Input
-                                            type="number"
+                                            type="select"
                                             name="state"
                                             id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
+                                            className="font-weight-bold breaker-phase-selection fields-disabled-style"
                                             placeholder="Select Phase"
                                             onChange={(e) => {
+                                                if (e.target.value === 'Select Phase') {
+                                                    return;
+                                                }
                                                 handleChange(id, 'phase_configuration', +e.target.value);
                                             }}
                                             value={breakerData.phase_configuration}
-                                            disabled={true}
-                                            min={0}></Input>
+                                            disabled={true}>
+                                            <option>Select Phase </option>
+                                            <option value="3">3</option>
+                                            <option value="1">1</option>
+                                        </Input>
                                     </Form.Group>
 
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -483,7 +489,7 @@ const BreakersComponent = ({ data, id }) => {
                                             className="font-weight-bold"
                                             value={breakerData.rated_amps}
                                             min={0}
-                                            step={5}
+                                            step={breakerData.rated_amps < 50 ? 5 : 10}
                                             onChange={(e) => {
                                                 handleChange(id, 'rated_amps', +e.target.value);
                                             }}
@@ -493,17 +499,25 @@ const BreakersComponent = ({ data, id }) => {
                                     <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                         <Form.Label>Volts</Form.Label>
                                         <Input
-                                            type="number"
+                                            type="select"
                                             name="state"
                                             id="userState"
-                                            className="font-weight-bold breaker-phase-selection"
+                                            className="font-weight-bold breaker-phase-selection fields-disabled-style"
                                             placeholder="Select Volts"
                                             onChange={(e) => {
+                                                if (e.target.value === 'Select Volts') {
+                                                    return;
+                                                }
                                                 handleChange(id, 'voltage', e.target.value);
                                             }}
                                             value={breakerData.voltage}
-                                            disabled={true}
-                                            min={0}></Input>
+                                            disabled={true}>
+                                            <option>Select Volts</option>
+                                            <option value="120">120</option>
+                                            <option value="208">208</option>
+                                            <option value="277">277</option>
+                                            <option value="347">347</option>
+                                        </Input>
                                     </Form.Group>
                                 </div>
 
