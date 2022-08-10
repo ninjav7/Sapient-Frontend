@@ -1096,7 +1096,7 @@ const EditBreakerPanel = () => {
             if (record.breaker_number === 7) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa1';
+                obj.data.parentBreaker = '62f3f892dbec261431640fd5';
             }
 
             // Two Level [12, 14]
@@ -1108,7 +1108,7 @@ const EditBreakerPanel = () => {
             if (record.breaker_number === 14) {
                 obj.data.breakerType = 2;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa8';
+                obj.data.parentBreaker = '62f3f893dbec261431640fdc';
             }
 
             // Three Level [9, 11, 13]
@@ -1121,13 +1121,13 @@ const EditBreakerPanel = () => {
             if (record.breaker_number === 11) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                obj.data.parentBreaker = '62f3f893dbec261431640fd9';
                 obj.data.phase_configuration = 3;
             }
             if (record.breaker_number === 13) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                obj.data.parentBreaker = '62f3f893dbec261431640fd9';
                 obj.data.phase_configuration = 3;
             }
 
@@ -1141,19 +1141,77 @@ const EditBreakerPanel = () => {
             if (record.breaker_number === 8) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                obj.data.parentBreaker = '62f3f892dbec261431640fd6';
                 obj.data.phase_configuration = 3;
             }
             if (record.breaker_number === 10) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
-                obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                obj.data.parentBreaker = '62f3f892dbec261431640fd6';
                 obj.data.phase_configuration = 3;
+            }
+
+            // 120/240 Service Volts
+            if (panel.voltage === '120/240') {
+                if (record.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 120;
+                }
+                if (record.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 240;
+                }
+            }
+
+            // 208/120 Service Volts
+            if (panel.voltage === '208/120') {
+                if (record.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 120;
+                }
+                if (record.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 240;
+                    console.log('Sudhanshu => ', obj);
+                }
+                if (record.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 240;
+                }
+            }
+
+            // 480 Service Volts
+            if (panel.voltage === '480') {
+                if (record.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 277;
+                }
+                if (record.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 480;
+                }
+                if (record.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 480;
+                }
+            }
+
+            // 600 Service Volts
+            if (panel.voltage === '600') {
+                if (record.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 347;
+                }
+                if (record.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 600;
+                }
             }
 
             distributedBreakerArray.push(obj);
         });
 
+        console.log('distributedBreakerArray :>> ', distributedBreakerArray);
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
         BreakersStore.update((s) => {

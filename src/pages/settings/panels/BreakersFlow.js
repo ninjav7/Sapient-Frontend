@@ -20,6 +20,9 @@ const BreakersComponent = ({ data, id }) => {
     const [breakerData, setBreakerData] = useState(data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
+    console.log(' SSR breakerData:>> ', breakerData);
+    console.log(' SSR doubleBreakerData:>> ', doubleBreakerData);
+    console.log(' SSR tripleBreakerData:>> ', tripleBreakerData);
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Edit Breaker Modal
@@ -59,10 +62,10 @@ const BreakersComponent = ({ data, id }) => {
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
-                if (doubleBreakerData.data.device_id === '') {
+                if (doubleBreakerData.data.device_id !== '') {
                     setDoubleSensorData(response);
                 }
-                if (tripleBreakerData.data.device_id === '') {
+                if (tripleBreakerData.data.device_id !== '') {
                     setTripleSensorData(response);
                 }
                 setIsSensorDataFetched(false);
@@ -291,31 +294,26 @@ const BreakersComponent = ({ data, id }) => {
                 equipment_link: breakerData.equipment_link,
             };
 
-            console.log('SSR Data we are passing');
-            console.log('SSR breakerObjOne');
-            console.log('SSR breakerObjTwo');
-            console.log('SSR breakerObjThree');
-
             let paramsOne = `?breaker_id=${id}`;
             let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
             let paramsThree = `?breaker_id=${tripleBreakerData.id}`;
 
-            // const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            // const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-            // const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
+            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
+            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
+            const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
 
-            // await axios.all([requestOne, requestTwo, requestThree]).then(
-            //     axios.spread((...responses) => {
-            //         const responseOne = responses[0];
-            //         const responseTwo = responses[1];
-            //         const responseThree = responses[2];
-            //         setIsProcessing(false);
-            //         setTimeout(() => {
-            //             triggerBreakerAPI();
-            //         }, 1000);
-            //         handleEditBreakerClose();
-            //     })
-            // );
+            await axios.all([requestOne, requestTwo, requestThree]).then(
+                axios.spread((...responses) => {
+                    const responseOne = responses[0];
+                    const responseTwo = responses[1];
+                    const responseThree = responses[2];
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
+                })
+            );
         } catch (error) {
             console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
