@@ -1,29 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
+import { Link, useParams, useLocation, useHistory } from 'react-router-dom';
 import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../../routes';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ComponentStore, ROUTE_LEVELS } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 
 import './SideNav.scss';
+
+export const SETTINGS_ROUTE_MAP = Object.freeze({
+    [ROUTE_LEVELS.PORTFOLIO]: 'account',
+    [ROUTE_LEVELS.BUILDINGS]: 'building-settings',
+});
+
+const hiddenPages = ['Utility Bills', 'Gateways', 'Users', 'Roles'];
 
 const SideNav = () => {
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     // const [bldgId, setBldgId] = useState(bldStoreId);
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const [activeRoute, setActiveRoute] = useState([]);
-    const parentRoute = ComponentStore.useState((s) => s.parent);
+    const [parentRoute, levelRoute] = ComponentStore.useState(({parent, level}) => [parent, level]);
     const location = useLocation();
 
+    const history = useHistory();
+    
+
     useEffect(() => {
-        const hiddenPages = ['Utility Bills', 'Gateways', 'Users', 'Roles'];
+        //@TODO Need to refactor ans use as HOC a whole app
         let activeSideRoutes = [];
         allFlattenRoutes.forEach((route) => {
+            if(location.pathname.startsWith('/settings')) {
+                if (route.parent === SETTINGS_ROUTE_MAP[levelRoute] && route.visibility === true) {
+                    !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+                }
+                return;
+            }
+
+            if(location.pathname.startsWith('/control')) {
+                if (route.parent === 'control' && route.visibility === true) {
+                    !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+                }
+                return;
+            }
+
+            
             if (route.parent === parentRoute && route.visibility === true) {
                 !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
             }
+            
         });
         setActiveRoute(activeSideRoutes);
-    }, [parentRoute]);
+    }, [levelRoute, parentRoute]);
+
+
+    useEffect(() => {
+        //@TODO Need to refactor ans use as HOC a whole app
+        let activeSideRoutes = [];
+        allFlattenRoutes.forEach((route) => {
+            if(location.pathname.startsWith('/settings')) {
+                if (route.parent === SETTINGS_ROUTE_MAP[levelRoute] && route.visibility === true) {
+                    !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+                }
+                return;
+            }
+
+            if(location.pathname.startsWith('/control')) {
+                if (route.parent === 'control' && route.visibility === true && route.visibility === true) {
+                    !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+                }
+                return;
+            }
+
+            if(location.pathname.startsWith('/energy')) {
+
+                if (route.parent === 'energy' && route.visibility === true && route.visibility === true) {
+                    !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+                }
+                return;
+            }
+
+            if (route.parent === parentRoute && route.visibility === true && route.visibility === true) {
+                !hiddenPages.find((page) => page === route.name) && activeSideRoutes.push(route);
+            }
+
+        });
+        
+        const path = activeSideRoutes[0]?.path;
+
+        console.log(path, levelRoute, parentRoute, 'path, levelRoute, parentRoute');
+
+        path && history.push(path)
+    }, [levelRoute, parentRoute]);
+    
+    
+    
 
     return (
         <>

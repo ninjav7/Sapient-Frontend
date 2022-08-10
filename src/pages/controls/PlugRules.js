@@ -31,12 +31,63 @@ import {
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import EditPlugRule from './EditPlugRule';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ComponentStore, ROUTE_LEVELS } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
-const PlugRuleTable = ({
+const PlugRuleTablePortfolioComponent = ({
+    plugRuleData,
+    handleEditRuleShow,
+    currentData,
+    setCurrentData,
+    handleCurrentDataChange,
+    modelRefresh,
+    setModelRefresh,
+}) => {
+    return (
+        <Card>
+            <CardBody className="px-0">
+                <Table className="mb-0 bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Building</th>
+                        <th>Days</th>
+                        <th>Socket Count</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {plugRuleData.map((record, index) => {
+                        return (
+                            <tr key={index}>
+                                <td
+                                    className="font-weight-bold panel-name"
+                                    onClick={() => {
+                                        setModelRefresh(!modelRefresh);
+                                        setCurrentData(record);
+                                        handleEditRuleShow();
+                                    }}>
+                                    {record.name}
+                                </td>
+                                <td className="font-weight-bold">
+                                    {record.description === '' ? '-' : record.description}
+                                </td>
+                                <td className="font-weight-bold">{record.days ? record.days : '-'}</td>
+                                <td className="font-weight-bold">{record.socketCount ? record.socketCount : 0}</td>
+                            </tr>
+                        );
+                    })}
+                    </tbody>
+                </Table>
+            </CardBody>
+        </Card>
+    );
+};
+
+
+const PlugRuleTableComponent = ({
     plugRuleData,
     handleEditRuleShow,
     currentData,
@@ -115,6 +166,9 @@ const PlugRuleTable = ({
 const PlugRules = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    
+    
+    const routeLevel = ComponentStore.useState(s => s.level);
 
     // Add Rule Model
     const [showAddRule, setShowAddRule] = useState(false);
@@ -422,16 +476,22 @@ const PlugRules = () => {
         };
         fetchPlugRuleData();
     }, [activeBuildingId]);
-
+    
+    
+    const PlugRuleTable = routeLevel === ROUTE_LEVELS.PORTFOLIO ? PlugRuleTablePortfolioComponent : PlugRuleTableComponent;
+    const title = routeLevel === ROUTE_LEVELS.PORTFOLIO ? 'Portfolio Plug Rules' : 'Plug Rules';
+    const levelName = routeLevel === ROUTE_LEVELS.PORTFOLIO ? 'Portfolio Level' : localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName');
+    
     return (
         <React.Fragment>
             <div className="plug-rules-header-style mt-4 ml-0 mr-0">
                 <div className="plug-left-header">
                     {/* <div className="plug-blg-name">NYPL</div> */}
+                    <div className="plug-heading-style">{title}</div>
                     <div className="plug-blg-name">
-                        {localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName')}
+                        {levelName}
                     </div>
-                    <div className="plug-heading-style">Plug Rules</div>
+                    
                 </div>
                 <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                     <div className="mr-2">

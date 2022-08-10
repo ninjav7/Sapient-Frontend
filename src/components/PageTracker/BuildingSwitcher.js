@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { BaseUrl, getBuilding } from '../../services/Network';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
@@ -9,32 +9,33 @@ import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ComponentStore, ROUTE_LEVELS } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
+import { allFlattenRoutes } from '../../routes';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     const location = useLocation();
+
+    const [currentParentRoute, levelRoute] = ComponentStore.useState((s) => [s.parent, s.level]);
+
     return (
         <div>
-            {location.pathname === '/energy/portfolio/overview' ? (
+            {currentParentRoute === 'portfolio' || location.pathname === '/energy/portfolio/overview' || levelRoute === ROUTE_LEVELS.PORTFOLIO ? (
                 <Dropdown.Item className="selected" as="div">
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
 
-                            <Link to="/energy/portfolio/overview">
-                                <span
-                                    className="portfolio-txt-style"
-                                    onClick={() => {
-                                        handlePortfolioClick && handlePortfolioClick('Portfolio');
-                                    }}>
-                                    Portfolio
-                                </span>
-                            </Link>
+                            <a
+                                onClick={() => {
+                                    handlePortfolioClick && handlePortfolioClick('Portfolio');
+                                }}>
+                                <span className="portfolio-txt-style">Portfolio</span>
+                            </a>
                         </div>
                         <div className="dropdown-item-selected">
                             <CheckIcon />
@@ -44,7 +45,10 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
             ) : (
                 <Dropdown.Item as="div">
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-                    <Link to="/energy/portfolio/overview">
+                    <a
+                        onClick={() => {
+                            handlePortfolioClick && handlePortfolioClick('Portfolio');
+                        }}>
                         <span
                             className="portfolio-txt-style"
                             onClick={() => {
@@ -52,7 +56,7 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                             }}>
                             Portfolio
                         </span>
-                    </Link>
+                    </a>
                 </Dropdown.Item>
             )}
         </div>
@@ -76,14 +80,18 @@ const FilterBuildings = ({ handleValueChange, value }) => {
 const BuildingSwitcher = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const currentParentRoute = ComponentStore.useState((s) => s.parent);
+    const levelRoute = ComponentStore.useState((s) => s.level);
 
     const location = useLocation();
 
+
     const [value, setValue] = useState('');
-    const [buildingList, setBuildingList] = useState([]);
+    const [buildingList, setBuildingList] = useState([
+
+    ]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
-    const [portfolioName, setPortfolioName] = useState('');
 
     useEffect(() => {
         const getBuildingList = async () => {
@@ -101,29 +109,8 @@ const BuildingSwitcher = () => {
         getBuildingList();
     }, []);
 
-    useEffect(() => {
-        ComponentStore.update((s) => {
-            s.parent = 'portfolio';
-        });
-    }, [portfolioName]);
+    const dropDownTitle = levelRoute === ROUTE_LEVELS.PORTFOLIO ? 'Portfolio' : bldStoreName;
 
-    useEffect(() => {
-        const getBuildingList = async () => {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                let data = res.data;
-                let activeBldgs = data.filter((bld) => bld.active === true);
-                setBuildingList(activeBldgs);
-            });
-        };
-        getBuildingList();
-    }, []);
-
-    const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });
@@ -147,7 +134,16 @@ const BuildingSwitcher = () => {
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
                         <div className="tracker-dropdown-content">
-                            <PortfolioItem handlePortfolioClick={setPortfolioName} />
+                            <PortfolioItem
+                                handlePortfolioClick={() => {
+                                    ComponentStore.update((s) => {
+                                        s.parent = 'portfolio';
+                                        s.level = ROUTE_LEVELS.PORTFOLIO;
+                                    });
+
+                                    localStorage.setItem('levelRoute', ROUTE_LEVELS.PORTFOLIO);
+                                }}
+                            />
 
                             <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />
                         </div>
