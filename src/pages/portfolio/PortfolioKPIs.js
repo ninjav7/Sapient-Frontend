@@ -46,7 +46,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
                 }
             />
 
-            <KPILabeled
+            {/* <KPILabeled
                 title="12 Mo. Electric EUI"
                 value={formatConsumptionValue(overalldata.yearly_electric_eui.now / 1000)}
                 badgePrecentage={percentageHandler(
@@ -61,7 +61,7 @@ const PortfolioKPIs = ({ totalBuilding = 0, overalldata = {}, daysCount = 0 }) =
                         ? TRENDS_BADGE_TYPES.UPWARD_TREND
                         : TRENDS_BADGE_TYPES.DOWNWARD_TREND
                 }
-            />
+            /> */}
         </div>
     );
 };

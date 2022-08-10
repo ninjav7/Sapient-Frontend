@@ -64,11 +64,11 @@ const NavLinks = () => {
                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                     </div>
                                 )}
-                                {item.name === 'Explore' && (
+                                {/* {item.name === 'Explore' && (
                                     <div className="font-icon-style active">
                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                     </div>
-                                )}
+                                )} */}
                                 <div
                                     onClick={() => {
                                         setSideNavBar(item.name);
@@ -93,11 +93,11 @@ const NavLinks = () => {
                                         <FontAwesomeIcon icon={faToggleOn} size="lg" />
                                     </div>
                                 )}
-                                {item.name === 'Explore' && (
+                                {/* {item.name === 'Explore' && (
                                     <div className="font-icon-style">
                                         <FontAwesomeIcon icon={faTelescope} size="lg" />
                                     </div>
-                                )}
+                                )} */}
                                 <div
                                     onClick={() => {
                                         setSideNavBar(item.name);
