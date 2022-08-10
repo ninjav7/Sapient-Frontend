@@ -1136,17 +1136,21 @@ const EditBreakerPanel = () => {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
                 obj.data.parentBreaker = '';
+                obj.data.phase_configuration = 3;
             }
             if (record.breaker_number === 8) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
                 obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                obj.data.phase_configuration = 3;
             }
             if (record.breaker_number === 10) {
                 obj.data.breakerType = 3;
                 obj.data.isLinked = true;
                 obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                obj.data.phase_configuration = 3;
             }
+
             distributedBreakerArray.push(obj);
         });
 

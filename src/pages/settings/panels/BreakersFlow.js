@@ -16,6 +16,7 @@ const BreakersComponent = ({ data, id }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const [breakerObj, setBreakerObj] = useState(data);
     const [breakerData, setBreakerData] = useState(data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
@@ -27,7 +28,12 @@ const BreakersComponent = ({ data, id }) => {
     const handleEditBreakerShow = () => setShowEditBreaker(true);
 
     const [sensorData, setSensorData] = useState([]);
+    const [doubleSensorData, setDoubleSensorData] = useState([]);
+    const [tripleSensorData, setTripleSensorData] = useState([]);
+
     const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
+    const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
+    const [isSensorDataFetchedForTriple, setIsSensorDataFetchedForTriple] = useState(false);
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
@@ -53,11 +59,71 @@ const BreakersComponent = ({ data, id }) => {
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
+                if (doubleBreakerData.data.device_id === '') {
+                    setDoubleSensorData(response);
+                }
+                if (tripleBreakerData.data.device_id === '') {
+                    setTripleSensorData(response);
+                }
                 setIsSensorDataFetched(false);
             });
         } catch (error) {
             console.log(error);
             setIsSensorDataFetched(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
+    const fetchDeviceSensorDataForDouble = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === 'unlink') {
+            return;
+        }
+        try {
+            setIsSensorDataFetchedForDouble(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setDoubleSensorData(response);
+                setIsSensorDataFetchedForDouble(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetchedForDouble(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
+    const fetchDeviceSensorDataForTriple = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === 'unlink') {
+            return;
+        }
+        try {
+            setIsSensorDataFetchedForTriple(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setTripleSensorData(response);
+                setIsSensorDataFetchedForTriple(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetchedForTriple(false);
             console.log('Failed to fetch Sensor Data');
         }
     };
@@ -207,8 +273,8 @@ const BreakersComponent = ({ data, id }) => {
                 voltage: breakerData.voltage,
                 link_type: breakerData.link_type,
                 link_id: breakerData.link_id,
-                sensor_link: breakerData.sensor_id,
-                device_link: breakerData.device_id,
+                sensor_link: doubleBreakerData.data.sensor_id,
+                device_link: doubleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
@@ -220,31 +286,36 @@ const BreakersComponent = ({ data, id }) => {
                 voltage: breakerData.voltage,
                 link_type: breakerData.link_type,
                 link_id: breakerData.link_id,
-                sensor_link: breakerData.sensor_id,
-                device_link: breakerData.device_id,
+                sensor_link: tripleBreakerData.data.sensor_id,
+                device_link: tripleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
             };
+
+            console.log('SSR Data we are passing');
+            console.log('SSR breakerObjOne');
+            console.log('SSR breakerObjTwo');
+            console.log('SSR breakerObjThree');
 
             let paramsOne = `?breaker_id=${id}`;
             let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
             let paramsThree = `?breaker_id=${tripleBreakerData.id}`;
 
-            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-            const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
+            // const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
+            // const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
+            // const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
 
-            await axios.all([requestOne, requestTwo, requestThree]).then(
-                axios.spread((...responses) => {
-                    const responseOne = responses[0];
-                    const responseTwo = responses[1];
-                    const responseThree = responses[2];
-                    setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
-                    handleEditBreakerClose();
-                })
-            );
+            // await axios.all([requestOne, requestTwo, requestThree]).then(
+            //     axios.spread((...responses) => {
+            //         const responseOne = responses[0];
+            //         const responseTwo = responses[1];
+            //         const responseThree = responses[2];
+            //         setIsProcessing(false);
+            //         setTimeout(() => {
+            //             triggerBreakerAPI();
+            //         }, 1000);
+            //         handleEditBreakerClose();
+            //     })
+            // );
         } catch (error) {
             console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
@@ -257,7 +328,7 @@ const BreakersComponent = ({ data, id }) => {
         return equip?.label;
     };
 
-    const handleChange = (id, key, value) => {
+    const handleSingleBreakerChange = (id, key, value) => {
         let breaker = Object.assign({}, breakerData);
         if (key === 'equipment_link') {
             let arr = [];
@@ -281,7 +352,9 @@ const BreakersComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
-        breaker.data[key] = value;
+        let data = Object.assign({}, breaker.data);
+        data[key] = value;
+        breaker['data'] = data;
         setDoubleBreakerData(breaker);
     };
 
@@ -295,41 +368,42 @@ const BreakersComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
-        breaker.data[key] = value;
+        let data = Object.assign({}, breaker.data);
+        data[key] = value;
+        breaker['data'] = data;
         setTripleBreakerData(breaker);
     };
 
     useEffect(() => {
-        if (!breakerData.isLinked) {
+        if (!breakerObj.isLinked) {
             return;
         }
 
-        if (breakerData.breakerType === 2) {
-            // if Breaker is a Parent Breaker
-            if (breakerData.parentBreaker === '') {
+        if (breakerObj.breakerType === 2) {
+            if (breakerObj.parentBreaker === '') {
                 let obj = distributedBreakersData.find((obj) => obj.data.parentBreaker === id);
                 setDoubleBreakerData(obj);
             } else {
-                let obj = distributedBreakersData.find((obj) => obj.id === breakerData.parentBreaker);
+                let obj = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
                 setDoubleBreakerData(obj);
             }
         }
 
-        if (breakerData.breakerType === 3) {
-            if (breakerData.parentBreaker === '') {
+        if (breakerObj.breakerType === 3) {
+            if (breakerObj.parentBreaker === '') {
                 let breakersList = distributedBreakersData.filter((obj) => obj.data.parentBreaker === id);
                 setDoubleBreakerData(breakersList[0]);
                 setTripleBreakerData(breakersList[1]);
             } else {
-                let objOne = distributedBreakersData.find((obj) => obj.id === breakerData.parentBreaker); // Parent
+                let objOne = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
                 let objTwo = distributedBreakersData.find(
-                    (obj) => obj.data.parentBreaker === breakerData.parentBreaker && obj.id !== id
+                    (obj) => obj.data.parentBreaker === breakerObj.parentBreaker && obj.id !== id
                 );
                 setDoubleBreakerData(objOne);
                 setTripleBreakerData(objTwo);
             }
         }
-    }, [breakerData]);
+    }, [breakerObj]);
 
     return (
         <React.Fragment>
@@ -471,7 +545,7 @@ const BreakersComponent = ({ data, id }) => {
                                                 if (e.target.value === 'Select Phase') {
                                                     return;
                                                 }
-                                                handleChange(id, 'phase_configuration', +e.target.value);
+                                                handleSingleBreakerChange(id, 'phase_configuration', +e.target.value);
                                             }}
                                             value={breakerData.phase_configuration}
                                             disabled={true}>
@@ -491,7 +565,7 @@ const BreakersComponent = ({ data, id }) => {
                                             min={0}
                                             step={breakerData.rated_amps < 50 ? 5 : 10}
                                             onChange={(e) => {
-                                                handleChange(id, 'rated_amps', +e.target.value);
+                                                handleSingleBreakerChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
                                     </Form.Group>
@@ -508,7 +582,7 @@ const BreakersComponent = ({ data, id }) => {
                                                 if (e.target.value === 'Select Volts') {
                                                     return;
                                                 }
-                                                handleChange(id, 'voltage', e.target.value);
+                                                handleSingleBreakerChange(id, 'voltage', e.target.value);
                                             }}
                                             value={breakerData.voltage}
                                             disabled={true}>
@@ -553,7 +627,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                 return;
                                                             }
                                                             fetchDeviceSensorData(e.target.value);
-                                                            handleChange(id, 'device_id', e.target.value);
+                                                            handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                         }}
                                                         value={breakerData.device_id}>
                                                         <option>Select Device</option>
@@ -581,7 +655,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
-                                                                handleChange(id, 'sensor_id', e.target.value);
+                                                                handleSingleBreakerChange(
+                                                                    id,
+                                                                    'sensor_id',
+                                                                    e.target.value
+                                                                );
                                                             }}
                                                             value={breakerData.sensor_id}>
                                                             <option>Select Sensor</option>
@@ -629,7 +707,21 @@ const BreakersComponent = ({ data, id }) => {
                                                                 return;
                                                             }
                                                             fetchDeviceSensorData(e.target.value);
-                                                            handleChange(id, 'device_id', e.target.value);
+                                                            handleSingleBreakerChange(id, 'device_id', e.target.value);
+                                                            if (doubleBreakerData.data.device_id === '') {
+                                                                handleDoubleBreakerChange(
+                                                                    id,
+                                                                    'device_id',
+                                                                    e.target.value
+                                                                );
+                                                            }
+                                                            if (tripleBreakerData.data.device_id === '') {
+                                                                handleTripleBreakerChange(
+                                                                    id,
+                                                                    'device_id',
+                                                                    e.target.value
+                                                                );
+                                                            }
                                                         }}
                                                         value={breakerData.device_id}>
                                                         <option>Select Device</option>
@@ -657,7 +749,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
-                                                                handleChange(id, 'sensor_id', e.target.value);
+                                                                handleSingleBreakerChange(
+                                                                    id,
+                                                                    'sensor_id',
+                                                                    e.target.value
+                                                                );
                                                             }}
                                                             value={breakerData.sensor_id}>
                                                             <option>Select Sensor</option>
@@ -699,7 +795,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
-                                                            fetchDeviceSensorData(e.target.value);
+                                                            fetchDeviceSensorDataForDouble(e.target.value);
                                                             handleDoubleBreakerChange(id, 'device_id', e.target.value);
                                                         }}
                                                         value={doubleBreakerData?.data?.device_id}>
@@ -715,7 +811,7 @@ const BreakersComponent = ({ data, id }) => {
 
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Form.Label>Sensor #</Form.Label>
-                                                    {isSensorDataFetched ? (
+                                                    {isSensorDataFetchedForDouble ? (
                                                         <Skeleton count={1} height={35} />
                                                     ) : (
                                                         <Input
@@ -736,7 +832,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={doubleBreakerData?.data?.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {sensorData.map((record) => {
+                                                            {doubleSensorData.map((record) => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -774,7 +870,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
-                                                            fetchDeviceSensorData(e.target.value);
+                                                            fetchDeviceSensorDataForTriple(e.target.value);
                                                             handleTripleBreakerChange(id, 'device_id', e.target.value);
                                                         }}
                                                         value={tripleBreakerData?.data?.device_id}>
@@ -790,7 +886,7 @@ const BreakersComponent = ({ data, id }) => {
 
                                                 <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                     <Form.Label>Sensor #</Form.Label>
-                                                    {isSensorDataFetched ? (
+                                                    {isSensorDataFetchedForTriple ? (
                                                         <Skeleton count={1} height={35} />
                                                     ) : (
                                                         <Input
@@ -811,7 +907,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={tripleBreakerData?.data?.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {sensorData.map((record) => {
+                                                            {tripleSensorData.map((record) => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -849,7 +945,7 @@ const BreakersComponent = ({ data, id }) => {
                                                 return;
                                             }
                                             addSelectedBreakerEquip(e.target.value);
-                                            handleChange(id, 'equipment_link', e.target.value);
+                                            handleSingleBreakerChange(id, 'equipment_link', e.target.value);
                                         }}
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
