@@ -517,18 +517,14 @@ const EditBreakerPanel = () => {
                 };
 
                 let params = `?panel_id=${panelId}`;
-                console.log('Step 1');
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                 });
-                console.log('Step 2');
                 setBreakerDataFetched(false);
-                console.log('Step 3');
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
-                console.log('Step 4');
             } catch (error) {
                 console.log(error);
                 setBreakerDataFetched(false);
@@ -584,15 +580,15 @@ const EditBreakerPanel = () => {
     // };
 
     const handleBreakerChange = (id, breakerObj) => {
-        console.log('handleBreakerChange id => ', id);
-        console.log('handleBreakerChange breakerObj => ', breakerObj);
-        console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
+        // console.log('handleBreakerChange id => ', id);
+        // console.log('handleBreakerChange breakerObj => ', breakerObj);
+        // console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
     };
 
     const handleDiscBreakerChange = (id, discBreakerObj) => {
-        console.log('handleDiscBreakerChange id => ', id);
-        console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
-        console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
+        // console.log('handleDiscBreakerChange id => ', id);
+        // console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
+        // console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
     };
 
     const initialEdges = [
@@ -1151,13 +1147,15 @@ const EditBreakerPanel = () => {
                 obj.data.phase_configuration = 3;
             }
 
+            let breakerObj = Object.assign({}, obj);
+
             // 120/240 Service Volts
             if (panel.voltage === '120/240') {
-                if (record.breakerType === 1) {
+                if (breakerObj.data.breakerType === 1) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 120;
                 }
-                if (record.breakerType === 2) {
+                if (breakerObj.data.breakerType === 2) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 240;
                 }
@@ -1165,16 +1163,15 @@ const EditBreakerPanel = () => {
 
             // 208/120 Service Volts
             if (panel.voltage === '208/120') {
-                if (record.breakerType === 1) {
+                if (breakerObj.data.breakerType === 1) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 120;
                 }
-                if (record.breakerType === 2) {
+                if (breakerObj.data.breakerType === 2) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 240;
-                    console.log('Sudhanshu => ', obj);
                 }
-                if (record.breakerType === 3) {
+                if (breakerObj.data.breakerType === 3) {
                     obj.data.phase_configuration = 3;
                     obj.data.voltage = 240;
                 }
@@ -1182,15 +1179,15 @@ const EditBreakerPanel = () => {
 
             // 480 Service Volts
             if (panel.voltage === '480') {
-                if (record.breakerType === 1) {
+                if (breakerObj.data.breakerType === 1) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 277;
                 }
-                if (record.breakerType === 2) {
+                if (breakerObj.data.breakerType === 2) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 480;
                 }
-                if (record.breakerType === 3) {
+                if (breakerObj.data.breakerType === 3) {
                     obj.data.phase_configuration = 3;
                     obj.data.voltage = 480;
                 }
@@ -1198,11 +1195,11 @@ const EditBreakerPanel = () => {
 
             // 600 Service Volts
             if (panel.voltage === '600') {
-                if (record.breakerType === 1) {
+                if (breakerObj.data.breakerType === 1) {
                     obj.data.phase_configuration = 1;
                     obj.data.voltage = 347;
                 }
-                if (record.breakerType === 3) {
+                if (breakerObj.data.breakerType === 3) {
                     obj.data.phase_configuration = 3;
                     obj.data.voltage = 600;
                 }
@@ -1211,7 +1208,6 @@ const EditBreakerPanel = () => {
             distributedBreakerArray.push(obj);
         });
 
-        console.log('distributedBreakerArray :>> ', distributedBreakerArray);
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
         BreakersStore.update((s) => {

@@ -20,9 +20,6 @@ const BreakersComponent = ({ data, id }) => {
     const [breakerData, setBreakerData] = useState(data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
-    console.log(' SSR breakerData:>> ', breakerData);
-    console.log(' SSR doubleBreakerData:>> ', doubleBreakerData);
-    console.log(' SSR tripleBreakerData:>> ', tripleBreakerData);
     const [isProcessing, setIsProcessing] = useState(false);
 
     // Edit Breaker Modal
@@ -587,8 +584,13 @@ const BreakersComponent = ({ data, id }) => {
                                             <option>Select Volts</option>
                                             <option value="120">120</option>
                                             <option value="208">208</option>
+                                            <option value="240">240</option>
                                             <option value="277">277</option>
                                             <option value="347">347</option>
+                                            <option value="415">415</option>
+                                            <option value="480">480</option>
+                                            <option value="520">520</option>
+                                            <option value="600">600</option>
                                         </Input>
                                     </Form.Group>
                                 </div>
