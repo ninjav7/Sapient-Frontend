@@ -1146,7 +1146,10 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        // console.log('setOverview => ', res.data);
+                        console.log('setOverview => ', percentageHandler(
+                            res.data.average_energy_density.now,
+                            res.data.average_energy_density.old
+                        ));
                     });
             } catch (error) {
                 console.log(error);
@@ -1432,7 +1435,7 @@ const BuildingOverview = () => {
         // buildingAlertsData();
         //buildingPeaksData();
         builidingEquipmentsData();
-        //builidingHourlyData();
+       // builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1498,7 +1501,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={overview.average_energy_density.now / 1000}
+                                description={(overview.average_energy_density.now / 1000).toFixed(5)}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1544,12 +1547,12 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            <Link
+                            {/* <Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link>
+                            </Link> */}
                         </div>
                     </div>
                 </div>

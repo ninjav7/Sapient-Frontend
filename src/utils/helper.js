@@ -6,7 +6,7 @@ export const percentageHandler = (v1, v2) => {
         return 100;
     }
     const percentage = ((v1 - v2) / v2) * 100;
-    const value = Math.abs(percentage).toFixed(2) || 0;
+    const value = Math.abs(percentage).toFixed(5) || 0;
     return value;
 };
 
