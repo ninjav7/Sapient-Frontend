@@ -1495,7 +1495,7 @@ const BuildingOverview = () => {
                                 1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
                             </p>
                         </div>
-                    </div> */} */}
+                    </div> */} 
 
                     <div className="card-box-style button-style">
                         <div className="card-body">
@@ -1530,7 +1530,7 @@ const BuildingOverview = () => {
                                 infoType={`total-bld-eui`}
                             />
                         </div>
-                    </div> */} */}
+                    </div> */} 
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
@@ -1583,7 +1583,7 @@ const BuildingOverview = () => {
                                         More Details
                                     </div>
                                 </Link>
-                            </div> */} */}
+                            </div> */} 
                         </div>
                         <div className="custom-bld-enduse-style">
                             <div>
@@ -1795,7 +1795,7 @@ const BuildingOverview = () => {
                                 ))}
                             </div>
                         </div>
-                    </Row> */} */}
+                    </Row> */} 
 
                     {/* Hourly Average Consumption */}
                     {/* {/* <Row>
@@ -1836,7 +1836,7 @@ const BuildingOverview = () => {
                                 />
                             </div>
                         </div>
-                    </Row> */} */}
+                    </Row> */}
 
                     {/* Total Energy Consumption  */}
                     <Row>
@@ -1886,7 +1886,6 @@ const BuildingOverview = () => {
                                                             size="lg"
                                                             className="ml-2"
                                                             color="#B42318
-"
                                                         />
                                                     </div>
                                                     <div>
@@ -1948,7 +1947,7 @@ const BuildingOverview = () => {
                                 })}
                             </div>
                         </div>
-                    </Row> */} */}
+                    </Row> */} 
                     <Row style={{ marginTop: '2rem' }}>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
