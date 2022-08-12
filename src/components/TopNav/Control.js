@@ -64,7 +64,6 @@ const Control = () => {
     return (
         <>
             <div className="topbar-buttons-wrapper">
-                
                 {currentParentRoute === 'buildings' ? (
                     <Link to="/settings/general" className="topbar-buttons">
                         {/* <div className="navbar-icon-container float-right" style={{ height: '100%' }}> */}
@@ -112,13 +111,13 @@ const Control = () => {
                     </Link>
                 )}
 
-                {/* <SearchModal /> */}
+                <SearchModal />
 
-                {/*<div className="navbar-icon-container float-right topbar-buttons">*/}
-                {/*    <button className="btn btn-sm float-right other-font-icon-style">*/}
-                {/*        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />*/}
-                {/*    </button>*/}
-                {/*</div>*/}
+                <div className="navbar-icon-container float-right topbar-buttons">
+                    <button className="btn btn-sm float-right other-font-icon-style">
+                        <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
+                    </button>
+                </div>
             </div>
 
             <button className="btn topbar-logout-btn" onClick={handleLogout}>

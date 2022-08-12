@@ -392,7 +392,6 @@
 .bldg-page-grid-style {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 2rem;
 }
 
 .custom-bldg-table-style {

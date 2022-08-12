@@ -4,7 +4,7 @@ import { ReactComponent as DecreaseSVG } from '../assets/icons/arrow-trend-down.
 import { ReactComponent as NeutralSVG } from '../assets/icons/arrow-trend-neutral.svg';
 
 import './style.scss';
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const TRENDS_BADGE_TYPES = Object.freeze({
     DOWNWARD_TREND: 'downward-trend',
@@ -42,10 +42,8 @@ const TrendsBadge = ({ value = null, type = TRENDS_BADGE_TYPES.UPWARD_TREND }) =
     );
 };
 
-TrendsBadge.Type = TRENDS_BADGE_TYPES;
-
 TrendsBadge.propTypes = {
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    value: PropTypes.string,
     type: PropTypes.oneOf(Object.values(TRENDS_BADGE_TYPES)),
 };
 

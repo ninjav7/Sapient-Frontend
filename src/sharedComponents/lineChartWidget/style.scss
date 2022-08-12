@@ -1,19 +1,9 @@
 @import '../../assets/scss/colors';
 
-.line-chart-widget-wrapper {
+.line-chart-widget {
     border: 1px solid #eaecf0;
     border-radius: 8px;
-}
-
-.line-chart-widget {
-    
-    &-titles {
-        padding: 1rem 24px 0 24px;
-    }
-    
     padding-right: 0.67rem;
-    margin-bottom: 10px;
-    
     &-wrapper {
         .apexcharts-xaxis-label {
             font-size: 0.625rem;

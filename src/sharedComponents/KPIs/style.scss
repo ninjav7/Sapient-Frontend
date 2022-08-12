@@ -1,18 +1,5 @@
 @import '../../assets/scss/colors';
 
-.KPI-wrapper {
-    background: $primary-gray-50;
-    display: inline-flex;
-    column-gap: 0.5rem;
-
-    border: 0.0625rem solid $primary-gray-100;
-
-    box-shadow: 0px 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0px 0.0625 0.125rem rgba(0, 0, 0, 0.06);
-    border-radius: 0.625rem;
-
-    padding: 0.1875rem 0.375rem;
-}
-
 .KPI-component {
     &-wrapper {
         font-family: 'Inter';

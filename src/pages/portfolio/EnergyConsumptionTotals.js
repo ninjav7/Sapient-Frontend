@@ -1,4 +1,5 @@
 import React from 'react';
+import { Col } from 'reactstrap';
 import { percentageHandler } from '../../utils/helper';
 import DonutChartWidget from '../../sharedComponents/donutChartWidget';
 import { COLOR_SCHEME_BY_DEVICE } from '../../constants/colors';
@@ -21,6 +22,7 @@ const donutChartDataMock = [
 ];
 
 const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
+
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         const value = (energy_consumption.now / 1000).toLocaleString(undefined, {
             maximumFractionDigits: 2,
@@ -36,12 +38,14 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
     });
 
     return (
-        <DonutChartWidget
-            id="consumptionEnergyDonut"
-            title="Energy Consumption by End Use"
-            subtitle="Energy Totals"
-            items={donutChartData}
-        />
+        <div>
+            <DonutChartWidget
+                id="consumptionEnergyDonut"
+                title="Energy Consumption by End Use"
+                subtitle="Energy Totals"
+                items={donutChartData}
+            />
+        </div>
     );
 };
 

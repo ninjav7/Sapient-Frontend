@@ -32,10 +32,11 @@ const AccountSettings = () => {
                 ];
                 bs.items = newList;
             });
-
+            ComponentStore.update((s) => {
+                s.parent = 'account';
+            });
         };
         updateBreadcrumbStore();
-        
     }, []);
 
     return (
