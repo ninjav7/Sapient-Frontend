@@ -146,7 +146,7 @@ const EditBreakerPanel = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditable, setIsEditable] = useState(false);
 
     const [normalData, setNormalData] = useState({
         related_amps: 200,
@@ -540,7 +540,6 @@ const EditBreakerPanel = () => {
                 let params = `?panel_id=${panelId}`;
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
-                    console.log('Sudhanshu', response);
                     setBreakersData(response);
                 });
                 setBreakerDataFetched(false);
@@ -1415,9 +1414,12 @@ const EditBreakerPanel = () => {
                                         type="button"
                                         className="btn btn-md btn-secondary font-weight-bold"
                                         onClick={() => {
-                                            setIsEditing(!isEditing);
+                                            setIsEditable(!isEditable);
+                                            BreakersStore.update((s) => {
+                                                s.isEditable = !isEditable;
+                                            });
                                         }}>
-                                        {isEditing ? 'Done Editing' : 'Edit Layout'}
+                                        {isEditable ? 'Done Editing' : 'Edit Layout'}
                                     </button>
                                 )}
                             </div>
@@ -1489,20 +1491,38 @@ const EditBreakerPanel = () => {
                                             <div
                                                 className="row"
                                                 style={{ width: '100%', height: '350vh', position: 'relative' }}>
-                                                <ReactFlow
-                                                    nodes={distributedBreakersNodes}
-                                                    edges={distributedBreakersEdges}
-                                                    onNodesChange={onNodesChange}
-                                                    onEdgesChange={onEdgesChange}
-                                                    onConnect={onConnect}
-                                                    nodeTypes={nodeTypes}
-                                                    edgeTypes={edgeTypes}
-                                                    style={{ background: '#fafbfc' }}
-                                                    zoomOnScroll={false}
-                                                    panOnScroll={false}
-                                                    preventScrolling={false}
-                                                    onPaneScroll={false}
-                                                />
+                                                {isEditable && (
+                                                    <ReactFlow
+                                                        nodes={distributedBreakersNodes}
+                                                        edges={distributedBreakersEdges}
+                                                        onNodesChange={onNodesChange}
+                                                        onEdgesChange={onEdgesChange}
+                                                        onConnect={onConnect}
+                                                        nodeTypes={nodeTypes}
+                                                        edgeTypes={edgeTypes}
+                                                        style={{ background: '#fafbfc' }}
+                                                        zoomOnScroll={false}
+                                                        panOnScroll={false}
+                                                        preventScrolling={false}
+                                                        onPaneScroll={false}
+                                                    />
+                                                )}
+                                                {!isEditable && (
+                                                    <ReactFlow
+                                                        nodes={distributedBreakersNodes}
+                                                        // edges={distributedBreakersEdges}
+                                                        onNodesChange={onNodesChange}
+                                                        onEdgesChange={onEdgesChange}
+                                                        onConnect={onConnect}
+                                                        nodeTypes={nodeTypes}
+                                                        edgeTypes={edgeTypes}
+                                                        style={{ background: '#fafbfc' }}
+                                                        zoomOnScroll={false}
+                                                        panOnScroll={false}
+                                                        preventScrolling={false}
+                                                        onPaneScroll={false}
+                                                    />
+                                                )}
                                             </div>
 
                                             {/* <ReactFlow

@@ -40,6 +40,7 @@ const BreakersComponent = ({ data, id }) => {
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
     const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
+    const isEditable = BreakersStore.useState((s) => s.isEditable);
 
     const fetchDeviceSensorData = async (deviceId) => {
         if (deviceId === null) {
@@ -500,20 +501,25 @@ const BreakersComponent = ({ data, id }) => {
                                     (breakerData.breaker_level === 'double-breaker' &&
                                         breakerData.panel_voltage === '600')
                                 ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            handleEditBreakerShow();
-                                            if (data?.sensor_id === '') {
-                                                return;
-                                            }
-                                            fetchDeviceSensorData(data?.device_id);
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
+                                    <>
+                                        {isEditable && (
+                                            <div
+                                                className="breaker-content-middle"
+                                                onClick={() => {
+                                                    handleEditBreakerShow();
+                                                    if (data?.sensor_id === '') {
+                                                        return;
+                                                    }
+                                                    fetchDeviceSensorData(data?.device_id);
+                                                }}>
+                                                <div className="edit-icon-bg-styling mr-2">
+                                                    <i className="uil uil-pen"></i>
+                                                </div>
+
+                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         ) : (
@@ -524,20 +530,25 @@ const BreakersComponent = ({ data, id }) => {
                                     (breakerData.breaker_level === 'double-breaker' &&
                                         breakerData.panel_voltage === '600')
                                 ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            handleEditBreakerShow();
-                                            if (data?.sensor_id === '') {
-                                                return;
-                                            }
-                                            fetchDeviceSensorData(data?.device_id);
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
+                                    <>
+                                        {isEditable && (
+                                            <div
+                                                className="breaker-content-middle"
+                                                onClick={() => {
+                                                    handleEditBreakerShow();
+                                                    if (data?.sensor_id === '') {
+                                                        return;
+                                                    }
+                                                    fetchDeviceSensorData(data?.device_id);
+                                                }}>
+                                                <div className="edit-icon-bg-styling mr-2">
+                                                    <i className="uil uil-pen"></i>
+                                                </div>
+
+                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}

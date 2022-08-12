@@ -15,12 +15,6 @@ const onEdgeClick = (evt, id, breakerLinkData) => {
     );
 };
 
-//
-
-// const isBreakerLinked = () => {
-
-// }
-
 export default function CustomEdge({
     id,
     sourceX,
@@ -61,7 +55,6 @@ export default function CustomEdge({
 
     const isBothBreakerLinked = () => {
         let isLinked;
-
         // If Parent ID exist for Source Breaker
         if (sourceBreakerObj?.data?.parentBreaker !== '') {
             if (sourceBreakerObj?.data?.parentBreaker === targetBreakerObj?.data?.parentBreaker) {
@@ -70,7 +63,6 @@ export default function CustomEdge({
                 isLinked = false;
             }
         }
-
         // If Parent ID not exist for Source Breaker
         if (sourceBreakerObj?.data?.parentBreaker === '') {
             if (sourceBreakerObj?.id === targetBreakerObj?.data?.parentBreaker) {
@@ -80,23 +72,6 @@ export default function CustomEdge({
             }
         }
         return isLinked;
-    };
-
-    const breakerLinkBackground = () => {
-        let linked;
-        if (!sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked) {
-            linked = false;
-        }
-        if (!sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked) {
-            linked = false;
-        }
-        if (sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked) {
-            linked = false;
-        }
-        if (sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked) {
-            isBothBreakerLinked() ? (linked = true) : (linked = false);
-        }
-        return linked;
     };
 
     return (
