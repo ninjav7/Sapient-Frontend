@@ -122,7 +122,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     rated_amps: 0,
                     voltage: '',
                     link_type: 'unlinked',
-                    link_id: '',
+                    // link_id: '',
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',
@@ -152,7 +152,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     rated_amps: 0,
                     voltage: '120',
                     link_type: 'unlinked',
-                    link_id: '',
+                    // link_id: '',
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',
@@ -323,6 +323,8 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     onBlur={(e) => {
                                         handleBreakerChange('distribution', +e.target.value);
                                     }}
+                                    min={0}
+                                    step={5}
                                     value={panelObj.breaker_count}
                                 />
                             )}

@@ -87,10 +87,10 @@ const IndividualPassiveDevice = () => {
         // { value: 'energy', label: 'Consumed Energy (Wh)' },
         // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
         // { value: 'mV', label: 'Voltage (V)' },
-        // { value: 'power', label: 'Real Power (W)' },
         { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
         { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
         { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
+        { value: 'passive-power', label: 'Power' },
         // { value: 'mAh', label: 'Amps' },
     ]);
 
@@ -413,7 +413,11 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Device Model
                                         </h6>
-                                        <h6 className="passive-device-value">{passiveData.model}</h6>
+                                        <h6 className="passive-device-value">
+                                            {passiveData?.model &&
+                                                passiveData?.model.charAt(0).toUpperCase() +
+                                                    passiveData?.model.slice(1)}
+                                        </h6>
                                     </div>
                                 </div>
                                 <div className="single-passive-grid">
