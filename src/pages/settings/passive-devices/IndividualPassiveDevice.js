@@ -413,7 +413,11 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Device Model
                                         </h6>
-                                        <h6 className="passive-device-value">{passiveData.model}</h6>
+                                        <h6 className="passive-device-value">
+                                            {passiveData?.model &&
+                                                passiveData?.model.charAt(0).toUpperCase() +
+                                                    passiveData?.model.slice(1)}
+                                        </h6>
                                     </div>
                                 </div>
                                 <div className="single-passive-grid">
