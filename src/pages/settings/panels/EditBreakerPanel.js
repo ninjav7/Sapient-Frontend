@@ -538,18 +538,15 @@ const EditBreakerPanel = () => {
                 };
 
                 let params = `?panel_id=${panelId}`;
-                console.log('Step 1');
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
+                    console.log('Sudhanshu', response);
                     setBreakersData(response);
                 });
-                console.log('Step 2');
                 setBreakerDataFetched(false);
-                console.log('Step 3');
                 LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
-                console.log('Step 4');
             } catch (error) {
                 console.log(error);
                 setBreakerDataFetched(false);
@@ -642,15 +639,16 @@ const EditBreakerPanel = () => {
     // Get co-rodinates for Distributed Breakers
     const getYaxisCordinates = (index) => {
         let num = index;
+        let value = 90;
 
         if (num === 1 || num === 2) {
-            return 90;
+            return value;
         }
         if (num % 2 === 0) {
-            return (num / 2) * 90;
+            return (num / 2) * value;
         }
         if (num % 2 !== 0) {
-            return ((num + 1) / 2) * 90;
+            return ((num + 1) / 2) * value;
         }
     };
 
@@ -1044,69 +1042,71 @@ const EditBreakerPanel = () => {
                 draggable: false,
             };
 
-            // Two Level [5, 7]
-            // if (record.breaker_number === 5) {
-            //     obj.data.breakerType = 2;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '';
-            // }
-            // if (record.breaker_number === 7) {
-            //     obj.data.breakerType = 2;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f892dbec261431640fd5';
-            // }
+            if (panel.panel_id === '62ece70793f90711430a8a9c') {
+                // Two Level [5, 7]
+                if (record.breaker_number === 5) {
+                    obj.data.breakerType = 2;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '';
+                }
+                if (record.breaker_number === 7) {
+                    obj.data.breakerType = 2;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa1';
+                }
 
-            // Two Level [12, 14]
-            // if (record.breaker_number === 12) {
-            //     obj.data.breakerType = 2;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '';
-            // }
-            // if (record.breaker_number === 14) {
-            //     obj.data.breakerType = 2;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f893dbec261431640fdc';
-            // }
+                // Two Level [12, 14]
+                if (record.breaker_number === 12) {
+                    obj.data.breakerType = 2;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '';
+                }
+                if (record.breaker_number === 14) {
+                    obj.data.breakerType = 2;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa8';
+                }
 
-            // Three Level [9, 11, 13]
-            // if (record.breaker_number === 9) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '';
-            //     obj.data.phase_configuration = 3;
-            // }
-            // if (record.breaker_number === 11) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f893dbec261431640fd9';
-            //     obj.data.phase_configuration = 3;
-            // }
-            // if (record.breaker_number === 13) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f893dbec261431640fd9';
-            //     obj.data.phase_configuration = 3;
-            // }
+                // Three Level [9, 11, 13]
+                if (record.breaker_number === 9) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '';
+                    obj.data.phase_configuration = 3;
+                }
+                if (record.breaker_number === 11) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                    obj.data.phase_configuration = 3;
+                }
+                if (record.breaker_number === 13) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                    obj.data.phase_configuration = 3;
+                }
 
-            // Three Level [6, 8, 10]
-            // if (record.breaker_number === 6) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '';
-            //     obj.data.phase_configuration = 3;
-            // }
-            // if (record.breaker_number === 8) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f892dbec261431640fd6';
-            //     obj.data.phase_configuration = 3;
-            // }
-            // if (record.breaker_number === 10) {
-            //     obj.data.breakerType = 3;
-            //     obj.data.isLinked = true;
-            //     obj.data.parentBreaker = '62f3f892dbec261431640fd6';
-            //     obj.data.phase_configuration = 3;
-            // }
+                // Three Level [6, 8, 10]
+                if (record.breaker_number === 6) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '';
+                    obj.data.phase_configuration = 3;
+                }
+                if (record.breaker_number === 8) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                    obj.data.phase_configuration = 3;
+                }
+                if (record.breaker_number === 10) {
+                    obj.data.breakerType = 3;
+                    obj.data.isLinked = true;
+                    obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                    obj.data.phase_configuration = 3;
+                }
+            }
 
             let breakerObj = Object.assign({}, obj);
 
@@ -1169,7 +1169,6 @@ const EditBreakerPanel = () => {
             distributedBreakerArray.push(obj);
         });
 
-        console.log('Sudhanshu', distributedBreakerArray);
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
         BreakersStore.update((s) => {

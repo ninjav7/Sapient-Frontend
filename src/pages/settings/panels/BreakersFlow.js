@@ -402,6 +402,7 @@ const BreakersComponent = ({ data, id }) => {
 
     return (
         <React.Fragment>
+            {/* Left Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 1 && (
                 <>
                     <Handle
@@ -419,6 +420,7 @@ const BreakersComponent = ({ data, id }) => {
                 </>
             )}
 
+            {/* Right Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 0 && (
                 <>
                     <Handle
