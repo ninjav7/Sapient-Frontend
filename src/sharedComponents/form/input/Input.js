@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 
 import Typography from '../../typography';
+import Brick from '../../brick';
 
 import { ReactComponent as ErrorSVG } from '../../assets/icons/errorInfo.svg';
 
 import './Input.scss';
-import Brick from '../../brick';
 
 const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...props }) => {
     const inputWrapperClassNames = cx('input-wrapper', className, {
@@ -19,6 +19,13 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...pr
 
     return (
         <div className={inputWrapperClassNames}>
+            {props.label && (
+                <>
+                    <Typography.Body size={Typography.Sizes.sm}>{props.label}</Typography.Body>
+                    <Brick sizeInRem={0.25} />
+                </>
+            )}
+
             <div className="input-inner-wrapper">
                 {iconUrl && <img className="input-icon" src={iconUrl} />}
                 <FormControl {...props} className={`input-control ${inputClassName}`} />
@@ -29,10 +36,11 @@ const Input = ({ iconUrl, elementEnd, inputClassName = '', className = '', ...pr
                     })}
                 {!!props.error && <ErrorSVG className="element-end-node" />}
             </div>
+
             {!!props.error && (
                 <>
                     <Brick sizeInRem={0.375} />
-                    <Typography.Body size={Typography.Sizes.xs} style={{ color: 'red' }}>
+                    <Typography.Body size={Typography.Sizes.xs} className="input-error-label">
                         {props.error}
                     </Typography.Body>
                 </>
@@ -45,6 +53,7 @@ Input.propTypes = {
     iconUrl: PropTypes.string,
     elementEnd: PropTypes.node,
     error: PropTypes.string,
+    label: PropTypes.string,
 };
 
 export default Input;

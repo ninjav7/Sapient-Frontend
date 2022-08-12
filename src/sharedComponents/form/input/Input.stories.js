@@ -18,7 +18,7 @@ export default {
     },
 };
 
-export const Default = (arg) => {
+export const Default = arg => {
     return (
         <>
             <InputTooltip {...arg} tooltipText="Help text" />
@@ -28,6 +28,12 @@ export const Default = (arg) => {
             <Input {...arg} elementEnd={<EyeSVG />} />
             <Brick />
             <Input {...arg} elementEnd={<EyeSVG />} error={'This is a error message.'} iconUrl={undefined} />
+            <Brick />
+            <Input label="Label text" />
+            <Brick />
+            <InputTooltip tooltipText="Help text" label="Input with Label text and Tooltip" />
+            <Brick />
+            <InputTooltip tooltipText="Help text" label="Input with Tooltip and with Error" error="Error message" />
         </>
     );
 };
