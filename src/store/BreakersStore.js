@@ -5,4 +5,5 @@ export const BreakersStore = new Store({
     equipmentData: [],
     distributedBreakersData: [],
     disconnectedBreakersData: [],
+    breakerLinkData: [],
 });
