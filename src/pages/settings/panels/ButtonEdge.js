@@ -5,7 +5,7 @@ import { getBezierPath, getEdgeCenter, getMarkerEnd } from 'react-flow-renderer'
 import { BreakersStore } from '../../../store/BreakersStore';
 import './panel-style.css';
 
-const foreignObjectSize = 40;
+const foreignObjectSize = 30;
 
 const onEdgeClick = (evt, id, breakerLinkData) => {
     let breakerLinkObj = breakerLinkData.find((record) => record?.id === id);
@@ -51,11 +51,11 @@ export default function CustomEdge({
                 height={foreignObjectSize}
                 x={edgeCenterX - foreignObjectSize / 2}
                 y={edgeCenterY - foreignObjectSize / 2}
-                className="edgebutton-foreignobject mt-4 mr-2"
+                className=""
                 requiredExtensions="http://www.w3.org/1999/xhtml">
                 <body>
-                    <button className="edgebutton" onClick={(event) => onEdgeClick(event, id, breakerLinkData)}>
-                        <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#D0D5DD" size="md" />
+                    <button className="link_button_style" onClick={(event) => onEdgeClick(event, id, breakerLinkData)}>
+                        <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
                     </button>
                 </body>
             </foreignObject>

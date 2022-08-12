@@ -434,14 +434,17 @@ const BreakersComponent = ({ data, id }) => {
             {/* Left Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 1 && (
                 <>
+                    {breakerData.breaker_number !== 1 && (
+                        <Handle
+                            type="target"
+                            position="left"
+                            id="a"
+                            style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                        />
+                    )}
+
                     <Handle
                         type="source"
-                        position="left"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
                         position="left"
                         id="b"
                         style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
@@ -452,14 +455,16 @@ const BreakersComponent = ({ data, id }) => {
             {/* Right Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 0 && (
                 <>
+                    {breakerData.breaker_number !== 2 && (
+                        <Handle
+                            type="target"
+                            position="right"
+                            id="a"
+                            style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                        />
+                    )}
                     <Handle
                         type="source"
-                        position="right"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
                         position="right"
                         id="b"
                         style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
