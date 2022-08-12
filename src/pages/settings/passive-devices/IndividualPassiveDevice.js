@@ -87,10 +87,10 @@ const IndividualPassiveDevice = () => {
         // { value: 'energy', label: 'Consumed Energy (Wh)' },
         // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
         // { value: 'mV', label: 'Voltage (V)' },
-        // { value: 'power', label: 'Real Power (W)' },
         { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
         { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
         { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
+        { value: 'passive-power', label: 'Power' },
         // { value: 'mAh', label: 'Amps' },
     ]);
 

@@ -17,6 +17,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     let userdata = cookies.get('user');
 
     const [breakerData, setBreakerData] = useState(data);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
@@ -34,6 +35,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const fetchDeviceSensorData = async (deviceId) => {
         if (deviceId === null) {
+            return;
+        }
+        if (deviceId === 'unlink') {
             return;
         }
         try {
@@ -111,8 +115,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 })
                 .then((res) => {
                     let response = res.data;
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
                 });
-            handleEditBreakerClose();
         } catch (error) {
             console.log('Failed to update Breaker');
             handleEditBreakerClose();
@@ -337,6 +345,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Device"
                                                 onChange={(e) => {
+                                                    if (e.target.value === 'Select Device') {
+                                                        return;
+                                                    }
                                                     fetchDeviceSensorData(e.target.value);
                                                     handleChange(id, 'device_id', e.target.value);
                                                 }}
@@ -345,7 +356,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {passiveDeviceData.map((record) => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
-                                                <option value="unlink">None</option>
+                                                {breakerData.device_id !== '' && <option value="unlink">None</option>}
                                             </Input>
                                         </Form.Group>
 
@@ -361,8 +372,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     className="font-weight-bold breaker-phase-selection"
                                                     placeholder="Select Sensor"
                                                     onChange={(e) => {
+                                                        if (e.target.value === 'Select Sensor') {
+                                                            return;
+                                                        }
                                                         handleChange(id, 'sensor_id', e.target.value);
-                                                        // handleLinkedSensor(breakerData.sensor_id, e.target.value);
                                                     }}
                                                     value={breakerData.sensor_id}>
                                                     <option>Select Sensor</option>
@@ -370,12 +383,18 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         return (
                                                             <option
                                                                 value={record.id}
-                                                                disabled={record.equipment_id !== ''}>
+                                                                disabled={record.equipment_id !== ''}
+                                                                className={
+                                                                    record.equipment_id !== '' &&
+                                                                    'fields-disabled-style'
+                                                                }>
                                                                 {record.name}
                                                             </option>
                                                         );
                                                     })}
-                                                    <option value="unlink">None</option>
+                                                    {breakerData.sensor_id !== '' && (
+                                                        <option value="unlink">None</option>
+                                                    )}
                                                 </Input>
                                             )}
                                         </Form.Group>
@@ -393,6 +412,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Equipment"
                                         onChange={(e) => {
+                                            if (e.target.value === 'Select Equipment') {
+                                                return;
+                                            }
                                             addSelectedBreakerEquip(e.target.value);
                                             handleChange(id, 'equipment_link', e.target.value);
                                         }}
@@ -418,9 +440,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     <Button
                         variant="primary"
                         onClick={() => {
-                            updateSingleBreakerData();
+                            // updateSingleBreakerData();
                             saveBreakerData();
-                            triggerBreakerAPI();
                         }}>
                         Save
                     </Button>

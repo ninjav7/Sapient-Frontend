@@ -517,7 +517,6 @@ const EditBreakerPanel = () => {
                 };
 
                 let params = `?panel_id=${panelId}`;
-
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
@@ -581,15 +580,15 @@ const EditBreakerPanel = () => {
     // };
 
     const handleBreakerChange = (id, breakerObj) => {
-        console.log('handleBreakerChange id => ', id);
-        console.log('handleBreakerChange breakerObj => ', breakerObj);
-        console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
+        // console.log('handleBreakerChange id => ', id);
+        // console.log('handleBreakerChange breakerObj => ', breakerObj);
+        // console.log('handleBreakerChange distributedBreakersNodes => ', distributedBreakersNodes);
     };
 
     const handleDiscBreakerChange = (id, discBreakerObj) => {
-        console.log('handleDiscBreakerChange id => ', id);
-        console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
-        console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
+        // console.log('handleDiscBreakerChange id => ', id);
+        // console.log('handleDiscBreakerChange discBreakerObj => ', discBreakerObj);
+        // console.log('handleDiscBreakerChange disconnectBreakersNodes => ', disconnectBreakersNodes);
     };
 
     const initialEdges = [
@@ -1073,44 +1072,150 @@ const EditBreakerPanel = () => {
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
                     onChange: handleBreakerChange,
+                    breakerType: 1,
+                    parentBreaker: '',
+                    isLinked: false,
                 },
                 position: {
-                    x: record.breaker_number % 2 === 0 ? 475 : 50,
+                    x: record.breaker_number % 2 === 0 ? 700 : 250,
                     y: getYaxisCordinates(record.breaker_number),
                 },
                 draggable: false,
             };
+
+            // Two Level [5, 7]
+            if (record.breaker_number === 5) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+            }
+            if (record.breaker_number === 7) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f892dbec261431640fd5';
+            }
+
+            // Two Level [12, 14]
+            if (record.breaker_number === 12) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+            }
+            if (record.breaker_number === 14) {
+                obj.data.breakerType = 2;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f893dbec261431640fdc';
+            }
+
+            // Three Level [9, 11, 13]
+            if (record.breaker_number === 9) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 11) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f893dbec261431640fd9';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 13) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f893dbec261431640fd9';
+                obj.data.phase_configuration = 3;
+            }
+
+            // Three Level [6, 8, 10]
+            if (record.breaker_number === 6) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 8) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f892dbec261431640fd6';
+                obj.data.phase_configuration = 3;
+            }
+            if (record.breaker_number === 10) {
+                obj.data.breakerType = 3;
+                obj.data.isLinked = true;
+                obj.data.parentBreaker = '62f3f892dbec261431640fd6';
+                obj.data.phase_configuration = 3;
+            }
+
+            let breakerObj = Object.assign({}, obj);
+
+            // 120/240 Service Volts
+            if (panel.voltage === '120/240') {
+                if (breakerObj.data.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 120;
+                }
+                if (breakerObj.data.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 240;
+                }
+            }
+
+            // 208/120 Service Volts
+            if (panel.voltage === '208/120') {
+                if (breakerObj.data.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 120;
+                }
+                if (breakerObj.data.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 240;
+                }
+                if (breakerObj.data.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 240;
+                }
+            }
+
+            // 480 Service Volts
+            if (panel.voltage === '480') {
+                if (breakerObj.data.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 277;
+                }
+                if (breakerObj.data.breakerType === 2) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 480;
+                }
+                if (breakerObj.data.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 480;
+                }
+            }
+
+            // 600 Service Volts
+            if (panel.voltage === '600') {
+                if (breakerObj.data.breakerType === 1) {
+                    obj.data.phase_configuration = 1;
+                    obj.data.voltage = 347;
+                }
+                if (breakerObj.data.breakerType === 3) {
+                    obj.data.phase_configuration = 3;
+                    obj.data.voltage = 600;
+                }
+            }
+
             distributedBreakerArray.push(obj);
         });
 
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
-
-        if (distributedBreakerArray.length !== 0) {
-            let newArray = [];
-            distributedBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            setDistributedBreakersNodes(newArray);
-        }
-
-        if (disconnectBreakerArray.length !== 0) {
-            let newArray = [];
-            disconnectBreakerArray.forEach((obj) => {
-                if (obj.type === 'breakerLink') {
-                    return;
-                }
-                obj.data.passive_data = passiveDeviceData;
-                obj.data.equipment_data = equipmentData;
-                newArray.push(obj);
-            });
-            setDisconnectBreakersNodes(newArray);
-        }
+        BreakersStore.update((s) => {
+            s.distributedBreakersData = distributedBreakerArray;
+        });
+        BreakersStore.update((s) => {
+            s.disconnectedBreakersData = disconnectBreakerArray;
+        });
     }, [breakersData]);
 
     useEffect(() => {
@@ -1403,7 +1508,7 @@ const EditBreakerPanel = () => {
                                         <div className="col-sm">
                                             <ReactFlow
                                                 elements={distributedBreakersNodes}
-                                                // edges={distributedBreakersEdges}
+                                                edges={distributedBreakersEdges}
                                                 onConnect={onConnect}
                                                 onLoad={onLoad}
                                                 nodeTypes={nodeTypes}
