@@ -1513,7 +1513,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={((overview.average_energy_density.now / 1000).toFixed(5)).toFixed(5)}
+                                description={((overview.average_energy_density.now / 1000).toFixed(5))}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,

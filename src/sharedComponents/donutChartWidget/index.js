@@ -40,7 +40,7 @@ const DonutChartWidget = ({
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
-    const series = items.map(({ value }) => Number(value));
+    const series = items.map(({ value }) => value);
 
     const options = {
         ...configDonutChartWidget(type),
@@ -48,7 +48,8 @@ const DonutChartWidget = ({
         colors,
         id,
     };
-
+    console.log(series);
+    console.log(items.map(({trendValue})=>trendValue));
     return (
         <>
             {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
@@ -77,7 +78,7 @@ DonutChartWidget.propTypes = {
         PropTypes.shape({ 
             label: PropTypes.string.isRequired, 
             color: PropTypes.string.isRequired, 
-            value: PropTypes.string.isRequired, 
+            value: PropTypes.any.isRequired, 
             unit: PropTypes.string.isRequired, 
             trendValue: PropTypes.number, 
             link: PropTypes.string, 
