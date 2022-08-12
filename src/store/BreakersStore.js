@@ -7,5 +7,5 @@ export const BreakersStore = new Store({
     disconnectedBreakersData: [],
     breakerLinkData: [],
     panelData: {},
-    isEditable: false,
+    isEditable: true,
 });

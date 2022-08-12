@@ -144,7 +144,7 @@ const EditBreakerPanel = () => {
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const [isEditable, setIsEditable] = useState(false);
+    const [isEditable, setIsEditable] = useState(true);
 
     const [normalData, setNormalData] = useState({
         related_amps: 200,
@@ -1006,13 +1006,13 @@ const EditBreakerPanel = () => {
                     rated_amps: record.rated_amps,
                     voltage: record.voltage,
                     link_type: record.link_type,
-                    link_id: '',
+                    link_id: record.link_id,
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
-                    breakerType: 1,
-                    parentBreaker: '',
-                    isLinked: false,
+                    breakerType: record.breaker_type,
+                    parentBreaker: record.parent_breaker,
+                    isLinked: record.is_linked,
                 },
                 position: {
                     x: record.breaker_number % 2 === 0 ? 700 : 250,
@@ -1021,7 +1021,7 @@ const EditBreakerPanel = () => {
                 draggable: false,
             };
 
-            if (panel.panel_id === '62ece70793f90711430a8a9c') {
+            if (panel.panel_id === '62f64ff8c38d623a31d7935f') {
                 // Two Level [5, 7]
                 if (record.breaker_number === 5) {
                     obj.data.breakerType = 2;
@@ -1031,7 +1031,7 @@ const EditBreakerPanel = () => {
                 if (record.breaker_number === 7) {
                     obj.data.breakerType = 2;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa1';
+                    obj.data.parentBreaker = '62f64ff9c38d623a31d79364';
                 }
 
                 // Two Level [12, 14]
@@ -1043,7 +1043,7 @@ const EditBreakerPanel = () => {
                 if (record.breaker_number === 14) {
                     obj.data.breakerType = 2;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa8';
+                    obj.data.parentBreaker = '62f64ffbc38d623a31d7936b';
                 }
 
                 // Three Level [9, 11, 13]
@@ -1056,13 +1056,13 @@ const EditBreakerPanel = () => {
                 if (record.breaker_number === 11) {
                     obj.data.breakerType = 3;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                    obj.data.parentBreaker = '62f64ffac38d623a31d79368';
                     obj.data.phase_configuration = 3;
                 }
                 if (record.breaker_number === 13) {
                     obj.data.breakerType = 3;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa5';
+                    obj.data.parentBreaker = '62f64ffac38d623a31d79368';
                     obj.data.phase_configuration = 3;
                 }
 
@@ -1076,13 +1076,13 @@ const EditBreakerPanel = () => {
                 if (record.breaker_number === 8) {
                     obj.data.breakerType = 3;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                    obj.data.parentBreaker = '62f64ffac38d623a31d79365';
                     obj.data.phase_configuration = 3;
                 }
                 if (record.breaker_number === 10) {
                     obj.data.breakerType = 3;
                     obj.data.isLinked = true;
-                    obj.data.parentBreaker = '62ece70893f90711430a8aa2';
+                    obj.data.parentBreaker = '62f64ffac38d623a31d79365';
                     obj.data.phase_configuration = 3;
                 }
             }
@@ -1159,6 +1159,7 @@ const EditBreakerPanel = () => {
 
         // Setup Linking between Breakers
         let breakerLinks = [];
+
         breakersData.forEach((record) => {
             if (record.breaker_number + 2 > breakersData.length) {
                 return;
@@ -1166,7 +1167,7 @@ const EditBreakerPanel = () => {
             let obj = {
                 id: generateBreakerLinkId(),
                 source: record.id,
-                target: getTargetBreakerId(record.breaker_number + 2),
+                target: getTargetBreakerId(record?.breaker_number + 2),
                 type: 'breakerLink',
             };
             breakerLinks.push(obj);
@@ -1174,6 +1175,7 @@ const EditBreakerPanel = () => {
         BreakersStore.update((s) => {
             s.breakerLinkData = breakerLinks;
         });
+        console.log('Sudhanshu => ', breakerLinks);
         setDistributedBreakersEdges(breakerLinks);
     }, [breakersData]);
 

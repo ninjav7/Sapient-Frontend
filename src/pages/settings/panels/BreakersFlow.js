@@ -192,6 +192,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: breakerData.breakerType,
+                parent_breaker: breakerData.parentBreaker,
+                is_linked: breakerData.isLinked,
             };
 
             let params = `?breaker_id=${id}`;
@@ -232,6 +235,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: breakerData.breakerType,
+                parent_breaker: breakerData.parentBreaker,
+                is_linked: breakerData.isLinked,
             };
 
             let breakerObjTwo = {
@@ -245,6 +251,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: doubleBreakerData.breakerType,
+                parent_breaker: doubleBreakerData.parentBreaker,
+                is_linked: doubleBreakerData.isLinked,
             };
 
             let paramsOne = `?breaker_id=${id}`;
@@ -293,6 +302,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: breakerData.breakerType,
+                parent_breaker: breakerData.parentBreaker,
+                is_linked: breakerData.isLinked,
             };
 
             let breakerObjTwo = {
@@ -306,6 +318,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: doubleBreakerData.data.sensor_id,
                 device_link: doubleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: doubleBreakerData.breakerType,
+                parent_breaker: doubleBreakerData.parentBreaker,
+                is_linked: doubleBreakerData.isLinked,
             };
 
             let breakerObjThree = {
@@ -319,6 +334,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: tripleBreakerData.data.sensor_id,
                 device_link: tripleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
+                breaker_type: tripleBreakerData.breakerType,
+                parent_breaker: tripleBreakerData.parentBreaker,
+                is_linked: tripleBreakerData.isLinked,
             };
 
             let paramsOne = `?breaker_id=${id}`;
