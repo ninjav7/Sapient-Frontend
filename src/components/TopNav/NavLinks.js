@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ComponentStore, ROUTE_LEVELS } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
 
@@ -50,9 +50,18 @@ const NavLinks = () => {
                 let str2 = location.pathname.split('/')[1];
                 let active = str1.localeCompare(str2);
 
+                const handleClick = (path) => {
+                    if (path === '/energy/portfolio/overview') {
+                        ComponentStore.update((s) => {
+                            s.parent = 'portfolio';
+                            s.level = ROUTE_LEVELS.PORTFOLIO;
+                        });
+                    }
+                };
+
                 return active === 0 ? (
                     <div key={index} className="navbar-head-container active">
-                        <Link to={item.path}>
+                        <Link to={item.path} onClick={() => handleClick(item.path)}>
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
                                     <div className="font-icon-style active">
@@ -81,7 +90,7 @@ const NavLinks = () => {
                     </div>
                 ) : (
                     <div key={index} className="navbar-head-container">
-                        <Link to={item.path}>
+                        <Link to={item.path} onClick={() => handleClick(item.path)}>
                             <div className="d-flex align-items-center">
                                 {item.name === 'Energy' && (
                                     <div className="font-icon-style">

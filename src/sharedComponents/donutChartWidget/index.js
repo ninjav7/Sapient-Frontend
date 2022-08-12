@@ -15,21 +15,21 @@ export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL_NO_TOTAL: 'vertical no-total',
 });
 
-const Titles = ({ sizeBrick, title, subtitle }) => {
+const Titles = ({ sizeBrick, title, subtitle, className }) => {
     return (
-        <>
+        <div className={className}>
             <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
                 {title}
             </Typography.Subheader>
             <Typography.Body size={Typography.Sizes.xs} as="h6">
                 {subtitle}
             </Typography.Body>
-            <Brick sizeInRem={sizeBrick} />
-        </>
+        </div>
     );
 };
 
 const DonutChartWidget = ({
+    classNameContainer = '',
     className = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
@@ -50,10 +50,9 @@ const DonutChartWidget = ({
     };
 
     return (
-        <>
-            {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
-            <div className={`donut-chart-widget-wrapper ${className} ${type}`}>
-                {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
+        <div className={`donut-chart-widget-container ${classNameContainer}`}>
+            <Titles className="donut-chart-widget-titles" sizeBrick={1.5625} {...{ title, subtitle }} />
+            <div className={`donut-chart-widget-wrapper ${type} ${className}`}>
                 <div className={`chart-wrapper ${type}`}>
                     <ReactApexChart options={options} {...props} series={series} type="donut" />
                 </div>
@@ -66,7 +65,7 @@ const DonutChartWidget = ({
                     />
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -74,15 +73,15 @@ DonutChartWidget.propTypes = {
     id: PropTypes.string,
     type: PropTypes.oneOf(Object.values(DONUT_CHART_TYPES)),
     items: PropTypes.arrayOf(
-        PropTypes.shape({ 
-            label: PropTypes.string.isRequired, 
-            color: PropTypes.string.isRequired, 
-            value: PropTypes.string.isRequired, 
-            unit: PropTypes.string.isRequired, 
-            trendValue: PropTypes.number, 
-            link: PropTypes.string, 
+        PropTypes.shape({
+            label: PropTypes.string.isRequired,
+            color: PropTypes.string.isRequired,
+            value: PropTypes.string.isRequired,
+            unit: PropTypes.string.isRequired,
+            trendValue: PropTypes.number,
+            link: PropTypes.string,
         }).isRequired
-    ).isRequired
-}
+    ).isRequired,
+};
 
 export default DonutChartWidget;

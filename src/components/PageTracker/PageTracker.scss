@@ -7,9 +7,11 @@
 .tracker-dropdown {
     display: flex;
     align-items: center;
-    padding: 0 0.7rem ;
+    padding: 0 0.7rem;
     border-radius: 0.5rem;
     margin: 0.25rem;
+    width: 13.875rem;
+    padding-right: 1.0625rem;
 
     &:hover {
         background-color: $primary-gray-100;
@@ -17,6 +19,10 @@
 
     .dropdown-menu {
         padding: 0;
+    }
+
+    .dropdown {
+        flex: 0 1 100%;
     }
 
     .dropdown-item {
@@ -29,7 +35,8 @@
             color: $primary-gray-800;
         }
 
-        &:hover, &.selected {
+        &:hover,
+        &.selected {
             background: $primary-gray-50;
             svg {
                 color: $primary-gray-600;
@@ -58,7 +65,7 @@
         margin: auto;
         margin-right: 0;
     }
-    
+
     .filter-bld-style {
         display: flex;
         flex-direction: row;
@@ -76,9 +83,14 @@
 
     &-content {
         padding: 0 1rem 0.625rem;
+
+        a {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
     }
-
-
 }
 .page-tracker-dropdown-btn {
     padding: 0;
@@ -92,8 +104,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
-    &:hover, &:focus {
+    width: 100%;
+
+    &:hover,
+    &:focus {
         background: none !important;
         box-shadow: none !important;
         color: $primary-gray-800 !important;
@@ -111,13 +125,14 @@
 
 .vl {
     background: #eaecf0;
-    width: 1px;
+    width: 0.0625rem;
     height: auto;
-    left: 279px;
-    top: 8.5px;
-    margin: 4px;
-}
+    left: 17.4375rem;
+    top: 0.5313rem;
+    margin: 0.5313rem 0.25rem;
 
+    margin-right: 1.5rem;
+}
 
 .content-font-style {
     font-family: 'Inter';
@@ -129,8 +144,6 @@
     margin-bottom: 0px;
     width: 18.75rem;
 }
-
-
 
 .breadcrumb {
     background: #ffffff;

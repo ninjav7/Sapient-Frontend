@@ -107,10 +107,6 @@
     height: 34px;
 }
 
-.card-alignment {
-    margin-left: 20px !important;
-}
-
 .grid-style-1 {
     display: grid;
     grid-template-columns: 1fr 1fr;
