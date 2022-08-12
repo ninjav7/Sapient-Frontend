@@ -2,6 +2,7 @@ import React from 'react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 
+import { TypographyHeader } from './TypographyHeader';
 import TypographySubheader from './TypographySubheader';
 import { TypographyBody } from './TypographyBody';
 
@@ -48,6 +49,7 @@ const Typography = ({ children, variant, size, fontWeight, className, noPadding,
 Typography.Types = FONT_WEIGHT_TYPES;
 Typography.Sizes = SIZES;
 
+Typography.Header = TypographyHeader;
 Typography.Subheader = TypographySubheader;
 Typography.Body = TypographyBody;
 
