@@ -37,6 +37,7 @@
         "draft-js": "^0.10.5",
         "draftjs-to-html": "^0.8.4",
         "export-to-csv": "^0.2.1",
+        "formik": "^2.2.9",
         "jotai": "^1.7.5",
         "jwt-decode": "^2.2.0",
         "leaflet": "^1.7.1",
