@@ -81,9 +81,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             if (voltageValue === '600') {
                 obj.voltage = '347';
             }
-            if (voltageValue === 'Select Volts') {
-                obj.voltage = '';
-            }
         });
         setBreakersData(newArray);
     };
@@ -126,6 +123,9 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
                 };
                 if (panelObj.voltage === '120/240') {
                     obj.voltage = '120';
@@ -156,6 +156,9 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
                 };
                 newArray.push(obj);
             }
