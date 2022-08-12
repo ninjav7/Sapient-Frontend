@@ -438,6 +438,7 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("energy consumption",res.data)
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
@@ -445,6 +446,7 @@ const PortfolioOverview = () => {
                             let fixedConsumption = record.energy_consumption.now;
                             newDonutData.push(parseInt(fixedConsumption / 1000));
                         });
+                        console.log(newDonutData);
                         setSeries(newDonutData);
                     });
             } catch (error) {

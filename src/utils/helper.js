@@ -5,7 +5,14 @@ export const percentageHandler = (v1, v2) => {
     if (v2 === 0) {
         return 100;
     }
-    const percentage = ((v1 - v2) / v2) * 100;
+    let percentage=0.0;
+    if(v1>v2){
+        percentage = ((v1 - v2) / v1) * 100;
+    }
+    else{
+        percentage = ((v1 - v2) / v2) * 100;
+    }
+    
     const value = Math.abs(percentage).toFixed(5) || 0;
     return value;
 };
