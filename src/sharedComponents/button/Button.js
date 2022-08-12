@@ -12,7 +12,7 @@ const SIZES = Object.freeze({
 
 const BUTTON_TYPES = Object.freeze({
     SecondaryGrey: 'secondary-grey',
-    Primary: 'primary'
+    Primary: 'primary',
 });
 
 const ButtonIconAlignment = Object.freeze({
@@ -21,6 +21,7 @@ const ButtonIconAlignment = Object.freeze({
 });
 
 const keysToExclude = new Set([
+    'typeButton',
     'label',
     'hoverLabel',
     'type',
@@ -34,7 +35,8 @@ const keysToExclude = new Set([
     'iconAlignment',
 ]);
 
-const Button = (props) => {
+const Button = props => {
+    const typeButton = props.typeButton || 'button';
     const type = props.type || BUTTON_TYPES.SecondaryGrey;
 
     const hasIconWithLabel = props.icon && props.label;
@@ -62,7 +64,7 @@ const Button = (props) => {
     const iconColor = props.labelColor && !props.disabled && `${props.labelColor}`;
 
     const buttonProps = {};
-    Object.keys(props).map((key) => {
+    Object.keys(props).map(key => {
         if (!keysToExclude.has(key)) {
             buttonProps[key] = props[key];
         }
@@ -70,8 +72,8 @@ const Button = (props) => {
     return (
         <div className="Button-wrapper">
             <button
-                type="button"
-                ref={(node) => {
+                type={typeButton}
+                ref={node => {
                     if (typeof props.buttonRef === 'function') {
                         props.buttonRef(node);
                     } else if (props.buttonRef) {
@@ -115,6 +117,7 @@ Button.propTypes = {
     type: PropTypes.oneOf(Object.values(BUTTON_TYPES)).isRequired,
     size: PropTypes.oneOf(Object.values(SIZES)).isRequired,
     icon: PropTypes.node,
+    typeButton: PropTypes.string,
 };
 
 export default Button;
