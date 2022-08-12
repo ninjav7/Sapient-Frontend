@@ -279,6 +279,20 @@
     gap: 10px;
     width: 27px;
     height: 23px;
+    background: #e0eaff;
+    border: 1px solid #eaecf0;
+    border-radius: 3px;
+}
+
+.unlink_button_style {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    gap: 10px;
+    width: 27px;
+    height: 23px;
     background: #f9fafb;
     border: 1px solid #eaecf0;
     border-radius: 3px;
