@@ -110,44 +110,67 @@ export default function CustomEdge({
                 className=""
                 requiredExtensions="http://www.w3.org/1999/xhtml">
                 <body>
-                    <button
-                        // className={breakerLinkBackground ? 'link_button_style' : 'unlink_button_style'}
-                        className={
-                            sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked
-                                ? 'link_button_style'
-                                : 'unlink_button_style'
-                        }
-                        onClick={(e) => {
-                            onEdgeClick(e, id, breakerLinkData);
-                            breakerLinkObjs();
-                        }}>
-                        {/* When Source & Target Breaker not linked */}
-                        {!sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                    {/* When Source & Target Breaker not linked */}
+                    {!sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                        <button
+                            className="unlink_button_style"
+                            onClick={(e) => {
+                                onEdgeClick(e, id, breakerLinkData);
+                                breakerLinkObjs();
+                            }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
-                        )}
+                        </button>
+                    )}
 
-                        {/* When Source Breaker is not linked & Target Breaker linked */}
-                        {!sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
+                    {/* When Source Breaker is not linked & Target Breaker linked */}
+                    {!sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
+                        <button
+                            className="unlink_button_style"
+                            onClick={(e) => {
+                                onEdgeClick(e, id, breakerLinkData);
+                                breakerLinkObjs();
+                            }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
-                        )}
+                        </button>
+                    )}
 
-                        {/* When Source Breaker is linked & Target Breaker not linked */}
-                        {sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                    {/* When Source Breaker is linked & Target Breaker not linked */}
+                    {sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                        <button
+                            className="unlink_button_style"
+                            onClick={(e) => {
+                                onEdgeClick(e, id, breakerLinkData);
+                                breakerLinkObjs();
+                            }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
-                        )}
+                        </button>
+                    )}
 
-                        {/* When Source & Target Breaker both linked */}
-                        {sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
-                            <>
-                                {isBothBreakerLinked() && (
+                    {/* When Source & Target Breaker both linked */}
+                    {sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
+                        <>
+                            {isBothBreakerLinked() && (
+                                <button
+                                    className="link_button_style"
+                                    onClick={(e) => {
+                                        onEdgeClick(e, id, breakerLinkData);
+                                        breakerLinkObjs();
+                                    }}>
                                     <FontAwesomeIcon icon={faLinkHorizontal} color="#444CE7" size="md" />
-                                )}
-                                {!isBothBreakerLinked() && (
+                                </button>
+                            )}
+                            {!isBothBreakerLinked() && (
+                                <button
+                                    className="unlink_button_style"
+                                    onClick={(e) => {
+                                        onEdgeClick(e, id, breakerLinkData);
+                                        breakerLinkObjs();
+                                    }}>
                                     <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
-                                )}
-                            </>
-                        )}
-                    </button>
+                                </button>
+                            )}
+                        </>
+                    )}
                 </body>
             </foreignObject>
         </>
