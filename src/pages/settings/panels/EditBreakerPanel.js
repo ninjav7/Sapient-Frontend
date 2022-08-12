@@ -34,10 +34,9 @@ import ReactFlow, {
     applyNodeChanges,
     applyEdgeChanges,
 } from 'react-flow-renderer';
-import ButtonEdge from './ButtonEdge';
+import BreakerLink from './BreakerLink';
 import BreakersComponent from './BreakersFlow';
 import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
-import BreakerLink from './BreakerLinkFlow';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
@@ -50,7 +49,6 @@ const nodeTypes = {
 };
 
 const edgeTypes = {
-    buttonEdge: ButtonEdge,
     breakerLink: BreakerLink,
 };
 
@@ -558,27 +556,6 @@ const EditBreakerPanel = () => {
         fetchBreakersData();
     }, [isBreakerApiTrigerred]);
 
-    const initialEdges = [
-        {
-            id: 'edge-1-3',
-            source: '62f3f891dbec261431640fd1',
-            target: '62f3f891dbec261431640fd3',
-            type: 'buttonEdge',
-        },
-        {
-            id: 'edge-3-5',
-            source: '62f3f891dbec261431640fd3',
-            target: '62f3f892dbec261431640fd5',
-            type: 'buttonEdge',
-        },
-        {
-            id: 'edge-2-4',
-            source: '62f3f891dbec261431640fd2',
-            target: '62f3f892dbec261431640fd4',
-            type: 'buttonEdge',
-        },
-    ];
-
     const initialDisconnectEdges = [
         {
             id: 'dis-link-12',
@@ -836,6 +813,9 @@ const EditBreakerPanel = () => {
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
                     setPanel(response);
+                    BreakersStore.update((s) => {
+                        s.panelData = response;
+                    });
                     setFetchedPanelResponse(response);
                     setIsPanelDataFetched(false);
                 });
@@ -1187,7 +1167,7 @@ const EditBreakerPanel = () => {
                 id: generateBreakerLinkId(),
                 source: record.id,
                 target: getTargetBreakerId(record.breaker_number + 2),
-                type: 'buttonEdge',
+                type: 'breakerLink',
             };
             breakerLinks.push(obj);
         });
