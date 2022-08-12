@@ -74,6 +74,35 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
+    const fetchSensorDataForSelectionOne = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === 'unlink') {
+            return;
+        }
+        try {
+            setIsSensorDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setSensorData(response);
+                setDoubleSensorData(response);
+                setTripleSensorData(response);
+                setIsSensorDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetched(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
     const fetchDeviceSensorDataForDouble = async (deviceId) => {
         if (deviceId === null) {
             return;
@@ -708,7 +737,8 @@ const BreakersComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
-                                                            fetchDeviceSensorData(e.target.value);
+                                                            // fetchDeviceSensorData(e.target.value);
+                                                            fetchSensorDataForSelectionOne(e.target.value);
                                                             handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                             if (doubleBreakerData.data.device_id === '') {
                                                                 handleDoubleBreakerChange(
