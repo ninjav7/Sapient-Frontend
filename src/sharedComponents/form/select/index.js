@@ -39,7 +39,7 @@ const Option = (props) => {
 
 const Select = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
-    
+
     return (
         <div className={`react-select-wrapper ${className}`}>
             <ReactSelect
@@ -54,18 +54,13 @@ const Select = ({ selectClassName = '', className = '', options = [], defaultVal
 };
 
 Select.propTypes = {
-    defaultValue: PropTypes.string,
+    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     options: PropTypes.arrayOf(
-        PropTypes.shape(
-            {
-                label: PropTypes.string.isRequired,
-                value: PropTypes.oneOfType([
-                    PropTypes.string,
-                    PropTypes.number,
-                ])
-            }
-        )
-    ).isRequired
-}
+        PropTypes.shape({
+            label: PropTypes.string.isRequired,
+            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        })
+    ).isRequired,
+};
 
 export default Select;

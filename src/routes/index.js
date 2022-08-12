@@ -29,6 +29,7 @@ import SingleRole from '../pages/settings/SingleRole';
 
 // controls
 import PlugRules from '../pages/controls/PlugRules';
+import { ROUTE_LEVELS } from '../store/ComponentStore';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -387,22 +388,22 @@ const portfolioRoutes = {
             visibility: true,
             parent: 'buildings',
         },
-        // {
-        //     path: '/energy/peak-demand/:bldgId',
-        //     name: 'Peak Demand',
-        //     component: PeakDemand,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
-        // {
-        //     path: '/energy/end-uses/:bldgId',
-        //     name: 'End Uses',
-        //     component: EndUses,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
+        // // {
+        // //     path: '/energy/peak-demand/:bldgId',
+        // //     name: 'Peak Demand',
+        // //     component: PeakDemand,
+        // //     route: PrivateRoute,
+        // //     visibility: true,
+        // //     parent: 'buildings',
+        // // },
+        // // {
+        // //     path: '/energy/end-uses/:bldgId',
+        // //     name: 'End Uses',
+        // //     component: EndUses,
+        // //     route: PrivateRoute,
+        // //     visibility: true,
+        // //     parent: 'buildings',
+        // // },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
@@ -795,7 +796,7 @@ const allRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    //exploreRoutes,
+    // exploreRoutes,
     authRoutes,
     // ...appRoutes,
     // pagesRoutes,
@@ -809,7 +810,7 @@ const authProtectedRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    //exploreRoutes,
+    // exploreRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];
