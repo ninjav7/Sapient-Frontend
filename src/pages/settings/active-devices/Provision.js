@@ -370,8 +370,8 @@ const Provision = () => {
                         HS110s:ele.HS110s,
                         KP115s:ele.KP115s,
                         HS300s:ele.HS300s,
-                        Socket:ele.KP115s+(ele.HS300s*ele.Socket),
-                        Remaining_Capacity:256 -(ele.KP115s+(ele.HS300s*ele.Socket))
+                        Socket:ele.Socket,
+                        Remaining_Capacity:256 -(ele.Socket)
                     }
                     kasadata.push(a)
                     if(ele.is_provisioned===false){
@@ -380,8 +380,8 @@ const Provision = () => {
                     Hs=Hs+ele.HS110s;
                     kp=kp+ele.KP115s;
                     Hs1=Hs1+ele.HS300s;
-                    socket=socket+(ele.KP115s+(ele.HS300s*ele.Socket));
-                    capy=capy+(256 -(ele.KP115s+(ele.HS300s*ele.Socket)));
+                    socket=socket+(ele.Socket);
+                    capy=capy+(256 -ele.Socket);
                 });
                 setLinkedAccount(kasadata);
                 let arr={
