@@ -16,6 +16,8 @@ import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import { ConsoleView } from 'react-device-detect';
 import { Cookies } from 'react-cookie';
+import DonutChartWidget, { DONUT_CHART_TYPES } from '../../sharedComponents/donutChartWidget';
+import Brick from '../../sharedComponents/brick';
 
 const TimeOfDay = () => {
     // const { bldgId } = useParams();
@@ -1018,7 +1020,7 @@ const TimeOfDay = () => {
     //     },
     // ];
 
-    const weekdaysChartHeight = 235;
+    const weekdaysChartHeight = 400;
 
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
@@ -1706,35 +1708,50 @@ const TimeOfDay = () => {
         averageUsageByHourFetch();
     }, [startDate, endDate, bldgId]);
 
+    const donatChartMock = [
+        {
+            label: 'HVAC',
+            color: '#66A4CE',
+            value: '12553',
+            unit: 'kWh',
+            trendValue: 1,
+            link: '#',
+        },
+        { label: 'Lighting', color: '#FBE384', value: '11553', unit: 'kWh', trendValue: 5, link: '#' },
+        { label: 'Plug', color: '#59BAA4', value: '6503', unit: 'kWh', trendValue: 2, link: '#' },
+        { label: 'Process', color: '#82EAF0', value: '2333', unit: 'kWh', trendValue: 1, link: '#' },
+    ];
+
     return (
         <React.Fragment>
             <Header title="Time of Day" />
-            <Row className="">
-                <Col xl={3}>
-                    <div className="card-body container-style">
-                        <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Off Hours Energy
-                        </h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                        <div className="mt-2 ">
-                            <DonutChart donutChartOpts={donutChartOpts} donutChartData={donutChartData} height={200} />
-                        </div>
-                    </div>
-                </Col>
-                <Col xl={9}>
-                    <div className="card-body">
+            <div className="d-flex">
+                <div className="mr-3">
+                    <DonutChartWidget
+                        items={donatChartMock}
+                        type={DONUT_CHART_TYPES.VERTICAL}
+                        title=" Off Hours Energy"
+                        subtitle="Energy Totals"
+                        classNameContainer="w-100"
+                    />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                    <div className="">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             Average Daily Usage by Hour
                         </h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour</h6>
                         <HeatMapChart options={weekdaysOptions} series={weekdaysSeries} height={weekdaysChartHeight} />
                     </div>
-                </Col>
-            </Row>
+                </div>
+            </div>
+
+            <Brick />
 
             <Row className="mt-2">
-                <Col xl={11}>
-                    <div className="card-body ">
+                <Col>
+                    <div className="">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
                         <div className="mt-2">

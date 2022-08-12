@@ -449,9 +449,12 @@
 
 .portfolio-consume-widget-wrapper {
     display: grid;
-    grid-template-columns: max-content auto;
+    grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 
+    .donut-chart-widget-container {
+        width: 100%;
+    }
     .donut-chart-widget-wrapper {
         display: flex;
         justify-content: center;

@@ -1,14 +1,16 @@
-// 
+//
 // general.scss
 //
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  padding-bottom: 60px;
-  overflow-x: hidden;
-  background: none;
+    overflow-x: hidden;
+    background: none;
+}
+#wrapper {
+    padding-bottom: 60px;
 }

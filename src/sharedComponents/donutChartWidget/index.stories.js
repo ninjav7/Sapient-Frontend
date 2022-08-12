@@ -24,7 +24,7 @@ const donatChartMock = [
 export const Default = () => {
     return (
         <BrowserRouter>
-        <DonutChartWidget items={donatChartMock} />
+        <DonutChartWidget items={donatChartMock} title='Title' subtitle='subtitle' />
         </BrowserRouter>
     )
 }
@@ -32,7 +32,7 @@ export const Default = () => {
 export const Vertical = () => {
     return (
         <BrowserRouter>
-            <DonutChartWidget items={donatChartMock} type={DONUT_CHART_TYPES.VERTICAL} />
+            <DonutChartWidget items={donatChartMock} type={DONUT_CHART_TYPES.VERTICAL} title='Title' subtitle='subtitle' />
         </BrowserRouter>
     )
 }
@@ -40,7 +40,7 @@ export const Vertical = () => {
 export const VerticalNoTotal = () => {
     return (
         <BrowserRouter>
-            <DonutChartWidget items={donatChartMock} type={DONUT_CHART_TYPES.VERTICAL_NO_TOTAL} />
+            <DonutChartWidget items={donatChartMock} type={DONUT_CHART_TYPES.VERTICAL_NO_TOTAL} title='Title' subtitle='subtitle' />
         </BrowserRouter>
     )
 }

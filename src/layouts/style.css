@@ -26,7 +26,7 @@
 .energy-page-content {
     margin-top: 6em;
     position: relative;
-    margin-left: 185px;
+    margin-left: 235px;
     padding-left: 0vw;
     padding-top: 0vw;
     padding-right: 0vw;
@@ -35,14 +35,14 @@
 }
 
 .energy-page-content-full-screen {
-    margin-top: 6em;
+    /* margin-top: 6em;
     position: relative;
     margin-left: 0px;
     padding-left: 0vw;
     padding-top: 0vw;
     padding-right: 0vw;
     height: 100%;
-    background-color: #ffffff;
+    background-color: #ffffff; */
 }
 
 .energy-side-nav {

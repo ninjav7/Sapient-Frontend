@@ -1,12 +1,12 @@
 import React from 'react';
 import cx from 'classnames';
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
+import { TypographyHeader } from './TypographyHeader';
 import TypographySubheader from './TypographySubheader';
 import { TypographyBody } from './TypographyBody';
 
 import './style.scss';
-
 
 const FONT_WEIGHT_TYPES = Object.freeze({
     SemiBold: 'SemiBold',
@@ -22,6 +22,7 @@ const SIZES = Object.freeze({
     md: 'md',
     sm: 'sm',
     xs: 'xs',
+    xxs: 'xxs',
 });
 
 const Typography = ({ children, variant, size, fontWeight, className, noPadding, as = 'div', innerRef, ...props }) => {
@@ -48,9 +49,9 @@ const Typography = ({ children, variant, size, fontWeight, className, noPadding,
 Typography.Types = FONT_WEIGHT_TYPES;
 Typography.Sizes = SIZES;
 
+Typography.Header = TypographyHeader;
 Typography.Subheader = TypographySubheader;
 Typography.Body = TypographyBody;
-
 
 Typography.propTypes = {
     variant: PropTypes.string.isRequired,
