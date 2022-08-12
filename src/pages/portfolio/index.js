@@ -438,6 +438,7 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("energy consumption",res.data)
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];

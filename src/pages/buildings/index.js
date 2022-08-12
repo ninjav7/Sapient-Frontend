@@ -11,6 +11,7 @@ import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
@@ -124,8 +125,8 @@ const BuildingOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
@@ -366,6 +367,9 @@ const BuildingOverview = () => {
             zoom: {
                 enabled: false,
             },
+            animations: {
+                enabled: false,
+            },
         },
         dataLabels: {
             enabled: false,
@@ -414,7 +418,7 @@ const BuildingOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - hh:mm');
+                    return moment(timestamp).format('DD/MMM - HH:mm');
                 },
             },
             style: {
@@ -1176,14 +1180,15 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        // console.log('setenergyConsumption', res.data);
+                        console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
                             // newArray.push(fixedConsumption);
-                            newDonutData.push(parseInt(fixedConsumption));
+                            newDonutData.push(fixedConsumption);
                         });
+                        console.log(newDonutData);
                         setDonutChartData(newDonutData);
                     });
             } catch (error) {
@@ -1389,7 +1394,7 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=day&building_id=${bldgId}`;
+                let params = `?aggregate=minute&building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
@@ -1410,7 +1415,7 @@ const BuildingOverview = () => {
                         response.forEach((record) => {
                             newArray[0].data.push({
                                 x: record.x,
-                                y: (record.y / 1000).toFixed(2),
+                                y: (record.y / 1000).toFixed(5),
                             });
                         });
                         // console.log('newArray => ', newArray);
@@ -1562,12 +1567,12 @@ const BuildingOverview = () => {
             <div className="bldg-page-grid-style">
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
-                    <div>
-                        <div>
-                            <div style={{ display: 'inline-block' }}>
+                    {/* <div> */}
+                        {/* <div> */}
+                            {/* <div style={{ display: 'inline-block' }}>
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            </div>
+                            </div> */}
                             {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
                                 <Link
                                     to={{
@@ -1584,17 +1589,18 @@ const BuildingOverview = () => {
                                     </div>
                                 </Link>
                             </div> */} 
-                        </div>
+                        {/* </div>
                         <div className="custom-bld-enduse-style">
-                            <div>
-                                <DonutChart
+                            <div> */}
+                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
+                                {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
                                     height={185}
                                     id={Date.now()}
-                                />
-                            </div>
-                            <div className="mt-3">
+                                /> */}
+                            {/* </div> */}
+                            {/* <div className="mt-3">
                                 {energyConsumption.map((record, index) => {
                                     return (
                                         <div>
@@ -1634,6 +1640,13 @@ const BuildingOverview = () => {
                                                                     background: '#3B8554',
                                                                 }}></div>
                                                         )}
+                                                        {record.device === 'Other' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3B8554',
+                                                                }}></div>
+                                                        )}
                                                     </div>
                                                     <div className="custom-bld-equip-style record-bld-style font-weight-bold">
                                                         {record.device}
@@ -1642,7 +1655,7 @@ const BuildingOverview = () => {
                                                         {(record.energy_consumption.now / 1000).toLocaleString(
                                                             undefined,
                                                             {
-                                                                maximumFractionDigits: 2,
+                                                                maximumFractionDigits: 5,
                                                             }
                                                         )}
                                                         kWh
@@ -1682,9 +1695,9 @@ const BuildingOverview = () => {
                                         </div>
                                     );
                                 })}
-                            </div>
-                        </div>
-                    </div>
+                            </div> */}
+                        {/* </div> */}
+                    {/* </div> */}
 
                     {/* Top 3 Peak Demand Periods  */}
                     {/* {/* <Row>

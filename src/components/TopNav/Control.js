@@ -111,13 +111,13 @@ const Control = () => {
                     </Link>
                 )}
 
-                <SearchModal />
+                {/* <SearchModal /> */}
 
-                <div className="navbar-icon-container float-right topbar-buttons">
+                {/* <div className="navbar-icon-container float-right topbar-buttons">
                     <button className="btn btn-sm float-right other-font-icon-style">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="lg" />
                     </button>
-                </div>
+                </div> */}
             </div>
 
             <button className="btn topbar-logout-btn" onClick={handleLogout}>

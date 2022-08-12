@@ -85,8 +85,8 @@ const Header = (props) => {
 
     return (
         <React.Fragment>
-            <div className="page-title">
-                <div className="header-container">
+            <Row className="page-title">
+                <Col className="header-container">
                     <span className="heading-style">{props.title}</span>
 
                     <div
@@ -149,8 +149,8 @@ const Header = (props) => {
                         )}
                     </div>
                     {/* )} */}
-                </div>
-            </div>
+                </Col>
+            </Row>
         </React.Fragment>
     );
 };
