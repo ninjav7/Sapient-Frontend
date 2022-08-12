@@ -246,14 +246,14 @@
 }
 
 .edgebutton {
-    width: 20px;
-    height: 20px;
-    background: #eee;
-    border: 1px solid #fff;
-    cursor: pointer;
-    border-radius: 50%;
-    font-size: 12px;
-    line-height: 1;
+    width: 20px !important;
+    height: 20px !important;
+    background: #eee !important;
+    border: 1px solid #fff !important;
+    cursor: pointer !important;
+    border-radius: 50% !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
 }
 
 .edgebutton:hover {
