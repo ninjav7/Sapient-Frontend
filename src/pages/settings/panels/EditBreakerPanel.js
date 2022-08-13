@@ -35,8 +35,9 @@ import ReactFlow, {
     applyEdgeChanges,
 } from 'react-flow-renderer';
 import BreakerLink from './BreakerLink';
+import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakersFlow';
-import DisconnectedBreakerComponent from './DisconnectedBreakerFlow';
+import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
@@ -50,6 +51,7 @@ const nodeTypes = {
 
 const edgeTypes = {
     breakerLink: BreakerLink,
+    disconnectBreakerLink: BreakerLinkForDisconnect,
 };
 
 const EditBreakerPanel = () => {
@@ -570,17 +572,31 @@ const EditBreakerPanel = () => {
         },
     ];
 
+    // For Distributed
     const [distributedBreakersNodes, setDistributedBreakersNodes] = useState([]);
     const [distributedBreakersEdges, setDistributedBreakersEdges] = useState([]);
 
+    // For Disconnected
+    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState([]);
+    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState([]);
+
+    // For Distributed
     const onNodesChange = useCallback(changes => setDistributedBreakersNodes(ns => applyNodeChanges(changes, ns)), []);
-
     const onEdgesChange = useCallback(changes => setDistributedBreakersEdges(es => applyEdgeChanges(changes, es)), []);
-
     const onConnect = useCallback(connection => setDistributedBreakersEdges(eds => addEdge(connection, eds)));
 
-    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState([]);
-    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState(initialDisconnectEdges);
+    // For Disconnected
+    const onNodesChangeForDisconnect = useCallback(
+        changes => setDisconnectBreakersNodes(ns => applyNodeChanges(changes, ns)),
+        []
+    );
+    const onEdgesChangeForDisconnect = useCallback(
+        changes => setDisconnectBreakersEdges(es => applyEdgeChanges(changes, es)),
+        []
+    );
+    const onConnectForDisconnect = useCallback(connection =>
+        setDisconnectBreakersEdges(eds => addEdge(connection, eds))
+    );
 
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -622,10 +638,10 @@ const EditBreakerPanel = () => {
             return 60;
         }
         if (index === 2) {
-            return 140;
+            return 150;
         }
         if (index === 3) {
-            return 220;
+            return 240;
         }
     };
 
@@ -760,8 +776,8 @@ const EditBreakerPanel = () => {
     };
 
     const getTargetBreakerId = targetBreakerNo => {
-        let targetObj = breakersData.find(obj => obj.breaker_number === targetBreakerNo);
-        return targetObj.id;
+        let targetObj = breakersData?.find(obj => obj?.breaker_number === targetBreakerNo);
+        return targetObj?.id;
     };
 
     useEffect(() => {
@@ -960,8 +976,8 @@ const EditBreakerPanel = () => {
             let obj = {
                 id: record.id,
                 type: 'disconnectedBreakerComponent',
-                targetPosition: 'left',
                 sourcePosition: 'right',
+                targetPosition: 'left',
                 data: {
                     name: record.name,
                     breaker_number: record.breaker_number,
@@ -971,6 +987,9 @@ const EditBreakerPanel = () => {
                     equipment_link: record.equipment_link,
                     sensor_id: record.sensor_link,
                     device_id: record.device_link,
+                    breakerType: record.breaker_type,
+                    parentBreaker: record.parent_breaker,
+                    isLinked: record.is_linked,
                 },
                 position: { x: 250, y: getDiscYaxisCordinates(record.breaker_number) },
                 draggable: false,
@@ -1008,7 +1027,6 @@ const EditBreakerPanel = () => {
             distributedBreakerArray.push(obj);
         });
 
-        console.log('distributedBreakerArray', distributedBreakerArray);
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
 
@@ -1021,6 +1039,7 @@ const EditBreakerPanel = () => {
 
         // Setup Linking between Breakers
         let breakerLinks = [];
+        let disconnectBreakerLinks = [];
 
         breakersData.forEach(record => {
             if (record.breaker_number + 2 > breakersData.length) {
@@ -1035,9 +1054,27 @@ const EditBreakerPanel = () => {
             breakerLinks.push(obj);
         });
 
+        breakersData.forEach(record => {
+            if (record.breaker_number + 1 > breakersData.length) {
+                return;
+            }
+            let obj = {
+                id: generateBreakerLinkId(),
+                source: record.id,
+                target: getTargetBreakerId(record?.breaker_number + 1),
+                type: 'disconnectBreakerLink',
+            };
+            disconnectBreakerLinks.push(obj);
+        });
+
         setDistributedBreakersEdges(breakerLinks);
+        setDisconnectBreakersEdges(disconnectBreakerLinks);
+
         BreakersStore.update(s => {
             s.breakerLinkData = breakerLinks;
+        });
+        BreakersStore.update(s => {
+            s.disconnectBreakerLinkData = disconnectBreakerLinks;
         });
     }, [breakersData]);
 
@@ -1162,7 +1199,7 @@ const EditBreakerPanel = () => {
                 </Col>
             </Row>
 
-            <Row style={{ marginLeft: '20px', marginBottom: '15vh' }}>
+            <Row style={{ marginLeft: '20px', marginBottom: '25vh' }}>
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
                         <Row className="panel-header-styling ml-1 mr-1">
@@ -1354,7 +1391,6 @@ const EditBreakerPanel = () => {
                                                 {!isEditable && (
                                                     <ReactFlow
                                                         nodes={distributedBreakersNodes}
-                                                        // edges={distributedBreakersEdges}
                                                         onNodesChange={onNodesChange}
                                                         onEdgesChange={onEdgesChange}
                                                         onConnect={onConnect}
@@ -1368,22 +1404,6 @@ const EditBreakerPanel = () => {
                                                     />
                                                 )}
                                             </div>
-
-                                            {/* <ReactFlow
-                                                elements={distributedBreakersNodes}
-                                                edges={distributedBreakersEdges}
-                                                onConnect={onConnect}
-                                                onLoad={onLoad}
-                                                nodeTypes={nodeTypes}
-                                                style={{ background: '#fafbfc' }}
-                                                onNodeContextMenu={onContextMenu}
-                                                connectionLineStyle={connectionLineStyle}
-                                                snapToGrid={false}
-                                                snapGrid={snapGrid}
-                                                onNodeMouseEnter={handleMouseEnter}
-                                                zoomOnScroll={false}
-                                                panOnDrag={false}
-                                                zoomOnDoubleClick={false}></ReactFlow> */}
                                         </div>
                                     )}
                                 </div>
@@ -1393,21 +1413,20 @@ const EditBreakerPanel = () => {
                         {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
                             <div className="row" style={{ width: '100%', height: '50vh', position: 'relative' }}>
                                 <div className="col-sm">
-                                    {/* <ReactFlow
-                                        elements={disconnectBreakersNodes}
-                                        // edges={disconnectBreakersEdges}
-                                        onConnect={onConnectDisconnectedBreakers}
+                                    <ReactFlow
+                                        nodes={disconnectBreakersNodes}
+                                        edges={disconnectBreakersEdges}
+                                        onNodesChange={onNodesChangeForDisconnect}
+                                        onEdgesChange={onEdgesChangeForDisconnect}
+                                        onConnect={onConnectForDisconnect}
                                         nodeTypes={nodeTypes}
+                                        edgeTypes={edgeTypes}
                                         style={{ background: '#fafbfc' }}
-                                        onLoad={onLoad}
-                                        onNodeContextMenu={onContextMenu}
-                                        connectionLineStyle={connectionLineStyle}
-                                        snapToGrid={false}
-                                        snapGrid={snapGrid}
-                                        onNodeMouseEnter={handleMouseEnter}
                                         zoomOnScroll={false}
-                                        panOnDrag={false}
-                                        zoomOnDoubleClick={false}></ReactFlow> */}
+                                        panOnScroll={false}
+                                        preventScrolling={false}
+                                        onPaneScroll={false}
+                                    />
                                 </div>
                             </div>
                         )}

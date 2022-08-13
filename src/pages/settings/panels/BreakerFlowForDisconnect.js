@@ -66,20 +66,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         setCurrentEquipIds(newArray);
     };
 
-    const updateSingleBreakerData = () => {
-        // if (activePanelType === 'distribution') {
-        //     let newArray = normalStruct;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setNormalStruct(newArray);
-        // }
-        // if (activePanelType === 'disconnect') {
-        //     let newArray = disconnectBreakerConfig;
-        //     newArray[currentBreakerIndex] = currentBreakerObj;
-        //     setDisconnectBreakerConfig(newArray);
-        // }
-        data.onChange(id, breakerData);
-    };
-
     const triggerBreakerAPI = () => {
         LoadingStore.update(s => {
             s.isBreakerDataFetched = true;
@@ -125,23 +111,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         }
     };
 
-    // const handleLinkedSensor = (previousSensorId, newSensorId) => {
-    //     if (previousSensorId === '') {
-    //         let newSensorList = linkedSensors;
-    //         newSensorList.push(newSensorId);
-    //         setLinkedSensors(newSensorList);
-    //     } else {
-    //         let newSensorList = linkedSensors;
-
-    //         let filteredList = newSensorList.filter((record) => {
-    //             return record !== previousSensorId;
-    //         });
-
-    //         filteredList.push(newSensorId);
-    //         setLinkedSensors(filteredList);
-    //     }
-    // };
-
     const findEquipmentName = equipId => {
         let equip = breakerData?.equipment_data?.find(record => record?.value === equipId);
         return equip?.label;
@@ -164,18 +133,22 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     return (
         <React.Fragment>
             <>
-                <Handle
-                    type="source"
-                    position="left"
-                    id="a"
-                    style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                />
-                <Handle
-                    type="target"
-                    position="left"
-                    id="b"
-                    style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                />
+                {breakerData.breaker_number !== 1 && (
+                    <Handle
+                        type="target"
+                        position="left"
+                        id="a"
+                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                )}
+                {breakerData.breaker_number !== 3 && (
+                    <Handle
+                        type="source"
+                        position="left"
+                        id="b"
+                        style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                    />
+                )}
             </>
 
             <FormGroup className="form-group row m-1 mb-4">
