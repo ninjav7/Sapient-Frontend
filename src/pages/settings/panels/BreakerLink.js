@@ -206,6 +206,12 @@ export default function CustomEdge({
 
         // breakerLink= 1:1
         if (sourceBreakerObj?.data?.breakerType === 1 && targetBreakerObj?.data?.breakerType === 1) {
+            if (panelData?.voltage === '600') {
+                alert(
+                    `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                );
+                return;
+            }
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
@@ -235,6 +241,12 @@ export default function CustomEdge({
 
         // breakerLink= 1:2 && breakerLink= 2:1
         if (sourceBreakerObj?.data?.breakerType === 2 || targetBreakerObj?.data?.breakerType === 2) {
+            if (panelData?.voltage === '120/240') {
+                alert(
+                    `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                );
+                return;
+            }
             if (sourceBreakerObj?.data?.breakerType === 2) {
                 let parentBreakerObj = distributedBreakersData.find(
                     record => record?.id === sourceBreakerObj?.data?.parentBreaker
