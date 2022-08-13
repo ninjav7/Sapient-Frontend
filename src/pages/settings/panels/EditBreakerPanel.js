@@ -1022,6 +1022,7 @@ const EditBreakerPanel = () => {
             distributedBreakerArray.push(obj);
         });
 
+        console.log('distributedBreakerArray', distributedBreakerArray);
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectBreakersNodes(disconnectBreakerArray);
 
