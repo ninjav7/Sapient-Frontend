@@ -42,6 +42,7 @@ export default function CustomEdge({
 
     const breakerLinkData = BreakersStore.useState(s => s.breakerLinkData);
     const distributedBreakersData = BreakersStore.useState(s => s.distributedBreakersData);
+    const panelData = BreakersStore.useState(s => s.panelData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
 
@@ -52,6 +53,84 @@ export default function CustomEdge({
         LoadingStore.update(s => {
             s.isBreakerDataFetched = true;
         });
+    };
+
+    const getVoltageConfigValue = (value, breakerType) => {
+        if (breakerType === 'single') {
+            if (value === '120/240') {
+                return 120;
+            }
+            if (value === '208/120') {
+                return 120;
+            }
+            if (value === '480') {
+                return 277;
+            }
+            if (value === '600') {
+                return 347;
+            }
+        }
+        if (breakerType === 'double') {
+            if (value === '120/240') {
+                return 240;
+            }
+            if (value === '208/120') {
+                return 240;
+            }
+            if (value === '480') {
+                return 480;
+            }
+        }
+        if (breakerType === 'triple') {
+            if (value === '208/120') {
+                return 208;
+            }
+            if (value === '480') {
+                return 480;
+            }
+            if (value === '600') {
+                return 600;
+            }
+        }
+    };
+
+    const getPhaseConfigValue = (value, breakerType) => {
+        if (breakerType === 'single') {
+            if (value === '120/240') {
+                return 1;
+            }
+            if (value === '208/120') {
+                return 1;
+            }
+            if (value === '480') {
+                return 1;
+            }
+            if (value === '600') {
+                return 1;
+            }
+        }
+        if (breakerType === 'double') {
+            if (value === '120/240') {
+                return 1;
+            }
+            if (value === '208/120') {
+                return 1;
+            }
+            if (value === '480') {
+                return 1;
+            }
+        }
+        if (breakerType === 'triple') {
+            if (value === '208/120') {
+                return 3;
+            }
+            if (value === '480') {
+                return 3;
+            }
+            if (value === '600') {
+                return 3;
+            }
+        }
     };
 
     const isBothBreakerLinked = () => {
@@ -117,18 +196,6 @@ export default function CustomEdge({
         }
     };
 
-    useEffect(() => {
-        let fetchedObj = breakerLinkData.find(record => record?.id === id);
-        setBreakerLinkObj(fetchedObj);
-    }, [breakerLinkData]);
-
-    useEffect(() => {
-        let sourceObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.source);
-        let targetObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.target);
-        setSourceBreakerObj(sourceObj);
-        setTargetBreakerObj(targetObj);
-    }, [breakerLinkObj]);
-
     const linkBreakers = () => {
         // breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3
         if (sourceBreakerObj?.data?.breakerType === 3 || targetBreakerObj?.data?.breakerType === 3) {
@@ -141,8 +208,8 @@ export default function CustomEdge({
         if (sourceBreakerObj?.data?.breakerType === 1 && targetBreakerObj?.data?.breakerType === 1) {
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
-                voltage: 240,
-                phase_configuration: 1,
+                voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
+                phase_configuration: getPhaseConfigValue(panelData?.voltage, 'double'),
                 breaker_type: 2,
                 parent_breaker: '',
                 is_linked: true,
@@ -150,8 +217,8 @@ export default function CustomEdge({
 
             let breakerObjTwo = {
                 breaker_id: targetBreakerObj.id,
-                voltage: 240,
-                phase_configuration: 1,
+                voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
+                phase_configuration: getPhaseConfigValue(panelData?.voltage, 'double'),
                 breaker_type: 2,
                 parent_breaker: sourceBreakerObj.id,
                 is_linked: true,
@@ -175,8 +242,8 @@ export default function CustomEdge({
 
                 let breakerObjOne = {
                     breaker_id: parentBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: '',
                     is_linked: true,
@@ -184,8 +251,8 @@ export default function CustomEdge({
 
                 let breakerObjTwo = {
                     breaker_id: sourceBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
@@ -193,8 +260,8 @@ export default function CustomEdge({
 
                 let breakerObjThree = {
                     breaker_id: targetBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: parentBreakerObj.id,
                     is_linked: true,
@@ -208,8 +275,8 @@ export default function CustomEdge({
 
                 let breakerObjOne = {
                     breaker_id: sourceBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: '',
                     is_linked: true,
@@ -217,8 +284,8 @@ export default function CustomEdge({
 
                 let breakerObjTwo = {
                     breaker_id: targetBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
@@ -226,8 +293,8 @@ export default function CustomEdge({
 
                 let breakerObjThree = {
                     breaker_id: thirdBreakerObj.id,
-                    voltage: 208,
-                    phase_configuration: 3,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
                     breaker_type: 3,
                     parent_breaker: sourceBreakerObj.id,
                     is_linked: true,
@@ -236,6 +303,18 @@ export default function CustomEdge({
             }
         }
     };
+
+    useEffect(() => {
+        let fetchedObj = breakerLinkData.find(record => record?.id === id);
+        setBreakerLinkObj(fetchedObj);
+    }, [breakerLinkData]);
+
+    useEffect(() => {
+        let sourceObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.source);
+        let targetObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.target);
+        setSourceBreakerObj(sourceObj);
+        setTargetBreakerObj(targetObj);
+    }, [breakerLinkObj]);
 
     return (
         <>
