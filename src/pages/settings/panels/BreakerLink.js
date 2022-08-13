@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import { getBezierPath, getEdgeCenter, getMarkerEnd } from 'react-flow-renderer';
@@ -12,7 +12,7 @@ import './panel-style.css';
 const foreignObjectSize = 30;
 
 const onEdgeClick = (evt, id, breakerLinkData) => {
-    let breakerLinkObj = breakerLinkData.find((record) => record?.id === id);
+    let breakerLinkObj = breakerLinkData.find(record => record?.id === id);
     evt.stopPropagation();
     alert(
         `For Selected BreakerLink: \nSource Breaker ID: ${breakerLinkObj.source} \nTarget Breaker ID: ${breakerLinkObj.target}`
@@ -30,6 +30,8 @@ export default function CustomEdge({
     style = {},
     markerEnd,
 }) {
+    console.log('BreakerLink component trigerred!');
+
     const edgePath = getBezierPath({
         sourceX,
         sourceY,
@@ -48,12 +50,32 @@ export default function CustomEdge({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const breakerLinkData = BreakersStore.useState((s) => s.breakerLinkData);
-    const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
+    const breakerLinkData = BreakersStore.useState(s => s.breakerLinkData);
+    console.log('Step 1 Global State => ', breakerLinkData);
+    const distributedBreakersData = BreakersStore.useState(s => s.distributedBreakersData);
 
-    let breakerLinkObj = breakerLinkData.find((record) => record?.id === id);
-    let sourceBreakerObj = distributedBreakersData.find((record) => record?.id === breakerLinkObj?.source);
-    let targetBreakerObj = distributedBreakersData.find((record) => record?.id === breakerLinkObj?.target);
+    const [breakerLinkObj, setBreakerLinkObj] = useState({});
+
+    const [sourceBreakerObj, setSourceBreakerObj] = useState({});
+    const [targetBreakerObj, setTargetBreakerObj] = useState({});
+
+    useEffect(() => {
+        let fetchedObj = breakerLinkData.find(record => record?.id === id);
+        setBreakerLinkObj(fetchedObj);
+    }, [breakerLinkData]);
+
+    console.log('Step 2 breakerLinkObj => ', breakerLinkObj);
+
+    useEffect(() => {
+        let sourceObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.source);
+        let targetObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.target);
+        setSourceBreakerObj(sourceObj);
+        setTargetBreakerObj(targetObj);
+        console.log('Step 3 sourceObj => ', sourceObj);
+        console.log('Step 4 targetObj => ', targetObj);
+    }, [breakerLinkObj]);
+
+    console.log('Step 2 distributedBreakersData => ', distributedBreakersData);
 
     const breakerLinkObjs = () => {
         console.log('SSR sourceBreakerObj', sourceBreakerObj);
@@ -61,7 +83,7 @@ export default function CustomEdge({
     };
 
     const triggerBreakerAPI = () => {
-        LoadingStore.update((s) => {
+        LoadingStore.update(s => {
             s.isBreakerDataFetched = true;
         });
     };
@@ -142,7 +164,7 @@ export default function CustomEdge({
     const linkTripleBreakers = async () => {
         // Fetch Parent ID
         let parentBreakerObj = distributedBreakersData.find(
-            (record) => record?.id === sourceBreakerObj?.data.parentBreaker
+            record => record?.id === sourceBreakerObj?.data.parentBreaker
         );
         console.log('SSR parentBreakerObj :>> ', parentBreakerObj);
 
@@ -212,6 +234,9 @@ export default function CustomEdge({
         }
     };
 
+    console.log('SSR sourceBreakerObj?.data?.isLinked :>> ', sourceBreakerObj?.data?.isLinked);
+    console.log('SSR targetBreakerObj?.data?.isLinked :>> ', targetBreakerObj?.data?.isLinked);
+
     return (
         <>
             <path id={id} style={style} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} />
@@ -224,10 +249,10 @@ export default function CustomEdge({
                 requiredExtensions="http://www.w3.org/1999/xhtml">
                 <body>
                     {/* When Source & Target Breaker not linked */}
-                    {!sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                    {!sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
                         <button
                             className="unlink_button_style"
-                            onClick={(e) => {
+                            onClick={e => {
                                 if (
                                     sourceBreakerObj?.data?.breakerType === 1 &&
                                     targetBreakerObj?.data?.breakerType === 1
@@ -247,10 +272,10 @@ export default function CustomEdge({
                     )}
 
                     {/* When Source Breaker is not linked & Target Breaker linked */}
-                    {!sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
+                    {!sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
                         <button
                             className="unlink_button_style"
-                            onClick={(e) => {
+                            onClick={e => {
                                 if (
                                     sourceBreakerObj?.data?.breakerType === 1 &&
                                     targetBreakerObj?.data?.breakerType === 1
@@ -270,10 +295,10 @@ export default function CustomEdge({
                     )}
 
                     {/* When Source Breaker is linked & Target Breaker not linked */}
-                    {sourceBreakerObj.data.isLinked && !targetBreakerObj.data.isLinked && (
+                    {sourceBreakerObj?.data?.isLinked && !targetBreakerObj?.data?.isLinked && (
                         <button
                             className="unlink_button_style"
-                            onClick={(e) => {
+                            onClick={e => {
                                 if (
                                     sourceBreakerObj?.data?.breakerType === 1 &&
                                     targetBreakerObj?.data?.breakerType === 1
@@ -293,12 +318,12 @@ export default function CustomEdge({
                     )}
 
                     {/* When Source & Target Breaker both linked */}
-                    {sourceBreakerObj.data.isLinked && targetBreakerObj.data.isLinked && (
+                    {sourceBreakerObj?.data?.isLinked && targetBreakerObj?.data?.isLinked && (
                         <>
                             {isBothBreakerLinked() && (
                                 <button
                                     className="link_button_style"
-                                    onClick={(e) => {
+                                    onClick={e => {
                                         onEdgeClick(e, id, breakerLinkData);
                                         breakerLinkObjs();
                                     }}>
@@ -308,7 +333,7 @@ export default function CustomEdge({
                             {!isBothBreakerLinked() && (
                                 <button
                                     className="unlink_button_style"
-                                    onClick={(e) => {
+                                    onClick={e => {
                                         onEdgeClick(e, id, breakerLinkData);
                                         breakerLinkObjs();
                                     }}>
