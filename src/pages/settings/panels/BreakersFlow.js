@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
@@ -182,6 +182,7 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObj = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -190,14 +191,9 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: breakerData.breakerType,
-                parent_breaker: breakerData.parentBreaker,
-                is_linked: breakerData.isLinked,
             };
 
-            let params = `?breaker_id=${id}`;
-
-            await axios.post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, headers).then(res => {
+            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then(res => {
                 setIsProcessing(false);
                 setTimeout(() => {
                     triggerBreakerAPI();
@@ -223,6 +219,7 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObjOne = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -231,12 +228,10 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: breakerData.breakerType,
-                parent_breaker: breakerData.parentBreaker,
-                is_linked: breakerData.isLinked,
             };
 
             let breakerObjTwo = {
+                breaker_id: doubleBreakerData.id,
                 name: doubleBreakerData.data.name,
                 breaker_number: doubleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -245,28 +240,15 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: doubleBreakerData.breakerType,
-                parent_breaker: doubleBreakerData.parentBreaker,
-                is_linked: doubleBreakerData.isLinked,
             };
 
-            let paramsOne = `?breaker_id=${id}`;
-            let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
-
-            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-
-            await axios.all([requestOne, requestTwo]).then(
-                axios.spread((...responses) => {
-                    const responseOne = responses[0];
-                    const responseTwo = responses[1];
-                    setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
-                    handleEditBreakerClose();
-                })
-            );
+            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then(res => {
+                setIsProcessing(false);
+                setTimeout(() => {
+                    triggerBreakerAPI();
+                }, 1000);
+                handleEditBreakerClose();
+            });
         } catch (error) {
             console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
@@ -286,6 +268,7 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObjOne = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -294,12 +277,10 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: breakerData.breakerType,
-                parent_breaker: breakerData.parentBreaker,
-                is_linked: breakerData.isLinked,
             };
 
             let breakerObjTwo = {
+                breaker_id: doubleBreakerData.id,
                 name: doubleBreakerData.data.name,
                 breaker_number: doubleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -308,12 +289,10 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: doubleBreakerData.data.sensor_id,
                 device_link: doubleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: doubleBreakerData.breakerType,
-                parent_breaker: doubleBreakerData.parentBreaker,
-                is_linked: doubleBreakerData.isLinked,
             };
 
             let breakerObjThree = {
+                breaker_id: tripleBreakerData.id,
                 name: tripleBreakerData.data.name,
                 breaker_number: tripleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
@@ -322,31 +301,17 @@ const BreakersComponent = ({ data, id }) => {
                 sensor_link: tripleBreakerData.data.sensor_id,
                 device_link: tripleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
-                breaker_type: tripleBreakerData.breakerType,
-                parent_breaker: tripleBreakerData.parentBreaker,
-                is_linked: tripleBreakerData.isLinked,
             };
 
-            let paramsOne = `?breaker_id=${id}`;
-            let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
-            let paramsThree = `?breaker_id=${tripleBreakerData.id}`;
-
-            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-            const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
-
-            await axios.all([requestOne, requestTwo, requestThree]).then(
-                axios.spread((...responses) => {
-                    const responseOne = responses[0];
-                    const responseTwo = responses[1];
-                    const responseThree = responses[2];
+            await axios
+                .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
+                .then(res => {
                     setIsProcessing(false);
                     setTimeout(() => {
                         triggerBreakerAPI();
                     }, 1000);
                     handleEditBreakerClose();
-                })
-            );
+                });
         } catch (error) {
             console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
