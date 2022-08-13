@@ -30,8 +30,6 @@ export default function CustomEdge({
     style = {},
     markerEnd,
 }) {
-    console.log('BreakerLink component trigerred!');
-
     const edgePath = getBezierPath({
         sourceX,
         sourceY,
@@ -51,7 +49,6 @@ export default function CustomEdge({
     let userdata = cookies.get('user');
 
     const breakerLinkData = BreakersStore.useState(s => s.breakerLinkData);
-    console.log('Step 1 Global State => ', breakerLinkData);
     const distributedBreakersData = BreakersStore.useState(s => s.distributedBreakersData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
@@ -64,23 +61,12 @@ export default function CustomEdge({
         setBreakerLinkObj(fetchedObj);
     }, [breakerLinkData]);
 
-    console.log('Step 2 breakerLinkObj => ', breakerLinkObj);
-
     useEffect(() => {
         let sourceObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.source);
         let targetObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.target);
         setSourceBreakerObj(sourceObj);
         setTargetBreakerObj(targetObj);
-        console.log('Step 3 sourceObj => ', sourceObj);
-        console.log('Step 4 targetObj => ', targetObj);
     }, [breakerLinkObj]);
-
-    console.log('Step 2 distributedBreakersData => ', distributedBreakersData);
-
-    const breakerLinkObjs = () => {
-        console.log('SSR sourceBreakerObj', sourceBreakerObj);
-        console.log('SSR targetBreakerObj', targetBreakerObj);
-    };
 
     const triggerBreakerAPI = () => {
         LoadingStore.update(s => {
@@ -166,7 +152,6 @@ export default function CustomEdge({
         let parentBreakerObj = distributedBreakersData.find(
             record => record?.id === sourceBreakerObj?.data.parentBreaker
         );
-        console.log('SSR parentBreakerObj :>> ', parentBreakerObj);
 
         try {
             let headers = {
@@ -234,9 +219,6 @@ export default function CustomEdge({
         }
     };
 
-    console.log('SSR sourceBreakerObj?.data?.isLinked :>> ', sourceBreakerObj?.data?.isLinked);
-    console.log('SSR targetBreakerObj?.data?.isLinked :>> ', targetBreakerObj?.data?.isLinked);
-
     return (
         <>
             <path id={id} style={style} className="react-flow__edge-path" d={edgePath} markerEnd={markerEnd} />
@@ -265,7 +247,6 @@ export default function CustomEdge({
                                 ) {
                                     linkTripleBreakers();
                                 }
-                                breakerLinkObjs();
                             }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
                         </button>
@@ -288,7 +269,6 @@ export default function CustomEdge({
                                 ) {
                                     linkTripleBreakers();
                                 }
-                                breakerLinkObjs();
                             }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
                         </button>
@@ -311,7 +291,6 @@ export default function CustomEdge({
                                 ) {
                                     linkTripleBreakers();
                                 }
-                                breakerLinkObjs();
                             }}>
                             <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
                         </button>
@@ -325,7 +304,6 @@ export default function CustomEdge({
                                     className="link_button_style"
                                     onClick={e => {
                                         onEdgeClick(e, id, breakerLinkData);
-                                        breakerLinkObjs();
                                     }}>
                                     <FontAwesomeIcon icon={faLinkHorizontal} color="#444CE7" size="md" />
                                 </button>
@@ -335,7 +313,6 @@ export default function CustomEdge({
                                     className="unlink_button_style"
                                     onClick={e => {
                                         onEdgeClick(e, id, breakerLinkData);
-                                        breakerLinkObjs();
                                     }}>
                                     <FontAwesomeIcon icon={faLinkHorizontalSlash} color="#7C879C" size="md" />
                                 </button>
