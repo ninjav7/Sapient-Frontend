@@ -207,11 +207,69 @@ export default function CustomEdge({
         // breakerLink= 1:1
         if (sourceBreakerObj?.data?.breakerType === 1 && targetBreakerObj?.data?.breakerType === 1) {
             if (panelData?.voltage === '600') {
-                alert(
-                    `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                // Setup Triple Breaker
+                if (targetBreakerObj?.data?.breaker_number + 2 > distributedBreakersData.length) {
+                    alert(
+                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    );
+                    return;
+                }
+
+                let thirdBreakerObj = distributedBreakersData.find(
+                    record => record?.data?.breaker_number === targetBreakerObj?.data?.breaker_number + 2
                 );
+
+                if (sourceBreakerObj?.data?.breakerType === 3) {
+                    alert(
+                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    );
+                    return;
+                }
+
+                if (targetBreakerObj?.data?.breakerType === 3) {
+                    alert(
+                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    );
+                    return;
+                }
+
+                if (thirdBreakerObj?.data?.breakerType === 3) {
+                    alert(
+                        `Breaker ${sourceBreakerObj?.data?.breaker_number} &  Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
+                    );
+                    return;
+                }
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: '',
+                    is_linked: true,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj.id,
+                    is_linked: true,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'triple'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'triple'),
+                    breaker_type: 3,
+                    parent_breaker: sourceBreakerObj.id,
+                    is_linked: true,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
                 return;
             }
+
             let breakerObjOne = {
                 breaker_id: sourceBreakerObj.id,
                 voltage: getVoltageConfigValue(panelData?.voltage, 'double'),
@@ -317,6 +375,82 @@ export default function CustomEdge({
     };
 
     const unlinkBreakers = () => {
+        if (panelData?.voltage === '600') {
+            // Parent Breaker in Triple Linking
+            if (sourceBreakerObj?.data?.parentBreaker === '') {
+                let linkedBreakerObjs = distributedBreakersData.filter(
+                    record => record?.data?.parentBreaker === sourceBreakerObj?.id
+                );
+                let thirdBreakerObj = linkedBreakerObjs[1];
+
+                let breakerObjOne = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: thirdBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+            }
+            // Child Breaker in Triple Linking
+            if (sourceBreakerObj?.data?.parentBreaker !== '') {
+                if (sourceBreakerObj?.data?.parentBreaker !== targetBreakerObj?.data?.parentBreaker) {
+                    return;
+                }
+                let parentBreakerObj = distributedBreakersData.find(
+                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                );
+
+                let breakerObjOne = {
+                    breaker_id: parentBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+
+                let breakerObjTwo = {
+                    breaker_id: sourceBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+
+                let breakerObjThree = {
+                    breaker_id: targetBreakerObj.id,
+                    voltage: getVoltageConfigValue(panelData?.voltage, 'single'),
+                    phase_configuration: getPhaseConfigValue(panelData?.voltage, 'single'),
+                    breaker_type: 1,
+                    parent_breaker: '',
+                    is_linked: false,
+                };
+                linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
+            }
+            return;
+        }
+        console.log('Execute kiya kya :>> ');
         if (sourceBreakerObj?.data?.breakerType === 3 && targetBreakerObj?.data?.breakerType === 3) {
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
@@ -353,7 +487,7 @@ export default function CustomEdge({
                 };
                 linkTripleBreakersAPI(breakerObjOne, breakerObjTwo, breakerObjThree);
             }
-
+            // Child Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker !== '') {
                 if (sourceBreakerObj?.data?.parentBreaker !== targetBreakerObj?.data?.parentBreaker) {
                     return;
