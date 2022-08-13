@@ -1018,7 +1018,7 @@ const EditBreakerPanel = () => {
                     isLinked: record.is_linked,
                 },
                 position: {
-                    x: record.breaker_number % 2 === 0 ? 700 : 250,
+                    x: record.breaker_number % 2 === 0 ? 475 : 50,
                     y: getYaxisCordinates(record.breaker_number),
                 },
                 draggable: false,
@@ -1366,7 +1366,7 @@ const EditBreakerPanel = () => {
                                     </FormGroup>
                                 </Row>
 
-                                <div className="row" style={{ width: '100%', height: '200vh', position: 'relative' }}>
+                                <div className="row" style={{ width: '100%', height: '350vh', position: 'relative' }}>
                                     {!panelDataFetched && (
                                         <div className="col-sm">
                                             <div
