@@ -16,12 +16,16 @@ export const configLineChartWidget = {
         // offsetX: -10,
         offsetY: 0,
     },
+    animations: {
+        enabled: false,
+    },
     dataLabels: {
         enabled: false,
     },
     toolbar: {
         show: true,
     },
+    
     colors: ['#5E94E4'],
     stroke: {
         width: [2, 2],
@@ -76,10 +80,10 @@ export const configLineChartWidget = {
         // },
         labels: {
             formatter: function (val, timestamp) {
-                return moment(timestamp).format('MMM DD');
-                //@TODO NEED?
-                return moment(timestamp).format('D/M/YY @ hh:mm A');
-                return moment(timestamp).format('DD/MMM - hh:mm');
+                // return moment(timestamp).format('MMM DD');
+                // //@TODO NEED?
+                // return moment(timestamp).format('D/M/YY @ hh:mm A');
+                return moment(timestamp).format('DD/MMM - HH:mm');
             },
             offsetX: 5,
             trim: true,

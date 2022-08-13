@@ -1,26 +1,12 @@
 @import '../../assets/scss/colors';
-@import '../../assets/scss/custom/fonts/_fonts.scss';
 
 .typography-wrapper {
-    font-family: $main-font;
-    &.header {
-        margin: 0;
-        padding: 0;
-
-        &.xs {
-            font-weight: 500;
-            font-size: 1rem;
-            line-height: 1.5rem;
-            color: $primary-gray-700;
-        }
-    }
-
     &.subheader {
         margin: 0;
         padding: 0;
 
         &.md {
-            font-weight: 500;
+            font-weight: 400;
             margin: 0 0 0.125rem 0;
             font-style: normal;
             font-size: 0.875rem;
@@ -29,7 +15,7 @@
         }
 
         &.sm {
-            font-weight: 500;
+            font-weight: 400;
             font-size: 0.75rem;
             line-height: 1.125rem;
             color: $primary-gray-500;
@@ -41,13 +27,6 @@
         margin: 0;
         padding: 0;
 
-        &.xxs {
-            font-weight: 500;
-            font-size: 0.625rem;
-            line-height: 1rem;
-            color: $primary-gray-800;
-        }
-
         &.xs {
             font-weight: 400;
             font-size: 0.75rem;
@@ -55,30 +34,6 @@
             color: $primary-gray-500;
             margin-top: 0;
         }
-
-        &.sm {
-            font-style: normal;
-            font-weight: 500;
-            font-size: 0.75rem;
-            line-height: 1.125rem;
-            color: $primary-gray-800;
-        }
-
-        &.md {
-            font-weight: 400;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            color: $primary-gray-800;
-        }
-    }
-
-    &.link {
-        font-weight: 500;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        border-bottom: 1px solid;
-        color: $primary-indigo-600;
-        text-decoration: none;
     }
 
     &.Regular {

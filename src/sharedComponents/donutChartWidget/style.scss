@@ -1,72 +1,61 @@
 @import '../../assets/scss/colors';
 
-.donut-chart-widget {
-    &-container {
-        border: 0.0625rem solid $primary-gray-200;
-        box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
-        border-radius: 0.625rem;
-        display: inline-flex;
+.donut-chart-widget-wrapper {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 0.9375rem;
+    background: $base-white;
+    border: 0.0625rem solid $primary-gray-200;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+    border-radius: 0.625rem;
+
+    &.horizontal {
+        padding: 2.875rem 4.8125rem 2.8125rem 2.8125rem;
+    }
+
+    &.vertical {
+        padding: 1rem 1.5rem 1.5rem 2rem;
         flex-direction: column;
-        justify-items: center;
-        overflow: hidden;
-    }
-    &-titles {
-        padding: 1rem;
-    }
-    &-wrapper {
-        display: inline-flex;
-        align-items: center;
-        column-gap: 0.25rem;
-        background: $base-white;
 
-        &.horizontal {
-            padding: 1.875rem 2.625rem 1.5rem 0.875rem;
+        &.vertical.no-total {
+            min-width: 19.5rem;
+            padding-bottom: 2.9375rem;
         }
 
+        .typography-wrapper {
+            margin: 0 -1rem;
+            flex: 1 0 100%;
+            align-self: start;
+            max-width: 15.625rem;
+        }
+    }
+
+    .chart-wrapper {
+        &:not(.vertical) {
+            width: 14.438rem;
+            max-height: 11.25rem;
+        }
         &.vertical {
-            padding: 1rem 1.5rem 1.5rem 2rem;
-            flex-direction: column;
-
-            &.vertical.no-total {
-                min-width: 19.5rem;
-                padding-bottom: 2.9375rem;
-            }
-
-            .typography-wrapper {
-                margin: 0 -1rem;
-                flex: 1 0 100%;
-                align-self: start;
-                max-width: 15.625rem;
-            }
+            width: 11.875rem;
+            height: 9.375rem;
+            margin-bottom: 2.3125rem;
         }
 
-        .chart-wrapper {
-            &:not(.vertical) {
-                width: 12.875rem;
-                max-height: 11.25rem;
-            }
-            &.vertical {
-                width: 11.875rem;
-                height: 9.375rem;
-                margin-bottom: 2.3125rem;
-            }
-
-            &.vertical.no-total {
-                width: 14.5rem;
-                margin-top: 1.125rem;
-                margin-bottom: 4.125rem;
-            }
+        &.vertical.no-total {
+            width: 14.5rem;
+            margin-top: 1.125rem;
+            margin-bottom: 4.125rem;
         }
+    }
 
-        text {
-            font-family: 'Inter' !important;
-        }
+    text {
+        font-family: 'Inter' !important;
+    }
 
-        .apexcharts-pie-label,
-        .apexcharts-datalabel,
-        .apexcharts-datalabel-label,
-        .apexcharts-datalabel-value {
-            fill: $primary-gray-550 !important;
-        }
+    .apexcharts-pie-label,
+    .apexcharts-datalabel,
+    .apexcharts-datalabel-label,
+    .apexcharts-datalabel-value {
+        fill: $primary-gray-550 !important;
     }
 }

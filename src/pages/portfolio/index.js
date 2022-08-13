@@ -36,7 +36,6 @@ import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
-import Brick from '../../sharedComponents/brick';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -439,6 +438,7 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("energy consumption",res.data)
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
@@ -446,6 +446,7 @@ const PortfolioOverview = () => {
                             let fixedConsumption = record.energy_consumption.now;
                             newDonutData.push(parseInt(fixedConsumption / 1000));
                         });
+                        console.log(newDonutData);
                         setSeries(newDonutData);
                     });
             } catch (error) {
@@ -604,7 +605,11 @@ const PortfolioOverview = () => {
                 </div>
             </Row>
 
-            <Brick sizeInRem={2} />
+            {/* <EnergyDensityMap
+                topEnergyDensity={topEnergyDensity}
+                markers={markers}
+                buildingsEnergyConsume={buildingsEnergyConsume}
+            /> */}
 
             <div className="portfolio-consume-widget-wrapper mt-5">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />

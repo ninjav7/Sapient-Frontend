@@ -1,7 +1,8 @@
 import React from 'react';
 import LineChartWidget from '../../sharedComponents/lineChartWidget';
 
-const EnergyConsumptionHistory = ({ series, height }) => {
+const EnergyConsumptionHistory = ({ series, height  }) => {
+
     return (
         <div>
             <LineChartWidget

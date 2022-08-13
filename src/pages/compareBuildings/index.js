@@ -178,7 +178,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
 
     return (
         <Card>
-            <CardBody className="px-0">
+            <CardBody>
                 {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
@@ -736,7 +736,7 @@ const CompareBuildings = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div className="input-group rounded">
+                    <div className="input-group rounded ml-4">
                         <input
                             type="search"
                             className="form-control rounded"

@@ -159,7 +159,7 @@ const Gateways = () => {
 
             <Row className="mt-2">
                 <Col md={3}>
-                    <div class="input-group rounded">
+                    <div class="input-group rounded ml-4">
                         <input
                             type="search"
                             class="form-control rounded"

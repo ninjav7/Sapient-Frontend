@@ -69,7 +69,7 @@ const UserTable = ({ userData }) => {
 
     return (
         <Card>
-            <CardBody className="px-0">
+            <CardBody>
                 <BootstrapTable
                     keyField="id"
                     data={userData}
@@ -113,7 +113,9 @@ const Users = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">Users</span>
+                    <span className="heading-style">
+                        Users
+                    </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -132,7 +134,7 @@ const Users = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div class="input-group rounded">
+                    <div class="input-group rounded ml-4">
                         <input
                             type="search"
                             class="form-control rounded"

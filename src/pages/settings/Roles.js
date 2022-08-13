@@ -45,7 +45,7 @@ const RoleTable = ({ roleData }) => {
 
     return (
         <Card>
-            <CardBody className="px-0">
+            <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
                         <tr>
@@ -103,7 +103,9 @@ const Roles = () => {
         <React.Fragment>
             <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">Roles</span>
+                    <span className="heading-style">
+                        Roles
+                    </span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -122,7 +124,7 @@ const Roles = () => {
 
             <Row className="mt-2">
                 <Col xl={3}>
-                    <div class="input-group rounded">
+                    <div class="input-group rounded ml-4">
                         <input
                             type="search"
                             class="form-control rounded"
