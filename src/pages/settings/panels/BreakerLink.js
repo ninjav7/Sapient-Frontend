@@ -5,19 +5,11 @@ import { getBezierPath, getEdgeCenter, getMarkerEnd } from 'react-flow-renderer'
 import { BreakersStore } from '../../../store/BreakersStore';
 import axios from 'axios';
 import { Cookies } from 'react-cookie';
-import { BaseUrl, updateLinkBreakers, updateBreaker } from '../../../services/Network';
+import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
 import { LoadingStore } from '../../../store/LoadingStore';
 import './panel-style.css';
 
 const foreignObjectSize = 30;
-
-const onEdgeClick = (evt, id, breakerLinkData) => {
-    let breakerLinkObj = breakerLinkData.find(record => record?.id === id);
-    evt.stopPropagation();
-    alert(
-        `For Selected BreakerLink: \nSource Breaker ID: ${breakerLinkObj.source} \nTarget Breaker ID: ${breakerLinkObj.target}`
-    );
-};
 
 export default function CustomEdge({
     id,
@@ -138,9 +130,7 @@ export default function CustomEdge({
     }, [breakerLinkObj]);
 
     const linkBreakers = () => {
-        // breakerLink= 1:3
-        // breakerLink= 3:1
-        // breakerLink= 3:3
+        // breakerLink= 1:3 && breakerLink= 3:1 && breakerLink= 3:3
         if (sourceBreakerObj?.data?.breakerType === 3 || targetBreakerObj?.data?.breakerType === 3) {
             alert(
                 `Breaker ${sourceBreakerObj?.data?.breaker_number} & Breaker ${targetBreakerObj?.data?.breaker_number} cannot be linked!`
@@ -176,8 +166,7 @@ export default function CustomEdge({
             );
         }
 
-        // breakerLink= 1:2
-        // breakerLink= 2:1
+        // breakerLink= 1:2 && breakerLink= 2:1
         if (sourceBreakerObj?.data?.breakerType === 2 || targetBreakerObj?.data?.breakerType === 2) {
             if (sourceBreakerObj?.data?.breakerType === 2) {
                 let parentBreakerObj = distributedBreakersData.find(

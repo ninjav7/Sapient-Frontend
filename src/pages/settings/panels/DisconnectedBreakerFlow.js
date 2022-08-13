@@ -19,8 +19,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [breakerData, setBreakerData] = useState(data);
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
-    const equipmentData = BreakersStore.useState((s) => s.equipmentData);
+    const passiveDeviceData = BreakersStore.useState(s => s.passiveDeviceData);
+    const equipmentData = BreakersStore.useState(s => s.equipmentData);
 
     // Edit Breaker Modal
     const [showEditBreaker, setShowEditBreaker] = useState(false);
@@ -33,7 +33,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const fetchDeviceSensorData = async (deviceId) => {
+    const fetchDeviceSensorData = async deviceId => {
         if (deviceId === null) {
             return;
         }
@@ -48,7 +48,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then(res => {
                 let response = res.data;
                 setSensorData(response);
                 setIsSensorDataFetched(false);
@@ -60,7 +60,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         }
     };
 
-    const addSelectedBreakerEquip = (equipId) => {
+    const addSelectedBreakerEquip = equipId => {
         let newArray = [];
         newArray.push(equipId);
         setCurrentEquipIds(newArray);
@@ -81,7 +81,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const triggerBreakerAPI = () => {
-        LoadingStore.update((s) => {
+        LoadingStore.update(s => {
             s.isBreakerDataFetched = true;
         });
     };
@@ -100,8 +100,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
@@ -113,7 +111,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 .post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, {
                     headers: header,
                 })
-                .then((res) => {
+                .then(res => {
                     let response = res.data;
                     setIsProcessing(false);
                     setTimeout(() => {
@@ -144,8 +142,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     //     }
     // };
 
-    const findEquipmentName = (equipId) => {
-        let equip = breakerData?.equipment_data?.find((record) => record?.value === equipId);
+    const findEquipmentName = equipId => {
+        let equip = breakerData?.equipment_data?.find(record => record?.value === equipId);
         return equip?.label;
     };
 
@@ -281,7 +279,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                             id="userState"
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Phase"
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 handleChange(id, 'phase_configuration', +e.target.value);
                                             }}
                                             value={breakerData.phase_configuration}
@@ -297,7 +295,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                             className="font-weight-bold"
                                             value={breakerData.rated_amps}
                                             min={0}
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 handleChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
@@ -311,7 +309,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                             id="userState"
                                             className="font-weight-bold breaker-phase-selection"
                                             placeholder="Select Volts"
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 handleChange(id, 'voltage', e.target.value);
                                             }}
                                             value={breakerData.voltage}
@@ -344,7 +342,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 id="userState"
                                                 className="font-weight-bold breaker-phase-selection"
                                                 placeholder="Select Device"
-                                                onChange={(e) => {
+                                                onChange={e => {
                                                     if (e.target.value === 'Select Device') {
                                                         return;
                                                     }
@@ -353,7 +351,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 }}
                                                 value={breakerData.device_id}>
                                                 <option>Select Device</option>
-                                                {passiveDeviceData.map((record) => {
+                                                {passiveDeviceData.map(record => {
                                                     return <option value={record.value}>{record.label}</option>;
                                                 })}
                                                 {breakerData.device_id !== '' && <option value="unlink">None</option>}
@@ -371,7 +369,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     id="userState"
                                                     className="font-weight-bold breaker-phase-selection"
                                                     placeholder="Select Sensor"
-                                                    onChange={(e) => {
+                                                    onChange={e => {
                                                         if (e.target.value === 'Select Sensor') {
                                                             return;
                                                         }
@@ -379,7 +377,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     }}
                                                     value={breakerData.sensor_id}>
                                                     <option>Select Sensor</option>
-                                                    {sensorData.map((record) => {
+                                                    {sensorData.map(record => {
                                                         return (
                                                             <option
                                                                 value={record.id}
@@ -411,7 +409,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         id="userState"
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Equipment"
-                                        onChange={(e) => {
+                                        onChange={e => {
                                             if (e.target.value === 'Select Equipment') {
                                                 return;
                                             }
@@ -420,7 +418,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         }}
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
-                                        {equipmentData.map((record) => {
+                                        {equipmentData.map(record => {
                                             return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
