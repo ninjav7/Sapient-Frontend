@@ -108,6 +108,34 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         setPanelObj(obj);
     };
 
+    const getVoltageConfigValue = (value, breakerType) => {
+        if (breakerType === 'single') {
+            if (value === '208/120') {
+                return 120;
+            }
+            if (value === '480') {
+                return 277;
+            }
+            if (value === '600') {
+                return 347;
+            }
+        }
+    };
+
+    const getPhaseConfigValue = (value, breakerType) => {
+        if (breakerType === 'single') {
+            if (value === '208/120') {
+                return 1;
+            }
+            if (value === '480') {
+                return 1;
+            }
+            if (value === '600') {
+                return 1;
+            }
+        }
+    };
+
     const handleBreakerChange = (panelType, breakerCount) => {
         let newArray = [];
         if (panelType === 'distribution') {
@@ -146,9 +174,9 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 let obj = {
                     name: `Breaker ${index}`,
                     breaker_number: index,
-                    phase_configuration: 1,
+                    phase_configuration: getPhaseConfigValue(panelObj.voltage, 'single'),
                     rated_amps: 0,
-                    voltage: '120',
+                    voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',

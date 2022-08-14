@@ -577,8 +577,8 @@ const EditBreakerPanel = () => {
     const [distributedBreakersEdges, setDistributedBreakersEdges] = useState([]);
 
     // For Disconnected
-    const [disconnectBreakersNodes, setDisconnectBreakersNodes] = useState([]);
-    const [disconnectBreakersEdges, setDisconnectBreakersEdges] = useState([]);
+    const [disconnectedBreakersNodes, setDisconnectedBreakersNodes] = useState([]);
+    const [disconnectedBreakersEdges, setDisconnectedBreakersEdges] = useState([]);
 
     // For Distributed
     const onNodesChange = useCallback(changes => setDistributedBreakersNodes(ns => applyNodeChanges(changes, ns)), []);
@@ -587,15 +587,15 @@ const EditBreakerPanel = () => {
 
     // For Disconnected
     const onNodesChangeForDisconnect = useCallback(
-        changes => setDisconnectBreakersNodes(ns => applyNodeChanges(changes, ns)),
+        changes => setDisconnectedBreakersNodes(ns => applyNodeChanges(changes, ns)),
         []
     );
     const onEdgesChangeForDisconnect = useCallback(
-        changes => setDisconnectBreakersEdges(es => applyEdgeChanges(changes, es)),
+        changes => setDisconnectedBreakersEdges(es => applyEdgeChanges(changes, es)),
         []
     );
     const onConnectForDisconnect = useCallback(connection =>
-        setDisconnectBreakersEdges(eds => addEdge(connection, eds))
+        setDisconnectedBreakersEdges(eds => addEdge(connection, eds))
     );
 
     const [isOpen, setIsOpen] = useState(false);
@@ -652,11 +652,11 @@ const EditBreakerPanel = () => {
 
     const onConnectDisconnectedBreakers = useCallback(
         params =>
-            setDisconnectBreakersNodes(els =>
+            setDisconnectedBreakersNodes(els =>
                 addEdge(
                     {
                         ...params,
-                        id: `edge_${disconnectBreakersNodes.length + 1}`,
+                        id: `edge_${disconnectedBreakersNodes.length + 1}`,
                         animated: false,
                         type: 'step',
                         style: { stroke: '#bababa' },
@@ -739,7 +739,7 @@ const EditBreakerPanel = () => {
             }
 
             if (activePanelType === 'disconnect') {
-                disconnectBreakersNodes.forEach(el => {
+                disconnectedBreakersNodes.forEach(el => {
                     if (el.type === 'breakerLink') {
                         return;
                     }
@@ -1028,7 +1028,7 @@ const EditBreakerPanel = () => {
         });
 
         setDistributedBreakersNodes(distributedBreakerArray);
-        setDisconnectBreakersNodes(disconnectBreakerArray);
+        setDisconnectedBreakersNodes(disconnectBreakerArray);
 
         BreakersStore.update(s => {
             s.distributedBreakersData = distributedBreakerArray;
@@ -1068,7 +1068,7 @@ const EditBreakerPanel = () => {
         });
 
         setDistributedBreakersEdges(breakerLinks);
-        setDisconnectBreakersEdges(disconnectBreakerLinks);
+        setDisconnectedBreakersEdges(disconnectBreakerLinks);
 
         BreakersStore.update(s => {
             s.breakerLinkData = breakerLinks;
@@ -1414,8 +1414,8 @@ const EditBreakerPanel = () => {
                             <div className="row" style={{ width: '100%', height: '50vh', position: 'relative' }}>
                                 <div className="col-sm">
                                     <ReactFlow
-                                        nodes={disconnectBreakersNodes}
-                                        edges={disconnectBreakersEdges}
+                                        nodes={disconnectedBreakersNodes}
+                                        edges={disconnectedBreakersEdges}
                                         onNodesChange={onNodesChangeForDisconnect}
                                         onEdgesChange={onEdgesChangeForDisconnect}
                                         onConnect={onConnectForDisconnect}
