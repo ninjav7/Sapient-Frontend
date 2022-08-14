@@ -34,9 +34,9 @@ import ReactFlow, {
     applyNodeChanges,
     applyEdgeChanges,
 } from 'react-flow-renderer';
-import BreakerLink from './BreakerLink';
+import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
-import BreakersComponent from './BreakersFlow';
+import BreakersComponent from './BreakerFlowForDistribution';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';

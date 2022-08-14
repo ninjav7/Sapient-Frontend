@@ -87,14 +87,14 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panelObj);
-        if (value === 'Select Location') {
-            value = '';
-        }
         if (value === 'None') {
             value = '';
         }
         if (value === 'disconnect') {
             obj.breaker_count = 3;
+            if (obj.voltage === '120/240') {
+                obj.voltage = '208/120';
+            }
             handleBreakerChange('disconnect', 3);
         }
         if (value === 'distribution') {
@@ -218,7 +218,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 });
             } catch (error) {
                 setIsProcessing(false);
-                console.log('Failed to save Breakers');
+                console.log('Failed to Save Breakers');
             }
         };
         saveBreakersData(generatedPanelId);
@@ -278,7 +278,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 }}
                                 value={panelObj.voltage}>
                                 <option>Select Volts</option>
-                                <option value="120/240">120/240</option>
+                                {panelObj.panel_type === 'distribution' && <option value="120/240">120/240</option>}
                                 <option value="208/120">208/120</option>
                                 <option value="480">480</option>
                                 <option value="600">600</option>
@@ -359,6 +359,9 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             id="userState"
                             className="font-weight-bold"
                             onChange={e => {
+                                if (e.target.value === 'Select Location') {
+                                    return;
+                                }
                                 handleChange('space_id', e.target.value);
                             }}
                             value={panelObj.space_id}>
