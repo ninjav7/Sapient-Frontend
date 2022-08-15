@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor, updateBreaker } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
@@ -37,11 +37,12 @@ const BreakersComponent = ({ data, id }) => {
 
     const [currentEquipIds, setCurrentEquipIds] = useState([]);
 
-    const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
-    const equipmentData = BreakersStore.useState((s) => s.equipmentData);
-    const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
+    const passiveDeviceData = BreakersStore.useState(s => s.passiveDeviceData);
+    const equipmentData = BreakersStore.useState(s => s.equipmentData);
+    const distributedBreakersData = BreakersStore.useState(s => s.distributedBreakersData);
+    const isEditable = BreakersStore.useState(s => s.isEditable);
 
-    const fetchDeviceSensorData = async (deviceId) => {
+    const fetchDeviceSensorData = async deviceId => {
         if (deviceId === null) {
             return;
         }
@@ -56,7 +57,7 @@ const BreakersComponent = ({ data, id }) => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then(res => {
                 let response = res.data;
                 setSensorData(response);
                 if (doubleBreakerData.data.device_id !== '') {
@@ -74,7 +75,36 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    const fetchDeviceSensorDataForDouble = async (deviceId) => {
+    const fetchSensorDataForSelectionOne = async deviceId => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === 'unlink') {
+            return;
+        }
+        try {
+            setIsSensorDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then(res => {
+                let response = res.data;
+                setSensorData(response);
+                setDoubleSensorData(response);
+                setTripleSensorData(response);
+                setIsSensorDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetched(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
+    const fetchDeviceSensorDataForDouble = async deviceId => {
         if (deviceId === null) {
             return;
         }
@@ -89,7 +119,7 @@ const BreakersComponent = ({ data, id }) => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then(res => {
                 let response = res.data;
                 setDoubleSensorData(response);
                 setIsSensorDataFetchedForDouble(false);
@@ -101,7 +131,7 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    const fetchDeviceSensorDataForTriple = async (deviceId) => {
+    const fetchDeviceSensorDataForTriple = async deviceId => {
         if (deviceId === null) {
             return;
         }
@@ -116,7 +146,7 @@ const BreakersComponent = ({ data, id }) => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let params = `?device_id=${deviceId}`;
-            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then(res => {
                 let response = res.data;
                 setTripleSensorData(response);
                 setIsSensorDataFetchedForTriple(false);
@@ -128,14 +158,14 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    const addSelectedBreakerEquip = (equipId) => {
+    const addSelectedBreakerEquip = equipId => {
         let newArray = [];
         newArray.push(equipId);
         setCurrentEquipIds(newArray);
     };
 
     const triggerBreakerAPI = () => {
-        LoadingStore.update((s) => {
+        LoadingStore.update(s => {
             s.isBreakerDataFetched = true;
         });
     };
@@ -152,21 +182,18 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObj = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
-            let params = `?breaker_id=${id}`;
-
-            await axios.post(`${BaseUrl}${updateBreaker}${params}`, breakerObj, headers).then((res) => {
+            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then(res => {
                 setIsProcessing(false);
                 setTimeout(() => {
                     triggerBreakerAPI();
@@ -192,48 +219,36 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObjOne = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
             let breakerObjTwo = {
+                breaker_id: doubleBreakerData.id,
                 name: doubleBreakerData.data.name,
                 breaker_number: doubleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
-            let paramsOne = `?breaker_id=${id}`;
-            let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
-
-            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-
-            await axios.all([requestOne, requestTwo]).then(
-                axios.spread((...responses) => {
-                    const responseOne = responses[0];
-                    const responseTwo = responses[1];
-                    setIsProcessing(false);
-                    setTimeout(() => {
-                        triggerBreakerAPI();
-                    }, 1000);
-                    handleEditBreakerClose();
-                })
-            );
+            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then(res => {
+                setIsProcessing(false);
+                setTimeout(() => {
+                    triggerBreakerAPI();
+                }, 1000);
+                handleEditBreakerClose();
+            });
         } catch (error) {
             console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
@@ -253,64 +268,50 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObjOne = {
+                breaker_id: id,
                 name: breakerData.name,
                 breaker_number: breakerData.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: breakerData.sensor_id,
                 device_link: breakerData.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
             let breakerObjTwo = {
+                breaker_id: doubleBreakerData.id,
                 name: doubleBreakerData.data.name,
                 breaker_number: doubleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: doubleBreakerData.data.sensor_id,
                 device_link: doubleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
             let breakerObjThree = {
+                breaker_id: tripleBreakerData.id,
                 name: tripleBreakerData.data.name,
                 breaker_number: tripleBreakerData.data.breaker_number,
                 phase_configuration: breakerData.phase_configuration,
                 rated_amps: breakerData.rated_amps,
                 voltage: breakerData.voltage,
-                link_type: breakerData.link_type,
-                link_id: breakerData.link_id,
                 sensor_link: tripleBreakerData.data.sensor_id,
                 device_link: tripleBreakerData.data.device_id,
                 equipment_link: breakerData.equipment_link,
             };
 
-            let paramsOne = `?breaker_id=${id}`;
-            let paramsTwo = `?breaker_id=${doubleBreakerData.id}`;
-            let paramsThree = `?breaker_id=${tripleBreakerData.id}`;
-
-            const requestOne = axios.post(`${BaseUrl}${updateBreaker}${paramsOne}`, breakerObjOne, headers);
-            const requestTwo = axios.post(`${BaseUrl}${updateBreaker}${paramsTwo}`, breakerObjTwo, headers);
-            const requestThree = axios.post(`${BaseUrl}${updateBreaker}${paramsThree}`, breakerObjThree, headers);
-
-            await axios.all([requestOne, requestTwo, requestThree]).then(
-                axios.spread((...responses) => {
-                    const responseOne = responses[0];
-                    const responseTwo = responses[1];
-                    const responseThree = responses[2];
+            await axios
+                .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
+                .then(res => {
                     setIsProcessing(false);
                     setTimeout(() => {
                         triggerBreakerAPI();
                     }, 1000);
                     handleEditBreakerClose();
-                })
-            );
+                });
         } catch (error) {
             console.log('Failed to update Triple Breakers!');
             setIsProcessing(false);
@@ -318,8 +319,8 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
-    const findEquipmentName = (equipId) => {
-        let equip = equipmentData?.find((record) => record?.value === equipId);
+    const findEquipmentName = equipId => {
+        let equip = equipmentData?.find(record => record?.value === equipId);
         return equip?.label;
     };
 
@@ -376,23 +377,23 @@ const BreakersComponent = ({ data, id }) => {
 
         if (breakerObj.breakerType === 2) {
             if (breakerObj.parentBreaker === '') {
-                let obj = distributedBreakersData.find((obj) => obj.data.parentBreaker === id);
+                let obj = distributedBreakersData.find(obj => obj.data.parentBreaker === id);
                 setDoubleBreakerData(obj);
             } else {
-                let obj = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
+                let obj = distributedBreakersData.find(obj => obj.id === breakerObj.parentBreaker);
                 setDoubleBreakerData(obj);
             }
         }
 
         if (breakerObj.breakerType === 3) {
             if (breakerObj.parentBreaker === '') {
-                let breakersList = distributedBreakersData.filter((obj) => obj.data.parentBreaker === id);
+                let breakersList = distributedBreakersData.filter(obj => obj.data.parentBreaker === id);
                 setDoubleBreakerData(breakersList[0]);
                 setTripleBreakerData(breakersList[1]);
             } else {
-                let objOne = distributedBreakersData.find((obj) => obj.id === breakerObj.parentBreaker);
+                let objOne = distributedBreakersData.find(obj => obj.id === breakerObj.parentBreaker);
                 let objTwo = distributedBreakersData.find(
-                    (obj) => obj.data.parentBreaker === breakerObj.parentBreaker && obj.id !== id
+                    obj => obj.data.parentBreaker === breakerObj.parentBreaker && obj.id !== id
                 );
                 setDoubleBreakerData(objOne);
                 setTripleBreakerData(objTwo);
@@ -402,16 +403,20 @@ const BreakersComponent = ({ data, id }) => {
 
     return (
         <React.Fragment>
+            {/* Left Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 1 && (
                 <>
+                    {breakerData.breaker_number !== 1 && (
+                        <Handle
+                            type="target"
+                            position="left"
+                            id="a"
+                            style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                        />
+                    )}
+
                     <Handle
                         type="source"
-                        position="left"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
                         position="left"
                         id="b"
                         style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
@@ -419,16 +424,19 @@ const BreakersComponent = ({ data, id }) => {
                 </>
             )}
 
+            {/* Right Breaker Connection Point  */}
             {breakerData.breaker_number % 2 === 0 && (
                 <>
+                    {breakerData.breaker_number !== 2 && (
+                        <Handle
+                            type="target"
+                            position="right"
+                            id="a"
+                            style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
+                        />
+                    )}
                     <Handle
                         type="source"
-                        position="right"
-                        id="a"
-                        style={{ top: 20, backgroundColor: '#bababa', width: '5px', height: '5px' }}
-                    />
-                    <Handle
-                        type="target"
                         position="right"
                         id="b"
                         style={{ bottom: 30, top: 'auto', backgroundColor: '#bababa', width: '5px', height: '5px' }}
@@ -464,20 +472,25 @@ const BreakersComponent = ({ data, id }) => {
                                     (breakerData.breaker_level === 'double-breaker' &&
                                         breakerData.panel_voltage === '600')
                                 ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            handleEditBreakerShow();
-                                            if (data?.sensor_id === '') {
-                                                return;
-                                            }
-                                            fetchDeviceSensorData(data?.device_id);
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
+                                    <>
+                                        {isEditable && (
+                                            <div
+                                                className="breaker-content-middle"
+                                                onClick={() => {
+                                                    handleEditBreakerShow();
+                                                    if (data?.sensor_id === '') {
+                                                        return;
+                                                    }
+                                                    fetchDeviceSensorData(data?.device_id);
+                                                }}>
+                                                <div className="edit-icon-bg-styling mr-2">
+                                                    <i className="uil uil-pen"></i>
+                                                </div>
+
+                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         ) : (
@@ -488,20 +501,25 @@ const BreakersComponent = ({ data, id }) => {
                                     (breakerData.breaker_level === 'double-breaker' &&
                                         breakerData.panel_voltage === '600')
                                 ) && (
-                                    <div
-                                        className="breaker-content-middle"
-                                        onClick={() => {
-                                            handleEditBreakerShow();
-                                            if (data?.sensor_id === '') {
-                                                return;
-                                            }
-                                            fetchDeviceSensorData(data?.device_id);
-                                        }}>
-                                        <div className="edit-icon-bg-styling mr-2">
-                                            <i className="uil uil-pen"></i>
-                                        </div>
-                                        <span className="font-weight-bold edit-btn-styling">Edit</span>
-                                    </div>
+                                    <>
+                                        {isEditable && (
+                                            <div
+                                                className="breaker-content-middle"
+                                                onClick={() => {
+                                                    handleEditBreakerShow();
+                                                    if (data?.sensor_id === '') {
+                                                        return;
+                                                    }
+                                                    fetchDeviceSensorData(data?.device_id);
+                                                }}>
+                                                <div className="edit-icon-bg-styling mr-2">
+                                                    <i className="uil uil-pen"></i>
+                                                </div>
+
+                                                <span className="font-weight-bold edit-btn-styling">Edit</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </>
                         )}
@@ -536,7 +554,7 @@ const BreakersComponent = ({ data, id }) => {
                                             id="userState"
                                             className="font-weight-bold breaker-phase-selection fields-disabled-style"
                                             placeholder="Select Phase"
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 if (e.target.value === 'Select Phase') {
                                                     return;
                                                 }
@@ -559,7 +577,7 @@ const BreakersComponent = ({ data, id }) => {
                                             value={breakerData.rated_amps}
                                             min={0}
                                             step={breakerData.rated_amps < 50 ? 5 : 10}
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 handleSingleBreakerChange(id, 'rated_amps', +e.target.value);
                                             }}
                                         />
@@ -573,7 +591,7 @@ const BreakersComponent = ({ data, id }) => {
                                             id="userState"
                                             className="font-weight-bold breaker-phase-selection fields-disabled-style"
                                             placeholder="Select Volts"
-                                            onChange={(e) => {
+                                            onChange={e => {
                                                 if (e.target.value === 'Select Volts') {
                                                     return;
                                                 }
@@ -622,7 +640,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         id="userState"
                                                         className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Device"
-                                                        onChange={(e) => {
+                                                        onChange={e => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
@@ -631,7 +649,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         }}
                                                         value={breakerData.device_id}>
                                                         <option>Select Device</option>
-                                                        {passiveDeviceData.map((record) => {
+                                                        {passiveDeviceData.map(record => {
                                                             return <option value={record.value}>{record.label}</option>;
                                                         })}
                                                         {breakerData.device_id !== '' && (
@@ -651,7 +669,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             id="userState"
                                                             className="font-weight-bold breaker-phase-selection"
                                                             placeholder="Select Sensor"
-                                                            onChange={(e) => {
+                                                            onChange={e => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
@@ -663,7 +681,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={breakerData.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {sensorData.map((record) => {
+                                                            {sensorData.map(record => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -702,11 +720,12 @@ const BreakersComponent = ({ data, id }) => {
                                                         id="userState"
                                                         className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Device"
-                                                        onChange={(e) => {
+                                                        onChange={e => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
-                                                            fetchDeviceSensorData(e.target.value);
+                                                            // fetchDeviceSensorData(e.target.value);
+                                                            fetchSensorDataForSelectionOne(e.target.value);
                                                             handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                             if (doubleBreakerData.data.device_id === '') {
                                                                 handleDoubleBreakerChange(
@@ -725,7 +744,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         }}
                                                         value={breakerData.device_id}>
                                                         <option>Select Device</option>
-                                                        {passiveDeviceData.map((record) => {
+                                                        {passiveDeviceData.map(record => {
                                                             return <option value={record.value}>{record.label}</option>;
                                                         })}
                                                         {breakerData.device_id !== '' && (
@@ -745,7 +764,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             id="userState"
                                                             className="font-weight-bold breaker-phase-selection"
                                                             placeholder="Select Sensor"
-                                                            onChange={(e) => {
+                                                            onChange={e => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
@@ -757,7 +776,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={breakerData.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {sensorData.map((record) => {
+                                                            {sensorData.map(record => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -791,7 +810,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         id="userState"
                                                         className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Device"
-                                                        onChange={(e) => {
+                                                        onChange={e => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
@@ -800,7 +819,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         }}
                                                         value={doubleBreakerData?.data?.device_id}>
                                                         <option>Select Device</option>
-                                                        {passiveDeviceData.map((record) => {
+                                                        {passiveDeviceData.map(record => {
                                                             return <option value={record.value}>{record.label}</option>;
                                                         })}
                                                         {doubleBreakerData?.data?.device_id !== '' && (
@@ -820,7 +839,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             id="userState"
                                                             className="font-weight-bold breaker-phase-selection"
                                                             placeholder="Select Sensor"
-                                                            onChange={(e) => {
+                                                            onChange={e => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
@@ -832,7 +851,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={doubleBreakerData?.data?.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {doubleSensorData.map((record) => {
+                                                            {doubleSensorData.map(record => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -866,7 +885,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         id="userState"
                                                         className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Device"
-                                                        onChange={(e) => {
+                                                        onChange={e => {
                                                             if (e.target.value === 'Select Device') {
                                                                 return;
                                                             }
@@ -875,7 +894,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         }}
                                                         value={tripleBreakerData?.data?.device_id}>
                                                         <option>Select Device</option>
-                                                        {passiveDeviceData.map((record) => {
+                                                        {passiveDeviceData.map(record => {
                                                             return <option value={record.value}>{record.label}</option>;
                                                         })}
                                                         {tripleBreakerData?.data?.device_id !== '' && (
@@ -895,7 +914,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             id="userState"
                                                             className="font-weight-bold breaker-phase-selection"
                                                             placeholder="Select Sensor"
-                                                            onChange={(e) => {
+                                                            onChange={e => {
                                                                 if (e.target.value === 'Select Sensor') {
                                                                     return;
                                                                 }
@@ -907,7 +926,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             }}
                                                             value={tripleBreakerData?.data?.sensor_id}>
                                                             <option>Select Sensor</option>
-                                                            {tripleSensorData.map((record) => {
+                                                            {tripleSensorData.map(record => {
                                                                 return (
                                                                     <option
                                                                         value={record.id}
@@ -940,7 +959,7 @@ const BreakersComponent = ({ data, id }) => {
                                         id="userState"
                                         className="font-weight-bold breaker-phase-selection"
                                         placeholder="Select Equipment"
-                                        onChange={(e) => {
+                                        onChange={e => {
                                             if (e.target.value === 'Select Equipment') {
                                                 return;
                                             }
@@ -949,7 +968,7 @@ const BreakersComponent = ({ data, id }) => {
                                         }}
                                         value={breakerData.equipment_link[0]}>
                                         <option>Select Equipment</option>
-                                        {equipmentData.map((record) => {
+                                        {equipmentData.map(record => {
                                             return <option value={record.value}>{record.label}</option>;
                                         })}
                                     </Input>
