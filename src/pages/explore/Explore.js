@@ -540,7 +540,7 @@ const Explore = () => {
         const exploreFilterDataFetch = async () => {
             if (counter === 2) {
                 setShowEquipmentChart(true);
-                // console.log(childFilter);
+                console.log(childFilter);
                 setEquipmentData(childFilter);
             } else {
                 try {
@@ -749,6 +749,7 @@ const Explore = () => {
                 showChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 sensorData={equipmentData}
+                showWindow={"metrics"}
             />
             {/* Explore Body  */}
             {activeExploreOpt.value === 'no-grouping' && (
