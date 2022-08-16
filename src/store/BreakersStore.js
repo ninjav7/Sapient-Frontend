@@ -6,4 +6,7 @@ export const BreakersStore = new Store({
     distributedBreakersData: [],
     disconnectedBreakersData: [],
     breakerLinkData: [],
+    disconnectBreakerLinkData: [],
+    panelData: {},
+    isEditable: true,
 });

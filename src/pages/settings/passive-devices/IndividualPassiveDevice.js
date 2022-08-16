@@ -90,7 +90,7 @@ const IndividualPassiveDevice = () => {
         { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
         { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
         { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
-        { value: 'passive-power', label: 'Power' },
+        { value: 'power', label: 'power' },
         // { value: 'mAh', label: 'Amps' },
     ]);
 
@@ -104,12 +104,12 @@ const IndividualPassiveDevice = () => {
     const filtered = !searchSensor
         ? sensors
         : sensors.filter((sensor) => {
-              return (
-                  sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                  sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                  sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
-              );
-          });
+            return (
+                sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
+            );
+        });
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -236,9 +236,8 @@ const IndividualPassiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${
-                id === sensorId ? sensorId : id
-            }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id
+                }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
@@ -270,7 +269,7 @@ const IndividualPassiveDevice = () => {
 
                             return _data;
                         });
-                    } catch (error) {}
+                    } catch (error) { }
 
                     exploreData.push(recordToInsert);
 
@@ -350,7 +349,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                        activeLocationId === passiveData.location_id
+                                            activeLocationId === passiveData.location_id
                                             ? true
                                             : false
                                     }>
@@ -416,7 +415,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="passive-device-value">
                                             {passiveData?.model &&
                                                 passiveData?.model.charAt(0).toUpperCase() +
-                                                    passiveData?.model.slice(1)}
+                                                passiveData?.model.slice(1)}
                                         </h6>
                                     </div>
                                 </div>
