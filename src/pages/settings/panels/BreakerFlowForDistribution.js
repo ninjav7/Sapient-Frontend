@@ -47,7 +47,7 @@ const BreakersComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -80,7 +80,7 @@ const BreakersComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -109,7 +109,7 @@ const BreakersComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -335,6 +335,11 @@ const BreakersComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
+        if(key === 'device_id'){
+            if(value === ''){
+                breaker.sensor_id = ''
+            }
+        }
         breaker[key] = value;
         setBreakerData(breaker);
     };
@@ -350,6 +355,11 @@ const BreakersComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
+        if(key === 'device_id'){
+            if(value === ''){
+                data.sensor_id = ''
+            }
+        }
         data[key] = value;
         breaker['data'] = data;
         setDoubleBreakerData(breaker);
@@ -366,6 +376,11 @@ const BreakersComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
+        if(key === 'device_id'){
+            if(value === ''){
+                data.sensor_id = ''
+            }
+        }
         data[key] = value;
         breaker['data'] = data;
         setTripleBreakerData(breaker);
@@ -667,7 +682,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -710,7 +725,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {breakerData.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -755,7 +770,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -798,7 +813,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {breakerData.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -831,7 +846,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {doubleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -874,7 +889,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {doubleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -907,7 +922,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {tripleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -950,7 +965,7 @@ const BreakersComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {tripleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}

@@ -47,7 +47,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -80,7 +80,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -109,7 +109,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -136,7 +136,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (deviceId === null) {
             return;
         }
-        if (deviceId === 'unlink') {
+        if (deviceId === '') {
             return;
         }
         try {
@@ -335,6 +335,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
+        if(key === 'device_id'){
+            if(value === ''){
+                breaker.sensor_id = ''
+            }
+        }
         breaker[key] = value;
         setBreakerData(breaker);
     };
@@ -350,6 +355,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
+        if(key === 'device_id'){
+            if(value === ''){
+                data.sensor_id = ''
+            }
+        }
         data[key] = value;
         breaker['data'] = data;
         setDoubleBreakerData(breaker);
@@ -366,6 +376,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
+        if(key === 'device_id'){
+            if(value === ''){
+                data.sensor_id = ''
+            }
+        }
         data[key] = value;
         breaker['data'] = data;
         setTripleBreakerData(breaker);
@@ -417,6 +432,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             }
         }
     }, [breakerObj]);
+
+    console.log('SSR breakerData => ', breakerData);
+    console.log('SSR doubleBreakerData => ', doubleBreakerData);
+    console.log('SSR tripleBreakerData => ', tripleBreakerData);
 
     return (
         <React.Fragment>
@@ -637,7 +656,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             return;
                                                         }
                                                         fetchDeviceSensorData(e.target.value);
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
+                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);                                                                                                             
                                                     }}
                                                     value={breakerData.device_id}>
                                                     <option>Select Device</option>
@@ -645,7 +664,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -688,7 +707,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {breakerData.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -717,7 +736,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         if (e.target.value === 'Select Device') {
                                                             return;
                                                         }
-                                                        // fetchDeviceSensorData(e.target.value);
                                                         fetchSensorDataForSelectionOne(e.target.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                         if (doubleBreakerData.data.device_id === '') {
@@ -726,6 +744,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         if (tripleBreakerData.data.device_id === '') {
                                                             handleTripleBreakerChange(id, 'device_id', e.target.value);
                                                         }
+
                                                     }}
                                                     value={breakerData.device_id}>
                                                     <option>Select Device</option>
@@ -733,7 +752,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -776,7 +795,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {breakerData.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -809,7 +828,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {doubleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -852,7 +871,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {doubleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
@@ -885,7 +904,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {tripleBreakerData?.data?.device_id !== '' && (
-                                                        <option value="unlink">None</option>
+                                                        <option value="">None</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -928,7 +947,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             );
                                                         })}
                                                         {tripleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="unlink">None</option>
+                                                            <option value="">None</option>
                                                         )}
                                                     </Input>
                                                 )}
