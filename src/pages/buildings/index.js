@@ -11,6 +11,8 @@ import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
@@ -1121,9 +1123,10 @@ const BuildingOverview = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [daysCount, setDaysCount] = useState(1);
+    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
 
     const [hoverRef, isHovered] = useHover();
-
+    const [isEquipmentProcessing, setIsEquipmentProcessing]= useState(false);
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1163,6 +1166,7 @@ const BuildingOverview = () => {
 
         const buildingEndUserData = async () => {
             try {
+                setIsEnergyConsumptionChartLoading(true)
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -1190,9 +1194,11 @@ const BuildingOverview = () => {
                         });
                         console.log(newDonutData);
                         setDonutChartData(newDonutData);
+                        setIsEnergyConsumptionChartLoading(false)
                     });
             } catch (error) {
                 console.log(error);
+                setIsEnergyConsumptionChartLoading(false)
                 console.log('Failed to fetch Building EndUses Data');
             }
         };
@@ -1254,6 +1260,7 @@ const BuildingOverview = () => {
 
         const builidingEquipmentsData = async () => {
             try {
+                setIsEquipmentProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -1283,9 +1290,11 @@ const BuildingOverview = () => {
                             return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
                         });
                         setTopEnergyConsumption(sortedData);
+                        setIsEquipmentProcessing(false);
                     });
             } catch (error) {
                 console.log(error);
+                setIsEquipmentProcessing(false);
                 console.log('Failed to fetch Building Equipments Data');
             }
         };
@@ -1599,7 +1608,7 @@ const BuildingOverview = () => {
                         {/* </div>
                         <div className="custom-bld-enduse-style">
                             <div> */}
-                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
+                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}/>
                                 {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
@@ -1861,9 +1870,10 @@ const BuildingOverview = () => {
                     {/* Total Energy Consumption  */}
                     <Row>
                         <div className="card-body">
+                            
+                            <div className="total-eng-consumtn">
                             <h6 className="card-title custom-title">Total Energy Consumption</h6>
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                            <div className="total-eng-consumtn">
                                 <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
                             </div>
                         </div>
@@ -1968,7 +1978,7 @@ const BuildingOverview = () => {
                             </div>
                         </div>
                     </Row> */}  
-                    <Row style={{ marginTop: '2rem' }}>
+                    <Row>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
                             <table className="table table-borderless">
@@ -1979,6 +1989,25 @@ const BuildingOverview = () => {
                                         <th>Change</th>
                                     </tr>
                                 </thead>
+                                {isEquipmentProcessing ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
                                 <tbody style={{ fontSize: '12px' }}>
                                     {topEnergyConsumption.map((item, index) => (
                                         <tr key={index}>
@@ -2059,6 +2088,7 @@ const BuildingOverview = () => {
                                         </tr>
                                     ))}
                                 </tbody>
+                    )}
                             </table>
                         </div>
                     </Row>

@@ -21,7 +21,7 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
+const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyConsumptionChartLoading }) => {
 
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
         const value = (energy_consumption.now / 1000).toLocaleString(undefined, {
@@ -44,6 +44,7 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
                 title="Energy Consumption by End Use"
                 subtitle="Energy Totals"
                 items={donutChartData}
+                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
             />
         </div>
     );
