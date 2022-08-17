@@ -57,11 +57,11 @@ const DonutChartWidget = ({
             {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
             <div className={`donut-chart-widget-wrapper ${className} ${type}`} style={{width:"100%",justifyContent:"center"}}>
                 {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
-                {isEnergyConsumptionChartLoading ? (
+                {/* {isEnergyConsumptionChartLoading ? (
                 <div className="loader-center-style">
                     <Spinner className="m-2" color={'primary'} />
                 </div>
-            ) : (<>
+            ) : (<> */}
                 <div className={`chart-wrapper ${type}`}>
                     <ReactApexChart options={options} {...props} series={series} type="donut" />
                 </div>
@@ -73,7 +73,7 @@ const DonutChartWidget = ({
                         labels={items}
                     />
                 </div>
-                </>)}
+                {/* </>)} */}
             </div>
             </div>
         </>

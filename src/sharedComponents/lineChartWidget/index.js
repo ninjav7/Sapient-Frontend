@@ -19,11 +19,11 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
                 {subtitle}
             </Typography.Body>
             <Brick sizeInRem={1} />
-            {isEnergyConsumptionHistoryLoading ? (
+            {/* {isEnergyConsumptionHistoryLoading ? (
                 <div className="loader-center-style">
                     <Spinner className="m-2" color={'primary'} />
                 </div>
-            ) : (<>
+            ) : (<> */}
             <Chart
                 className="line-chart-widget"
                 options={configLineChartWidget}
@@ -31,8 +31,8 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
                 {...{ height, width }}
                 type="line"
             />
-            </>
-            )}
+            {/* </>
+            )} */}
         </div>
     );
 };
