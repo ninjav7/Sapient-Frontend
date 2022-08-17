@@ -56,7 +56,7 @@ const Header = (props) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             localStorage.setItem('dateFilter', date);
-            endCustomDate.setDate(endCustomDate.getDate() - 1);
+            endCustomDate.setDate(endCustomDate.getDate());
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
             // localStorage.setItem('startDate', startCustomDate);
@@ -96,7 +96,7 @@ const Header = (props) => {
                         <div>
                             <Select
                                 style={{ color: 'black', fontWeight: 'bold' }}
-                                className="header-datefilter-select"
+                                className="header-datefilter-select date-selector-width"
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
@@ -118,7 +118,7 @@ const Header = (props) => {
                             </Input> */}
                         </div>
 
-                        <div className="header-datefilter-datepicker-wrapper">
+                        <div className="">
                             <Datepicker
                                 selectsRange={true}
                                 startDate={startDate}
