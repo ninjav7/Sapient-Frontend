@@ -33,7 +33,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center;
-    align-content: stretch;
+    /* align-content: stretch; */
 }
 
 .width-custom-style {
@@ -243,4 +243,57 @@
     background: #e9ecef !important;
     font-weight: 500 !important;
     line-height: 1.5 !important;
+}
+
+.edgebutton {
+    width: 20px !important;
+    height: 20px !important;
+    background: #eee !important;
+    border: 1px solid #fff !important;
+    cursor: pointer !important;
+    border-radius: 50% !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+.edgebutton:hover {
+    box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.08);
+}
+
+.edgebutton-foreignobject body {
+    background: transparent;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+}
+
+.link_button_style {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    gap: 10px;
+    width: 27px;
+    height: 23px;
+    background: #e0eaff;
+    border: 1px solid #eaecf0;
+    border-radius: 3px;
+}
+
+.unlink_button_style {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+    gap: 10px;
+    width: 27px;
+    height: 23px;
+    background: #f9fafb;
+    border: 1px solid #eaecf0;
+    border-radius: 3px;
 }

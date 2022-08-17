@@ -427,6 +427,9 @@ const DeviceChartModel = ({
                         name="select"
                         id="exampleSelect"
                         onChange={(e) => {
+                            if (e.target.value === 'passive-power') {
+                                return;
+                            }
                             setConsumption(e.target.value);
                         }}
                         className="font-weight-bold model-sensor-energy-filter mr-2"

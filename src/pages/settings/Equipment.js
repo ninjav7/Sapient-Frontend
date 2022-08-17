@@ -22,6 +22,7 @@ import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
+import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
     const [selected,setSelected]=useState([]);
@@ -1216,8 +1217,10 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 </CardBody>
             </Card>
             <div>
-                <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/>
-                <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/>
+                <EquipmentDeviceChartModel showChart={modal1} handleChartClose={Close1} equipData={equipData} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} showWindow={"configure"} deviceType={"active"}/>
+                <EquipmentDeviceChartModel showChart={modal2} handleChartClose={Close2} equipData={equipData} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} showWindow={"configure"} deviceType={"passive"} locationData={locationData}/>
+                {/* <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/> */}
+                {/* <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/> */}
             </div>
         </>
     );

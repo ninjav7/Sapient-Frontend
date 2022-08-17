@@ -67,8 +67,12 @@ const Layout = () => {
     // Saving API data
     const [floorListAPI, setFloorListAPI] = useState([]);
     const [spaceListAPI, setSpaceListAPI] = useState([]);
+    const [flootListsuccess, setFlootListsuccess] = useState(false);
+    const [spaceListsuccess, setSpaceListsuccess] = useState(false);
 
     console.log('floorListAPI', floorListAPI);
+    console.log('spaceListsuccess', spaceListsuccess);
+    console.log('flootListsuccess', flootListsuccess);
 
     const [modalShow, setModalShow] = useState(false);
     const [floorId, setFloorId] = useState('');
@@ -119,7 +123,6 @@ const Layout = () => {
     const [getSpaceName18, setGetSpaceName18] = useAtom(spaceName18);
     const [getSpaceName19, setGetSpaceName19] = useAtom(spaceName19);
     const [getSpaceName20, setGetSpaceName20] = useAtom(spaceName20);
-    // TODO:
 
     const [modelToShow, setModelToShow] = useState(1);
     const [floorIdNow, setFloorIdNow] = useAtom(floorStaticId);
@@ -146,6 +149,8 @@ const Layout = () => {
     const [modalSpaceShow19, setModalSpaceShow19] = useState(false);
     const [modalSpaceShow20, setModalSpaceShow20] = useState(false);
 
+    const [editFloor, setEditFloor] = useState(false);
+
     const [closeModal] = useAtom(closeEditSpaceModal);
 
     const [currentFloorId, setCurrentFloorId] = useAtom(flooridNew);
@@ -166,6 +171,7 @@ const Layout = () => {
         const params = `?building_id=${bldgId}`;
         axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
             setFloorListAPI(res.data.data);
+            setFlootListsuccess(true);
         });
     }, [bldgId]);
 
@@ -180,6 +186,7 @@ const Layout = () => {
             const params = `?building_id=${bldgId}`;
             axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
                 setFloorListAPI(res.data.data);
+                setFlootListsuccess(true);
             });
         }
     }, [floorModal]);
@@ -217,6 +224,7 @@ const Layout = () => {
             axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 if (modelToShow >= 2) {
                     setSpaceListAPI(res.data.data);
+                    setSpaceListsuccess(true);
                     setReloadSpace('false');
                 }
             });
@@ -255,7 +263,7 @@ const Layout = () => {
 
     return (
         <React.Fragment>
-            <EditFloorModal show={modalShow} onHide={() => setModalShow(false)} />
+            <EditFloorModal editFloor={editFloor} show={modalShow} onHide={() => setModalShow(false)} />
             <EditSpace currentFloorId={currentFloorId} show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <EditSpace
                 show={modalSpaceShow2}
@@ -378,7 +386,7 @@ const Layout = () => {
                                 </div>
                             </div>
                             <div className="container-content-group">
-                                {floorListAPI?.length === 0 || floor2?.length === 0 ? (
+                                {!flootListsuccess || floor2?.length === 0 ? (
                                     <Skeleton count={10} height={40} width={250} />
                                 ) : (
                                     <>
@@ -411,6 +419,14 @@ const Layout = () => {
                             <div className="container-column">
                                 <div className="container-heading">
                                     <span>{getSpaceName}</span>
+                                    <div
+                                        className="ml-2"
+                                        onClick={() => {
+                                            setEditFloor(true);
+                                            setModalShow(true);
+                                        }}>
+                                        <i className="uil uil-pen mr-2"></i>
+                                    </div>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
                                         {/* <i className="uil uil-plus mr-2"></i> */}
@@ -432,7 +448,7 @@ const Layout = () => {
                                     </div>
                                 </div>
                                 <div className="container-conte nt-group">
-                                    {spaceListAPI?.length === 0 ? (
+                                    {!spaceListsuccess ? (
                                         <Skeleton count={10} height={40} width={250} />
                                     ) : (
                                         <>

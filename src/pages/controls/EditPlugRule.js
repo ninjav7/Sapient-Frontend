@@ -18,6 +18,7 @@ import { Cookies } from 'react-cookie';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import { ceil } from 'lodash';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 const EditPlugRule = ({
     showEditRule,
@@ -44,6 +45,7 @@ const EditPlugRule = ({
     const getConditionId = () => uuidv4();
 
     const [activeRuleId, setActiveRuleId] = useState(null);
+    const [dateUpdateOnClick, setDateUpdateOnClick] = useState([]);
 
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -51,6 +53,7 @@ const EditPlugRule = ({
 
     const [linkedRuleData, setLinkedRuleData] = useState([]);
     const [unLinkedRuleData, setUnLinkedRuleData] = useState([]);
+    const [allUnlinkedRuleAdded, setAllUnlinkedRuleAdded] = useState([]);
     const [allData, setAllData] = useState([]);
     console.log('allData', allData);
     const [allLinkedRuleData, setAllLinkedRuleData] = useState([]);
@@ -60,12 +63,81 @@ const EditPlugRule = ({
     const [paginationData, setPaginationData] = useState({});
     const [checkedAll, setCheckedAll] = useState(false);
     const [options, setOptions] = useState([]);
-    const [locationFilter, setLocationFilter] = useState('');
+    const [macOptions, setMacOptions] = useState([]);
+    const [locationOptions, setLocationOptions] = useState([]);
+    // const [locationFilter, setLocationFilter] = useState('');
 
-    console.log('locationFilter', locationFilter);
-    console.log('locationFilter?.length', locationFilter?.length);
+    console.log('locationOptions', locationOptions);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const [annotationXAxis, setAnnotationXAxis] = useState([
+        {
+            x: 'Sat 12 am',
+            x2: 'Sat 12 pm',
+            label: {
+                borderColor: '#000',
+                borderWidth: 1,
+                borderRadius: 2,
+                text: 'off',
+                textAnchor: 'middle',
+                position: 'top',
+                orientation: 'horizontal',
+                offsetX: 60,
+                offsetY: -15,
+
+                style: {
+                    background: '#333',
+                    fontSize: '15px',
+                    fontWeight: 400,
+                },
+            },
+        },
+        {
+            x: 'Sun 12 am',
+            x2: 'Sun 12 pm',
+            label: {
+                borderColor: '#000',
+                borderWidth: 1,
+                borderRadius: 2,
+                text: 'off',
+                textAnchor: 'middle',
+                position: 'top',
+                orientation: 'horizontal',
+                offsetX: 60,
+                offsetY: -15,
+
+                style: {
+                    background: '#333',
+                    fontSize: '15px',
+                    fontWeight: 400,
+                },
+            },
+        },
+    ]);
+    const [hoursNew, setHoursNew] = useState([]);
+
+    const hours = [];
+    const generateHours = () => {
+        for (let day = 0; day < 8; day++) {
+            for (let hour = 0; hour < 24; hour += 12) {
+                hours.push(moment({ day, hour }).format('ddd h a'));
+                setHoursNew(hours);
+            }
+        }
+    };
+
+    useEffect(() => {
+        generateHours();
+    }, []);
+
+    // for (let i = 0; i < hours.length; i++) {
+    //     setHoursNew((el) => [...el, hours[i]]);
+    // }
+
+    console.log('hoursNew', hoursNew);
+
+    console.log('annotationXAxis', annotationXAxis);
 
     const [lineChartOptions, setLineChartOptions] = useState({
         chart: {
@@ -73,22 +145,16 @@ const EditPlugRule = ({
             zoom: {
                 enabled: false,
             },
+            id: 'areachart-2',
+            // background:
         },
         dataLabels: {
             enabled: false,
         },
-        toolbar: {
-            show: true,
-        },
+
         colors: ['#87AADE'],
         stroke: {
             curve: 'straight',
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5,
-            },
         },
         stroke: {
             width: [2, 2],
@@ -117,17 +183,124 @@ const EditPlugRule = ({
                 },
             },
         },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                format: 'dd/MMM - hh:mm TT',
-            },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
+
+        // xaxis: {
+        //     type: 'datetime',
+
+        //     // min: n,
+        //     // labels: {
+        //     //     format: 'ddd, hA',
+        //     // },
+        //     style: {
+        //         fontSize: '12px',
+        //         fontWeight: 600,
+        //         cssClass: 'apexcharts-xaxis-label',
+        //     },
+        // },
+
+        annotations: {
+            xaxis: [
+                {
+                    x: 'Mon 12 am',
+                    x2: 'Mon 12 pm',
+                    strokeDashArray: 0,
+                    borderColor: '#775DD0',
+                    label: {
+                        borderColor: '#775DD0',
+                        style: {
+                            color: '#000',
+                            background: '#775DD0',
+                        },
+                    },
+                },
+                {
+                    x: 'Tue 12 am',
+                    x2: 'Tue 12 pm',
+                    strokeDashArray: 0,
+                    borderColor: '#775DD0',
+                    label: {
+                        borderColor: '#775DD0',
+                        style: {
+                            color: '#000',
+                            background: '#775DD0',
+                        },
+                    },
+                },
+                // {
+                //     x: 'Wed 12AM',
+                //     x2: 'Wed 12PM',
+                //     strokeDashArray: 0,
+                //     borderColor: '#775DD0',
+                //     label: {
+                //         borderColor: '#775DD0',
+                //         style: {
+                //             color: '#000',
+                //             background: '#775DD0',
+                //         },
+                //     },
+                // },
+                // {
+                //     x: 'Thu 12AM',
+                //     x2: 'Thu 12PM',
+                //     strokeDashArray: 0,
+                //     borderColor: '#775DD0',
+                //     label: {
+                //         borderColor: '#775DD0',
+                //         style: {
+                //             color: '#000',
+                //             background: '#775DD0',
+                //         },
+                //     },
+                // },
+                // {
+                //     x: 'Fri 12AM',
+                //     x2: 'Fri 12PM',
+                //     strokeDashArray: 0,
+                //     borderColor: '#775DD0',
+                //     label: {
+                //         borderColor: '#775DD0',
+                //         style: {
+                //             color: '#000',
+                //             background: '#775DD0',
+                //         },
+                //     },
+                // },
+                // {
+                //     x: 'Sat 12AM',
+                //     x2: 'Sat 12PM',
+                //     strokeDashArray: 0,
+                //     borderColor: '#775DD0',
+                //     label: {
+                //         borderColor: '#775DD0',
+                //         style: {
+                //             color: '#000',
+                //             background: '#775DD0',
+                //         },
+                //     },
+                // },
+            ],
         },
+
+        xaxis: {
+            categories: [
+                'Sun 12AM',
+                'Sun 12PM',
+                'Mon 12AM',
+                'Mon 12PM',
+                'Tue 12AM',
+                'Tue 12PM',
+                'Wed 12AM',
+                'Wed 12PM',
+                'Thu 12AM',
+                'Thu 12PM',
+                'Fri 12AM',
+                'Fri 12PM',
+                'Sat 12AM',
+                'Sat 12PM',
+                'Sun 12AM',
+            ],
+        },
+
         yaxis: {
             labels: {
                 formatter: function (value) {
@@ -141,70 +314,240 @@ const EditPlugRule = ({
             style: {
                 fontSize: '12px',
                 fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
+                // cssClass: 'apexcharts-xaxis-label',
             },
         },
     });
 
-    const [lineChartData, setLineChartData] = useState([
-        {
-            data: [
-                {
-                    x: 'May 13',
-                    y: '0.07',
+    useEffect(() => {
+        setLineChartOptions({
+            chart: {
+                type: 'line',
+                zoom: {
+                    enabled: false,
                 },
-                {
-                    x: 'May 26',
-                    y: '0.01',
+                id: 'areachart-2',
+            },
+            dataLabels: {
+                enabled: false,
+            },
+
+            colors: ['#87AADE'],
+            stroke: {
+                curve: 'straight',
+            },
+            stroke: {
+                width: [2, 2],
+            },
+            plotOptions: {
+                bar: {
+                    columnWidth: '20%',
                 },
-                {
-                    x: 'May 27',
-                    y: '123.45',
+            },
+            tooltip: {
+                shared: false,
+                intersect: false,
+                style: {
+                    fontSize: '12px',
+                    fontFamily: 'Inter, Arial, sans-serif',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
                 },
-                {
-                    x: 'May 28',
-                    y: '7.20',
+                x: {
+                    show: true,
+                    format: 'dd/MMM',
                 },
-                {
-                    x: 'Jun 3',
-                    y: '0.07',
+                y: {
+                    formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                        return value + ' K';
+                    },
                 },
-                {
-                    x: 'Jun 4',
-                    y: '21.60',
+            },
+
+            annotations: {
+                xaxis: annotationXAxis,
+            },
+
+            xaxis: {
+                categories: [
+                    'Sun 12AM',
+                    'Sun 12PM',
+                    'Mon 12AM',
+                    'Mon 12PM',
+                    'Tue 12AM',
+                    'Tue 12PM',
+                    'Wed 12AM',
+                    'Wed 12PM',
+                    'Thu 12AM',
+                    'Thu 12PM',
+                    'Fri 12AM',
+                    'Fri 12PM',
+                    'Sat 12AM',
+                    'Sat 12PM',
+                    'Sun 12AM',
+                ],
+            },
+
+            yaxis: {
+                labels: {
+                    formatter: function (value) {
+                        var val = Math.abs(value);
+                        if (val >= 1000) {
+                            val = (val / 1000).toFixed(0) + ' K';
+                        }
+                        return val;
+                    },
                 },
-                {
-                    x: 'Jun 5',
-                    y: '25.20',
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    // cssClass: 'apexcharts-xaxis-label',
                 },
-                {
-                    x: 'Jun 6',
-                    y: '21.75',
-                },
-                {
-                    x: 'Jun 8',
-                    y: '820.01',
-                },
-            ],
-        },
-    ]);
+            },
+        });
+    }, [annotationXAxis]);
+
+    const [lineChartData, setLineChartData] = useState([]);
+
+    useEffect(() => {
+        setLineChartData([
+            {
+                data: [
+                    {
+                        x: `${hoursNew[2]}`,
+                        y: '0.07',
+                    },
+                    {
+                        x: `${hoursNew[3]}`,
+                        y: '49.1',
+                    },
+                    {
+                        x: `${hoursNew[4]}`,
+                        y: '10.3',
+                    },
+                    {
+                        x: `${hoursNew[5]}`,
+                        y: '49.3',
+                    },
+                    {
+                        x: `${hoursNew[6]}`,
+                        y: '45.3',
+                    },
+                    {
+                        x: `${hoursNew[7]}`,
+                        y: '45.3',
+                    },
+                    {
+                        x: `${hoursNew[8]}`,
+                        y: '45.1',
+                    },
+                    {
+                        x: `${hoursNew[9]}`,
+                        y: '10.3',
+                    },
+                    {
+                        x: `${hoursNew[10]}`,
+                        y: '45.3',
+                    },
+                    {
+                        x: `${hoursNew[11]}`,
+                        y: '91.3',
+                    },
+                    {
+                        x: `${hoursNew[12]}`,
+                        y: '45.3',
+                    },
+                    {
+                        x: `${hoursNew[13]}`,
+                        y: '10.3',
+                    },
+                    {
+                        x: `${hoursNew[14]}`,
+                        y: '20.3',
+                    },
+                    {
+                        x: `${hoursNew[15]}`,
+                        y: '10.3',
+                    },
+                ],
+            },
+        ]);
+    }, [hoursNew]);
+
+    console.log('lineChartData', lineChartData);
 
     const [selectedOption, setSelectedOption] = useState([]);
-    console.log('selectedOption', selectedOption);
-    const handleFilterEquipment = (e) => {
-        let activeId = e.target.value;
-        if (activeId === 'All') {
-            setAllLinkedRuleData(allData);
-            // console.log(allData);
-        } else {
-            const result = allData.find(({ equipment_type_name }) => equipment_type_name === activeId);
-            // console.log(result);
-            let arr = [];
-            arr.push(result);
-            // console.log(arr)
-            setAllLinkedRuleData(arr);
-        }
+    const [selectedOptionMac, setSelectedOptionMac] = useState([]);
+    const [selectedOptionLocation, setSelectedOptionLocation] = useState([]);
+    console.log('selectedOptionLocation', selectedOptionLocation);
+
+    const [selectedEqupimentOption, setSelectedEqupimentOption] = useState([]);
+    const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
+
+    const [selectedMacOption, setSelectedMacOption] = useState([]);
+    const [macTypeFilterString, setMacTypeFilterString] = useState('');
+
+    const [selectedLocationOption, setSelectedLocationOption] = useState([]);
+    const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
+
+    const handleEqupimentTypeFilter = () => {
+        return selectedOption?.map((item) => {
+            setSelectedEqupimentOption((el) => [...el, item?.value]);
+        });
     };
+
+    const handleMacFilter = () => {
+        return selectedOptionMac?.map((item) => {
+            setSelectedMacOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleLocationFilter = () => {
+        return selectedOptionLocation?.map((item) => {
+            setSelectedLocationOption((el) => [...el, item?.value]);
+        });
+    };
+
+    console.log('selectedEqupimentOption', selectedEqupimentOption);
+
+    useEffect(() => {
+        setSelectedEqupimentOption([]);
+        handleEqupimentTypeFilter();
+    }, [selectedOption]);
+
+    useEffect(() => {
+        setSelectedMacOption([]);
+        handleMacFilter();
+    }, [selectedOptionMac]);
+
+    useEffect(() => {
+        setSelectedLocationOption([]);
+        handleLocationFilter();
+    }, [selectedOptionLocation]);
+
+    const equpimentTypeFilterStringFunc = () => {
+        return setEqupimentTypeFilterString(selectedEqupimentOption?.join('%2B'));
+    };
+
+    const macFilterStringFunc = () => {
+        return setMacTypeFilterString(selectedMacOption?.join('%2B'));
+    };
+
+    const locationFilterStringFunc = () => {
+        return setLocationTypeFilterString(selectedLocationOption?.join('%2B'));
+    };
+
+    useEffect(() => {
+        equpimentTypeFilterStringFunc();
+    }, [selectedEqupimentOption]);
+
+    useEffect(() => {
+        macFilterStringFunc();
+    }, [selectedMacOption]);
+
+    useEffect(() => {
+        locationFilterStringFunc();
+    }, [selectedLocationOption]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -390,10 +733,18 @@ const EditPlugRule = ({
         {
             console.log('manas');
         }
+
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
                 setOptions((el) => [...el, { value: record?.equipment_type, label: record?.name }]);
+                setMacOptions((el) => [...el, { value: record?.device_link, label: record?.device_link }]);
+                if (record?.equipment_link_location) {
+                    setLocationOptions((el) => [
+                        ...el,
+                        { value: record?.equipment_link_location_id, label: record?.equipment_link_location },
+                    ]);
+                }
             });
     };
 
@@ -438,7 +789,7 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     // console.log(response.total_data);
@@ -449,6 +800,7 @@ const EditPlugRule = ({
                         unLinkedData.push(record);
                     });
                     setUnLinkedRuleData(unLinkedData);
+                    setAllUnlinkedRuleAdded((el) => [...el, '1']);
                 });
             } catch (error) {
                 console.log(error);
@@ -458,7 +810,7 @@ const EditPlugRule = ({
 
         fetchLinkedSocketRules();
         fetchUnLinkedSocketRules();
-    }, [activeRuleId]);
+    }, [activeRuleId, equpimentTypeFilterString, macTypeFilterString, locationTypeFilterString]);
 
     useEffect(() => {
         let arr1 = [];
@@ -487,6 +839,7 @@ const EditPlugRule = ({
                         unLinkedData.push(record);
                     });
                     setAllData(unLinkedData);
+                    setAllUnlinkedRuleAdded((el) => [...el, '2']);
                 });
             } catch (error) {
                 console.log(error);
@@ -501,46 +854,6 @@ const EditPlugRule = ({
         let id = currentData.id ? currentData.id : null;
         setActiveRuleId(id);
     }, [currentData]);
-
-    const data = [];
-
-    const columns = [
-        {
-            title: 'Equipment Type',
-            dataIndex: 'equipmentType',
-            key: 'equipmentType',
-        },
-        {
-            title: 'Location',
-            dataIndex: 'location',
-            key: 'location',
-        },
-        {
-            title: 'MAC Address',
-            dataIndex: 'macAddress',
-            key: 'macAddress',
-        },
-        {
-            title: 'Sensor',
-            dataIndex: 'sensor',
-            key: 'sensor',
-        },
-        {
-            title: 'Assigned Rule',
-            dataIndex: 'assignedRule',
-            key: 'assignedRule',
-        },
-        {
-            title: 'Tags',
-            dataIndex: 'tags',
-            key: 'tags',
-        },
-        {
-            title: 'Last Data',
-            dataIndex: 'lastData',
-            key: 'lastData',
-        },
-    ];
 
     return (
         <>
@@ -735,98 +1048,365 @@ const EditPlugRule = ({
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('mon')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
+                                                                                // TODO:
                                                                                 handleActionDayChange(
                                                                                     'mon',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('mon')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Mon 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('mon')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Mon 12 am',
+                                                                                            x2: 'Mon 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Mo
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('tue')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'tue',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('tue')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Tue 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('tue')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Tue 12 am',
+                                                                                            x2: 'Tue 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Tu
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('wed')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'wed',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('wed')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Wed 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('wed')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Wed 12 am',
+                                                                                            x2: 'Wed 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             We
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('thr')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'thr',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('thr')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Thu 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('thr')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Thu 12 am',
+                                                                                            x2: 'Thu 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Th
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('fri')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'fri',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('fri')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Fri 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('fri')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Fri 12 am',
+                                                                                            x2: 'Fri 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Fr
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('sat')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'sat',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('sat')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Sat 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('sat')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Sat 12 am',
+                                                                                            x2: 'Sat 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Sa
                                                                         </div>
                                                                         <div
                                                                             className={
                                                                                 record.action_day.includes('sun')
-                                                                                    ? 'schedular-weekday-active'
-                                                                                    : 'schedular-weekday'
+                                                                                    ? 'schedular-weekday'
+                                                                                    : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
                                                                                 handleActionDayChange(
                                                                                     'sun',
                                                                                     record.condition_id
                                                                                 );
+                                                                                if (record.action_day.includes('sun')) {
+                                                                                    setAnnotationXAxis((current) =>
+                                                                                        current.filter((item) => {
+                                                                                            return (
+                                                                                                item?.x !== 'Sun 12 am'
+                                                                                            );
+                                                                                        })
+                                                                                    );
+                                                                                }
+                                                                                if (
+                                                                                    !record.action_day.includes('sun')
+                                                                                ) {
+                                                                                    setAnnotationXAxis((prev) => [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            x: 'Sun 12 am',
+                                                                                            x2: 'Sun 12 pm',
+                                                                                            label: {
+                                                                                                borderColor: '#000',
+                                                                                                borderWidth: 1,
+                                                                                                borderRadius: 2,
+                                                                                                text: 'off',
+                                                                                                textAnchor: 'middle',
+                                                                                                position: 'top',
+                                                                                                orientation:
+                                                                                                    'horizontal',
+                                                                                                offsetX: 60,
+                                                                                                offsetY: -15,
+
+                                                                                                style: {
+                                                                                                    background: '#333',
+                                                                                                    fontSize: '15px',
+                                                                                                    fontWeight: 400,
+                                                                                                },
+                                                                                            },
+                                                                                        },
+                                                                                    ]);
+                                                                                }
                                                                             }}>
                                                                             Su
                                                                         </div>
@@ -897,8 +1477,11 @@ const EditPlugRule = ({
                                         <h5 className="plugrule-chart-title float-right">1,722 kWh</h5>
                                     </div>
                                 </div>
+
                                 <div className="total-eng-consumtn">
-                                    <LineChart options={lineChartOptions} series={lineChartData} height={200} />
+                                    {lineChartData && lineChartOptions && (
+                                        <LineChart options={lineChartOptions} series={lineChartData} height={200} />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -983,12 +1566,33 @@ const EditPlugRule = ({
                                             </Form.Group>
                                         </div>
 
+                                        {/* MAC Address */}
+                                        <div>
+                                            <Form.Group>
+                                                <Form.Label for="userState" className="card-title">
+                                                    MAC Address
+                                                </Form.Label>
+
+                                                <MultiSelect
+                                                    options={macOptions}
+                                                    value={selectedOptionMac}
+                                                    onChange={setSelectedOptionMac}
+                                                    labelledBy="MAC..."
+                                                    className="column-filter-styling"
+                                                    valueRenderer={() => {
+                                                        return 'MAC';
+                                                    }}
+                                                    ClearSelectedIcon={null}
+                                                />
+                                            </Form.Group>
+                                        </div>
+
                                         <div>
                                             <Form.Group>
                                                 <Form.Label for="userState" className="card-title">
                                                     Location
                                                 </Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1003,9 +1607,18 @@ const EditPlugRule = ({
                                                         ?.map((items) => {
                                                             return <option>{items?.equipment_link_location}</option>;
                                                         })}
-                                                    {/* <option>Filtered</option> */}
-                                                    {/* <option>Option 1</option> */}
-                                                </Input>
+                                                </Input> */}
+                                                <MultiSelect
+                                                    options={locationOptions}
+                                                    value={selectedOptionLocation}
+                                                    onChange={setSelectedOptionLocation}
+                                                    labelledBy="Location"
+                                                    className="column-filter-styling"
+                                                    valueRenderer={() => {
+                                                        return 'Location';
+                                                    }}
+                                                    ClearSelectedIcon={null}
+                                                />
                                             </Form.Group>
                                         </div>
 
@@ -1056,7 +1669,6 @@ const EditPlugRule = ({
                                                         onChange={() => {
                                                             setCheckedAll(!checkedAll);
                                                         }}
-                                                        // disabled
                                                     />
                                                 </th>
                                                 <th>Equipment Type</th>
@@ -1069,237 +1681,319 @@ const EditPlugRule = ({
                                             </tr>
                                         </thead>
 
-                                        {selectedRuleFilter === 0 && selectedOption?.length === 0 && (
-                                            <tbody>
-                                                {allLinkedRuleData.map((record, index) => {
-                                                    return (
-                                                        <tr key={index}>
-                                                            <td>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="socket_rule"
-                                                                    name="socket_rule"
-                                                                    checked={record.linked_rule || checkedAll}
-                                                                    value={
-                                                                        record.linked_rule || checkedAll ? true : false
-                                                                    }
-                                                                    onChange={(e) => {
-                                                                        handleRuleStateChange(e.target.value, record);
-                                                                    }}
-                                                                />
-                                                            </td>
-
-                                                            {/* Just added */}
-                                                            {/* <td className="font-weight-bold">{record.name}</td> */}
-
-                                                            {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">-</td>
-                                                            ) : (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type}`}
-                                                                    </div>
-                                                                </td>
-                                                            )}
-
-                                                            <td className="font-weight-bold">
-                                                                {record.equipment_link_location}
-                                                            </td>
-
-                                                            <td className="font-weight-bold">{record.device_link}</td>
-
-                                                            <td className="font-weight-bold">-</td>
-
-                                                            <td className="font-weight-bold">
-                                                                {record.assigned_rules.length === 0
-                                                                    ? 'None'
-                                                                    : record.assigned_rules}
-                                                            </td>
-
-                                                            <td className="font-weight-bold">{record.tag}</td>
-
-                                                            <td className="font-weight-bold">{record.last_data}</td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        )}
-
-                                        {selectedRuleFilter === 0 && locationFilter?.length > 0 && (
-                                            <tbody>
-                                                {allLinkedRuleData
-                                                    ?.filter((item) => {
-                                                        console.log(
-                                                            'item?.equipment_link_location',
-                                                            item?.equipment_link_location
-                                                        );
-                                                        return locationFilter === item?.equipment_link_location;
-                                                    })
-                                                    .map((record, index) => {
-                                                        return (
-                                                            <tr key={index}>
-                                                                <td>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        id="socket_rule"
-                                                                        name="socket_rule"
-                                                                        checked={record.linked_rule || checkedAll}
-                                                                        value={
-                                                                            record.linked_rule || checkedAll
-                                                                                ? true
-                                                                                : false
-                                                                        }
-                                                                        onChange={(e) => {
-                                                                            handleRuleStateChange(
-                                                                                e.target.value,
-                                                                                record
-                                                                            );
-                                                                        }}
-                                                                    />
-                                                                </td>
-
-                                                                {/* Just added */}
-                                                                {/* <td className="font-weight-bold">{record.name}</td> */}
-
-                                                                {record.equipment_link_type === '' ? (
-                                                                    <td className="font-weight-bold panel-name">-</td>
-                                                                ) : (
-                                                                    <td className="font-weight-bold panel-name">
-                                                                        <div className="plug-equip-container">
-                                                                            {`${record.equipment_link_type}`}
-                                                                        </div>
+                                        {selectedRuleFilter === 0 && (
+                                            <>
+                                                {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                                    <tbody>
+                                                        {allLinkedRuleData.map((record, index) => {
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            id="socket_rule"
+                                                                            name="socket_rule"
+                                                                            checked={record.linked_rule || checkedAll}
+                                                                            value={
+                                                                                record.linked_rule || checkedAll
+                                                                                    ? true
+                                                                                    : false
+                                                                            }
+                                                                            onChange={(e) => {
+                                                                                handleRuleStateChange(
+                                                                                    e.target.value,
+                                                                                    record
+                                                                                );
+                                                                            }}
+                                                                        />
                                                                     </td>
-                                                                )}
 
-                                                                <td className="font-weight-bold">
-                                                                    {record.equipment_link_location}
-                                                                </td>
+                                                                    {/* Just added */}
+                                                                    {/* <td className="font-weight-bold">{record.name}</td> */}
 
-                                                                <td className="font-weight-bold">
-                                                                    {record.device_link}
-                                                                </td>
+                                                                    {record.equipment_link_type === '' ? (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            -
+                                                                        </td>
+                                                                    ) : (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            <div className="plug-equip-container">
+                                                                                {`${record.equipment_link_type}`}
+                                                                            </div>
+                                                                        </td>
+                                                                    )}
 
-                                                                <td className="font-weight-bold">-</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.equipment_link_location}
+                                                                    </td>
 
-                                                                <td className="font-weight-bold">
-                                                                    {record.assigned_rules.length === 0
-                                                                        ? 'None'
-                                                                        : record.assigned_rules}
-                                                                </td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.device_link}
+                                                                    </td>
 
-                                                                <td className="font-weight-bold">{record.tag}</td>
+                                                                    <td className="font-weight-bold">-</td>
 
-                                                                <td className="font-weight-bold">{record.last_data}</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.assigned_rules.length === 0
+                                                                            ? 'None'
+                                                                            : record.assigned_rules}
+                                                                    </td>
+
+                                                                    <td className="font-weight-bold">{record.tag}</td>
+
+                                                                    <td className="font-weight-bold">
+                                                                        {record.last_data}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                ) : (
+                                                    <tbody>
+                                                        <SkeletonTheme color="#202020" height={35}>
+                                                            <tr>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
                                                             </tr>
-                                                        );
-                                                    })}
-                                            </tbody>
+                                                        </SkeletonTheme>
+                                                    </tbody>
+                                                )}
+                                            </>
                                         )}
 
-                                        {selectedRuleFilter === 1 && selectedOption?.length === 0 && (
-                                            <tbody>
-                                                {linkedRuleData.map((record, index) => {
-                                                    return (
-                                                        <tr key={index}>
-                                                            <td>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="socket_rule"
-                                                                    name="socket_rule"
-                                                                    checked={record.linked_rule || checkedAll}
-                                                                    value={
-                                                                        record.linked_rule || checkedAll ? true : false
-                                                                    }
-                                                                    onChange={(e) => {
-                                                                        handleRuleStateChange(e.target.value, record);
-                                                                    }}
-                                                                />
-                                                            </td>
+                                        {selectedRuleFilter === 1 && (
+                                            <>
+                                                {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                                    <tbody>
+                                                        {linkedRuleData.map((record, index) => {
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            id="socket_rule"
+                                                                            name="socket_rule"
+                                                                            checked={record.linked_rule || checkedAll}
+                                                                            value={
+                                                                                record.linked_rule || checkedAll
+                                                                                    ? true
+                                                                                    : false
+                                                                            }
+                                                                            onChange={(e) => {
+                                                                                handleRuleStateChange(
+                                                                                    e.target.value,
+                                                                                    record
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    </td>
 
-                                                            {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">-</td>
-                                                            ) : (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type}`}
-                                                                    </div>
-                                                                </td>
-                                                            )}
+                                                                    {record.equipment_link_type === '' ? (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            -
+                                                                        </td>
+                                                                    ) : (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            <div className="plug-equip-container">
+                                                                                {`${record.equipment_link_type}`}
+                                                                            </div>
+                                                                        </td>
+                                                                    )}
 
-                                                            <td className="font-weight-bold">
-                                                                {record.equipment_link_location}
-                                                            </td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.equipment_link_location}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">{record.device_link}</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.device_link}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">-</td>
+                                                                    <td className="font-weight-bold">-</td>
 
-                                                            <td className="font-weight-bold">
-                                                                {record.assigned_rules.length === 0
-                                                                    ? 'None'
-                                                                    : record.assigned_rules}
-                                                            </td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.assigned_rules.length === 0
+                                                                            ? 'None'
+                                                                            : record.assigned_rules}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                                    <td className="font-weight-bold">{record.tag}</td>
 
-                                                            <td className="font-weight-bold">{record.last_data}</td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.last_data}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                ) : (
+                                                    <tbody>
+                                                        <SkeletonTheme color="#202020" height={35}>
+                                                            <tr>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                            </tr>
+                                                        </SkeletonTheme>
+                                                    </tbody>
+                                                )}
+                                            </>
                                         )}
 
-                                        {selectedRuleFilter === 2 && selectedOption?.length === 0 && (
-                                            <tbody>
-                                                {unLinkedRuleData.map((record, index) => {
-                                                    return (
-                                                        <tr key={index}>
-                                                            <td>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    id="socket_rule"
-                                                                    name="socket_rule"
-                                                                    checked={record.linked_rule || checkedAll}
-                                                                    value={
-                                                                        record.linked_rule || checkedAll ? true : false
-                                                                    }
-                                                                    onChange={(e) => {
-                                                                        handleRuleStateChange(e.target.value, record);
-                                                                    }}
-                                                                />
-                                                            </td>
+                                        {selectedRuleFilter === 2 && (
+                                            <>
+                                                {unLinkedRuleData?.length !== 0 && allData?.length !== 0 ? (
+                                                    <tbody>
+                                                        {unLinkedRuleData.map((record, index) => {
+                                                            return (
+                                                                <tr key={index}>
+                                                                    <td>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            id="socket_rule"
+                                                                            name="socket_rule"
+                                                                            checked={record.linked_rule || checkedAll}
+                                                                            value={
+                                                                                record.linked_rule || checkedAll
+                                                                                    ? true
+                                                                                    : false
+                                                                            }
+                                                                            onChange={(e) => {
+                                                                                handleRuleStateChange(
+                                                                                    e.target.value,
+                                                                                    record
+                                                                                );
+                                                                            }}
+                                                                        />
+                                                                    </td>
 
-                                                            {record.equipment_link_type === '' ? (
-                                                                <td className="font-weight-bold panel-name">-</td>
-                                                            ) : (
-                                                                <td className="font-weight-bold panel-name">
-                                                                    <div className="plug-equip-container">
-                                                                        {`${record.equipment_link_type}`}
-                                                                    </div>
-                                                                </td>
-                                                            )}
+                                                                    {record.equipment_link_type === '' ? (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            -
+                                                                        </td>
+                                                                    ) : (
+                                                                        <td className="font-weight-bold panel-name">
+                                                                            <div className="plug-equip-container">
+                                                                                {`${record.equipment_link_type}`}
+                                                                            </div>
+                                                                        </td>
+                                                                    )}
 
-                                                            <td className="font-weight-bold">
-                                                                {record.equipment_link_location}
-                                                            </td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.equipment_link_location}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">{record.device_link}</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.device_link}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">-</td>
+                                                                    <td className="font-weight-bold">-</td>
 
-                                                            <td className="font-weight-bold">
-                                                                {record.assigned_rules.length === 0
-                                                                    ? 'None'
-                                                                    : record.assigned_rules}
-                                                            </td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.assigned_rules.length === 0
+                                                                            ? 'None'
+                                                                            : record.assigned_rules}
+                                                                    </td>
 
-                                                            <td className="font-weight-bold">{record.tag}</td>
+                                                                    <td className="font-weight-bold">{record.tag}</td>
 
-                                                            <td className="font-weight-bold">{record.last_data}</td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.last_data}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                ) : (
+                                                    <tbody>
+                                                        <SkeletonTheme color="#202020" height={35}>
+                                                            <tr>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                                <th>
+                                                                    <Skeleton count={5} />
+                                                                </th>
+                                                            </tr>
+                                                        </SkeletonTheme>
+                                                    </tbody>
+                                                )}
+                                            </>
                                         )}
                                     </Table>
                                     <div className="page-button-style">

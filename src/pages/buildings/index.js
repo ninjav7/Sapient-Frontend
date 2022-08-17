@@ -11,6 +11,7 @@ import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
@@ -124,8 +125,8 @@ const BuildingOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#3B8554'],
         series: [12553, 11553, 6503, 2333],
         plotOptions: {
             pie: {
@@ -366,6 +367,9 @@ const BuildingOverview = () => {
             zoom: {
                 enabled: false,
             },
+            animations: {
+                enabled: false,
+            },
         },
         dataLabels: {
             enabled: false,
@@ -414,7 +418,7 @@ const BuildingOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - hh:mm');
+                    return moment(timestamp).format('DD/MMM - HH:mm');
                 },
             },
             style: {
@@ -1146,7 +1150,10 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        // console.log('setOverview => ', res.data);
+                        console.log('setOverview => ', percentageHandler(
+                            res.data.average_energy_density.now,
+                            res.data.average_energy_density.old
+                        ));
                     });
             } catch (error) {
                 console.log(error);
@@ -1173,14 +1180,15 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        // console.log('setenergyConsumption', res.data);
+                        console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
                             // newArray.push(fixedConsumption);
-                            newDonutData.push(parseInt(fixedConsumption));
+                            newDonutData.push(fixedConsumption);
                         });
+                        console.log(newDonutData);
                         setDonutChartData(newDonutData);
                     });
             } catch (error) {
@@ -1189,60 +1197,60 @@ const BuildingOverview = () => {
             }
         };
 
-        const buildingAlertsData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${1}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingAlerts}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setBuildingAlerts(res.data);
-                        // console.log('Building Alert => ', res.data);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Alert Data');
-            }
-        };
+        // const buildingAlertsData = async () => {
+        //     try {
+        //         let headers = {
+        //             'Content-Type': 'application/json',
+        //             accept: 'application/json',
+        //             Authorization: `Bearer ${userdata.token}`,
+        //         };
+        //         let params = `?building_id=${1}`;
+        //         await axios
+        //             .post(
+        //                 `${BaseUrl}${builidingAlerts}${params}`,
+        //                 {
+        //                     date_from: dateFormatHandler(startDate),
+        //                     date_to: dateFormatHandler(endDate),
+        //                 },
+        //                 { headers }
+        //             )
+        //             .then((res) => {
+        //                 setBuildingAlerts(res.data);
+        //                 // console.log('Building Alert => ', res.data);
+        //             });
+        //     } catch (error) {
+        //         console.log(error);
+        //         console.log('Failed to fetch Building Alert Data');
+        //     }
+        // };
 
-        const buildingPeaksData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&limit=${2}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingPeak}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setTopContributors(res.data);
-                        // console.log('setTopContributors => ', res.data);
-                        // console.log(res.data);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Peak Data');
-            }
-        };
+        // const buildingPeaksData = async () => {
+        //     try {
+        //         let headers = {
+        //             'Content-Type': 'application/json',
+        //             accept: 'application/json',
+        //             Authorization: `Bearer ${userdata.token}`,
+        //         };
+        //         let params = `?building_id=${bldgId}&limit=${2}`;
+        //         await axios
+        //             .post(
+        //                 `${BaseUrl}${builidingPeak}${params}`,
+        //                 {
+        //                     date_from: dateFormatHandler(startDate),
+        //                     date_to: dateFormatHandler(endDate),
+        //                 },
+        //                 { headers }
+        //             )
+        //             .then((res) => {
+        //                 setTopContributors(res.data);
+        //                 // console.log('setTopContributors => ', res.data);
+        //                 // console.log(res.data);
+        //             });
+        //     } catch (error) {
+        //         console.log(error);
+        //         console.log('Failed to fetch Building Peak Data');
+        //     }
+        // };
 
         const builidingEquipmentsData = async () => {
             try {
@@ -1282,102 +1290,109 @@ const BuildingOverview = () => {
             }
         };
 
-        const builidingHourlyData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingHourly}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data;
+        // // // // // // const builidingHourlyData = async () => {
+        // // // // // //     try {
+        // // // // // //         let headers = {
+        // // // // // //             'Content-Type': 'application/json',
+        // // // // // //             accept: 'application/json',
+        // // // // // //             Authorization: `Bearer ${userdata.token}`,
+        // // // // // //         };
+        // // // // // //         let params = `?building_id=${bldgId}`;
+        // // // // // //         await axios
+        // // // // // //             .post(
+        // // // // // //                 `${BaseUrl}${builidingHourly}${params}`,
+        // // // // // //                 {
+        // // // // // //                     date_from: dateFormatHandler(startDate),
+        // // // // // //                     date_to: dateFormatHandler(endDate),
+        // // // // // //                 },
+        // // // // // //                 { headers }
+        // // // // // //             )
+        // // // // // //             .then((res) => {
+        // // // // // //                 let response = res.data;
 
-                        let weekDaysResData = response[0].weekdays;
-                        let weekEndResData = response[0].weekend;
+        // // // // // //                 let weekDaysResData = response[0].weekdays;
+        // // // // // //                 let weekEndResData = response[0].weekend;
 
-                        // console.log('weekDaysResData => ', weekDaysResData);
+        // // // // // //                 // console.log('weekDaysResData => ', weekDaysResData);
 
-                        const weekDaysData = weekDaysResData.map((el) => {
-                            return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
-                            };
-                        });
+        // // // // // //                 const weekDaysData = weekDaysResData.map((el) => {
+        // // // //                     return {
+        // // // //                         x: parseInt(moment(el.x).format('HH')),
+        // // // //                         y: (el.y / 1000).toFixed(2),
+        // // // //                     };
+        // // // //                 });
 
-                        const weekendsData = weekEndResData.map((el) => {
-                            return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
-                            };
-                        });
+        // //                 const weekendsData = weekEndResData.map((el) => {
+        // // // //                     return {
+        // // // //                         x: parseInt(moment(el.x).format('HH')),
+        // // // //                         y: (el.y / 1000).toFixed(2),
+        // // // //                     };
+        // // // //                 });
 
-                        const newWeekdaysData = [
-                            {
-                                name: 'Weekdays',
-                                data: [],
-                            },
-                        ];
+        // //                 const weekendsData = weekEndResData.map((el) => {
+        // //                     return {
+        // //                         x: parseInt(moment(el.x).format('HH')),
+        // //                         y: (el.y / 1000).toFixed(2),
+        // //                     };
+        // //                 });
 
-                        const newWeekendsData = [
-                            {
-                                name: 'Weekends',
-                                data: [],
-                            },
-                        ];
+        // //                 const newWeekdaysData = [
+        // //                     {
+        // //                         name: 'Weekdays',
+        // //                         data: [],
+        // //                     },
+        // //                 ];
 
-                        for (let i = 1; i <= 24; i++) {
-                            let matchedRecord = weekDaysData.find((record) => record.x === i);
+        // //                 const newWeekendsData = [
+        // //                     {
+        // //                         name: 'Weekends',
+        // //                         data: [],
+        // //                     },
+        // //                 ];
 
-                            if (matchedRecord) {
-                                newWeekdaysData[0].data.push(matchedRecord);
-                            } else {
-                                newWeekdaysData[0].data.push({
-                                    x: i,
-                                    y: 0,
-                                });
-                            }
-                        }
+        // //                 for (let i = 1; i <= 24; i++) {
+        // //                     let matchedRecord = weekDaysData.find((record) => record.x === i);
 
-                        for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
-                            if (matchedRecord) {
-                                matchedRecord.x = i;
-                                // console.log('matchedRecord => ', matchedRecord);
-                                newWeekendsData[0].data.push(matchedRecord);
-                            } else {
-                                newWeekendsData[0].data.push({
-                                    x: i,
-                                    y: 0,
-                                });
-                            }
-                        }
-                        // console.log('newWeekendsData => ', newWeekendsData);
-                        setWeekDaysSeries(newWeekdaysData);
-                        setWeekEndsSeries(newWeekendsData);
-                        // setWeekEndsSeries([
-                        //     {
-                        //         name: 'Weekends',
-                        //         data: [
-                        //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-                        //         ],
-                        //     },
-                        // ]);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Hourly Data');
-            }
-        };
+        // // //                     if (matchedRecord) {
+        // // //                         newWeekdaysData[0].data.push(matchedRecord);
+        // // //                     } else {
+        // // //                         newWeekdaysData[0].data.push({
+        // // //                             x: i,
+        // // //                             y: 0,
+        // // //                         });
+        // // //                     }
+        // // //                 }
+
+        //                 for (let i = 0; i < 24; i++) {
+        //                     let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+        //                     if (matchedRecord) {
+        //                         matchedRecord.x = i;
+        //                         // console.log('matchedRecord => ', matchedRecord);
+        //                         newWeekendsData[0].data.push(matchedRecord);
+        //                     } else {
+        //                         newWeekendsData[0].data.push({
+        //                             x: i,
+        //                             y: 0,
+        //                         });
+        //                     }
+        //                 }
+        //                 // console.log('newWeekendsData => ', newWeekendsData);
+        //                 setWeekDaysSeries(newWeekdaysData);
+        //                 setWeekEndsSeries(newWeekendsData);
+        //                 // setWeekEndsSeries([
+        //                 //     {
+        //                 //         name: 'Weekends',
+        //                 //         data: [
+        //                 //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+        //                 //         ],
+        //                 //     },
+        //                 // ]);
+        //             });
+        //     } catch (error) {
+        //         console.log(error);
+        //         console.log('Failed to fetch Building Hourly Data');
+        //     }
+        // };
 
         const buildingConsumptionChart = async () => {
             try {
@@ -1386,7 +1401,7 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=day&building_id=${bldgId}`;
+                let params = `?aggregate=minute&building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
@@ -1407,7 +1422,7 @@ const BuildingOverview = () => {
                         response.forEach((record) => {
                             newArray[0].data.push({
                                 x: record.x,
-                                y: (record.y / 1000).toFixed(2),
+                                y: (record.y / 1000).toFixed(5),
                             });
                         });
                         // console.log('newArray => ', newArray);
@@ -1429,10 +1444,10 @@ const BuildingOverview = () => {
         calculateDays();
         buildingOverallData();
         buildingEndUserData();
-        buildingAlertsData();
-        buildingPeaksData();
+        // // // buildingAlertsData();
+        //////buildingPeaksData();
         builidingEquipmentsData();
-        builidingHourlyData();
+       // builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1477,7 +1492,7 @@ const BuildingOverview = () => {
                         </div>
                     </div>
 
-                    <div className="card-box-style button-style">
+                    {/* {/* {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style">
                                 Portfolio Rank&nbsp;&nbsp;
@@ -1492,13 +1507,13 @@ const BuildingOverview = () => {
                                 1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
                             </p>
                         </div>
-                    </div>
+                    </div> */}  
 
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={overview.average_energy_density.now / 1000}
+                                description={((overview.average_energy_density.now / 1000).toFixed(5))}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1512,7 +1527,7 @@ const BuildingOverview = () => {
                             />
                         </div>
                     </div>
-                    <div className="card-box-style button-style">
+                    {/* {/* {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="12 Mo. Electric EUI"
@@ -1527,7 +1542,7 @@ const BuildingOverview = () => {
                                 infoType={`total-bld-eui`}
                             />
                         </div>
-                    </div>
+                    </div> */}  
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
@@ -1544,12 +1559,12 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            <Link
+                            {/* {/* <Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link>
+                            </Link> */} 
                         </div>
                     </div>
                 </div>
@@ -1559,13 +1574,13 @@ const BuildingOverview = () => {
             <div className="bldg-page-grid-style">
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
-                    <div>
-                        <div>
-                            <div style={{ display: 'inline-block' }}>
+                    {/* <div> */}
+                        {/* <div> */}
+                            {/* <div style={{ display: 'inline-block' }}>
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
-                            </div>
-                            <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
+                            </div> */}
+                            {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
                                 <Link
                                     to={{
                                         pathname: `/energy/end-uses/${bldgId}`,
@@ -1580,18 +1595,19 @@ const BuildingOverview = () => {
                                         More Details
                                     </div>
                                 </Link>
-                            </div>
-                        </div>
+                            </div> */} 
+                        {/* </div>
                         <div className="custom-bld-enduse-style">
-                            <div>
-                                <DonutChart
+                            <div> */}
+                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
+                                {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
                                     height={185}
                                     id={Date.now()}
-                                />
-                            </div>
-                            <div className="mt-3">
+                                /> */}
+                            {/* </div> */}
+                            {/* <div className="mt-3">
                                 {energyConsumption.map((record, index) => {
                                     return (
                                         <div>
@@ -1631,6 +1647,13 @@ const BuildingOverview = () => {
                                                                     background: '#3B8554',
                                                                 }}></div>
                                                         )}
+                                                        {record.device === 'Other' && (
+                                                            <div
+                                                                className="dot"
+                                                                style={{
+                                                                    background: '#3B8554',
+                                                                }}></div>
+                                                        )}
                                                     </div>
                                                     <div className="custom-bld-equip-style record-bld-style font-weight-bold">
                                                         {record.device}
@@ -1639,7 +1662,7 @@ const BuildingOverview = () => {
                                                         {(record.energy_consumption.now / 1000).toLocaleString(
                                                             undefined,
                                                             {
-                                                                maximumFractionDigits: 2,
+                                                                maximumFractionDigits: 5,
                                                             }
                                                         )}
                                                         kWh
@@ -1679,12 +1702,12 @@ const BuildingOverview = () => {
                                         </div>
                                     );
                                 })}
-                            </div>
-                        </div>
-                    </div>
+                            </div> */}
+                        {/* </div> */}
+                    {/* </div> */}
 
                     {/* Top 3 Peak Demand Periods  */}
-                    <Row>
+                    {/* {/* {/* <Row>
                         <div className="card-body">
                             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                                 Top 3 Peak Demand Periods
@@ -1792,10 +1815,10 @@ const BuildingOverview = () => {
                                 ))}
                             </div>
                         </div>
-                    </Row>
+                    </Row> */}  
 
                     {/* Hourly Average Consumption */}
-                    <Row>
+                    {/* {/* {/* <Row>
                         <div className="card-body">
                             <h6
                                 className="card-title custom-title"
@@ -1833,7 +1856,7 @@ const BuildingOverview = () => {
                                 />
                             </div>
                         </div>
-                    </Row>
+                    </Row> */}
 
                     {/* Total Energy Consumption  */}
                     <Row>
@@ -1850,7 +1873,7 @@ const BuildingOverview = () => {
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
-                    <Row>
+                    {/* {/* {/* <Row>
                         <div>
                             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                                 Building Alerts
@@ -1883,7 +1906,6 @@ const BuildingOverview = () => {
                                                             size="lg"
                                                             className="ml-2"
                                                             color="#B42318
-"
                                                         />
                                                     </div>
                                                     <div>
@@ -1945,7 +1967,7 @@ const BuildingOverview = () => {
                                 })}
                             </div>
                         </div>
-                    </Row>
+                    </Row> */}  
                     <Row style={{ marginTop: '2rem' }}>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>

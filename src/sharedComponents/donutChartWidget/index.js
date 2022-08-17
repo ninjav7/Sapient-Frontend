@@ -40,7 +40,7 @@ const DonutChartWidget = ({
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
-    const series = items.map(({ value }) => Number(value));
+    const series = items.map(({ value }) => value);
 
     const options = {
         ...configDonutChartWidget(type),
@@ -48,11 +48,12 @@ const DonutChartWidget = ({
         colors,
         id,
     };
-
+    console.log(series);
+    console.log(items.map(({trendValue})=>trendValue));
     return (
         <>
             {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
-            <div className={`donut-chart-widget-wrapper ${className} ${type}`}>
+            <div className={`donut-chart-widget-wrapper ${className} ${type}`} style={{width:"100%",justifyContent:"center"}}>
                 {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
                 <div className={`chart-wrapper ${type}`}>
                     <ReactApexChart options={options} {...props} series={series} type="donut" />
@@ -77,7 +78,7 @@ DonutChartWidget.propTypes = {
         PropTypes.shape({ 
             label: PropTypes.string.isRequired, 
             color: PropTypes.string.isRequired, 
-            value: PropTypes.string.isRequired, 
+            value: PropTypes.any.isRequired, 
             unit: PropTypes.string.isRequired, 
             trendValue: PropTypes.number, 
             link: PropTypes.string, 

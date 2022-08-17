@@ -387,22 +387,22 @@ const portfolioRoutes = {
             visibility: true,
             parent: 'buildings',
         },
-        {
-            path: '/energy/peak-demand/:bldgId',
-            name: 'Peak Demand',
-            component: PeakDemand,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
-        {
-            path: '/energy/end-uses/:bldgId',
-            name: 'End Uses',
-            component: EndUses,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
+        // {
+        //     path: '/energy/peak-demand/:bldgId',
+        //     name: 'Peak Demand',
+        //     component: PeakDemand,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'buildings',
+        // },
+        // {
+        //     path: '/energy/end-uses/:bldgId',
+        //     name: 'End Uses',
+        //     component: EndUses,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'buildings',
+        // },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
@@ -474,14 +474,14 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        {
-            path: '/settings/utility-bills',
-            name: 'Utility Bills',
-            component: UtilityBills,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'building-settings',
-        },
+        // {
+        //     path: '/settings/utility-bills',
+        //     name: 'Utility Bills',
+        //     component: UtilityBills,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'building-settings',
+        // },
         // {
         //     path: '/settings/panels/editPanel/:panelId',
         //     name: 'Edit Panel',
@@ -562,14 +562,14 @@ const settingsRoutes = {
             visibility: true,
             parent: 'building-settings',
         },
-        {
-            path: '/settings/gateways',
-            name: 'Gateways',
-            component: Gateways,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'building-settings',
-        },
+        // {
+        //     path: '/settings/gateways',
+        //     name: 'Gateways',
+        //     component: Gateways,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'building-settings',
+        // },
         {
             path: '/settings/account',
             name: 'General',
@@ -586,22 +586,22 @@ const settingsRoutes = {
             visibility: true,
             parent: 'account',
         },
-        {
-            path: '/settings/users',
-            name: 'Users',
-            component: Users,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
-        {
-            path: '/settings/roles',
-            name: 'Roles',
-            component: Roles,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'account',
-        },
+        // {
+        //     path: '/settings/users',
+        //     name: 'Users',
+        //     component: Users,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
+        // {
+        //     path: '/settings/roles',
+        //     name: 'Roles',
+        //     component: Roles,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'account',
+        // },
         {
             path: '/settings/user-profile',
             name: 'User Profile',
@@ -631,16 +631,16 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
-const exploreRoutes = {
-    name: 'Explore',
-    path: '/explore/page',
-    component: Explore,
-    route: PrivateRoute,
-    visibility: true,
-    icon: FeatherIcon.PieChart,
-    parent: 'explore',
-    roles: ['Admin'],
-};
+// const exploreRoutes = {
+//     name: 'Explore',
+//     path: '/explore/page',
+//     component: Explore,
+//     route: PrivateRoute,
+//     visibility: true,
+//     icon: FeatherIcon.PieChart,
+//     parent: 'explore',
+//     roles: ['Admin'],
+// };
 
 const controlRoutes = {
     path: '/control/plug-rules',
@@ -795,7 +795,7 @@ const allRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    exploreRoutes,
+    //exploreRoutes,
     authRoutes,
     // ...appRoutes,
     // pagesRoutes,
@@ -809,7 +809,7 @@ const authProtectedRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    exploreRoutes,
+    //exploreRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

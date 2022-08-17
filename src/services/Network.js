@@ -62,7 +62,9 @@ export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreaker = '/api/config/panels/update_breaker';
+export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
+export const updateLinkBreakers = '/api/config/panels/link_breakers';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
@@ -90,6 +92,7 @@ export const createFloors = '/api/config/layout/create-floor';
 export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
+export const updateSpace = '/api/config/layout/update-floor';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
