@@ -82,7 +82,7 @@ const PassiveDevicesTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th className="active-device-header">
                                     <div className="passive-device-flex">
@@ -196,7 +196,7 @@ const PassiveDevicesTable = ({
                         <tbody>
                             {deviceData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className='mouse-pointer'>
                                         {selectedOptions.some((record) => record.value === 'status') && (
                                             <td scope="row" className="text-center">
                                                 {record.status === 'Online' && (
@@ -222,7 +222,7 @@ const PassiveDevicesTable = ({
                                         </Link>
 
                                         {selectedOptions.some((record) => record.value === 'model') && (
-                                            <td>{record.model}</td>
+                                            <td>{record.model.charAt(0).toUpperCase() + record.model.slice(1)}</td>
                                         )}
 
                                         {selectedOptions.some((record) => record.value === 'location') && (
@@ -314,12 +314,12 @@ const PassiveDevices = () => {
     const [duplicatePassiveDeviceData, setDuplicatePassiveDeviceData] = useState([]);
     const [passiveDeviceModel, setPassiveDeviceModel] = useState([
         {
-            value: 'HYDRA-1',
-            label: 'HYDRA-1',
+            value: 'hydra',
+            label: 'Hydra',
         },
         {
-            value: 'PR55-4A',
-            label: 'PR55-4A',
+            value: 'trident',
+            label: 'Trident',
         },
     ]);
     const [paginationData, setPaginationData] = useState({});
@@ -504,6 +504,10 @@ const PassiveDevices = () => {
     };
 
     useEffect(() => {
+        console.log('createDeviceData :>> ', createDeviceData);
+    });
+
+    useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
@@ -555,30 +559,8 @@ const PassiveDevices = () => {
             }
         };
 
-        const fetchGatewayData = async () => {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}`;
-            await axios
-                .get(`${BaseUrl}${generalGateway}${params}`, {
-                    headers: header,
-                })
-                .then((res) => {
-                    setGeneralGatewayData(res.data);
-                    console.log(res.data);
-                })
-                .catch((error) => {
-                    console.log(error);
-                    console.log('Failed to fetch Gateway data');
-                });
-        };
-
         fetchPassiveDeviceData();
         fetchLocationData();
-        fetchGatewayData();
     }, [pageRefresh, bldgId]);
 
     useEffect(() => {
@@ -614,6 +596,7 @@ const PassiveDevices = () => {
                 console.log('Failed to fetch all Active Devices');
             }
         };
+
         fetchPassiveDeviceData();
     }, [pageSize]);
 
@@ -801,10 +784,10 @@ const PassiveDevices = () => {
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>MAC Address</Form.Label>
+                            <Form.Label>Identifier</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Enter MAC Address"
+                                placeholder="Enter Identifier"
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('mac_address', e.target.value);
@@ -846,23 +829,6 @@ const PassiveDevices = () => {
                                 })}
                             </Input>
                         </Form.Group>
-
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Gateway</Form.Label>
-                            <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                onChange={(e) => {
-                                    handleChange('gateway_id', e.target.value);
-                                }}>
-                                <option selected>Select Gateway</option>
-                                {generalGatewayData.map((record) => {
-                                    return <option value={record.equipments_id}>{record.model}</option>;
-                                })}
-                            </Input>
-                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

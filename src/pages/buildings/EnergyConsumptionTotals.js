@@ -24,10 +24,10 @@ const donutChartDataMock = [
 const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyConsumptionChartLoading }) => {
 
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(5);
-        let value=parseFloat(val)
-        console.log(value)
-        console.log(val)
+        const value = (energy_consumption.now / 1000).toLocaleString(undefined, {
+            maximumFractionDigits: 5,
+        });
+
         const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
         const trendType =
             energy_consumption.now <= energy_consumption.old
@@ -38,7 +38,7 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyC
     });
 
     return (
-        <div>
+        <div style={{width:"100%"}}>
             <DonutChartWidget
                 id="consumptionEnergyDonut"
                 title="Energy Consumption by End Use"

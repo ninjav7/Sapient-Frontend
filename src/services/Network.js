@@ -1,6 +1,7 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-//export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net';
-//export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'http://localhost:8000';
+// export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'https://a987-2409-4043-4d04-ab41-f42e-cefb-c945-ff66.in.ngrok.io';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -63,7 +64,9 @@ export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
 export const updateBreaker = '/api/config/panels/update_breaker';
+export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
+export const updateLinkBreakers = '/api/config/panels/link_breakers';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';

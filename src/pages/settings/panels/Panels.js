@@ -33,7 +33,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
                             {selectedOptions.some((record) => record.value === 'type') && <th>Type</th>}
                             {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
@@ -79,7 +79,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                         <tbody>
                             {generalPanelData.map((record, index) => {
                                 return (
-                                    <tr key={record.panel_id}>
+                                    <tr key={record.panel_id} className='mouse-pointer'>
                                         {selectedOptions.some((record) => record.value === 'name') && (
                                             <td className="font-weight-bold panel-name">
                                                 <Link

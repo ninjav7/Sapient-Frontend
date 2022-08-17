@@ -1,7 +1,7 @@
 import React from 'react';
 import LineChartWidget from '../../sharedComponents/lineChartWidget';
 
-const EnergyConsumptionHistory = ({ series, height = 259 }) => {
+const EnergyConsumptionHistory = ({ series, height, isEnergyConsumptionHistoryLoading  }) => {
 
     return (
         <div>
@@ -10,6 +10,7 @@ const EnergyConsumptionHistory = ({ series, height = 259 }) => {
                 title="Energy Consumption History"
                 subtitle="Energy Totals by Day"
                 series={series}
+                isEnergyConsumptionHistoryLoading={isEnergyConsumptionHistoryLoading}
             />
         </div>
     );

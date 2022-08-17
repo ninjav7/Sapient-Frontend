@@ -52,7 +52,8 @@ const PortfolioOverview = () => {
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
-
+    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
+    const [isEnergyConsumptionHistoryLoading, setIsEnergyConsumptionHistoryLoading] = useState(false);
     const [lineChartSeries, setLineChartSeries] = useState([
         {
             data: [
@@ -422,6 +423,7 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             try {
+                setIsEnergyConsumptionChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -438,23 +440,28 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
+                        console.log("energy consumption",res.data)
                         setenergyConsumption(res.data);
+                        setIsEnergyConsumptionChartLoading(false);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
                             newDonutData.push(parseInt(fixedConsumption / 1000));
                         });
+                        console.log(newDonutData);
                         setSeries(newDonutData);
                     });
             } catch (error) {
                 console.log(error);
+                setIsEnergyConsumptionChartLoading(false);
                 console.log('Failed to fetch Portfolio EndUses Data');
             }
         };
 
         const energyConsumptionData = async () => {
             try {
+                setIsEnergyConsumptionHistoryLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -489,9 +496,11 @@ const PortfolioOverview = () => {
                             });
                         });
                         setEnergyConsumptionChart(newArray);
+                        setIsEnergyConsumptionHistoryLoading(false);
                     });
             } catch (error) {
                 console.log(error);
+                setIsEnergyConsumptionHistoryLoading(false);
                 console.log('Failed to fetch Energy Consumption Data');
             }
         };
@@ -610,8 +619,9 @@ const PortfolioOverview = () => {
             /> */}
 
             <div className="portfolio-consume-widget-wrapper mt-5">
-                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
-                <EnergyConsumptionHistory series={energyConsumptionChart} />
+            
+                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}/>
+                <EnergyConsumptionHistory series={energyConsumptionChart} isEnergyConsumptionHistoryLoading={isEnergyConsumptionHistoryLoading}/>
             </div>
         </>
     );

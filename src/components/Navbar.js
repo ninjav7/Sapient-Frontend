@@ -37,7 +37,7 @@ const Navbar = (props) => {
                     <AppMenu mode={'vertical'} />
 
                     <div className="nav-right-icon-style">
-                        <SearchModal />
+                        {/* <SearchModal /> */}
 
                         <Link to="/settings/general">
                             <button className="btn btn-sm btn-link nav-link right-bar-toggle float-right">

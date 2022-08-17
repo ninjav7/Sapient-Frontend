@@ -1,13 +1,18 @@
 @import '../../assets/scss/colors';
 
-.donut-chart-widget-wrapper {
-    display: inline-flex;
-    align-items: center;
-    column-gap: 0.9375rem;
+.donut-main-wrapper{
+    padding: 1rem;
     background: $base-white;
     border: 0.0625rem solid $primary-gray-200;
     box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
     border-radius: 0.625rem;
+    min-height: 37vh;
+}
+
+.donut-chart-widget-wrapper {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 0.9375rem;
 
     &.horizontal {
         padding: 2.875rem 4.8125rem 2.8125rem 2.8125rem;
