@@ -397,10 +397,10 @@
     height: 100%;
     /* width: 50%; */
     margin-left: 25px;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 .edit-icon-bg-styling {
@@ -447,7 +447,7 @@
 
 .sub-breaker-style {
     display: flex;
-    flex-direction: row;
+	flex-direction: row;
     width: 350px !important;
     height: 50px;
     background: #f9fafb;
@@ -468,9 +468,17 @@
 
 .breaker-equip-name {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
     color: #1d2939;
+    white-space: nowrap; 
+    width: 5.5vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+.breaker-equip-name:hover {
+    overflow: visible;
+  }
 
 .time-picker-style {
     width: 95px;
