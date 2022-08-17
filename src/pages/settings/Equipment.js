@@ -966,7 +966,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 <CardBody>
                     <Table className="mb-0 bordered table-hover">
                         <thead>
-                            <tr>
+                            <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th >Status</th>
                                 )}
@@ -1150,7 +1150,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                             onClick={() => {
                                                 setEquipData(record);
                                                 Toggle(record);
-                                            }}>
+                                            }} className='mouse-pointer'>
                                                  {selectedOptions.some((record) => record.value === 'status') && (
                                             <td className="text-center">
                                                 <div>

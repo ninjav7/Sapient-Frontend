@@ -50,7 +50,7 @@ const PlugRuleTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             <th>Name</th>
                             <th>Description</th>
                             <th>Days</th>
@@ -84,7 +84,7 @@ const PlugRuleTable = ({
                         <tbody>
                             {plugRuleData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className='mouse-pointer'>
                                         <td
                                             className="font-weight-bold panel-name"
                                             onClick={() => {

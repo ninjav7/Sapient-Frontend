@@ -82,7 +82,7 @@ const PassiveDevicesTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th className="active-device-header">
                                     <div className="passive-device-flex">
@@ -196,7 +196,7 @@ const PassiveDevicesTable = ({
                         <tbody>
                             {deviceData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className='mouse-pointer'>
                                         {selectedOptions.some((record) => record.value === 'status') && (
                                             <td scope="row" className="text-center">
                                                 {record.status === 'Online' && (
