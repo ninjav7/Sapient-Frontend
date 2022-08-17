@@ -61,6 +61,10 @@ const General = () => {
     const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
     const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
     const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
+
+    const [textLocation, settextLocation] = useState('');
+    console.log('textLocation', textLocation.split(' ').join('+'));
+
     const [timeZone, setTimeZone] = useState('12');
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
@@ -507,6 +511,60 @@ const General = () => {
         window.scrollTo(0, 0);
     }, []);
 
+    // useEffect(() => {
+    //     const el = document.querySelector('ge-autocomplete');
+    //     // 'select' event handler - when a user selects an item from the suggestions
+    //     console.log(el);
+    //     if (el) {
+    //         el.addEventListener('select', (event) => {
+    //             console.log(event.detail, event);
+    //         });
+    //     }
+    // }, []);
+
+    // TODO:
+    const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
+    console.log(getResponseOfPlaces, 'getResponseOfPlaces');
+    const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
+    const [totalSelectedData, setTotalSelectedData] = useState();
+    console.log('totalSelectedData', totalSelectedData);
+    const [openDropdown, setopenDropdown] = useState(false);
+    const getPlacesAutocomplete = async () => {
+        const params = `${textLocation.split(' ').join('+')}`;
+        await axios
+            .get(`https://api.geocode.earth/v1/autocomplete?api_key=ge-2200db37475e4ed3&text=${params}`)
+            .then((res) => {
+                setGetResponseOfPlaces(res?.data);
+            });
+    };
+
+    // const getGooglePlacesAutocomplete = async () => {
+    //     let header = {
+    //         'Content-Type': 'application/json',
+    //         accept: 'application/json',
+    //         Authorization: `Bearer ${userdata.token}`,
+    //     };
+
+    //     const params = `${textLocation.split(' ').join('+')}`;
+    //     let API_KEY = 'AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4';
+    //     await axios
+    //         .get(
+    //             `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=amoeba&types=establishment&location=37.76999%2C-122.44696&radius=500&key=AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4`,
+    //             {
+    //                 headers: header,
+    //             }
+    //         )
+    //         .then((res) => {
+    //             // setGetResponseOfPlaces(res?.data);
+    //             console.log(res, 'maps.googleapis.com');
+    //         });
+    // };
+
+    useEffect(() => {
+        getPlacesAutocomplete();
+        // getGooglePlacesAutocomplete();
+    }, [textLocation]);
+
     // update section end
     return (
         <React.Fragment>
@@ -695,19 +753,51 @@ const General = () => {
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
-                                            <Input
-                                                type="text"
-                                                name="street_address"
-                                                id="userAddress1"
-                                                placeholder="Address 1"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('street_address', e.target.value);
-                                                }}
-                                                // onBlur={EditAddressHandler}
-                                                className="font-weight-bold"
-                                                value={buildingAddress.street_address}
-                                            />
+                                            // TODO:
+                                            <div style={{ position: 'absolute' }}>
+                                                <Input
+                                                    type="text"
+                                                    name="street_address"
+                                                    id="userAddress1"
+                                                    placeholder="Address 1"
+                                                    onChange={(e) => {
+                                                        handleBldgSettingChanges('street_address', e.target.value);
+                                                        settextLocation(e.target.value);
+                                                        if (getResponseOfPlaces) {
+                                                            setopenDropdown(true);
+                                                        }
+                                                    }}
+                                                    // onBlur={EditAddressHandler}
+                                                    className="font-weight-bold"
+                                                    // value={buildingAddress.street_address || selectedPlaceLabel}
+                                                    value={selectedPlaceLabel || buildingAddress.street_address}
+                                                />
+                                                {openDropdown && (
+                                                    <div className="div-dropdown">
+                                                        {getResponseOfPlaces?.features?.map((item) => {
+                                                            return (
+                                                                <div
+                                                                    className="onchangedrowpdown"
+                                                                    onClick={() => {
+                                                                        console.log(item, 'clickedgetResponseOfPlaces');
+                                                                        setSelectedPlaceLabel(item?.properties?.label);
+                                                                        setTotalSelectedData(item);
+                                                                        setopenDropdown(false);
+                                                                    }}>
+                                                                    {item?.properties?.label}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            // <ge-autocomplete
+                                            //     onChange={(e) => {
+                                            //         console.log(e, 'e');
+                                            //     }}
+                                            //     api_key="ge-2200db37475e4ed3"></ge-autocomplete>
                                         )}
+                                        {/* <div>{getResponseOfPlaces}</div> */}
                                     </FormGroup>
 
                                     <FormGroup>
@@ -751,7 +841,7 @@ const General = () => {
                                                     handleBldgSettingChanges('city', e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
-                                                value={buildingAddress.city}
+                                                value={totalSelectedData?.properties?.locality || buildingAddress.city}
                                             />
                                         )}
                                     </FormGroup>
@@ -764,18 +854,16 @@ const General = () => {
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
                                             <Input
-                                                type="select"
+                                                type="text"
                                                 name="state"
                                                 id="userState"
-                                                defaultChecked={buildingAddress.state}
+                                                value={totalSelectedData?.properties?.region || buildingAddress.state}
                                                 onChange={(e) => {
                                                     handleBldgSettingChanges('state', e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
-                                                className="font-weight-bold">
-                                                <option>Oregon</option>
-                                                <option>Washington</option>
-                                            </Input>
+                                                className="font-weight-bold"
+                                            />
                                         )}
                                     </FormGroup>
 
