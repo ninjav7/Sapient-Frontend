@@ -8,13 +8,6 @@ import 'react-time-picker/dist/TimePicker.css';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
-import {
-    BaseUrl,
-    generalBuildingDetail,
-    generalBuildingAddress,
-    generalDateTime,
-    generalOperatingHours,
-} from '../../services/Network';
 import axios from 'axios';
 
 const AccountSettings = () => {
@@ -77,8 +70,7 @@ const AccountSettings = () => {
                                                 id="buildingName"
                                                 placeholder="Enter Account Name"
                                                 className="single-line-style font-weight-bold"
-                                                // defaultValue='Nike'
-                                                value="Nike"
+                                                value=""
                                             />
                                         </div>
                                     </FormGroup>

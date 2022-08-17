@@ -182,7 +182,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                 {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'name') && (
                                 <th className="table-heading-style">
                                     <button
@@ -332,7 +332,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                     <tbody>
                         {items.map((record, index) => {
                             return (
-                                <tr key={record.building_id}>
+                                <tr key={record.building_id} className='mouse-pointer'>
                                     {selectedOptions.some((record) => record.value === 'name') && (
                                         <th scope="row">
                                             <Link

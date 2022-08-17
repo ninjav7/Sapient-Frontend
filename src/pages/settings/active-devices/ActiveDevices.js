@@ -117,7 +117,7 @@ const ActiveDevicesTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th className="active-device-header">
                                     <div className="active-device-flex">
@@ -303,7 +303,7 @@ const ActiveDevicesTable = ({
                         <tbody>
                             {deviceData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className='mouse-pointer'>
                                         {selectedOptions.some((record) => record.value === 'status') && (
                                             <td scope="row" className="text-center">
                                                 {record.status === 'Online' && (

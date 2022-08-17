@@ -182,7 +182,7 @@ const EquipmentTable = ({
                 <CardBody>
                     <Table className="mb-0 bordered table-hover">
                         <thead>
-                            <tr>
+                            <tr className='mouse-pointer'>
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th>End Use Category</th>
@@ -220,7 +220,7 @@ const EquipmentTable = ({
                                             onClick={() => {
                                                 setEquipData(record);
                                                 Toggle();
-                                            }}>
+                                            }} className='mouse-pointer'>
                                             <td className="equip-type-style">
                                                 {record.equipment_type ? record.equipment_type : '-'}
                                             </td>

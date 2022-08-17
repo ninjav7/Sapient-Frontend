@@ -4,6 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BaseUrl, createPanel, createBreaker } from '../../../services/Network';
+import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import '../style.css';
@@ -13,6 +14,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
     const cookies = new Cookies();
     const userdata = cookies.get('user');
     const history = useHistory();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -201,9 +203,10 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             };
 
             let newPanel = Object.assign({}, panelObj);
+            let params = `?building_id=${bldgId}`;
 
             await axios
-                .post(`${BaseUrl}${createPanel}`, newPanel, {
+                .post(`${BaseUrl}${createPanel}${params}`, newPanel, {
                     headers: header,
                 })
                 .then(res => {

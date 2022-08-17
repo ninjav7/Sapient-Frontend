@@ -21,7 +21,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className='mouse-pointer'>
                             <th>Name</th>
                             <th>Sq. Ft.</th>
                             <th>Devices</th>
@@ -49,7 +49,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                         <tbody>
                             {buildingsData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className='mouse-pointer'>
                                         <th scope="row">
                                             <Link to="/settings/general">
                                                 <div
@@ -64,10 +64,11 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                     }}>
                                                     {record.building_name}
                                                 </div>
-                                            </Link>
+                                                </Link>
                                             <span className="badge badge-soft-secondary label-styling mr-2">
                                                 {record.building_type}
                                             </span>
+                                            
                                         </th>
                                         <td className="font-weight-bold">
                                             {record.building_size.toLocaleString(undefined, {

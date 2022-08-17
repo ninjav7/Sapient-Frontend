@@ -966,7 +966,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 <CardBody>
                     <Table className="mb-0 bordered table-hover">
                         <thead>
-                            <tr>
+                            <tr className='mouse-pointer'>
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th >Status</th>
                                 )}
@@ -1150,7 +1150,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                             onClick={() => {
                                                 setEquipData(record);
                                                 Toggle(record);
-                                            }}>
+                                            }} className='mouse-pointer'>
                                                  {selectedOptions.some((record) => record.value === 'status') && (
                                             <td className="text-center">
                                                 <div>
@@ -1321,29 +1321,30 @@ const handleSearch = async () => {
             console.log('Failed to fetch Equipment Type Data');
         }
     };
+
     const saveDeviceData = async () => {
         let obj = Object.assign({}, createEqipmentData);
         obj['building_id'] = bldgId;
         try {
+            setIsProcessing(true);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsProcessing(true);
+            };           
 
-            axios
+            await axios
                 .post(`${BaseUrl}${createEquipment}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
-                    // console.log(res.data);
                     setTimeout(function () {
                         fetchEquipmentData();
-                    }, 3000);
+                    }, 0);
                 });
 
             setIsProcessing(false);
+            handleClose();
         } catch (error) {
             setIsProcessing(false);
             console.log('Failed to create Passive device data');
@@ -1382,6 +1383,7 @@ const handleSearch = async () => {
             console.log('Failed to fetch all Equipments Data');
         }
     };
+
     const fetchEquipmentData = async () => {
         try {
             setIsEquipDataFetched(true);
@@ -1743,7 +1745,6 @@ const handleSearch = async () => {
                         variant="primary"
                         onClick={() => {
                             saveDeviceData();
-                            handleClose();
                         }}
                         disabled={isProcessing}>
                         {isProcessing ? 'Adding...' : 'Add'}
