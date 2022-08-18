@@ -335,9 +335,9 @@ const BreakersComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
-        if(key === 'device_id'){
-            if(value === ''){
-                breaker.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                breaker.sensor_id = '';
             }
         }
         breaker[key] = value;
@@ -355,9 +355,9 @@ const BreakersComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
-        if(key === 'device_id'){
-            if(value === ''){
-                data.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                data.sensor_id = '';
             }
         }
         data[key] = value;
@@ -376,9 +376,9 @@ const BreakersComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
-        if(key === 'device_id'){
-            if(value === ''){
-                data.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                data.sensor_id = '';
             }
         }
         data[key] = value;
@@ -681,9 +681,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     {passiveDeviceData.map((record) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
-                                                    {breakerData.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
+                                                    {breakerData.device_id !== '' && <option value="">None</option>}
                                                 </Input>
                                             </Form.Group>
 
@@ -717,16 +715,14 @@ const BreakersComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
                                                                 </option>
                                                             );
                                                         })}
-                                                        {breakerData.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
+                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
                                                     </Input>
                                                 )}
                                             </Form.Group>
@@ -769,9 +765,7 @@ const BreakersComponent = ({ data, id }) => {
                                                     {passiveDeviceData.map((record) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
-                                                    {breakerData.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
+                                                    {breakerData.device_id !== '' && <option value="">None</option>}
                                                 </Input>
                                             </Form.Group>
 
@@ -805,16 +799,14 @@ const BreakersComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
                                                                 </option>
                                                             );
                                                         })}
-                                                        {breakerData.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
+                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
                                                     </Input>
                                                 )}
                                             </Form.Group>
@@ -866,7 +858,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Sensor') {
                                                                 return;
                                                             }
-                                                            handleLinkedSensor(doubleBreakerData?.data?.sensor_id, e.target.value);
+                                                            handleLinkedSensor(
+                                                                doubleBreakerData?.data?.sensor_id,
+                                                                e.target.value
+                                                            );
                                                             handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={doubleBreakerData?.data?.sensor_id}>
@@ -881,7 +876,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
@@ -942,7 +937,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Sensor') {
                                                                 return;
                                                             }
-                                                            handleLinkedSensor(tripleBreakerData?.data?.sensor_id, e.target.value);
+                                                            handleLinkedSensor(
+                                                                tripleBreakerData?.data?.sensor_id,
+                                                                e.target.value
+                                                            );
                                                             handleTripleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={tripleBreakerData?.data?.sensor_id}>
@@ -957,7 +955,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
@@ -994,7 +992,14 @@ const BreakersComponent = ({ data, id }) => {
                                     value={breakerData.equipment_link[0]}>
                                     <option>Select Equipment</option>
                                     {equipmentData.map((record) => {
-                                        return <option value={record.value}>{record.label}</option>;
+                                        return (
+                                            <option
+                                                value={record.value}
+                                                disabled={record.breakerId !== ''}
+                                                className={record.breakerId !== '' && 'fields-disabled-style'}>
+                                                {record.label}
+                                            </option>
+                                        );
                                     })}
                                 </Input>
                                 {/* <MultiSelect

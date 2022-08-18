@@ -335,9 +335,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (value === 'Select Volts') {
             value = '';
         }
-        if(key === 'device_id'){
-            if(value === ''){
-                breaker.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                breaker.sensor_id = '';
             }
         }
         breaker[key] = value;
@@ -355,9 +355,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
-        if(key === 'device_id'){
-            if(value === ''){
-                data.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                data.sensor_id = '';
             }
         }
         data[key] = value;
@@ -376,9 +376,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             value = '';
         }
         let data = Object.assign({}, breaker.data);
-        if(key === 'device_id'){
-            if(value === ''){
-                data.sensor_id = ''
+        if (key === 'device_id') {
+            if (value === '') {
+                data.sensor_id = '';
             }
         }
         data[key] = value;
@@ -432,10 +432,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             }
         }
     }, [breakerObj]);
-
-    console.log('SSR breakerData => ', breakerData);
-    console.log('SSR doubleBreakerData => ', doubleBreakerData);
-    console.log('SSR tripleBreakerData => ', tripleBreakerData);
 
     return (
         <React.Fragment>
@@ -656,16 +652,14 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             return;
                                                         }
                                                         fetchDeviceSensorData(e.target.value);
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);                                                                                                             
+                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                     }}
                                                     value={breakerData.device_id}>
                                                     <option>Select Device</option>
                                                     {passiveDeviceData.map((record) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
-                                                    {breakerData.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
+                                                    {breakerData.device_id !== '' && <option value="">None</option>}
                                                 </Input>
                                             </Form.Group>
 
@@ -699,16 +693,14 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
                                                                 </option>
                                                             );
                                                         })}
-                                                        {breakerData.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
+                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
                                                     </Input>
                                                 )}
                                             </Form.Group>
@@ -744,16 +736,13 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         if (tripleBreakerData.data.device_id === '') {
                                                             handleTripleBreakerChange(id, 'device_id', e.target.value);
                                                         }
-
                                                     }}
                                                     value={breakerData.device_id}>
                                                     <option>Select Device</option>
                                                     {passiveDeviceData.map((record) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
-                                                    {breakerData.device_id !== '' && (
-                                                        <option value="">None</option>
-                                                    )}
+                                                    {breakerData.device_id !== '' && <option value="">None</option>}
                                                 </Input>
                                             </Form.Group>
 
@@ -787,16 +776,14 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
                                                                 </option>
                                                             );
                                                         })}
-                                                        {breakerData.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
+                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
                                                     </Input>
                                                 )}
                                             </Form.Group>
@@ -848,7 +835,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Sensor') {
                                                                 return;
                                                             }
-                                                            handleLinkedSensor(doubleBreakerData?.data?.sensor_id, e.target.value);
+                                                            handleLinkedSensor(
+                                                                doubleBreakerData?.data?.sensor_id,
+                                                                e.target.value
+                                                            );
                                                             handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={doubleBreakerData?.data?.sensor_id}>
@@ -863,7 +853,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
@@ -924,7 +914,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             if (e.target.value === 'Select Sensor') {
                                                                 return;
                                                             }
-                                                            handleLinkedSensor(tripleBreakerData?.data?.sensor_id, e.target.value);
+                                                            handleLinkedSensor(
+                                                                tripleBreakerData?.data?.sensor_id,
+                                                                e.target.value
+                                                            );
                                                             handleTripleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={tripleBreakerData?.data?.sensor_id}>
@@ -939,7 +932,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                                     }
                                                                     className={
                                                                         (record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)) &&
+                                                                            linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
                                                                     {record.name}
@@ -976,7 +969,14 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     value={breakerData.equipment_link[0]}>
                                     <option>Select Equipment</option>
                                     {equipmentData.map((record) => {
-                                        return <option value={record.value}>{record.label}</option>;
+                                        return (
+                                            <option
+                                                value={record.value}
+                                                disabled={record.breakerId !== ''}
+                                                className={record.breakerId !== '' && 'fields-disabled-style'}>
+                                                {record.label}
+                                            </option>
+                                        );
                                     })}
                                 </Input>
                                 {/* <MultiSelect

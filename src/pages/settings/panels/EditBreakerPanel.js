@@ -60,8 +60,8 @@ const EditBreakerPanel = () => {
     const [equipmentData, setEquipmentData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
-    const bldgId = BuildingStore.useState(s => s.BldgId);
-    const isBreakerApiTrigerred = LoadingStore.useState(s => s.isBreakerDataFetched);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -143,7 +143,7 @@ const EditBreakerPanel = () => {
         setPanel(obj);
     };
 
-    const addBreakersToList = newBreakerIndex => {
+    const addBreakersToList = (newBreakerIndex) => {
         let newBreakerList = normalStruct;
         let obj = {
             name: `Breaker ${newBreakerIndex}`,
@@ -251,25 +251,31 @@ const EditBreakerPanel = () => {
     const [disconnectedBreakersEdges, setDisconnectedBreakersEdges] = useState([]);
 
     // For Distributed
-    const onNodesChange = useCallback(changes => setDistributedBreakersNodes(ns => applyNodeChanges(changes, ns)), []);
-    const onEdgesChange = useCallback(changes => setDistributedBreakersEdges(es => applyEdgeChanges(changes, es)), []);
-    const onConnect = useCallback(connection => setDistributedBreakersEdges(eds => addEdge(connection, eds)));
+    const onNodesChange = useCallback(
+        (changes) => setDistributedBreakersNodes((ns) => applyNodeChanges(changes, ns)),
+        []
+    );
+    const onEdgesChange = useCallback(
+        (changes) => setDistributedBreakersEdges((es) => applyEdgeChanges(changes, es)),
+        []
+    );
+    const onConnect = useCallback((connection) => setDistributedBreakersEdges((eds) => addEdge(connection, eds)));
 
     // For Disconnected
     const onNodesChangeForDisconnect = useCallback(
-        changes => setDisconnectedBreakersNodes(ns => applyNodeChanges(changes, ns)),
+        (changes) => setDisconnectedBreakersNodes((ns) => applyNodeChanges(changes, ns)),
         []
     );
     const onEdgesChangeForDisconnect = useCallback(
-        changes => setDisconnectedBreakersEdges(es => applyEdgeChanges(changes, es)),
+        (changes) => setDisconnectedBreakersEdges((es) => applyEdgeChanges(changes, es)),
         []
     );
-    const onConnectForDisconnect = useCallback(connection =>
-        setDisconnectedBreakersEdges(eds => addEdge(connection, eds))
+    const onConnectForDisconnect = useCallback((connection) =>
+        setDisconnectedBreakersEdges((eds) => addEdge(connection, eds))
     );
 
     // Get co-rodinates for Distributed Breakers
-    const getYaxisCordinates = index => {
+    const getYaxisCordinates = (index) => {
         let num = index;
         let value = 90;
 
@@ -284,7 +290,7 @@ const EditBreakerPanel = () => {
         }
     };
 
-    const getDiscYaxisCordinates = index => {
+    const getDiscYaxisCordinates = (index) => {
         if (index === 1) {
             return 60;
         }
@@ -321,7 +327,7 @@ const EditBreakerPanel = () => {
                 .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
                     headers: header,
                 })
-                .then(res => {
+                .then((res) => {
                     let response = res.data;
                 });
             setIsProcessing(false);
@@ -335,14 +341,14 @@ const EditBreakerPanel = () => {
         }
     };
 
-    const getTargetBreakerId = targetBreakerNo => {
-        let targetObj = breakersData?.find(obj => obj?.breaker_number === targetBreakerNo);
+    const getTargetBreakerId = (targetBreakerNo) => {
+        let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
         return targetObj?.id;
     };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update(bs => {
+            BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
                         label: 'Edit Panel',
@@ -352,7 +358,7 @@ const EditBreakerPanel = () => {
                 ];
                 bs.items = newList;
             });
-            ComponentStore.update(s => {
+            ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
         };
@@ -379,18 +385,18 @@ const EditBreakerPanel = () => {
 
                 let params = `?panel_id=${panelId}`;
 
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                     setBreakerDataFetched(false);
-                    LoadingStore.update(s => {
+                    LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
                     });
                 });
             } catch (error) {
                 console.log(error);
                 setBreakerDataFetched(false);
-                LoadingStore.update(s => {
+                LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
                 console.log('Failed to fetch Breakers Data List');
@@ -409,12 +415,12 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
                     setPanel(response);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.panelData = response;
                     });
                     setFetchedPanelResponse(response);
@@ -439,11 +445,11 @@ const EditBreakerPanel = () => {
 
                 let params = `?panel_id=${panelId}`;
 
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                     setBreakerDataFetched(false);
-                    LoadingStore.update(s => {
+                    LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
                     });
                 });
@@ -462,7 +468,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPanelsDataList(response);
                 });
@@ -479,22 +485,23 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then(res => {
+                let params = `?building_id=${bldgId}&occupancy_filter=true`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                     let responseData = res.data;
                     let equipArray = [];
-                    responseData.forEach(record => {
+                    responseData.forEach((record) => {
                         if (record.equipments_name === '') {
                             return;
                         }
                         let obj = {
                             label: record.equipments_name,
                             value: record.equipments_id,
+                            breakerId: record.breaker_id,
                         };
                         equipArray.push(obj);
                     });
                     setEquipmentData(equipArray);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.equipmentData = equipArray;
                     });
                 });
@@ -512,10 +519,10 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&page_size=10&page_no=1`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
-                    responseData.forEach(record => {
+                    responseData.forEach((record) => {
                         let obj = {
                             label: record.identifier,
                             value: record.equipments_id,
@@ -523,7 +530,7 @@ const EditBreakerPanel = () => {
                         newArray.push(obj);
                     });
                     setPassiveDeviceData(newArray);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.passiveDeviceData = newArray;
                     });
                 });
@@ -546,7 +553,7 @@ const EditBreakerPanel = () => {
                 } else {
                     requestedBldgId = bldgId;
                 }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
                     setLocationDataList(res.data);
                 });
             } catch (error) {
@@ -572,7 +579,7 @@ const EditBreakerPanel = () => {
         let disconnectBreakerArray = [];
 
         // If Breakers are of Disconnected Panels
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             let obj = {
                 id: record.id,
                 type: 'disconnectedBreakerComponent',
@@ -598,7 +605,7 @@ const EditBreakerPanel = () => {
         });
 
         // If Breakers are of Distributed Panels
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             let obj = {
                 id: record.id,
                 type: 'breakerComponent',
@@ -630,10 +637,10 @@ const EditBreakerPanel = () => {
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectedBreakersNodes(disconnectBreakerArray);
 
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.distributedBreakersData = distributedBreakerArray;
         });
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.disconnectedBreakersData = disconnectBreakerArray;
         });
 
@@ -641,7 +648,7 @@ const EditBreakerPanel = () => {
         let breakerLinks = [];
         let disconnectBreakerLinks = [];
 
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             if (record.breaker_number + 2 > breakersData.length) {
                 return;
             }
@@ -654,7 +661,7 @@ const EditBreakerPanel = () => {
             breakerLinks.push(obj);
         });
 
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             if (record.breaker_number + 1 > breakersData.length) {
                 return;
             }
@@ -670,10 +677,10 @@ const EditBreakerPanel = () => {
         setDistributedBreakersEdges(breakerLinks);
         setDisconnectedBreakersEdges(disconnectBreakerLinks);
 
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.breakerLinkData = breakerLinks;
         });
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.disconnectBreakerLinkData = disconnectBreakerLinks;
         });
     }, [breakersData]);
@@ -725,7 +732,7 @@ const EditBreakerPanel = () => {
                                     name="panelName"
                                     id="panelName"
                                     placeholder="Panel Name"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('panel_name', e.target.value);
                                     }}
                                     className="font-weight-bold"
@@ -748,12 +755,12 @@ const EditBreakerPanel = () => {
                                     name="state"
                                     id="userState"
                                     className="font-weight-bold"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('parent_id', e.target.value);
                                     }}
                                     value={panel.parent_id}>
                                     <option>None</option>
-                                    {panelsDataList.map(record => {
+                                    {panelsDataList.map((record) => {
                                         if (record.panel_id === panelId) {
                                             return;
                                         }
@@ -777,7 +784,7 @@ const EditBreakerPanel = () => {
                                     name="state"
                                     id="userState"
                                     className="font-weight-bold"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         if (e.target.value === 'Select Location') {
                                             return;
                                         }
@@ -785,7 +792,7 @@ const EditBreakerPanel = () => {
                                     }}
                                     value={panel.location_id}>
                                     <option>Select Location</option>
-                                    {locationDataList.map(record => {
+                                    {locationDataList.map((record) => {
                                         return <option value={record.location_id}>{record.location_name}</option>;
                                     })}
                                 </Input>
@@ -815,12 +822,12 @@ const EditBreakerPanel = () => {
                                                 name="state"
                                                 id="userState"
                                                 className="fields-disabled-style"
-                                                onChange={e => {
+                                                onChange={(e) => {
                                                     setActivePanelType(e.target.value);
                                                 }}
                                                 disabled={true}
                                                 value={panel.panel_type}>
-                                                {panelType.map(record => {
+                                                {panelType.map((record) => {
                                                     return <option value={record.value}>{record.name}</option>;
                                                 })}
                                             </Input>
@@ -844,7 +851,7 @@ const EditBreakerPanel = () => {
                                                         name="breakers"
                                                         id="breakers"
                                                         value={panel.breakers}
-                                                        onChange={e => {
+                                                        onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
                                                             }
@@ -863,7 +870,7 @@ const EditBreakerPanel = () => {
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
                                                         value={panel.breakers}
-                                                        onChange={e => {
+                                                        onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,
                                                                 parseInt(e.target.value)
@@ -871,7 +878,7 @@ const EditBreakerPanel = () => {
                                                             setDisconnectBreakerCount(parseInt(e.target.value));
                                                         }}
                                                         disabled={true}>
-                                                        {disconnectBreaker.map(record => {
+                                                        {disconnectBreaker.map((record) => {
                                                             return <option value={record.value}>{record.name}</option>;
                                                         })}
                                                     </Input>
@@ -892,7 +899,7 @@ const EditBreakerPanel = () => {
                                         className="btn btn-md btn-secondary font-weight-bold"
                                         onClick={() => {
                                             setIsEditable(!isEditable);
-                                            BreakersStore.update(s => {
+                                            BreakersStore.update((s) => {
                                                 s.isEditable = !isEditable;
                                             });
                                         }}>
@@ -962,12 +969,11 @@ const EditBreakerPanel = () => {
                                     </FormGroup>
                                 </Row>
 
-                                <div className="row" style={{ width: '100%', height: '350vh', position: 'relative' }}>
+                                <div className="row">
                                     {!panelDataFetched && (
                                         <div className="col-sm">
                                             <div
-                                                className="row"
-                                                style={{ width: '100%', height: '350vh', position: 'relative' }}>
+                                                className="row breaker-group-style">
                                                 {isEditable && (
                                                     <ReactFlow
                                                         nodes={distributedBreakersNodes}
@@ -1043,7 +1049,7 @@ const EditBreakerPanel = () => {
                                 type="number"
                                 placeholder="Enter Amps"
                                 className="font-weight-bold"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handlePanelConfigChange('rated_amps', e.target.value);
                                 }}
                                 defaultValue={panelConfig.rated_amps === null ? 200 : panelConfig.rated_amps}
@@ -1059,7 +1065,7 @@ const EditBreakerPanel = () => {
                                 id="userState"
                                 className="font-weight-bold selection-volts-style"
                                 placeholder="Select Volts"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handlePanelConfigChange('voltage', e.target.value);
                                 }}
                                 value={panelConfig.voltage}>
