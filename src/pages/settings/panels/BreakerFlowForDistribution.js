@@ -712,11 +712,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 <option
                                                                     value={record.id}
                                                                     disabled={
-                                                                        record.equipment_id !== '' ||
+                                                                        record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)
                                                                     }
                                                                     className={
-                                                                        (record.equipment_id !== '' ||
+                                                                        (record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
@@ -800,11 +800,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 <option
                                                                     value={record.id}
                                                                     disabled={
-                                                                        record.equipment_id !== '' ||
+                                                                        record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)
                                                                     }
                                                                     className={
-                                                                        (record.equipment_id !== '' ||
+                                                                        (record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
@@ -876,11 +876,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 <option
                                                                     value={record.id}
                                                                     disabled={
-                                                                        record.equipment_id !== '' ||
+                                                                        record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)
                                                                     }
                                                                     className={
-                                                                        (record.equipment_id !== '' ||
+                                                                        (record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
@@ -952,11 +952,11 @@ const BreakersComponent = ({ data, id }) => {
                                                                 <option
                                                                     value={record.id}
                                                                     disabled={
-                                                                        record.equipment_id !== '' ||
+                                                                        record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)
                                                                     }
                                                                     className={
-                                                                        (record.equipment_id !== '' ||
+                                                                        (record.breaker_id !== '' ||
                                                                         linkedSensors.includes(record.id)) &&
                                                                         'fields-disabled-style'
                                                                     }>
