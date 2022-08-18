@@ -9,7 +9,7 @@ import LineChart from '../charts/LineChart';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, linkSocketRules, unLinkSocketRules } from '../../services/Network';
+import { BaseUrl, graphData, linkSocketRules, unLinkSocketRules } from '../../services/Network';
 import axios from 'axios';
 import { faTrashCan } from '@fortawesome/pro-light-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
@@ -65,9 +65,8 @@ const EditPlugRule = ({
     const [options, setOptions] = useState([]);
     const [macOptions, setMacOptions] = useState([]);
     const [locationOptions, setLocationOptions] = useState([]);
+    const [sensorOptions, setSensorOptions] = useState([]);
     // const [locationFilter, setLocationFilter] = useState('');
-
-    console.log('locationOptions', locationOptions);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -409,6 +408,10 @@ const EditPlugRule = ({
 
     const [lineChartData, setLineChartData] = useState([]);
 
+    const [totalGraphData, setTotalGraphData] = useState();
+
+    console.log('totalGraphData', totalGraphData);
+
     useEffect(() => {
         setLineChartData([
             {
@@ -479,7 +482,7 @@ const EditPlugRule = ({
     const [selectedOption, setSelectedOption] = useState([]);
     const [selectedOptionMac, setSelectedOptionMac] = useState([]);
     const [selectedOptionLocation, setSelectedOptionLocation] = useState([]);
-    console.log('selectedOptionLocation', selectedOptionLocation);
+    const [selectedOptionSensor, setSelectedOptionSensor] = useState([]);
 
     const [selectedEqupimentOption, setSelectedEqupimentOption] = useState([]);
     const [equpimentTypeFilterString, setEqupimentTypeFilterString] = useState('');
@@ -489,6 +492,33 @@ const EditPlugRule = ({
 
     const [selectedLocationOption, setSelectedLocationOption] = useState([]);
     const [locationTypeFilterString, setLocationTypeFilterString] = useState('');
+
+    const [selectedSensorOption, setSelectedSensorOption] = useState([]);
+    const [sensorTypeFilterString, setSensorTypeFilterString] = useState('');
+
+    const [sensorsIdNow, setSensorIdNow] = useState('');
+    const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
+
+    // Getting Graph Data API Call
+    // const getGraphData = async () => {
+    //     let headers = {
+    //         'Content-Type': 'application/json',
+    //         accept: 'application/json',
+    //         Authorization: `Bearer ${userdata.token}`,
+    //     };
+
+    //     // TODO:
+    //     let params = `?sensors=${sensorsIdNow}`;
+    //     await axios.get(`${BaseUrl}${graphData}${params}`, { headers }).then((res) => {
+    //         let response = res.data;
+    //         setTotalGraphData(response);
+    //         console.log(response, 'totalResponseNow');
+    //     });
+    // };
+
+    // useEffect(() => {
+    //     getGraphData();
+    // }, [sensorsIdNow]);
 
     const handleEqupimentTypeFilter = () => {
         return selectedOption?.map((item) => {
@@ -505,6 +535,12 @@ const EditPlugRule = ({
     const handleLocationFilter = () => {
         return selectedOptionLocation?.map((item) => {
             setSelectedLocationOption((el) => [...el, item?.value]);
+        });
+    };
+
+    const handleSensorFilter = () => {
+        return selectedOptionSensor?.map((item) => {
+            setSelectedSensorOption((el) => [...el, item?.value]);
         });
     };
 
@@ -525,6 +561,11 @@ const EditPlugRule = ({
         handleLocationFilter();
     }, [selectedOptionLocation]);
 
+    useEffect(() => {
+        setSelectedSensorOption([]);
+        handleSensorFilter();
+    }, [selectedOptionSensor]);
+
     const equpimentTypeFilterStringFunc = () => {
         return setEqupimentTypeFilterString(selectedEqupimentOption?.join('%2B'));
     };
@@ -535,6 +576,10 @@ const EditPlugRule = ({
 
     const locationFilterStringFunc = () => {
         return setLocationTypeFilterString(selectedLocationOption?.join('%2B'));
+    };
+
+    const sensorFilterStringFunc = () => {
+        return setSensorTypeFilterString(selectedSensorOption?.join('%2B'));
     };
 
     useEffect(() => {
@@ -548,6 +593,10 @@ const EditPlugRule = ({
     useEffect(() => {
         locationFilterStringFunc();
     }, [selectedLocationOption]);
+
+    useEffect(() => {
+        sensorFilterStringFunc();
+    }, [selectedSensorOption]);
 
     const handleSwitchChange = () => {
         let obj = currentData;
@@ -738,6 +787,7 @@ const EditPlugRule = ({
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
                 setOptions((el) => [...el, { value: record?.equipment_type, label: record?.name }]);
+                setEqupimentTypeAdded((el) => [...el, record?.equipment_type]);
                 setMacOptions((el) => [...el, { value: record?.device_link, label: record?.device_link }]);
                 if (record?.equipment_link_location) {
                     setLocationOptions((el) => [
@@ -746,6 +796,11 @@ const EditPlugRule = ({
                     ]);
                 }
             });
+
+        // Remove duplicates
+        // options?.map((item) => {
+
+        // })
     };
 
     useEffect(() => {
@@ -753,6 +808,8 @@ const EditPlugRule = ({
             addOptions();
         }
     }, [allData]);
+
+    console.log('options', options);
 
     useEffect(() => {
         if (activeRuleId === null) {
@@ -789,7 +846,7 @@ const EditPlugRule = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}`;
+                let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}&sensor_number=${sensorTypeFilterString}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     // console.log(response.total_data);
@@ -810,7 +867,13 @@ const EditPlugRule = ({
 
         fetchLinkedSocketRules();
         fetchUnLinkedSocketRules();
-    }, [activeRuleId, equpimentTypeFilterString, macTypeFilterString, locationTypeFilterString]);
+    }, [
+        activeRuleId,
+        equpimentTypeFilterString,
+        macTypeFilterString,
+        locationTypeFilterString,
+        sensorTypeFilterString,
+    ]);
 
     useEffect(() => {
         let arr1 = [];
@@ -960,6 +1023,7 @@ const EditPlugRule = ({
                                                         type="textarea"
                                                         placeholder="Enter Rule Name"
                                                         className="passive-location-style font-weight-bold"
+                                                        style={{ cursor: 'pointer' }}
                                                         value={currentData.name}
                                                         onChange={(e) => {
                                                             handleCurrentDataChange('name', e.target.value);
@@ -1052,7 +1116,6 @@ const EditPlugRule = ({
                                                                                     : 'schedular-weekday-active'
                                                                             }
                                                                             onClick={() => {
-                                                                                // TODO:
                                                                                 handleActionDayChange(
                                                                                     'mon',
                                                                                     record.condition_id
@@ -1586,28 +1649,32 @@ const EditPlugRule = ({
                                                 />
                                             </Form.Group>
                                         </div>
+                                        {/* Sensor */}
+                                        <div>
+                                            <Form.Group>
+                                                <Form.Label for="userState" className="card-title">
+                                                    Sensors
+                                                </Form.Label>
+
+                                                <MultiSelect
+                                                    options={sensorOptions}
+                                                    value={selectedOptionSensor}
+                                                    onChange={setSelectedOptionSensor}
+                                                    labelledBy="Sensors"
+                                                    className="column-filter-styling"
+                                                    valueRenderer={() => {
+                                                        return 'Sensors';
+                                                    }}
+                                                    ClearSelectedIcon={null}
+                                                />
+                                            </Form.Group>
+                                        </div>
 
                                         <div>
                                             <Form.Group>
                                                 <Form.Label for="userState" className="card-title">
                                                     Location
                                                 </Form.Label>
-                                                {/* <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold socket-filter-width"
-                                                    onChange={(e) => {
-                                                        setLocationFilter(e.target.value);
-                                                        console.log('e.target.value', e.target.value);
-                                                    }}>
-                                                    <option>Filtered</option>
-                                                    {allData
-                                                        ?.filter((item) => item?.equipment_link_location?.length > 0)
-                                                        ?.map((items) => {
-                                                            return <option>{items?.equipment_link_location}</option>;
-                                                        })}
-                                                </Input> */}
                                                 <MultiSelect
                                                     options={locationOptions}
                                                     value={selectedOptionLocation}
@@ -1699,7 +1766,10 @@ const EditPlugRule = ({
                                                                                     ? true
                                                                                     : false
                                                                             }
+                                                                            // TODO:
                                                                             onChange={(e) => {
+                                                                                console.log('checkedrecord', record);
+                                                                                setSensorIdNow(record?.id);
                                                                                 handleRuleStateChange(
                                                                                     e.target.value,
                                                                                     record

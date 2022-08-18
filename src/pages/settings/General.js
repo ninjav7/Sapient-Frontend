@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
+import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader, Button, Spinner } from 'reactstrap';
 import Switch from 'react-switch';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-time-picker/dist/TimePicker.css';
+import { useAtom } from 'jotai';
 import './style.css';
 import {
     BaseUrl,
@@ -11,7 +12,6 @@ import {
     generalBuildingAddress,
     generalDateTime,
     generalOperatingHours,
-    getBuildings,
     generalBldgDelete,
 } from '../../services/Network';
 import axios from 'axios';
@@ -22,6 +22,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { buildingData } from '../../store/globalState';
 
 const General = () => {
     let cookies = new Cookies();
@@ -30,7 +31,7 @@ const General = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const _ = require('lodash');
     const [isEditing, setIsEditing] = useState(false);
-    const [buildingData, setBuildingData] = useState({});
+    // const [buildingData, setBuildingData] = useState({});
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
@@ -66,6 +67,7 @@ const General = () => {
     console.log('textLocation', textLocation.split(' ').join('+'));
 
     const [timeZone, setTimeZone] = useState('12');
+    const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
         tue: false,
@@ -205,6 +207,7 @@ const General = () => {
                 ])
                 .then(
                     axios.spread((data1, data2, data3) => {
+                        setLoadButton(false);
                         console.log('Data1 => ', data1);
                         console.log('Data2 => ', data2);
                         console.log('Data3 => ', data3);
@@ -215,58 +218,107 @@ const General = () => {
         }
     };
 
+    const [buildingListData] = useAtom(buildingData);
+
     const fetchBuildingData = async () => {
         let fixing = true;
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
+
         setIsbuildingDetailsFetched(true);
         if (fixing) {
-            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                let response = res.data;
+            let data = {};
+            if (bldgId) {
+                data = buildingListData.find((el) => el.building_id === bldgId);
+                if (data === undefined) {
+                    return (fixing = false);
+                }
+                setBldgData(data);
+
+                let buildingDetailsObj = {
+                    name: data.building_name,
+                    typee: data.building_type,
+                    square_footage: data.building_size,
+                    active: data.active,
+                };
+                setBuildingDetails(buildingDetailsObj);
+                setResponseBuildingDetails(buildingDetailsObj);
+
+                let buildingAddressObj = {
+                    street_address: data.street_address,
+                    address_2: data.address_2,
+                    city: data.city,
+                    state: data.state,
+                    zip_code: data.zip_code,
+                };
+                setBuildingAddress(buildingAddressObj);
+                setResponseBuildingAddress(buildingAddressObj);
+
+                let buildingDateTimeObj = {
+                    timezone: data.timezone,
+                    time_format: data.time_format,
+                };
+                setBuildingDateTime(buildingDateTimeObj);
+                setResponseBuildingDateTime(buildingDateTimeObj);
+
+                let buildingOperatingHours = {
+                    operating_hours: data.operating_hours,
+                };
+                setBuildingOperatingHours(buildingOperatingHours);
+                setResponseBuildingOperatingHours(buildingOperatingHours);
+
+                const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+                setWeekToggle({
+                    mon: mon['stat'],
+                    tue: tue['stat'],
+                    wed: wed['stat'],
+                    thu: thu['stat'],
+                    fri: fri['stat'],
+                    sat: sat['stat'],
+                    sun: sun['stat'],
+                });
+            }
+            // setBuildingData(data);
+            setIsbuildingDetailsFetched(false);
+            // });
+        }
+    };
+
+    useEffect(() => {
+        if (buildingListData) {
+            fetchBuildingData();
+        }
+    }, [bldgId, buildingListData]);
+
+    useEffect(() => {
+        let fixing = true;
+        const fetchBuildingData = async () => {
+            setIsbuildingDetailsFetched(true);
+            if (fixing) {
                 let data = {};
                 if (bldgId) {
-                    data = response.find((el) => el.building_id === bldgId);
+                    data = buildingListData.find((el) => el.building_id === bldgId);
                     if (data === undefined) {
                         return (fixing = false);
                     }
-                    setBldgData(data);
-
-                    let buildingDetailsObj = {
-                        name: data.building_name,
-                        typee: data.building_type,
-                        square_footage: data.building_size,
+                    setInputField({
+                        ...inputField,
                         active: data.active,
-                    };
-                    setBuildingDetails(buildingDetailsObj);
-                    setResponseBuildingDetails(buildingDetailsObj);
-
-                    let buildingAddressObj = {
+                        name: data.building_name,
+                        square_footage: data.building_size,
+                        typee: data.building_type,
                         street_address: data.street_address,
                         address_2: data.address_2,
                         city: data.city,
                         state: data.state,
                         zip_code: data.zip_code,
-                    };
-                    setBuildingAddress(buildingAddressObj);
-                    setResponseBuildingAddress(buildingAddressObj);
-
-                    let buildingDateTimeObj = {
                         timezone: data.timezone,
                         time_format: data.time_format,
-                    };
-                    setBuildingDateTime(buildingDateTimeObj);
-                    setResponseBuildingDateTime(buildingDateTimeObj);
-
-                    let buildingOperatingHours = {
                         operating_hours: data.operating_hours,
-                    };
-                    setBuildingOperatingHours(buildingOperatingHours);
-                    setResponseBuildingOperatingHours(buildingOperatingHours);
-
+                    });
+                    setActiveToggle(data.active);
+                    setTimeToggle(data.time_format);
+                    // console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+
                     setWeekToggle({
                         mon: mon['stat'],
                         tue: tue['stat'],
@@ -277,67 +329,9 @@ const General = () => {
                         sun: sun['stat'],
                     });
                 }
-                setBuildingData(data);
+                // setBuildingData(data);
                 setIsbuildingDetailsFetched(false);
-            });
-        }
-    };
-
-    useEffect(() => {
-        fetchBuildingData();
-    }, [bldgId]);
-
-    useEffect(() => {
-        let fixing = true;
-        const fetchBuildingData = async () => {
-            setIsbuildingDetailsFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            if (fixing) {
-                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    let response = res.data;
-                    let data = {};
-                    if (bldgId) {
-                        data = response.find((el) => el.building_id === bldgId);
-                        if (data === undefined) {
-                            return (fixing = false);
-                        }
-                        setInputField({
-                            ...inputField,
-                            active: data.active,
-                            name: data.building_name,
-                            square_footage: data.building_size,
-                            typee: data.building_type,
-                            street_address: data.street_address,
-                            address_2: data.address_2,
-                            city: data.city,
-                            state: data.state,
-                            zip_code: data.zip_code,
-                            timezone: data.timezone,
-                            time_format: data.time_format,
-                            operating_hours: data.operating_hours,
-                        });
-                        setActiveToggle(data.active);
-                        setTimeToggle(data.time_format);
-                        // console.log(buildingData);
-                        const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-
-                        setWeekToggle({
-                            mon: mon['stat'],
-                            tue: tue['stat'],
-                            wed: wed['stat'],
-                            thu: thu['stat'],
-                            fri: fri['stat'],
-                            sat: sat['stat'],
-                            sun: sun['stat'],
-                        });
-                    }
-                    setBuildingData(data);
-                    setIsbuildingDetailsFetched(false);
-                });
+                // });
             }
         };
         fetchBuildingData();
@@ -586,14 +580,22 @@ const General = () => {
                                         }}>
                                         Cancel
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary buildings-save-style ml-3"
-                                        onClick={() => {
-                                            saveBuildingSettings();
-                                        }}>
-                                        Save
-                                    </button>
+                                    {loadButton ? (
+                                        <Button color="primary" disabled>
+                                            <Spinner size="sm">Loading...</Spinner>
+                                            <span> Saving</span>
+                                        </Button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary buildings-save-style ml-3"
+                                            onClick={() => {
+                                                setLoadButton(true);
+                                                saveBuildingSettings();
+                                            }}>
+                                            Save
+                                        </button>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -767,13 +769,16 @@ const General = () => {
                                                             setopenDropdown(true);
                                                         }
                                                     }}
-                                                    // onBlur={EditAddressHandler}
                                                     className="font-weight-bold"
-                                                    // value={buildingAddress.street_address || selectedPlaceLabel}
                                                     value={selectedPlaceLabel || buildingAddress.street_address}
                                                 />
                                                 {openDropdown && (
-                                                    <div className="div-dropdown">
+                                                    <div
+                                                        style={{
+                                                            backgroundColor: 'white',
+                                                            border: '1px solid black',
+                                                            zIndex: 1000,
+                                                        }}>
                                                         {getResponseOfPlaces?.features?.map((item) => {
                                                             return (
                                                                 <div
