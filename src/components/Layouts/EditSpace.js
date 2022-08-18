@@ -99,7 +99,7 @@ const EditSpace = (props) => {
                         <option>--Select any type--</option>
                         {floor2?.map((item) => {
                             return (
-                                <option key={item.id} value={item.id}>
+                                <option key={item._id} value={item._id}>
                                     {item.name}
                                 </option>
                             );

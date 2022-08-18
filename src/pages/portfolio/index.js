@@ -19,7 +19,6 @@ import {
     portfolioBuilidings,
     portfolioEndUser,
     portfolioOverall,
-    getBuilding,
     getEnergyConsumption,
 } from '../../services/Network';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
@@ -438,7 +437,7 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log("energy consumption",res.data)
+                        console.log('energy consumption', res.data);
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
@@ -590,7 +589,7 @@ const PortfolioOverview = () => {
     //     let topVal = buildingsEnergyConsume[0].density;
     //     setTopEnergyDensity(topVal);
     // }, [buildingsEnergyConsume]);
-    
+
     return (
         <>
             <Header title="Portfolio Overview" />
