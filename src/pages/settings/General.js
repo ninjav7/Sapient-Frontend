@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
-
-import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader, Button, Spinner } from 'reactstrap';
-
+import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
 import Switch from 'react-switch';
-
 import DatePicker from 'react-datepicker';
-
 import 'react-datepicker/dist/react-datepicker.css';
-
 import 'react-time-picker/dist/TimePicker.css';
-
 import { useAtom } from 'jotai';
-
 import './style.css';
-
 import {
     BaseUrl,
     generalBuildingDetail,
@@ -22,158 +14,92 @@ import {
     generalOperatingHours,
     generalBldgDelete,
 } from '../../services/Network';
-
 import axios from 'axios';
-
 import moment from 'moment';
-
 import { BuildingStore } from '../../store/BuildingStore';
-
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-
 import { ComponentStore } from '../../store/ComponentStore';
-
 import { Cookies } from 'react-cookie';
-
 import Skeleton from 'react-loading-skeleton';
-
 import 'react-loading-skeleton/dist/skeleton.css';
-
-import { buildingData } from '../../store/globalState';
 
 const General = () => {
     let cookies = new Cookies();
-
     let userdata = cookies.get('user');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
     const _ = require('lodash');
-
     const [isEditing, setIsEditing] = useState(false);
 
     // const [buildingData, setBuildingData] = useState({});
 
     const [operatingHours, setOperatingHours] = useState([]);
-
     const [allbuildingData, setAllBuildingData] = useState({});
-
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
-
     const [checked, setChecked] = useState(generalDateTimeData.time_format);
-
     const [generalOperatingData, setGeneralOperatingData] = useState({});
-
     const [startDate, setStartDate] = useState(new Date());
-
     const [endDate, setEndDate] = useState(new Date(`January 31 1980 12:50`));
-
     const [value, onChange] = useState('10:00');
-
     const [render, setRender] = useState(false);
-
     const [activeToggle, setActiveToggle] = useState(false);
-
     const [weekToggle, setWeekToggle] = useState({});
-
     const [timeToggle, setTimeToggle] = useState(false);
-
     const [inputField, setInputField] = useState({
         kWh: 0,
-
         total_paid: 0,
     });
 
     const [bldgData, setBldgData] = useState({});
-
     const [isbuildingDetailsFetched, setIsbuildingDetailsFetched] = useState(true);
-
     const [buildingDetails, setBuildingDetails] = useState({});
-
     const [buildingAddress, setBuildingAddress] = useState({});
-
     const [buildingDateTime, setBuildingDateTime] = useState({});
-
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
-
     const [responseBuildingDetails, setResponseBuildingDetails] = useState({});
-
     const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
-
     const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
-
     const [responseBuildingOperatingHours, setResponseBuildingOperatingHours] = useState({});
 
     const [textLocation, settextLocation] = useState('');
-
     console.log('textLocation', textLocation.split(' ').join('+'));
 
     const [timeZone, setTimeZone] = useState('12');
-
     const [loadButton, setLoadButton] = useState(false);
-
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
-
         tue: false,
-
         wed: false,
-
         thu: false,
-
         fri: false,
-
         sat: false,
-
         sun: false,
     });
 
     const [timeValue, setTimeValue] = useState({
         monFrom: '',
-
         monTo: '',
-
         tueFrom: '',
-
         tueTo: '',
-
         wedFrom: '',
-
         wedTo: '',
-
         thuFrom: '',
-
         thuTo: '',
-
         friFrom: '',
-
         friTo: '',
-
         satFrom: '',
-
         satTo: '',
-
         sunFrom: '',
-
         sunTo: '',
     });
-
-    console.log('timeValue', timeValue);
 
     useEffect(() => {
         setSwitchPhrace({
             mon: weekToggle?.mon,
-
             tue: weekToggle?.tue,
-
             wed: weekToggle?.wed,
-
             thu: weekToggle?.thu,
-
             fri: weekToggle?.fri,
-
             sat: weekToggle?.sat,
-
             sun: weekToggle?.sun,
         });
     }, [weekToggle]);
@@ -181,31 +107,18 @@ const General = () => {
     useEffect(() => {
         setTimeValue({
             monFrom: buildingOperatingHours?.operating_hours?.mon?.time_range?.frm,
-
             monTo: buildingOperatingHours?.operating_hours?.mon?.time_range?.to,
-
             tueFrom: buildingOperatingHours?.operating_hours?.tue?.time_range?.frm,
-
             tueTo: buildingOperatingHours?.operating_hours?.tue?.time_range?.to,
-
             wedFrom: buildingOperatingHours?.operating_hours?.wed?.time_range?.frm,
-
             wedTo: buildingOperatingHours?.operating_hours?.wed?.time_range?.to,
-
             thuFrom: buildingOperatingHours?.operating_hours?.thu?.time_range?.frm,
-
             thuTo: buildingOperatingHours?.operating_hours?.thu?.time_range?.to,
-
             friFrom: buildingOperatingHours?.operating_hours?.fri?.time_range?.frm,
-
             friTo: buildingOperatingHours?.operating_hours?.fri?.time_range?.to,
-
             satFrom: buildingOperatingHours?.operating_hours?.sat?.time_range?.frm,
-
             satTo: buildingOperatingHours?.operating_hours?.sat?.time_range?.to,
-
             sunFrom: buildingOperatingHours?.operating_hours?.sun?.time_range?.frm,
-
             sunTo: buildingOperatingHours?.operating_hours?.sun?.time_range?.to,
         });
     }, [buildingOperatingHours]);
@@ -214,37 +127,27 @@ const General = () => {
         operating_hours: {
             mon: {
                 stat: switchPhrase?.mon,
-
                 time_range: {
                     frm: timeValue?.monFrom,
-
                     to: timeValue?.monTo,
                 },
             },
-
             tue: {
                 stat: switchPhrase?.tue,
-
                 time_range: {
                     frm: timeValue?.tueFrom,
-
                     to: timeValue?.tueTo,
                 },
             },
-
             wed: {
                 stat: switchPhrase?.wed,
-
                 time_range: {
                     frm: timeValue?.wedFrom,
-
                     to: timeValue?.wedTo,
                 },
             },
-
             thu: {
                 stat: switchPhrase?.thu,
-
                 time_range: {
                     frm: timeValue?.thuFrom,
 
@@ -319,7 +222,6 @@ const General = () => {
                 .then(
                     axios.spread((data1, data2, data3) => {
                         setLoadButton(false);
-
                         console.log('Data1 => ', data1);
 
                         console.log('Data2 => ', data2);
@@ -341,87 +243,58 @@ const General = () => {
 
         if (fixing) {
             let data = {};
-
             if (bldgId) {
                 data = buildingListData.find((el) => el.building_id === bldgId);
-
                 if (data === undefined) {
                     return (fixing = false);
                 }
-
                 setBldgData(data);
 
                 let buildingDetailsObj = {
                     name: data.building_name,
-
                     typee: data.building_type,
-
                     square_footage: data.building_size,
-
                     active: data.active,
                 };
-
                 setBuildingDetails(buildingDetailsObj);
-
                 setResponseBuildingDetails(buildingDetailsObj);
 
                 let buildingAddressObj = {
                     street_address: data.street_address,
-
                     address_2: data.address_2,
-
                     city: data.city,
-
                     state: data.state,
-
                     zip_code: data.zip_code,
                 };
-
                 setBuildingAddress(buildingAddressObj);
-
                 setResponseBuildingAddress(buildingAddressObj);
 
                 let buildingDateTimeObj = {
                     timezone: data.timezone,
-
                     time_format: data.time_format,
                 };
-
                 setBuildingDateTime(buildingDateTimeObj);
-
                 setResponseBuildingDateTime(buildingDateTimeObj);
 
                 let buildingOperatingHours = {
                     operating_hours: data.operating_hours,
                 };
-
                 setBuildingOperatingHours(buildingOperatingHours);
-
                 setResponseBuildingOperatingHours(buildingOperatingHours);
 
                 const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-
                 setWeekToggle({
                     mon: mon['stat'],
-
                     tue: tue['stat'],
-
                     wed: wed['stat'],
-
                     thu: thu['stat'],
-
                     fri: fri['stat'],
-
                     sat: sat['stat'],
-
                     sun: sun['stat'],
                 });
             }
-
             // setBuildingData(data);
-
             setIsbuildingDetailsFetched(false);
-
             // });
         }
     };
@@ -437,78 +310,52 @@ const General = () => {
 
         const fetchBuildingData = async () => {
             setIsbuildingDetailsFetched(true);
-
             if (fixing) {
                 let data = {};
-
                 if (bldgId) {
                     data = buildingListData.find((el) => el.building_id === bldgId);
-
                     if (data === undefined) {
                         return (fixing = false);
                     }
-
                     setInputField({
                         ...inputField,
-
                         active: data.active,
-
                         name: data.building_name,
-
                         square_footage: data.building_size,
-
                         typee: data.building_type,
-
                         street_address: data.street_address,
-
                         address_2: data.address_2,
-
                         city: data.city,
-
                         state: data.state,
-
                         zip_code: data.zip_code,
-
                         timezone: data.timezone,
-
                         time_format: data.time_format,
-
                         operating_hours: data.operating_hours,
                     });
-
                     setActiveToggle(data.active);
-
                     setTimeToggle(data.time_format);
-
                     // console.log(buildingData);
-
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
 
                     setWeekToggle({
                         mon: mon['stat'],
-
                         tue: tue['stat'],
-
                         wed: wed['stat'],
-
                         thu: thu['stat'],
-
                         fri: fri['stat'],
-
                         sat: sat['stat'],
-
                         sun: sun['stat'],
                     });
                 }
-
                 // setBuildingData(data);
-
                 setIsbuildingDetailsFetched(false);
-
                 // });
             }
+            // setBuildingData(data);
+            setIsbuildingDetailsFetched(false);
+            // });
+        }
         };
-
         fetchBuildingData();
     }, [render]);
 
@@ -745,94 +592,56 @@ const General = () => {
     }, []);
 
     // useEffect(() => {
-
     //     const el = document.querySelector('ge-autocomplete');
-
     //     // 'select' event handler - when a user selects an item from the suggestions
-
     //     console.log(el);
-
     //     if (el) {
-
     //         el.addEventListener('select', (event) => {
-
     //             console.log(event.detail, event);
-
     //         });
-
     //     }
-
     // }, []);
 
     // TODO:
-
     const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
-
     console.log(getResponseOfPlaces, 'getResponseOfPlaces');
-
     const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
-
     const [totalSelectedData, setTotalSelectedData] = useState();
-
     console.log('totalSelectedData', totalSelectedData);
-
     const [openDropdown, setopenDropdown] = useState(false);
-
     const getPlacesAutocomplete = async () => {
         const params = `${textLocation.split(' ').join('+')}`;
-
         await axios
-
             .get(`https://api.geocode.earth/v1/autocomplete?api_key=ge-2200db37475e4ed3&text=${params}`)
-
             .then((res) => {
                 setGetResponseOfPlaces(res?.data);
             });
     };
 
     // const getGooglePlacesAutocomplete = async () => {
-
     //     let header = {
-
     //         'Content-Type': 'application/json',
-
     //         accept: 'application/json',
-
     //         Authorization: `Bearer ${userdata.token}`,
-
     //     };
 
     //     const params = `${textLocation.split(' ').join('+')}`;
-
     //     let API_KEY = 'AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4';
-
     //     await axios
-
     //         .get(
-
     //             `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=amoeba&types=establishment&location=37.76999%2C-122.44696&radius=500&key=AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4`,
-
     //             {
-
     //                 headers: header,
-
     //             }
-
     //         )
-
     //         .then((res) => {
-
     //             // setGetResponseOfPlaces(res?.data);
-
     //             console.log(res, 'maps.googleapis.com');
-
     //         });
-
     // };
 
     useEffect(() => {
         getPlacesAutocomplete();
-
         // getGooglePlacesAutocomplete();
     }, [textLocation]);
 
@@ -860,11 +669,9 @@ const General = () => {
                                         }}>
                                         Cancel
                                     </button>
-
                                     {loadButton ? (
                                         <Button color="primary" disabled>
                                             <Spinner size="sm">Loading...</Spinner>
-
                                             <span> Saving</span>
                                         </Button>
                                     ) : (
@@ -873,7 +680,6 @@ const General = () => {
                                             className="btn btn-primary buildings-save-style ml-3"
                                             onClick={() => {
                                                 setLoadButton(true);
-
                                                 saveBuildingSettings();
                                             }}>
                                             Save
@@ -1050,7 +856,6 @@ const General = () => {
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
                                             // TODO:
-
                                             <div style={{ position: 'absolute' }}>
                                                 <Input
                                                     type="text"
@@ -1059,9 +864,7 @@ const General = () => {
                                                     placeholder="Address 1"
                                                     onChange={(e) => {
                                                         handleBldgSettingChanges('street_address', e.target.value);
-
                                                         settextLocation(e.target.value);
-
                                                         if (getResponseOfPlaces) {
                                                             setopenDropdown(true);
                                                         }
@@ -1069,14 +872,11 @@ const General = () => {
                                                     className="font-weight-bold"
                                                     value={selectedPlaceLabel || buildingAddress.street_address}
                                                 />
-
                                                 {openDropdown && (
                                                     <div
                                                         style={{
                                                             backgroundColor: 'white',
-
                                                             border: '1px solid black',
-
                                                             zIndex: 1000,
                                                         }}>
                                                         {getResponseOfPlaces?.features?.map((item) => {
@@ -1085,11 +885,8 @@ const General = () => {
                                                                     className="onchangedrowpdown"
                                                                     onClick={() => {
                                                                         console.log(item, 'clickedgetResponseOfPlaces');
-
                                                                         setSelectedPlaceLabel(item?.properties?.label);
-
                                                                         setTotalSelectedData(item);
-
                                                                         setopenDropdown(false);
                                                                     }}>
                                                                     {item?.properties?.label}
@@ -1099,18 +896,12 @@ const General = () => {
                                                     </div>
                                                 )}
                                             </div>
-
                                             // <ge-autocomplete
-
                                             //     onChange={(e) => {
-
                                             //         console.log(e, 'e');
-
                                             //     }}
-
                                             //     api_key="ge-2200db37475e4ed3"></ge-autocomplete>
                                         )}
-
                                         {/* <div>{getResponseOfPlaces}</div> */}
                                     </FormGroup>
 
@@ -1158,7 +949,6 @@ const General = () => {
                                                     handleBldgSettingChanges('city', e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
-
                                                 value={totalSelectedData?.properties?.locality || buildingAddress.city}
                                             />
                                         )}
@@ -1181,7 +971,6 @@ const General = () => {
                                                     handleBldgSettingChanges('state', e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
-
                                                 className="font-weight-bold"
                                             />
                                         )}
