@@ -36,8 +36,6 @@ const BreakersComponent = ({ data, id }) => {
     const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
     const [isSensorDataFetchedForTriple, setIsSensorDataFetchedForTriple] = useState(false);
 
-    const [currentEquipIds, setCurrentEquipIds] = useState([]);
-
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
     const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
@@ -157,12 +155,6 @@ const BreakersComponent = ({ data, id }) => {
             setIsSensorDataFetchedForTriple(false);
             console.log('Failed to fetch Sensor Data');
         }
-    };
-
-    const addSelectedBreakerEquip = (equipId) => {
-        let newArray = [];
-        newArray.push(equipId);
-        setCurrentEquipIds(newArray);
     };
 
     const triggerBreakerAPI = () => {
@@ -329,7 +321,9 @@ const BreakersComponent = ({ data, id }) => {
         let breaker = Object.assign({}, breakerData);
         if (key === 'equipment_link') {
             let arr = [];
-            arr.push(value);
+            if (value !== '') {
+                arr.push(value);
+            }
             value = arr;
         }
         if (value === 'Select Volts') {
@@ -986,7 +980,6 @@ const BreakersComponent = ({ data, id }) => {
                                         if (e.target.value === 'Select Equipment') {
                                             return;
                                         }
-                                        addSelectedBreakerEquip(e.target.value);
                                         handleSingleBreakerChange(id, 'equipment_link', e.target.value);
                                     }}
                                     value={breakerData.equipment_link[0]}>
@@ -1001,6 +994,7 @@ const BreakersComponent = ({ data, id }) => {
                                             </option>
                                         );
                                     })}
+                                    {breakerData?.equipment_link?.length !== 0 && <option value="">None</option>}
                                 </Input>
                                 {/* <MultiSelect
                                         options={equipmentData}

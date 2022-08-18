@@ -36,8 +36,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
     const [isSensorDataFetchedForTriple, setIsSensorDataFetchedForTriple] = useState(false);
 
-    const [currentEquipIds, setCurrentEquipIds] = useState([]);
-
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
     const disconnectedBreakersData = BreakersStore.useState((s) => s.disconnectedBreakersData);
@@ -157,12 +155,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             setIsSensorDataFetchedForTriple(false);
             console.log('Failed to fetch Sensor Data');
         }
-    };
-
-    const addSelectedBreakerEquip = (equipId) => {
-        let newArray = [];
-        newArray.push(equipId);
-        setCurrentEquipIds(newArray);
     };
 
     const triggerBreakerAPI = () => {
@@ -963,7 +955,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         if (e.target.value === 'Select Equipment') {
                                             return;
                                         }
-                                        addSelectedBreakerEquip(e.target.value);
                                         handleSingleBreakerChange(id, 'equipment_link', e.target.value);
                                     }}
                                     value={breakerData.equipment_link[0]}>
@@ -978,6 +969,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                             </option>
                                         );
                                     })}
+                                    {breakerData?.equipment_link?.length !== 0 && <option value="">None</option>}
                                 </Input>
                                 {/* <MultiSelect
                                         options={equipmentData}
