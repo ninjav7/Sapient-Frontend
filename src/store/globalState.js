@@ -1,5 +1,7 @@
 import { atom } from 'jotai';
 
+export const buildingData = atom([]);
+
 export const switchValue = atom({
     mon: false,
     tue: false,

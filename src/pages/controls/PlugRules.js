@@ -19,6 +19,7 @@ import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
+import { useAtom } from 'jotai';
 import {
     BaseUrl,
     listPlugRules,
@@ -26,7 +27,6 @@ import {
     updatePlugRule,
     linkSocket,
     unLinkSocket,
-    getBuilding,
 } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -35,6 +35,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { buildingData } from '../../store/globalState';
 
 const PlugRuleTable = ({
     plugRuleData,
@@ -50,7 +51,7 @@ const PlugRuleTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             <th>Name</th>
                             <th>Description</th>
                             <th>Days</th>
@@ -84,7 +85,7 @@ const PlugRuleTable = ({
                         <tbody>
                             {plugRuleData.map((record, index) => {
                                 return (
-                                    <tr key={index} className='mouse-pointer'>
+                                    <tr key={index} className="mouse-pointer">
                                         <td
                                             className="font-weight-bold panel-name"
                                             onClick={() => {
@@ -175,6 +176,8 @@ const PlugRules = () => {
         action: [],
     });
     const [buildingRecord, setBuildingRecord] = useState([]);
+
+    console.log(buildingRecord, 'buildingRecord');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -322,6 +325,9 @@ const PlugRules = () => {
         }
     };
 
+    // Building List Data Globally
+    const [buildingListData] = useAtom(buildingData);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -338,23 +344,14 @@ const PlugRules = () => {
                 s.parent = 'control';
             });
         };
+
         const getBuildingData = async () => {
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setBuildingRecord(data);
-                    console.log('Get Building', data);
-                    data.map((record, index) => {
-                        if (record.building_id === activeBuildingId) {
-                            localStorage.setItem('timeZone', record.timezone);
-                            // console.log("timezone",record.timezone);
-                        }
-                    });
+                setBuildingRecord(buildingListData);
+                buildingListData.map((record, index) => {
+                    if (record.building_id === activeBuildingId) {
+                        localStorage.setItem('timeZone', record.timezone);
+                    }
                 });
             } catch (error) {
                 console.log(error);
@@ -363,7 +360,7 @@ const PlugRules = () => {
         };
         getBuildingData();
         updateBreadcrumbStore();
-    }, []);
+    }, [buildingListData]);
 
     useEffect(() => {
         const fetchPlugRuleData = async () => {

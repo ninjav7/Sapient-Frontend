@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
+import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader, Button, Spinner } from 'reactstrap';
 import Switch from 'react-switch';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-time-picker/dist/TimePicker.css';
+import { useAtom } from 'jotai';
 import './style.css';
 import {
     BaseUrl,
@@ -11,7 +12,6 @@ import {
     generalBuildingAddress,
     generalDateTime,
     generalOperatingHours,
-    getBuildings,
     generalBldgDelete,
 } from '../../services/Network';
 import axios from 'axios';
@@ -22,15 +22,17 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { buildingData } from '../../store/globalState';
 
 const General = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const _ = require('lodash');
     const [isEditing, setIsEditing] = useState(false);
-    const [buildingData, setBuildingData] = useState({});
+
+    // const [buildingData, setBuildingData] = useState({});
+
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
@@ -43,20 +45,17 @@ const General = () => {
     const [activeToggle, setActiveToggle] = useState(false);
     const [weekToggle, setWeekToggle] = useState({});
     const [timeToggle, setTimeToggle] = useState(false);
-
     const [inputField, setInputField] = useState({
         kWh: 0,
         total_paid: 0,
     });
 
     const [bldgData, setBldgData] = useState({});
-
     const [isbuildingDetailsFetched, setIsbuildingDetailsFetched] = useState(true);
     const [buildingDetails, setBuildingDetails] = useState({});
     const [buildingAddress, setBuildingAddress] = useState({});
     const [buildingDateTime, setBuildingDateTime] = useState({});
     const [buildingOperatingHours, setBuildingOperatingHours] = useState({});
-
     const [responseBuildingDetails, setResponseBuildingDetails] = useState({});
     const [responseBuildingAddress, setResponseBuildingAddress] = useState({});
     const [responseBuildingDateTime, setResponseBuildingDateTime] = useState({});
@@ -66,6 +65,7 @@ const General = () => {
     console.log('textLocation', textLocation.split(' ').join('+'));
 
     const [timeZone, setTimeZone] = useState('12');
+    const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
         mon: false,
         tue: false,
@@ -75,6 +75,7 @@ const General = () => {
         sat: false,
         sun: false,
     });
+
     const [timeValue, setTimeValue] = useState({
         monFrom: '',
         monTo: '',
@@ -91,8 +92,6 @@ const General = () => {
         sunFrom: '',
         sunTo: '',
     });
-
-    console.log('timeValue', timeValue);
 
     useEffect(() => {
         setSwitchPhrace({
@@ -152,27 +151,37 @@ const General = () => {
                 stat: switchPhrase?.thu,
                 time_range: {
                     frm: timeValue?.thuFrom,
+
                     to: timeValue?.thuTo,
                 },
             },
+
             fri: {
                 stat: switchPhrase?.fri,
+
                 time_range: {
                     frm: timeValue?.friFrom,
+
                     to: timeValue?.friTo,
                 },
             },
+
             sat: {
                 stat: switchPhrase?.sat,
+
                 time_range: {
                     frm: timeValue?.satFrom,
+
                     to: timeValue?.satTo,
                 },
             },
+
             sun: {
                 stat: switchPhrase?.sun,
+
                 time_range: {
                     frm: timeValue?.sunFrom,
+
                     to: timeValue?.sunTo,
                 },
             },
@@ -183,30 +192,41 @@ const General = () => {
         try {
             let header = {
                 'Content-Type': 'application/json',
+
                 accept: 'application/json',
+
                 Authorization: `Bearer ${userdata.token}`,
             };
 
             // let params = `?building_id=${bldgId}`;
+
             let params = `/${bldgId}`;
 
             await axios
+
                 .all([
                     axios.patch(`${BaseUrl}${generalBuildingDetail}${params}`, buildingDetails, {
                         headers: header,
                     }),
+
                     axios.patch(`${BaseUrl}${generalBuildingAddress}${params}`, buildingAddress, {
                         headers: header,
                     }),
+
                     axios.patch(`${BaseUrl}${generalDateTime}${params}`, buildingDateTime, {
                         headers: header,
                     }),
+
                     axios.patch(`${BaseUrl}${generalOperatingHours}/${bldgId}`, operationTime, { headers: header }),
                 ])
+
                 .then(
                     axios.spread((data1, data2, data3) => {
+                        setLoadButton(false);
                         console.log('Data1 => ', data1);
+
                         console.log('Data2 => ', data2);
+
                         console.log('Data3 => ', data3);
                     })
                 );
@@ -215,58 +235,109 @@ const General = () => {
         }
     };
 
+    const [buildingListData] = useAtom(buildingData);
+
     const fetchBuildingData = async () => {
         let fixing = true;
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
+
         setIsbuildingDetailsFetched(true);
+
         if (fixing) {
-            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                let response = res.data;
+            let data = {};
+            if (bldgId) {
+                data = buildingListData.find((el) => el.building_id === bldgId);
+                if (data === undefined) {
+                    return (fixing = false);
+                }
+                setBldgData(data);
+
+                let buildingDetailsObj = {
+                    name: data.building_name,
+                    typee: data.building_type,
+                    square_footage: data.building_size,
+                    active: data.active,
+                };
+                setBuildingDetails(buildingDetailsObj);
+                setResponseBuildingDetails(buildingDetailsObj);
+
+                let buildingAddressObj = {
+                    street_address: data.street_address,
+                    address_2: data.address_2,
+                    city: data.city,
+                    state: data.state,
+                    zip_code: data.zip_code,
+                };
+                setBuildingAddress(buildingAddressObj);
+                setResponseBuildingAddress(buildingAddressObj);
+
+                let buildingDateTimeObj = {
+                    timezone: data.timezone,
+                    time_format: data.time_format,
+                };
+                setBuildingDateTime(buildingDateTimeObj);
+                setResponseBuildingDateTime(buildingDateTimeObj);
+
+                let buildingOperatingHours = {
+                    operating_hours: data.operating_hours,
+                };
+                setBuildingOperatingHours(buildingOperatingHours);
+                setResponseBuildingOperatingHours(buildingOperatingHours);
+
+                const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+                setWeekToggle({
+                    mon: mon['stat'],
+                    tue: tue['stat'],
+                    wed: wed['stat'],
+                    thu: thu['stat'],
+                    fri: fri['stat'],
+                    sat: sat['stat'],
+                    sun: sun['stat'],
+                });
+            }
+            // setBuildingData(data);
+            setIsbuildingDetailsFetched(false);
+            // });
+        }
+    };
+
+    useEffect(() => {
+        if (buildingListData) {
+            fetchBuildingData();
+        }
+    }, [bldgId, buildingListData]);
+
+    useEffect(() => {
+        let fixing = true;
+
+        const fetchBuildingData = async () => {
+            setIsbuildingDetailsFetched(true);
+            if (fixing) {
                 let data = {};
                 if (bldgId) {
-                    data = response.find((el) => el.building_id === bldgId);
+                    data = buildingListData.find((el) => el.building_id === bldgId);
                     if (data === undefined) {
                         return (fixing = false);
                     }
-                    setBldgData(data);
-
-                    let buildingDetailsObj = {
-                        name: data.building_name,
-                        typee: data.building_type,
-                        square_footage: data.building_size,
+                    setInputField({
+                        ...inputField,
                         active: data.active,
-                    };
-                    setBuildingDetails(buildingDetailsObj);
-                    setResponseBuildingDetails(buildingDetailsObj);
-
-                    let buildingAddressObj = {
+                        name: data.building_name,
+                        square_footage: data.building_size,
+                        typee: data.building_type,
                         street_address: data.street_address,
                         address_2: data.address_2,
                         city: data.city,
                         state: data.state,
                         zip_code: data.zip_code,
-                    };
-                    setBuildingAddress(buildingAddressObj);
-                    setResponseBuildingAddress(buildingAddressObj);
-
-                    let buildingDateTimeObj = {
                         timezone: data.timezone,
                         time_format: data.time_format,
-                    };
-                    setBuildingDateTime(buildingDateTimeObj);
-                    setResponseBuildingDateTime(buildingDateTimeObj);
-
-                    let buildingOperatingHours = {
                         operating_hours: data.operating_hours,
-                    };
-                    setBuildingOperatingHours(buildingOperatingHours);
-                    setResponseBuildingOperatingHours(buildingOperatingHours);
-
+                    });
+                    setActiveToggle(data.active);
+                    setTimeToggle(data.time_format);
+                    // console.log(buildingData);
                     const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
+
                     setWeekToggle({
                         mon: mon['stat'],
                         tue: tue['stat'],
@@ -277,69 +348,15 @@ const General = () => {
                         sun: sun['stat'],
                     });
                 }
-                setBuildingData(data);
+                // setBuildingData(data);
                 setIsbuildingDetailsFetched(false);
-            });
-        }
-    };
-
-    useEffect(() => {
-        fetchBuildingData();
-    }, [bldgId]);
-
-    useEffect(() => {
-        let fixing = true;
-        const fetchBuildingData = async () => {
-            setIsbuildingDetailsFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            if (fixing) {
-                await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                    let response = res.data;
-                    let data = {};
-                    if (bldgId) {
-                        data = response.find((el) => el.building_id === bldgId);
-                        if (data === undefined) {
-                            return (fixing = false);
-                        }
-                        setInputField({
-                            ...inputField,
-                            active: data.active,
-                            name: data.building_name,
-                            square_footage: data.building_size,
-                            typee: data.building_type,
-                            street_address: data.street_address,
-                            address_2: data.address_2,
-                            city: data.city,
-                            state: data.state,
-                            zip_code: data.zip_code,
-                            timezone: data.timezone,
-                            time_format: data.time_format,
-                            operating_hours: data.operating_hours,
-                        });
-                        setActiveToggle(data.active);
-                        setTimeToggle(data.time_format);
-                        // console.log(buildingData);
-                        const { mon, tue, wed, thu, fri, sat, sun } = data?.operating_hours;
-
-                        setWeekToggle({
-                            mon: mon['stat'],
-                            tue: tue['stat'],
-                            wed: wed['stat'],
-                            thu: thu['stat'],
-                            fri: fri['stat'],
-                            sat: sat['stat'],
-                            sun: sun['stat'],
-                        });
-                    }
-                    setBuildingData(data);
-                    setIsbuildingDetailsFetched(false);
-                });
+                // });
             }
+            // setBuildingData(data);
+            setIsbuildingDetailsFetched(false);
+            // });
         };
+
         fetchBuildingData();
     }, [render]);
 
@@ -349,21 +366,27 @@ const General = () => {
                 let newList = [
                     {
                         label: 'General',
+
                         path: '/settings/general',
+
                         active: true,
                     },
                 ];
+
                 bs.items = newList;
             });
+
             ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
         };
+
         updateBreadcrumbStore();
     }, []);
 
     const inputsBuildingHandler = (e) => {
         // console.log(e.target.name);
+
         setInputField({ [e.target.name]: e.target.value });
     };
 
@@ -373,29 +396,43 @@ const General = () => {
 
     const dateHandler = (operating_hours, day) => {
         let days = '';
+
         let timeFrom = '';
+
         let timeTo = '';
+
         let stat = '';
+
         if (operating_hours) {
             days = operating_hours[day];
+
             timeFrom = days['time_range'].frm;
+
             timeTo = days['time_range'].to;
+
             stat = days['stat'];
         }
+
         return {
             frm: new Date(`January 31 1980 ${timeFrom}`),
+
             to: new Date(`January 31 1980 ${timeTo}`),
+
             stat,
         };
     };
 
     const inputsActiveToggleHandler = (e) => {
         setActiveToggle(!activeToggle);
+
         const headers = {
             'Content-Type': 'application/json',
+
             accept: 'application/json',
+
             Authorization: `Bearer ${userdata.token}`,
         };
+
         axios.patch(`${BaseUrl}${generalBuildingDetail}/${bldgId}`, { active: e }, { headers }).then((res) => {
             setRender(!render);
         });
@@ -403,82 +440,123 @@ const General = () => {
 
     const handleSwitchChange = () => {
         let obj = buildingDetails;
+
         obj.active = !buildingDetails.active;
+
         handleBldgSettingChanges('active', obj.active);
     };
 
     const handleDateTimeSwitch = () => {
         let obj = buildingDateTime;
+
         obj.active = !buildingDateTime.active;
+
         handleBldgSettingChanges('time_format', obj.active);
     };
 
     const handleBldgSettingChanges = (key, value) => {
         if (key === 'active') {
             let obj = Object.assign({}, buildingDetails);
+
             obj[key] = value;
+
             setBuildingDetails(obj);
         }
+
         if (key === 'name') {
             let obj = Object.assign({}, buildingDetails);
+
             obj[key] = value;
+
             setBuildingDetails(obj);
         }
+
         if (key === 'typee') {
             let obj = Object.assign({}, buildingDetails);
+
             obj[key] = value;
+
             setBuildingDetails(obj);
         }
+
         if (key === 'square_footage') {
             let obj = Object.assign({}, buildingDetails);
+
             obj[key] = value;
+
             setBuildingDetails(obj);
         }
+
         if (key === 'street_address') {
             let obj = Object.assign({}, buildingAddress);
+
             obj[key] = value;
+
             setBuildingAddress(obj);
         }
+
         if (key === 'address_2') {
             let obj = Object.assign({}, buildingAddress);
+
             obj[key] = value;
+
             setBuildingAddress(obj);
         }
+
         if (key === 'city') {
             let obj = Object.assign({}, buildingAddress);
+
             obj[key] = value;
+
             setBuildingAddress(obj);
         }
+
         if (key === 'state') {
             let obj = Object.assign({}, buildingAddress);
+
             obj[key] = value;
+
             setBuildingAddress(obj);
         }
+
         if (key === 'zip_code') {
             let obj = Object.assign({}, buildingAddress);
+
             obj[key] = value;
+
             setBuildingAddress(obj);
         }
+
         if (key === 'time_format') {
             let obj = Object.assign({}, buildingDateTime);
+
             obj[key] = value;
+
             setBuildingDateTime(obj);
         }
     };
 
     const deleteBuildingHandler = () => {
         var answer = window.confirm("'Are you sure wants o delete!!!'");
+
         if (answer) {
             //some code
+
             // console.log("'Are you sure wants o delete!!!'");
+
             // console.log('helloo');
+
             const headers = {
                 'Content-Type': 'application/json',
+
                 accept: 'application/json',
+
                 Authorization: `Bearer ${userdata.token}`,
             };
+
             axios.delete(`${BaseUrl}${generalBldgDelete}/${bldgId}`, { headers }).then((res) => {
                 console.log(res.data);
+
                 setRender(!render);
             });
         }
@@ -486,6 +564,7 @@ const General = () => {
 
     const operatingHoursChangeHandler = (date, day, type1, type2) => {
         const time1 = moment(date).format('HH:MM');
+
         const data = {
             [day]: {
                 time_range: {
@@ -498,8 +577,10 @@ const General = () => {
     const checkDateTimeHandler = (day, value) => {
         setWeekToggle({
             ...weekToggle,
+
             [day]: value,
         });
+
         const data = {
             [day]: {
                 stat: value,
@@ -566,12 +647,14 @@ const General = () => {
     }, [textLocation]);
 
     // update section end
+
     return (
         <React.Fragment>
             <Row className="page-title">
                 <Col lg={8}>
                     <div className="building-heading-container">
                         <div className="heading-style">General Building Settings</div>
+
                         <div>
                             {isbuildingDetailsFetched ? (
                                 <Skeleton count={1} height={40} width={150} />
@@ -582,18 +665,27 @@ const General = () => {
                                         className="btn btn-default buildings-cancel-style"
                                         onClick={() => {
                                             setIsEditing(false);
+
                                             fetchBuildingData();
                                         }}>
                                         Cancel
                                     </button>
-                                    <button
-                                        type="button"
-                                        className="btn btn-primary buildings-save-style ml-3"
-                                        onClick={() => {
-                                            saveBuildingSettings();
-                                        }}>
-                                        Save
-                                    </button>
+                                    {loadButton ? (
+                                        <Button color="primary" disabled>
+                                            <Spinner size="sm">Loading...</Spinner>
+                                            <span> Saving</span>
+                                        </Button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="btn btn-primary buildings-save-style ml-3"
+                                            onClick={() => {
+                                                setLoadButton(true);
+                                                saveBuildingSettings();
+                                            }}>
+                                            Save
+                                        </button>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -609,12 +701,14 @@ const General = () => {
                                 Building Details
                             </h5>
                         </CardHeader>
+
                         <CardBody>
                             <Form>
                                 <div className="grid-style-3">
                                     <FormGroup>
                                         <div className="single-line-style">
                                             <h6 className="building-content-title">Active</h6>
+
                                             <h6 className="building-content-subtitle mb-2" htmlFor="customSwitches">
                                                 Non-admin users can only view active buildings.
                                             </h6>
@@ -641,6 +735,7 @@ const General = () => {
                                     <FormGroup>
                                         <div className="single-line-style">
                                             <h6 className="building-content-title">Building Name</h6>
+
                                             <h6 className="building-content-subtitle mb-2">
                                                 A human-friendly display name for this building
                                             </h6>
@@ -660,6 +755,7 @@ const General = () => {
                                                         handleBldgSettingChanges('name', e.target.value);
                                                     }}
                                                     // onBlur={EditBuildingHandler}
+
                                                     placeholder="Enter Building Name"
                                                     className="single-line-style font-weight-bold"
                                                     value={buildingDetails.name}
@@ -671,6 +767,7 @@ const General = () => {
                                     <FormGroup>
                                         <div className="single-line-style">
                                             <h6 className="building-content-title">Type</h6>
+
                                             <h6 className="building-content-subtitle mb-2">
                                                 The primary use/type of this building
                                             </h6>
@@ -690,9 +787,11 @@ const General = () => {
                                                         handleBldgSettingChanges('typee', e.target.value);
                                                     }}
                                                     // onBlur={EditBuildingHandler}
+
                                                     value={buildingDetails.typee}
                                                     className="font-weight-bold">
                                                     <option>Office Building</option>
+
                                                     <option>Residential Building</option>
                                                 </Input>
                                             </div>
@@ -702,6 +801,7 @@ const General = () => {
                                     <FormGroup>
                                         <div className="single-line-style">
                                             <h6 className="building-content-title">Square Footage</h6>
+
                                             <h6 className="building-content-subtitle mb-2">
                                                 The total square footage of this building
                                             </h6>
@@ -722,6 +822,7 @@ const General = () => {
                                                         handleBldgSettingChanges('square_footage', +e.target.value);
                                                     }}
                                                     // onBlur={EditBuildingHandler}
+
                                                     value={buildingDetails.square_footage}
                                                     className="font-weight-bold"
                                                 />
@@ -743,6 +844,7 @@ const General = () => {
                                 Address
                             </h5>
                         </CardHeader>
+
                         <CardBody>
                             <Form>
                                 <div className="grid-style-1">
@@ -750,6 +852,7 @@ const General = () => {
                                         <Label for="userAddress1" className="building-content-title">
                                             Street Address
                                         </Label>
+
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
@@ -767,13 +870,16 @@ const General = () => {
                                                             setopenDropdown(true);
                                                         }
                                                     }}
-                                                    // onBlur={EditAddressHandler}
                                                     className="font-weight-bold"
-                                                    // value={buildingAddress.street_address || selectedPlaceLabel}
                                                     value={selectedPlaceLabel || buildingAddress.street_address}
                                                 />
                                                 {openDropdown && (
-                                                    <div className="div-dropdown">
+                                                    <div
+                                                        style={{
+                                                            backgroundColor: 'white',
+                                                            border: '1px solid black',
+                                                            zIndex: 1000,
+                                                        }}>
                                                         {getResponseOfPlaces?.features?.map((item) => {
                                                             return (
                                                                 <div
@@ -804,6 +910,7 @@ const General = () => {
                                         <Label for="userAddress2" className="building-content-title">
                                             Address 2 (optional)
                                         </Label>
+
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
@@ -817,6 +924,7 @@ const General = () => {
                                                     handleBldgSettingChanges('address_2', e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
+
                                                 value={buildingAddress.address_2}
                                             />
                                         )}
@@ -828,6 +936,7 @@ const General = () => {
                                         <Label for="userCity" className="building-content-title">
                                             City
                                         </Label>
+
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
@@ -850,6 +959,7 @@ const General = () => {
                                         <Label for="userState" className="building-content-title">
                                             State
                                         </Label>
+
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
@@ -871,6 +981,7 @@ const General = () => {
                                         <Label for="useZipCode" className="building-content-title">
                                             Zip
                                         </Label>
+
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
@@ -884,6 +995,7 @@ const General = () => {
                                                     handleBldgSettingChanges('zip_code', +e.target.value);
                                                 }}
                                                 // onBlur={EditAddressHandler}
+
                                                 className="font-weight-bold"
                                             />
                                         )}
@@ -903,12 +1015,14 @@ const General = () => {
                                 Date & Time
                             </h5>
                         </CardHeader>
+
                         <CardBody>
                             <Form>
                                 <div className="grid-style-4">
                                     <div className="single-line-style">
                                         <h6 className="building-content-title">Timezone</h6>
                                     </div>
+
                                     <div className="single-line-style">
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={25} width={150} />
@@ -916,9 +1030,11 @@ const General = () => {
                                             <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
                                         )}
                                     </div>
+
                                     <div className="single-line-style">
                                         <h6 className="building-content-title">Use 24-hour Clock</h6>
                                     </div>
+
                                     <div>
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={25} width={150} />
@@ -926,9 +1042,11 @@ const General = () => {
                                             <Switch
                                                 onChange={(e) => {
                                                     handleDateTimeSwitch();
+
                                                     if (e) {
                                                         setTimeZone('24');
                                                     }
+
                                                     if (!e) {
                                                         setTimeZone('12');
                                                     }
@@ -957,15 +1075,18 @@ const General = () => {
                                 Operating Hours
                             </h5>
                         </CardHeader>
+
                         <CardBody>
                             <Row>
                                 <div>
                                     <>
                                         {/* Monday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('mon', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, mon: e });
                                                 }}
                                                 checked={weekToggle['mon']}
@@ -974,14 +1095,18 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Mon
                                             </div>
+
                                             <DatePicker
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         monFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -994,13 +1119,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'mon').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         monTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1016,10 +1146,12 @@ const General = () => {
                                         </div>
 
                                         {/* Tuesday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('tue', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, tue: e });
                                                 }}
                                                 checked={weekToggle['tue']}
@@ -1028,15 +1160,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Tue
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'tue').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         tueFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1049,13 +1186,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'tue').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         tueTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1071,10 +1213,12 @@ const General = () => {
                                         </div>
 
                                         {/* Wednesday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('wed', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, wed: e });
                                                 }}
                                                 checked={weekToggle['wed']}
@@ -1083,15 +1227,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Wed
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'wed').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         wedFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1104,13 +1253,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'wed').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         wedTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1126,10 +1280,12 @@ const General = () => {
                                         </div>
 
                                         {/* Thursday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('thu', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, thu: e });
                                                 }}
                                                 checked={weekToggle['thu']}
@@ -1138,15 +1294,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Thu
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'thu').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         thuFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1159,13 +1320,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'thu').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         thuTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1181,10 +1347,12 @@ const General = () => {
                                         </div>
 
                                         {/* Friday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('fri', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, fri: e });
                                                 }}
                                                 checked={weekToggle['fri']}
@@ -1193,15 +1361,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Fri
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'fri').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         friFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1214,13 +1387,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'fri').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         friTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1236,10 +1414,12 @@ const General = () => {
                                         </div>
 
                                         {/* Saturday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('sat', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, sat: e });
                                                 }}
                                                 checked={weekToggle['sat']}
@@ -1248,15 +1428,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Sat
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'sat').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         satFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1269,13 +1454,18 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'sat').to}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         satTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1291,10 +1481,12 @@ const General = () => {
                                         </div>
 
                                         {/* Sunday */}
+
                                         <div className="operate-hour-style">
                                             <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('sun', e);
+
                                                     setSwitchPhrace({ ...switchPhrase, tue: e });
                                                 }}
                                                 checked={weekToggle['sun']}
@@ -1303,15 +1495,20 @@ const General = () => {
                                                 checkedIcon={false}
                                                 className="react-switch"
                                             />
+
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Sun
                                             </div>
+
                                             <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'sun').frm}
+
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         sunFrom: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1324,12 +1521,16 @@ const General = () => {
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+
                                             <div className="spacing"> to </div>
+
                                             <DatePicker
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
+
                                                     setTimeValue({
                                                         ...timeValue,
+
                                                         sunTo: moment(date)?.format('HH:MM'),
                                                     });
                                                 }}
@@ -1359,6 +1560,7 @@ const General = () => {
                                 Danger Zone
                             </h5>
                         </CardHeader>
+
                         <CardBody>
                             <Form>
                                 <FormGroup>

@@ -1123,7 +1123,6 @@ const BuildingOverview = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [daysCount, setDaysCount] = useState(1);
-    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
 
     const [hoverRef, isHovered] = useHover();
     const [isEquipmentProcessing, setIsEquipmentProcessing]= useState(false);
@@ -1166,7 +1165,6 @@ const BuildingOverview = () => {
 
         const buildingEndUserData = async () => {
             try {
-                setIsEnergyConsumptionChartLoading(true)
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -1194,11 +1192,9 @@ const BuildingOverview = () => {
                         });
                         console.log(newDonutData);
                         setDonutChartData(newDonutData);
-                        setIsEnergyConsumptionChartLoading(false)
                     });
             } catch (error) {
                 console.log(error);
-                setIsEnergyConsumptionChartLoading(false)
                 console.log('Failed to fetch Building EndUses Data');
             }
         };
@@ -1608,7 +1604,7 @@ const BuildingOverview = () => {
                         {/* </div>
                         <div className="custom-bld-enduse-style">
                             <div> */}
-                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}/>
+                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
                                 {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}

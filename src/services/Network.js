@@ -92,6 +92,7 @@ export const getSpaces = '/api/config/layout/get-spaces';
 export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
 export const updateSpace = '/api/config/layout/update-floor';
+export const deleteSpace = '/api/config/layout/delete-space';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
@@ -123,3 +124,4 @@ export const linkSocketRules = '/api/user_role/plug_rule/list_link_socket';
 export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildingID';
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
+export const graphData = '/api/user_role/plug_rule/average-chart-calculation';
