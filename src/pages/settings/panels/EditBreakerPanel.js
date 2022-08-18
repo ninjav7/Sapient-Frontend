@@ -972,8 +972,7 @@ const EditBreakerPanel = () => {
                                 <div className="row">
                                     {!panelDataFetched && (
                                         <div className="col-sm">
-                                            <div
-                                                className="row breaker-group-style">
+                                            <div className="row breaker-group-style">
                                                 {isEditable && (
                                                     <ReactFlow
                                                         nodes={distributedBreakersNodes}
@@ -988,6 +987,7 @@ const EditBreakerPanel = () => {
                                                         panOnScroll={false}
                                                         preventScrolling={false}
                                                         onPaneScroll={false}
+                                                        panOnDrag={false}
                                                     />
                                                 )}
                                                 {!isEditable && (
@@ -1003,6 +1003,7 @@ const EditBreakerPanel = () => {
                                                         panOnScroll={false}
                                                         preventScrolling={false}
                                                         onPaneScroll={false}
+                                                        panOnDrag={false}
                                                     />
                                                 )}
                                             </div>
@@ -1028,6 +1029,7 @@ const EditBreakerPanel = () => {
                                         panOnScroll={false}
                                         preventScrolling={false}
                                         onPaneScroll={false}
+                                        panOnDrag={false}
                                     />
                                 </div>
                             </div>
