@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, getBuildings, createBuilding } from '../../services/Network';
+import { BaseUrl, createBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -14,6 +14,8 @@ import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
+import { useAtom } from 'jotai';
+import { buildingData } from '../../store/globalState';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
@@ -21,7 +23,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             <th>Name</th>
                             <th>Sq. Ft.</th>
                             <th>Devices</th>
@@ -49,7 +51,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                         <tbody>
                             {buildingsData.map((record, index) => {
                                 return (
-                                    <tr key={index} className='mouse-pointer'>
+                                    <tr key={index} className="mouse-pointer">
                                         <th scope="row">
                                             <Link to="/settings/general">
                                                 <div
@@ -64,11 +66,10 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                     }}>
                                                     {record.building_name}
                                                 </div>
-                                                </Link>
+                                            </Link>
                                             <span className="badge badge-soft-secondary label-styling mr-2">
                                                 {record.building_type}
                                             </span>
-                                            
                                         </th>
                                         <td className="font-weight-bold">
                                             {record.building_size.toLocaleString(undefined, {
@@ -169,24 +170,15 @@ const Buildings = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    const [buildingListData] = useAtom(buildingData);
+
     const fetchBuildingData = async () => {
         try {
             setIsDataProcessing(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuildings}`, { headers }).then((res) => {
-                // let activeBuildings = [];
-                // res.data.forEach((bldg) => {
-                //     if (bldg.active) {
-                //         activeBuildings.push(bldg);
-                //     }
-                // });
-                setBuildingsData(res.data);
-                setIsDataProcessing(false);
-            });
+
+            setBuildingsData(buildingListData);
+            setIsDataProcessing(false);
         } catch (error) {
             console.log(error);
             setIsDataProcessing(false);
@@ -196,7 +188,7 @@ const Buildings = () => {
 
     useEffect(() => {
         fetchBuildingData();
-    }, [bldgId]);
+    }, [buildingListData]);
 
     return (
         <React.Fragment>

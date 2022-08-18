@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { BaseUrl, getBuilding } from '../../services/Network';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,6 +14,8 @@ import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
+import { buildingData } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     const location = useLocation();
@@ -85,43 +86,22 @@ const BuildingSwitcher = () => {
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
     const [portfolioName, setPortfolioName] = useState('');
 
+    const [buildingListData] = useAtom(buildingData);
+
+    console.log(buildingList, 'buildingListNew');
+
     useEffect(() => {
         const getBuildingList = async () => {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                let data = res.data;
-                let activeBldgs = data.filter((bld) => bld.active === true);
-                setBuildingList(activeBldgs);
-            });
+            setBuildingList(buildingListData);
         };
         getBuildingList();
-    }, []);
+    }, [buildingListData]);
 
     useEffect(() => {
         ComponentStore.update((s) => {
             s.parent = 'portfolio';
         });
     }, [portfolioName]);
-
-    useEffect(() => {
-        const getBuildingList = async () => {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                let data = res.data;
-                let activeBldgs = data.filter((bld) => bld.active === true);
-                setBuildingList(activeBldgs);
-            });
-        };
-        getBuildingList();
-    }, []);
 
     const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {
