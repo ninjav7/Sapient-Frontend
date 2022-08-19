@@ -316,8 +316,8 @@ const PortfolioOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process','Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554','#D70040'],
         legend: {
             show: false,
         },
