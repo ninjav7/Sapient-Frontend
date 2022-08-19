@@ -3,4 +3,5 @@ export const COLOR_SCHEME_BY_DEVICE = Object.freeze({
     Lighting: '#FBE384',
     Plug: '#59BAA4',
     Process: '#82EAF0',
+    Other: '#D70040',
 });
