@@ -64,12 +64,12 @@ const AccountSettings = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
-    //     localStorage.setItem('accountName', userdata.name);
-    //     UserStore.update((s) => {
-    //         s.accountName = userdata.name;
-    //     });
-    // }, []);
+    useEffect(() => {
+        localStorage.setItem('accountName', userdata.name);
+        UserStore.update((s) => {
+            s.accountName = userdata.name;
+        });
+    }, []);
 
     return (
         <React.Fragment>

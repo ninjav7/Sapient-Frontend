@@ -12,6 +12,7 @@ import {
     Button,
     Input,
 } from 'reactstrap';
+import moment from 'moment';
 import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
@@ -21,10 +22,13 @@ import { BaseUrl, listUsers, addUser } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import './style.css';
 
-const UserTable = ({ userData }) => {
+const UserTable = ({ userData, isUserDataFetched }) => {
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -56,27 +60,55 @@ const UserTable = ({ userData }) => {
                             <th>Last Active</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {userData.map((record, index) => {
-                            return (
-                                <tr className="mouse-pointer">
-                                    <td className="font-weight-bold panel-name">
-                                        <Link
-                                            to={{
-                                                pathname: `/settings/user-profile/${record?.user_id}`,
-                                            }}>
-                                            <a>{record?.name === '' ? '-' : record?.name}</a>
-                                        </Link>
+                    {isUserDataFetched ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
-                                    <td className="">{record?.building_access.length === 0 ? '-' : ''}</td>
-                                    <td className="">{record?.email === '' ? '-' : record?.email}</td>
-                                    <td className="font-weight-bold">
-                                        {record?.last_active === '' ? '-' : record?.last_active}
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
                                     </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {userData.map((record, index) => {
+                                return (
+                                    <tr className="mouse-pointer">
+                                        <td className="font-weight-bold panel-name">
+                                            <Link
+                                                to={{
+                                                    pathname: `/settings/user-profile/${record?.user_id}`,
+                                                }}>
+                                                <a>{record?.name === '' ? '-' : record?.name}</a>
+                                            </Link>
+                                        </td>
+                                        <td className="">{record?.building_access.length === 0 ? '-' : ''}</td>
+                                        <td className="">{record?.email === '' ? '-' : record?.email}</td>
+                                        <td className="font-weight-bold">
+                                            {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -93,6 +125,7 @@ const Users = () => {
     let userdata = cookies.get('user');
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isUserDataFetched, setIsUserDataFetched] = useState(false);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generatedUserId, setGeneratedUserId] = useState('');
 
@@ -142,6 +175,7 @@ const Users = () => {
 
     const getUsersList = async () => {
         try {
+            setIsUserDataFetched(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
@@ -152,8 +186,10 @@ const Users = () => {
                 let response = res.data;
                 setUserData(response.data);
             });
+            setIsUserDataFetched(false);
         } catch (error) {
             console.log(error);
+            setIsUserDataFetched(false);
             console.log('Failed to fetch End Use Data');
         }
     };
@@ -190,26 +226,29 @@ const Users = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-2 ml-2">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                        />
-                        <span class="input-group-text border-0" id="search-addon">
-                            <Search className="icon-sm" />
-                        </span>
+                    <div className="">
+                        <div className="active-sensor-header">
+                            <div className="search-container mr-2">
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <input
+                                    className="search-box ml-2"
+                                    type="search"
+                                    name="search"
+                                    placeholder="Search..."
+                                    // value={searchSensor}
+                                    // onChange={handleSearchChange}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </Col>
             </Row>
 
             <Row>
                 <Col lg={8}>
-                    <UserTable userData={userData} />
+                    <UserTable userData={userData} isUserDataFetched={isUserDataFetched} />
                 </Col>
             </Row>
 

@@ -182,7 +182,7 @@ const EquipmentTable = ({
                 <CardBody>
                     <Table className="mb-0 bordered table-hover">
                         <thead>
-                            <tr className='mouse-pointer'>
+                            <tr className="mouse-pointer">
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th>End Use Category</th>
@@ -220,7 +220,8 @@ const EquipmentTable = ({
                                             onClick={() => {
                                                 setEquipData(record);
                                                 Toggle();
-                                            }} className='mouse-pointer'>
+                                            }}
+                                            className="mouse-pointer">
                                             <td className="equip-type-style">
                                                 {record.equipment_type ? record.equipment_type : '-'}
                                             </td>
@@ -522,7 +523,7 @@ const EquipmentTypes = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <span className="heading-style">Equipment Types</span>
 
