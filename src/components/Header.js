@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Row, Col, Input } from 'reactstrap';
 import Datepicker from '../sharedComponents/datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -8,10 +8,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/portfolio/style.scss';
 import Select from '../sharedComponents/form/select';
+import DatePicker, { DateObject, getAllDatesInRange } from 'react-multi-date-picker';
+import DatePanel from 'react-multi-date-picker/plugins/date_panel';
+import { Button, Grid } from '@mui/material';
 
 const Header = (props) => {
-    const [dateRange, setDateRange] = useState([null, null]);
+    const datePickerRef = useRef();
+
+    const [dateRange, setDateRange] = useState([new Date(), new Date()]);
     const [startDate, endDate] = dateRange;
+
+    const [localDateRange, setLocalDateRange] = useState([new Date(), new Date()]);
+    const [localStartDate, localEndDate] = localDateRange;
 
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
@@ -52,15 +60,20 @@ const Header = (props) => {
     ];
 
     useEffect(() => {
+        console.log('Sudhanshu => ', localDateRange);
+    });
+
+    useEffect(() => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             localStorage.setItem('dateFilter', date);
-            if(date !== 0){
+            if (date !== 0) {
                 endCustomDate.setDate(endCustomDate.getDate() - 1);
-            }            
+            }
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
+            setLocalDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
                 s.startDate = startCustomDate;
@@ -118,7 +131,96 @@ const Header = (props) => {
                             </Input> */}
                         </div>
 
-                        <div className="">
+                        <div className="select-button">
+                            <Grid container alignItems="center" justifyContent="space-between" px={1}>
+                                <Grid item>
+                                    <FontAwesomeIcon icon={faCalendar} style={{ fontSize: '1.3em' }} />
+                                </Grid>
+                                <Grid item>
+                                    <DatePicker
+                                        numberOfMonths={2}
+                                        onChange={(dateObjects) => {
+                                            setLocalDateRange(dateObjects);
+                                        }}
+                                        value={dateRange}
+                                        ref={datePickerRef}
+                                        range
+                                        render={
+                                            <Button
+                                                variant="text"
+                                                w="100%"
+                                                border={2}
+                                                onClick={() => datePickerRef.current.openCalendar()}>
+                                                {`${dateRange[0]?.toDateString()} - ${dateRange[1]?.toDateString()}`}
+                                            </Button>
+                                        }
+                                        children={
+                                            <>
+                                                <Grid
+                                                    container
+                                                    justifyContent="space-around"
+                                                    p={2}
+                                                    pl={0}
+                                                    borderTop={1}>
+                                                    <Grid item sm={7} md={7} lg={7}>
+                                                        <Grid container spacing={2}>
+                                                            {/* Date Selector 1 */}
+                                                            <Grid item md={6} sm={6} lg={6} xs={6}>
+                                                                <DatePicker
+                                                                    value={localDateRange[0]}
+                                                                    render={
+                                                                        <Button variant="outlined">
+                                                                            {localDateRange[0] &&
+                                                                                `${localDateRange[0]}`}
+                                                                        </Button>
+                                                                    }
+                                                                    readOnly
+                                                                />
+                                                            </Grid>
+                                                            {/* Date Selector 2 */}
+                                                            <Grid item md={6} sm={6} lg={4} xs={6}>
+                                                                <DatePicker
+                                                                    value={localDateRange[1]}
+                                                                    render={
+                                                                        <Button variant="outlined" w="100%" border={2}>
+                                                                            {localDateRange[1] &&
+                                                                                `${localDateRange[1]}`}
+                                                                        </Button>
+                                                                    }
+                                                                    readOnly
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                    {/* Cancel */}
+                                                    <Grid item sm={2} md={2} lg={2}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            onClick={() => datePickerRef.current.closeCalendar()}>
+                                                            Cancel
+                                                        </Button>
+                                                    </Grid>
+                                                    {/* Apply */}
+                                                    <Grid item sm={2} md={2} lg={2}>
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={() => {
+                                                                // let range = localDateRange;
+                                                                setDateRange(localDateRange);
+                                                                datePickerRef.current.closeCalendar();
+                                                            }}>
+                                                            Apply
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                            </>
+                                        }
+                                    />
+                                </Grid>
+                            </Grid>
+                        </div>
+
+                        {/* <div className="">
                             <Datepicker
                                 selectsRange={true}
                                 startDate={startDate}
@@ -130,9 +232,8 @@ const Header = (props) => {
                                 dateFormat="MMMM d"
                                 className="header-datefilter-datepicker"
                                 placeholderText="Select Date Range"
-                                // monthsShown={2}
                             />
-                        </div>
+                        </div> */}
 
                         {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
                             <></>
