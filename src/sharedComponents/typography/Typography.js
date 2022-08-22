@@ -12,6 +12,7 @@ const FONT_WEIGHT_TYPES = Object.freeze({
     SemiBold: 'SemiBold',
     Bold: 'Bold',
     Regular: 'Regular',
+    Light: 'Light',
     Medium: 'Medium',
 });
 
