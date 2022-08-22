@@ -779,10 +779,6 @@ const EditPlugRule = ({
     };
 
     const addOptions = () => {
-        {
-            console.log('manas');
-        }
-
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
@@ -795,12 +791,8 @@ const EditPlugRule = ({
                         { value: record?.equipment_link_location_id, label: record?.equipment_link_location },
                     ]);
                 }
+                setSensorOptions((el) => [...el, { value: record?.sensor_number_2, label: record?.sensor_number_2 }]);
             });
-
-        // Remove duplicates
-        // options?.map((item) => {
-
-        // })
     };
 
     useEffect(() => {
@@ -809,7 +801,51 @@ const EditPlugRule = ({
         }
     }, [allData]);
 
-    console.log('options', options);
+    const uniqueIds = [];
+    const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
+
+    const uniqueMacIds = [];
+    const [removeMacDuplication, setRemoveMacDuplication] = useState();
+
+    console.log(removeEqupimentTypesDuplication, 'removeEqupimentTypesDuplication');
+
+    const removeDuplicates = () => {
+        const uniqueEqupimentTypes = options.filter((element) => {
+            const isDuplicate = uniqueIds.includes(element.id);
+            if (!isDuplicate) {
+                uniqueIds.push(element.id);
+                return true;
+            }
+            return false;
+        });
+
+        setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
+    };
+
+    const removeMacDuplicates = () => {
+        const uniqueMac = macOptions.filter((element) => {
+            const isDuplicate = uniqueMacIds.includes(element?.device_link);
+
+            if (!isDuplicate) {
+                uniqueMacIds.push(element?.device_link);
+                return true;
+            }
+            return false;
+        });
+
+        setRemoveMacDuplication(uniqueMac);
+    };
+
+    useEffect(() => {
+        removeDuplicates();
+    }, [options]);
+
+    useEffect(() => {
+        removeMacDuplicates();
+    }, [macOptions]);
+
+    console.log(uniqueMacIds, 'uniqueMacIds');
+    console.log(removeMacDuplication, 'removeMacDuplication');
 
     useEffect(() => {
         if (activeRuleId === null) {
@@ -1616,7 +1652,7 @@ const EditPlugRule = ({
                                                 </Form.Label>
 
                                                 <MultiSelect
-                                                    options={options}
+                                                    options={removeEqupimentTypesDuplication}
                                                     value={selectedOption}
                                                     onChange={setSelectedOption}
                                                     labelledBy="Columns"
@@ -1700,7 +1736,6 @@ const EditPlugRule = ({
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
                                                     <option>All</option>
-                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -1801,7 +1836,9 @@ const EditPlugRule = ({
                                                                         {record.device_link}
                                                                     </td>
 
-                                                                    <td className="font-weight-bold">-</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record?.sensor_number_2}
+                                                                    </td>
 
                                                                     <td className="font-weight-bold">
                                                                         {record.assigned_rules.length === 0
@@ -1809,7 +1846,9 @@ const EditPlugRule = ({
                                                                             : record.assigned_rules}
                                                                     </td>
 
-                                                                    <td className="font-weight-bold">{record.tag}</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.tag?.[0]}
+                                                                    </td>
 
                                                                     <td className="font-weight-bold">
                                                                         {record.last_data}

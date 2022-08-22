@@ -23,6 +23,7 @@ import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { buildingData } from '../../store/globalState';
+import DropDownInput from '../../components/DropdownInput/DropDownInput';
 
 const General = () => {
     let cookies = new Cookies();
@@ -603,7 +604,6 @@ const General = () => {
     //     }
     // }, []);
 
-    // TODO:
     const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
     console.log(getResponseOfPlaces, 'getResponseOfPlaces');
     const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
@@ -856,7 +856,6 @@ const General = () => {
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={35} width={200} />
                                         ) : (
-                                            // TODO:
                                             <div style={{ position: 'absolute' }}>
                                                 <Input
                                                     type="text"
@@ -1082,8 +1081,8 @@ const General = () => {
                                     <>
                                         {/* Monday */}
 
-                                        <div className="operate-hour-style">
-                                            <Switch
+                                        {/* <div className=""> */}
+                                        {/* <Switch
                                                 onChange={(e) => {
                                                     checkDateTimeHandler('mon', e);
 
@@ -1098,9 +1097,9 @@ const General = () => {
 
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Mon
-                                            </div>
+                                            </div> */}
 
-                                            <DatePicker
+                                        {/* <DatePicker
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
 
@@ -1118,11 +1117,13 @@ const General = () => {
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
-                                            />
+                                            /> */}
+                                        {/* TODO: */}
+                                        {/* <DropDownInput setWeekToggle={setWeekToggle} /> */}
 
-                                            <div className="spacing"> to </div>
+                                        {/* <div className="spacing"> to </div> */}
 
-                                            <DatePicker
+                                        {/* <DatePicker
                                                 // selected={dateHandler(inputField.operating_hours, 'mon').to}
 
                                                 onChange={(date) => {
@@ -1142,8 +1143,8 @@ const General = () => {
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
-                                            />
-                                        </div>
+                                            /> */}
+                                        {/* </div> */}
 
                                         {/* Tuesday */}
 
