@@ -1,17 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
-import Switch from 'react-switch';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
+import { Cookies } from 'react-cookie';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import './style.css';
+import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
+import { BaseUrl, updateAccount } from '../../services/Network';
+import './style.css';
 
 const AccountSettings = () => {
-    const [checked, setChecked] = useState(true);
+    const cookies = new Cookies();
+    const userdata = cookies.get('user');
+
+    const accountName = UserStore.useState((s) => s.accountName);
+    const [name, setName] = useState(accountName);
+
+    const updateAccountName = async () => {
+        const accountName = name.trim();
+
+        if (accountName === userdata.name) {
+            return;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        const accountData = {
+            name: accountName,
+        };
+
+        await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
+            let response = res.data;
+            if (response.success) {
+                localStorage.setItem('accountName', accountName);
+                UserStore.update((s) => {
+                    s.accountName = accountName;
+                });
+            }
+        });
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -32,13 +64,18 @@ const AccountSettings = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // useEffect(() => {
+    //     localStorage.setItem('accountName', userdata.name);
+    //     UserStore.update((s) => {
+    //         s.accountName = userdata.name;
+    //     });
+    // }, []);
+
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        General Account Settings
-                    </span>
+                    <span className="heading-style">General Account Settings</span>
                 </Col>
             </Row>
 
@@ -70,7 +107,9 @@ const AccountSettings = () => {
                                                 id="buildingName"
                                                 placeholder="Enter Account Name"
                                                 className="single-line-style font-weight-bold"
-                                                value=""
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                onBlur={updateAccountName}
                                             />
                                         </div>
                                     </FormGroup>

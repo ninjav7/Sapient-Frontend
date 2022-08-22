@@ -17,11 +17,11 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, generalActiveDevices } from '../../services/Network';
-import { ChevronDown } from 'react-feather';
+import { BaseUrl, listUsers, addUser } from '../../services/Network';
+import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import BootstrapTable from 'react-bootstrap-table-next';
+import { Cookies } from 'react-cookie';
 import './style.css';
 
 const UserTable = ({ userData }) => {
@@ -43,40 +43,41 @@ const UserTable = ({ userData }) => {
         };
         updateBreadcrumbStore();
     }, []);
-    const columns = [
-        {
-            dataField: 'name',
-            text: 'Name',
-            sort: true,
-            style: { color: 'blue' },
-        },
-        {
-            dataField: 'emailId',
-            text: 'Email',
-            sort: true,
-        },
-        {
-            dataField: 'lastActive',
-            text: 'Last Active',
-            sort: true,
-        },
-        {
-            dataField: 'buildingAccess',
-            text: 'Building Access',
-            sort: true,
-        },
-    ];
 
     return (
         <Card>
             <CardBody>
-                <BootstrapTable
-                    keyField="id"
-                    data={userData}
-                    columns={columns}
-                    bordered={false}
-                    sort={{ dataField: 'name', order: 'asc' }}
-                />
+                <Table className="mb-0 bordered table-hover">
+                    <thead>
+                        <tr className="mouse-pointer">
+                            <th>Name</th>
+                            <th>Building Access</th>
+                            <th>Email</th>
+                            <th>Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {userData.map((record, index) => {
+                            return (
+                                <tr className="mouse-pointer">
+                                    <td className="font-weight-bold panel-name">
+                                        <Link
+                                            to={{
+                                                pathname: `/settings/user-profile/${record?.user_id}`,
+                                            }}>
+                                            <a>{record?.name === '' ? '-' : record?.name}</a>
+                                        </Link>
+                                    </td>
+                                    <td className="">{record?.building_access.length === 0 ? '-' : ''}</td>
+                                    <td className="">{record?.email === '' ? '-' : record?.email}</td>
+                                    <td className="font-weight-bold">
+                                        {record?.last_active === '' ? '-' : record?.last_active}
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </Table>
             </CardBody>
         </Card>
     );
@@ -88,34 +89,91 @@ const Users = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const [userData, setUserData] = useState([
-        {
-            name: 'Michael Scott',
-            buildingAccess: 'All Buildings',
-            emailId: 'manager@dundermifflin.com',
-            lastActive: 'Today',
-        },
-        {
-            name: 'Jim Halpert',
-            buildingAccess: '2 Buildings',
-            emailId: 'jhalpert@dundermifflin.com',
-            lastActive: '4 days ago',
-        },
-        {
-            name: 'Dwight Schrute',
-            buildingAccess: '3 Buildings',
-            emailId: 'dschrute@dundermifflin.com',
-            lastActive: '10 mins ago',
-        },
-    ]);
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
+
+    const [isProcessing, setIsProcessing] = useState(false);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const [generatedUserId, setGeneratedUserId] = useState('');
+
+    const [userData, setUserData] = useState([]);
+
+    const [userObj, setUserObj] = useState({
+        is_active: true,
+        first_name: '',
+        last_name: '',
+        email: '',
+        user_role_id: '',
+    });
+
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, userObj);
+        obj[key] = value;
+        setUserObj(obj);
+    };
+
+    const saveUserData = async () => {
+        try {
+            setIsProcessing(true);
+
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let userData = Object.assign({}, userObj);
+
+            await axios
+                .post(`${BaseUrl}${addUser}`, userData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                    setGeneratedUserId(response.id);
+                });
+            setIsProcessing(false);
+            handleClose();
+        } catch (error) {
+            setIsProcessing(false);
+            console.log('Failed to Create Panel');
+        }
+    };
+
+    const getUsersList = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?ordered_by=name&sort_by=ace`;
+            await axios.get(`${BaseUrl}${listUsers}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setUserData(response.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch End Use Data');
+        }
+    };
+
+    useEffect(() => {
+        getUsersList();
+    }, [bldgId]);
+
+    useEffect(() => {
+        if (generatedUserId === '') {
+            return;
+        }
+        getUsersList();
+    }, [generatedUserId]);
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Users
-                    </span>
+                    <span className="heading-style">Users</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -169,6 +227,10 @@ const Users = () => {
                                         type="text"
                                         placeholder="Enter First Name"
                                         className="font-weight-bold"
+                                        onChange={(e) => {
+                                            handleChange('first_name', e.target.value);
+                                        }}
+                                        value={userObj.first_name}
                                         autoFocus
                                     />
                                 </Form.Group>
@@ -180,6 +242,10 @@ const Users = () => {
                                         type="text"
                                         placeholder="Enter Last Name"
                                         className="font-weight-bold"
+                                        onChange={(e) => {
+                                            handleChange('last_name', e.target.value);
+                                        }}
+                                        value={userObj.last_name}
                                     />
                                 </Form.Group>
                             </Col>
@@ -187,12 +253,20 @@ const Users = () => {
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Email Address</Form.Label>
-                            <Form.Control type="text" placeholder="Enter Email" className="font-weight-bold" />
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter Email"
+                                className="font-weight-bold"
+                                onChange={(e) => {
+                                    handleChange('email', e.target.value);
+                                }}
+                                value={userObj.email}
+                            />
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Role</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
+                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold" disabled>
                                 <option selected>Member</option>
                                 <option>Phoenix Baker</option>
                                 <option>Olivia Rhye</option>
@@ -205,8 +279,12 @@ const Users = () => {
                     <Button variant="light" onClick={handleClose}>
                         Cancel
                     </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Add User
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            saveUserData();
+                        }}>
+                        {isProcessing ? 'Adding User...' : 'Add User'}
                     </Button>
                 </Modal.Footer>
             </Modal>

@@ -529,7 +529,7 @@ const settingsRoutes = {
             name: 'Users',
             component: Users,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'account',
         },
 
@@ -546,7 +546,7 @@ const settingsRoutes = {
             name: 'Users',
             component: UserProfile,
             route: PrivateRoute,
-            visibility: true,
+            visibility: false,
             parent: 'account',
         },
         {

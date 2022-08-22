@@ -192,7 +192,7 @@ const Buildings = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <span className="heading-style">Buildings</span>
 
