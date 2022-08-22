@@ -36,11 +36,11 @@ const DonutChartWidget = ({
     items,
     title,
     subtitle,
+    series,
     ...props
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
-    const series = items.map(({ value }) => Number(value));
 
     const options = {
         ...configDonutChartWidget(type),
@@ -82,6 +82,7 @@ DonutChartWidget.propTypes = {
             link: PropTypes.string,
         }).isRequired
     ).isRequired,
+    series: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
 export default DonutChartWidget;
