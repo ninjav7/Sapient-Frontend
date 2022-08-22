@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import ReactSelect, { components } from 'react-select';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
-import MultiSelect from './MultiSelect';
+import { Checkbox } from '../checkbox';
+import Typography from '../../typography';
+
+import useClickOutside from '../../hooks/useClickOutside';
 
 import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
 
@@ -24,7 +27,14 @@ const Option = props => {
 
     return !isDisabled ? (
         <components.Option {...props} className={className}>
-            {!!customOption ? React.cloneElement(customOption, { className }, children) : children}
+            <Checkbox
+                id={null}
+                label={children}
+                className="w-100"
+                classInput="mr-3"
+                checked={props.isSelected}
+                readOnly
+            />
         </components.Option>
     ) : null;
 };
@@ -41,25 +51,50 @@ const Control = ({ children, ...props }) => (
     </components.Control>
 );
 
-const Select = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+// eslint-disable-next-line no-unused-vars
+const ValueContainer = ({ children, ...props }) => {
+    const { label } = props.selectProps;
+
+    //@TODO Blur when click to other element, is not working yet
+    return (
+        <components.ValueContainer {...props}>
+            <components.Placeholder {...props} isFocused={props.isFocused}>
+                <Typography.Body size={Typography.Sizes.lg}>
+                    {label ? label : props.selectProps.placeholder}
+                </Typography.Body>
+            </components.Placeholder>
+            {/*{React.Children.map(children, child => (child && child.type !== Placeholder ? child : null))}*/}
+        </components.ValueContainer>
+    );
+};
+
+const MultiSelect = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef(null);
+
     const selectedOption = options.find(({ value }) => value === defaultValue);
 
+    useClickOutside(ref, ['click'], () => setIsOpen(false));
+
     return (
-        <div className={`react-select-wrapper ${className}`}>
+        <div className={`react-select-wrapper ${className}`} ref={ref} onClick={() => setIsOpen(true)}>
             <ReactSelect
                 {...props}
                 options={options}
                 defaultValue={selectedOption}
-                components={{ DropdownIndicator, Control, Option }}
+                components={{ ValueContainer, DropdownIndicator, Control, Option }}
                 className={selectClassName}
+                menuIsOpen={isOpen}
+                isMulti={true}
+                hideSelectedOptions={false}
+                isClearable={false}
             />
         </div>
     );
 };
 
-Select.MultiSelect = MultiSelect;
-
-Select.propTypes = {
+MultiSelect.propTypes = {
+    selectClassName: PropTypes.string,
     defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     options: PropTypes.arrayOf(
         PropTypes.shape({
@@ -68,6 +103,7 @@ Select.propTypes = {
         })
     ).isRequired,
     customOption: PropTypes.node,
+    label: PropTypes.string,
 };
 
-export default Select;
+export default MultiSelect;
