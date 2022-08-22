@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, createBuilding } from '../../services/Network';
+import { BaseUrl, createBuilding, generalBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -57,14 +57,14 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                 <div
                                                     className="buildings-name"
                                                     onClick={() => {
-                                                        localStorage.setItem('buildingId', record.building_id);
-                                                        localStorage.setItem('buildingName', record.building_name);
+                                                        localStorage.setItem('buildingId', record._id);
+                                                        localStorage.setItem('buildingName', record.name);
                                                         BuildingStore.update((s) => {
-                                                            s.BldgId = record.building_id;
-                                                            s.BldgName = record.building_name;
+                                                            s.BldgId = record._id;
+                                                            s.BldgName = record.name;
                                                         });
                                                     }}>
-                                                    {record.building_name}
+                                                    {record.name}
                                                 </div>
                                             </Link>
                                             <span className="badge badge-soft-secondary label-styling mr-2">
@@ -76,7 +76,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                 maximumFractionDigits: 2,
                                             })}
                                         </td>
-                                        <td className="font-weight-bold">{0}</td>
+                                        <td className="font-weight-bold">{record.num_of_devices}</td>
                                     </tr>
                                 );
                             })}
@@ -177,7 +177,7 @@ const Buildings = () => {
         try {
             setIsDataProcessing(true);
 
-            setBuildingsData(buildingListData);
+            //setBuildingsData(buildingListData);
             setIsDataProcessing(false);
         } catch (error) {
             console.log(error);
@@ -189,6 +189,28 @@ const Buildings = () => {
     useEffect(() => {
         fetchBuildingData();
     }, [buildingListData]);
+
+    const fetchGeneralBuildingData = async()=>{
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+          
+            await axios.get(`${BaseUrl}${generalBuilding}`, { headers }).then((res) => {
+                console.log('createBuilding sending data to API => ', res.data);
+                setBuildingsData(res.data)
+            });
+        } catch (error) {
+            console.log('Failed to create Building');
+        }
+
+    }
+
+    useEffect(()=>{
+          fetchGeneralBuildingData();
+    },[])
 
     return (
         <React.Fragment>

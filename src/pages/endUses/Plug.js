@@ -245,7 +245,7 @@ const UsagePageThree = () => {
                     )
                     .then((res) => {
                         setEndUsesData(res.data);
-                        // console.log('setEndUsesData => ', res.data);
+                        console.log('setEndUsesData => ', res.data);
                     });
             } catch (error) {
                 console.log(error);
@@ -424,6 +424,8 @@ const UsagePageThree = () => {
                 {endUsesData.length !== 0 &&
                     endUsesData.map((record, index) => {
                         return (
+                            <>
+                            {record.device==='Plug'?
                             <div className="endUses-button-container mt-2" style={{ marginLeft: '29px' }}>
                                 <div className="usage-card-box-style enduses-button-style">
                                     <div className="card-body">
@@ -634,6 +636,8 @@ const UsagePageThree = () => {
                                 </div>
                             </div> */}
                             </div>
+                            :""}
+                            </>    
                         );
                     })}
             </Row>

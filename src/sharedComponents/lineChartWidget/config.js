@@ -49,7 +49,12 @@ export const configLineChartWidget = {
         },
         x: {
             show: true,
-            format: 'dd MMM',
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - HH:mm');
+                },
+            },
         },
         y: {
             formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -74,19 +79,10 @@ export const configLineChartWidget = {
     },
     xaxis: {
         type: 'datetime',
-        //@TODO NEED?
-        // labels: {
-        //     format: 'dd/MMM - hh:mm TT',
-        // },
         labels: {
             formatter: function (val, timestamp) {
-                // return moment(timestamp).format('MMM DD');
-                // //@TODO NEED?
-                // return moment(timestamp).format('D/M/YY @ hh:mm A');
                 return moment(timestamp).format('DD/MMM - HH:mm');
             },
-            offsetX: 5,
-            trim: true,
         },
         style: {
             fontSize: '12px',
