@@ -79,10 +79,6 @@ const UserTable = ({ userData, isUserDataFetched }) => {
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
                                 </tr>
                             </SkeletonTheme>
                         </tbody>

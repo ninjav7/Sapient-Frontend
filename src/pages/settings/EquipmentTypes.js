@@ -191,7 +191,7 @@ const EquipmentTable = ({
                         </thead>
                         {isDeviceProcessing ? (
                             <tbody>
-                                <SkeletonTheme color="#202020" height={20}>
+                                <SkeletonTheme color="#202020" height={35}>
                                     <tr>
                                         <td>
                                             <Skeleton count={5} />
