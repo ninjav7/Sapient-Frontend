@@ -1,6 +1,9 @@
 @import '../../assets/scss/colors';
 
 .TableFilterWidget {
+    &-columns {
+        min-width: 11.26rem;
+    }
     &-filters {
         display: grid;
         grid-template-columns: auto 1fr auto;

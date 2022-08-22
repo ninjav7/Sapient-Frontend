@@ -72,7 +72,7 @@ const TableBody = () => (
                 <TrendsBadge value={22} />
             </Table.Cell>
             <Table.Cell width={150}>
-                <Typography.Body size={Typography.Sizes.md}>25,003 kWh</Typography.Body>
+                <Typography.Body size={Typography.Sizes.sm}>25,003 kWh</Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={100} />
             </Table.Cell>
@@ -112,7 +112,7 @@ const TableBody = () => (
                 <TrendsBadge value={12} />
             </Table.Cell>
             <Table.Cell width={150}>
-                <Typography.Body size={Typography.Sizes.md}>0.6 kWh / sq. ft.</Typography.Body>
+                <Typography.Body size={Typography.Sizes.sm}>0.6 kWh / sq. ft.</Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={60} />
             </Table.Cell>
@@ -152,7 +152,7 @@ const TableBody = () => (
                 <TrendsBadge value={1} type={TrendsBadge.Type.NEUTRAL_UP_TREND} />
             </Table.Cell>
             <Table.Cell width={150}>
-                <Typography.Body size={Typography.Sizes.md}>0.5 kWh / sq. ft.</Typography.Body>
+                <Typography.Body size={Typography.Sizes.sm}>0.5 kWh / sq. ft.</Typography.Body>
                 <Brick sizeInRem={0.375} />
                 <TinyBarChart percent={27} />
             </Table.Cell>
@@ -175,13 +175,22 @@ const TableBody = () => (
     </Table.TBody>
 );
 
-export const Default = (arg) => {
+export const Default = arg => {
     return (
-        <TableFilterWidget>
-            <Table {...arg}>
+        <TableFilterWidget {...arg}>
+            <Table>
                 <TableHeader />
                 <TableBody />
             </Table>
         </TableFilterWidget>
     );
+};
+
+Default.args = {
+    columns: [
+        { label: 'Select All', value: 'all' },
+        { label: '7 Days', value: '7 days' },
+        { label: '1 Year', value: '1 Year' },
+    ],
+    onSelectColumn: column => alert(JSON.stringify(column)),
 };
