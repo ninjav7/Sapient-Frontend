@@ -13,7 +13,6 @@ import Equipment from '../pages/settings/Equipment';
 import EquipmentTypes from '../pages/settings/EquipmentTypes';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
-// import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
 import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
@@ -157,7 +156,6 @@ const dashboardRoutes = {
 };
 
 // apps
-
 const calendarAppRoutes = {
     path: '/apps/calendar',
     name: 'Calendar',
@@ -301,50 +299,6 @@ const pagesRoutes = {
     ],
 };
 
-// components
-const componentsRoutes = {
-    path: '/ui',
-    name: 'UI Elements',
-    header: 'Components',
-    icon: FeatherIcon.Package,
-    children: [
-        {
-            path: '/ui/bscomponents',
-            name: 'Bootstrap UI',
-            component: BSComponents,
-            route: PrivateRoute,
-            roles: ['Admin'],
-        },
-        {
-            path: '/ui/icons',
-            name: 'Icons',
-            children: [
-                {
-                    path: '/ui/icons/feather',
-                    name: 'Feather Icons',
-                    component: FeatherIcons,
-                    route: PrivateRoute,
-                    roles: ['Admin'],
-                },
-                {
-                    path: '/ui/icons/unicons',
-                    name: 'Unicons Icons',
-                    component: UniconsIcons,
-                    route: PrivateRoute,
-                    roles: ['Admin'],
-                },
-            ],
-        },
-        {
-            path: '/ui/widgets',
-            name: 'Widgets',
-            component: Widgets,
-            route: PrivateRoute,
-            roles: ['Admin'],
-        },
-    ],
-};
-
 // charts
 const chartRoutes = {
     path: '/charts',
@@ -482,14 +436,6 @@ const settingsRoutes = {
         //     visibility: true,
         //     parent: 'building-settings',
         // },
-        // {
-        //     path: '/settings/panels/editPanel/:panelId',
-        //     name: 'Edit Panel',
-        //     component: EditPanel,
-        //     route: PrivateRoute,
-        //     visibility: false,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels/edit-panel/:panelId',
             name: 'Edit Breaker-Panel',
@@ -498,14 +444,6 @@ const settingsRoutes = {
             visibility: false,
             parent: 'building-settings',
         },
-        // {
-        //     path: '/settings/panels/panelBreakersFlow',
-        //     name: 'Panel Breakers',
-        //     component: PanelBreakers,
-        //     route: PrivateRoute,
-        //     visibility: false,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels',
             name: 'Panels',
@@ -586,36 +524,37 @@ const settingsRoutes = {
             visibility: true,
             parent: 'account',
         },
-        // {
-        //     path: '/settings/users',
-        //     name: 'Users',
-        //     component: Users,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
-        // {
-        //     path: '/settings/roles',
-        //     name: 'Roles',
-        //     component: Roles,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
+        {
+            path: '/settings/users',
+            name: 'Users',
+            component: Users,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
+        },
+
+        {
+            path: '/settings/roles/config',
+            name: 'Single Role',
+            component: SingleRole,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
         {
             path: '/settings/user-profile',
-            name: 'User Profile',
+            name: 'Users',
             component: UserProfile,
             route: PrivateRoute,
             visibility: false,
             parent: 'account',
         },
         {
-            path: '/settings/role-config',
-            name: 'Single Role',
-            component: SingleRole,
+            path: '/settings/roles',
+            name: 'Roles',
+            component: Roles,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'account',
         },
         {
@@ -630,17 +569,6 @@ const settingsRoutes = {
     icon: FeatherIcon.PieChart,
     roles: ['Admin'],
 };
-
-// const exploreRoutes = {
-//     name: 'Explore',
-//     path: '/explore/page',
-//     component: Explore,
-//     route: PrivateRoute,
-//     visibility: true,
-//     icon: FeatherIcon.PieChart,
-//     parent: 'explore',
-//     roles: ['Admin'],
-// };
 
 const controlRoutes = {
     path: '/control/plug-rules',
@@ -658,70 +586,6 @@ const controlRoutes = {
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],
-};
-
-const formsRoutes = {
-    path: '/forms',
-    name: 'Forms',
-    icon: FeatherIcon.FileText,
-    children: [
-        {
-            path: '/forms/basic',
-            name: 'Basic Elements',
-            component: BasicForms,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/advanced',
-            name: 'Advanced',
-            component: FormAdvanced,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/validation',
-            name: 'Validation',
-            component: FormValidation,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/wizard',
-            name: 'Wizard',
-            component: FormWizard,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/editor',
-            name: 'Editor',
-            component: Editor,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/upload',
-            name: 'File Upload',
-            component: FileUpload,
-            route: PrivateRoute,
-        },
-    ],
-};
-
-const tableRoutes = {
-    path: '/tables',
-    name: 'Tables',
-    icon: FeatherIcon.Grid,
-    children: [
-        {
-            path: '/tables/basic',
-            name: 'Basic',
-            component: BasicTables,
-            route: PrivateRoute,
-        },
-        {
-            path: '/tables/advanced',
-            name: 'Advanced',
-            component: AdvancedTables,
-            route: PrivateRoute,
-        },
-    ],
 };
 
 // auth
@@ -795,24 +659,11 @@ const allRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    //exploreRoutes,
     authRoutes,
-    // ...appRoutes,
-    // pagesRoutes,
-    // componentsRoutes,
-    // formsRoutes,
-    // tableRoutes,
+    //exploreRoutes,
 ];
 
-const authProtectedRoutes = [
-    dashboardRoutes,
-    portfolioRoutes,
-    settingsRoutes,
-    controlRoutes,
-    //exploreRoutes,
-    chartRoutes,
-    // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
-];
+const authProtectedRoutes = [dashboardRoutes, portfolioRoutes, settingsRoutes, controlRoutes];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };

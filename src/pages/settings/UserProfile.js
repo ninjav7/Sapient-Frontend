@@ -19,14 +19,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 
 const UserProfile = () => {
-    const [buildingData, setBuildingData] = useState({});
-    const [buildingAddress, setBuildingAddress] = useState({});
-    const [generalDateTimeData, setGeneralDateTimeData] = useState({});
     const [checked, setChecked] = useState(true);
-    const [generalOperatingData, setGeneralOperatingData] = useState({});
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
-    const [value, onChange] = useState('10:00');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -52,15 +45,11 @@ const UserProfile = () => {
             <Row className="page-title">
                 <Col md={8} className="header-container">
                     <div>
-                        <span className="heading-style">
-                            Michael Scott
-                        </span>
-                        <p style={{ marginLeft: '20px' }} className="emailId-style">
-                            mscott@dundermifflin.com
-                        </p>
+                        <span className="heading-style ml-4">Michael Scott</span>
+                        <p className="emailId-style ml-4">mscott@dundermifflin.com</p>
                     </div>
 
-                    <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
+                    {/* <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
                             <button
                                 type="button"
@@ -75,7 +64,7 @@ const UserProfile = () => {
                                 Save
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                 </Col>
             </Row>
 
