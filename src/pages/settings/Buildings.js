@@ -6,7 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BaseUrl, createBuilding } from '../../services/Network';
+import { BaseUrl, createBuilding, generalBuilding } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -78,7 +78,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                 maximumFractionDigits: 2,
                                             })}
                                         </td>
-                                        <td className="font-weight-bold">{0}</td>
+                                        <td className="font-weight-bold">{record.num_of_devices}</td>
                                     </tr>
                                 );
                             })}
@@ -179,7 +179,7 @@ const Buildings = () => {
         try {
             setIsDataProcessing(true);
 
-            setBuildingsData(buildingListData);
+            //setBuildingsData(buildingListData);
             setIsDataProcessing(false);
         } catch (error) {
             console.log(error);
@@ -191,6 +191,28 @@ const Buildings = () => {
     useEffect(() => {
         fetchBuildingData();
     }, [buildingListData]);
+
+    const fetchGeneralBuildingData = async()=>{
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+          
+            await axios.get(`${BaseUrl}${generalBuilding}`, { headers }).then((res) => {
+                console.log('createBuilding sending data to API => ', res.data);
+                setBuildingsData(res.data)
+            });
+        } catch (error) {
+            console.log('Failed to create Building');
+        }
+
+    }
+
+    useEffect(()=>{
+          fetchGeneralBuildingData();
+    },[])
 
     return (
         <React.Fragment>

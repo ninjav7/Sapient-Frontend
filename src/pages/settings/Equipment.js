@@ -871,7 +871,11 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter,locationData }) => {
+const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter,locationData, nextPageData,
+    previousPageData,
+    paginationData,
+    pageSize,
+    setPageSize, }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
     const [nameOrder, setNameOrder] = useState(false);
@@ -883,7 +887,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
     const [deviceIdOrder, setDeviceIdOrder] = useState(false);
 
     const handleColumnSort = (order, columnName) => {
-        if (columnName === 'name') {
+        if (columnName === 'equipments_name') {
             setEquipTypeOrder(false);
             setLocationOrder(false);
             setTagsOrder(false);
@@ -891,7 +895,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
             setLastDataOrder(false);
             setDeviceIdOrder(false);
         }
-        if (columnName === 'typee.name') {
+        if (columnName === 'equipments_type') {
             setNameOrder(false);
             setLocationOrder(false);
             setTagsOrder(false);
@@ -899,7 +903,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
             setLastDataOrder(false);
             setDeviceIdOrder(false);
         }
-        if (columnName === 'tag') {
+        if (columnName === 'tags') {
             setEquipTypeOrder(false);
             setLocationOrder(false);
             setNameOrder(false);
@@ -915,7 +919,7 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
             setLastDataOrder(false);
             setDeviceIdOrder(false);
         }
-        if (columnName === 'sensor_link') {
+        if (columnName === 'sensor_number') {
             setEquipTypeOrder(false);
             setLocationOrder(false);
             setTagsOrder(false);
@@ -978,13 +982,13 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                         {nameOrder ? (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'name')}>
+                                                onClick={() => handleColumnSort('ace', 'equipments_name')}>
                                                 <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                             </div>
                                         ) : (
                                             <div
                                                 className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'name')}>
+                                                onClick={() => handleColumnSort('dce', 'equipments_name')}>
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
@@ -1041,13 +1045,13 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                     {TagsOrder ? (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'tag')}>
+                                            onClick={() => handleColumnSort('ace', 'tags')}>
                                             <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                         </div>
                                     ) : (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'tag')}>
+                                            onClick={() => handleColumnSort('dce', 'tags')}>
                                             <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                         </div>
                                     )}
@@ -1062,13 +1066,13 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                     {sensorOrder ? (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'sensor_link')}>
+                                            onClick={() => handleColumnSort('ace', 'sensor_number')}>
                                             <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                         </div>
                                     ) : (
                                         <div
                                             className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'sensor_link')}>
+                                            onClick={() => handleColumnSort('dce', 'sensor_number')}>
                                             <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                         </div>
                                     )}
@@ -1204,6 +1208,52 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                             </tbody>
                         )}
                     </Table>
+                    <div className="page-button-style">
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.previous === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.next === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[20, 50, 100].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                 </CardBody>
             </Card>
             <div>
@@ -1239,6 +1289,9 @@ const Equipment = () => {
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    const [pageSize, setPageSize] = useState(20);
+    const [pageNo, setPageNo] = useState(1);
     const tableColumnOptions = [
         { label: 'Status', value: 'status' },
         { label: 'Name', value: 'name' },
@@ -1358,7 +1411,7 @@ const handleSearch = async () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}&ordered_by=${filterBy}&sort_by=${order}`;
+            let params = `?building_id=${bldgId}&ordered_by=${filterBy}&sort_by=${order}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
                 setGeneralEquipmentData(responseData);
@@ -1383,6 +1436,82 @@ const handleSearch = async () => {
             console.log('Failed to fetch all Equipments Data');
         }
     };
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            setIsEquipDataFetched(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentData(responseData.data);
+                setDuplicateGeneralEquipmentData(responseData.data);
+                let onlineEquip = [];
+                let offlineEquip = [];
+                responseData.data.forEach((record) => {
+                    if (record.status === 'Online') {
+                        onlineEquip.push(record);
+                    }
+                    if (record.status === 'Offline') {
+                        offlineEquip.push(record);
+                    }
+                });
+                setOnlineEquipData(onlineEquip);
+                setOfflineEquipData(offlineEquip);
+                setIsEquipDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+            setIsEquipDataFetched(false);
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            setIsEquipDataFetched(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `&building_id=${bldgId}`;
+            await axios.get(`${BaseUrl}${path}${params}`, { headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                setGeneralEquipmentData(responseData.data);
+                setDuplicateGeneralEquipmentData(responseData.data);
+                let onlineEquip = [];
+                let offlineEquip = [];
+                responseData.data.forEach((record) => {
+                    if (record.status === 'Online') {
+                        onlineEquip.push(record);
+                    }
+                    if (record.status === 'Offline') {
+                        offlineEquip.push(record);
+                    }
+                });
+                setOnlineEquipData(onlineEquip);
+                setOfflineEquipData(offlineEquip);
+                setIsEquipDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Active Devices');
+            setIsEquipDataFetched(false);
+        }
+    };
 
     const fetchEquipmentData = async () => {
         try {
@@ -1392,14 +1521,15 @@ const handleSearch = async () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?building_id=${bldgId}`;
+            let params = `?building_id=${bldgId}&page_size=${pageSize}&page_no=${pageNo}`;
             await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
                 let responseData = res.data;
-                setGeneralEquipmentData(responseData);
-                setDuplicateGeneralEquipmentData(responseData);
+                setPaginationData(res.data);
+                setGeneralEquipmentData(responseData.data);
+                setDuplicateGeneralEquipmentData(responseData.data);
                 let onlineEquip = [];
                 let offlineEquip = [];
-                responseData.forEach((record) => {
+                responseData.data.forEach((record) => {
                     if (record.status === 'Online') {
                         onlineEquip.push(record);
                     }
@@ -1513,7 +1643,7 @@ const handleSearch = async () => {
         // fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
-    }, [bldgId]);
+    }, [bldgId,pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1650,15 +1780,27 @@ const handleSearch = async () => {
                 <Col lg={11}>
                     {selectedTab === 0 && (
                         <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
+                        previousPageData={previousPageData}
+                        paginationData={paginationData}
+                        pageSize={pageSize}
+                        setPageSize={setPageSize}/>
                     )}
                     {selectedTab === 1 && (
                         <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
+                        previousPageData={previousPageData}
+                        paginationData={paginationData}
+                        pageSize={pageSize}
+                        setPageSize={setPageSize}/>
                     )}
                     {selectedTab === 2 && (
                         <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData}/>
+                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
+                        previousPageData={previousPageData}
+                        paginationData={paginationData}
+                        pageSize={pageSize}
+                        setPageSize={setPageSize}/>
                     )}
                 </Col>
             </Row>

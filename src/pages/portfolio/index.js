@@ -50,6 +50,8 @@ const PortfolioOverview = () => {
     const [daysCount, setDaysCount] = useState(1);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
     const [lineChartSeries, setLineChartSeries] = useState([
@@ -462,7 +464,7 @@ const PortfolioOverview = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = '?aggregate=day';
+                let params = `?aggregate=day&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,

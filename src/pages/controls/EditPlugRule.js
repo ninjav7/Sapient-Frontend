@@ -498,27 +498,31 @@ const EditPlugRule = ({
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
+    const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false)
 
-    // Getting Graph Data API Call
-    // const getGraphData = async () => {
-    //     let headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //         Authorization: `Bearer ${userdata.token}`,
-    //     };
+    // Getting Graph Data API Call TODO:
+    // unlinkedSocketRuleSuccess
+    const getGraphData = async () => {
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
 
-    //     // TODO:
-    //     let params = `?sensors=${sensorsIdNow}`;
-    //     await axios.get(`${BaseUrl}${graphData}${params}`, { headers }).then((res) => {
-    //         let response = res.data;
-    //         setTotalGraphData(response);
-    //         console.log(response, 'totalResponseNow');
-    //     });
-    // };
+        // TODO:
+        let params = `?building_id=${activeBuildingId}&sensors=${sensorsIdNow}`;
+        await axios.get(`${BaseUrl}${graphData}${params}`, { headers }).then((res) => {
+            let response = res.data;
+            setTotalGraphData(response);
+            console.log(response, 'totalResponseNow');
+        });
+    };
 
-    // useEffect(() => {
-    //     getGraphData();
-    // }, [sensorsIdNow]);
+    useEffect(() => {
+        if(sensorsIdNow) { 
+            getGraphData();
+        }
+    }, [sensorsIdNow]);
 
     const handleEqupimentTypeFilter = () => {
         return selectedOption?.map((item) => {
@@ -779,10 +783,6 @@ const EditPlugRule = ({
     };
 
     const addOptions = () => {
-        {
-            console.log('manas');
-        }
-
         return allData
             ?.filter((item) => item?.equipment_type_name?.length > 0)
             ?.map((record, index) => {
@@ -795,12 +795,8 @@ const EditPlugRule = ({
                         { value: record?.equipment_link_location_id, label: record?.equipment_link_location },
                     ]);
                 }
+                setSensorOptions((el) => [...el, { value: record?.sensor_number_2, label: record?.sensor_number_2 }]);
             });
-
-        // Remove duplicates
-        // options?.map((item) => {
-
-        // })
     };
 
     useEffect(() => {
@@ -809,7 +805,51 @@ const EditPlugRule = ({
         }
     }, [allData]);
 
-    console.log('options', options);
+    const uniqueIds = [];
+    const [removeEqupimentTypesDuplication, setRemoveEqupimentTypesDuplication] = useState();
+
+    const uniqueMacIds = [];
+    const [removeMacDuplication, setRemoveMacDuplication] = useState();
+
+    console.log(removeEqupimentTypesDuplication, 'removeEqupimentTypesDuplication');
+
+    const removeDuplicates = () => {
+        const uniqueEqupimentTypes = options.filter((element) => {
+            const isDuplicate = uniqueIds.includes(element.id);
+            if (!isDuplicate) {
+                uniqueIds.push(element.id);
+                return true;
+            }
+            return false;
+        });
+
+        setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
+    };
+
+    const removeMacDuplicates = () => {
+        const uniqueMac = macOptions.filter((element) => {
+            const isDuplicate = uniqueMacIds.includes(element?.device_link);
+
+            if (!isDuplicate) {
+                uniqueMacIds.push(element?.device_link);
+                return true;
+            }
+            return false;
+        });
+
+        setRemoveMacDuplication(uniqueMac);
+    };
+
+    useEffect(() => {
+        removeDuplicates();
+    }, [options]);
+
+    useEffect(() => {
+        removeMacDuplicates();
+    }, [macOptions]);
+
+    console.log(uniqueMacIds, 'uniqueMacIds');
+    console.log(removeMacDuplication, 'removeMacDuplication');
 
     useEffect(() => {
         if (activeRuleId === null) {
@@ -839,6 +879,7 @@ const EditPlugRule = ({
             }
         };
 
+
         const fetchUnLinkedSocketRules = async () => {
             try {
                 let headers = {
@@ -848,6 +889,7 @@ const EditPlugRule = ({
                 };
                 let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}&sensor_number=${sensorTypeFilterString}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                    setUnlinkedSocketRuleSuccess(res.status);
                     let response = res.data;
                     // console.log(response.total_data);
                     setTotalSocket(parseInt(response.total_data));
@@ -1616,7 +1658,7 @@ const EditPlugRule = ({
                                                 </Form.Label>
 
                                                 <MultiSelect
-                                                    options={options}
+                                                    options={removeEqupimentTypesDuplication}
                                                     value={selectedOption}
                                                     onChange={setSelectedOption}
                                                     labelledBy="Columns"
@@ -1700,7 +1742,6 @@ const EditPlugRule = ({
                                                     id="userState"
                                                     className="font-weight-bold socket-filter-width">
                                                     <option>All</option>
-                                                    {/* <option>Option 1</option> */}
                                                 </Input>
                                             </Form.Group>
                                         </div>
@@ -1801,7 +1842,9 @@ const EditPlugRule = ({
                                                                         {record.device_link}
                                                                     </td>
 
-                                                                    <td className="font-weight-bold">-</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record?.sensor_number_2}
+                                                                    </td>
 
                                                                     <td className="font-weight-bold">
                                                                         {record.assigned_rules.length === 0
@@ -1809,7 +1852,9 @@ const EditPlugRule = ({
                                                                             : record.assigned_rules}
                                                                     </td>
 
-                                                                    <td className="font-weight-bold">{record.tag}</td>
+                                                                    <td className="font-weight-bold">
+                                                                        {record.tag?.[0]}
+                                                                    </td>
 
                                                                     <td className="font-weight-bold">
                                                                         {record.last_data}

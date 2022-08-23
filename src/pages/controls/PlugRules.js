@@ -39,6 +39,7 @@ import { buildingData } from '../../store/globalState';
 
 const PlugRuleTable = ({
     plugRuleData,
+    skeletonLoading,
     handleEditRuleShow,
     currentData,
     setCurrentData,
@@ -59,7 +60,7 @@ const PlugRuleTable = ({
                         </tr>
                     </thead>
                     {console.log(plugRuleData, 'plugRuleData')}
-                    {plugRuleData?.length === 0 ? (
+                    {skeletonLoading ? (
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
                                 <tr>
@@ -130,6 +131,7 @@ const PlugRules = () => {
     const activeBuildingId = localStorage.getItem('buildingId');
 
     const [buildingId, setBuildingId] = useState(1);
+    const [skeletonLoading, setSkeletonLoading] = useState(true)
     const [ruleData, setRuleData] = useState([
         {
             name: '8am-6pm M-F',
@@ -372,6 +374,9 @@ const PlugRules = () => {
                 };
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    if(res?.status) {
+                        setSkeletonLoading(false);
+                    }
                     let response = res.data;
                     // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
@@ -401,6 +406,9 @@ const PlugRules = () => {
                 };
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    if(res?.status) {
+                        setSkeletonLoading(false);
+                    }
                     let response = res.data;
                     // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
@@ -517,6 +525,7 @@ const PlugRules = () => {
                     {selectedTab === 0 && (
                         <PlugRuleTable
                             plugRuleData={plugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
@@ -532,6 +541,7 @@ const PlugRules = () => {
                     {selectedTab === 1 && (
                         <PlugRuleTable
                             plugRuleData={onlinePlugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
@@ -547,6 +557,7 @@ const PlugRules = () => {
                     {selectedTab === 2 && (
                         <PlugRuleTable
                             plugRuleData={offlinePlugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}

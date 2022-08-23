@@ -349,14 +349,14 @@ const portfolioRoutes = {
         //     visibility: true,
         //     parent: 'buildings',
         // },
-        // {
-        //     path: '/energy/end-uses/:bldgId',
-        //     name: 'End Uses',
-        //     component: EndUses,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
+        {
+            path: '/energy/end-uses/:bldgId',
+            name: 'End Uses',
+            component: EndUses,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
@@ -570,6 +570,17 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
+const exploreRoutes = {
+    name: 'Explore',
+    path: '/explore/page',
+    component: Explore,
+    route: PrivateRoute,
+    visibility: true,
+    icon: FeatherIcon.PieChart,
+    parent: 'explore',
+    roles: ['Admin'],
+};
+
 const controlRoutes = {
     path: '/control/plug-rules',
     name: 'Control',
@@ -659,11 +670,24 @@ const allRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
+    exploreRoutes,
     authRoutes,
-    //exploreRoutes,
+    // ...appRoutes,
+    // pagesRoutes,
+    // componentsRoutes,
+    // formsRoutes,
+    // tableRoutes,
 ];
 
-const authProtectedRoutes = [dashboardRoutes, portfolioRoutes, settingsRoutes, controlRoutes];
+const authProtectedRoutes = [
+    dashboardRoutes,
+    portfolioRoutes,
+    settingsRoutes,
+    controlRoutes,
+    exploreRoutes,
+    chartRoutes,
+    // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
+];
 
 const allFlattenRoutes = flattenRoutes(allRoutes);
 export { allRoutes, authProtectedRoutes, allFlattenRoutes };
