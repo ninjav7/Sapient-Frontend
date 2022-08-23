@@ -19,14 +19,16 @@ import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, compareBuildings } from '../../services/Network';
+import { BaseUrl, compareBuildings, sortCompareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
 import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
+import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
 const useSortableData = (items, config = null) => {
     const [sortConfig, setSortConfig] = useState(config);
@@ -59,7 +61,7 @@ const useSortableData = (items, config = null) => {
     return { items: sortedItems, requestSort, sortConfig };
 };
 
-const BuildingTable = ({ buildingsData, selectedOptions }) => {
+const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,isBuildingDataFetched }) => {
     const records = [
         {
             name: '123 Main St. Portland OR',
@@ -110,13 +112,17 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
 
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
-    const { items, requestSort, sortConfig } = useSortableData(buildingsData);
-    const getClassNamesFor = (name) => {
-        if (!sortConfig) {
-            return;
-        }
-        return sortConfig.key === name ? sortConfig.direction : undefined;
-    };
+    const [nameOrder, setNameOrder] = useState(false);
+    const [densityOrder, setDensityOrder] = useState(false);
+    const [totalOrder, setTotalOrder] = useState(false);
+    const [squareFtOrder, setSquareFtOrder] = useState(false);
+    // const { items, requestSort, sortConfig } = useSortableData(buildingsData);
+    // const getClassNamesFor = (name) => {
+    //     if (!sortConfig) {
+    //         return;
+    //     }
+    //     return sortConfig.key === name ? sortConfig.direction : undefined;
+    // };
     const columns = [
         {
             dataField: 'building_name',
@@ -166,6 +172,31 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
         },
     ];
 
+    const handleColumnSort = (order, columnName) => {
+        if (columnName === 'building_name') {
+            setDensityOrder(false);
+            setTotalOrder(false);
+            setSquareFtOrder(false);
+        }
+        if (columnName === 'energy_density') {
+            setNameOrder(false);
+            setTotalOrder(false);
+            setSquareFtOrder(false);
+        }
+        if (columnName === 'total_consumption') {
+            setDensityOrder(false);
+            setNameOrder(false);
+            setSquareFtOrder(false);
+        }
+        if (columnName === 'square_footage') {
+            setDensityOrder(false);
+            setTotalOrder(false);
+            setNameOrder(false);
+        }
+        
+        buildingDataWithFilter(order, columnName);
+    };
+
     useEffect(() => {
         if (!buildingsData.length > 0) {
             return;
@@ -182,45 +213,63 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                 {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'name') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        onClick={() => requestSort('building_name')}
-                                        className={getClassNamesFor('building_name')}
-                                        style={{
+                                <th className="table-heading-style" onClick={() => setNameOrder(!nameOrder)}>
+                                     <div className="active-device-flex">
+                                     <div  style={{
                                             border: 'none',
                                             backgroundColor: 'white',
                                             fontWeight: 'bolder',
                                             fontSize: '16px',
-                                        }}>
-                                        Name
-                                    </button>
+                                        }}>Name</div>
+                                        {nameOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(true, 'building_name')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(false, 'building_name')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                   </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'density') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        onClick={() => requestSort('energy_density')}
-                                        className={getClassNamesFor('energy_density')}
-                                        style={{
+                                <th className="table-heading-style" onClick={() => setDensityOrder(!densityOrder)}>
+                                    <div className="active-device-flex">
+                                    <div  style={{
                                             border: 'none',
                                             backgroundColor: 'white',
                                             fontWeight: 'bolder',
                                             fontSize: '16px',
-                                        }}>
-                                        Energy Density
-                                    </button>
+                                        }}>Energy Density </div>
+                                        {densityOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(true, 'energy_density')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(false, 'energy_density')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                        </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'per_change') && (
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
-                                        onClick={() => requestSort('change')}
-                                        className={getClassNamesFor('change')}
+                                        // onClick={() => requestSort('change')}
+                                        // className={getClassNamesFor('change')}
                                         style={{
                                             border: 'none',
                                             backgroundColor: 'white',
@@ -235,8 +284,8 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
-                                        onClick={() => requestSort('hvac_consumption')}
-                                        className={getClassNamesFor('hvac_consumption')}
+                                        // onClick={() => requestSort('hvac_consumption')}
+                                        // className={getClassNamesFor('hvac_consumption')}
                                         style={{
                                             border: 'none',
                                             backgroundColor: 'white',
@@ -251,8 +300,8 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
-                                        onClick={() => requestSort('hvac_per')}
-                                        className={getClassNamesFor('hvac_per')}
+                                        // onClick={() => requestSort('hvac_per')}
+                                        // className={getClassNamesFor('hvac_per')}
                                         style={{
                                             border: 'none',
                                             backgroundColor: 'white',
@@ -264,27 +313,36 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'total') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        onClick={() => requestSort('total_consumption')}
-                                        className={getClassNamesFor('total_consumption')}
-                                        style={{
+                                <th className="table-heading-style" onClick={() => setTotalOrder(!totalOrder)}>
+                                    <div className="active-device-flex">
+                                    <div  style={{
                                             border: 'none',
                                             backgroundColor: 'white',
                                             fontWeight: 'bolder',
                                             fontSize: '16px',
-                                        }}>
-                                        Total Consumption
-                                    </button>
+                                        }}>Total Consumption </div>
+                                        {totalOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(true, 'total_consumption')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(false, 'total_consumption')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                        </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'total_per') && (
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
-                                        onClick={() => requestSort('total_per')}
-                                        className={getClassNamesFor('total_per')}
+                                        // onClick={() => requestSort('total_per')}
+                                        // className={getClassNamesFor('total_per')}
                                         style={{
                                             border: 'none',
                                             backgroundColor: 'white',
@@ -296,27 +354,36 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'sq_ft') && (
-                                <th className="table-heading-style">
-                                    <button
-                                        type="button"
-                                        onClick={() => requestSort('sq_ft')}
-                                        className={getClassNamesFor('sq_ft')}
-                                        style={{
+                                <th className="table-heading-style" onClick={() => setSquareFtOrder(!squareFtOrder)}>
+                                    <div className="active-device-flex">
+                                   <div  style={{
                                             border: 'none',
                                             backgroundColor: 'white',
                                             fontWeight: 'bolder',
                                             fontSize: '16px',
-                                        }}>
-                                        Sq. Ft.
-                                    </button>
+                                        }}>Sq. Ft. </div>
+                                        {squareFtOrder ? (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(true, 'square_footage')}>
+                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="ml-2"
+                                                onClick={() => handleColumnSort(false, 'square_footage')}>
+                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                            </div>
+                                        )}
+                                        </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'load') && (
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
-                                        onClick={() => requestSort('')}
-                                        className={getClassNamesFor('')}
+                                        // onClick={() => requestSort('')}
+                                        // className={getClassNamesFor('')}
                                         style={{
                                             border: 'none',
                                             backgroundColor: 'white',
@@ -329,10 +396,44 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                             )}
                         </tr>
                     </thead>
+                    {isBuildingDataFetched ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+                                    </tr>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
                     <tbody>
-                        {items.map((record, index) => {
+                        {buildingsData.map((record, index) => {
                             return (
-                                <tr key={record.building_id} className='mouse-pointer'>
+                                <tr key={record.building_id} className="mouse-pointer">
                                     {selectedOptions.some((record) => record.value === 'name') && (
                                         <th scope="row">
                                             <Link
@@ -346,7 +447,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                     )}
                                     {selectedOptions.some((record) => record.value === 'density') && (
                                         <td className="table-content-style">
-                                            {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                            {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq. ft.
                                             <br />
                                             <div style={{ width: '100%', display: 'inline-block' }}>
                                                 {index === 0 && record.energy_density === 0 && (
@@ -462,7 +563,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                     )}
                                     {selectedOptions.some((record) => record.value === 'hvac') && (
                                         <td className="table-content-style">
-                                            {parseFloat(record.hvac_consumption.now).toFixed(2)} kWh / sq. ft.sq. ft.
+                                            {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq. ft.
                                             <br />
                                             <div style={{ width: '100%', display: 'inline-block' }}>
                                                 {/* <Line
@@ -594,9 +695,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                                     )}
                                     {selectedOptions.some((record) => record.value === 'total') && (
                                         <td className="value-style">
-                                            {(record.total_consumption / 1000).toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                                            {(record.total_consumption / 1000).toFixed(5)}
                                             kWh
                                         </td>
                                     )}
@@ -642,6 +741,7 @@ const BuildingTable = ({ buildingsData, selectedOptions }) => {
                             );
                         })}
                     </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -665,6 +765,7 @@ const CompareBuildings = () => {
         { label: 'Monitored Load', value: 'load' },
     ];
 
+    const [isBuildingDataFetched,setIsBuildingDataFetched] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
 
     useEffect(() => {
@@ -687,11 +788,11 @@ const CompareBuildings = () => {
         let arr = [
             { label: 'Name', value: 'name' },
             { label: 'Energy Density', value: 'density' },
-            { label: '% Change', value: 'per_change' },
+            // { label: '% Change', value: 'per_change' },
             // { label: 'HVAC Consumption', value: 'hvac' },
             // { label: 'HVAC % change', value: 'hvac_per' },
             { label: 'Total Consumption', value: 'total' },
-            { label: 'Total % change', value: 'total_per' },
+            // { label: 'Total % change', value: 'total_per' },
             { label: 'Sq. ft.', value: 'sq_ft' },
             { label: 'Monitored Load', value: 'load' },
         ];
@@ -701,6 +802,7 @@ const CompareBuildings = () => {
     useEffect(() => {
         const compareBuildingsData = async () => {
             try {
+                setIsBuildingDataFetched(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -710,19 +812,43 @@ const CompareBuildings = () => {
 
                 let count = parseInt(localStorage.getItem('dateFilter'));
                 let params = `?days=${count}`;
-                await axios.post(`${BaseUrl}${compareBuildings}${params}`, {}, { headers }).then((res) => {
+                await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     response.sort((a, b) => b.energy_consumption - a.energy_consumption);
                     setBuildingsData(response);
+                    setIsBuildingDataFetched(false);
                     // console.log('setBuildingsData => ', res.data);
                 });
             } catch (error) {
                 console.log(error);
+                setIsBuildingDataFetched(false);
                 console.log('Failed to fetch Buildings Data');
             }
         };
         compareBuildingsData();
     }, [daysCount]);
+    const buildingDataWithFilter = async (order, filterBy) => {
+        try {
+            setIsBuildingDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let count = parseInt(localStorage.getItem('dateFilter'));
+                let params = `?days=${count}&${filterBy}=${order}`;
+            await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                    setBuildingsData(response);
+                    setIsBuildingDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsBuildingDataFetched(false);
+            console.log('Failed to fetch all Equipments Data');
+        }
+    };
 
     return (
         <React.Fragment>
@@ -772,7 +898,7 @@ const CompareBuildings = () => {
             </Row>
             <Row>
                 <Col xl={12}>
-                    <BuildingTable buildingsData={buildingsData} selectedOptions={selectedOptions} />
+                    <BuildingTable buildingsData={buildingsData} selectedOptions={selectedOptions} buildingDataWithFilter={buildingDataWithFilter} isBuildingDataFetched={isBuildingDataFetched}/>
                 </Col>
             </Row>
         </React.Fragment>
