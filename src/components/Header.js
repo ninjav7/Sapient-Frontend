@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input } from 'reactstrap';
-import Datepicker from '../sharedComponents/datepicker';
+import moment from 'moment';
+import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
 import { DateRangeStore } from '../store/DateRangeStore';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar } from '@fortawesome/free-solid-svg-icons';
 import '../pages/portfolio/style.scss';
 import Select from '../sharedComponents/form/select';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
+import 'bootstrap-daterangepicker/daterangepicker.css';
 
 const Header = (props) => {
     const [dateRange, setDateRange] = useState([null, null]);
@@ -51,9 +50,15 @@ const Header = (props) => {
         },
     ];
 
+    const handleEvent = (event, picker) => {
+        let start = picker.startDate._d;
+        let end = picker.endDate._d;
+        setDateRange([start, end]);
+    };
+
     useEffect(() => {
         const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
+            let endCustomDate = new Date();
             let startCustomDate = new Date();
             localStorage.setItem('dateFilter', date);
             if (date !== 0) {
@@ -71,10 +76,12 @@ const Header = (props) => {
     }, [dateFilter]);
 
     useEffect(() => {
-        const setCustomDate = (date) => {
-            let startCustomDate = date[0];
-            let endCustomDate = date[1];
-            let dt = new Date();
+        if (dateRange[0] === null || dateRange[1] === null) {
+            return;
+        }
+        const setCustomDate = (dates) => {
+            let startCustomDate = dates[0];
+            let endCustomDate = dates[1];
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
@@ -103,35 +110,18 @@ const Header = (props) => {
                                     setDateFilter(value);
                                 }}
                             />
-
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                onChange={(e) => {
-                                    setDateFilter(e.target.value);
-                                }}
-                                defaultValue={dateFilter}>
-                                {customDaySelect.map((el, index) => {
-                                    return <option value={el.value}>{el.label}</option>;
-                                })}
-                            </Input> */}
                         </div>
 
-                        <div className="">
-                            <Datepicker
-                                selectsRange={true}
+                        <div className="header-datefilter-datepicker">
+                            <DateRangePicker
                                 startDate={startDate}
                                 endDate={endDate}
-                                onChange={(update) => {
-                                    setDateRange(update);
-                                }}
-                                maxDate={new Date()}
-                                dateFormat="MMMM d"
-                                className="header-datefilter-datepicker"
-                                placeholderText="Select Date Range"
-                                // monthsShown={2}
-                            />
+                                alwaysShowCalendars={false}
+                                onEvent={handleEvent}>
+                                <button className="">
+                                    {moment(startDate).format('LL')} to {moment(endDate).format('LL')}
+                                </button>
+                            </DateRangePicker>
                         </div>
 
                         {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
