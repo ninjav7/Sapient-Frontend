@@ -498,27 +498,31 @@ const EditPlugRule = ({
 
     const [sensorsIdNow, setSensorIdNow] = useState('');
     const [equpimentTypeAdded, setEqupimentTypeAdded] = useState([]);
+    const [unlinkedSocketRuleSuccess, setUnlinkedSocketRuleSuccess] = useState(false)
 
-    // Getting Graph Data API Call
-    // const getGraphData = async () => {
-    //     let headers = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //         Authorization: `Bearer ${userdata.token}`,
-    //     };
+    // Getting Graph Data API Call TODO:
+    // unlinkedSocketRuleSuccess
+    const getGraphData = async () => {
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
 
-    //     // TODO:
-    //     let params = `?sensors=${sensorsIdNow}`;
-    //     await axios.get(`${BaseUrl}${graphData}${params}`, { headers }).then((res) => {
-    //         let response = res.data;
-    //         setTotalGraphData(response);
-    //         console.log(response, 'totalResponseNow');
-    //     });
-    // };
+        // TODO:
+        let params = `?building_id=${activeBuildingId}&sensors=${sensorsIdNow}`;
+        await axios.get(`${BaseUrl}${graphData}${params}`, { headers }).then((res) => {
+            let response = res.data;
+            setTotalGraphData(response);
+            console.log(response, 'totalResponseNow');
+        });
+    };
 
-    // useEffect(() => {
-    //     getGraphData();
-    // }, [sensorsIdNow]);
+    useEffect(() => {
+        if(sensorsIdNow) { 
+            getGraphData();
+        }
+    }, [sensorsIdNow]);
 
     const handleEqupimentTypeFilter = () => {
         return selectedOption?.map((item) => {
@@ -875,6 +879,7 @@ const EditPlugRule = ({
             }
         };
 
+
         const fetchUnLinkedSocketRules = async () => {
             try {
                 let headers = {
@@ -884,6 +889,7 @@ const EditPlugRule = ({
                 };
                 let params = `?page_size=${pageSize}&page_no=${pageNo}&rule_id=${activeRuleId}&building_id=${activeBuildingId}&equipment_types=${equpimentTypeFilterString}&mac_address=${macTypeFilterString}&location=${locationTypeFilterString}&sensor_number=${sensorTypeFilterString}`;
                 await axios.get(`${BaseUrl}${unLinkSocketRules}${params}`, { headers }).then((res) => {
+                    setUnlinkedSocketRuleSuccess(res.status);
                     let response = res.data;
                     // console.log(response.total_data);
                     setTotalSocket(parseInt(response.total_data));
