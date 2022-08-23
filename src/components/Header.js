@@ -4,14 +4,14 @@ import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Link, withRouter } from 'react-router-dom';
 import { DateRangeStore } from '../store/DateRangeStore';
-import '../pages/portfolio/style.scss';
 import Select from '../sharedComponents/form/select';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
+import '../pages/portfolio/style.scss';
 
 const Header = (props) => {
-    const [dateRange, setDateRange] = useState([null, null]);
-    const [startDate, endDate] = dateRange;
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
@@ -54,30 +54,32 @@ const Header = (props) => {
     const handleEvent = (event, picker) => {
         let start = picker.startDate._d;
         let end = picker.endDate._d;
-        setDateRange([start, end]);
+        setStartDate(start);
+        setEndDate(end);
     };
 
     useEffect(() => {
         const setCustomDate = (date) => {
-            let endCustomDate = new Date();
-            let startCustomDate = new Date();
+            let end = new Date();
+            let start = new Date();
             localStorage.setItem('dateFilter', date);
             if (date !== 0) {
-                endCustomDate.setDate(endCustomDate.getDate() - 1);
+                end.setDate(end.getDate() - 1);
             }
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            setDateRange([startCustomDate, endCustomDate]);
+            start.setDate(start.getDate() - date);
+            setStartDate(start);
+            setEndDate(end);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
+                s.startDate = start;
+                s.endDate = end;
             });
         };
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
     useEffect(() => {
-        if (dateRange[0] === null || dateRange[1] === null) {
+        if (startDate === null || endDate === null) {
             return;
         }
         const setCustomDate = (dates) => {
@@ -88,8 +90,8 @@ const Header = (props) => {
                 s.endDate = endCustomDate;
             });
         };
-        setCustomDate(dateRange);
-    }, [dateRange]);
+        setCustomDate([startDate, endDate]);
+    }, [startDate, endDate]);
 
     return (
         <React.Fragment>
@@ -103,8 +105,7 @@ const Header = (props) => {
                         aria-label="Basic example">
                         <div>
                             <Select
-                                style={{ color: 'black', fontWeight: 'bold' }}
-                                className="header-datefilter-select date-selector-width"
+                                className="header-datefilter-select"
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
@@ -113,13 +114,17 @@ const Header = (props) => {
                             />
                         </div>
 
-                        <div className="header-datefilter-datepicker">
+                        <div>
                             <DateRangePicker
                                 startDate={startDate}
                                 endDate={endDate}
+                                // initialSettings={{
+                                //     startDate: startDate?.toISOString(),
+                                //     endDate: endDate?.toISOString(),
+                                // }}
                                 alwaysShowCalendars={false}
-                                onEvent={handleEvent}>
-                                <button className="">
+                                onApply={handleEvent}>
+                                <button className="select-button form-control header-widget-styling datefilter-styling">
                                     {moment(startDate).format('LL')} to {moment(endDate).format('LL')}
                                 </button>
                             </DateRangePicker>

@@ -311,7 +311,7 @@ const UsagePageTwo = ({ title = 'Lighting' }) => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&end_uses_type=lighting`;
+                let params = `?building_id=${bldgId}&end_uses_type=Lighting`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,

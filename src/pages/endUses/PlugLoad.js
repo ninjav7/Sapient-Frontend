@@ -218,7 +218,7 @@ const PlugLoad = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&end_uses_type=plug`;
+                let params = `?building_id=${bldgId}&end_uses_type=Plug`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesFloorChart}${params}`,
@@ -269,7 +269,7 @@ const PlugLoad = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=plug`;
+                let params = `?building_id=${bldgId}&end_uses_type=Plug`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,

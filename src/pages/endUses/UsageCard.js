@@ -28,7 +28,7 @@ const UsageCard = ({
                         {usage.device === 'HVAC' && (
                             <Link
                                 to={{
-                                    pathname: `/energy/hvac/${bldgId}`,
+                                    pathname: `/energy/end-uses/hvac/${bldgId}`,
                                 }}>
                                 <Button
                                     color="light"
@@ -40,7 +40,7 @@ const UsageCard = ({
                         {usage.device === 'Lighting' && (
                             <Link
                                 to={{
-                                    pathname: `/energy/lighting/${bldgId}`,
+                                    pathname: `/energy/end-uses/lighting/${bldgId}`,
                                 }}>
                                 <Button
                                     color="light"
@@ -52,7 +52,7 @@ const UsageCard = ({
                         {usage.device === 'Plug' && (
                             <Link
                                 to={{
-                                    pathname: `/energy/plug-load/${bldgId}`,
+                                    pathname: `/energy/end-uses/plug-load/${bldgId}`,
                                 }}>
                                 <Button
                                     color="light"
