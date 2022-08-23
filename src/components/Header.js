@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Link, withRouter } from 'react-router-dom';
 import { DateRangeStore } from '../store/DateRangeStore';
 import '../pages/portfolio/style.scss';
 import Select from '../sharedComponents/form/select';
@@ -92,7 +93,7 @@ const Header = (props) => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <span className="heading-style">{props.title}</span>
 

@@ -19,6 +19,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
+import moment from 'moment';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
+import 'bootstrap-daterangepicker/daterangepicker.css';
 import './style.css';
 
 const Explore = () => {
@@ -370,6 +373,12 @@ const Explore = () => {
             tickAmount: 2,
         },
     });
+
+    const handleEvent = (event, picker) => {
+        let start = picker.startDate._d;
+        let end = picker.endDate._d;
+        setDateRange([start, end]);
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -728,7 +737,7 @@ const Explore = () => {
                         </Input>
                     </div>
                     <div>
-                        <DatePicker
+                        {/* <DatePicker
                             selectsRange={true}
                             startDate={startDate}
                             endDate={endDate}
@@ -738,7 +747,16 @@ const Explore = () => {
                             dateFormat="MMMM d"
                             className="select-button form-control form-control-md font-weight-bold"
                             placeholderText="Select Date Range"
-                        />
+                        /> */}
+                        <DateRangePicker
+                            startDate={startDate}
+                            endDate={endDate}
+                            alwaysShowCalendars={false}
+                            onEvent={handleEvent}>
+                            <button className="">
+                                {moment(startDate).format('LL')} to {moment(endDate).format('LL')}
+                            </button>
+                        </DateRangePicker>
                     </div>
                     <div className="explore-three-dot">
                         <MoreVertical className="icon-sm" />
@@ -749,7 +767,7 @@ const Explore = () => {
                 showChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 sensorData={equipmentData}
-                showWindow={"metrics"}
+                showWindow={'metrics'}
             />
             {/* Explore Body  */}
             {activeExploreOpt.value === 'no-grouping' && (

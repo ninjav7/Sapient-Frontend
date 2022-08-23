@@ -52,7 +52,7 @@ const UsageCard = ({
                         {usage.device === 'Plug' && (
                             <Link
                                 to={{
-                                    pathname: `/energy/plug/${bldgId}`,
+                                    pathname: `/energy/plug-load/${bldgId}`,
                                 }}>
                                 <Button
                                     color="light"

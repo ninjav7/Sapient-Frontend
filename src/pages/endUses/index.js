@@ -13,45 +13,20 @@ import useSortableData from '../../helpers/useSortableData';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
+import { Spinner } from 'reactstrap';
+import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
 const EndUses = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
-    const [endUsage, seteEndUsage] = useState([
-        {
-            title: 'HVAC',
-            totalConsumption: 11441,
-            afterHourConsumption: 2321,
-            val1: { value: 61, type: 'up' },
-            val2: { value: 6, type: 'down' },
-            val3: { value: 31, type: 'normal' },
-            val4: { value: 2, type: 'up' },
-        },
-        {
-            title: 'Lighting',
-            totalConsumption: 7247,
-            afterHourConsumption: 2321,
-            val1: { value: 32, type: 'increased' },
-            val2: { value: 4, type: 'decreased' },
-            val3: { value: 41, type: 'decreased' },
-            val4: { value: 12, type: 'increased' },
-        },
-        {
-            title: 'Plug',
-            totalConsumption: 11441,
-            afterHourConsumption: 2321,
-            val1: { value: 6, type: 'increased' },
-            val2: { value: 6, type: 'increased' },
-            val3: { value: 3, type: 'decreased' },
-            val4: { value: 2, type: 'decreased' },
-        },
-    ]);
+
+    const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
+    const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
     const [barChartOptions, setBarChartOptions] = useState({
         chart: {
@@ -87,7 +62,7 @@ const EndUses = () => {
                 },
             },
         },
-        colors: ['#3094B9', '#66D6BC', '#2C4A5E', '#847CB5'],
+        colors: ['#66A4CE', '#80E1D9', '#0C7EA0', '#847CB5', '#2C4A5E'],
         tooltip: {
             y: {
                 formatter: function (val) {
@@ -139,14 +114,15 @@ const EndUses = () => {
         if (endDate === null) {
             return;
         }
+
         const endUsesDataFetch = async () => {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setIsEndUsesDataFetched(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
@@ -158,14 +134,17 @@ const EndUses = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setEndUsesData(res.data);
-                        // console.log('setEndUsesData => ', res.data);
+                        let response = res.data;
+                        setEndUsesData(response);
+                        setIsEndUsesDataFetched(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch EndUses Data');
+                setIsEndUsesDataFetched(false);
             }
         };
+
         const endUsesChartDataFetch = async () => {
             try {
                 let headers = {
@@ -174,6 +153,7 @@ const EndUses = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
+                setIsEndUsesChartLoading(true);
                 await axios
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
@@ -212,12 +192,15 @@ const EndUses = () => {
                             return newXaxis.categories.push(`Week ${num}`);
                         });
                         setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
+                        setIsEndUsesChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch EndUses Data');
+                setIsEndUsesChartLoading(false);
             }
         };
+
         endUsesDataFetch();
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
@@ -244,59 +227,84 @@ const EndUses = () => {
     return (
         <React.Fragment>
             <Header title="End Uses" />
-            <Row>
-                <div className="card-group button-style mt-1 mb-0" style={{ marginLeft: '29px' }}>
-                    {endUsesData.map((record, index) => {
-                        return (
-                            <div className="card usage-card-box-style button-style">
-                                <div className="card-body">
-                                    <div>
-                                        {index === 0 && (
-                                            <p className="dot" style={{ backgroundColor: '#3094B9' }}>
-                                                <span className="card-title card-title-style">
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                </span>
-                                            </p>
-                                        )}
-                                        {index === 1 && (
-                                            <p className="dot" style={{ backgroundColor: '#66D6BC' }}>
-                                                <span className="card-title card-title-style">
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                </span>
-                                            </p>
-                                        )}
-                                        {index === 2 && (
-                                            <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
-                                                <span className="card-title card-title-style">
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                </span>
-                                            </p>
-                                        )}
-                                        {index === 3 && (
-                                            <p className="dot" style={{ backgroundColor: '#847CB5' }}>
-                                                <span className="card-title card-title-style">
-                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                </span>
-                                            </p>
-                                        )}
+
+            {isEndUsesDataFetched ? (
+                <Row className="ml-4">
+                    <Skeleton count={1} color="#f9fafb" height={120} width={650} />
+                </Row>
+            ) : (
+                <Row className="ml-4">
+                    <div className="card-group button-style mt-1 mb-0">
+                        {endUsesData.map((record, index) => {
+                            return (
+                                <div className="card usage-card-box-style button-style">
+                                    <div className="card-body">
+                                        <div>
+                                            {index === 0 && (
+                                                <p className="dot" style={{ backgroundColor: '#66A4CE' }}>
+                                                    <span className="card-title card-title-style">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </p>
+                                            )}
+                                            {index === 1 && (
+                                                <p className="dot" style={{ backgroundColor: '#80E1D9' }}>
+                                                    <span className="card-title card-title-style">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </p>
+                                            )}
+                                            {index === 2 && (
+                                                <p className="dot" style={{ backgroundColor: '#0C7EA0' }}>
+                                                    <span className="card-title card-title-style">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </p>
+                                            )}
+                                            {index === 3 && (
+                                                <p className="dot" style={{ backgroundColor: '#847CB5' }}>
+                                                    <span className="card-title card-title-style">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </p>
+                                            )}
+                                            {index === 4 && (
+                                                <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
+                                                    <span className="card-title card-title-style">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
+                                                    </span>
+                                                </p>
+                                            )}
+                                        </div>
+                                        <p className="card-text card-content-style">
+                                            {record.energy_consumption.now.toLocaleString(undefined, {
+                                                maximumFractionDigits: 2,
+                                            })}
+                                            <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
+                                        </p>
                                     </div>
-                                    <p className="card-text card-content-style">
-                                        {record.energy_consumption.now.toLocaleString(undefined, {
-                                            maximumFractionDigits: 2,
-                                        })}
-                                        <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                                    </p>
                                 </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </Row>
-            <Row>
-                <Col xl={12}>
-                    <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
-                </Col>
-            </Row>
+                            );
+                        })}
+                    </div>
+                </Row>
+            )}
+
+            {isEndUsesChartLoading ? (
+                <Row>
+                    <Col xl={12}>
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    </Col>
+                </Row>
+            ) : (
+                <Row>
+                    <Col xl={12}>
+                        <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
+                    </Col>
+                </Row>
+            )}
 
             <Row style={{ marginLeft: '0.5px' }}>
                 <div className="card-body">
@@ -307,49 +315,55 @@ const EndUses = () => {
                         Click explore to see more energy usage details.
                     </h6>
 
-                    <Row className="mt-4 energy-container">
-                        {endUsesData.slice(0, 3).map((usage, index) => {
-                            return (
-                                <div className="usage-card">
-                                    <EnergyUsageCard
-                                        bldgId={bldgId}
-                                        usage={usage}
-                                        button="View"
-                                        lastPeriodPerTotalHrs={percentageHandler(
-                                            usage.energy_consumption.now,
-                                            usage.energy_consumption.old
-                                        )}
-                                        lastPeriodPerTotalHrsNormal={
-                                            usage.energy_consumption.now >= usage.energy_consumption.old
-                                        }
-                                        lastYearPerTotalHrs={percentageHandler(
-                                            usage.energy_consumption.now,
-                                            usage.energy_consumption.yearly
-                                        )}
-                                        lastYearPerTotalHrsNormal={
-                                            usage.energy_consumption.now >= usage.energy_consumption.yearly
-                                        }
-                                        lastPeriodPerAfterHrs={percentageHandler(
-                                            usage.after_hours_energy_consumption.now,
-                                            usage.after_hours_energy_consumption.old
-                                        )}
-                                        lastPeriodPerAfterHrsNormal={
-                                            usage.after_hours_energy_consumption.now >=
-                                            usage.after_hours_energy_consumption.old
-                                        }
-                                        lastYearPerAfterHrs={percentageHandler(
-                                            usage.after_hours_energy_consumption.now,
-                                            usage.after_hours_energy_consumption.yearly
-                                        )}
-                                        lastYearPerAfterHrsNormal={
-                                            usage.after_hours_energy_consumption.now >=
-                                            usage.after_hours_energy_consumption.yearly
-                                        }
-                                    />
-                                </div>
-                            );
-                        })}
-                    </Row>
+                    {isEndUsesDataFetched ? (
+                        <Row className="mt-4 energy-container-loader ml-1">
+                            <Skeleton count={3} color="#f9fafb" height={100} />
+                        </Row>
+                    ) : (
+                        <Row className="mt-4 energy-container">
+                            {endUsesData.slice(0, 3).map((usage, index) => {
+                                return (
+                                    <div className="usage-card">
+                                        <EnergyUsageCard
+                                            bldgId={bldgId}
+                                            usage={usage}
+                                            button="View"
+                                            lastPeriodPerTotalHrs={percentageHandler(
+                                                usage.energy_consumption.now,
+                                                usage.energy_consumption.old
+                                            )}
+                                            lastPeriodPerTotalHrsNormal={
+                                                usage.energy_consumption.now >= usage.energy_consumption.old
+                                            }
+                                            lastYearPerTotalHrs={percentageHandler(
+                                                usage.energy_consumption.now,
+                                                usage.energy_consumption.yearly
+                                            )}
+                                            lastYearPerTotalHrsNormal={
+                                                usage.energy_consumption.now >= usage.energy_consumption.yearly
+                                            }
+                                            lastPeriodPerAfterHrs={percentageHandler(
+                                                usage.after_hours_energy_consumption.now,
+                                                usage.after_hours_energy_consumption.old
+                                            )}
+                                            lastPeriodPerAfterHrsNormal={
+                                                usage.after_hours_energy_consumption.now >=
+                                                usage.after_hours_energy_consumption.old
+                                            }
+                                            lastYearPerAfterHrs={percentageHandler(
+                                                usage.after_hours_energy_consumption.now,
+                                                usage.after_hours_energy_consumption.yearly
+                                            )}
+                                            lastYearPerAfterHrsNormal={
+                                                usage.after_hours_energy_consumption.now >=
+                                                usage.after_hours_energy_consumption.yearly
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </Row>
+                    )}
                 </div>
             </Row>
         </React.Fragment>

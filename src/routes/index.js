@@ -87,7 +87,7 @@ const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 // endUses - Sub-pages
 const HVACUsage = React.lazy(() => import('../pages/endUses/HVAC'));
 const LightingUsage = React.lazy(() => import('../pages/endUses/Lighting'));
-const PlugUsage = React.lazy(() => import('../pages/endUses/Plug'));
+const PlugLoad = React.lazy(() => import('../pages/endUses/PlugLoad'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
@@ -380,9 +380,9 @@ const portfolioRoutes = {
             visibility: false,
         },
         {
-            path: '/energy/plug/:bldgId',
-            name: 'Plug Usage',
-            component: PlugUsage,
+            path: '/energy/plug-load/:bldgId',
+            name: 'Plug Load',
+            component: PlugLoad,
             route: PrivateRoute,
             visibility: false,
         },
