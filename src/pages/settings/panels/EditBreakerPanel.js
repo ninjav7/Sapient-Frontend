@@ -487,7 +487,7 @@ const EditBreakerPanel = () => {
                 };
                 let params = `?building_id=${bldgId}&occupancy_filter=true`;
                 await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    let responseData = res.data;
+                    let responseData = res.data.data;
                     let equipArray = [];
                     responseData.forEach((record) => {
                         if (record.equipments_name === '') {

@@ -16,6 +16,8 @@ import { Search } from 'react-feather';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import axios from 'axios';
 import { BaseUrl, generalActiveDevices } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
@@ -59,7 +61,7 @@ const RoleTable = ({ roleData }) => {
                             return (
                                 <tr key={index}>
                                     <th scope="row">
-                                        <Link to="/settings/role-config">
+                                        <Link to="/settings/roles/config">
                                             <a className="buildings-name">{record.name}</a>
                                         </Link>
                                     </th>
@@ -101,11 +103,9 @@ const Roles = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
-                    <span className="heading-style">
-                        Roles
-                    </span>
+                    <span className="heading-style">Roles</span>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
@@ -122,25 +122,28 @@ const Roles = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-2 ml-2">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                        />
-                        <span class="input-group-text border-0" id="search-addon">
-                            <Search className="icon-sm" />
-                        </span>
+                    <div className="">
+                        <div className="active-sensor-header">
+                            <div className="search-container mr-2">
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <input
+                                    className="search-box ml-2"
+                                    type="search"
+                                    name="search"
+                                    placeholder="Search..."
+                                    // value={searchSensor}
+                                    // onChange={handleSearchChange}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </Col>
             </Row>
 
             <Row>
-                <Col lg={8}>
+                <Col lg={6}>
                     <RoleTable roleData={roleData} />
                 </Col>
             </Row>
