@@ -21,6 +21,9 @@ export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
 export const generalBldgDelete = '/api/config/general/delete_building';
+export const updateAccount = '/api/user_role/user/update-user';
+export const listUsers = '/api/user_role/user/list_user_by_parentId';
+export const addUser = '/api/user_role/user/add_user';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
