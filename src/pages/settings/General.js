@@ -107,6 +107,8 @@ const General = () => {
         sunTo: '',
     });
 
+    console.log('timeValue', timeValue);
+
     useEffect(() => {
         setSwitchPhrace({
             mon: weekToggle?.mon,
@@ -118,6 +120,12 @@ const General = () => {
             sun: weekToggle?.sun,
         });
     }, [weekToggle]);
+
+    console.log('buildingOperatingHours', buildingOperatingHours);
+    console.log(
+        'moment(buildingOperatingHours)',
+        moment(buildingOperatingHours?.operating_hours?.mon?.time_range?.frm).format('HH:MM')
+    );
 
     useEffect(() => {
         setTimeValue({
@@ -215,9 +223,7 @@ const General = () => {
             // let params = `?building_id=${bldgId}`;
 
             let params = `/${bldgId}`;
-
             await axios
-
                 .all([
                     axios.patch(`${BaseUrl}${generalBuildingDetail}${params}`, buildingDetails, {
                         headers: header,
@@ -380,33 +386,6 @@ const General = () => {
 
         fetchBuildingData();
     }, [render]);
-
-    const timing12hour = [
-        '12:00 AM',
-        '01:00 AM',
-        '02:00 AM',
-        '03:00 AM',
-        '04:00 AM',
-        '05:00 AM',
-        '06:00 AM',
-        '07:00 AM',
-        '08:00 AM',
-        '09:00 AM',
-        '10:00 AM',
-        '11:00 AM',
-        '12:00 PM',
-        '01:00 PM',
-        '02:00 PM',
-        '03:00 PM',
-        '04:00 PM',
-        '05:00 PM',
-        '06:00 PM',
-        '07:00 PM',
-        '08:00 PM',
-        '09:00 PM',
-        '10:00 PM',
-        '11:00 PM',
-    ];
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1166,38 +1145,31 @@ const General = () => {
                                             <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
                                                 Mon
                                             </div>
-
                                             <DatePicker
-                                                onInputClick={() => {
-                                                    console.log('manas');
-                                                }}
                                                 style={{ position: 'relative' }}
                                                 onChange={(date) => {
+                                                    console.log('moment(date)', moment(date).format('HH:MM'));
                                                     operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
-
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            monFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            monFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        monFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 disabled={!weekToggle['mon']}
                                                 showTimeSelect
                                                 showTimeSelectOnly
-                                                value={timeValue?.monFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.monFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.monFrom)?.format('HH:MM')
+                                                }
                                                 timeIntervals={60}
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '24' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 className="time-picker-style"
                                             />
+                                            {console.log(timeValue?.monFrom, 'timeValue?.monFrom')}
 
                                             {/* <input
                                                 type="text"
@@ -1224,24 +1196,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            monTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            monTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        monTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['mon']}
                                                 timeIntervals={60}
-                                                value={timeValue?.monTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.monTo)?.format('h:mm a')
+                                                        : moment(timeValue?.monTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1275,24 +1243,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            tueFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            tueFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        tueFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['tue']}
                                                 timeIntervals={60}
-                                                value={timeValue?.tueFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.tueFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.tueFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1307,23 +1271,19 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            tueTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            tueTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        tueTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
-                                                value={timeValue?.tueTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.tueTo)?.format('h:mm a')
+                                                        : moment(timeValue?.tueTo)?.format('HH:MM')
+                                                }
                                                 disabled={!weekToggle['tue']}
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1358,24 +1318,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            wedFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            wedFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        wedFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
                                                 disabled={!weekToggle['wed']}
-                                                value={timeValue?.wedFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.wedFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.wedFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1390,24 +1346,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            wedTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            wedTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        wedTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['wed']}
                                                 timeIntervals={60}
-                                                value={timeValue?.wedTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.wedTo)?.format('h:mm a')
+                                                        : moment(timeValue?.wedTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1441,24 +1393,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            thuFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            thuFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        thuFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
                                                 disabled={!weekToggle['thu']}
-                                                value={timeValue?.thuFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.thuFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.thuFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1473,24 +1421,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            thuTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            thuTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        thuTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
                                                 disabled={!weekToggle['thu']}
-                                                value={timeValue?.thuTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.thuTo)?.format('h:mm a')
+                                                        : moment(timeValue?.thuTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1524,24 +1468,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            friFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            friFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        friFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['fri']}
                                                 timeIntervals={60}
-                                                value={timeValue?.friFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.friFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.friFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1556,24 +1496,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            friTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            friTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        friTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
                                                 disabled={!weekToggle['fri']}
-                                                value={timeValue?.friTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.friTo)?.format('h:mm a')
+                                                        : moment(timeValue?.friTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1607,24 +1543,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            satFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            satFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        satFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['sat']}
                                                 timeIntervals={60}
-                                                value={timeValue?.satFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.satFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.satFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1639,24 +1571,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            satTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            satTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        satTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 disabled={!weekToggle['sat']}
                                                 timeIntervals={60}
-                                                value={timeValue?.satTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.satTo)?.format('h:mm a')
+                                                        : moment(timeValue?.satTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1690,24 +1618,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            sunFrom: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            sunFrom: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        sunFrom: moment(date).format(),
+                                                    });
                                                 }}
                                                 disabled={!weekToggle['sun']}
                                                 showTimeSelect
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
-                                                value={timeValue?.sunFrom}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.sunFrom)?.format('h:mm a')
+                                                        : moment(timeValue?.sunFrom)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
@@ -1720,24 +1644,20 @@ const General = () => {
                                                 onChange={(date) => {
                                                     operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
 
-                                                    if (timeZone === '24') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            sunTo: moment(date)?.format('HH:MM'),
-                                                        });
-                                                    }
-                                                    if (timeZone === '12') {
-                                                        setTimeValue({
-                                                            ...timeValue,
-                                                            sunTo: moment(date)?.format('h:mm a'),
-                                                        });
-                                                    }
+                                                    setTimeValue({
+                                                        ...timeValue,
+                                                        sunTo: moment(date).format(),
+                                                    });
                                                 }}
                                                 showTimeSelect
                                                 disabled={!weekToggle['sun']}
                                                 showTimeSelectOnly
                                                 timeIntervals={60}
-                                                value={timeValue?.sunTo}
+                                                value={
+                                                    timeZone === '12'
+                                                        ? moment(timeValue?.sunTo)?.format('h:mm a')
+                                                        : moment(timeValue?.sunTo)?.format('HH:MM')
+                                                }
                                                 timeCaption="Time"
                                                 dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
                                                 timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
