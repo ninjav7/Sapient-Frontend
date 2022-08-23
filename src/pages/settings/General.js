@@ -1454,7 +1454,7 @@ const General = () => {
                                                 checked={weekToggle['fri']}
                                                 onColor={'#2955E7'}
                                                 uncheckedIcon={false}
-                                                checkedIcon={false}
+                                           ,     checkedIcon={false}
                                                 className="react-switch"
                                             />
 
