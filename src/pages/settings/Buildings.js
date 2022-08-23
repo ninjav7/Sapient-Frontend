@@ -59,14 +59,14 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                 <div
                                                     className="buildings-name"
                                                     onClick={() => {
-                                                        localStorage.setItem('buildingId', record._id);
-                                                        localStorage.setItem('buildingName', record.name);
+                                                        localStorage.setItem('buildingId', record.building_id);
+                                                        localStorage.setItem('buildingName', record.building_name);
                                                         BuildingStore.update((s) => {
-                                                            s.BldgId = record._id;
-                                                            s.BldgName = record.name;
+                                                            s.BldgId = record.building_id;
+                                                            s.BldgName = record.building_name;
                                                         });
                                                     }}>
-                                                    {record.name}
+                                                    {record.building_name}
                                                 </div>
                                             </Link>
                                             <span className="badge badge-soft-secondary label-styling mr-2">
