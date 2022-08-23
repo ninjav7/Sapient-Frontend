@@ -108,6 +108,7 @@ export const getEnergyConsumption = '/api/energy/chart';
 
 // explore
 export const getExplore = '/api/explorer/chart';
+export const getExploreByBuilding = '/api/explorer/chart/by_building';
 
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';

@@ -12,7 +12,7 @@ import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
-import { BaseUrl, getExplore } from '../../services/Network';
+import { BaseUrl, getExplore, getExploreByBuilding } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,6 +29,8 @@ const Explore = () => {
 
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+    const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
+    const [topPeakPower, setPeakPower] = useState(1);
 
     const customDaySelect = [
         {
@@ -57,12 +59,7 @@ const Explore = () => {
     const [dateFilter, setDateFilter] = useState(dateValue);
 
     const [exploreOpts, setExploreOpts] = useState([
-        { value: 'no-grouping', label: 'No Grouping' },
-        { value: 'enduses', label: 'End Use' },
-        { value: 'equipment_type', label: 'Equipment Type' },
-        { value: 'floor', label: 'Floor' },
-        { value: 'location', label: 'Location' },
-        { value: 'location-type', label: 'Location Type' },
+        { value: 'by-building', label: 'By Building' },
     ]);
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
 
@@ -77,9 +74,7 @@ const Explore = () => {
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'power', label: 'Power (kW)' },
-        { value: 'mVh', label: 'Voltage (V)' },
-        { value: 'mAh', label: 'Current (A)' },
+        { value: 'power', label: 'Peak Power (kW)' },
     ];
 
     const [equipmentData, setEquipmentData] = useState([]);
@@ -91,8 +86,9 @@ const Explore = () => {
             height: 230,
             toolbar: {
                 autoSelected: 'pan',
-                show: true,
+                show: false,
             },
+
             animations: {
                 enabled: false,
             },
@@ -405,10 +401,10 @@ const Explore = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?filters=${activeExploreOpt.value}`;
+                let params = `?consumption=energy`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExplore}${params}`,
+                        `${BaseUrl}${getExploreByBuilding}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -421,34 +417,37 @@ const Explore = () => {
                         setSeriesLineData([]);
                         let responseData = res.data;
 
-                        let childExploreList = [];
-                        responseData.forEach((record) => {
-                            let obj = {
-                                value: record.eq_name,
-                                label: record.eq_name,
-                                eq_id: record.eq_id,
-                            };
-                            childExploreList.push(obj);
-                        });
-                        setExploreSecondLvlOpts(childExploreList);
+                        // let childExploreList = [];
+                        // responseData.forEach((record) => {
+                        //     let obj = {
+                        //         value: record.eq_name,
+                        //         label: record.eq_name,
+                        //         eq_id: record.eq_id,
+                        //     };
+                        //     childExploreList.push(obj);
+                        // });
+                        // setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
-                        // console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now)
+                        setPeakPower(responseData[0].peak_power.now)
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
                         data.forEach((record) => {
-                            if (record.eq_name !== null) {
+                            if (record.building_name !== null) {
                                 let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
+                                    name: record.building_name,
+                                    data: record.building_consumption,
                                 };
                                 exploreData.push(recordToInsert);
                             }
                         });
                         // console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
+                        console.log(exploreData);
                         setSeriesLineData([
                             {
                                 data: exploreData[0].data,
@@ -462,7 +461,7 @@ const Explore = () => {
         };
 
         exploreDataFetch();
-    }, [activeExploreOpt, startDate, endDate]);
+    }, [startDate, endDate]);
 
     useEffect(() => {
         let obj = activeExploreOpt;
@@ -485,10 +484,10 @@ const Explore = () => {
                     // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?filters=no-grouping`;
+                let params = `?consumption=energy`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExplore}${params}`,
+                        `${BaseUrl}${getExploreByBuilding}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -497,15 +496,15 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
                         data.forEach((record) => {
-                            if (record.eq_name !== null) {
+                            if (record.building_name !== null) {
                                 let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
+                                    name: record.building_name,
+                                    data: record.building_consumption,
                                 };
                                 exploreData.push(recordToInsert);
                             }
@@ -513,7 +512,7 @@ const Explore = () => {
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
-                                data: exploreData[0].data,
+                                data: exploreData[0].building_consumption,
                             },
                         ]);
                     });
@@ -615,8 +614,12 @@ const Explore = () => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate() - 1);
+                //startCustomDate.setDate(startCustomDate.getDate() - date-1);    
+                startCustomDate.setDate(startCustomDate.getDate() - date);
+            console.log(date)
+            if(date!=='0')
+            endCustomDate.setDate(endCustomDate.getDate() - 1);    
+            
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
@@ -752,7 +755,7 @@ const Explore = () => {
                 showWindow={"metrics"}
             />
             {/* Explore Body  */}
-            {activeExploreOpt.value === 'no-grouping' && (
+            {activeExploreOpt.value === 'by-building' && (
                 <>
                     <BrushChart
                         seriesData={seriesData}
@@ -769,6 +772,8 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                topEnergyConsumption={topEnergyConsumption}
+                                topPeakPower={topPeakPower}
                             />
                         </Col>
                     </Row>
