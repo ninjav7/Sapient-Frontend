@@ -404,9 +404,9 @@ const Layout = () => {
                                                     setModelToShow(2);
                                                 }}>
                                                 <span> {floorName?.name}</span>
-                                                <span class="badge badge-light mr-4 font-weight-bold float-right ">
+                                                {/* <span class="badge badge-light mr-4 font-weight-bold float-right ">
                                                     {spaceName?.type}
-                                                </span>
+                                                </span> */}
                                             </div>
                                         ))}
                                     </>
