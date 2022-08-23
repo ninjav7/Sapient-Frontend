@@ -103,7 +103,10 @@ const BuildingSwitcher = () => {
         });
     }, [portfolioName]);
 
-    const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
+    const dropDownTitle =
+        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
+            ? 'Portfolio'
+            : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });

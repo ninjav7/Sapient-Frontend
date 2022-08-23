@@ -17,6 +17,8 @@ export const closeEditSpaceModal = atom(false);
 export const floorList = atom([]);
 export const spaceId = atom('');
 
+export const showSkeletonNow = atom(false);
+
 export const spaceName = atom('');
 export const spaceName2 = atom('');
 export const spaceName3 = atom('');

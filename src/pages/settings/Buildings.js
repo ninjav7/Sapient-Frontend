@@ -16,6 +16,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import { useAtom } from 'jotai';
 import { buildingData } from '../../store/globalState';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
@@ -214,7 +216,7 @@ const Buildings = () => {
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <span className="heading-style">Buildings</span>
 
@@ -234,19 +236,22 @@ const Buildings = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-2 ml-2">
                 <Col xl={3}>
-                    <div class="input-group rounded ml-4">
-                        <input
-                            type="search"
-                            class="form-control rounded"
-                            placeholder="Search"
-                            aria-label="Search"
-                            aria-describedby="search-addon"
-                        />
-                        <span class="input-group-text border-0" id="search-addon">
-                            <Search className="icon-sm" />
-                        </span>
+                    <div className="">
+                        <div className="active-sensor-header">
+                            <div className="search-container mr-2">
+                                <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                <input
+                                    className="search-box ml-2"
+                                    type="search"
+                                    name="search"
+                                    placeholder="Search..."
+                                    // value={searchSensor}
+                                    // onChange={handleSearchChange}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </Col>
             </Row>

@@ -213,7 +213,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                 {/* <BootstrapTable keyField='id' data={ userData } columns={ columns } bordered={ false } sort={ { dataField: 'name', order: 'asc' } } /> */}
                 <Table className="mb-0 bordered">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'name') && (
                                 <th className="table-heading-style" onClick={() => setNameOrder(!nameOrder)}>
                                      <div className="active-device-flex">
@@ -433,7 +433,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                     <tbody>
                         {buildingsData.map((record, index) => {
                             return (
-                                <tr key={record.building_id} className='mouse-pointer'>
+                                <tr key={record.building_id} className="mouse-pointer">
                                     {selectedOptions.some((record) => record.value === 'name') && (
                                         <th scope="row">
                                             <Link
@@ -447,7 +447,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                     )}
                                     {selectedOptions.some((record) => record.value === 'density') && (
                                         <td className="table-content-style">
-                                            {parseFloat(record.energy_density / 1000).toFixed(2)} kWh / sq. ft.sq. ft.
+                                            {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq. ft.
                                             <br />
                                             <div style={{ width: '100%', display: 'inline-block' }}>
                                                 {index === 0 && record.energy_density === 0 && (
@@ -563,7 +563,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                     )}
                                     {selectedOptions.some((record) => record.value === 'hvac') && (
                                         <td className="table-content-style">
-                                            {parseFloat(record.hvac_consumption.now).toFixed(2)} kWh / sq. ft.sq. ft.
+                                            {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq. ft.
                                             <br />
                                             <div style={{ width: '100%', display: 'inline-block' }}>
                                                 {/* <Line
@@ -695,9 +695,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                     )}
                                     {selectedOptions.some((record) => record.value === 'total') && (
                                         <td className="value-style">
-                                            {(record.total_consumption / 1000).toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                                            {(record.total_consumption / 1000).toFixed(5)}
                                             kWh
                                         </td>
                                     )}
@@ -790,11 +788,11 @@ const CompareBuildings = () => {
         let arr = [
             { label: 'Name', value: 'name' },
             { label: 'Energy Density', value: 'density' },
-            { label: '% Change', value: 'per_change' },
+            // { label: '% Change', value: 'per_change' },
             // { label: 'HVAC Consumption', value: 'hvac' },
             // { label: 'HVAC % change', value: 'hvac_per' },
             { label: 'Total Consumption', value: 'total' },
-            { label: 'Total % change', value: 'total_per' },
+            // { label: 'Total % change', value: 'total_per' },
             { label: 'Sq. ft.', value: 'sq_ft' },
             { label: 'Monitored Load', value: 'load' },
         ];

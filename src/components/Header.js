@@ -56,9 +56,9 @@ const Header = (props) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
             localStorage.setItem('dateFilter', date);
-            if(date !== 0){
+            if (date !== 0) {
                 endCustomDate.setDate(endCustomDate.getDate() - 1);
-            }            
+            }
             startCustomDate.setDate(startCustomDate.getDate() - date);
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
