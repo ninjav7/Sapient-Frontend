@@ -20,6 +20,7 @@ import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import moment from 'moment';
+import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import './style.css';
@@ -752,9 +753,10 @@ const Explore = () => {
                             startDate={startDate}
                             endDate={endDate}
                             alwaysShowCalendars={false}
-                            onEvent={handleEvent}>
-                            <button className="">
-                                {moment(startDate).format('LL')} to {moment(endDate).format('LL')}
+                            onApply={handleEvent}>
+                            <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
+                                <FontAwesomeIcon icon={faCalendar} size="lg" color="#7C879C" className="mr-2" />
+                                {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
                             </button>
                         </DateRangePicker>
                     </div>

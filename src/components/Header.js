@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Link, withRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../store/DateRangeStore';
 import Select from '../sharedComponents/form/select';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
@@ -105,7 +107,7 @@ const Header = (props) => {
                         aria-label="Basic example">
                         <div>
                             <Select
-                                className="header-datefilter-select"
+                                className="header-datefilter-select font-weight-bold"
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
@@ -124,8 +126,9 @@ const Header = (props) => {
                                 // }}
                                 alwaysShowCalendars={false}
                                 onApply={handleEvent}>
-                                <button className="select-button form-control header-widget-styling datefilter-styling">
-                                    {moment(startDate).format('LL')} to {moment(endDate).format('LL')}
+                                <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
+                                    <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
+                                    {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
                                 </button>
                             </DateRangePicker>
                         </div>
