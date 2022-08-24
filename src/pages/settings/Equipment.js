@@ -44,12 +44,13 @@ import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import moment from 'moment';
+import { result } from 'lodash';
 import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
     const [selected, setSelected] = useState([]);
     const [sensors, setSensors] = useState([]);
+    // console.log(equipmentTypeData)
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
@@ -1254,11 +1255,7 @@ const EquipmentTable = ({
                                                 <td>{record.sensor_number === 0 ? '-' : record.sensor_number}</td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                <td>
-                                                    {record.last_data === ''
-                                                        ? '-'
-                                                        : moment(record?.last_data).fromNow()}
-                                                </td>
+                                                <td>{record.last_data === '' ? '-' : record.last_data}</td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'device_id') && (
                                                 <td className="font-weight-bold">{record.device_mac}</td>

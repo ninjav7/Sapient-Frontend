@@ -349,6 +349,14 @@ const portfolioRoutes = {
         //     visibility: true,
         //     parent: 'buildings',
         // },
+        // {
+        //     path: '/energy/end-uses/:bldgId',
+        //     name: 'End Uses',
+        //     component: EndUses,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'buildings',
+        // },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
