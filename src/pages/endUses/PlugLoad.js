@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
@@ -96,50 +97,51 @@ const PlugLoad = () => {
     ]);
 
     const [energyChartOptions, setEnergyChartOptions] = useState({
-        options: {
-            chart: {
-                height: 350,
-                type: 'line',
-                toolbar: {
-                    show: true,
-                },
-            },
-            stroke: {
-                width: 0.2,
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
                 show: true,
-                curve: 'straight',
             },
-            dataLabels: {
-                enabled: true,
-                enabledOnSeries: [1],
-            },
-            labels: ['01 Jan 2001', '02 Jan 2001', '03 Jan 2001'],
-            xaxis: {
-                type: 'datetime',
-            },
-            yaxis: [
-                {
-                    title: {
-                        text: 'Consumption',
-                    },
+        },
+        stroke: {
+            width: 0.2,
+            show: true,
+            curve: 'straight',
+        },
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD MMM - HH:mm');
                 },
-                {
-                    opposite: true,
-                    title: {
-                        text: 'Occupancy',
-                    },
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+        },
+        yaxis: {
+            labels: {
+                formatter: function (value) {
+                    var val = Math.abs(value);
+                    return val + ' K';
                 },
-            ],
+            },
+            style: {
+                fontSize: '12px',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
         },
     });
 
-    const [energyChartData, setEnergyChartData] = useState([
-        {
-            name: 'CONSUMPTION',
-            type: 'column',
-            data: [],
-        },
-    ]);
+    const [energyChartData, setEnergyChartData] = useState([]);
 
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
     const [isPlugLoadChartLoading, setIsPlugLoadChartLoading] = useState(false);
@@ -281,17 +283,20 @@ const PlugLoad = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        let energyUsage = [
+                        let energyData = [
                             {
                                 name: 'CONSUMPTION',
-                                type: 'column',
                                 data: [],
                             },
                         ];
                         data.map((record) => {
-                            energyUsage[0].data.push(record.energy_consumption);
+                            let obj = {
+                                x: record.date,
+                                y: record.energy_consumption,
+                            };
+                            energyData[0].data.push(obj);
                         });
-                        setEnergyChartData(energyUsage);
+                        setEnergyChartData(energyData);
                         setIsPlugLoadChartLoading(false);
                     });
             } catch (error) {
@@ -592,7 +597,6 @@ const PlugLoad = () => {
                             <LineColumnChart
                                 energyChartData={energyChartData}
                                 energyChartOptions={energyChartOptions}
-                                title=""
                             />
                         )}
                     </div>

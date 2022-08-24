@@ -8,7 +8,7 @@ const LineColumnChart = ({ energyChartOptions, energyChartData }) => {
     return (
         <Card>
             <CardBody>
-                <Chart options={energyChartOptions} series={energyChartData} type="line" className="apex-charts" />
+                <Chart options={energyChartOptions} series={energyChartData} type="bar" className="apex-charts" />
             </CardBody>
         </Card>
     );
