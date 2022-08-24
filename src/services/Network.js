@@ -30,7 +30,7 @@ export const endUses = '/api/energy/portfolio/end-user';
 export const endUsesChart = '/api/energy/chart/end-uses';
 export const hvacUsageChart = '/api/energy/chart/hvac';
 export const endUsesFloorChart = '/api/energy/chart/byfloor';
-export const endUsesUsageChart = '/api/energy/chart/usage';
+export const endUsesUsageChart = '/api/energy/end_use/load_usage';
 
 // equipments
 export const generalEquipments = '/api/config/equipments_details/';
