@@ -1,20 +1,30 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Redirect, Link } from 'react-router-dom'
+import { Redirect, Link } from 'react-router-dom';
 
-import { Container, Row, Col, Card, CardBody, Label, FormGroup, Button, Alert, InputGroup, InputGroupAddon } from 'reactstrap';
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Label,
+    FormGroup,
+    Button,
+    Alert,
+    InputGroup,
+    InputGroupAddon,
+} from 'reactstrap';
 import { AvForm, AvGroup, AvInput, AvFeedback } from 'availity-reactstrap-validation';
 import { Mail, Lock } from 'react-feather';
 
 import { loginUser } from '../../redux/actions';
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
-import logo from '../../assets/images/logo.png';
-import {
-    BaseUrl,
-    login
-} from '../../services/Network';
+// import logo from '../../assets/images/logo.png';
+import { BaseUrl, login } from '../../services/Network';
 import './auth.css';
+import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
 
 class Login extends Component {
     _isMounted = false;
@@ -26,14 +36,14 @@ class Login extends Component {
         this.state = {
             username: '',
             password: '',
-            error:false,
-            message:''
-        }
+            error: false,
+            message: '',
+        };
     }
 
     componentDidMount() {
         this._isMounted = true;
-        
+
         document.body.classList.add('authentication-bg');
     }
 
@@ -48,136 +58,173 @@ class Login extends Component {
     handleValidSubmit = (event, values) => {
         // console.log(this.props.history);
         this.props.loginUser(values.username.trim(), values.password.trim(), this.props.history);
-        if(values.username==="" || values.password===""){
-            
+        if (values.username === '' || values.password === '') {
         }
-        
-    }
-
+    };
 
     /**
      * Redirect to root
      */
     renderRedirectToRoot = () => {
-
         const isAuthTokenValid = isUserAuthenticated();
         if (isAuthTokenValid) {
-            return <Redirect to='/' />
+            return <Redirect to="/" />;
         }
-    }
+    };
 
     render() {
-        let error=false;
-        let message="";
+        let error = false;
+        let message = '';
         const isAuthTokenValid = isUserAuthenticated();
-        if(localStorage.getItem('login_success')==="false"){
-            error=true;
-            message=localStorage.getItem('failed_message');
+        if (localStorage.getItem('login_success') === 'false') {
+            error = true;
+            message = localStorage.getItem('failed_message');
             localStorage.removeItem('login_success');
             localStorage.removeItem('failed_message');
         }
         return (
             <React.Fragment>
-
                 {this.renderRedirectToRoot()}
 
-                {(this._isMounted || !isAuthTokenValid) && <div className="account-pages my-5">
-                    <Container className='auth-container'>
-                        <Row className="justify-content-center">
-                            <Col xl={10}>
-                                <Card className="">
-                                    <CardBody className="p-0">
-                                        <Row>
-                                            <Col md={6} className="p-5 position-relative">
-                                                { /* preloader */}
-                                                {this.props.loading && <Loader />}
+                {(this._isMounted || !isAuthTokenValid) && (
+                    <div
+                        style={{
+                            height: '100%',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            paddingTop: '100px',
+                        }}>
+                        <div style={{ height: '100%', width: '100%' }}>
+                            <div style={{ width: '100%', height: '630px', display: 'flex', justifyContent: 'center' }}>
+                                <div
+                                    style={{
+                                        width: '32%',
+                                        height: '100%',
+                                        backgroundColor: 'white',
+                                        boxShadow: '0px 3px 14px -1px rgba(0,0,0,0.75)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                    <div style={{ width: '70%' }}>
+                                        {/* preloader */}
+                                        {this.props.loading && <Loader />}
 
-                                                <div className="mx-auto mb-5">
-                                                    <a href="/">
-                                                        {/* <img src={logo} alt="" height="24" /> */}
-                                                        <h3 className="d-inline align-middle ml-1 text-logo">Sapient</h3>
-                                                    </a>
-                                                </div>
+                                        <div
+                                            style={{
+                                                width: '100%',
+                                                height: '90%',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                marginBottom: '50px',
+                                                // alignItems: 'center',
+                                            }}>
+                                            <a href="/">
+                                                {/* <img src={logo} alt="" height="24" /> */}
+                                                <LogoSVG />
+                                                {/* <h3 className="d-inline align-middle ml-1 text-logo">Sapient</h3> */}
+                                            </a>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <h6>Please sign in below</h6>
+                                        </div>
 
-                                                <h6 className="h5 mb-0 mt-4">Welcome back!</h6>
-                                                <p className="text-muted mt-1 mb-4">Enter your email address and password to access admin panel.</p>
+                                        {this.props.error && (
+                                            <Alert color="danger" isOpen={this.props.error ? true : false}>
+                                                <div>{this.props.error}</div>
+                                            </Alert>
+                                        )}
+                                        {error && (
+                                            <Alert color="danger" isOpen={error ? true : false}>
+                                                <div>{message}</div>
+                                            </Alert>
+                                        )}
+                                        <AvForm
+                                            onValidSubmit={this.handleValidSubmit}
+                                            className="authentication-form"
+                                            autoComplete="off">
+                                            <AvGroup className="">
+                                                <Label for="username">Email</Label>
+                                                <InputGroup>
+                                                    <AvInput
+                                                        type="text"
+                                                        name="username"
+                                                        id="username"
+                                                        placeholder="hello@Sapient.com"
+                                                        value={this.state.username}
+                                                        required
+                                                    />
+                                                </InputGroup>
 
+                                                <AvFeedback>This field is invalid</AvFeedback>
+                                            </AvGroup>
 
-                                                {this.props.error && <Alert color="danger" isOpen={this.props.error ? true : false}>
-                                                    <div>{this.props.error}</div>
-                                                </Alert>}
-                                                {error && <Alert color="danger" isOpen={error ? true : false}>
-                                                    <div>{message}</div>
-                                                </Alert>}
-                                                <AvForm onValidSubmit={this.handleValidSubmit} className="authentication-form" autoComplete="off">
-                                                    <AvGroup className="">
-                                                        <Label for="username">Username</Label>
-                                                        <InputGroup>
-                                                            <InputGroupAddon addonType="prepend">
-                                                                <span className="input-group-text">
-                                                                    <Mail className="icon-dual" />
-                                                                </span>
-                                                            </InputGroupAddon>
-                                                            <AvInput type="text" name="username" id="username" placeholder="hello@Sapient.com" value={this.state.username} required />
-                                                        </InputGroup>
-                                                        
-                                                        <AvFeedback>This field is invalid</AvFeedback>
-                                                    </AvGroup>
+                                            <AvGroup className="mb-3">
+                                                <Label for="password">Password</Label>
 
+                                                <InputGroup>
+                                                    <AvInput
+                                                        type="password"
+                                                        name="password"
+                                                        id="password"
+                                                        placeholder="Enter your password"
+                                                        value={this.state.password}
+                                                        required
+                                                    />
+                                                </InputGroup>
+                                                <AvFeedback>This field is invalid</AvFeedback>
+                                                <Link
+                                                    to="/account/forget-password"
+                                                    className="float-right  ml-1 text-primary font-weight-bold"
+                                                    style={{ marginTop: '30px' }}>
+                                                    Forgot Password?
+                                                </Link>
+                                            </AvGroup>
 
-                                                    <AvGroup className="mb-3">
-                                                        <Label for="password">Password</Label>
-                                                        <Link to="/account/forget-password" className="float-right text-muted text-unline-dashed ml-1">Forgot your password?</Link>
-                                                        <InputGroup>
-                                                            <InputGroupAddon addonType="prepend">
-                                                                <span className="input-group-text">
-                                                                    <Lock className="icon-dual" />
-                                                                </span>
-                                                            </InputGroupAddon>
-                                                            <AvInput type="password" name="password" id="password" placeholder="Enter your password" value={this.state.password} required />
-                                                        </InputGroup>
-                                                        <AvFeedback>This field is invalid</AvFeedback>
-                                                    </AvGroup>
+                                            <div
+                                                style={{
+                                                    width: '100%',
+                                                    marginTop: '80px',
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                }}>
+                                                <FormGroup>
+                                                    <Button style={{ width: '100px' }} color="primary">
+                                                        Sign In
+                                                    </Button>
+                                                </FormGroup>
+                                            </div>
 
-                                                    <FormGroup className="form-group mb-0 text-center">
-                                                        <Button color="primary" className="btn-block">Log In</Button>
-                                                    </FormGroup>
-
-                                                    <p className="mt-3"><strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <br /> <strong>Password:</strong> Test@123</p>
-                                                </AvForm>
-                                            </Col>
-
-                                            <Col md={6} className="d-none d-md-inline-block">
-                                                <div className="auth-page-sidebar">
-                                                    <div className="overlay"></div>
-                                                    <div className="auth-user-testimonial">
-                                                        {/* <p className="font-size-24 font-weight-bold text-white mb-1">I simply love it!</p> */}
-                                                        {/* <p className="lead">"It's a elegent templete. I love it very much!"</p> */}
-                                                        {/* <p>- Admin User</p> */}
-                                                    </div>
-                                                </div>
-                                            </Col>
-                                        </Row>
-
-                                        
-                                    </CardBody>
-                                </Card>
-                            </Col>
-                        </Row>
-
-                        <Row className="mt-3">
-                            <Col className="col-12 text-center">
-                                <p className="text-muted">Don't have an account? <Link to="/account/register" className="text-primary font-weight-bold ml-1">Sign Up</Link></p>
-                            </Col>
-                        </Row>
-
-                    </Container>
-                </div>}
+                                            <Row className="">
+                                                <Col className="col-12 text-center">
+                                                    <p className="text-muted">
+                                                        Don't have an account?{' '}
+                                                        <Link
+                                                            to="/account/register"
+                                                            className="text-primary font-weight-bold ml-1">
+                                                            Request Account
+                                                        </Link>
+                                                    </p>
+                                                </Col>
+                                            </Row>
+                                        </AvForm>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* <p>
+                                <strong>Username:</strong> sapient@sapient.industries &nbsp;&nbsp; <br />{' '}
+                                <strong>Password:</strong> Test@123
+                            </p> */}
+                        </div>
+                    </div>
+                )}
             </React.Fragment>
-        )
+        );
     }
 }
-
 
 const mapStateToProps = (state) => {
     const { user, loading, error } = state.Auth;
