@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { Cookies } from 'react-cookie';
 import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ const Control = () => {
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
     let history = useHistory();
     let cookies = new Cookies();
+
 
     const handleLogout = () => {
         cookies.remove('user', { path: '/' });
@@ -60,6 +61,7 @@ const Control = () => {
             return;
         }
     };
+  
 
     return (
         <>

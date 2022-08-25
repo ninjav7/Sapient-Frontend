@@ -344,7 +344,14 @@
     height: 100%;
     background-color: #ffffff;
 }
-
+.energy-page-content-full-screen {
+    margin-top: 5.5625rem;
+    margin-left: 0rem;
+    position: relative;
+    padding: 0 2rem;
+    height: 100%;
+    background-color: #ffffff;
+}
 .top-nav-routes-list {
     display: flex;
     flex-direction: row;

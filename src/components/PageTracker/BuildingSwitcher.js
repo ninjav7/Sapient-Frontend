@@ -102,9 +102,9 @@ const BuildingSwitcher = () => {
             s.parent = 'portfolio';
         });
     }, [portfolioName]);
-
+    console.log(localStorage.getItem("explorer")!=='true')
     const dropDownTitle =
-        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
+        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings' || (location.pathname === '/explore/page' && localStorage.getItem("explorer")!=='true')
             ? 'Portfolio'
             : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {

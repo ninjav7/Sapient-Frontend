@@ -31,6 +31,7 @@ class HorizontalLayout extends Component {
      *
      */
     componentDidMount = () => {
+        console.log(this.props);
         this.props.changeLayout(layoutConstants.LAYOUT_HORIZONTAL);
     };
 
@@ -45,7 +46,6 @@ class HorizontalLayout extends Component {
     render() {
         // get the child view which we would like to render
         const children = this.props.children || null;
-        // console.log('children => ', this.props.children);
         const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
         const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
         // const location = useLocation();
@@ -68,10 +68,11 @@ class HorizontalLayout extends Component {
                     )} */}
 
                     <div>
+                        {window.location.pathname!=="/explore/page"?(
                         <div className="energy-side-nav">
                             <SideNav />
-                        </div>
-                        <div className="energy-page-content">
+                        </div>):("")}
+                        <div className={window.location.pathname==="/explore/page"?"energy-page-content-full-screen":"energy-page-content"}>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
