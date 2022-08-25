@@ -3,7 +3,7 @@ import moment from 'moment';
 import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
-import MixedChart from '../charts/MixedChart';
+import HvacUsesCard from './HvacUsesCard';
 import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import axios from 'axios';
@@ -151,6 +151,8 @@ const EndUseType = () => {
 
     const [endUsesData, setEndUsesData] = useState({});
 
+    const [hvacUsageData, setHvacUsageData] = useState([]);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -263,7 +265,6 @@ const EndUseType = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-
                         let equipTypeName = [];
                         let equipTypeUsage = [];
 
@@ -291,6 +292,7 @@ const EndUseType = () => {
 
                         setEquipTypeChartOptions({ ...equipTypeChartOptions, xaxis: xaxisData });
                         setEquipTypeChartData(equipTypeConsumption);
+                        setHvacUsageData(data);
                         setIsEquipTypeChartLoading(false);
                     });
             } catch (error) {
@@ -568,6 +570,73 @@ const EndUseType = () => {
                     </div>
                 </Col>
             </Row>
+
+            {endUseType === 'hvac' && (
+                <>
+                    {isEquipTypeChartLoading ? (
+                        <Row className="mt-4 energy-container-loader ml-1">
+                            <Skeleton count={3} color="#f9fafb" height={100} />
+                        </Row>
+                    ) : (
+                        <>
+                            {hvacUsageData.length !== 0 && (
+                                <Row>
+                                    <div className="card-body mt-5 ml-2">
+                                        <h6 className="custom-title" style={{ display: 'inline-block' }}>
+                                            Top Systems by Usage
+                                        </h6>
+                                        <h6 className="custom-subtitle-style">
+                                            Click explore to see more energy usage details.
+                                        </h6>
+
+                                        <Row className="mt-4 energy-container">
+                                            {hvacUsageData.map((usage, index) => {
+                                                return (
+                                                    <div className="usage-card">
+                                                        <HvacUsesCard
+                                                            usage={usage}
+                                                            lastPeriodPerTotalHrs={percentageHandler(
+                                                                usage?.consumption?.now,
+                                                                usage?.consumption?.old
+                                                            )}
+                                                            lastPeriodPerTotalHrsNormal={
+                                                                usage?.consumption?.now >= usage?.consumption?.old
+                                                            }
+                                                            lastYearPerTotalHrs={percentageHandler(
+                                                                usage?.consumption?.now,
+                                                                usage?.consumption?.yearly
+                                                            )}
+                                                            lastYearPerTotalHrsNormal={
+                                                                usage?.consumption?.now >= usage?.consumption?.yearly
+                                                            }
+                                                            lastPeriodPerAfterHrs={percentageHandler(
+                                                                usage?.after_hours_consumption?.now,
+                                                                usage?.after_hours_consumption?.old
+                                                            )}
+                                                            lastPeriodPerAfterHrsNormal={
+                                                                usage?.after_hours_consumption?.now >=
+                                                                usage?.after_hours_consumption?.old
+                                                            }
+                                                            lastYearPerAfterHrs={percentageHandler(
+                                                                usage?.after_hours_consumption?.now,
+                                                                usage?.after_hours_consumption?.yearly
+                                                            )}
+                                                            lastYearPerAfterHrsNormal={
+                                                                usage?.after_hours_consumption?.now >=
+                                                                usage?.after_hours_consumption?.yearly
+                                                            }
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
+                                        </Row>
+                                    </div>
+                                </Row>
+                            )}
+                        </>
+                    )}
+                </>
+            )}
         </React.Fragment>
     );
 };
