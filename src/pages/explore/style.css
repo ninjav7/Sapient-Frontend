@@ -11,7 +11,31 @@
     align-content: stretch !important;
 }
 
-.button-danger,
+.button-danger{
+    position: static;
+    width: 47px;
+    height: 22px;
+    left: 118px;
+    top: 4px;
+    border: 0.5px solid #fee2e2;
+
+    /* green/100 */
+
+    background: #fee2e2;
+    border-radius: 6px;
+
+}
 .button-success {
-    width: fit-content !important;
+    /* width: fit-content !important; */
+    position: static;
+    width: 47px;
+    height: 22px;
+    left: 118px;
+    top: 4px;
+    border: 0.5px solid #d1fae5;
+
+    /* green/100 */
+
+    background: #d1fae5;
+    border-radius: 6px;
 }

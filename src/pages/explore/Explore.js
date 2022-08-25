@@ -1,28 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { List } from 'react-feather';
-import { Link } from 'react-router-dom';
+import { Link, useLocation,useHistory } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
-import EquipmentChartModel from '../settings/EquipmentChartModel';
+import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import axios from 'axios';
+import { ChevronDown, Search } from 'react-feather';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
-import { BaseUrl, getExplore, getExploreByBuilding } from '../../services/Network';
+import { BaseUrl, getExplore, getExploreByBuilding, getExploreByEquipment } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
+import { ChildFilterStore } from '../../store/ChildFilterStore';
+
 
 const Explore = () => {
     const [parentFilter, setParentFilter] = useState('');
+    const currentParentRoute = ComponentStore.useState((s) => s.parent);
+    const ChildFilterId = ChildFilterStore.useState((s)=>s.Building_id);
+    const ChildFilterName = ChildFilterStore.useState((s)=>s.Building_name);
+    const location = useLocation();
+    let history = useHistory();
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -36,6 +45,10 @@ const Explore = () => {
         {
             label: 'Today',
             value: 0,
+        },
+        {
+            label: 'Last Day',
+            value: 1,
         },
         {
             label: 'Last 7 Days',
@@ -83,7 +96,7 @@ const Explore = () => {
         chart: {
             id: 'chart2',
             type: 'line',
-            height: 230,
+            height: '1000px',
             toolbar: {
                 autoSelected: 'pan',
                 show: false,
@@ -91,6 +104,17 @@ const Explore = () => {
 
             animations: {
                 enabled: false,
+            },
+        },
+        legend:{
+            position:'top',
+            horizontalAlign: 'left',
+            fontSize: '18px',
+            fontFamily: 'Helvetica, Arial',
+            fontWeight: 600,
+            itemMargin: {
+                horizontal: 30,
+                vertical: 20
             },
         },
         colors: ['#546E7A'],
@@ -116,7 +140,7 @@ const Explore = () => {
     const [optionsLineData, setOptionsLineData] = useState({
         chart: {
             id: 'chart1',
-            height: 130,
+            height: '500px',
             toolbar: {
                 show: false,
             },
@@ -155,6 +179,7 @@ const Explore = () => {
     const [exploreTableData, setExploreTableData] = useState([]);
     const [mainParent, setMainParent] = useState([]);
     const [childFilter, setChildFilter] = useState({});
+    const [equipmentFilter, setEquipmentFilter] = useState({});
     const [secActive, setSecActive] = useState('');
     const [thirdActive, setThirdActive] = useState('');
 
@@ -372,7 +397,7 @@ const Explore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Explore',
+                        label: 'Portfolio Level',
                         path: '/explore/page',
                         active: true,
                     },
@@ -384,6 +409,16 @@ const Explore = () => {
             });
         };
         updateBreadcrumbStore();
+        localStorage.removeItem("explorer");
+        // console.log(currentParentRoute);
+        // console.log(location);
+        // console.log(ComponentStore.getRawState())
+        // let parentState=ComponentStore.getRawState()
+        // if(parentState.parent==='explore'){
+        //     history.push('/explore/page');
+        //     window.location.reload();
+        // }
+
     }, []);
 
     useEffect(() => {
@@ -512,7 +547,7 @@ const Explore = () => {
                         setSeriesData(exploreData);
                         setSeriesLineData([
                             {
-                                data: exploreData[0].building_consumption,
+                                data: exploreData[0].data,
                             },
                         ]);
                     });
@@ -537,11 +572,19 @@ const Explore = () => {
         window.scroll(0, 0);
 
         const exploreFilterDataFetch = async () => {
-            if (counter === 2) {
-                setShowEquipmentChart(true);
-                console.log(childFilter);
-                setEquipmentData(childFilter);
-            } else {
+            console.log(childFilter);
+            // if (counter === 2) {
+            //     setShowEquipmentChart(true);
+            //     console.log(childFilter);
+            //     setEquipmentData(childFilter);
+            // } else {
+                localStorage.setItem("explorer",true);
+               
+                console.log(ChildFilterId);
+                console.log(ChildFilterName);
+                // ComponentStore.update((s) => {
+                //     s.parent = 'explore';
+                // });
                 try {
                     const start = performance.now();
                     let headers = {
@@ -550,10 +593,11 @@ const Explore = () => {
                         // 'user-auth': '628f3144b712934f578be895',
                         Authorization: `Bearer ${userdata.token}`,
                     };
-                    let params = `?filters=${childFilter.parent}&filter_id=${childFilter.eq_id}`;
+                  
+                    let params = `?consumption=energy&building_id=${childFilter.building_id}`;
                     await axios
                         .post(
-                            `${BaseUrl}${getExplore}${params}`,
+                            `${BaseUrl}${getExploreByEquipment}${params}`,
                             {
                                 date_from: dateFormatHandler(startDate),
                                 date_to: dateFormatHandler(endDate),
@@ -561,54 +605,68 @@ const Explore = () => {
                             { headers }
                         )
                         .then((res) => {
+                            setActiveExploreOpt({value: 'by-equipment', label: 'By Equipment'})
                             setExploreTableData([]);
                             setSeriesData([]);
                             setSeriesLineData([]);
+                            setParentFilter('by-equipment');
                             let responseData = res.data;
-                            // console.log('SSR API response => ', responseData);
-                            setExploreTableData(responseData);
-                            let data = responseData;
-                            let exploreData = [];
-                            data.forEach((record) => {
-                                if (record.eq_name !== null) {
-                                    let recordToInsert = {
-                                        name: record.eq_name,
-                                        data: record.data,
-                                    };
-                                    exploreData.push(recordToInsert);
-                                }
-                            });
-                            // console.log('SSR Customized exploreData => ', exploreData);
-                            setCounter(counter + 1);
-                            // console.log('Counter ', counter + 1);
-                            setSeriesData(exploreData);
-                            setSeriesLineData([
-                                {
-                                    data: exploreData[0].data,
-                                },
-                            ]);
-                            if (counter + 1 === 1) {
-                                setSecActive(childFilter);
+                            console.log('SSR API response => ', responseData);
+                            setTopEnergyConsumption(responseData[0].energy_consumption.now)
+                        setPeakPower(responseData[0].peak_power.now)
+                        // setCounter(counter+1);
+                        // console.log(counter+1);
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.equipment_name !== null) {
+                                let recordToInsert = {
+                                    name: record.equipment_name,
+                                    data: record.equipment_consumption,
+                                };
+                                exploreData.push(recordToInsert);
                             }
-                            if (counter + 1 === 2) {
-                                setThirdActive(childFilter);
-                            }
-                            let newObj = childFilter;
-                            newObj.parent = 'equipment_type';
-                            setChildFilter(newObj);
-                            setParentFilter(newObj.parent);
-                            const duration = performance.now() - start;
-                            // console.log('fetching time ', duration);
+                        });
+                        // console.log('SSR Customized exploreData => ', exploreData);
+                        setSeriesData(exploreData);
+                        console.log(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+
                         });
                 } catch (error) {
                     console.log(error);
                     console.log('Failed to fetch Explore Data');
                 }
-            }
-        };
+                console.log(childFilter)
+                BuildingStore.update((s) => {
+                    s.BldgId = childFilter.building_id;
+                    s.BldgName = childFilter.building_name;
+                });
+                BreadcrumbStore.update((bs) => {
+                    let newList = [
+                        {
+                            label: 'Building View',
+                            path: '/explore/page',
+                            active: true,
+                        },
+                    ];
+                    bs.items = newList;
+                });
+        //     }
+         };
 
         exploreFilterDataFetch();
     }, [childFilter]);
+    useEffect(()=>{
+            console.log(equipmentFilter);
+            if(Object.keys(equipmentFilter).length!==0)
+                setShowEquipmentChart(true);
+    },[equipmentFilter])
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -748,10 +806,10 @@ const Explore = () => {
                     </div>
                 </div>
             </Row>
-            <EquipmentChartModel
+            <EquipmentDeviceChartModel
                 showChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
-                sensorData={equipmentData}
+                equipData={equipmentFilter}
                 showWindow={"metrics"}
             />
             {/* Explore Body  */}
@@ -763,7 +821,29 @@ const Explore = () => {
                         seriesLineData={seriesLineData}
                         optionsLineData={optionsLineData}
                     />
+                     <Row className="mt-2">
+                            <Col xl={3}>
+                                <div className="input-group rounded ml-4">
+                                    <input
+                                        type="search"
+                                        className="form-control rounded"
+                                        placeholder="Search"
+                                        aria-label="Search"
+                                        aria-describedby="search-addon"
+                                    />
+                                    <span className="input-group-text border-0" id="search-addon">
+                                        <Search className="icon-sm" />
+                                    </span>
+                                </div>
+                            </Col>
+                            <Col xl={9}>
+                                <button type="button" className="btn btn-white d-inline ml-2">
+                                    <i className="uil uil-plus mr-1"></i>Add Filter
+                                </button>
+                            </Col>
+                        </Row>
                     <Row>
+                       
                         <Col lg={12} className="ml-2">
                             <ExploreTable
                                 exploreTableData={exploreTableData}
@@ -780,7 +860,7 @@ const Explore = () => {
                 </>
             )}
 
-            {activeExploreOpt.value === 'enduses' && (
+            {activeExploreOpt.value === 'by-equipment' && (
                 <>
                     <BrushChart
                         seriesData={seriesData}
@@ -793,8 +873,8 @@ const Explore = () => {
                             <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
-                                childFilter={childFilter}
-                                setChildFilter={setChildFilter}
+                                equipmentFilter={equipmentFilter}
+                                setEquipmentFilter={setEquipmentFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                             />

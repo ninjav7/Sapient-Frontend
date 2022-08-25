@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { Line } from 'rc-progress';
+import { ChildFilterStore } from '../../store/ChildFilterStore';
 
 const ExploreTable = ({
     exploreTableData,
@@ -12,9 +13,21 @@ const ExploreTable = ({
     parentFilter,
     setParentFilter,
     topEnergyConsumption,
-    topPeakPower
+    topPeakPower,
+    equipmmentFilter,
+    setEquipmentFilter
 }) => {
     console.log(topEnergyConsumption)
+    const handleBuildingClicked =(id,name)=>{
+        setChildFilter({
+            building_id:id,
+            building_name:name
+        });
+        ChildFilterStore.update((s) => {
+            s.Building_id = id;
+            s.Building_name = name;
+        });
+    }
     
     return (
         <>
@@ -23,8 +36,8 @@ const ExploreTable = ({
                     <Table className="mb-0 bordered">
                         <thead>
                             <tr>
-                                <th className="table-heading-style">Name</th>
-                                <th className="table-heading-style">Energy (kWh)</th>
+                                <th className="table-heading-style"><input type="checkbox" style={{marginRight:"0.5rem"}}/>Name</th>
+                                <th className="table-heading-style">Energy Consumption </th>
                                 <th className="table-heading-style">% Change</th>
                                 {/* <th className="table-heading-style">Peak Power</th> */}
                                 {/* <th className="table-heading-style">% Change</th>
@@ -40,7 +53,7 @@ const ExploreTable = ({
                                     }
                                     return (
                                         <tr key={index}>
-                                            {!(parentFilter === 'by-building') &&
+                                            {/* {!(parentFilter === 'by-building') &&
                                                 (childFilter.parent === 'equipment_type' ? (
                                                     <th scope="row">
                                                         <a
@@ -69,15 +82,33 @@ const ExploreTable = ({
                                                             {record.eq_name}
                                                         </a>
                                                     </th>
-                                                ))}
+                                                ))} */}
 
                                             {parentFilter === 'by-building' && (
-                                                <th scope="row">
-                                                    <a className="building-name" onClick={() => {}}>
+                                                    <th scope="row">
+                                                           <a
+                                                            className="building-name"
+                                                            onClick={(e)=>{handleBuildingClicked(record.building_id,record.building_name)}}>
                                                         {record.building_name}
                                                     </a>
                                                 </th>
                                             )}
+                                             {parentFilter === 'by-equipment' && (
+                                                    <th scope="row">
+                                                           <a
+                                                            className="building-name"
+                                                            onClick={() => {
+                                                                setEquipmentFilter({
+                                                                    equipments_id:record.equipment_id,
+                                                                    equipments_name:record.equipment_name
+                                                                });
+                                                            }}
+                                                            >
+                                                        {record.equipment_name}
+                                                    </a>
+                                                </th>
+                                            )}
+
 
                                             <td className="table-content-style">
                                                 {(record.energy_consumption.now / 1000).toFixed(5)} kWh / sq. ft.sq. ft.
