@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
-import EnergyUsageCard from './UsageCard';
-import axios from 'axios';
+import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { useParams } from 'react-router-dom';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import useSortableData from '../../helpers/useSortableData';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
@@ -17,7 +15,7 @@ import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
-const EndUses = () => {
+const EndUsesPage = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -36,6 +34,7 @@ const EndUses = () => {
                 show: true,
             },
         },
+        colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -62,7 +61,6 @@ const EndUses = () => {
                 },
             },
         },
-        colors: ['#66A4CE', '#80E1D9', '#0C7EA0', '#847CB5', '#2C4A5E'],
         tooltip: {
             y: {
                 formatter: function (val) {
@@ -91,7 +89,6 @@ const EndUses = () => {
     });
 
     const [barChartData, setBarChartData] = useState([]);
-
     const [endUsesData, setEndUsesData] = useState([]);
 
     const sortArrayOfObj = (arr) => {
@@ -106,6 +103,25 @@ const EndUses = () => {
         });
         return newData;
     };
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'End Uses',
+                        path: '/energy/end-uses',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     useEffect(() => {
         if (startDate === null) {
@@ -135,7 +151,26 @@ const EndUses = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        setEndUsesData(response);
+                        let data = [];
+                        response.forEach((record, index) => {
+                            if (index === 0) {
+                                record.color = '#66A4CE';
+                            }
+                            if (index === 1) {
+                                record.color = '#FBE384';
+                            }
+                            if (index === 2) {
+                                record.color = '#59BAA4';
+                            }
+                            if (index === 3) {
+                                record.color = '#80E1D9';
+                            }
+                            if (index === 4) {
+                                record.color = '#847CB5';
+                            }
+                            data.push(record);
+                        });
+                        setEndUsesData(data);
                         setIsEndUsesDataFetched(false);
                     });
             } catch (error) {
@@ -205,25 +240,6 @@ const EndUses = () => {
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'End Uses',
-                        path: '/energy/end-uses',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
     return (
         <React.Fragment>
             <Header title="End Uses" />
@@ -239,49 +255,18 @@ const EndUses = () => {
                             return (
                                 <div className="card usage-card-box-style button-style">
                                     <div className="card-body">
-                                        <div>
-                                            {index === 0 && (
-                                                <p className="dot" style={{ backgroundColor: '#66A4CE' }}>
-                                                    <span className="card-title card-title-style">
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                    </span>
-                                                </p>
-                                            )}
-                                            {index === 1 && (
-                                                <p className="dot" style={{ backgroundColor: '#80E1D9' }}>
-                                                    <span className="card-title card-title-style">
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                    </span>
-                                                </p>
-                                            )}
-                                            {index === 2 && (
-                                                <p className="dot" style={{ backgroundColor: '#0C7EA0' }}>
-                                                    <span className="card-title card-title-style">
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                    </span>
-                                                </p>
-                                            )}
-                                            {index === 3 && (
-                                                <p className="dot" style={{ backgroundColor: '#847CB5' }}>
-                                                    <span className="card-title card-title-style">
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                    </span>
-                                                </p>
-                                            )}
-                                            {index === 4 && (
-                                                <p className="dot" style={{ backgroundColor: '#2C4A5E' }}>
-                                                    <span className="card-title card-title-style">
-                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{record.device}
-                                                    </span>
-                                                </p>
-                                            )}
+                                        <div className="enduses-content-1">
+                                            <p className="dot" style={{ backgroundColor: record.color }}></p>
+                                            <span className="card-title card-title-style">{record.device}</span>
                                         </div>
-                                        <p className="card-text card-content-style">
-                                            {record.energy_consumption.now.toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
-                                            <span className="card-unit-style">&nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;</span>
-                                        </p>
+                                        <div className="enduses-content-2">
+                                            <span className="card-text card-content-style">
+                                                {record.energy_consumption.now.toLocaleString(undefined, {
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                            </span>
+                                            <span className="card-unit-style">kWh</span>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -321,13 +306,12 @@ const EndUses = () => {
                         </Row>
                     ) : (
                         <Row className="mt-4 energy-container">
-                            {endUsesData.slice(0, 3).map((usage, index) => {
+                            {endUsesData.slice(0, 5).map((usage, index) => {
                                 return (
                                     <div className="usage-card">
-                                        <EnergyUsageCard
+                                        <EndUsesCard
                                             bldgId={bldgId}
                                             usage={usage}
-                                            button="View"
                                             lastPeriodPerTotalHrs={percentageHandler(
                                                 usage.energy_consumption.now,
                                                 usage.energy_consumption.old
@@ -370,4 +354,4 @@ const EndUses = () => {
     );
 };
 
-export default EndUses;
+export default EndUsesPage;

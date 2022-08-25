@@ -77,6 +77,7 @@ const PeakDemand = React.lazy(() => import('../pages/peakDemand'));
 
 // endUses
 const EndUses = React.lazy(() => import('../pages/endUses'));
+const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
 
 // timeOfDay
 const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
@@ -84,10 +85,6 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 // compareBuildings
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 
-// endUses - Sub-pages
-const HVACUsage = React.lazy(() => import('../pages/endUses/HVAC'));
-const LightingUsage = React.lazy(() => import('../pages/endUses/Lighting'));
-const PlugLoad = React.lazy(() => import('../pages/endUses/PlugLoad'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
@@ -366,23 +363,9 @@ const portfolioRoutes = {
             parent: 'buildings',
         },
         {
-            path: '/energy/end-uses/hvac/:bldgId',
-            name: 'HVAC Usage',
-            component: HVACUsage,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/end-uses/lighting/:bldgId',
-            name: 'Lighting Usage',
-            component: LightingUsage,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/end-uses/plug-load/:bldgId',
-            name: 'Plug Load',
-            component: PlugLoad,
+            path: '/energy/end-uses/:endUseType/:bldgId',
+            name: 'EndUseType',
+            component: EndUseType,
             route: PrivateRoute,
             visibility: false,
         },
