@@ -25,6 +25,7 @@ import Loader from '../../components/Loader';
 import { BaseUrl, login } from '../../services/Network';
 import './auth.css';
 import { ReactComponent as LogoSVG } from '../../assets/icon/logo.svg';
+import LogoImage from '../../assets/images/login.jpg';
 
 class Login extends Component {
     _isMounted = false;
@@ -88,15 +89,16 @@ class Login extends Component {
 
                 {(this._isMounted || !isAuthTokenValid) && (
                     <div
+                        className="authbackground"
                         style={{
-                            height: '100%',
+                            height: '100vh',
                             width: '100%',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            paddingTop: '100px',
+                            backgroundImage: '../../assets/images/login.jpg',
                         }}>
-                        <div style={{ height: '100%', width: '100%' }}>
+                        <div style={{ height: '100%', width: '100%', paddingTop: '100px' }}>
                             <div style={{ width: '100%', height: '630px', display: 'flex', justifyContent: 'center' }}>
                                 <div
                                     style={{
