@@ -1,39 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { List } from 'react-feather';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
-import EquipmentChartModel from '../settings/EquipmentChartModel';
+import ViewEquipModal from './ViewEquipModal';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
 import axios from 'axios';
+import { ChevronDown, Search } from 'react-feather';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
-import { BaseUrl, getExplore } from '../../services/Network';
+import {
+    BaseUrl,
+    getExplore,
+    getExploreByBuilding,
+    getExploreByEquipment,
+    equipmentGraphData,
+} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
+import { BuildingStore } from '../../store/BuildingStore';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { Spinner } from 'reactstrap';
+import { ChildFilterStore } from '../../store/ChildFilterStore';
 import './style.css';
 
 const Explore = () => {
     const [parentFilter, setParentFilter] = useState('');
+
+    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+
+    const ChildFilterId = ChildFilterStore.useState((s) => s.Building_id);
+    const ChildFilterName = ChildFilterStore.useState((s) => s.Building_name);
+    const exploreBldId = ExploreBuildingStore.useState((s) => s.exploreBldId);
+
+    const location = useLocation();
+    let history = useHistory();
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+    const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
+    const [topPeakPower, setPeakPower] = useState(1);
 
     const customDaySelect = [
         {
             label: 'Today',
             value: 0,
+        },
+        {
+            label: 'Last Day',
+            value: 1,
         },
         {
             label: 'Last 7 Days',
@@ -56,14 +82,7 @@ const Explore = () => {
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
 
-    const [exploreOpts, setExploreOpts] = useState([
-        { value: 'no-grouping', label: 'No Grouping' },
-        { value: 'enduses', label: 'End Use' },
-        { value: 'equipment_type', label: 'Equipment Type' },
-        { value: 'floor', label: 'Floor' },
-        { value: 'location', label: 'Location' },
-        { value: 'location-type', label: 'Location Type' },
-    ]);
+    const [exploreOpts, setExploreOpts] = useState([{ value: 'by-building', label: 'By Building' }]);
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
 
     const [exploreSecondLvlOpts, setExploreSecondLvlOpts] = useState([]);
@@ -72,14 +91,10 @@ const Explore = () => {
     const [exploreThirdLvlOpts, setExploreThirdLvlOpts] = useState([]);
     const [activeThirdLvlOpt, setActiveThirdLvlOpt] = useState(exploreThirdLvlOpts[0]);
     const [counter, setCounter] = useState(0);
-    const [showChart, setShowChart] = useState(false);
-    const handleChartClose = () => setShowEquipmentChart(false);
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'power', label: 'Power (kW)' },
-        { value: 'mVh', label: 'Voltage (V)' },
-        { value: 'mAh', label: 'Current (A)' },
+        { value: 'power', label: 'Peak Power (kW)' },
     ];
 
     const [equipmentData, setEquipmentData] = useState([]);
@@ -88,13 +103,25 @@ const Explore = () => {
         chart: {
             id: 'chart2',
             type: 'line',
-            height: 230,
+            height: '1000px',
             toolbar: {
                 autoSelected: 'pan',
-                show: true,
+                show: false,
             },
+
             animations: {
                 enabled: false,
+            },
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            fontSize: '18px',
+            fontFamily: 'Helvetica, Arial',
+            fontWeight: 600,
+            itemMargin: {
+                horizontal: 30,
+                vertical: 20,
             },
         },
         colors: ['#546E7A'],
@@ -120,7 +147,7 @@ const Explore = () => {
     const [optionsLineData, setOptionsLineData] = useState({
         chart: {
             id: 'chart1',
-            height: 130,
+            height: '500px',
             toolbar: {
                 show: false,
             },
@@ -159,224 +186,20 @@ const Explore = () => {
     const [exploreTableData, setExploreTableData] = useState([]);
     const [mainParent, setMainParent] = useState([]);
     const [childFilter, setChildFilter] = useState({});
+    const [equipmentFilter, setEquipmentFilter] = useState({});
     const [secActive, setSecActive] = useState('');
     const [thirdActive, setThirdActive] = useState('');
 
-    // New Approach
-    const [currentFilterLevel, setCurrentFilterLevel] = useState('first');
-
-    const [firstLevelExploreData, setFirstLevelExploreData] = useState();
-    const [firstLevelExploreOpts, setFirstLevelExploreOpts] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: 230,
-            toolbar: {
-                autoSelected: 'pan',
-                show: true,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
-        fill: {
-            opacity: 1,
-        },
-        markers: {
-            size: 0,
-        },
-        xaxis: {
-            type: 'datetime',
-        },
-    });
-    const [secondLevelExploreData, setSecondLevelExploreData] = useState();
-    const [secondLevelExploreOpts, setSecondLevelExploreOpts] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: 230,
-            toolbar: {
-                autoSelected: 'pan',
-                show: true,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
-        fill: {
-            opacity: 1,
-        },
-        markers: {
-            size: 0,
-        },
-        xaxis: {
-            type: 'datetime',
-        },
-    });
-    const [thirdLevelExploreData, setThirdLevelExploreData] = useState();
-    const [thirdLevelExploreOpts, setThirdLevelExploreOpts] = useState({
-        chart: {
-            id: 'chart2',
-            type: 'line',
-            height: 230,
-            toolbar: {
-                autoSelected: 'pan',
-                show: true,
-            },
-        },
-        colors: ['#546E7A'],
-        stroke: {
-            width: 3,
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
-        fill: {
-            opacity: 1,
-        },
-        markers: {
-            size: 0,
-        },
-        xaxis: {
-            type: 'datetime',
-        },
-    });
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
-    const [firstLevelLineData, setFirstLevelLineData] = useState();
-    const [firstLevelLineOpts, setFirstLevelLineOpts] = useState({
-        chart: {
-            id: 'chart1',
-            height: 130,
-            toolbar: {
-                show: false,
-            },
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            selection: {
-                enabled: true,
-                // xaxis: {
-                //     min: new Date('01 June 2022').getTime(),
-                //     max: new Date('02 June 2022').getTime(),
-                // },
-            },
-        },
-        colors: ['#008FFB'],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.91,
-                opacityTo: 0.1,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            tooltip: {
-                enabled: false,
-            },
-        },
-        yaxis: {
-            tickAmount: 2,
-        },
-    });
-    const [secondLevelLineData, setSecondLevelLineData] = useState();
-    const [secondLevelLineOpts, setSecondLevelLineOpts] = useState({
-        chart: {
-            id: 'chart1',
-            height: 130,
-            toolbar: {
-                show: false,
-            },
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            selection: {
-                enabled: true,
-                // xaxis: {
-                //     min: new Date('01 June 2022').getTime(),
-                //     max: new Date('02 June 2022').getTime(),
-                // },
-            },
-        },
-        colors: ['#008FFB'],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.91,
-                opacityTo: 0.1,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            tooltip: {
-                enabled: false,
-            },
-        },
-        yaxis: {
-            tickAmount: 2,
-        },
-    });
-    const [thirdLevelLineData, setThirdLevelLineData] = useState();
-    const [thirdLevelLineOpts, setThirdLevelLineOpts] = useState({
-        chart: {
-            id: 'chart1',
-            height: 130,
-            toolbar: {
-                show: false,
-            },
-            type: 'area',
-            brush: {
-                target: 'chart2',
-                enabled: true,
-            },
-            selection: {
-                enabled: true,
-                // xaxis: {
-                //     min: new Date('01 June 2022').getTime(),
-                //     max: new Date('02 June 2022').getTime(),
-                // },
-            },
-        },
-        colors: ['#008FFB'],
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.91,
-                opacityTo: 0.1,
-            },
-        },
-        xaxis: {
-            type: 'datetime',
-            tooltip: {
-                enabled: false,
-            },
-        },
-        yaxis: {
-            tickAmount: 2,
-        },
-    });
+    const handleChartOpen = () => setShowEquipmentChart(true);
+    const handleChartClose = () => setShowEquipmentChart(false);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Explore',
+                        label: 'Portfolio Level',
                         path: '/explore/page',
                         active: true,
                     },
@@ -388,6 +211,15 @@ const Explore = () => {
             });
         };
         updateBreadcrumbStore();
+        localStorage.removeItem('explorer');
+        // console.log(currentParentRoute);
+        // console.log(location);
+        // console.log(ComponentStore.getRawState())
+        // let parentState=ComponentStore.getRawState()
+        // if(parentState.parent==='explore'){
+        //     history.push('/explore/page');
+        //     window.location.reload();
+        // }
     }, []);
 
     useEffect(() => {
@@ -399,16 +231,16 @@ const Explore = () => {
         }
         const exploreDataFetch = async () => {
             try {
+                setIsExploreDataLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?filters=${activeExploreOpt.value}`;
+                let params = `?consumption=energy`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExplore}${params}`,
+                        `${BaseUrl}${getExploreByBuilding}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -420,49 +252,55 @@ const Explore = () => {
                         setSeriesData([]);
                         setSeriesLineData([]);
                         let responseData = res.data;
+                        setParentFilter('by-building');
 
-                        let childExploreList = [];
-                        responseData.forEach((record) => {
-                            let obj = {
-                                value: record.eq_name,
-                                label: record.eq_name,
-                                eq_id: record.eq_id,
-                            };
-                            childExploreList.push(obj);
-                        });
-                        setExploreSecondLvlOpts(childExploreList);
+                        // let childExploreList = [];
+                        // responseData.forEach((record) => {
+                        //     let obj = {
+                        //         value: record.eq_name,
+                        //         label: record.eq_name,
+                        //         eq_id: record.eq_id,
+                        //     };
+                        //     childExploreList.push(obj);
+                        // });
+                        // setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
-                        // console.log('SSR API response => ', responseData);
+                        console.log('SSR API response => ', responseData);
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setPeakPower(responseData[0].peak_power.now);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
                         let data = responseData;
                         let exploreData = [];
                         data.forEach((record) => {
-                            if (record.eq_name !== null) {
+                            if (record.building_name !== null) {
                                 let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
+                                    name: record.building_name,
+                                    data: record.building_consumption,
                                 };
                                 exploreData.push(recordToInsert);
                             }
                         });
                         // console.log('SSR Customized exploreData => ', exploreData);
                         setSeriesData(exploreData);
+                        console.log(exploreData);
                         setSeriesLineData([
                             {
                                 data: exploreData[0].data,
                             },
                         ]);
+                        setIsExploreDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
             }
         };
 
         exploreDataFetch();
-    }, [activeExploreOpt, startDate, endDate]);
+    }, [startDate, endDate]);
 
     useEffect(() => {
         let obj = activeExploreOpt;
@@ -476,19 +314,22 @@ const Explore = () => {
         if (endDate === null) {
             return;
         }
+
         const exploreDataFetch = async () => {
+            if (exploreBldId !== 'portfolio') {
+                return;
+            }
             try {
-                const start = performance.now();
+                setIsExploreDataLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?filters=no-grouping`;
+                let params = `?consumption=energy`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExplore}${params}`,
+                        `${BaseUrl}${getExploreByBuilding}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -497,15 +338,15 @@ const Explore = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log('SSR API response => ', responseData);
                         setExploreTableData(responseData);
+                        setParentFilter('by-building');
                         let data = responseData;
                         let exploreData = [];
                         data.forEach((record) => {
-                            if (record.eq_name !== null) {
+                            if (record.building_name !== null) {
                                 let recordToInsert = {
-                                    name: record.eq_name,
-                                    data: record.data,
+                                    name: record.building_name,
+                                    data: record.building_consumption,
                                 };
                                 exploreData.push(recordToInsert);
                             }
@@ -516,17 +357,90 @@ const Explore = () => {
                                 data: exploreData[0].data,
                             },
                         ]);
+                        setIsExploreDataLoading(false);
                     });
-                const duration = performance.now() - start;
-                // console.log('fetching time ', duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
             }
         };
 
+        const exploreFilterDataFetch = async () => {
+            if (exploreBldId === 'portfolio') {
+                return;
+            }
+            try {
+                setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?consumption=energy&building_id=${exploreBldId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreByEquipment}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setActiveExploreOpt({ value: 'by-equipment', label: 'By Equipment' });
+                        setExploreTableData([]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                        setParentFilter('by-equipment');
+                        let responseData = res.data;
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setPeakPower(responseData[0].peak_power.now);
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.equipment_name !== null) {
+                                let recordToInsert = {
+                                    name: record.equipment_name,
+                                    data: record.equipment_consumption,
+                                };
+                                exploreData.push(recordToInsert);
+                            }
+                        });
+                        setSeriesData(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                        setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
+            }
+            // BuildingStore.update((s) => {
+            //     s.BldgId = childFilter.building_id;
+            //     s.BldgName = childFilter.building_name;
+            // });
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building View',
+                        path: '/explore/page',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+        };
+
+        exploreFilterDataFetch();
         exploreDataFetch();
-    }, []);
+    }, [exploreBldId]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -538,74 +452,93 @@ const Explore = () => {
         window.scroll(0, 0);
 
         const exploreFilterDataFetch = async () => {
-            if (counter === 2) {
-                setShowEquipmentChart(true);
-                console.log(childFilter);
-                setEquipmentData(childFilter);
-            } else {
-                try {
-                    const start = performance.now();
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        // 'user-auth': '628f3144b712934f578be895',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                    let params = `?filters=${childFilter.parent}&filter_id=${childFilter.eq_id}`;
-                    await axios
-                        .post(
-                            `${BaseUrl}${getExplore}${params}`,
-                            {
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
-                            },
-                            { headers }
-                        )
-                        .then((res) => {
-                            setExploreTableData([]);
-                            setSeriesData([]);
-                            setSeriesLineData([]);
-                            let responseData = res.data;
-                            // console.log('SSR API response => ', responseData);
-                            setExploreTableData(responseData);
-                            let data = responseData;
-                            let exploreData = [];
-                            data.forEach((record) => {
-                                if (record.eq_name !== null) {
-                                    let recordToInsert = {
-                                        name: record.eq_name,
-                                        data: record.data,
-                                    };
-                                    exploreData.push(recordToInsert);
-                                }
-                            });
-                            // console.log('SSR Customized exploreData => ', exploreData);
-                            setCounter(counter + 1);
-                            // console.log('Counter ', counter + 1);
-                            setSeriesData(exploreData);
-                            setSeriesLineData([
-                                {
-                                    data: exploreData[0].data,
-                                },
-                            ]);
-                            if (counter + 1 === 1) {
-                                setSecActive(childFilter);
+            console.log(childFilter);
+            // if (counter === 2) {
+            //     setShowEquipmentChart(true);
+            //     console.log(childFilter);
+            //     setEquipmentData(childFilter);
+            // } else {
+            localStorage.setItem('explorer', true);
+
+            console.log(ChildFilterId);
+            console.log(ChildFilterName);
+            // ComponentStore.update((s) => {
+            //     s.parent = 'explore';
+            // });
+            try {
+                setIsExploreDataLoading(true);
+                const start = performance.now();
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?consumption=energy&building_id=${childFilter.building_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreByEquipment}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setActiveExploreOpt({ value: 'by-equipment', label: 'By Equipment' });
+                        setExploreTableData([]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                        setParentFilter('by-equipment');
+                        let responseData = res.data;
+                        console.log('SSR API response => ', responseData);
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setPeakPower(responseData[0].peak_power.now);
+                        // setCounter(counter+1);
+                        // console.log(counter+1);
+                        setExploreTableData(responseData);
+                        let data = responseData;
+                        let exploreData = [];
+                        data.forEach((record) => {
+                            if (record.equipment_name !== null) {
+                                let recordToInsert = {
+                                    name: record.equipment_name,
+                                    data: record.equipment_consumption,
+                                };
+                                exploreData.push(recordToInsert);
                             }
-                            if (counter + 1 === 2) {
-                                setThirdActive(childFilter);
-                            }
-                            let newObj = childFilter;
-                            newObj.parent = 'equipment_type';
-                            setChildFilter(newObj);
-                            setParentFilter(newObj.parent);
-                            const duration = performance.now() - start;
-                            // console.log('fetching time ', duration);
                         });
-                } catch (error) {
-                    console.log(error);
-                    console.log('Failed to fetch Explore Data');
-                }
+                        // console.log('SSR Customized exploreData => ', exploreData);
+                        setSeriesData(exploreData);
+                        console.log(exploreData);
+                        setSeriesLineData([
+                            {
+                                data: exploreData[0].data,
+                            },
+                        ]);
+                        setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
             }
+            console.log(childFilter);
+            BuildingStore.update((s) => {
+                s.BldgId = childFilter.building_id;
+                s.BldgName = childFilter.building_name;
+            });
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building View',
+                        path: '/explore/page',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            //     }
         };
 
         exploreFilterDataFetch();
@@ -615,8 +548,11 @@ const Explore = () => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
+            //startCustomDate.setDate(startCustomDate.getDate() - date-1);
             startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate() - 1);
+            console.log(date);
+            if (date !== '0') endCustomDate.setDate(endCustomDate.getDate() - 1);
+
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
@@ -679,7 +615,7 @@ const Explore = () => {
                     </div>
                 ) : (
                     <div>
-                        <Select
+                        {/* <Select
                             className="react-select explorer-select-style ml-4"
                             onChange={(e) => {
                                 setActiveExploreOpt(e);
@@ -694,7 +630,7 @@ const Explore = () => {
                                 };
                             })}
                             defaultValue={exploreOpts[0]}
-                        />
+                        /> */}
                     </div>
                 )}
 
@@ -745,21 +681,50 @@ const Explore = () => {
                     </div>
                 </div>
             </Row>
-            <EquipmentChartModel
-                showChart={showEquipmentChart}
+
+            <ViewEquipModal
+                showEquipmentChart={showEquipmentChart}
+                handleChartOpen={handleChartOpen}
                 handleChartClose={handleChartClose}
-                sensorData={equipmentData}
-                showWindow={"metrics"}
+                equipmentFilter={equipmentFilter}
+                showWindow={'metrics'}
             />
             {/* Explore Body  */}
-            {activeExploreOpt.value === 'no-grouping' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+            {activeExploreOpt.value === 'by-building' && (
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
+                    <Row className="mt-2">
+                        <Col xl={3}>
+                            <div className="input-group rounded ml-4">
+                                <input
+                                    type="search"
+                                    className="form-control rounded"
+                                    placeholder="Search"
+                                    aria-label="Search"
+                                    aria-describedby="search-addon"
+                                />
+                                <span className="input-group-text border-0" id="search-addon">
+                                    <Search className="icon-sm" />
+                                </span>
+                            </div>
+                        </Col>
+                        <Col xl={9}>
+                            <button type="button" className="btn btn-white d-inline ml-2">
+                                <i className="uil uil-plus mr-1"></i>Add Filter
+                            </button>
+                        </Col>
+                    </Row>
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -769,43 +734,62 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                topEnergyConsumption={topEnergyConsumption}
+                                topPeakPower={topPeakPower}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
-            {activeExploreOpt.value === 'enduses' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+            {activeExploreOpt.value === 'by-equipment' && (
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
                                 exploreTableData={exploreTableData}
                                 activeExploreOpt={activeExploreOpt}
-                                childFilter={childFilter}
-                                setChildFilter={setChildFilter}
+                                equipmentFilter={equipmentFilter}
+                                setEquipmentFilter={setEquipmentFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'equipment_type' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
+
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -815,20 +799,28 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'floor' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -838,20 +830,28 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'location' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -861,20 +861,28 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'location-type' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -884,10 +892,12 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
         </>
     );

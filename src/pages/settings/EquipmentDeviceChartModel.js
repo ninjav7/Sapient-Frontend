@@ -33,6 +33,7 @@ import { result } from 'lodash';
 const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equipData,equipmentTypeData,endUse,fetchEquipmentData, deviceType,locationData }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    console.log(equipData);
     
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -124,19 +125,19 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
     const exploreDataFetch = async () => {
         try {
             console.log(sensorData.length)
-            if (sensorData.id === undefined || sensorData.length===0) {
+            if (equipData.equipments_id === undefined ) {
                 return;
-            }
+             }
             setIsSensorChartLoading(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&tz_info=${timeZone}`;
+            let params = `?equipment_id=${equipData.equipments_id}&consumption=${selectedConsumption}`;
             await axios
                 .post(
-                    `${BaseUrl}${sensorGraphData}${params}`,
+                    `${BaseUrl}${equipmentGraphData}${params}`,
                     {
                         date_from: dateFormatHandler(startDate),
                         date_to: dateFormatHandler(endDate),
@@ -236,6 +237,7 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
         }
         if(showWindow==="metrics")
         setShowTab("metrics");
+        //exploreDataFetch();
     }, []);
 
     const generateDayWiseTimeSeries = (baseval, count, yrange) => {
@@ -472,12 +474,14 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
         console.log(equipData!==null?equipData.device_type:"")
         if(equipData!==null){
         if(equipData.device_type!=="passive"){
-            fetchActiveDeviceSensorData();
+           // fetchActiveDeviceSensorData();
         }
+       // exploreDataFetch();
     }
     }, [equipData]);
     var result=[];
-        if(equipData!==null){
+        if(equipData!==null && equipData!==undefined){
+            if(equipmentTypeData!==undefined)
             result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
             // var x=document.getElementById('endUsePop');
             // console.log(x);
