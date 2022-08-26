@@ -1,31 +1,39 @@
-import React,{useEffect} from 'react';
+import React, { useEffect } from 'react';
 import BuildingSwitcher from './BuildingSwitcher';
-import { ComponentStore } from '../../store/ComponentStore';
+import ExploreBuildingSwitcher from './ExploreBuildingSwitcher';
+import { Link, useLocation } from 'react-router-dom';
 import '../style.css';
-import './PageTracker.scss'
+import './PageTracker.scss';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import Breadcrumbs from './Breadcrumbs';
-import { Redirect, Link, useLocation, useHistory } from 'react-router-dom';
-
 
 const PageTracker = () => {
-    const currentParentRoute = ComponentStore.useState((s) => s.parent);
+    const exploreBldId = ExploreBuildingStore.useState((s) => s.exploreBldId);
+    const exploreBldName = ExploreBuildingStore.useState((s) => s.exploreBldName);
     const location = useLocation();
-    let history = useHistory();
-    useEffect(()=>{
-        // console.log(currentParentRoute);
-        // console.log(location);
-        // console.log(history);
-        // if(location.pathname==='/explore/page'){
-        //     window.location.reload();
-        // }
-    },[])
+
+    useEffect(() => {
+        console.log('SSR exploreBldId => ', exploreBldId);
+        console.log('SSR exploreBldName => ', exploreBldName);
+    });
+
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
-                <>
-                    <BuildingSwitcher />
-                    <div className="vl"></div>
-                </>
+                {location.pathname === '/explore/page' && (
+                    <>
+                        <ExploreBuildingSwitcher />
+                        <div className="vl"></div>
+                    </>
+                )}
+
+                {location.pathname !== '/explore/page' && (
+                    <>
+                        <BuildingSwitcher />
+                        <div className="vl"></div>
+                    </>
+                )}
+
                 <div className="route-tracker">
                     <Breadcrumbs />
                 </div>

@@ -27,6 +27,7 @@ import {
     updateEquipment,
     listSensor,
     sensorGraphData,
+    getExploreEquipmentYTDUsage,
 } from '../../services/Network';
 import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
@@ -35,14 +36,6 @@ import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-s
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from 'react-router-dom';
-import {
-    generalEquipments,
-    getLocation,
-    equipmentType,
-    createEquipment,
-    getEndUseId,
-    searchEquipment,
-} from '../../services/Network';
 import { ComponentStore } from '../../store/ComponentStore';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
@@ -621,11 +614,9 @@ const ViewEquipModal = ({
                     .then((res) => {
                         let response = res.data;
                         let data = response.data;
-                        setTopConsumption(data.YTD_DATA[0].ytd.ytd);
-                        setPeak(data.YTD_DATA[0].ytd_peak.energy);
                         let exploreData = [];
                         let recordToInsert = {
-                            data: data.GRAPH,
+                            data: data,
                             name: 'AHUs',
                         };
                         exploreData.push(recordToInsert);
@@ -654,7 +645,39 @@ const ViewEquipModal = ({
             });
             //     }
         };
+        const fetchEquipmentYTDUsageData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?equipment_id=${equipmentFilter?.equipments_id}&consumption=energy`;
+
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res.data;
+                        let data = response.data;
+                        setTopConsumption(data[0].ytd.ytd);
+                        setPeak(data[0].ytd_peak.energy);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+            }
+        };
+
         fetchEquipmentChart();
+        fetchEquipmentYTDUsageData();
     }, [equipmentFilter]);
 
     return (
@@ -738,8 +761,9 @@ const ViewEquipModal = ({
                         <Col lg={9}>
                             <div>
                                 <span className="heading-style">
-                                    {/* {equipData !== null ? equipData?.equipments_type : ''} */}
-                                    Un labled
+                                    {localStorage.getItem('exploreEquipName') === ''
+                                        ? '-'
+                                        : localStorage.getItem('exploreEquipName')}
                                 </span>
                             </div>
                         </Col>

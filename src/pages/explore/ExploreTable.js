@@ -5,6 +5,7 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { Line } from 'rc-progress';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ChildFilterStore } from '../../store/ChildFilterStore';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 
 const ExploreTable = ({
     exploreTableData,
@@ -15,7 +16,7 @@ const ExploreTable = ({
     setParentFilter,
     topEnergyConsumption,
     topPeakPower,
-    equipmmentFilter,
+    equipmentFilter,
     setEquipmentFilter,
     isExploreDataLoading,
     handleChartOpen,
@@ -29,6 +30,10 @@ const ExploreTable = ({
         ChildFilterStore.update((s) => {
             s.Building_id = id;
             s.Building_name = name;
+        });
+        ExploreBuildingStore.update((s) => {
+            s.exploreBldId = id;
+            s.exploreBldName = name;
         });
     };
 
@@ -132,9 +137,15 @@ const ExploreTable = ({
                                                                     equipments_id: record?.equipment_id,
                                                                     equipments_name: record?.equipment_name,
                                                                 });
+                                                                localStorage.setItem(
+                                                                    'exploreEquipName',
+                                                                    record?.equipment_name
+                                                                );
                                                                 handleChartOpen();
                                                             }}>
-                                                            {record?.equipment_name}
+                                                            {record?.equipment_name === ''
+                                                                ? '-'
+                                                                : record?.equipment_name}
                                                         </a>
                                                     </th>
                                                 )}
