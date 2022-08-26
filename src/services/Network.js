@@ -112,7 +112,6 @@ export const getExplore = '/api/explorer/chart';
 export const getExploreByBuilding = '/api/explorer/chart/by_building';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 
-
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { List } from 'react-feather';
-import { Link, useLocation,useHistory } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
 import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
@@ -21,15 +21,18 @@ import { faAngleRight } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
+import { Spinner } from 'reactstrap';
 import './style.css';
 import { ChildFilterStore } from '../../store/ChildFilterStore';
 
-
 const Explore = () => {
     const [parentFilter, setParentFilter] = useState('');
+
+    const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
+
     const currentParentRoute = ComponentStore.useState((s) => s.parent);
-    const ChildFilterId = ChildFilterStore.useState((s)=>s.Building_id);
-    const ChildFilterName = ChildFilterStore.useState((s)=>s.Building_name);
+    const ChildFilterId = ChildFilterStore.useState((s) => s.Building_id);
+    const ChildFilterName = ChildFilterStore.useState((s) => s.Building_name);
     const location = useLocation();
     let history = useHistory();
 
@@ -71,9 +74,7 @@ const Explore = () => {
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
 
-    const [exploreOpts, setExploreOpts] = useState([
-        { value: 'by-building', label: 'By Building' },
-    ]);
+    const [exploreOpts, setExploreOpts] = useState([{ value: 'by-building', label: 'By Building' }]);
     const [activeExploreOpt, setActiveExploreOpt] = useState(exploreOpts[0]);
 
     const [exploreSecondLvlOpts, setExploreSecondLvlOpts] = useState([]);
@@ -106,15 +107,15 @@ const Explore = () => {
                 enabled: false,
             },
         },
-        legend:{
-            position:'top',
+        legend: {
+            position: 'top',
             horizontalAlign: 'left',
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
             itemMargin: {
                 horizontal: 30,
-                vertical: 20
+                vertical: 20,
             },
         },
         colors: ['#546E7A'],
@@ -409,7 +410,7 @@ const Explore = () => {
             });
         };
         updateBreadcrumbStore();
-        localStorage.removeItem("explorer");
+        localStorage.removeItem('explorer');
         // console.log(currentParentRoute);
         // console.log(location);
         // console.log(ComponentStore.getRawState())
@@ -418,7 +419,6 @@ const Explore = () => {
         //     history.push('/explore/page');
         //     window.location.reload();
         // }
-
     }, []);
 
     useEffect(() => {
@@ -430,10 +430,10 @@ const Explore = () => {
         }
         const exploreDataFetch = async () => {
             try {
+                setIsExploreDataLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?consumption=energy`;
@@ -464,8 +464,8 @@ const Explore = () => {
                         // setExploreSecondLvlOpts(childExploreList);
                         // console.log('childExploreList => ', childExploreList);
                         console.log('SSR API response => ', responseData);
-                        setTopEnergyConsumption(responseData[0].energy_consumption.now)
-                        setPeakPower(responseData[0].peak_power.now)
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setPeakPower(responseData[0].peak_power.now);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -488,10 +488,12 @@ const Explore = () => {
                                 data: exploreData[0].data,
                             },
                         ]);
+                        setIsExploreDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
             }
         };
 
@@ -512,11 +514,11 @@ const Explore = () => {
         }
         const exploreDataFetch = async () => {
             try {
+                setIsExploreDataLoading(true);
                 const start = performance.now();
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?consumption=energy`;
@@ -550,12 +552,14 @@ const Explore = () => {
                                 data: exploreData[0].data,
                             },
                         ]);
+                        setIsExploreDataLoading(false);
                     });
                 const duration = performance.now() - start;
                 // console.log('fetching time ', duration);
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
             }
         };
 
@@ -578,42 +582,42 @@ const Explore = () => {
             //     console.log(childFilter);
             //     setEquipmentData(childFilter);
             // } else {
-                localStorage.setItem("explorer",true);
-               
-                console.log(ChildFilterId);
-                console.log(ChildFilterName);
-                // ComponentStore.update((s) => {
-                //     s.parent = 'explore';
-                // });
-                try {
-                    const start = performance.now();
-                    let headers = {
-                        'Content-Type': 'application/json',
-                        accept: 'application/json',
-                        // 'user-auth': '628f3144b712934f578be895',
-                        Authorization: `Bearer ${userdata.token}`,
-                    };
-                  
-                    let params = `?consumption=energy&building_id=${childFilter.building_id}`;
-                    await axios
-                        .post(
-                            `${BaseUrl}${getExploreByEquipment}${params}`,
-                            {
-                                date_from: dateFormatHandler(startDate),
-                                date_to: dateFormatHandler(endDate),
-                            },
-                            { headers }
-                        )
-                        .then((res) => {
-                            setActiveExploreOpt({value: 'by-equipment', label: 'By Equipment'})
-                            setExploreTableData([]);
-                            setSeriesData([]);
-                            setSeriesLineData([]);
-                            setParentFilter('by-equipment');
-                            let responseData = res.data;
-                            console.log('SSR API response => ', responseData);
-                            setTopEnergyConsumption(responseData[0].energy_consumption.now)
-                        setPeakPower(responseData[0].peak_power.now)
+            localStorage.setItem('explorer', true);
+
+            console.log(ChildFilterId);
+            console.log(ChildFilterName);
+            // ComponentStore.update((s) => {
+            //     s.parent = 'explore';
+            // });
+            try {
+                setIsExploreDataLoading(true);
+                const start = performance.now();
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+
+                let params = `?consumption=energy&building_id=${childFilter.building_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreByEquipment}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setActiveExploreOpt({ value: 'by-equipment', label: 'By Equipment' });
+                        setExploreTableData([]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
+                        setParentFilter('by-equipment');
+                        let responseData = res.data;
+                        console.log('SSR API response => ', responseData);
+                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setPeakPower(responseData[0].peak_power.now);
                         // setCounter(counter+1);
                         // console.log(counter+1);
                         setExploreTableData(responseData);
@@ -636,48 +640,47 @@ const Explore = () => {
                                 data: exploreData[0].data,
                             },
                         ]);
-
-                        });
-                } catch (error) {
-                    console.log(error);
-                    console.log('Failed to fetch Explore Data');
-                }
-                console.log(childFilter)
-                BuildingStore.update((s) => {
-                    s.BldgId = childFilter.building_id;
-                    s.BldgName = childFilter.building_name;
-                });
-                BreadcrumbStore.update((bs) => {
-                    let newList = [
-                        {
-                            label: 'Building View',
-                            path: '/explore/page',
-                            active: true,
-                        },
-                    ];
-                    bs.items = newList;
-                });
-        //     }
-         };
+                        setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
+            }
+            console.log(childFilter);
+            BuildingStore.update((s) => {
+                s.BldgId = childFilter.building_id;
+                s.BldgName = childFilter.building_name;
+            });
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Building View',
+                        path: '/explore/page',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            //     }
+        };
 
         exploreFilterDataFetch();
     }, [childFilter]);
-    useEffect(()=>{
-            console.log(equipmentFilter);
-            if(Object.keys(equipmentFilter).length!==0)
-                setShowEquipmentChart(true);
-    },[equipmentFilter])
+    useEffect(() => {
+        console.log(equipmentFilter);
+        if (Object.keys(equipmentFilter).length !== 0) setShowEquipmentChart(true);
+    }, [equipmentFilter]);
 
     useEffect(() => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
             let startCustomDate = new Date();
-                //startCustomDate.setDate(startCustomDate.getDate() - date-1);    
-                startCustomDate.setDate(startCustomDate.getDate() - date);
-            console.log(date)
-            if(date!=='0')
-            endCustomDate.setDate(endCustomDate.getDate() - 1);    
-            
+            //startCustomDate.setDate(startCustomDate.getDate() - date-1);
+            startCustomDate.setDate(startCustomDate.getDate() - date);
+            console.log(date);
+            if (date !== '0') endCustomDate.setDate(endCustomDate.getDate() - 1);
+
             setDateRange([startCustomDate, endCustomDate]);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
@@ -740,7 +743,7 @@ const Explore = () => {
                     </div>
                 ) : (
                     <div>
-                        <Select
+                        {/* <Select
                             className="react-select explorer-select-style ml-4"
                             onChange={(e) => {
                                 setActiveExploreOpt(e);
@@ -755,7 +758,7 @@ const Explore = () => {
                                 };
                             })}
                             defaultValue={exploreOpts[0]}
-                        />
+                        /> */}
                     </div>
                 )}
 
@@ -810,40 +813,45 @@ const Explore = () => {
                 showChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 equipData={equipmentFilter}
-                showWindow={"metrics"}
+                showWindow={'metrics'}
             />
             {/* Explore Body  */}
             {activeExploreOpt.value === 'by-building' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
-                     <Row className="mt-2">
-                            <Col xl={3}>
-                                <div className="input-group rounded ml-4">
-                                    <input
-                                        type="search"
-                                        className="form-control rounded"
-                                        placeholder="Search"
-                                        aria-label="Search"
-                                        aria-describedby="search-addon"
-                                    />
-                                    <span className="input-group-text border-0" id="search-addon">
-                                        <Search className="icon-sm" />
-                                    </span>
-                                </div>
-                            </Col>
-                            <Col xl={9}>
-                                <button type="button" className="btn btn-white d-inline ml-2">
-                                    <i className="uil uil-plus mr-1"></i>Add Filter
-                                </button>
-                            </Col>
-                        </Row>
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
+                    <Row className="mt-2">
+                        <Col xl={3}>
+                            <div className="input-group rounded ml-4">
+                                <input
+                                    type="search"
+                                    className="form-control rounded"
+                                    placeholder="Search"
+                                    aria-label="Search"
+                                    aria-describedby="search-addon"
+                                />
+                                <span className="input-group-text border-0" id="search-addon">
+                                    <Search className="icon-sm" />
+                                </span>
+                            </div>
+                        </Col>
+                        <Col xl={9}>
+                            <button type="button" className="btn btn-white d-inline ml-2">
+                                <i className="uil uil-plus mr-1"></i>Add Filter
+                            </button>
+                        </Col>
+                    </Row>
                     <Row>
-                       
                         <Col lg={12} className="ml-2">
                             <ExploreTable
                                 exploreTableData={exploreTableData}
@@ -854,20 +862,27 @@ const Explore = () => {
                                 setParentFilter={setParentFilter}
                                 topEnergyConsumption={topEnergyConsumption}
                                 topPeakPower={topPeakPower}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'by-equipment' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -877,20 +892,28 @@ const Explore = () => {
                                 setEquipmentFilter={setEquipmentFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'equipment_type' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
+
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -900,20 +923,27 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'floor' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -923,20 +953,27 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'location' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -946,20 +983,27 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
 
             {activeExploreOpt.value === 'location-type' && (
-                <>
-                    <BrushChart
-                        seriesData={seriesData}
-                        optionsData={optionsData}
-                        seriesLineData={seriesLineData}
-                        optionsLineData={optionsLineData}
-                    />
+                <div className="explore-content-style">
+                    {isExploreDataLoading ? (
+                        <div className="loader-center-style" style={{ height: '400px' }}>
+                            <Spinner className="m-2" color={'primary'} />
+                        </div>
+                    ) : (
+                        <BrushChart
+                            seriesData={seriesData}
+                            optionsData={optionsData}
+                            seriesLineData={seriesLineData}
+                            optionsLineData={optionsLineData}
+                        />
+                    )}
                     <Row>
                         <Col lg={12} className="ml-2">
                             <ExploreTable
@@ -969,10 +1013,11 @@ const Explore = () => {
                                 setChildFilter={setChildFilter}
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
+                                isExploreDataLoading={isExploreDataLoading}
                             />
                         </Col>
                     </Row>
-                </>
+                </div>
             )}
         </>
     );
