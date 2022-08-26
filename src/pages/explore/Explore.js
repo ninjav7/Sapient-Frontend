@@ -3,7 +3,7 @@ import { List } from 'react-feather';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import Select from 'react-select';
-import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
+import ViewEquipModal from './ViewEquipModal';
 import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -13,7 +13,13 @@ import BrushChart from '../charts/BrushChart';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import ExploreTable from './ExploreTable';
 import { MoreVertical } from 'react-feather';
-import { BaseUrl, getExplore, getExploreByBuilding, getExploreByEquipment } from '../../services/Network';
+import {
+    BaseUrl,
+    getExplore,
+    getExploreByBuilding,
+    getExploreByEquipment,
+    equipmentGraphData,
+} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,8 +28,8 @@ import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { Spinner } from 'reactstrap';
-import './style.css';
 import { ChildFilterStore } from '../../store/ChildFilterStore';
+import './style.css';
 
 const Explore = () => {
     const [parentFilter, setParentFilter] = useState('');
@@ -84,7 +90,6 @@ const Explore = () => {
     const [activeThirdLvlOpt, setActiveThirdLvlOpt] = useState(exploreThirdLvlOpts[0]);
     const [counter, setCounter] = useState(0);
     const [showChart, setShowChart] = useState(false);
-    const handleChartClose = () => setShowEquipmentChart(false);
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)' },
@@ -184,6 +189,10 @@ const Explore = () => {
     const [secActive, setSecActive] = useState('');
     const [thirdActive, setThirdActive] = useState('');
 
+    const [topConsumption, setTopConsumption] = useState('');
+    const [peak, setPeak] = useState('');
+    const [deviceData, setDeviceData] = useState([]);
+
     // New Approach
     const [currentFilterLevel, setCurrentFilterLevel] = useState('first');
 
@@ -274,7 +283,11 @@ const Explore = () => {
             type: 'datetime',
         },
     });
+
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
+    const handleChartOpen = () => setShowEquipmentChart(true);
+    const handleChartClose = () => setShowEquipmentChart(false);
+
     const [firstLevelLineData, setFirstLevelLineData] = useState();
     const [firstLevelLineOpts, setFirstLevelLineOpts] = useState({
         chart: {
@@ -667,10 +680,6 @@ const Explore = () => {
 
         exploreFilterDataFetch();
     }, [childFilter]);
-    useEffect(() => {
-        console.log(equipmentFilter);
-        if (Object.keys(equipmentFilter).length !== 0) setShowEquipmentChart(true);
-    }, [equipmentFilter]);
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -809,10 +818,12 @@ const Explore = () => {
                     </div>
                 </div>
             </Row>
-            <EquipmentDeviceChartModel
-                showChart={showEquipmentChart}
+
+            <ViewEquipModal
+                showEquipmentChart={showEquipmentChart}
+                handleChartOpen={handleChartOpen}
                 handleChartClose={handleChartClose}
-                equipData={equipmentFilter}
+                equipmentFilter={equipmentFilter}
                 showWindow={'metrics'}
             />
             {/* Explore Body  */}
@@ -863,6 +874,7 @@ const Explore = () => {
                                 topEnergyConsumption={topEnergyConsumption}
                                 topPeakPower={topPeakPower}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
@@ -893,6 +905,7 @@ const Explore = () => {
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
@@ -924,6 +937,7 @@ const Explore = () => {
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
@@ -954,6 +968,7 @@ const Explore = () => {
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
@@ -984,6 +999,7 @@ const Explore = () => {
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>
@@ -1014,6 +1030,7 @@ const Explore = () => {
                                 parentFilter={parentFilter}
                                 setParentFilter={setParentFilter}
                                 isExploreDataLoading={isExploreDataLoading}
+                                handleChartOpen={handleChartOpen}
                             />
                         </Col>
                     </Row>

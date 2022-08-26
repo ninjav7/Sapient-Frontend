@@ -18,6 +18,7 @@ const ExploreTable = ({
     equipmmentFilter,
     setEquipmentFilter,
     isExploreDataLoading,
+    handleChartOpen,
 }) => {
     console.log(topEnergyConsumption);
     const handleBuildingClicked = (id, name) => {
@@ -72,7 +73,7 @@ const ExploreTable = ({
                             <tbody>
                                 {!(exploreTableData.length === 0) &&
                                     exploreTableData.map((record, index) => {
-                                        if (record.eq_name === null) {
+                                        if (record?.eq_name === null) {
                                             return;
                                         }
                                         return (
@@ -84,12 +85,12 @@ const ExploreTable = ({
                                     className="building-name"
                                     onClick={() => {
                                         setChildFilter({
-                                            eq_id: record.eq_id,
-                                            eq_name: record.eq_name,
+                                            eq_id: record?.eq_id,
+                                            eq_name: record?.eq_name,
                                             parent: childFilter.parent,
                                         });
                                     }}>
-                                    {record.eq_name}
+                                    {record?.eq_name}
                                 </a>
                             </th>
                         ) : (
@@ -98,12 +99,12 @@ const ExploreTable = ({
                                     className="building-name"
                                     onClick={() => {
                                         setChildFilter({
-                                            eq_id: record.eq_id,
-                                            eq_name: record.eq_name,
+                                            eq_id: record?.eq_id,
+                                            eq_name: record?.eq_name,
                                             parent: parentFilter,
                                         });
                                     }}>
-                                    {record.eq_name}
+                                    {record?.eq_name}
                                 </a>
                             </th>
                         ))} */}
@@ -114,11 +115,11 @@ const ExploreTable = ({
                                                             className="building-name"
                                                             onClick={(e) => {
                                                                 handleBuildingClicked(
-                                                                    record.building_id,
-                                                                    record.building_name
+                                                                    record?.building_id,
+                                                                    record?.building_name
                                                                 );
                                                             }}>
-                                                            {record.building_name}
+                                                            {record?.building_name}
                                                         </a>
                                                     </th>
                                                 )}
@@ -128,21 +129,22 @@ const ExploreTable = ({
                                                             className="building-name"
                                                             onClick={() => {
                                                                 setEquipmentFilter({
-                                                                    equipments_id: record.equipment_id,
-                                                                    equipments_name: record.equipment_name,
+                                                                    equipments_id: record?.equipment_id,
+                                                                    equipments_name: record?.equipment_name,
                                                                 });
+                                                                handleChartOpen();
                                                             }}>
-                                                            {record.equipment_name}
+                                                            {record?.equipment_name}
                                                         </a>
                                                     </th>
                                                 )}
 
                                                 <td className="table-content-style">
-                                                    {(record.energy_consumption.now / 1000).toFixed(5)} kWh / sq. ft.sq.
-                                                    ft.
+                                                    {(record?.energy_consumption.now / 1000).toFixed(5)} kWh / sq.
+                                                    ft.sq. ft.
                                                     <br />
                                                     <div style={{ width: '100%', display: 'inline-block' }}>
-                                                        {index === 0 && record.energy_consumption.now === 0 && (
+                                                        {index === 0 && record?.energy_consumption.now === 0 && (
                                                             <Line
                                                                 percent={0}
                                                                 strokeWidth="3"
@@ -151,10 +153,10 @@ const ExploreTable = ({
                                                                 strokeLinecap="round"
                                                             />
                                                         )}
-                                                        {index === 0 && record.energy_consumption.now > 0 && (
+                                                        {index === 0 && record?.energy_consumption.now > 0 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -167,7 +169,7 @@ const ExploreTable = ({
                                                         {index === 1 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -180,7 +182,7 @@ const ExploreTable = ({
                                                         {index === 2 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -193,7 +195,7 @@ const ExploreTable = ({
                                                         {index === 3 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -206,7 +208,7 @@ const ExploreTable = ({
                                                         {index === 4 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -219,7 +221,7 @@ const ExploreTable = ({
                                                         {index === 5 && (
                                                             <Line
                                                                 percent={parseFloat(
-                                                                    (record.energy_consumption.now /
+                                                                    (record?.energy_consumption.now /
                                                                         topEnergyConsumption) *
                                                                         100
                                                                 ).toFixed(2)}
@@ -243,15 +245,16 @@ const ExploreTable = ({
                         </div> */}
                                                 </td>
                                                 <td>
-                                                    {record.energy_consumption.now <= record.energy_consumption.old && (
+                                                    {record?.energy_consumption.now <=
+                                                        record?.energy_consumption.old && (
                                                         <button
                                                             className="button-success text-success btn-font-style"
                                                             style={{ width: 'auto' }}>
                                                             <i className="uil uil-chart-down">
                                                                 <strong>
                                                                     {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
+                                                                        record?.energy_consumption.now,
+                                                                        record?.energy_consumption.old
                                                                     )}
                                                                     %
                                                                 </strong>
@@ -264,23 +267,24 @@ const ExploreTable = ({
                                                         //     <i className="uil uil-chart-down">
                                                         //         <strong>
                                                         //             {percentageHandler(
-                                                        //                 record.energy_consumption.now,
-                                                        //                 record.energy_consumption.old
+                                                        //                 record?.energy_consumption.now,
+                                                        //                 record?.energy_consumption.old
                                                         //             )}{' '}
                                                         //             %
                                                         //         </strong>
                                                         //     </i>
                                                         // </button>
                                                     )}
-                                                    {record.energy_consumption.now > record.energy_consumption.old && (
+                                                    {record?.energy_consumption.now >
+                                                        record?.energy_consumption.old && (
                                                         <button
                                                             className="button-danger text-danger btn-font-style"
                                                             style={{ width: 'auto', marginBottom: '4px' }}>
                                                             <i className="uil uil-arrow-growth">
                                                                 <strong>
                                                                     {percentageHandler(
-                                                                        record.energy_consumption.now,
-                                                                        record.energy_consumption.old
+                                                                        record?.energy_consumption.now,
+                                                                        record?.energy_consumption.old
                                                                     )}
                                                                     %
                                                                 </strong>
@@ -292,8 +296,8 @@ const ExploreTable = ({
                                                         //     <i className="uil uil-arrow-growth">
                                                         //         <strong>
                                                         //             {percentageHandler(
-                                                        //                 record.energy_consumption.now,
-                                                        //                 record.energy_consumption.old
+                                                        //                 record?.energy_consumption.now,
+                                                        //                 record?.energy_consumption.old
                                                         //             )}{' '}
                                                         //             %
                                                         //         </strong>
@@ -302,10 +306,10 @@ const ExploreTable = ({
                                                     )}
                                                 </td>
                                                 {/* <td className="table-content-style">
-                        {record.peak_power.now.toFixed(2)} kWh / sq. ft.sq. ft.
+                        {record?.peak_power.now.toFixed(2)} kWh / sq. ft.sq. ft.
                         <br />
                     <div style={{ width: '100%', display: 'inline-block' }}>
-                        {index === 0 && record.peak_power.now === 0 && (
+                        {index === 0 && record?.peak_power.now === 0 && (
                             <Line
                                 percent={0}
                                 strokeWidth="3"
@@ -314,10 +318,10 @@ const ExploreTable = ({
                                 strokeLinecap="round"
                             />
                         )}
-                        {index === 0 && record.peak_power.now > 0 && (
+                        {index === 0 && record?.peak_power.now > 0 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now / topPeakPower) * 100
+                                    (record?.peak_power.now / topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -328,7 +332,7 @@ const ExploreTable = ({
                         {index === 1 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now / topPeakPower) * 100
+                                    (record?.peak_power.now / topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -339,7 +343,7 @@ const ExploreTable = ({
                         {index === 2 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now / topPeakPower) * 100
+                                    (record?.peak_power.now / topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -350,7 +354,7 @@ const ExploreTable = ({
                         {index === 3 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now /topPeakPower) * 100
+                                    (record?.peak_power.now /topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -361,7 +365,7 @@ const ExploreTable = ({
                         {index === 4 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now / topPeakPower) * 100
+                                    (record?.peak_power.now / topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -372,7 +376,7 @@ const ExploreTable = ({
                         {index === 5 && (
                             <Line
                                 percent={parseFloat(
-                                    (record.peak_power.now /topPeakPower) * 100
+                                    (record?.peak_power.now /topPeakPower) * 100
                                 ).toFixed(2)}
                                 strokeWidth="3"
                                 trailWidth="3"
@@ -383,30 +387,30 @@ const ExploreTable = ({
                     </div>
                     </td> */}
                                                 {/* <td>
-                        {record.peak_power.now <= record.peak_power.old && (
+                        {record?.peak_power.now <= record?.peak_power.old && (
                             <button
                                 className="button-success text-success btn-font-style"
                                 style={{ width: '100px' }}>
                                 <i className="uil uil-chart-down">
                                     <strong>
                                         {percentageHandler(
-                                            record.peak_power.now,
-                                            record.peak_power.old
+                                            record?.peak_power.now,
+                                            record?.peak_power.old
                                         )}{' '}
                                         %
                                     </strong>
                                 </i>
                             </button>
                         )}
-                        {record.peak_power.now > record.peak_power.old && (
+                        {record?.peak_power.now > record?.peak_power.old && (
                             <button
                                 className="button-danger text-danger btn-font-style"
                                 style={{ width: '100px' }}>
                                 <i className="uil uil-arrow-growth">
                                     <strong>
                                         {percentageHandler(
-                                            record.peak_power.now,
-                                            record.peak_power.old
+                                            record?.peak_power.now,
+                                            record?.peak_power.old
                                         )}{' '}
                                         %
                                     </strong>
@@ -414,7 +418,7 @@ const ExploreTable = ({
                             </button>
                         )}
                     </td> */}
-                                                {/* <td className="">{record.location}</td> */}
+                                                {/* <td className="">{record?.location}</td> */}
                                             </tr>
                                         );
                                     })}
