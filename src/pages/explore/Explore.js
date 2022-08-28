@@ -200,7 +200,7 @@ const Explore = () => {
                 let newList = [
                     {
                         label: 'Portfolio Level',
-                        path: '/explore/page',
+                        path: '/explore/by-building',
                         active: true,
                     },
                 ];
@@ -217,7 +217,7 @@ const Explore = () => {
         // console.log(ComponentStore.getRawState())
         // let parentState=ComponentStore.getRawState()
         // if(parentState.parent==='explore'){
-        //     history.push('/explore/page');
+        //     history.push('/explore/by-building');
         //     window.location.reload();
         // }
     }, []);
@@ -430,7 +430,7 @@ const Explore = () => {
                 let newList = [
                     {
                         label: 'Building View',
-                        path: '/explore/page',
+                        path: '/explore/by-building',
                         active: true,
                     },
                 ];
@@ -532,7 +532,7 @@ const Explore = () => {
                 let newList = [
                     {
                         label: 'Building View',
-                        path: '/explore/page',
+                        path: '/explore/by-building',
                         active: true,
                     },
                 ];

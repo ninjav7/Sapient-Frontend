@@ -68,11 +68,19 @@ class HorizontalLayout extends Component {
                     )} */}
 
                     <div>
-                        {window.location.pathname!=="/explore/page"?(
-                        <div className="energy-side-nav">
-                            <SideNav />
-                        </div>):("")}
-                        <div className={window.location.pathname==="/explore/page"?"energy-page-content-full-screen":"energy-page-content"}>
+                        {window.location.pathname !== '/explore/by-building' ? (
+                            <div className="energy-side-nav">
+                                <SideNav />
+                            </div>
+                        ) : (
+                            ''
+                        )}
+                        <div
+                            className={
+                                window.location.pathname === '/explore/by-building'
+                                    ? 'energy-page-content-full-screen'
+                                    : 'energy-page-content'
+                            }>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>

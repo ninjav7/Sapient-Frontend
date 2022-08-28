@@ -137,7 +137,7 @@ const Header = (props) => {
                             <div className="float-right ml-2">
                                 <Link
                                     to={{
-                                        pathname: `/explore/page`,
+                                        pathname: `/explore/by-building`,
                                     }}>
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                         <i className="uil uil-pen mr-1"></i>Explore

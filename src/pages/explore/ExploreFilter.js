@@ -408,7 +408,7 @@ const Explore = () => {
                 let newList = [
                     {
                         label: 'Explore',
-                        path: '/explore/page',
+                        path: '/explore/by-building',
                         active: true,
                     },
                 ];

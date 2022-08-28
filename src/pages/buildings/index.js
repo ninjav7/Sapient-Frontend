@@ -1770,7 +1770,7 @@ const BuildingOverview = () => {
                                                         className="m-4">
                                                         <Link
                                                             to={{
-                                                                pathname: `/explore/page`,
+                                                                pathname: `/explore/by-building`,
                                                             }}>
                                                             <button
                                                                 type="button"

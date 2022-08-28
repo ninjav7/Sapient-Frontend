@@ -20,14 +20,14 @@ const PageTracker = () => {
     return (
         <React.Fragment>
             <div className="page-tracker-container energy-second-nav-custom">
-                {location.pathname === '/explore/page' && (
+                {location.pathname === '/explore/by-building' && (
                     <>
                         <ExploreBuildingSwitcher />
                         <div className="vl"></div>
                     </>
                 )}
 
-                {location.pathname !== '/explore/page' && (
+                {location.pathname !== '/explore/by-building' && (
                     <>
                         <BuildingSwitcher />
                         <div className="vl"></div>

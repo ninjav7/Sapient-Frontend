@@ -377,7 +377,7 @@ const Explore = () => {
                 let newList = [
                     {
                         label: 'Explore',
-                        path: '/explore/page',
+                        path: '/explore/by-building',
                         active: true,
                     },
                 ];
@@ -749,7 +749,7 @@ const Explore = () => {
                 showChart={showEquipmentChart}
                 handleChartClose={handleChartClose}
                 sensorData={equipmentData}
-                showWindow={"metrics"}
+                showWindow={'metrics'}
             />
             {/* Explore Body  */}
             {activeExploreOpt.value === 'no-grouping' && (
