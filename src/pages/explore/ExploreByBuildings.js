@@ -78,6 +78,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                    <input type="checkbox" className="mr-4" />
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -453,11 +454,12 @@ const ExploreByBuildings = () => {
                             }
                         });
                         setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
+                        setSeriesLineData(exploreData);
+                        // setSeriesLineData([
+                        //     {
+                        //         data: exploreData[0].data,
+                        //     },
+                        // ]);
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {

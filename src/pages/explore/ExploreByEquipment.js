@@ -16,6 +16,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
+import ApexCharts from 'apexcharts';
 import './style.css';
 
 const ExploreEquipmentTable = ({
@@ -26,6 +27,9 @@ const ExploreEquipmentTable = ({
     handleChartOpen,
     setEquipmentFilter,
 }) => {
+    const handleSelection=(e)=>{
+        console.log(e.target.value);
+    }
     return (
         <>
             <Card>
@@ -81,6 +85,7 @@ const ExploreEquipmentTable = ({
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                    <input type="checkbox" className="mr-4" id="equipselected" value={record?.equipment_name} onClick={(e)=>{handleSelection(e)}}/>
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -469,7 +474,7 @@ const ExploreByEquipment = () => {
                 // },
             },
         },
-        colors: ['#008FFB'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -485,6 +490,9 @@ const ExploreByEquipment = () => {
         },
         yaxis: {
             tickAmount: 2,
+        },
+        legend: {
+            show: false,
         },
     });
 
@@ -544,11 +552,12 @@ const ExploreByEquipment = () => {
                             }
                         });
                         setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
+                        setSeriesLineData(exploreData);
+                        // setSeriesLineData([
+                        //     {
+                        //         data: exploreData[0].data,
+                        //     },
+                        // ]);
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
