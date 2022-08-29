@@ -3,11 +3,12 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor, updateBreakers } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
 import { BreakersStore } from '../../../store/BreakersStore';
+import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import '../style.css';
 import './panel-style.css';
@@ -37,9 +38,13 @@ const BreakersComponent = ({ data, id }) => {
     const [isSensorDataFetchedForTriple, setIsSensorDataFetchedForTriple] = useState(false);
 
     const passiveDeviceData = BreakersStore.useState((s) => s.passiveDeviceData);
+    const totalPassiveDeviceCount = BreakersStore.useState((s) => s.totalPassiveDeviceCount);
     const equipmentData = BreakersStore.useState((s) => s.equipmentData);
     const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
     const isEditable = BreakersStore.useState((s) => s.isEditable);
+
+    const [passiveDevicePageNo, setPassiveDevicePageNo] = useState(1);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const fetchDeviceSensorData = async (deviceId) => {
         if (deviceId === null) {
@@ -427,6 +432,45 @@ const BreakersComponent = ({ data, id }) => {
         }
     }, [breakerObj]);
 
+    useEffect(() => {
+        const fetchPassiveDeviceData = async () => {
+            if (passiveDevicePageNo === 1) {
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&page_size=100&page_no=${passiveDevicePageNo}`;
+
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                    let responseData = res.data.data;
+
+                    let newArray = [...passiveDeviceData];
+                    responseData.forEach((record) => {
+                        let obj = {
+                            label: record.identifier,
+                            value: record.equipments_id,
+                        };
+                        newArray.push(obj);
+                    });
+                    BreakersStore.update((s) => {
+                        s.passiveDeviceData = newArray;
+                    });
+                    BreakersStore.update((s) => {
+                        s.totalPassiveDeviceCount = res?.data?.total_data;
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Passive devices');
+            }
+        };
+        fetchPassiveDeviceData();
+    }, [passiveDevicePageNo]);
+
     return (
         <React.Fragment>
             {/* Left Breaker Connection Point  */}
@@ -667,6 +711,10 @@ const BreakersComponent = ({ data, id }) => {
                                                         if (e.target.value === 'Select Device') {
                                                             return;
                                                         }
+                                                        if (e.target.value === 'show-more') {
+                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
+                                                            return;
+                                                        }
                                                         fetchDeviceSensorData(e.target.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.target.value);
                                                     }}
@@ -676,6 +724,9 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && <option value="">None</option>}
+                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
+                                                        <option value="show-more">Show More</option>
+                                                    )}
                                                 </Input>
                                             </Form.Group>
 
@@ -744,6 +795,10 @@ const BreakersComponent = ({ data, id }) => {
                                                         if (e.target.value === 'Select Device') {
                                                             return;
                                                         }
+                                                        if (e.target.value === 'show-more') {
+                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
+                                                            return;
+                                                        }
                                                         // fetchDeviceSensorData(e.target.value);
                                                         fetchSensorDataForSelectionOne(e.target.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.target.value);
@@ -760,6 +815,9 @@ const BreakersComponent = ({ data, id }) => {
                                                         return <option value={record.value}>{record.label}</option>;
                                                     })}
                                                     {breakerData.device_id !== '' && <option value="">None</option>}
+                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
+                                                        <option value="show-more">Show More</option>
+                                                    )}
                                                 </Input>
                                             </Form.Group>
 
@@ -823,6 +881,10 @@ const BreakersComponent = ({ data, id }) => {
                                                         if (e.target.value === 'Select Device') {
                                                             return;
                                                         }
+                                                        if (e.target.value === 'show-more') {
+                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
+                                                            return;
+                                                        }
                                                         fetchDeviceSensorDataForDouble(e.target.value);
                                                         handleDoubleBreakerChange(id, 'device_id', e.target.value);
                                                     }}
@@ -833,6 +895,9 @@ const BreakersComponent = ({ data, id }) => {
                                                     })}
                                                     {doubleBreakerData?.data?.device_id !== '' && (
                                                         <option value="">None</option>
+                                                    )}
+                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
+                                                        <option value="show-more">Show More</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>
@@ -902,6 +967,10 @@ const BreakersComponent = ({ data, id }) => {
                                                         if (e.target.value === 'Select Device') {
                                                             return;
                                                         }
+                                                        if (e.target.value === 'show-more') {
+                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
+                                                            return;
+                                                        }
                                                         fetchDeviceSensorDataForTriple(e.target.value);
                                                         handleTripleBreakerChange(id, 'device_id', e.target.value);
                                                     }}
@@ -912,6 +981,9 @@ const BreakersComponent = ({ data, id }) => {
                                                     })}
                                                     {tripleBreakerData?.data?.device_id !== '' && (
                                                         <option value="">None</option>
+                                                    )}
+                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
+                                                        <option value="show-more">Show More</option>
                                                     )}
                                                 </Input>
                                             </Form.Group>

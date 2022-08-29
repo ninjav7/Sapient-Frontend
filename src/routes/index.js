@@ -77,6 +77,7 @@ const PeakDemand = React.lazy(() => import('../pages/peakDemand'));
 
 // endUses
 const EndUses = React.lazy(() => import('../pages/endUses'));
+const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
 
 // timeOfDay
 const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
@@ -84,10 +85,6 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 // compareBuildings
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 
-// endUses - Sub-pages
-const HVACUsage = React.lazy(() => import('../pages/endUses/HVAC'));
-const LightingUsage = React.lazy(() => import('../pages/endUses/Lighting'));
-const PlugUsage = React.lazy(() => import('../pages/endUses/Plug'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
@@ -103,7 +100,9 @@ const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
 // explore
-const Explore = React.lazy(() => import('../pages/explore/Explore'));
+const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
+const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
+const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -349,14 +348,14 @@ const portfolioRoutes = {
         //     visibility: true,
         //     parent: 'buildings',
         // },
-        {
-            path: '/energy/end-uses/:bldgId',
-            name: 'End Uses',
-            component: EndUses,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
+        // {
+        //     path: '/energy/end-uses/:bldgId',
+        //     name: 'End Uses',
+        //     component: EndUses,
+        //     route: PrivateRoute,
+        //     visibility: true,
+        //     parent: 'buildings',
+        // },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
@@ -366,25 +365,19 @@ const portfolioRoutes = {
             parent: 'buildings',
         },
         {
-            path: '/energy/hvac/:bldgId',
-            name: 'HVAC Usage',
-            component: HVACUsage,
+            path: '/energy/end-uses/:endUseType/:bldgId',
+            name: 'EndUseType',
+            component: EndUseType,
             route: PrivateRoute,
             visibility: false,
         },
         {
-            path: '/energy/lighting/:bldgId',
-            name: 'Lighting Usage',
-            component: LightingUsage,
+            path: '/energy/end-uses/:bldgId',
+            name: 'End Uses',
+            component: EndUses,
             route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/plug/:bldgId',
-            name: 'Plug Usage',
-            component: PlugUsage,
-            route: PrivateRoute,
-            visibility: false,
+            visibility: true,
+            parent: 'buildings',
         },
         {
             path: '/energy/building-peak-explore/:bldgId',
@@ -571,13 +564,28 @@ const settingsRoutes = {
 };
 
 const exploreRoutes = {
+    path: '/explore-page/by-buildings',
     name: 'Explore',
-    path: '/explore/page',
-    component: Explore,
-    route: PrivateRoute,
     visibility: true,
+    children: [
+        {
+            path: '/explore-page/by-buildings',
+            name: 'Explore by Building',
+            component: ExploreByBuildings,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: true,
+        },
+        {
+            path: '/explore-page/by-equipment/:bldgId',
+            name: 'Explore by Equipment',
+            component: ExploreByEquipment,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: true,
+        },
+    ],
     icon: FeatherIcon.PieChart,
-    parent: 'explore',
     roles: ['Admin'],
 };
 
