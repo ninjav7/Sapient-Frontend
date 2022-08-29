@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import {Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Input,FormGroup} from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Table,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownToggle,
+    DropdownItem,
+    Button,
+    Input,
+    FormGroup,
+} from 'reactstrap';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BaseUrl, generalEquipments, getLocation, equipmentType, createEquipment, getEndUseId, updateEquipment, listSensor, searchEquipment} from '../../services/Network';
+import {
+    BaseUrl,
+    generalEquipments,
+    getLocation,
+    equipmentType,
+    createEquipment,
+    getEndUseId,
+    updateEquipment,
+    listSensor,
+    searchEquipment,
+} from '../../services/Network';
+import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -24,8 +48,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
 import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 
-const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData }) => {
-    const [selected,setSelected]=useState([]);
+const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
+    const [selected, setSelected] = useState([]);
     const [sensors, setSensors] = useState([]);
     // console.log(equipmentTypeData)
     let cookies = new Cookies();
@@ -52,41 +76,41 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         };
         fetchActiveDeviceSensorData();
     }, [equipData]);
-    var result=[];
-        if(equipData!==null){
-            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
-            // var x=document.getElementById('endUsePop');
-            // console.log(x);
-            // if(x!==null)
-            // x.value=result.end_use_name;
-            // console.log(result);
+    var result = [];
+    if (equipData !== null) {
+        result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
+        // var x=document.getElementById('endUsePop');
+        // console.log(x);
+        // if(x!==null)
+        // x.value=result.end_use_name;
+        // console.log(result);
+    }
+    console.log(equipData);
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, updateEqipmentData);
+        if (key === 'equipment_type') {
+            const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
+            // console.log(result1.end_use_name);
+            const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
+            // console.log(eq_id);
+            // var x=document.getElementById("endUsePop");
+            // x.value=(eq_id.end_user_id);
+            obj['end_use'] = eq_id.end_user_id;
         }
-        console.log(equipData)
-        const handleChange = (key, value) => {
-            let obj = Object.assign({}, updateEqipmentData);
-            if(key==="equipment_type"){
-                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-                // console.log(result1.end_use_name);
-                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-                // console.log(eq_id);
-                // var x=document.getElementById("endUsePop");
-                // x.value=(eq_id.end_user_id);
-                obj['end_use']=eq_id.end_user_id;
-            }
-            obj[key] = value;
-            // console.log(obj);
-            setUpdateEqipmentData(obj);
-        };
-        const handleSave=()=>{
+        obj[key] = value;
+        // console.log(obj);
+        setUpdateEqipmentData(obj);
+    };
+    const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
-            obj['tag']=selected;
+            obj['tag'] = selected;
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params=`?equipment_id=${equipData.equipments_id}`
+            let params = `?equipment_id=${equipData.equipments_id}`;
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
@@ -95,12 +119,11 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                     // console.log(res.data);
                     fetchEquipmentData();
                     close();
-                
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
         }
-        }
+    };
     return (
         <>
             {show ? (
@@ -187,15 +210,19 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold" 
-                                                defaultValue={result.length===0?"":result.equipment_id}
+                                                className="font-weight-bold"
+                                                defaultValue={result.length === 0 ? '' : result.equipment_id}
                                                 onChange={(e) => {
                                                     handleChange('equipment_type', e.target.value);
                                                 }}>
-                                                 <option selected>Select Type</option>
-                                                     {equipmentTypeData.map((record) => {
-                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
-                                                        })}
+                                                <option selected>Select Type</option>
+                                                {equipmentTypeData.map((record) => {
+                                                    return (
+                                                        <option value={record.equipment_id}>
+                                                            {record.equipment_type}
+                                                        </option>
+                                                    );
+                                                })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -238,7 +265,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
                                             <TagsInput
-                                                 value={equipData.tags}
+                                                value={equipData.tags}
                                                 onChange={setSelected}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
@@ -267,78 +294,82 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
                             </Col>
                             <Col lg={4}>
                                 <div className="modal-right-container">
-                                <div className="equip-socket-container">
-                                <div className="mt-2 sockets-slots-container">
-                                    {sensors.map((record, index) => {
-                                        return (
-                                            <>
-                                                {record.status && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#3C6DF5"
-                                                            />
-                                                        </div>
-                                                        {record.equipment_type_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
+                                    <div className="equip-socket-container">
+                                        <div className="mt-2 sockets-slots-container">
+                                            {sensors.map((record, index) => {
+                                                return (
+                                                    <>
+                                                        {record.status && (
+                                                            <div>
+                                                                <div className="power-off-style">
+                                                                    <FontAwesomeIcon
+                                                                        icon={faPowerOff}
+                                                                        size="lg"
+                                                                        color="#3C6DF5"
+                                                                    />
+                                                                </div>
+                                                                {record.equipment_type_id === '' ? (
+                                                                    <div className="socket-rect">
+                                                                        <img src={SocketLogo} alt="Socket" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="online-socket-container">
+                                                                        <img
+                                                                            src={UnionLogo}
+                                                                            alt="Union"
+                                                                            className="union-icon-style"
+                                                                            width="35vw"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
-                                                    </div>
-                                                )}
 
-                                                {!record.status && (
-                                                    <div>
-                                                        <div className="power-off-style">
-                                                            <FontAwesomeIcon
-                                                                icon={faPowerOff}
-                                                                size="lg"
-                                                                color="#EAECF0"
-                                                            />
-                                                        </div>
-                                                        {record.equipment_type_id === '' ? (
-                                                            <div className="socket-rect">
-                                                                <img src={SocketLogo} alt="Socket" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="online-socket-container">
-                                                                <img
-                                                                    src={UnionLogo}
-                                                                    alt="Union"
-                                                                    className="union-icon-style"
-                                                                    width="35vw"
-                                                                />
+                                                        {!record.status && (
+                                                            <div>
+                                                                <div className="power-off-style">
+                                                                    <FontAwesomeIcon
+                                                                        icon={faPowerOff}
+                                                                        size="lg"
+                                                                        color="#EAECF0"
+                                                                    />
+                                                                </div>
+                                                                {record.equipment_type_id === '' ? (
+                                                                    <div className="socket-rect">
+                                                                        <img src={SocketLogo} alt="Socket" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="online-socket-container">
+                                                                        <img
+                                                                            src={UnionLogo}
+                                                                            alt="Union"
+                                                                            className="union-icon-style"
+                                                                            width="35vw"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                                                    </>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
                                     <div className="modal-right-card mt-2">
                                         <span className="modal-right-card-title">Power Strip Socket 2</span>
                                         <Link
                                             to={{
-                                                pathname: equipData.device_id!==""?`/settings/active-devices/single/${equipData.device_id}`:`equipment/#`,
+                                                pathname:
+                                                    equipData.device_id !== ''
+                                                        ? `/settings/active-devices/single/${equipData.device_id}`
+                                                        : `equipment/#`,
                                             }}>
-                                        <button
-                                            type="button"
-                                            class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipData.device_id===""?true:false}>
-                                            View Devices
-                                        </button>
+                                            <button
+                                                type="button"
+                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                disabled={equipData.device_id === '' ? true : false}>
+                                                View Devices
+                                            </button>
                                         </Link>
                                     </div>
                                     <div>
@@ -388,55 +419,63 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         </>
     );
 };
-const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,endUse,fetchEquipmentData, locationData }) => {
+const SinglePassiveEquipmentModal = ({
+    show,
+    equipData,
+    close,
+    equipmentTypeData,
+    endUse,
+    fetchEquipmentData,
+    locationData,
+}) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const [selectedTags,setSelectedTags]=useState([]);
-    const [selectedZones,setSelectedZones]=useState([]);
-    const [endUseName,setEndUseName]=useState([]);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedZones, setSelectedZones] = useState([]);
+    const [endUseName, setEndUseName] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
-    
-    var result=[];
-    var loc=[];
-        console.log(locationData)
-        if(equipData!==null){
-            console.log(equipData.location)
-            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
-            // loc = locationData.find(({location_name})=>location_name===equipData.location)
-            // console.log(loc)
-            // var x=document.getElementById('endUsePop');
-            // console.log(x);
-            // if(x!==null)
-            // x.value=result.end_use_name;
-            // console.log(result);
+
+    var result = [];
+    var loc = [];
+    console.log(locationData);
+    if (equipData !== null) {
+        console.log(equipData.location);
+        result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
+        // loc = locationData.find(({location_name})=>location_name===equipData.location)
+        // console.log(loc)
+        // var x=document.getElementById('endUsePop');
+        // console.log(x);
+        // if(x!==null)
+        // x.value=result.end_use_name;
+        // console.log(result);
+    }
+    // console.log(equipData)
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, updateEqipmentData);
+        if (key === 'equipment_type') {
+            const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
+            // console.log(result1.end_use_name);
+            const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
+            // console.log(eq_id);
+            var x = document.getElementById('endUsePop');
+            x.value = eq_id.end_user_id;
+            obj['end_use'] = eq_id.end_user_id;
         }
-        // console.log(equipData)
-        const handleChange = (key, value) => {
-            let obj = Object.assign({}, updateEqipmentData);
-            if(key==="equipment_type"){
-                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-                // console.log(result1.end_use_name);
-                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-                // console.log(eq_id);
-                var x=document.getElementById("endUsePop");
-                x.value=(eq_id.end_user_id);
-                obj['end_use']=eq_id.end_user_id;
-            }
-            obj[key] = value;
-            // console.log(obj);
-            setUpdateEqipmentData(obj);
-        };
-        const handleSave=()=>{
+        obj[key] = value;
+        // console.log(obj);
+        setUpdateEqipmentData(obj);
+    };
+    const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
-            obj['tag']=selectedTags;
+            obj['tag'] = selectedTags;
             console.log(obj);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params=`?equipment_id=${equipData.equipments_id}`
+            let params = `?equipment_id=${equipData.equipments_id}`;
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
@@ -445,12 +484,11 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                     // console.log(res.data);
                     fetchEquipmentData();
                     close();
-                
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
         }
-        }
+    };
     return (
         <>
             {show ? (
@@ -468,20 +506,23 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                 </div>
                             </Col>
                             <Col lg={3}>
-                           
-                                <div className='button-wrapper'>
-                                
-                                    
-                                <div>
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={close}>
-                                        Cancel
-                                    </button>
-                                </div>
-                                <div>
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
-                                        Save
-                                    </button>
-                                </div>
+                                <div className="button-wrapper">
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-light font-weight-bold mr-4"
+                                            onClick={close}>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            onClick={handleSave}>
+                                            Save
+                                        </button>
+                                    </div>
                                 </div>
                             </Col>
                         </Row>
@@ -525,14 +566,19 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 type="select"
                                                 name="select"
                                                 id="exampleSelect"
-                                                className="font-weight-bold" defaultValue={result.length===0?"":result.equipment_id}
+                                                className="font-weight-bold"
+                                                defaultValue={result.length === 0 ? '' : result.equipment_id}
                                                 onChange={(e) => {
                                                     handleChange('equipment_type', e.target.value);
                                                 }}>
-                                                 <option selected>Select Type</option>
-                                                     {equipmentTypeData.map((record) => {
-                                                            return <option value={record.equipment_id}>{record.equipment_type}</option>;
-                                                        })}
+                                                <option selected>Select Type</option>
+                                                {equipmentTypeData.map((record) => {
+                                                    return (
+                                                        <option value={record.equipment_id}>
+                                                            {record.equipment_type}
+                                                        </option>
+                                                    );
+                                                })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -544,11 +590,11 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 name="select"
                                                 id="endUsePop"
                                                 className="font-weight-bold"
-                                                defaultValue={result.length===0?"":result.end_use_id}>
-                                                 <option selected>Select Category</option>
-                                                     {endUse.map((record) => {
-                                                            return <option value={record.end_user_id}>{record.name}</option>;
-                                                        })}
+                                                defaultValue={result.length === 0 ? '' : result.end_use_id}>
+                                                <option selected>Select Category</option>
+                                                {endUse.map((record) => {
+                                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                                })}
                                             </Input>
                                         </Form.Group>
                                     </Col>
@@ -558,21 +604,25 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Equipment Location</Form.Label>
                                             <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                className="font-weight-bold"
-                                // defaultValue={loc.length===0?"":loc.location_id}
-                                onChange={(e) => {
-                                    handleChange('space_id', e.target.value);
-                                }}>
-                                <option value="" selected>
-                                    Select Location
-                                </option>
-                                {locationData.map((record) => {
-                                    return <option value={record.location_id}>{record.location_name}</option>;
-                                })}
-                            </Input>
+                                                type="select"
+                                                name="select"
+                                                id="exampleSelect"
+                                                className="font-weight-bold"
+                                                // defaultValue={loc.length===0?"":loc.location_id}
+                                                onChange={(e) => {
+                                                    handleChange('space_id', e.target.value);
+                                                }}>
+                                                <option value="" selected>
+                                                    Select Location
+                                                </option>
+                                                {locationData.map((record) => {
+                                                    return (
+                                                        <option value={record.location_id}>
+                                                            {record.location_name}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </Input>
                                             <Form.Label>Location this equipment is installed in.</Form.Label>
                                         </Form.Group>
                                     </Col>
@@ -732,16 +782,19 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                         <div className="modal-right-pic"></div>
                                         <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                             <span className="modal-right-card-title">Energy Monitoring</span>
-                                            
-                                        <Link
-                                            to={{
-                                                pathname: equipData.device_id!==""?`/settings/passive-devices/single/${equipData.device_id}`:`equipment/#`,
-                                            }}>
-                                            <button
-                                                type="button"
-                                                class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                View
-                                            </button>
+
+                                            <Link
+                                                to={{
+                                                    pathname:
+                                                        equipData.device_id !== ''
+                                                            ? `/settings/passive-devices/single/${equipData.device_id}`
+                                                            : `equipment/#`,
+                                                }}>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                                    View
+                                                </button>
                                             </Link>
                                         </div>
                                     </div>
@@ -810,8 +863,8 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
                                                 />
                                             </span> 
                                         </div> */}
-                                        
-                                        {/* <div className="white-container" style={{clear:"both"}}>
+
+                                    {/* <div className="white-container" style={{clear:"both"}}>
                                             Exhaust Fan
                                             <span className='float-right mr-2'>
                                             <FontAwesomeIcon
@@ -871,11 +924,21 @@ const SinglePassiveEquipmentModal = ({ show, equipData, close, equipmentTypeData
     );
 };
 
-const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, endUse,fetchEquipmentData, selectedOptions,equipmentDataWithFilter,locationData, nextPageData,
+const EquipmentTable = ({
+    equipmentData,
+    isEquipDataFetched,
+    equipmentTypeData,
+    endUse,
+    fetchEquipmentData,
+    selectedOptions,
+    equipmentDataWithFilter,
+    locationData,
+    nextPageData,
     previousPageData,
     paginationData,
     pageSize,
-    setPageSize, }) => {
+    setPageSize,
+}) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
     const [nameOrder, setNameOrder] = useState(false);
@@ -946,7 +1009,6 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
         equipmentDataWithFilter(order, columnName);
     };
 
-
     const Close1 = () => {
         setModal1(false);
     };
@@ -970,143 +1032,137 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 <CardBody>
                     <Table className="mb-0 bordered table-hover">
                         <thead>
-                            <tr className='mouse-pointer'>
-                            {selectedOptions.some((record) => record.value === 'status') && (
-                                <th >Status</th>
-                                )}
+                            <tr className="mouse-pointer">
+                                {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
                                 {selectedOptions.some((record) => record.value === 'name') && (
-                                <th className="active-device-header"
-                                    onClick={() => setNameOrder(!nameOrder)}>
-                                <div className="active-device-flex">
-                                        <div>Name</div>
-                                        {nameOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'equipments_name')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('dce', 'equipments_name')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                                 )}
-                                 {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                <th className="active-device-header"
-                                onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
-                            <div className="active-device-flex">
-                                    <div>Equipment Type</div>
-                                    {equipTypeOrder ? (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'equipments_type')}>
-                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                    <th className="active-device-header" onClick={() => setNameOrder(!nameOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Name</div>
+                                            {nameOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'equipments_name')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('dce', 'equipments_name')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'equipments_type')}>
-                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                    <th
+                                        className="active-device-header"
+                                        onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Equipment Type</div>
+                                            {equipTypeOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'equipments_type')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('dce', 'equipments_type')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                                </th>
-                                 )}
-                                 {selectedOptions.some((record) => record.value === 'location') && (
-                                <th className="active-device-header"
-                                onClick={() => setLocationOrder(!locationOrder)}>
-                            <div className="active-device-flex">
-                                    <div>Location</div>
-                                    {locationOrder ? (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'location')}>
-                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'location') && (
+                                    <th
+                                        className="active-device-header"
+                                        onClick={() => setLocationOrder(!locationOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Location</div>
+                                            {locationOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'location')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('dce', 'location')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'location')}>
-                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'tags') && (
+                                    <th className="active-device-header" onClick={() => setTagsOrder(!TagsOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Tags</div>
+                                            {TagsOrder ? (
+                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'tags')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div className="ml-2" onClick={() => handleColumnSort('dce', 'tags')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                                </th>
-                                 )}
-                                 {selectedOptions.some((record) => record.value === 'tags') && (
-                                <th className="active-device-header"
-                                onClick={() => setTagsOrder(!TagsOrder)}>
-                            <div className="active-device-flex">
-                                    <div>Tags</div>
-                                    {TagsOrder ? (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'tags')}>
-                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                        </div>
-                                    ) : (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'tags')}>
-                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                        </div>
-                                    )}
-                                </div>
-                                </th>
-                                 )}
+                                    </th>
+                                )}
                                 {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                <th className="active-device-header"
-                                onClick={() => setSensorOrder(!sensorOrder)}>
-                            <div className="active-device-flex">
-                                    <div>Sensor Number</div>
-                                    {sensorOrder ? (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'sensor_number')}>
-                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                    <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Sensor Number</div>
+                                            {sensorOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'sensor_number')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('dce', 'sensor_number')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'sensor_number')}>
-                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                        </div>
-                                    )}
-                                </div>
-                                </th>
-                                 )}
+                                    </th>
+                                )}
                                 {selectedOptions.some((record) => record.value === 'last_data') && (
-                                <th className="active-device-header">
-                            <div className="active-device-flex">
-                                    <div>Last Data</div>
-                                </div>
-                                </th>
-                                 )}
+                                    <th className="active-device-header">
+                                        <div className="active-device-flex">
+                                            <div>Last Data</div>
+                                        </div>
+                                    </th>
+                                )}
                                 {selectedOptions.some((record) => record.value === 'device_id') && (
-                                <th className="active-device-header"
-                                onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
-                            <div className="active-device-flex">
-                                    <div>Device ID</div>
-                                    {deviceIdOrder ? (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('ace', 'device_mac')}>
-                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                    <th
+                                        className="active-device-header"
+                                        onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
+                                        <div className="active-device-flex">
+                                            <div>Device ID</div>
+                                            {deviceIdOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'device_mac')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('dce', 'device_mac')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div
-                                            className="ml-2"
-                                            onClick={() => handleColumnSort('dce', 'device_mac')}>
-                                            <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                        </div>
-                                    )}
-                                </div>
-                                </th>
-                                 )}
+                                    </th>
+                                )}
                             </tr>
                         </thead>
                         {isEquipDataFetched ? (
@@ -1154,53 +1210,60 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                                             onClick={() => {
                                                 setEquipData(record);
                                                 Toggle(record);
-                                            }} className='mouse-pointer'>
-                                                 {selectedOptions.some((record) => record.value === 'status') && (
-                                            <td className="text-center">
-                                                <div>
-                                                    {record.status === 'Online' && (
-                                                        <div className="icon-bg-styling">
-                                                            <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )}
-                                                    {record.status === 'Offline' && (
-                                                        <div className="icon-bg-styling-slash">
-                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                                 )}
-                                                  {selectedOptions.some((record) => record.value === 'name') && (
-                                            <td className="font-weight-bold">
-                                                {!(record.equipments_name === '') ? record.equipments_name : '-'}
-                                            </td>
-                                                  )}
-                                                  {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                            <td className="font-weight-bold">{record.equipments_type}</td>)}
-                                            {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>
-                                                {record.location === ' > '
-                                                    ? ' - '
-                                                    : record.location.split('>').reverse().join(' > ')}
-                                            </td>)}
-                                            {selectedOptions.some((record) => record.value === 'tags') && (
-                                            <td>
-                                                {
-                                                    <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                        {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                            }}
+                                            className="mouse-pointer">
+                                            {selectedOptions.some((record) => record.value === 'status') && (
+                                                <td className="text-center">
+                                                    <div>
+                                                        {record.status === 'Online' && (
+                                                            <div className="icon-bg-styling">
+                                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                            </div>
+                                                        )}
+                                                        {record.status === 'Offline' && (
+                                                            <div className="icon-bg-styling-slash">
+                                                                <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                }
-                                            </td>
+                                                </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'name') && (
+                                                <td className="font-weight-bold">
+                                                    {!(record.equipments_name === '') ? record.equipments_name : '-'}
+                                                </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                                <td className="font-weight-bold">{record.equipments_type}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'location') && (
+                                                <td>
+                                                    {record.location === ' > '
+                                                        ? ' - '
+                                                        : record.location.split('>').reverse().join(' > ')}
+                                                </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'tags') && (
+                                                <td>
+                                                    {
+                                                        <div className="badge badge-light mr-2 font-weight-bold week-day-style">
+                                                            {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                                        </div>
+                                                    }
+                                                </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                            <td>{record.sensor_number===0?'-':record.sensor_number}</td>
+                                                <td>{record.sensor_number === 0 ? '-' : record.sensor_number}</td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'last_data') && (
-                                            <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                                <td>
+                                                    {record.last_data === ''
+                                                        ? '-'
+                                                        : moment(record?.last_data).fromNow()}
+                                                </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'device_id') && (
-                                            <td className="font-weight-bold">{record.device_mac}</td>
+                                                <td className="font-weight-bold">{record.device_mac}</td>
                                             )}
                                         </tr>
                                     );
@@ -1257,8 +1320,27 @@ const EquipmentTable = ({ equipmentData, isEquipDataFetched, equipmentTypeData, 
                 </CardBody>
             </Card>
             <div>
-                <EquipmentDeviceChartModel showChart={modal1} handleChartClose={Close1} equipData={equipData} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} showWindow={"configure"} deviceType={"active"}/>
-                <EquipmentDeviceChartModel showChart={modal2} handleChartClose={Close2} equipData={equipData} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} showWindow={"configure"} deviceType={"passive"} locationData={locationData}/>
+                <EquipmentDeviceChartModel
+                    showChart={modal1}
+                    handleChartClose={Close1}
+                    equipData={equipData}
+                    equipmentTypeData={equipmentTypeData}
+                    endUse={endUse}
+                    fetchEquipmentData={fetchEquipmentData}
+                    showWindow={'configure'}
+                    deviceType={'active'}
+                />
+                <EquipmentDeviceChartModel
+                    showChart={modal2}
+                    handleChartClose={Close2}
+                    equipData={equipData}
+                    equipmentTypeData={equipmentTypeData}
+                    endUse={endUse}
+                    fetchEquipmentData={fetchEquipmentData}
+                    showWindow={'configure'}
+                    deviceType={'passive'}
+                    locationData={locationData}
+                />
                 {/* <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/> */}
                 {/* <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/> */}
             </div>
@@ -1307,39 +1389,38 @@ const Equipment = () => {
     const [search, setSearch] = useState('');
 
     // search_by_equipment
-const handleSearchtxt = (e) => {
-    if (e.target.value !== '') {
-        setSearch(e.target.value);
-    } else {
-        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
-    }
-};
-
-const handleSearch = async () => {
-    if (search !== '') {
-        try {
-            setIsEquipDataFetched(true);
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            let params = `?building_id=${bldgId}&name=${search}`;
-            await axios.post(`${BaseUrl}${searchEquipment}${params}`,{}, { headers }).then((res) => {
-                let response = res.data;
-                setGeneralEquipmentData(res.data);
-            });
-            setIsEquipDataFetched(false);
-        } catch (error) {
-            console.log(error);
-            setIsEquipDataFetched(false);
-            console.log('Failed to fetch all Equipment Data');
+    const handleSearchtxt = (e) => {
+        if (e.target.value !== '') {
+            setSearch(e.target.value);
+        } else {
+            setGeneralEquipmentData(DuplicateGeneralEquipmentData);
         }
-    } else {
-        setGeneralEquipmentData(DuplicateGeneralEquipmentData);
-    }
-};
+    };
 
+    const handleSearch = async () => {
+        if (search !== '') {
+            try {
+                setIsEquipDataFetched(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&name=${search}`;
+                await axios.post(`${BaseUrl}${searchEquipment}${params}`, {}, { headers }).then((res) => {
+                    let response = res.data;
+                    setGeneralEquipmentData(res.data);
+                });
+                setIsEquipDataFetched(false);
+            } catch (error) {
+                console.log(error);
+                setIsEquipDataFetched(false);
+                console.log('Failed to fetch all Equipment Data');
+            }
+        } else {
+            setGeneralEquipmentData(DuplicateGeneralEquipmentData);
+        }
+    };
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createEqipmentData);
@@ -1384,7 +1465,7 @@ const handleSearch = async () => {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
-            };           
+            };
 
             await axios
                 .post(`${BaseUrl}${createEquipment}`, obj, {
@@ -1643,7 +1724,7 @@ const handleSearch = async () => {
         // fetchOfflineEquipData();
         fetchEquipTypeData();
         fetchLocationData();
-    }, [bldgId,pageSize]);
+    }, [bldgId, pageSize]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1779,28 +1860,55 @@ const handleSearch = async () => {
             <Row>
                 <Col lg={11}>
                     {selectedTab === 0 && (
-                        <EquipmentTable equipmentData={generalEquipmentData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
-                        previousPageData={previousPageData}
-                        paginationData={paginationData}
-                        pageSize={pageSize}
-                        setPageSize={setPageSize}/>
+                        <EquipmentTable
+                            equipmentData={generalEquipmentData}
+                            isEquipDataFetched={isEquipDataFetched}
+                            equipmentTypeData={equipmentTypeData}
+                            endUse={endUseData}
+                            fetchEquipmentData={fetchEquipmentData}
+                            selectedOptions={selectedOptions}
+                            equipmentDataWithFilter={equipmentDataWithFilter}
+                            locationData={locationData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                        />
                     )}
                     {selectedTab === 1 && (
-                        <EquipmentTable equipmentData={onlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
-                        previousPageData={previousPageData}
-                        paginationData={paginationData}
-                        pageSize={pageSize}
-                        setPageSize={setPageSize}/>
+                        <EquipmentTable
+                            equipmentData={onlineEquipData}
+                            isEquipDataFetched={isEquipDataFetched}
+                            equipmentTypeData={equipmentTypeData}
+                            endUse={endUseData}
+                            fetchEquipmentData={fetchEquipmentData}
+                            selectedOptions={selectedOptions}
+                            equipmentDataWithFilter={equipmentDataWithFilter}
+                            locationData={locationData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                        />
                     )}
                     {selectedTab === 2 && (
-                        <EquipmentTable equipmentData={offlineEquipData} isEquipDataFetched={isEquipDataFetched} equipmentTypeData={equipmentTypeData} endUse={endUseData} fetchEquipmentData={fetchEquipmentData} selectedOptions={selectedOptions}
-                        equipmentDataWithFilter={equipmentDataWithFilter} locationData={locationData} nextPageData={nextPageData}
-                        previousPageData={previousPageData}
-                        paginationData={paginationData}
-                        pageSize={pageSize}
-                        setPageSize={setPageSize}/>
+                        <EquipmentTable
+                            equipmentData={offlineEquipData}
+                            isEquipDataFetched={isEquipDataFetched}
+                            equipmentTypeData={equipmentTypeData}
+                            endUse={endUseData}
+                            fetchEquipmentData={fetchEquipmentData}
+                            selectedOptions={selectedOptions}
+                            equipmentDataWithFilter={equipmentDataWithFilter}
+                            locationData={locationData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
+                            paginationData={paginationData}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                        />
                     )}
                 </Col>
             </Row>

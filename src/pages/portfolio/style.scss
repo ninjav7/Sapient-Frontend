@@ -19,6 +19,7 @@
     width: auto;
 }
 
+
 .custom-date-picker-props {
     border: none;
     font-weight: 600;
@@ -231,10 +232,6 @@
     padding-top: 5px !important;
 }
 
-.nav-right-icon-style {
-    /* background: red; */
-}
-
 .custom-navbar-fonts {
     font-style: normal;
     font-weight: 700;
@@ -443,10 +440,6 @@
     grid-template-columns: 0.7fr 1.5fr 2fr 2fr;
 }
 
-* {
-    font-family: 'Inter', sans-serif !important;
-}
-
 .portfolio-consume-widget-wrapper {
     display: grid;
     grid-template-columns: max-content auto;
@@ -456,4 +449,12 @@
         display: flex;
         justify-content: center;
     }
+}
+
+.datefilter-styling{
+    height: 90% !important;
+}
+
+* {
+    font-family: 'Inter', sans-serif !important;
 }

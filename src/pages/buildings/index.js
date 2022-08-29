@@ -1125,7 +1125,7 @@ const BuildingOverview = () => {
     const [daysCount, setDaysCount] = useState(1);
 
     const [hoverRef, isHovered] = useHover();
-    const [isEquipmentProcessing, setIsEquipmentProcessing]= useState(false);
+    const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1152,10 +1152,10 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        console.log('setOverview => ', percentageHandler(
-                            res.data.average_energy_density.now,
-                            res.data.average_energy_density.old
-                        ));
+                        console.log(
+                            'setOverview => ',
+                            percentageHandler(res.data.average_energy_density.now, res.data.average_energy_density.old)
+                        );
                     });
             } catch (error) {
                 console.log(error);
@@ -1430,7 +1430,6 @@ const BuildingOverview = () => {
                                 y: (record.y / 1000).toFixed(5),
                             });
                         });
-                        // console.log('newArray => ', newArray);
                         setBuildingConsumptionChart(newArray);
                     });
             } catch (error) {
@@ -1452,7 +1451,7 @@ const BuildingOverview = () => {
         // // // buildingAlertsData();
         //////buildingPeaksData();
         builidingEquipmentsData();
-       // builidingHourlyData();
+        // builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1512,13 +1511,13 @@ const BuildingOverview = () => {
                                 1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
                             </p>
                         </div>
-                    </div> */}  
+                    </div> */}
 
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={((overview.average_energy_density.now / 1000).toFixed(5))}
+                                description={(overview.average_energy_density.now / 1000).toFixed(5)}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1547,7 +1546,7 @@ const BuildingOverview = () => {
                                 infoType={`total-bld-eui`}
                             />
                         </div>
-                    </div> */}  
+                    </div> */}
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
@@ -1569,7 +1568,7 @@ const BuildingOverview = () => {
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link> */} 
+                            </Link> */}
                         </div>
                     </div>
                 </div>
@@ -1580,12 +1579,12 @@ const BuildingOverview = () => {
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
                     {/* <div> */}
-                        {/* <div> */}
-                            {/* <div style={{ display: 'inline-block' }}>
+                    {/* <div> */}
+                    {/* <div style={{ display: 'inline-block' }}>
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                             </div> */}
-                            {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
+                    {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
                                 <Link
                                     to={{
                                         pathname: `/energy/end-uses/${bldgId}`,
@@ -1600,19 +1599,23 @@ const BuildingOverview = () => {
                                         More Details
                                     </div>
                                 </Link>
-                            </div> */} 
-                        {/* </div>
+                            </div> */}
+                    {/* </div>
                         <div className="custom-bld-enduse-style">
                             <div> */}
-                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
-                                {/* <DonutChart
+                    <EnergyConsumptionTotals
+                        series={donutChartData}
+                        options={donutChartOpts}
+                        energyConsumption={energyConsumption}
+                    />
+                    {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
                                     height={185}
                                     id={Date.now()}
                                 /> */}
-                            {/* </div> */}
-                            {/* <div className="mt-3">
+                    {/* </div> */}
+                    {/* <div className="mt-3">
                                 {energyConsumption.map((record, index) => {
                                     return (
                                         <div>
@@ -1708,7 +1711,7 @@ const BuildingOverview = () => {
                                     );
                                 })}
                             </div> */}
-                        {/* </div> */}
+                    {/* </div> */}
                     {/* </div> */}
 
                     {/* Top 3 Peak Demand Periods  */}
@@ -1767,7 +1770,7 @@ const BuildingOverview = () => {
                                                         className="m-4">
                                                         <Link
                                                             to={{
-                                                                pathname: `/explore/page`,
+                                                                pathname: `/explore/by-building`,
                                                             }}>
                                                             <button
                                                                 type="button"
@@ -1820,7 +1823,7 @@ const BuildingOverview = () => {
                                 ))}
                             </div>
                         </div>
-                    </Row> */}  
+                    </Row> */}
 
                     {/* Hourly Average Consumption */}
                     {/* {/* {/* <Row>
@@ -1866,10 +1869,9 @@ const BuildingOverview = () => {
                     {/* Total Energy Consumption  */}
                     <Row>
                         <div className="card-body">
-                            
                             <div className="total-eng-consumtn">
-                            <h6 className="card-title custom-title">Total Energy Consumption</h6>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
+                                <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
                                 <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
                             </div>
                         </div>
@@ -1973,7 +1975,7 @@ const BuildingOverview = () => {
                                 })}
                             </div>
                         </div>
-                    </Row> */}  
+                    </Row> */}
                     <Row>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
@@ -1986,105 +1988,107 @@ const BuildingOverview = () => {
                                     </tr>
                                 </thead>
                                 {isEquipmentProcessing ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                    <tbody>
+                                        <SkeletonTheme color="#202020" height={35}>
+                                            <tr>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                                <tbody style={{ fontSize: '12px' }}>
-                                    {topEnergyConsumption.map((item, index) => (
-                                        <tr key={index}>
-                                            <td className="equip-table-content">
-                                                <div>
-                                                    <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                        {item.equipment_name}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="equip-table-content">
-                                                <div>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+                                            </tr>
+                                        </SkeletonTheme>
+                                    </tbody>
+                                ) : (
+                                    <tbody style={{ fontSize: '12px' }}>
+                                        {topEnergyConsumption.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="equip-table-content">
                                                     <div>
-                                                        <span>
-                                                            {(item.energy_consumption.now / 1000).toLocaleString(
-                                                                undefined,
-                                                                {
-                                                                    maximumFractionDigits: 2,
-                                                                }
+                                                        <div className="font-weight-bold" style={{ color: 'black' }}>
+                                                            {item.equipment_name}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="equip-table-content">
+                                                    <div>
+                                                        <div>
+                                                            <span>
+                                                                {(item.energy_consumption.now / 1000).toLocaleString(
+                                                                    undefined,
+                                                                    {
+                                                                        maximumFractionDigits: 2,
+                                                                    }
+                                                                )}
+                                                            </span>
+                                                            <span className="equip-table-unit">&nbsp;kWh</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <div>
+                                                            {item.energy_consumption.now <
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-success text-success equip-table-button"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-chart-down">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
                                                             )}
-                                                        </span>
-                                                        <span className="equip-table-unit">&nbsp;kWh</span>
+                                                            {item.energy_consumption.now >
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-danger text-danger equip-table-button"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                            {item.energy_consumption.now ===
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button text-muted equip-table-button"
+                                                                    style={{ width: 'auto', border: 'none' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <div>
-                                                        {item.energy_consumption.now < item.energy_consumption.old && (
-                                                            <button
-                                                                className="button-success text-success equip-table-button"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {item.energy_consumption.now > item.energy_consumption.old && (
-                                                            <button
-                                                                className="button-danger text-danger equip-table-button"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {item.energy_consumption.now ===
-                                                            item.energy_consumption.old && (
-                                                            <button
-                                                                className="button text-muted equip-table-button"
-                                                                style={{ width: 'auto', border: 'none' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                )}
                             </table>
                         </div>
                     </Row>

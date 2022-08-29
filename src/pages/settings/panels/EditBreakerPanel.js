@@ -518,7 +518,7 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&page_size=10&page_no=1`;
+                let params = `?building_id=${bldgId}&page_size=100&page_no=1`;
                 await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
@@ -532,6 +532,9 @@ const EditBreakerPanel = () => {
                     setPassiveDeviceData(newArray);
                     BreakersStore.update((s) => {
                         s.passiveDeviceData = newArray;
+                    });
+                    BreakersStore.update((s) => {
+                        s.totalPassiveDeviceCount = res?.data?.total_data;
                     });
                 });
             } catch (error) {

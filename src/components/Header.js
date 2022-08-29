@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input } from 'reactstrap';
-import Datepicker from '../sharedComponents/datepicker';
+import moment from 'moment';
+import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
-import { DateRangeStore } from '../store/DateRangeStore';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar } from '@fortawesome/free-solid-svg-icons';
-import '../pages/portfolio/style.scss';
+import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
+import { DateRangeStore } from '../store/DateRangeStore';
 import Select from '../sharedComponents/form/select';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
+import 'bootstrap-daterangepicker/daterangepicker.css';
+import '../pages/portfolio/style.scss';
 
 const Header = (props) => {
-    const [dateRange, setDateRange] = useState([null, null]);
-    const [startDate, endDate] = dateRange;
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
@@ -51,41 +53,51 @@ const Header = (props) => {
         },
     ];
 
+    const handleEvent = (event, picker) => {
+        let start = picker.startDate._d;
+        let end = picker.endDate._d;
+        setStartDate(start);
+        setEndDate(end);
+    };
+
     useEffect(() => {
         const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
-            let startCustomDate = new Date();
+            let end = new Date();
+            let start = new Date();
             localStorage.setItem('dateFilter', date);
             if (date !== 0) {
-                endCustomDate.setDate(endCustomDate.getDate() - 1);
+                end.setDate(end.getDate() - 1);
             }
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            setDateRange([startCustomDate, endCustomDate]);
+            start.setDate(start.getDate() - date);
+            setStartDate(start);
+            setEndDate(end);
             DateRangeStore.update((s) => {
                 s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
+                s.startDate = start;
+                s.endDate = end;
             });
         };
         setCustomDate(dateFilter);
     }, [dateFilter]);
 
     useEffect(() => {
-        const setCustomDate = (date) => {
-            let startCustomDate = date[0];
-            let endCustomDate = date[1];
-            let dt = new Date();
+        if (startDate === null || endDate === null) {
+            return;
+        }
+        const setCustomDate = (dates) => {
+            let startCustomDate = dates[0];
+            let endCustomDate = dates[1];
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
             });
         };
-        setCustomDate(dateRange);
-    }, [dateRange]);
+        setCustomDate([startDate, endDate]);
+    }, [startDate, endDate]);
 
     return (
         <React.Fragment>
-            <Row className="page-title">
+            <Row className="page-title ml-2">
                 <Col className="header-container">
                     <span className="heading-style">{props.title}</span>
 
@@ -95,50 +107,37 @@ const Header = (props) => {
                         aria-label="Basic example">
                         <div>
                             <Select
-                                style={{ color: 'black', fontWeight: 'bold' }}
-                                className="header-datefilter-select date-selector-width"
+                                className="header-datefilter-select font-weight-bold"
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
                                     setDateFilter(value);
                                 }}
                             />
-
-                            {/* <Input
-                                type="select"
-                                name="select"
-                                id="exampleSelect"
-                                onChange={(e) => {
-                                    setDateFilter(e.target.value);
-                                }}
-                                defaultValue={dateFilter}>
-                                {customDaySelect.map((el, index) => {
-                                    return <option value={el.value}>{el.label}</option>;
-                                })}
-                            </Input> */}
                         </div>
 
-                        <div className="">
-                            <Datepicker
-                                selectsRange={true}
+                        <div>
+                            <DateRangePicker
                                 startDate={startDate}
                                 endDate={endDate}
-                                onChange={(update) => {
-                                    setDateRange(update);
-                                }}
-                                maxDate={new Date()}
-                                dateFormat="MMMM d"
-                                className="header-datefilter-datepicker"
-                                placeholderText="Select Date Range"
-                                // monthsShown={2}
-                            />
+                                // initialSettings={{
+                                //     startDate: startDate?.toISOString(),
+                                //     endDate: endDate?.toISOString(),
+                                // }}
+                                alwaysShowCalendars={false}
+                                onApply={handleEvent}>
+                                <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
+                                    <FontAwesomeIcon icon={faCalendar} size="md" color="#7C879C" className="mr-2" />
+                                    {moment(startDate).format('MMM D')} - {moment(endDate).format('MMM D')}
+                                </button>
+                            </DateRangePicker>
                         </div>
 
                         {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
                             <div className="float-right ml-2">
                                 <Link
                                     to={{
-                                        pathname: `/explore/page`,
+                                        pathname: `/explore-page/by-buildings`,
                                     }}>
                                     <button type="button" className="btn btn-md btn-primary font-weight-bold">
                                         <i className="uil uil-pen mr-1"></i>Explore

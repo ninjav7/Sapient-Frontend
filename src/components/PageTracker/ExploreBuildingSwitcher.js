@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
@@ -16,7 +15,7 @@ import { buildingData } from '../../store/globalState';
 import { useAtom } from 'jotai';
 
 const PortfolioItem = ({ exploreBldName, exploreBldId }) => {
-    const location = useLocation();
+    const history = useHistory();
     return (
         <div>
             {exploreBldId === 'portfolio' ? (
@@ -37,9 +36,14 @@ const PortfolioItem = ({ exploreBldName, exploreBldId }) => {
                     <span
                         className="portfolio-txt-style"
                         onClick={() => {
+                            localStorage.setItem('exploreBldId', 'portfolio');
+                            localStorage.setItem('exploreBldName', 'Portfolio');
                             ExploreBuildingStore.update((s) => {
                                 s.exploreBldId = 'portfolio';
                                 s.exploreBldName = 'Portfolio';
+                            });
+                            history.push({
+                                pathname: `/explore-page/by-buildings`,
                             });
                         }}>
                         Portfolio
@@ -68,8 +72,6 @@ const ExploreBuildingSwitcher = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const location = useLocation();
-
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const exploreBldId = ExploreBuildingStore.useState((s) => s.exploreBldId);
@@ -83,11 +85,6 @@ const ExploreBuildingSwitcher = () => {
         };
         getBuildingList();
     }, [buildingListData]);
-
-    const dropDownTitle =
-        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
-            ? 'Portfolio'
-            : exploreBldName;
 
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
