@@ -869,7 +869,7 @@ const EquipChartModal = ({
                                                 type="text"
                                                 placeholder="Enter Equipment Name"
                                                 className="font-weight-bold"
-                                                defaultValue={equipData !== null ? equipData?.equipments_name : ''}
+                                                defaultValue={equipmentData?.equipments_name}
                                                 onChange={(e) => {
                                                     handleChange('name', e.target.value);
                                                 }}
@@ -884,15 +884,15 @@ const EquipChartModal = ({
                                                 name="select"
                                                 id="exampleSelect"
                                                 className="font-weight-bold"
-                                                defaultValue={result.length === 0 ? '' : result.equipment_id}
+                                                defaultValue={equipmentData?.equipments_id}
                                                 onChange={(e) => {
                                                     handleChange('equipment_type', e.target.value);
                                                 }}>
                                                 <option selected>Select Type</option>
-                                                {equipmentTypeData.map((record) => {
+                                                {equipmentTypeData?.map((record) => {
                                                     return (
-                                                        <option value={record.equipment_id}>
-                                                            {record.equipment_type}
+                                                        <option value={record?.equipment_id}>
+                                                            {record?.equipment_type}
                                                         </option>
                                                     );
                                                 })}
@@ -907,10 +907,10 @@ const EquipChartModal = ({
                                                 name="select"
                                                 id="endUsePop"
                                                 className="font-weight-bold"
-                                                defaultValue={result.length === 0 ? '' : result.end_use_id}>
+                                                defaultValue="">
                                                 <option selected>Select Category</option>
-                                                {endUse.map((record) => {
-                                                    return <option value={record.end_user_id}>{record.name}</option>;
+                                                {endUse?.map((record) => {
+                                                    return <option value={record?.end_user_id}>{record?.name}</option>;
                                                 })}
                                             </Input>
                                         </Form.Group>
@@ -932,10 +932,10 @@ const EquipChartModal = ({
                                                 <option value="" selected>
                                                     Select Location
                                                 </option>
-                                                {locationData.map((record) => {
+                                                {locationData?.map((record) => {
                                                     return (
-                                                        <option value={record.location_id}>
-                                                            {record.location_name}
+                                                        <option value={record?.location_id}>
+                                                            {record?.location_name}
                                                         </option>
                                                     );
                                                 })}
@@ -963,7 +963,7 @@ const EquipChartModal = ({
                                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                             <Form.Label>Tags</Form.Label>
                                             <TagsInput
-                                                value={equipData !== null ? equipData?.tags : ''}
+                                                value={equipmentData !== null ? equipmentData?.tags : ''}
                                                 onChange={setSelected}
                                                 name="tag"
                                                 placeHolder="+ Add Tag"
@@ -981,7 +981,7 @@ const EquipChartModal = ({
                                                 id="exampleText"
                                                 rows="3"
                                                 placeholder="Enter a Note..."
-                                                defaultValue={equipData !== null ? equipData?.note : ''}
+                                                defaultValue={equipmentData !== null ? equipmentData?.note : ''}
                                                 onChange={(e) => {
                                                     handleChange('note', e.target.value);
                                                 }}
@@ -1002,7 +1002,7 @@ const EquipChartModal = ({
                                                     pathname:
                                                         equipData !== null
                                                             ? equipData?.device_id !== ''
-                                                                ? `/settings/passive-devices/single/${equipData?.device_id}`
+                                                                ? `/settings/passive-devices/single/${equipmentData?.device_id}`
                                                                 : `equipment/#`
                                                             : '',
                                                 }}>
