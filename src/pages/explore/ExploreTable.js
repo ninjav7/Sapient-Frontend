@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Row, Col, Input, Card, CardBody, Table, FormGroup } from 'reactstrap';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { Card, CardBody, Table } from 'reactstrap';
+import { percentageHandler } from '../../utils/helper';
 import { Line } from 'rc-progress';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { ChildFilterStore } from '../../store/ChildFilterStore';
@@ -41,7 +40,7 @@ const ExploreTable = ({
         <>
             <Card>
                 <CardBody>
-                    <Table className="mb-0 bordered">
+                    <Table className="mb-0 bordered mouse-pointer">
                         <thead>
                             <tr>
                                 <th className="table-heading-style">

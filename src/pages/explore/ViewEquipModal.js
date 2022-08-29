@@ -637,7 +637,7 @@ const ViewEquipModal = ({
                 let newList = [
                     {
                         label: 'Building View',
-                        path: '/explore/by-building',
+                        path: '/explore-page/by-buildings',
                         active: true,
                     },
                 ];

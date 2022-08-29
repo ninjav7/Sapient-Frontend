@@ -102,6 +102,7 @@ const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 // explore
 const Explore = React.lazy(() => import('../pages/explore/Explore'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
+const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -563,21 +564,21 @@ const settingsRoutes = {
 };
 
 const exploreRoutes = {
-    path: '/explore/by-building',
+    path: '/explore-page/by-buildings',
     name: 'Explore',
     visibility: true,
     children: [
         {
-            path: '/explore/by-building',
-            name: 'Explore',
-            component: Explore,
+            path: '/explore-page/by-buildings',
+            name: 'Explore by Building',
+            component: ExploreByBuildings,
             route: PrivateRoute,
             parent: 'explore',
             visibility: true,
         },
         {
-            path: '/explore/by-equipment/:equipId',
-            name: 'Explore',
+            path: '/explore-page/by-equipment/:bldgId',
+            name: 'Explore by Equipment',
             component: ExploreByEquipment,
             route: PrivateRoute,
             parent: 'explore',

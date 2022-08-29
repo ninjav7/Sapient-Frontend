@@ -61,7 +61,7 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/explore/by-building">
+                        <Link to="/explore-page/by-buildings">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
@@ -139,7 +139,7 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                 </h6>
                 <Link to="/energy/building-peak-explore">
                     <div className="float-right ml-2">
-                        <Link to="/explore/by-building">
+                        <Link to="/explore-page/by-buildings">
                             <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
                                 <i className="uil uil-pen mr-1"></i>Explore
                             </button>
