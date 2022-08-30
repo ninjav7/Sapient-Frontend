@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
 import { Link, useParams } from 'react-router-dom';
-import { BaseUrl, builidingPeak, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
+import { BaseUrl, peakDemand, builidingPeak, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
@@ -14,40 +14,33 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
 import moment from 'moment';
+import Skeleton from 'react-loading-skeleton';
+import { Spinner } from 'reactstrap';
+import './style.css';
 
-const BuildingPeakButton = ({ buildingPeakData, recordDate, recordTime }) => {
+const TopBuildingPeaks = ({ peakData }) => {
     return (
         <>
-            {/* <h5 className="card-title card-title-style">{`March 3rd @ 3:20 PM`}&nbsp;&nbsp;</h5> */}
             <h5 className="card-title card-title-style">
-                {`${moment(recordDate).format('MMMM Do')} @ ${recordTime}`}&nbsp;&nbsp;
+                {`${moment(peakData?.timestamp).format('MMMM Do')} @ ${moment(peakData?.timestamp).format('LT')}`}
             </h5>
-            <p className="card-text card-content-style">
-                {buildingPeakData.overall_energy_consumption.toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                })}
-                <span className="card-unit-style">
-                    &nbsp;&nbsp;{`kW`}&nbsp;&nbsp;&nbsp;
-                    {/* {props.consumptionNormal && ( */}
-                    {/* <button
-                        className="button-success text-success font-weight-bold font-size-5"
-                        style={{ width: '100%' }}>
-                        <i className="uil uil-chart-down">
-                            <strong>{`12`} %</strong>
-                        </i>
-                    </button> */}
-                    {/* )} */}
-                    {/* {!props.consumptionNormal && (*/}
+            <div className="bld-peak-content-style">
+                <div className="card-text card-content-style">
+                    <div>{peakData?.consumption?.now / 1000}</div>
+                    <div className="card-unit-style ml-1">kW</div>
+                </div>
+                <div className="ml-2">
                     <button
                         className="button-danger text-danger font-weight-bold font-size-5"
                         style={{ width: '100%' }}>
                         <i className="uil uil-arrow-growth">
-                            <strong>{`100`} %</strong>
+                            <strong>
+                                {percentageHandler(peakData?.consumption?.now, peakData?.consumption?.old)}%
+                            </strong>
                         </i>
                     </button>
-                    {/* )}  */}
-                </span>
-            </p>
+                </div>
+            </div>
         </>
     );
 };
@@ -209,14 +202,20 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
 };
 
 const PeakDemand = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
-
-    // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-    const [selectedTab, setSelectedTab] = useState(0);
+    const cookies = new Cookies();
+    const userdata = cookies.get('user');
+
+    // Loaders
+    const [isPeakContentLoading, setIsPeakContentLoading] = useState(false);
+    const [isTopBuildingPeaksLoading, setIsTopBuildingPeaksLoading] = useState(false);
+    const [isTopPeakCategoriesLoading, setIsTopPeakCategoriesLoading] = useState(false);
+    const [isTopPeakContributersLoading, setIsTopPeakContributersLoading] = useState(false);
+    const [isPeakTrendChartLoading, setIsPeakTrendChartLoading] = useState(false);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
+
+    const [selectedTab, setSelectedTab] = useState(0);
 
     const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
         tooltip: {
@@ -279,13 +278,11 @@ const PeakDemand = () => {
             curve: 'smooth',
         },
         xaxis: {
-            // type: 'datetime',
             labels: {
                 labels: {
-                    format: 'ddd',
+                    format: 'd',
                 },
             },
-            // categories: ['Week 1', 'Week 3', 'Week 5'],
         },
         yaxis: {
             labels: {
@@ -434,6 +431,36 @@ const PeakDemand = () => {
             return;
         }
 
+        const fetchPeakDemandData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                setIsTopBuildingPeaksLoading(true);
+                let params = `?building_id=${bldgId}&consumption=energy`;
+                await axios
+                    .post(
+                        `${BaseUrl}${peakDemand}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        setTopBuildingPeaks(responseData);
+                        setIsTopBuildingPeaksLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Top Building Peak Data');
+                setIsTopBuildingPeaksLoading(false);
+            }
+        };
+
         const buildingPeaksData = async () => {
             try {
                 let headers = {
@@ -453,7 +480,6 @@ const PeakDemand = () => {
                         { headers }
                     )
                     .then((res) => {
-                        setTopBuildingPeaks([]);
                         setSingleEquipPeakOne([]);
                         setSingleEquipPeakTwo([]);
                         setSingleEquipPeakThree([]);
@@ -461,7 +487,6 @@ const PeakDemand = () => {
                         setEquipTypePeakTwo([]);
                         setEquipTypePeakThree([]);
                         let responseData = res.data;
-                        setTopBuildingPeaks(responseData);
                         // console.log(responseData);
                         // console.log(responseData[0].top_contributors);
                         setSingleEquipPeakOne(responseData[0].top_contributors);
@@ -482,9 +507,9 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setIsPeakTrendChartLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
@@ -496,7 +521,7 @@ const PeakDemand = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let responseData = res.data;
+                        let responseData = res?.data;
                         let newPeakData = [
                             {
                                 name: 'Peak for Time Period',
@@ -506,16 +531,19 @@ const PeakDemand = () => {
                         let newData = [];
                         let newDateLabels = [];
                         responseData.map((record) => {
-                            newData.push(record.energy_consumption);
-                            newDateLabels.push(moment(record.date).format('LL'));
+                            newData.push((record?.energy_consumption / 1000).toFixed(3));
+                            newDateLabels.push(moment(record?.date).format('LL'));
                         });
                         newPeakData[0].data = newData;
+                        console.log('Sudhanshu => ', newPeakData);
                         setPeakDemandTrendData(newPeakData);
                         setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
+                        setIsPeakTrendChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Peak-Demand Trend Data');
+                console.log('Failed to fetch Peak-Demand Trend Chart Data');
+                setIsPeakTrendChartLoading(false);
             }
         };
 
@@ -524,9 +552,9 @@ const PeakDemand = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setIsPeakContentLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
@@ -540,16 +568,19 @@ const PeakDemand = () => {
                     .then((res) => {
                         let responseData = res.data;
                         setYearlyPeakData(responseData);
+                        setIsPeakContentLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Peak-Demand Yearly Peak Data');
+                setIsPeakContentLoading(false);
             }
         };
 
-        buildingPeaksData();
-        peakDemandTrendFetch();
+        fetchPeakDemandData();
         peakDemandYearlyData();
+        // buildingPeaksData();
+        peakDemandTrendFetch();
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -576,42 +607,44 @@ const PeakDemand = () => {
             <Header title="Peak Demand" />
 
             <Row>
-                <div className="card-group button-style" style={{ marginLeft: '29px' }}>
-                    <div className="card card-box-style button-style">
-                        {yearlyPeakData && (
+                {isPeakContentLoading ? (
+                    <div className="mb-2 mr-2 ml-4">
+                        <Skeleton count={1} color="#f9fafb" height={80} width={500} />
+                    </div>
+                ) : (
+                    <div className="card-group button-style ml-4">
+                        <div className="card card-box-style button-style">
                             <div className="card-body card-box-style">
-                                <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak&nbsp;&nbsp;</h5>
+                                <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak</h5>
                                 <p className="card-text card-content-style custom-kw-style">
-                                    {yearlyPeakData.energy_consumption.now / 1000}
+                                    {yearlyPeakData?.energy_consumption?.now / 1000}
+                                    <div className="card-unit-style ml-1 font-weight-bold mr-1">kW</div>
                                     <span className="card-unit-style">
-                                        &nbsp;&nbsp;kWh&nbsp;&nbsp;&nbsp;
-                                        {yearlyPeakData.energy_consumption.now <=
-                                            yearlyPeakData.energy_consumption.old && (
+                                        {yearlyPeakData?.energy_consumption?.now <=
+                                            yearlyPeakData?.energy_consumption?.old && (
                                             <button
-                                                className="button-success text-success font-weight-bold font-size-5"
+                                                className="button-success text-success font-weight-bold"
                                                 style={{ width: '100px' }}>
                                                 <i className="uil uil-chart-down">
                                                     <strong>
                                                         {percentageHandler(
-                                                            yearlyPeakData.energy_consumption.now,
-                                                            yearlyPeakData.energy_consumption.old
-                                                        )}{' '}
+                                                            yearlyPeakData?.energy_consumption?.now,
+                                                            yearlyPeakData?.energy_consumption?.old
+                                                        )}
                                                         %
                                                     </strong>
                                                 </i>
                                             </button>
                                         )}
-                                        {yearlyPeakData.energy_consumption.now >
-                                            yearlyPeakData.energy_consumption.old && (
-                                            <button
-                                                className="button-danger text-danger font-weight-bold font-size-5"
-                                                style={{ width: '100px' }}>
+                                        {yearlyPeakData?.energy_consumption?.now >
+                                            yearlyPeakData?.energy_consumption?.old && (
+                                            <button className="button-danger text-danger " style={{ width: '100px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
-                                                            yearlyPeakData.energy_consumption.now,
-                                                            yearlyPeakData.energy_consumption.old
-                                                        )}{' '}
+                                                            yearlyPeakData?.energy_consumption?.now,
+                                                            yearlyPeakData?.energy_consumption?.old
+                                                        )}
                                                         %
                                                     </strong>
                                                 </i>
@@ -620,68 +653,60 @@ const PeakDemand = () => {
                                     </span>
                                 </p>
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    <div className="card card-box-style button-style">
-                        {yearlyPeakData && (
+                        <div className="card card-box-style button-style">
                             <div className="card-body" style={{ marginTop: '6px' }}>
                                 <h5 className="card-title custom-date-time-style">
-                                    {moment(yearlyPeakData.timestamp).format('MMMM D , h:mm A')}&nbsp;&nbsp;
+                                    {moment(yearlyPeakData?.timestamp).format('MMMM D, h:mm A')}
                                 </h5>
                                 <p className="card-text custom-time-style">
-                                    {moment(yearlyPeakData.timestamp).format('h:mm A')}
+                                    {moment(yearlyPeakData?.timestamp).format('h:mm A')}
                                 </p>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
             </Row>
 
-            <Row style={{ marginLeft: '0.5px' }}>
+            <Row>
                 <div className="card-body">
                     <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                         Top 5 Building Peaks
                     </h6>
 
                     <Row className="mt-2">
-                        <div className="button-style" style={{ marginLeft: '10px' }}>
-                            {topBuildingPeaks.map((record, index) => {
-                                return (
-                                    <>
-                                        {selectedTab === index ? (
-                                            <div
-                                                onClick={() => setSelectedTab(index)}
-                                                className="card peak-card-box-style-selected button-style">
-                                                <div className="card-body">
-                                                    <BuildingPeakButton
-                                                        buildingPeakData={record}
-                                                        recordDate={record.timeRange.to.split(' ')[0]}
-                                                        // recordTime={convert24hourTo12HourFormat(
-                                                        //     record.timeRange.to.split(' ')[1].split('.')[0]
-                                                        // )}
-                                                    />
+                        {isTopBuildingPeaksLoading ? (
+                            <div className="mb-2 mr-2 ml-2">
+                                <Skeleton count={1} color="#f9fafb" height={120} width={1000} />
+                            </div>
+                        ) : (
+                            <div className="button-style" style={{ marginLeft: '10px' }}>
+                                {topBuildingPeaks?.map((record, index) => {
+                                    return (
+                                        <>
+                                            {selectedTab === index ? (
+                                                <div
+                                                    onClick={() => setSelectedTab(index)}
+                                                    className="card peak-card-box-style-selected button-style">
+                                                    <div className="card-body">
+                                                        <TopBuildingPeaks peakData={record} />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div
-                                                onClick={() => setSelectedTab(index)}
-                                                className="card peak-card-box-style button-style">
-                                                <div className="card-body">
-                                                    <BuildingPeakButton
-                                                        buildingPeakData={record}
-                                                        recordDate={record.timeRange.to.split(' ')[0]}
-                                                        recordTime={convert24hourTo12HourFormat(
-                                                            record.timeRange.to.split(' ')[1].split('.')[0]
-                                                        )}
-                                                    />
+                                            ) : (
+                                                <div
+                                                    onClick={() => setSelectedTab(index)}
+                                                    className="card peak-card-box-style button-style">
+                                                    <div className="card-body">
+                                                        <TopBuildingPeaks peakData={record} />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            })}
-                        </div>
+                                            )}
+                                        </>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </Row>
 
                     {selectedTab === 0 && (
@@ -689,14 +714,14 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <EquipmentTypePeaks
                                     energyConsumption={equipTypePeakOne}
-                                    title="Equipment Type Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakOne}
-                                    title="Individual Equipment Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
@@ -708,14 +733,14 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <EquipmentTypePeaks
                                     energyConsumption={equipTypePeakTwo}
-                                    title="Equipment Type Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakTwo}
-                                    title="Individual Equipment Peaks"
+                                    title="Top Peak Contributors"
                                     subtitle="At building peak time"
                                 />
                             </Col>
@@ -727,14 +752,14 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <EquipmentTypePeaks
                                     energyConsumption={equipTypePeakThree}
-                                    title="Equipment Type Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakThree}
-                                    title="Individual Equipment Peaks"
+                                    title="Top Peak Contributors"
                                     subtitle="At building peak time"
                                 />
                             </Col>
@@ -746,14 +771,14 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <EquipmentTypePeaks
                                     energyConsumption={equipTypePeakThree}
-                                    title="Equipment Type Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakThree}
-                                    title="Individual Equipment Peaks"
+                                    title="Top Peak Contributors"
                                     subtitle="At building peak time"
                                 />
                             </Col>
@@ -765,14 +790,14 @@ const PeakDemand = () => {
                             <Col xl={6}>
                                 <EquipmentTypePeaks
                                     energyConsumption={equipTypePeakThree}
-                                    title="Equipment Type Peaks"
+                                    title="Top Peak Categories"
                                     subtitle="At building peak time"
                                 />
                             </Col>
                             <Col xl={6}>
                                 <IndividualEquipmentPeaks
                                     energyConsumption={singleEquipPeakThree}
-                                    title="Individual Equipment Peaks"
+                                    title="Top Peak Contributors"
                                     subtitle="At building peak time"
                                 />
                             </Col>
@@ -783,31 +808,25 @@ const PeakDemand = () => {
 
             <Row>
                 <Col xl={12}>
-                    <Card>
-                        <CardBody className="pt-2 pb-3">
-                            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                                Building 15-Minute Demand Peaks Trend
-                            </h6>
-                            <Button
-                                className="button-success text-success font-weight-bold font-size-5 float-right"
-                                size={'sm'}
-                                color="primary"
-                                style={{ width: 'auto' }}>
-                                <i className="uil uil-chart-down">
-                                    <strong>5 %</strong>
-                                </i>
-                            </Button>
+                    <div className="peak-content-style">
+                        <div className="m-1">
+                            <h6 className="card-title custom-title">Building 15-Minute Demand Peaks Trend</h6>
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                 Max power draw (15 minute period)
                             </h6>
-                            <LineAnnotationChart
-                                title=""
-                                height={350}
-                                peakDemandTrendOptions={peakDemandTrendOptions}
-                                peakDemandTrendData={peakDemandTrendData}
-                            />
-                        </CardBody>
-                    </Card>
+                            {isPeakTrendChartLoading ? (
+                                <div className="loader-center-style" style={{ height: '400px' }}>
+                                    <Spinner className="m-2" color={'primary'} />
+                                </div>
+                            ) : (
+                                <LineAnnotationChart
+                                    height={350}
+                                    peakDemandTrendOptions={peakDemandTrendOptions}
+                                    peakDemandTrendData={peakDemandTrendData}
+                                />
+                            )}
+                        </div>
+                    </div>
                 </Col>
             </Row>
         </React.Fragment>

@@ -251,17 +251,17 @@ const EndUsesPage = () => {
             ) : (
                 <Row className="ml-4">
                     <div className="card-group button-style mt-1 mb-0">
-                        {endUsesData.map((record, index) => {
+                        {endUsesData?.map((record, index) => {
                             return (
                                 <div className="card usage-card-box-style button-style">
                                     <div className="card-body">
                                         <div className="enduses-content-1">
-                                            <p className="dot" style={{ backgroundColor: record.color }}></p>
-                                            <span className="card-title card-title-style">{record.device}</span>
+                                            <p className="dot" style={{ backgroundColor: record?.color }}></p>
+                                            <span className="card-title card-title-style">{record?.device}</span>
                                         </div>
                                         <div className="enduses-content-2">
                                             <span className="card-text card-content-style">
-                                                {record.energy_consumption.now.toLocaleString(undefined, {
+                                                {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </span>
@@ -306,41 +306,41 @@ const EndUsesPage = () => {
                         </Row>
                     ) : (
                         <Row className="mt-4 energy-container">
-                            {endUsesData.slice(0, 5).map((usage, index) => {
+                            {endUsesData?.slice(0, 5).map((usage, index) => {
                                 return (
                                     <div className="usage-card">
                                         <EndUsesCard
                                             bldgId={bldgId}
                                             usage={usage}
                                             lastPeriodPerTotalHrs={percentageHandler(
-                                                usage.energy_consumption.now,
-                                                usage.energy_consumption.old
+                                                usage?.energy_consumption?.now,
+                                                usage?.energy_consumption?.old
                                             )}
                                             lastPeriodPerTotalHrsNormal={
-                                                usage.energy_consumption.now >= usage.energy_consumption.old
+                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.old
                                             }
                                             lastYearPerTotalHrs={percentageHandler(
-                                                usage.energy_consumption.now,
-                                                usage.energy_consumption.yearly
+                                                usage?.energy_consumption?.now,
+                                                usage?.energy_consumption?.yearly
                                             )}
                                             lastYearPerTotalHrsNormal={
-                                                usage.energy_consumption.now >= usage.energy_consumption.yearly
+                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.yearly
                                             }
                                             lastPeriodPerAfterHrs={percentageHandler(
-                                                usage.after_hours_energy_consumption.now,
-                                                usage.after_hours_energy_consumption.old
+                                                usage?.after_hours_energy_consumption?.now,
+                                                usage?.after_hours_energy_consumption?.old
                                             )}
                                             lastPeriodPerAfterHrsNormal={
-                                                usage.after_hours_energy_consumption.now >=
-                                                usage.after_hours_energy_consumption.old
+                                                usage?.after_hours_energy_consumption?.now >=
+                                                usage?.after_hours_energy_consumption?.old
                                             }
                                             lastYearPerAfterHrs={percentageHandler(
-                                                usage.after_hours_energy_consumption.now,
-                                                usage.after_hours_energy_consumption.yearly
+                                                usage?.after_hours_energy_consumption?.now,
+                                                usage?.after_hours_energy_consumption?.yearly
                                             )}
                                             lastYearPerAfterHrsNormal={
-                                                usage.after_hours_energy_consumption.now >=
-                                                usage.after_hours_energy_consumption.yearly
+                                                usage?.after_hours_energy_consumption?.now >=
+                                                usage?.after_hours_energy_consumption?.yearly
                                             }
                                         />
                                     </div>
