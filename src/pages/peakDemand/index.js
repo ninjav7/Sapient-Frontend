@@ -548,6 +548,11 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
+                        if (responseData?.length === 0) {
+                            setIsTopPeakCategoriesLoading(false);
+                            setIsTopPeakContributersLoading(false);
+                            return;
+                        }
                         setEquipUsageToFetch(responseData[0].id);
                         setEquipTypeData(responseData);
                         setIsTopPeakCategoriesLoading(false);
@@ -592,6 +597,11 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
+                        if (responseData?.length === 0) {
+                            setIsTopPeakCategoriesLoading(false);
+                            setIsTopPeakContributersLoading(false);
+                            return;
+                        }
                         setEquipUsageData(responseData);
                         setIsTopPeakContributersLoading(false);
                     });
