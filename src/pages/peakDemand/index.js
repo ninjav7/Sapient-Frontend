@@ -1,8 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
+import { Row, Col, Table } from 'reactstrap';
 import Header from '../../components/Header';
-import { Link, useParams } from 'react-router-dom';
 import {
     BaseUrl,
     peakDemand,
@@ -11,7 +10,6 @@ import {
     peakDemandTrendChart,
     peakDemandYearlyPeak,
 } from '../../services/Network';
-import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
@@ -23,6 +21,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
 import moment from 'moment';
 import './style.css';
+import '../../sharedComponents/lineChartWidget/style.scss';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -254,8 +253,12 @@ const PeakDemand = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
+    const headers = {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${userdata.token}`,
+    };
 
-    // Loaders
     const [isPeakContentLoading, setIsPeakContentLoading] = useState(false);
     const [isTopBuildingPeaksLoading, setIsTopBuildingPeaksLoading] = useState(false);
     const [isTopPeakCategoriesLoading, setIsTopPeakCategoriesLoading] = useState(false);
@@ -271,9 +274,50 @@ const PeakDemand = () => {
     const [selectedTab, setSelectedTab] = useState(0);
 
     const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
+        chart: {
+            type: 'line',
+            toolbar: {
+                show: true,
+            },
+        },
         tooltip: {
-            theme: 'dark',
-            x: { show: false },
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MMM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            'D/M/YY @ hh:mm A'
+                        )}</div>
+                    </div>`;
+            },
         },
         annotations: {
             yaxis: [
@@ -315,15 +359,12 @@ const PeakDemand = () => {
                 },
             ],
         },
-        chart: {
-            type: 'line',
-            toolbar: {
-                show: true,
-            },
-        },
         labels: [],
         colors: ['#39afd1'],
         dataLabels: {
+            enabled: false,
+        },
+        animations: {
             enabled: false,
         },
         stroke: {
@@ -390,11 +431,6 @@ const PeakDemand = () => {
 
         const fetchPeakDemandData = async () => {
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
@@ -423,11 +459,6 @@ const PeakDemand = () => {
 
         const peakDemandTrendFetch = async () => {
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsPeakTrendChartLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -467,11 +498,6 @@ const PeakDemand = () => {
 
         const peakDemandYearlyData = async () => {
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsPeakContentLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
@@ -501,25 +527,6 @@ const PeakDemand = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Peak Demand',
-                        path: '/energy/peak-demand',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'buildings';
-            });
-        };
-        updateBreadcrumbStore();
-    }, []);
-
-    useEffect(() => {
         const fetchEquipTypeData = async (filterDate) => {
             if (filterDate === null || filterDate === '') {
                 setIsTopPeakCategoriesLoading(false);
@@ -527,13 +534,6 @@ const PeakDemand = () => {
                 return;
             }
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                console.log('Reached to UseEffect');
-                console.log('Reached to UseEffect filterDate', filterDate);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
@@ -579,11 +579,6 @@ const PeakDemand = () => {
                 return;
             }
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
                 setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
                 await axios
@@ -613,6 +608,25 @@ const PeakDemand = () => {
         };
         fetchEquipUsageData(equipUsageToFetch, equipTypeToFetch);
     }, [equipUsageToFetch]);
+
+    useEffect(() => {
+        const updateBreadcrumbStore = () => {
+            BreadcrumbStore.update((bs) => {
+                let newList = [
+                    {
+                        label: 'Peak Demand',
+                        path: '/energy/peak-demand',
+                        active: true,
+                    },
+                ];
+                bs.items = newList;
+            });
+            ComponentStore.update((s) => {
+                s.parent = 'buildings';
+            });
+        };
+        updateBreadcrumbStore();
+    }, []);
 
     return (
         <React.Fragment>
