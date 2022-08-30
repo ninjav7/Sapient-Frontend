@@ -120,6 +120,7 @@ export const getEquipmentChart = '/api/explorer/equipment_chart';
 export const peakDemand = '/api/energy/peak_demand';
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
+export const peakEquipType = '/api/energy/peak_demand/equipment_type';
 export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
 
 // sensors list

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
 import { Link, useParams } from 'react-router-dom';
-import { BaseUrl, peakDemand, builidingPeak, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
+import { BaseUrl, peakDemand, peakEquipType, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
 import exploreBuildingPeak from './ExploreBuildingPeak';
@@ -18,9 +18,9 @@ import Skeleton from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
 import './style.css';
 
-const TopBuildingPeaks = ({ peakData }) => {
+const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
-        <>
+        <div onClick={() => setEquipTypeToFetch(peakData?.timestamp)}>
             <h5 className="card-title card-title-style">
                 {`${moment(peakData?.timestamp).format('MMMM Do')} @ ${moment(peakData?.timestamp).format('LT')}`}
             </h5>
@@ -41,7 +41,7 @@ const TopBuildingPeaks = ({ peakData }) => {
                     </button>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 
@@ -214,6 +214,7 @@ const PeakDemand = () => {
     const [isPeakTrendChartLoading, setIsPeakTrendChartLoading] = useState(false);
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
+    const [equipTypeToFetch, setEquipTypeToFetch] = useState('');
 
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -439,6 +440,7 @@ const PeakDemand = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsTopBuildingPeaksLoading(true);
+                setIsTopPeakCategoriesLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
                 await axios
                     .post(
@@ -450,7 +452,8 @@ const PeakDemand = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let responseData = res.data;
+                        let responseData = res?.data;
+                        setEquipTypeToFetch(responseData[0]?.timestamp);
                         setTopBuildingPeaks(responseData);
                         setIsTopBuildingPeaksLoading(false);
                     });
@@ -458,47 +461,6 @@ const PeakDemand = () => {
                 console.log(error);
                 console.log('Failed to fetch Top Building Peak Data');
                 setIsTopBuildingPeaksLoading(false);
-            }
-        };
-
-        const buildingPeaksData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${builidingPeak}${params}`,
-                        {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setSingleEquipPeakOne([]);
-                        setSingleEquipPeakTwo([]);
-                        setSingleEquipPeakThree([]);
-                        setEquipTypePeakOne([]);
-                        setEquipTypePeakTwo([]);
-                        setEquipTypePeakThree([]);
-                        let responseData = res.data;
-                        // console.log(responseData);
-                        // console.log(responseData[0].top_contributors);
-                        setSingleEquipPeakOne(responseData[0].top_contributors);
-                        setSingleEquipPeakTwo(responseData[1].top_contributors);
-                        setSingleEquipPeakThree(responseData[2].top_contributors);
-                        setEquipTypePeakOne(responseData[0].top_eq_type_contributors);
-                        setEquipTypePeakTwo(responseData[1].top_eq_type_contributors);
-                        setEquipTypePeakThree(responseData[2].top_eq_type_contributors);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Peak Data');
             }
         };
 
@@ -531,11 +493,10 @@ const PeakDemand = () => {
                         let newData = [];
                         let newDateLabels = [];
                         responseData.map((record) => {
-                            newData.push((record?.energy_consumption / 1000).toFixed(3));
+                            newData.push((record?.energy_consumption / 1000).toFixed(5));
                             newDateLabels.push(moment(record?.date).format('LL'));
                         });
                         newPeakData[0].data = newData;
-                        console.log('Sudhanshu => ', newPeakData);
                         setPeakDemandTrendData(newPeakData);
                         setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
                         setIsPeakTrendChartLoading(false);
@@ -579,7 +540,6 @@ const PeakDemand = () => {
 
         fetchPeakDemandData();
         peakDemandYearlyData();
-        // buildingPeaksData();
         peakDemandTrendFetch();
     }, [startDate, endDate, bldgId]);
 
@@ -601,6 +561,42 @@ const PeakDemand = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        const fetchEquipTypeData = async (filterDate) => {
+            if (filterDate === null || filterDate === '') {
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                setIsTopPeakCategoriesLoading(true);
+                let params = `?building_id=${bldgId}&consumption=energy`;
+                await axios
+                    .post(
+                        `${BaseUrl}${peakEquipType}${params}`,
+                        {
+                            date_from: dateFormatHandler(filterDate),
+                            date_to: dateFormatHandler(filterDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res?.data;
+                        console.log('SSR => ', responseData);
+                        setIsTopPeakCategoriesLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Top Building Peak Data');
+                setIsTopPeakCategoriesLoading(false);
+            }
+        };
+        fetchEquipTypeData(equipTypeToFetch);
+    }, [equipTypeToFetch]);
 
     return (
         <React.Fragment>
@@ -690,7 +686,10 @@ const PeakDemand = () => {
                                                     onClick={() => setSelectedTab(index)}
                                                     className="card peak-card-box-style-selected button-style">
                                                     <div className="card-body">
-                                                        <TopBuildingPeaks peakData={record} />
+                                                        <TopBuildingPeaks
+                                                            peakData={record}
+                                                            setEquipTypeToFetch={setEquipTypeToFetch}
+                                                        />
                                                     </div>
                                                 </div>
                                             ) : (
@@ -698,7 +697,10 @@ const PeakDemand = () => {
                                                     onClick={() => setSelectedTab(index)}
                                                     className="card peak-card-box-style button-style">
                                                     <div className="card-body">
-                                                        <TopBuildingPeaks peakData={record} />
+                                                        <TopBuildingPeaks
+                                                            peakData={record}
+                                                            setEquipTypeToFetch={setEquipTypeToFetch}
+                                                        />
                                                     </div>
                                                 </div>
                                             )}
