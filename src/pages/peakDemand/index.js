@@ -3,24 +3,34 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
 import Header from '../../components/Header';
 import { Link, useParams } from 'react-router-dom';
-import { BaseUrl, peakDemand, peakEquipType, peakDemandTrendChart, peakDemandYearlyPeak } from '../../services/Network';
+import {
+    BaseUrl,
+    peakDemand,
+    peakEquipType,
+    peakEquipUsage,
+    peakDemandTrendChart,
+    peakDemandYearlyPeak,
+} from '../../services/Network';
 import DetailedButton from '../buildings/DetailedButton';
 import LineAnnotationChart from '../charts/LineAnnotationChart';
-import exploreBuildingPeak from './ExploreBuildingPeak';
-import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { Spinner } from 'reactstrap';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
 import moment from 'moment';
-import Skeleton from 'react-loading-skeleton';
-import { Spinner } from 'reactstrap';
 import './style.css';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
-        <div onClick={() => setEquipTypeToFetch(peakData?.timestamp)}>
+        <div
+            onClick={() => {
+                setEquipTypeToFetch(peakData?.timestamp);
+            }}
+            className="mouse-pointer">
             <h5 className="card-title card-title-style">
                 {`${moment(peakData?.timestamp).format('MMMM Do')} @ ${moment(peakData?.timestamp).format('LT')}`}
             </h5>
@@ -45,53 +55,74 @@ const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     );
 };
 
-const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
+const EquipmentTypePeaks = ({ equipTypeData, isTopPeakCategoriesLoading, setEquipUsageToFetch }) => {
     return (
-        <Card>
-            <CardBody className="pb-0 pt-2">
-                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                    {title}
-                </h6>
-                <Link to="/energy/building-peak-explore">
-                    <div className="float-right ml-2">
-                        <Link to="/explore-page/by-buildings">
-                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </Link>
-                    </div>
-                </Link>
-                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
-                <Table className="mb-0" borderless hover>
-                    <thead>
-                        <tr>
-                            <th scope="col">Equipment</th>
-                            <th scope="col">Power</th>
-                            <th scope="col">Change from Previous Year</th>
-                        </tr>
-                    </thead>
+        <div className="m-2 mt-4">
+            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                Top Peak Categories
+            </h6>
+            {/* <Link to="/energy/building-peak-explore">
+                <div className="float-right ml-2">
+                    <Link to="/explore-page/by-buildings">
+                        <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                            <i className="uil uil-pen mr-1"></i>Explore
+                        </button>
+                    </Link>
+                </div>
+            </Link> */}
+            <h6 className="card-subtitle mb-2 custom-subtitle-style">At building peak time</h6>
+            <Table className="mb-0" borderless hover>
+                <thead className="mouse-pointer">
+                    <tr>
+                        <th scope="col">Equipment</th>
+                        <th scope="col">Power</th>
+                        <th scope="col">Change from Previous Year</th>
+                    </tr>
+                </thead>
+                {isTopPeakCategoriesLoading ? (
                     <tbody>
-                        {energyConsumption.map((record, index) => {
+                        <SkeletonTheme color="#202020" height={35}>
+                            <tr>
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+                            </tr>
+                        </SkeletonTheme>
+                    </tbody>
+                ) : (
+                    <tbody className="mouse-pointer">
+                        {equipTypeData?.map((record, index) => {
                             return (
                                 <tr key={index}>
-                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
-                                        {record.equipment_name}
+                                    <td
+                                        className="custom-equip-style"
+                                        style={{ color: '#2955e7' }}
+                                        onClick={setEquipUsageToFetch(record?.id)}>
+                                        {record?.name}
                                     </td>
                                     <td className="custom-usage-style muted">
-                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                        {record?.consumption?.now.toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                     </td>
                                     <td>
-                                        {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                        {record?.consumption?.now >= record?.consumption?.yearly ? (
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
+                                                            record?.consumption?.now,
+                                                            record?.consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -104,8 +135,8 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                                                 <i className="uil uil-chart-down">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
+                                                            record?.consumption?.now,
+                                                            record?.consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -117,59 +148,77 @@ const EquipmentTypePeaks = ({ energyConsumption, title, subtitle }) => {
                             );
                         })}
                     </tbody>
-                </Table>
-            </CardBody>
-        </Card>
+                )}
+            </Table>
+        </div>
     );
 };
 
-const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
+const EquipmentUsagePeaks = ({ equipUsageData, isTopPeakContributersLoading }) => {
     return (
-        <Card>
-            <CardBody className="pb-0 pt-2">
-                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                    {title}
-                </h6>
-                <Link to="/energy/building-peak-explore">
-                    <div className="float-right ml-2">
-                        <Link to="/explore-page/by-buildings">
-                            <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
-                                <i className="uil uil-pen mr-1"></i>Explore
-                            </button>
-                        </Link>
-                    </div>
-                </Link>
-                <h6 className="card-subtitle mb-2 custom-subtitle-style">{subtitle}</h6>
-                <Table className="mb-0" borderless hover>
-                    <thead>
-                        <tr>
-                            <th scope="col">Equipment</th>
-                            <th scope="col">Power</th>
-                            <th scope="col">Change from Previous Year</th>
-                        </tr>
-                    </thead>
+        <div className="m-2 mt-4">
+            <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                Top Peak Contributers
+            </h6>
+            {/* <Link to="/energy/building-peak-explore">
+                <div className="float-right ml-2">
+                    <Link to="/explore-page/by-buildings">
+                        <button type="button" className="btn btn-sm btn-outline-primary font-weight-bold">
+                            <i className="uil uil-pen mr-1"></i>Explore
+                        </button>
+                    </Link>
+                </div>
+            </Link> */}
+            <h6 className="card-subtitle mb-2 custom-subtitle-style">At building peak time</h6>
+            <Table className="mb-0" borderless hover>
+                <thead>
+                    <tr className="mouse-pointer">
+                        <th scope="col">Equipment</th>
+                        <th scope="col">Power</th>
+                        <th scope="col">Change from Previous Year</th>
+                    </tr>
+                </thead>
+                {isTopPeakContributersLoading ? (
                     <tbody>
-                        {energyConsumption.map((record, index) => {
+                        <SkeletonTheme color="#202020" height={35}>
+                            <tr>
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+
+                                <td>
+                                    <Skeleton count={5} />
+                                </td>
+                            </tr>
+                        </SkeletonTheme>
+                    </tbody>
+                ) : (
+                    <tbody className="mouse-pointer">
+                        {equipUsageData?.map((record, index) => {
                             return (
                                 <tr key={index}>
                                     <td className="custom-equip-style" style={{ color: '#2955e7' }}>
-                                        {record.equipment_name}
+                                        {record?.name}
                                     </td>
                                     <td className="custom-usage-style muted">
-                                        {record.energy_consumption.now.toLocaleString(undefined, {
+                                        {record?.consumption?.now.toLocaleString(undefined, {
                                             maximumFractionDigits: 2,
                                         })}
                                     </td>
                                     <td>
-                                        {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                        {record?.consumption?.now >= record?.consumption?.yearly ? (
                                             <button
                                                 className="button-danger text-danger btn-font-style"
                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
+                                                            record?.consumption?.now,
+                                                            record?.consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -182,8 +231,8 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                                                 <i className="uil uil-chart-down">
                                                     <strong>
                                                         {percentageHandler(
-                                                            record.energy_consumption.now,
-                                                            record.energy_consumption.old
+                                                            record?.consumption?.now,
+                                                            record?.consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -195,9 +244,9 @@ const IndividualEquipmentPeaks = ({ energyConsumption, title, subtitle }) => {
                             );
                         })}
                     </tbody>
-                </Table>
-            </CardBody>
-        </Card>
+                )}
+            </Table>
+        </div>
     );
 };
 
@@ -215,6 +264,9 @@ const PeakDemand = () => {
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
     const [equipTypeToFetch, setEquipTypeToFetch] = useState('');
+    const [equipUsageToFetch, setEquipUsageToFetch] = useState('');
+    const [equipTypeData, setEquipTypeData] = useState([]);
+    const [equipUsageData, setEquipUsageData] = useState([]);
 
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -325,102 +377,6 @@ const PeakDemand = () => {
 
     const [yearlyPeakData, setYearlyPeakData] = useState(null);
 
-    const [topEnergyConsumption, setTopEnergyConsumption] = useState([
-        {
-            equipment: 'AHU 1',
-            power: 25.3,
-            change: 22,
-        },
-        {
-            equipment: 'AHU 2',
-            power: 21.3,
-            change: 3,
-        },
-        {
-            equipment: 'RTU 1',
-            power: 2.3,
-            change: 6,
-        },
-        {
-            equipment: 'Front RTU',
-            power: 25.3,
-            change: 2,
-        },
-    ]);
-
-    const [energyConsumption, setEnergyConsumption] = useState([
-        {
-            equipName: 'AHUs',
-            usage: '25.3 kW',
-            percentage: 25,
-        },
-        {
-            equipName: 'CRACs',
-            usage: '21.3 kW',
-            percentage: 8,
-        },
-        {
-            equipName: 'Refrigerators',
-            usage: '5.3 kW',
-            percentage: 6,
-        },
-        {
-            equipName: 'Desktop PCs',
-            usage: '2.3 kW',
-            percentage: 2,
-        },
-        {
-            equipName: 'Laptop PCs',
-            usage: '1.2 kW',
-            percentage: 1,
-        },
-        {
-            equipName: 'Space Heaters',
-            usage: '0.2 kW',
-            percentage: 2,
-        },
-    ]);
-
-    const [singleEquipPeak, setSingleEquipPeak] = useState([
-        {
-            equipName: 'AHU 1',
-            usage: '25.3 kW',
-            percentage: 25,
-        },
-        {
-            equipName: 'AHU 2',
-            usage: '21.3 kW',
-            percentage: 8,
-        },
-        {
-            equipName: 'RTU 1',
-            usage: '5.3 kW',
-            percentage: 6,
-        },
-        {
-            equipName: 'Front RTU',
-            usage: '2.3 kW',
-            percentage: 2,
-        },
-        {
-            equipName: 'Chiller',
-            usage: '1.2 kW',
-            percentage: 1,
-        },
-        {
-            equipName: 'Chiller',
-            usage: '0.2 kW',
-            percentage: 2,
-        },
-    ]);
-
-    const [singleEquipPeakOne, setSingleEquipPeakOne] = useState([]);
-    const [singleEquipPeakTwo, setSingleEquipPeakTwo] = useState([]);
-    const [singleEquipPeakThree, setSingleEquipPeakThree] = useState([]);
-    const [equipTypePeakOne, setEquipTypePeakOne] = useState([]);
-    const [equipTypePeakTwo, setEquipTypePeakTwo] = useState([]);
-    const [equipTypePeakThree, setEquipTypePeakThree] = useState([]);
-
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -441,6 +397,7 @@ const PeakDemand = () => {
                 };
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
+                setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
                 await axios
                     .post(
@@ -565,6 +522,8 @@ const PeakDemand = () => {
     useEffect(() => {
         const fetchEquipTypeData = async (filterDate) => {
             if (filterDate === null || filterDate === '') {
+                setIsTopPeakCategoriesLoading(false);
+                setIsTopPeakContributersLoading(false);
                 return;
             }
             try {
@@ -573,7 +532,10 @@ const PeakDemand = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                console.log('Reached to UseEffect');
+                console.log('Reached to UseEffect filterDate', filterDate);
                 setIsTopPeakCategoriesLoading(true);
+                setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
                 await axios
                     .post(
@@ -586,17 +548,61 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
-                        console.log('SSR => ', responseData);
+                        setEquipUsageToFetch(responseData[0].id);
+                        setEquipTypeData(responseData);
                         setIsTopPeakCategoriesLoading(false);
                     });
             } catch (error) {
                 console.log(error);
-                console.log('Failed to fetch Top Building Peak Data');
+                console.log('Failed to fetch Top Peak Categories');
                 setIsTopPeakCategoriesLoading(false);
             }
         };
         fetchEquipTypeData(equipTypeToFetch);
     }, [equipTypeToFetch]);
+
+    useEffect(() => {
+        const fetchEquipUsageData = async (equipId, filterDate) => {
+            if (filterDate === null || filterDate === '') {
+                setIsTopPeakCategoriesLoading(false);
+                setIsTopPeakContributersLoading(false);
+                return;
+            }
+            if (equipId === '') {
+                setIsTopPeakCategoriesLoading(false);
+                setIsTopPeakContributersLoading(false);
+                return;
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                setIsTopPeakContributersLoading(true);
+                let params = `?building_id=${bldgId}&consumption=energy`;
+                await axios
+                    .post(
+                        `${BaseUrl}${peakEquipUsage}${params}`,
+                        {
+                            date_from: dateFormatHandler(filterDate),
+                            date_to: dateFormatHandler(filterDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res?.data;
+                        setEquipUsageData(responseData);
+                        setIsTopPeakContributersLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Top Peak Contributer');
+                setIsTopPeakContributersLoading(false);
+            }
+        };
+        fetchEquipUsageData(equipUsageToFetch, equipTypeToFetch);
+    }, [equipUsageToFetch]);
 
     return (
         <React.Fragment>
@@ -617,7 +623,7 @@ const PeakDemand = () => {
                                     <div className="card-unit-style ml-1 font-weight-bold mr-1">kW</div>
                                     <span className="card-unit-style">
                                         {yearlyPeakData?.energy_consumption?.now <=
-                                            yearlyPeakData?.energy_consumption?.old && (
+                                            yearlyPeakData?.energy_consumption?.yearly && (
                                             <button
                                                 className="button-success text-success font-weight-bold"
                                                 style={{ width: '100px' }}>
@@ -625,7 +631,7 @@ const PeakDemand = () => {
                                                     <strong>
                                                         {percentageHandler(
                                                             yearlyPeakData?.energy_consumption?.now,
-                                                            yearlyPeakData?.energy_consumption?.old
+                                                            yearlyPeakData?.energy_consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -633,13 +639,13 @@ const PeakDemand = () => {
                                             </button>
                                         )}
                                         {yearlyPeakData?.energy_consumption?.now >
-                                            yearlyPeakData?.energy_consumption?.old && (
+                                            yearlyPeakData?.energy_consumption?.yearly && (
                                             <button className="button-danger text-danger " style={{ width: '100px' }}>
                                                 <i className="uil uil-arrow-growth">
                                                     <strong>
                                                         {percentageHandler(
                                                             yearlyPeakData?.energy_consumption?.now,
-                                                            yearlyPeakData?.energy_consumption?.old
+                                                            yearlyPeakData?.energy_consumption?.yearly
                                                         )}
                                                         %
                                                     </strong>
@@ -665,25 +671,27 @@ const PeakDemand = () => {
                 )}
             </Row>
 
-            <Row>
-                <div className="card-body">
-                    <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+            <Row className="ml-3 mt-3">
+                <div>
+                    <h6 className="card-title custom-title mb-1" style={{ display: 'inline-block' }}>
                         Top 5 Building Peaks
                     </h6>
 
-                    <Row className="mt-2">
+                    <div className="mt-1">
                         {isTopBuildingPeaksLoading ? (
-                            <div className="mb-2 mr-2 ml-2">
+                            <div className="mb-2 mr-2">
                                 <Skeleton count={1} color="#f9fafb" height={120} width={1000} />
                             </div>
                         ) : (
-                            <div className="button-style" style={{ marginLeft: '10px' }}>
+                            <div className="button-style">
                                 {topBuildingPeaks?.map((record, index) => {
                                     return (
                                         <>
                                             {selectedTab === index ? (
                                                 <div
-                                                    onClick={() => setSelectedTab(index)}
+                                                    onClick={() => {
+                                                        setSelectedTab(index);
+                                                    }}
                                                     className="card peak-card-box-style-selected button-style">
                                                     <div className="card-body">
                                                         <TopBuildingPeaks
@@ -694,12 +702,15 @@ const PeakDemand = () => {
                                                 </div>
                                             ) : (
                                                 <div
-                                                    onClick={() => setSelectedTab(index)}
+                                                    onClick={() => {
+                                                        setSelectedTab(index);
+                                                    }}
                                                     className="card peak-card-box-style button-style">
                                                     <div className="card-body">
                                                         <TopBuildingPeaks
                                                             peakData={record}
                                                             setEquipTypeToFetch={setEquipTypeToFetch}
+                                                            setSelectedTab={setSelectedTab}
                                                         />
                                                     </div>
                                                 </div>
@@ -709,106 +720,27 @@ const PeakDemand = () => {
                                 })}
                             </div>
                         )}
-                    </Row>
-
-                    {selectedTab === 0 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <EquipmentTypePeaks
-                                    energyConsumption={equipTypePeakOne}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <IndividualEquipmentPeaks
-                                    energyConsumption={singleEquipPeakOne}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )}
-
-                    {selectedTab === 1 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <EquipmentTypePeaks
-                                    energyConsumption={equipTypePeakTwo}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <IndividualEquipmentPeaks
-                                    energyConsumption={singleEquipPeakTwo}
-                                    title="Top Peak Contributors"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )}
-
-                    {selectedTab === 2 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <EquipmentTypePeaks
-                                    energyConsumption={equipTypePeakThree}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <IndividualEquipmentPeaks
-                                    energyConsumption={singleEquipPeakThree}
-                                    title="Top Peak Contributors"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )}
-
-                    {selectedTab === 3 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <EquipmentTypePeaks
-                                    energyConsumption={equipTypePeakThree}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <IndividualEquipmentPeaks
-                                    energyConsumption={singleEquipPeakThree}
-                                    title="Top Peak Contributors"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )}
-
-                    {selectedTab === 4 && (
-                        <Row className="equip-peak-container">
-                            <Col xl={6}>
-                                <EquipmentTypePeaks
-                                    energyConsumption={equipTypePeakThree}
-                                    title="Top Peak Categories"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                            <Col xl={6}>
-                                <IndividualEquipmentPeaks
-                                    energyConsumption={singleEquipPeakThree}
-                                    title="Top Peak Contributors"
-                                    subtitle="At building peak time"
-                                />
-                            </Col>
-                        </Row>
-                    )}
+                    </div>
                 </div>
             </Row>
 
-            <Row>
+            <Row className="equip-peak-container ml-3">
+                <Col xl={6}>
+                    <EquipmentTypePeaks
+                        equipTypeData={equipTypeData}
+                        isTopPeakCategoriesLoading={isTopPeakCategoriesLoading}
+                        setEquipUsageToFetch={setEquipUsageToFetch}
+                    />
+                </Col>
+                <Col xl={6}>
+                    <EquipmentUsagePeaks
+                        equipUsageData={equipUsageData}
+                        isTopPeakContributersLoading={isTopPeakContributersLoading}
+                    />
+                </Col>
+            </Row>
+
+            <Row className="ml-1">
                 <Col xl={12}>
                     <div className="peak-content-style">
                         <div className="m-1">

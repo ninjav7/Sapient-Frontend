@@ -1,5 +1,5 @@
-// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
 //export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -121,6 +121,7 @@ export const peakDemand = '/api/energy/peak_demand';
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
 export const peakEquipType = '/api/energy/peak_demand/equipment_type';
+export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
 
 // sensors list
