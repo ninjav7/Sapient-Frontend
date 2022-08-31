@@ -16,6 +16,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import ApexCharts from 'apexcharts';
 import './style.css';
 
 const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEnergyConsumption }) => {
@@ -32,6 +33,57 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
             s.exploreBldName = bldName;
         });
     };
+    const handleSelectionAll=(e)=>{
+        var ischecked = document.getElementById("selection");
+        if(ischecked.checked == true){
+            for(var i=0;i<exploreTableData.length;i++){
+                //console.log(exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart2', 'showSeries', exploreTableData[i].building_name);
+                ApexCharts.exec('chart1', 'showSeries', exploreTableData[i].building_name);
+                var checking = document.getElementById(exploreTableData[i].building_name);
+                checking.checked= ischecked.checked;
+            }
+        }
+        else{
+            for(var i=0;i<exploreTableData.length;i++){
+                //console.log(exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart2', 'hideSeries', exploreTableData[i].building_name);
+                ApexCharts.exec('chart1', 'hideSeries', exploreTableData[i].building_name);
+                var checking = document.getElementById(exploreTableData[i].building_name);
+                checking.checked= ischecked.checked;
+            }
+            ischecked.checked =ischecked.checked
+        }
+       
+    }
+    const handleSelection=(e,id)=>{
+        var isChecked = document.getElementById(id);
+        //console.log(id)
+        ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+        ApexCharts.exec('chart1', 'toggleSeries', e.target.value);
+        if (isChecked.checked == true){
+            ApexCharts.exec('chart2', 'showSeries', e.target.value);
+            ApexCharts.exec('chart1', 'showSeries', e.target.value);
+        }
+        else{
+            ApexCharts.exec('chart2', 'hideSeries', e.target.value);
+            ApexCharts.exec('chart1', 'hideSeries', e.target.value);
+        }
+        //     ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+
+        // }
+
+    }
+   useEffect(()=>{
+    var check = document.getElementById('selection');
+    check.checked=true;
+   },[])
+   useEffect(()=>{
+    for(var i=0;i<exploreTableData.length;i++){
+        var checking = document.getElementById(exploreTableData[i].building_name);
+        checking.checked= true;
+    }
+   },[isExploreDataLoading])
 
     return (
         <>
@@ -42,7 +94,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                             <thead>
                                 <tr>
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" />
+                                    <input type="checkbox" className="mr-4" id="selection" onClick={(e)=>{handleSelectionAll(e)}} />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
@@ -78,7 +130,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
-                                                    <input type="checkbox" className="mr-4" />
+                                                    <input type="checkbox" className="mr-4" id={record?.building_name} value={record?.building_name} onClick={(e)=>{handleSelection(e,record?.building_name)}}/>
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -324,6 +376,9 @@ const ExploreByBuildings = () => {
             height: '500px',
             toolbar: {
                 show: false,
+            },
+            animations: {
+                enabled: false,
             },
             type: 'area',
             brush: {

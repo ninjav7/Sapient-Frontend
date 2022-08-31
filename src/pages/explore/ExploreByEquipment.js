@@ -27,9 +27,57 @@ const ExploreEquipmentTable = ({
     handleChartOpen,
     setEquipmentFilter,
 }) => {
-    const handleSelection=(e)=>{
-        console.log(e.target.value);
+    const handleSelectionAll=(e)=>{
+        var ischecked = document.getElementById("selection");
+        if(ischecked.checked == true){
+            for(var i=0;i<exploreTableData.length;i++){
+                //console.log(exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart2', 'showSeries', exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart1', 'showSeries', exploreTableData[i].equipment_id);
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked= ischecked.checked;
+            }
+        }
+        else{
+            for(var i=0;i<exploreTableData.length;i++){
+                //console.log(exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart2', 'hideSeries', exploreTableData[i].equipment_id);
+                ApexCharts.exec('chart1', 'hideSeries', exploreTableData[i].equipment_id);
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked= ischecked.checked;
+            }
+            ischecked.checked =ischecked.checked
+        }
+       
     }
+    const handleSelection=(e,id)=>{
+        var isChecked = document.getElementById(id);
+        //console.log(id)
+        ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+        ApexCharts.exec('chart1', 'toggleSeries', e.target.value);
+        if (isChecked.checked == true){
+            ApexCharts.exec('chart2', 'showSeries', e.target.value);
+            ApexCharts.exec('chart1', 'showSeries', e.target.value);
+        }
+        else{
+            ApexCharts.exec('chart2', 'hideSeries', e.target.value);
+            ApexCharts.exec('chart1', 'hideSeries', e.target.value);
+        }
+        //     ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+
+        // }
+
+    }
+   useEffect(()=>{
+    var check = document.getElementById('selection');
+    check.checked=true;
+   },[])
+   useEffect(()=>{
+    for(var i=0;i<exploreTableData.length;i++){
+        var checking = document.getElementById(exploreTableData[i].equipment_id);
+        checking.checked= true;
+    }
+   },[isExploreDataLoading])
     return (
         <>
             <Card>
@@ -39,7 +87,7 @@ const ExploreEquipmentTable = ({
                             <thead>
                                 <tr>
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" />
+                                        <input type="checkbox" className="mr-4" id="selection" onClick={(e)=>{handleSelectionAll(e)}} />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
@@ -85,7 +133,7 @@ const ExploreEquipmentTable = ({
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
-                                                    <input type="checkbox" className="mr-4" id="equipselected" value={record?.equipment_name} onClick={(e)=>{handleSelection(e)}}/>
+                                                    <input type="checkbox" className="mr-4" id={record?.equipment_id} value={record?.equipment_id} onClick={(e)=>{handleSelection(e,record?.equipment_id)}}/>
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -461,6 +509,10 @@ const ExploreByEquipment = () => {
             toolbar: {
                 show: false,
             },
+            
+            animations: {
+                enabled: false,
+            },
             type: 'area',
             brush: {
                 target: 'chart2',
@@ -545,7 +597,7 @@ const ExploreByEquipment = () => {
                         data.forEach((record) => {
                             if (record.equipment_name !== null) {
                                 let recordToInsert = {
-                                    name: record.equipment_name,
+                                    name: record.equipment_id,
                                     data: record.equipment_consumption,
                                 };
                                 exploreData.push(recordToInsert);
@@ -553,6 +605,8 @@ const ExploreByEquipment = () => {
                         });
                         setSeriesData(exploreData);
                         setSeriesLineData(exploreData);
+                       
+                        // ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
                         // setSeriesLineData([
                         //     {
                         //         data: exploreData[0].data,
