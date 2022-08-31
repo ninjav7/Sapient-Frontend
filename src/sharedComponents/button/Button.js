@@ -43,19 +43,23 @@ const Button = props => {
     const iconAlignedLeft = hasIconWithLabel && props.iconAlignment === ButtonIconAlignment.left;
     const iconAlignedRight =
         hasIconWithLabel && (props.iconAlignment === ButtonIconAlignment.right || !iconAlignedLeft);
+
     const iconClasses = ['aicon', 'cicon'];
     if (props.icon?.props?.className) {
         iconClasses.push(props.icon.props.className);
     }
+
+    const sideAlignedClass =
+        (iconAlignedLeft && ButtonIconAlignment.left) || (iconAlignedRight && ButtonIconAlignment.right);
+
+    console.log(iconAlignedLeft && ButtonIconAlignment.left, iconAlignedRight && ButtonIconAlignment.right);
 
     const buttonClasses = cx('button', props.size, type, {
         disabled: props.disabled,
         round: !props.children && !props.label,
         large: props.large,
         wrapText: props.wrapText,
-        align:
-            props.icon &&
-            ((iconAlignedLeft && ButtonIconAlignment.left) || (iconAlignedRight && ButtonIconAlignment.right)),
+        [`align-${sideAlignedClass}`]: props.icon && sideAlignedClass,
         ['wrap-text']: props.wrapText,
     });
 
@@ -111,13 +115,19 @@ const Button = props => {
 
 Button.Type = BUTTON_TYPES;
 Button.Sizes = SIZES;
+Button.IconAlignment = ButtonIconAlignment;
 
 Button.propTypes = {
     label: PropTypes.string.isRequired,
     type: PropTypes.oneOf(Object.values(BUTTON_TYPES)).isRequired,
     size: PropTypes.oneOf(Object.values(SIZES)).isRequired,
     icon: PropTypes.node,
+    iconAlignment: PropTypes.oneOf(Object.values(ButtonIconAlignment)),
     typeButton: PropTypes.string,
+};
+
+Button.defaultProps = {
+    iconAlignment: ButtonIconAlignment.left,
 };
 
 export default Button;
