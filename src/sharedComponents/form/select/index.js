@@ -1,73 +1,70 @@
 import React from 'react';
-import ReactSelect, { components } from 'react-select';
+import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
-import cx from 'classnames';
 
 import MultiSelect from './MultiSelect';
+import { Control, DropdownIndicator, Option, SingleValue } from './customComponents';
 
-import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
+import { stringOrNumberPropTypes } from '../../helpers/helper';
 
 import './style.scss';
 
-const conditionalClass = props => (props.selectProps.menuIsOpen ? 'is-open' : 'is-closed');
+export const DROPDOWN_INPUT_TYPES = Object.freeze({
+    Default: 'Default',
+    Icon: 'Icon',
+    Chart: 'Chart',
+});
 
-const Option = props => {
-    const { isDisabled, isSelected, isFocused, children } = props;
-    const { customOption } = props.selectProps;
-
-    const className = cx('react-select-option', {
-        'react-select-option--is-disabled': isDisabled,
-        'react-select-option--is-focused': isFocused,
-        'react-select-option--is-selected': isSelected,
-        customOption: !!customOption,
-    });
-
-    return !isDisabled ? (
-        <components.Option {...props} className={className}>
-            {!!customOption ? React.cloneElement(customOption, { className }, children) : children}
-        </components.Option>
-    ) : null;
-};
-
-const DropdownIndicator = props => (
-    <components.DropdownIndicator {...props}>
-        <CaretDownIcon className={conditionalClass(props)} />
-    </components.DropdownIndicator>
-);
-
-const Control = ({ children, ...props }) => (
-    <components.Control {...props} className={conditionalClass(props)}>
-        {children}
-    </components.Control>
-);
-
-const Select = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+const Select = ({
+    selectClassName = '',
+    className = '',
+    options = [],
+    type = DROPDOWN_INPUT_TYPES.Default,
+    defaultValue,
+    ...props
+}) => {
     const selectedOption = options.find(({ value }) => value === defaultValue);
 
     return (
         <div className={`react-select-wrapper ${className}`}>
             <ReactSelect
                 {...props}
+                type={type}
                 options={options}
                 defaultValue={selectedOption}
-                components={{ DropdownIndicator, Control, Option }}
+                components={{ DropdownIndicator, Control, Option, SingleValue }}
                 className={selectClassName}
+                isSearchable={false}
             />
         </div>
     );
 };
 
-Select.MultiSelect = MultiSelect;
+Select.Types = DROPDOWN_INPUT_TYPES;
+MultiSelect.Types = DROPDOWN_INPUT_TYPES;
+
+Select.Multi = MultiSelect;
 
 Select.propTypes = {
-    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    selectClassName: PropTypes.string,
+    defaultValue: stringOrNumberPropTypes,
     options: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string.isRequired,
-            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            value: stringOrNumberPropTypes.isRequired,
+            supportText: PropTypes.string,
+            img: PropTypes.node,
+            labelChart: PropTypes.string,
+            percentLabel: stringOrNumberPropTypes,
+            isSelected: PropTypes.bool,
+            isDisabled: PropTypes.bool,
+            isFocused: PropTypes.bool,
         })
     ).isRequired,
     customOption: PropTypes.node,
+    type: PropTypes.oneOf(Object.values(DROPDOWN_INPUT_TYPES)),
+    icon: PropTypes.node,
+    hideTick: PropTypes.bool,
 };
 
 export default Select;

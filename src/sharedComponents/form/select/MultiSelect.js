@@ -1,93 +1,96 @@
 import React, { useRef, useState } from 'react';
-import ReactSelect, { components } from 'react-select';
+import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
-import cx from 'classnames';
+import _ from 'lodash';
 
-import { Checkbox } from '../checkbox';
-import Typography from '../../typography';
+import {
+    Control,
+    DropdownIndicator,
+    MenuList,
+    OptionMulti as Option,
+    ValueContainerMulti as ValueContainer,
+} from './customComponents';
 
 import useClickOutside from '../../hooks/useClickOutside';
-
-import { ReactComponent as CaretDownIcon } from '../../assets/icons/caretDown.svg';
+import { stringOrNumberPropTypes } from '../../helpers/helper';
+import { DROPDOWN_INPUT_TYPES } from './index';
+import { selectAllOption } from './constants';
 
 import './style.scss';
 
-const conditionalClass = props => (props.selectProps.menuIsOpen ? 'is-open' : 'is-closed');
-
-const Option = props => {
-    const { isDisabled, isSelected, isFocused, children } = props;
-    const { customOption } = props.selectProps;
-
-    const className = cx('react-select-option', {
-        'react-select-option--is-disabled': isDisabled,
-        'react-select-option--is-focused': isFocused,
-        'react-select-option--is-selected': isSelected,
-        customOption: !!customOption,
-    });
-
-    return !isDisabled ? (
-        <components.Option {...props} className={className}>
-            <Checkbox
-                id={null}
-                label={children}
-                className="w-100"
-                classInput="mr-3"
-                checked={props.isSelected}
-                readOnly
-            />
-        </components.Option>
-    ) : null;
-};
-
-const DropdownIndicator = props => (
-    <components.DropdownIndicator {...props}>
-        <CaretDownIcon className={conditionalClass(props)} />
-    </components.DropdownIndicator>
-);
-
-const Control = ({ children, ...props }) => (
-    <components.Control {...props} className={conditionalClass(props)}>
-        {children}
-    </components.Control>
-);
-
-// eslint-disable-next-line no-unused-vars
-const ValueContainer = ({ children, ...props }) => {
-    const { label } = props.selectProps;
-
-    //@TODO Blur when click to other element, is not working yet
-    return (
-        <components.ValueContainer {...props}>
-            <components.Placeholder {...props} isFocused={props.isFocused}>
-                <Typography.Body size={Typography.Sizes.lg}>
-                    {label ? label : props.selectProps.placeholder}
-                </Typography.Body>
-            </components.Placeholder>
-            {/*{React.Children.map(children, child => (child && child.type !== Placeholder ? child : null))}*/}
-        </components.ValueContainer>
-    );
-};
-
-const MultiSelect = ({ selectClassName = '', className = '', options = [], defaultValue, ...props }) => {
+const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INPUT_TYPES.Default, ...props }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [value, setValue] = useState(props.value);
     const ref = useRef(null);
-
-    const selectedOption = options.find(({ value }) => value === defaultValue);
 
     useClickOutside(ref, ['click'], () => setIsOpen(false));
 
+    const options = props.isSelectAll ? [selectAllOption, ...props.options] : props.options;
+
+    const handleChange = selected => {
+        props.onChange && props.onChange(selected);
+
+        setValue(selected);
+
+        if (
+            _.isEqual(
+                _.sortBy(selected, [
+                    function(o) {
+                        return o.label;
+                    },
+                ]),
+
+                _.sortBy(props.options, function(o) {
+                    return o.label;
+                })
+            )
+        ) {
+            setValue(options);
+        } else {
+            setValue(selected.filter(option => option.value !== selectAllOption.value));
+        }
+    };
+
+    const handleClick = () => {
+        setIsOpen(true);
+    };
+
+    const handleBlur = () => {
+        setIsOpen(false);
+    };
+
     return (
-        <div className={`react-select-wrapper ${className}`} ref={ref} onClick={() => setIsOpen(true)}>
+        <div className={`react-select-wrapper ${className}`} ref={ref} onClick={handleClick} onBlur={handleBlur}>
             <ReactSelect
                 {...props}
+                type={type}
                 options={options}
-                defaultValue={selectedOption}
-                components={{ ValueContainer, DropdownIndicator, Control, Option }}
+                value={value}
+                components={Object.assign(
+                    {
+                        ValueContainer,
+                        DropdownIndicator,
+                        Control,
+                        Option,
+                    },
+                    props.isSearchable ? { MenuList } : null
+                )}
                 className={selectClassName}
                 menuIsOpen={isOpen}
+                onChange={handleChange}
+                checkAllCheckboxes={() => {
+                    if ((value || []).find(option => option.value === selectAllOption.value)) {
+                        setValue([]);
+                        return;
+                    }
+                    setValue(options);
+                }}
                 isMulti={true}
                 hideSelectedOptions={false}
                 isClearable={false}
+                hideTick={true}
+                isSearchable={false}
+                backspaceRemovesValue={false}
             />
         </div>
     );
@@ -95,15 +98,26 @@ const MultiSelect = ({ selectClassName = '', className = '', options = [], defau
 
 MultiSelect.propTypes = {
     selectClassName: PropTypes.string,
-    defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    value: PropTypes.arrayOf(stringOrNumberPropTypes),
     options: PropTypes.arrayOf(
         PropTypes.shape({
             label: PropTypes.string.isRequired,
-            value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            value: stringOrNumberPropTypes,
+            supportText: PropTypes.string,
+            img: PropTypes.node,
+            labelChart: PropTypes.string,
+            percentLabel: stringOrNumberPropTypes,
+            isSelected: PropTypes.bool,
+            isDisabled: PropTypes.bool,
+            isFocused: PropTypes.bool,
         })
     ).isRequired,
     customOption: PropTypes.node,
-    label: PropTypes.string,
+    type: PropTypes.string,
+    icon: PropTypes.node,
+    hideTick: PropTypes.bool,
+    isSelectAll: PropTypes.bool,
+    isSearchable: PropTypes.bool,
 };
 
 export default MultiSelect;
