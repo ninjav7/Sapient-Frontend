@@ -1,0 +1,18 @@
+@import '../../../assets/scss/colors';
+
+.rotate-180 {
+    transform: rotate(180deg);
+
+    svg {
+        transition: 0.4s all;
+    }
+}
+
+.box-shadow {
+    &-xl {
+        box-shadow: 0px 10px 24px -4px rgba(16, 24, 40, 0.08), 0px 6px 8px -4px rgba(16, 24, 40, 0.03);
+    }
+    &-xs {
+        box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05), 0px 0px 0px 4px $primary-gray-100;
+    }
+}
