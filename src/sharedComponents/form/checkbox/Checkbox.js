@@ -3,6 +3,7 @@ import cx from 'classnames';
 import PropTypes from 'prop-types';
 
 import Typography from '../../typography';
+import { DropDownCheckbox } from './DropDownCheckbox';
 
 import { generateID } from '../../helpers/helper';
 
@@ -19,6 +20,11 @@ const CHECKBOX_STATES = Object.freeze({
     Empty: 'Empty',
 });
 
+const CHECKBOX_TYPES = Object.freeze({
+    checkbox: 'checkbox',
+    dropDownCheckbox: 'dropDownCheckbox',
+});
+
 const textSizesMap = Object.freeze({
     [CHECKBOX_SIZES.sm]: [Typography.Sizes.sm, Typography.Sizes.xs],
     [CHECKBOX_SIZES.md]: [Typography.Sizes.lg, Typography.Sizes.md],
@@ -32,6 +38,7 @@ const Checkbox = ({
     size = CHECKBOX_SIZES.sm,
     id = generateID() + '_field_checkbox',
     classInput = '',
+    type = CHECKBOX_TYPES.checkbox,
     autoFocused: autoFocus,
     ...props
 }) => {
@@ -41,9 +48,10 @@ const Checkbox = ({
         checkboxRef.current.indeterminate = indeterminate;
     }, [indeterminate]);
 
-    const classNameWrapper = cx('Checkbox-wrapper', size, { [value]: !!value });
+    const classNameWrapper = cx('Checkbox-wrapper', size, { [value]: !!value, [type]: !!type });
     const classInputInner = cx('form-check-input', 'ml-0', 'mt-0', 'position-static', 'flex-shrink-0', classInput);
-    const [labelSize, descriptionSize] = textSizesMap[size];
+    const [labelSize, descriptionSize] =
+        type === CHECKBOX_TYPES.dropDownCheckbox ? [Typography.Sizes.md] : textSizesMap[size];
 
     return (
         <div className={classNameWrapper}>
@@ -58,7 +66,7 @@ const Checkbox = ({
                 />
                 <label className="m-0 w-100 cursor-pointer" htmlFor={id}>
                     <Typography.Body size={labelSize}>{label}</Typography.Body>
-                    {description && (
+                    {description && type !== CHECKBOX_TYPES.dropDownCheckbox && (
                         <Typography.Body
                             className="Checkbox-description"
                             size={descriptionSize}
@@ -73,6 +81,8 @@ const Checkbox = ({
 };
 
 Checkbox.Sizes = CHECKBOX_SIZES;
+Checkbox.Types = CHECKBOX_TYPES;
+Checkbox.DropDownCheckbox = DropDownCheckbox;
 
 Checkbox.propTypes = {
     label: PropTypes.string.isRequired,
@@ -81,6 +91,7 @@ Checkbox.propTypes = {
     size: PropTypes.oneOf(Object.values(CHECKBOX_SIZES)),
     indeterminate: PropTypes.bool,
     classInput: PropTypes.string,
+    type: PropTypes.oneOf(Object.values(CHECKBOX_TYPES)),
 };
 
 export default Checkbox;

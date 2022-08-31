@@ -1,5 +1,7 @@
 import React from 'react';
+
 import Checkbox from './Checkbox';
+
 import '../../assets/scss/stories.scss';
 
 export default {
@@ -104,6 +106,8 @@ export const Default = args => {
                     {...args}
                 />
             </div>
+            <h4 className="mb-4">Dropdown List Checkbox</h4>
+            <Checkbox.DropDownCheckbox label="Remember me" />
         </>
     );
 };
