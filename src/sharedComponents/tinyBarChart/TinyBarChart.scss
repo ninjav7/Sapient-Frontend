@@ -1,0 +1,12 @@
+.tiny-bar-chart {
+    &-wrapper {
+        background: #f0f2f5;
+        border-radius: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    &-line {
+        background: #c64245;
+        height: 0.375rem;
+    }
+}

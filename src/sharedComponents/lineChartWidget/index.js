@@ -3,27 +3,25 @@ import Typography from '../typography';
 import Brick from '../brick';
 import Chart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
+
 import { configLineChartWidget } from './config';
 
 import './style.scss';
 
-
-const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width, isEnergyConsumptionHistoryLoading }) => {
+const LineChartWidget = ({ className = '', series, title, subtitle, height = 228, width }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                {title}
-            </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
-                {subtitle}
-            </Typography.Body>
+            <div className='line-chart-widget-titles'>
+                <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
+                    {title}
+                </Typography.Subheader>
+                <Typography.Body size={Typography.Sizes.xs} as="h6">
+                    {subtitle}
+                </Typography.Body>
+            </div>
+            
             <Brick sizeInRem={1} />
-            {/* {isEnergyConsumptionHistoryLoading ? (
-                <div className="loader-center-style">
-                    <Spinner className="m-2" color={'primary'} />
-                </div>
-            ) : (<> */}
+
             <Chart
                 className="line-chart-widget"
                 options={configLineChartWidget}
@@ -31,8 +29,6 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
                 {...{ height, width }}
                 type="line"
             />
-            {/* </>
-            )} */}
         </div>
     );
 };
@@ -40,7 +36,7 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
 LineChartWidget.propTypes = {
     title: PropTypes.string.isRequired,
     subtitle: PropTypes.string.isRequired,
-    height: PropTypes.string,
+    height: PropTypes.number,
     width: PropTypes.string,
     series: PropTypes.arrayOf(
         PropTypes.shape({
