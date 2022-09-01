@@ -550,11 +550,12 @@ const ExploreByBuildings = () => {
         };
         exploreDataFetch();
     }, [startDate, endDate]);
-
+    const dataarr = [];
     useEffect(() => {
         console.log(buildingListForChart);
         console.log(seriesData);
         console.log(removeId);
+
         const fetchExploreChartData = async (id) => {
             try {
                 // setIsExploreDataLoading(true);
@@ -594,11 +595,43 @@ const ExploreByBuildings = () => {
                         //exploreData.push(recordToInsert);
                         //     }
                         // });
+
+                        console.log("exploreChartData ", seriesData)
+                        let idrr = [];
+                        let arr1 = [];
+                        if (removeId !== "") {
+                            idrr = exploreTableData.filter(function (item) {
+                                return item.building_id === removeId
+                            })
+                            console.log("remove id", idrr);
+                            arr1 = seriesData.filter(function (item) {
+                                return item.name !== idrr[0].building_name
+                            })
+                            console.log(arr1);
+                            setSeriesData(arr1);
+                            setSeriesLineData(arr1);
+                            setRemoveId('');
+                        }
+                        else {
+                            if (exploreTableData.length === buildingListForChart.length) {
+                                // dataarr.push(recordToInsert);
+                                // console.log(dataarr);
+                                // setSeriesData(dataarr);
+                                // setSeriesLineData(dataarr);
+                                console.log(recordToInsert);
+                                console.log(seriesData);
+                                setSeriesData([...seriesData, recordToInsert]);
+                                setSeriesLineData([...seriesLineData, recordToInsert]);
+                            }
+                            else {
+                                console.log(recordToInsert);
+                                console.log(seriesData);
+                                setSeriesData([...seriesData, recordToInsert]);
+                                setSeriesLineData([...seriesLineData, recordToInsert]);
+                            }
+                        }
                         // expSeriesData.push(recordToInsert);
                         // expSeriesLineData.push(recordToInsert);
-                        setSeriesData([...seriesData, recordToInsert]);
-                        setSeriesLineData([...seriesLineData, recordToInsert]);
-
                         //setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -619,6 +652,10 @@ const ExploreByBuildings = () => {
 
         for (i = 0; i < buildingListForChart.length; i++)
             fetchExploreChartData(buildingListForChart[i]);
+        if (buildingListForChart.length === 0) {
+            setSeriesData([]);
+            setSeriesLineData([]);
+        }
     }, [buildingListForChart])
 
 
