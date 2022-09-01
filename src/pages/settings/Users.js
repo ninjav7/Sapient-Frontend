@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listUsers, addUser } from '../../services/Network';
+import { BaseUrl, listUsers, addUser, addMemberUser, getMemberUser } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -88,14 +88,15 @@ const UserTable = ({ userData, isUserDataFetched }) => {
                                 return (
                                     <tr className="mouse-pointer">
                                         <td className="font-weight-bold panel-name">
-                                            <Link
-                                                to={{
-                                                    pathname: `/settings/user-profile/${record?.user_id}`,
-                                                }}>
-                                                <a>{record?.name === '' ? '-' : record?.name}</a>
+                                            <Link to={`/settings/user-profile/single/${record?._id}`}>
+                                                <a>
+                                                    {record?.first_name
+                                                        ? record?.first_name + ' ' + record?.last_name
+                                                        : record?.name}
+                                                </a>
                                             </Link>
                                         </td>
-                                        <td className="">{record?.building_access.length === 0 ? '-' : ''}</td>
+                                        <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
                                         <td className="">{record?.email === '' ? '-' : record?.email}</td>
                                         <td className="font-weight-bold">
                                             {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
@@ -128,12 +129,12 @@ const Users = () => {
     const [userData, setUserData] = useState([]);
 
     const [userObj, setUserObj] = useState({
-        is_active: true,
         first_name: '',
         last_name: '',
         email: '',
-        user_role_id: '',
     });
+
+    console.log('userObj', userObj);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, userObj);
@@ -154,7 +155,7 @@ const Users = () => {
             let userData = Object.assign({}, userObj);
 
             await axios
-                .post(`${BaseUrl}${addUser}`, userData, {
+                .post(`${BaseUrl}${addMemberUser}`, userData, {
                     headers: header,
                 })
                 .then((res) => {
@@ -177,8 +178,8 @@ const Users = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?ordered_by=name&sort_by=ace`;
-            await axios.get(`${BaseUrl}${listUsers}${params}`, { headers }).then((res) => {
+            // let params = `?ordered_by=name&sort_by=ace`;
+            await axios.get(`${BaseUrl}${getMemberUser}`, { headers }).then((res) => {
                 let response = res.data;
                 setUserData(response.data);
             });
@@ -200,6 +201,18 @@ const Users = () => {
         }
         getUsersList();
     }, [generatedUserId]);
+
+    // TODO:
+    const [addMemberUserBody, seTaddMemberUserBody] = useState({});
+
+    const createUserMember = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        axios.post(`${BaseUrl}${addMemberUser}`, { headers }).then((res) => {});
+    };
 
     return (
         <React.Fragment>

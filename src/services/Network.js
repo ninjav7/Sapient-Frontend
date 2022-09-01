@@ -1,6 +1,6 @@
-//export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
-//export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -112,7 +112,6 @@ export const getExplore = '/api/explorer/chart';
 export const getExploreByBuilding = '/api/explorer/chart/by_building';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 
-
 // peakDemand Chart
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
@@ -135,3 +134,13 @@ export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildi
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
 export const graphData = '/api/user_role/plug_rule/average-chart-calculation';
+
+// user permission and roles
+export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
+export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
+export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
+export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
+export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
+export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';

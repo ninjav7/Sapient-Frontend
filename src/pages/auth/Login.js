@@ -179,7 +179,7 @@ class Login extends Component {
                                                 </InputGroup>
                                                 <AvFeedback>This field is invalid</AvFeedback>
                                                 <Link
-                                                    to="/account/forget-password"
+                                                    to="#"
                                                     className="float-right  ml-1 text-primary font-weight-bold"
                                                     style={{ marginTop: '30px' }}>
                                                     Forgot Password?
@@ -203,10 +203,8 @@ class Login extends Component {
                                             <Row className="">
                                                 <Col className="col-12 text-center">
                                                     <p className="text-muted">
-                                                        Don't have an account?{' '}
-                                                        <Link
-                                                            to="/account/register"
-                                                            className="text-primary font-weight-bold ml-1">
+                                                        Don't have an account? {/* /account/register */}
+                                                        <Link to="#" className="text-primary font-weight-bold ml-1">
                                                             Request Account
                                                         </Link>
                                                     </p>

@@ -1,31 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
-import { Search } from 'react-feather';
-import { Link } from 'react-router-dom';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+import { Row, Col, Card, CardBody, Table, Button, Input } from 'reactstrap';
+import { Link, useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
-import axios from 'axios';
-import { BaseUrl, generalActiveDevices } from '../../services/Network';
-import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import './style.css';
+import { Cookies } from 'react-cookie';
+import axios from 'axios';
+import { BaseUrl, getPermissionRole } from '../../services/Network';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 
-const RoleTable = ({ roleData }) => {
+const RoleTable = ({ roleDataList }) => {
+    console.log(roleDataList);
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -56,21 +43,41 @@ const RoleTable = ({ roleData }) => {
                             <th>Total Users</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {roleData.map((record, index) => {
-                            return (
-                                <tr key={index}>
-                                    <th scope="row">
-                                        <Link to="/settings/roles/config">
-                                            <a className="buildings-name">{record.name}</a>
-                                        </Link>
-                                    </th>
-                                    <td className="font-weight-bold">{record.permissions}</td>
-                                    <td className="font-weight-bold">{record.totalUsers}</td>
+                    {roleDataList?.length === 0 ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {roleDataList.map((record, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <th scope="row">
+                                            <Link to={`/settings/roles/${record?._id}`}>
+                                                <a className="buildings-name">{record.name}</a>
+                                            </Link>
+                                        </th>
+                                        <td className="font-weight-bold">-</td>
+                                        <td className="font-weight-bold">-</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
                 </Table>
             </CardBody>
         </Card>
@@ -79,27 +86,27 @@ const RoleTable = ({ roleData }) => {
 
 const Roles = () => {
     // Modal states
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const history = useHistory();
+    let cookies = new Cookies();
+    let userdata = cookies.get('user');
 
-    const [roleData, setRoleData] = useState([
-        {
-            name: 'Account Administrator',
-            permissions: 'All Permissions',
-            totalUsers: 2,
-        },
-        {
-            name: 'Building Administrator',
-            permissions: 'Partial Permissions',
-            totalUsers: 10,
-        },
-        {
-            name: 'Facilities Manager',
-            permissions: 'Partial Permissions',
-            totalUsers: 24,
-        },
-    ]);
+    const [roleDataList, setRoleDataList] = useState([]);
+
+    const getPermissionRoleFunc = async () => {
+        let header = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
+            setRoleDataList(res.data.data);
+        });
+    };
+
+    useEffect(() => {
+        getPermissionRoleFunc();
+    }, []);
 
     return (
         <React.Fragment>
@@ -113,7 +120,7 @@ const Roles = () => {
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold"
                                 onClick={() => {
-                                    handleShow();
+                                    history.push('/settings/roles/config');
                                 }}>
                                 <i className="uil uil-plus mr-1"></i>Add Role
                             </button>
@@ -144,65 +151,9 @@ const Roles = () => {
 
             <Row>
                 <Col lg={6}>
-                    <RoleTable roleData={roleData} />
+                    <RoleTable roleDataList={roleDataList} />
                 </Col>
             </Row>
-
-            <Modal show={show} onHide={handleClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Add Role</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Row>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>First Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter First Name"
-                                        className="font-weight-bold"
-                                        autoFocus
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col md={6}>
-                                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <Form.Label>Last Name</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter Last Name"
-                                        className="font-weight-bold"
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Email Address</Form.Label>
-                            <Form.Control type="email" placeholder="Enter Email" className="font-weight-bold" />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Role</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold">
-                                <option selected>Member</option>
-                                <option>Phoenix Baker</option>
-                                <option>Olivia Rhye</option>
-                                <option>Lana Steiner</option>
-                            </Input>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" onClick={handleClose}>
-                        Add Role
-                    </Button>
-                </Modal.Footer>
-            </Modal>
         </React.Fragment>
     );
 };

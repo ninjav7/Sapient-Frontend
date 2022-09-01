@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Table, Button, FormGroup, Label, Input } from 'reactstrap';
+
 import { Search } from 'react-feather';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -18,6 +19,8 @@ import { useAtom } from 'jotai';
 import { buildingData } from '../../store/globalState';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { useQuery } from 'react-query';
+import { QueryClient } from 'react-query';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
     return (
@@ -59,6 +62,11 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                 <div
                                                     className="buildings-name"
                                                     onClick={() => {
+                                                        console.log(
+                                                            'recordBuilding_idName',
+                                                            record.building_id,
+                                                            record.building_name
+                                                        );
                                                         localStorage.setItem('buildingId', record.building_id);
                                                         localStorage.setItem('buildingName', record.building_name);
                                                         BuildingStore.update((s) => {
@@ -93,6 +101,10 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
 const Buildings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+    const location = useLocation();
+    const controller = new AbortController();
+
+    const queryClient = new QueryClient();
 
     // Modal states
     const [show, setShow] = useState(false);
@@ -192,27 +204,19 @@ const Buildings = () => {
         fetchBuildingData();
     }, [buildingListData]);
 
-    const fetchGeneralBuildingData = async()=>{
-        try {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-          
-            await axios.get(`${BaseUrl}${generalBuilding}`, { headers }).then((res) => {
-                console.log('createBuilding sending data to API => ', res.data);
-                setBuildingsData(res.data)
-            });
-        } catch (error) {
-            console.log('Failed to create Building');
-        }
+    const fetchGeneralBuildingData = async ({ signal }) => {
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        const { data } = await axios.get(`${BaseUrl}${generalBuilding}`, { headers }, signal);
+        setBuildingsData(data);
+        return data;
+    };
+    const { data, error, isError, isLoading } = useQuery('generalBuilding', fetchGeneralBuildingData);
 
-    }
-
-    useEffect(()=>{
-          fetchGeneralBuildingData();
-    },[])
+    console.log('data', data, 'isLoading', isLoading);
 
     return (
         <React.Fragment>
