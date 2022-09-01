@@ -1,13 +1,13 @@
 import React from 'react';
-import cx from 'classnames';
 import PropTypes from 'prop-types';
 
-import './TopConsumptionWidget.scss';
 import Typography from '../typography';
 import Brick from '../brick';
 import { Link } from 'react-router-dom';
 import { TRENDS_BADGE_TYPES, TrendsBadge } from '../trendsBadge';
 import { UNITS } from '../../constants/units';
+
+import './TopConsumptionWidget.scss';
 
 const TopConsumptionWidget = ({ title, heads = [], rows = [], className }) => {
     return (

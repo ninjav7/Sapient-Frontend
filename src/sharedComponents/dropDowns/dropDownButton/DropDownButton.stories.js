@@ -14,25 +14,25 @@ export default {
     component: DropDownButton,
 };
 
-export const Default = arg => {
+export const Default = (props) => {
     return (
         <BrowserRouter>
             <div className="d-flex justify-content-between">
                 <div>
                     <h6>Default</h6>
-                    <DropDownButton {...arg} />
+                    <DropDownButton {...props} />
                 </div>
 
                 <div>
                     <h6>With Search</h6>
-                    <DropDownButton {...arg} withSearch={true} label="Searchable" />
+                    <DropDownButton {...props} withSearch={true} label="Searchable" />
                 </div>
 
                 <div>
                     <h6>Icon Leading</h6>
                     <DropDownButton
-                        {...arg}
-                        links={arg.links.map((link, index) =>
+                        {...props}
+                        links={props.links.map((link, index) =>
                             index === 3 ? { ...link } : { ...link, icon: <ProfileSVG /> }
                         )}
                     />
@@ -41,7 +41,7 @@ export const Default = arg => {
                 <div>
                     <h6>With Avatar Header</h6>
                     <DropDownButton
-                        {...arg}
+                        {...props}
                         header={
                             <Avatar userEmail="olivia@untitledui.com" userName="Olivia Rhye" avatarUrl={AvatarBigURL} />
                         }
@@ -50,7 +50,7 @@ export const Default = arg => {
 
                 <div>
                     <h6>Dropdown Icon</h6>
-                    <DropDownIcon {...arg} label={null} />
+                    <DropDownIcon {...props} label={null} />
                 </div>
             </div>
         </BrowserRouter>

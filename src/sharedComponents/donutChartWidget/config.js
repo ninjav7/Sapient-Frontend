@@ -3,12 +3,12 @@ import _ from 'lodash';
 import { DONUT_CHART_TYPES } from '.';
 import { UNITS } from '../../constants/units';
 
-export const configDonutChartWidget = type => {
+export const configDonutChartWidget = (type) => {
     const options = {
         chart: {
             type: 'donut',
             events: {
-                mounted: function(chartContext, config) {
+                mounted: function (chartContext, config) {
                     chartContext.toggleDataPointSelection(0, 0);
                 },
             },
@@ -43,7 +43,7 @@ export const configDonutChartWidget = type => {
                             fontSize: '1rem',
                             fontWeight: 500,
                             lineHeight: '1rem',
-                            formatter: function(val) {
+                            formatter: function (val) {
                                 return `${val} ${UNITS.KWH}`;
                             },
                         },
@@ -54,7 +54,7 @@ export const configDonutChartWidget = type => {
                             fontSize: '1rem',
                             fontWeight: 500,
                             lineHeight: '1rem',
-                            formatter: function(w) {
+                            formatter: function (w) {
                                 let sum = w.globals.seriesTotals
                                     .reduce((a, b) => {
                                         return Number(a) + Number(b);

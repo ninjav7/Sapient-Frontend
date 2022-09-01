@@ -35,7 +35,7 @@ const keysToExclude = new Set([
     'iconAlignment',
 ]);
 
-const Button = props => {
+const Button = (props) => {
     const typeButton = props.typeButton || 'button';
     const type = props.type || BUTTON_TYPES.SecondaryGrey;
 
@@ -52,8 +52,6 @@ const Button = props => {
     const sideAlignedClass =
         (iconAlignedLeft && ButtonIconAlignment.left) || (iconAlignedRight && ButtonIconAlignment.right);
 
-    console.log(iconAlignedLeft && ButtonIconAlignment.left, iconAlignedRight && ButtonIconAlignment.right);
-
     const buttonClasses = cx('button', props.size, type, {
         disabled: props.disabled,
         round: !props.children && !props.label,
@@ -68,16 +66,17 @@ const Button = props => {
     const iconColor = props.labelColor && !props.disabled && `${props.labelColor}`;
 
     const buttonProps = {};
-    Object.keys(props).map(key => {
+    Object.keys(props).map((key) => {
         if (!keysToExclude.has(key)) {
             buttonProps[key] = props[key];
         }
     });
+
     return (
-        <div className="Button-wrapper">
+        <div className="button-wrapper">
             <button
                 type={typeButton}
-                ref={node => {
+                ref={(node) => {
                     if (typeof props.buttonRef === 'function') {
                         props.buttonRef(node);
                     } else if (props.buttonRef) {

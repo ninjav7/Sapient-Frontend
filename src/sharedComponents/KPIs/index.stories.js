@@ -1,7 +1,7 @@
 import React from 'react';
-import { KPIBasic, KPILabeled, KPIPrecentage, KPIRank, KPIWithDate, KPIButton } from './index';
+import { KPIBasic, KPILabeled, KPIPercentage, KPIRank, KPIWithDate, KPIButton } from './index';
 import { TRENDS_BADGE_TYPES } from '../trendsBadge';
-import {BrowserRouter} from "react-router-dom";
+import { BrowserRouter } from 'react-router-dom';
 
 export default {
     title: 'Components/KPIs',
@@ -25,20 +25,24 @@ const mockKPI = {
     value: 10,
 };
 
-export const Default = (args) => <KPIBasic {...args} />;
+export const Default = (props) => <KPIBasic {...props} />;
 
 Default.args = mockKPI;
 Default.storyName = 'Basic';
 
-export const WithButton = (args) => <BrowserRouter><KPIButton {...args} /></BrowserRouter>;
+export const WithButton = (props) => (
+    <BrowserRouter>
+        <KPIButton {...props} />
+    </BrowserRouter>
+);
 WithButton.args = {
     ...mockKPI,
     tooltipText: 'Tooltip text',
     labelButton: 'Text',
-    linkButton: '#'
+    linkButton: '#',
 };
 
-export const Labeled = (arg) => <KPILabeled {...arg} />;
+export const Labeled = (props) => <KPILabeled {...props} />;
 Labeled.args = {
     ...mockKPI,
     badgePrecentage: 5,
@@ -47,14 +51,14 @@ Labeled.args = {
     type: TRENDS_BADGE_TYPES.DOWNWARD_TREND,
 };
 
-export const Percentage = (arg) => <KPIPrecentage {...arg} />;
+export const Percentage = (props) => <KPIPercentage {...props} />;
 Percentage.args = {
     title: 'Percent of usage',
     value: 56,
     tooltipText: 'Tooltip text',
 };
 
-export const Rank = (arg) => <KPIRank {...arg} />;
+export const Rank = (props) => <KPIRank {...props} />;
 Rank.args = {
     ...mockKPI,
     title: 'Ranked values',
@@ -63,7 +67,7 @@ Rank.args = {
     tooltipText: 'Rank text',
 };
 
-export const WithDate = (arg) => <KPIWithDate {...arg} />;
+export const WithDate = (props) => <KPIWithDate {...props} />;
 WithDate.args = {
     ...mockKPI,
     value: 20,

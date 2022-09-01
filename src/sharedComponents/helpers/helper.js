@@ -1,18 +1,15 @@
 import PropTypes from 'prop-types';
 
-const generateID = () =>
-    Math.random()
-        .toString(36)
-        .substring(2, 9);
+const generateID = () => Math.random().toString(36).substring(2, 9);
 
-const kFormatter = num => {
+const kFormatter = (num) => {
     return Math.abs(num) > 999
         ? Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + ' K'
         : Math.sign(num) * Math.abs(num);
 };
 
 //@TODO Maybe we can find better substitute
-const mixColors = function(color_1, color_2, weight) {
+const mixColors = function (color_1, color_2, weight) {
     function d2h(d) {
         return d.toString(16);
     } // convert a decimal value to hex

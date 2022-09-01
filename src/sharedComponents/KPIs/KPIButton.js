@@ -1,12 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Button} from "../button";
-import {UncontrolledTooltip} from "reactstrap";
-import {ReactComponent as TooltipIcon} from "../assets/icons/tooltip.svg";
-import {generateID} from "../helpers/helper";
-import {Link} from "react-router-dom";
+import { Button } from '../button';
+import { UncontrolledTooltip } from 'reactstrap';
+import { ReactComponent as TooltipIcon } from '../assets/icons/tooltip.svg';
+import { generateID } from '../helpers/helper';
+import { Link } from 'react-router-dom';
 
-const KPIButton = ({ title, tooltipText, tooltipId = generateID(),labelButton, linkButton, className = '', classNameBody = '' }) => {
+const KPIButton = ({
+    title,
+    tooltipText,
+    tooltipId = generateID(),
+    labelButton,
+    linkButton,
+    className = '',
+    classNameBody = '',
+}) => {
     return (
         <div className={`KPI-component-wrapper ${className}`}>
             <div className={`KPI-component-body ${classNameBody}`}>
@@ -24,7 +32,9 @@ const KPIButton = ({ title, tooltipText, tooltipId = generateID(),labelButton, l
                         </>
                     )}
                 </div>
-                <Link className="text-decoration-none" to={linkButton}><Button size={Button.Sizes.sm} label={labelButton} type={Button.Type.SecondaryGrey} /></Link>
+                <Link className="text-decoration-none" to={linkButton}>
+                    <Button size={Button.Sizes.sm} label={labelButton} type={Button.Type.SecondaryGrey} />
+                </Link>
             </div>
         </div>
     );

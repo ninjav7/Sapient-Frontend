@@ -7,7 +7,7 @@ export default {
     component: DropDown,
 };
 
-const DropDownMenu = props => {
+const DropDownMenu = (props) => {
     return (
         <DropDown triggerButton={<button>Click me and scroll</button>} {...props}>
             <div
@@ -15,7 +15,7 @@ const DropDownMenu = props => {
                     width: 220,
                     height: 220,
                     border: '1px solid #EAECF0',
-                    boxShadow: '0px 10px 24px -4px rgba(16, 24, 40, 0.08), 0px 6px 8px -4px rgba(16, 24, 40, 0.03)',
+                    boxShadow: '0px 10px 24px -4px rgba(16, 24, 40, 0.08), 0 6px 8px -4px rgba(16, 24, 40, 0.03)',
                 }}>
                 I am a content
             </div>

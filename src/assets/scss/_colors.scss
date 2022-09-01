@@ -1,3 +1,4 @@
+
 $base-white: #ffffff;
 
 $success: #d1fadf;
@@ -13,6 +14,7 @@ $error-500: #f04438;
 $error-600: #d92d20;
 $error-700: #b42318;
 
+$primary-indigo-50: #EEF4FF;
 $primary-indigo-300: #a4bcfd;
 $primary-indigo-400: #8098f9;
 $primary-indigo-500: #6172f3;
@@ -37,3 +39,8 @@ $primary-gray-900: #101828;
 $dataviz-blue-50: #eff5ff;
 $dataviz-blue-100: #dbe8fe;
 $dataviz-blue-600: #2955e7;
+
+:export {
+  primaryIndigo50: $primary-indigo-50;
+  primaryIndigo400: $primary-indigo-400;
+}

@@ -7,6 +7,7 @@ import Typography from '../typography';
 import { stringOrNumberPropTypes } from '../helpers/helper';
 
 import './TinyPieChart.scss';
+import colors from '../../assets/scss/_colors.scss';
 
 const TinyPieChart = ({ height = 20, width = 20, percent = 0, label, ...props }) => {
     const className = cx('TinyPieChart-wrapper', 'd-flex', 'align-items-center', props.className);
@@ -18,13 +19,13 @@ const TinyPieChart = ({ height = 20, width = 20, percent = 0, label, ...props })
             </Typography.Body>
 
             <svg height={height} width={width} viewBox="0 0 20 20">
-                <circle r="10" cx="10" cy="10" fill="#EEF4FF" />
+                <circle r="10" cx="10" cy="10" fill={colors.primaryIndigo50} />
                 <circle
                     r="5"
                     cx="10"
                     cy="10"
                     fill="transparent"
-                    stroke="#8098F9"
+                    stroke={colors.primaryIndigo400}
                     strokeWidth="10"
                     strokeDasharray={`calc(${percent} * 31.4 / 100) 31.4`}
                     transform="rotate(-90) translate(-20)"

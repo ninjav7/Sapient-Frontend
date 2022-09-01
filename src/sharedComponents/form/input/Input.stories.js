@@ -18,16 +18,16 @@ export default {
     },
 };
 
-export const Default = arg => {
+export const Default = (props) => {
     return (
         <>
-            <InputTooltip {...arg} tooltipText="Help text" />
+            <InputTooltip {...props} tooltipText="Help text" />
             <Brick />
-            <Input {...arg} />
+            <Input {...props} />
             <Brick />
-            <Input {...arg} elementEnd={<EyeSVG />} />
+            <Input {...props} elementEnd={<EyeSVG />} />
             <Brick />
-            <Input {...arg} elementEnd={<EyeSVG />} error={'This is a error message.'} iconUrl={undefined} />
+            <Input {...props} elementEnd={<EyeSVG />} error={'This is a error message.'} iconUrl={undefined} />
             <Brick />
             <Input label="Label text" />
             <Brick />

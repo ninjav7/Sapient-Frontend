@@ -5,14 +5,14 @@
         padding: 1rem;
         display: inline-block;
         border: 0.0625rem solid #eaecf0;
-        /* shadow/base */
-
-        box-shadow: 0rem 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0rem 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
+        box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.01), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.06);
         border-radius: 0.5rem;
     }
+
     &-table {
         display: grid;
         gap: 0.5rem;
+
         &-head-cell {
             color: $primary-gray-550;
         }

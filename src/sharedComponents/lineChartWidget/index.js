@@ -11,7 +11,7 @@ import './style.scss';
 const LineChartWidget = ({ className = '', series, title, subtitle, height = 228, width }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
-            <div className='line-chart-widget-titles'>
+            <div className="line-chart-widget-titles">
                 <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
                     {title}
                 </Typography.Subheader>
@@ -19,7 +19,7 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 228
                     {subtitle}
                 </Typography.Body>
             </div>
-            
+
             <Brick sizeInRem={1} />
 
             <Chart

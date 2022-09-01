@@ -27,7 +27,7 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
 
     const options = props.isSelectAll ? [selectAllOption, ...props.options] : props.options;
 
-    const handleChange = selected => {
+    const handleChange = (selected) => {
         props.onChange && props.onChange(selected);
 
         setValue(selected);
@@ -35,19 +35,19 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
         if (
             _.isEqual(
                 _.sortBy(selected, [
-                    function(o) {
+                    function (o) {
                         return o.label;
                     },
                 ]),
 
-                _.sortBy(props.options, function(o) {
+                _.sortBy(props.options, function (o) {
                     return o.label;
                 })
             )
         ) {
             setValue(options);
         } else {
-            setValue(selected.filter(option => option.value !== selectAllOption.value));
+            setValue(selected.filter((option) => option.value !== selectAllOption.value));
         }
     };
 
@@ -79,7 +79,7 @@ const MultiSelect = ({ selectClassName = '', className = '', type = DROPDOWN_INP
                 menuIsOpen={isOpen}
                 onChange={handleChange}
                 checkAllCheckboxes={() => {
-                    if ((value || []).find(option => option.value === selectAllOption.value)) {
+                    if ((value || []).find((option) => option.value === selectAllOption.value)) {
                         setValue([]);
                         return;
                     }

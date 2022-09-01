@@ -16,7 +16,7 @@
     height: 1rem;
     margin-top: 0.25rem;
     vertical-align: top;
-    background-color: #fff;
+    background-color: $base-white;
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
@@ -53,7 +53,7 @@
     opacity: 0.5;
 }
 
-.Checkbox {
+.checkbox {
     &-description {
         color: $primary-gray-550 !important;
     }

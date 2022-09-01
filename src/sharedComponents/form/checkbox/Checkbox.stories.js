@@ -9,24 +9,24 @@ export default {
     component: Checkbox,
 };
 
-export const Default = args => {
+export const Default = (props) => {
     return (
         <>
             <h4 className="mb-4">SM</h4>
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr' }}>
-                <Checkbox label="Remember me" size={Checkbox.Sizes.sm} {...args} />
+                <Checkbox label="Remember me" size={Checkbox.Sizes.sm} {...props} />
                 <Checkbox
                     label="Remember me"
                     size={Checkbox.Sizes.sm}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                     checked={true}
                 />
                 <Checkbox
                     label="Remember me"
                     size={Checkbox.Sizes.sm}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                     autoFocused={true}
                 />
                 <Checkbox
@@ -39,32 +39,32 @@ export const Default = args => {
                     size={Checkbox.Sizes.sm}
                     disabled={true}
                     checked={true}
-                    {...args}
+                    {...props}
                 />
                 <Checkbox
                     label="Remember me {Disabled} {Unchecked}"
                     size={Checkbox.Sizes.sm}
                     description="Save my login details for next time."
                     disabled={true}
-                    {...args}
+                    {...props}
                 />
             </div>
 
             <h4 className="mb-4">MD</h4>
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr' }}>
-                <Checkbox label="Remember me" size={Checkbox.Sizes.md} {...args} />
+                <Checkbox label="Remember me" size={Checkbox.Sizes.md} {...props} />
                 <Checkbox
                     label="Remember me"
                     size={Checkbox.Sizes.md}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                     checked={true}
                 />
                 <Checkbox
                     label="Remember me"
                     size={Checkbox.Sizes.md}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                     autoFocused={true}
                 />
                 <Checkbox
@@ -77,14 +77,14 @@ export const Default = args => {
                     size={Checkbox.Sizes.md}
                     disabled={true}
                     checked={true}
-                    {...args}
+                    {...props}
                 />
                 <Checkbox
                     label="Remember me {Disabled} {Unchecked}"
                     size={Checkbox.Sizes.md}
                     description="Save my login details for next time."
                     disabled={true}
-                    {...args}
+                    {...props}
                 />
             </div>
 
@@ -95,7 +95,7 @@ export const Default = args => {
                     label="Remember me {SM}"
                     size={Checkbox.Sizes.sm}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                 />
 
                 <Checkbox
@@ -103,7 +103,7 @@ export const Default = args => {
                     label="Remember me {MD}"
                     size={Checkbox.Sizes.md}
                     description="Save my login details for next time."
-                    {...args}
+                    {...props}
                 />
             </div>
             <h4 className="mb-4">Dropdown List Checkbox</h4>

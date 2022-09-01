@@ -89,7 +89,7 @@ export const SingleValue = ({ children, ...props }) => {
     );
 };
 
-export const Option = props => {
+export const Option = (props) => {
     const { isDisabled, isSelected, isFocused } = props;
     const { customOption } = props.selectProps;
 
@@ -110,7 +110,7 @@ const BadgeSingleValue = ({ handleCloseBtn, ...props }) => (
     </div>
 );
 
-export const OptionMulti = props => {
+export const OptionMulti = (props) => {
     const { isDisabled, isSelected, isFocused, children } = props;
     const { customOption } = props.selectProps;
 
@@ -182,7 +182,7 @@ export const OptionMulti = props => {
 export const ValueContainerMulti = ({ children, ...props }) => {
     const { label, value } = props.selectProps;
 
-    const selectedItems = Array.isArray(value) ? value.filter(option => option.value !== selectAllOption.value) : [];
+    const selectedItems = Array.isArray(value) ? value.filter((option) => option.value !== selectAllOption.value) : [];
     const isTitleShow = selectedItems.length > 1;
 
     const handleCloseBtn = useCallback(() => {
@@ -216,14 +216,14 @@ export const ValueContainerMulti = ({ children, ...props }) => {
 export const MenuList = ({ selectProps: { onMenuInputFocus }, ...props }) => {
     const [value, setValue] = useState('');
 
-    const handleMouseDown = event => {
+    const handleMouseDown = (event) => {
         event.stopPropagation();
         event.preventDefault();
 
         event.target.focus();
     };
 
-    const handleChange = event => {
+    const handleChange = (event) => {
         event.stopPropagation();
         event.preventDefault();
 
@@ -267,7 +267,7 @@ export const Control = ({ children, ...props }) => (
     </components.Control>
 );
 
-export const DropdownIndicator = props => (
+export const DropdownIndicator = (props) => (
     <components.DropdownIndicator {...props}>
         <CaretDownIcon className={conditionalClass(props)} />
     </components.DropdownIndicator>

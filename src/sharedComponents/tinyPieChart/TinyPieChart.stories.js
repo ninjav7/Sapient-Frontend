@@ -19,13 +19,13 @@ export default {
     },
 };
 
-export const Default = arg => (
+export const Default = (props) => (
     <>
         <h5>Tiny Pie Chart</h5>
-        <TinyPieChart {...arg} percent={80} label="80%" />
+        <TinyPieChart {...props} percent={80} label="80%" />
         <Brick />
-        <TinyPieChart {...arg} percent={73} label="73% 1,5 kWh" />
+        <TinyPieChart {...props} percent={73} label="73% 1,5 kWh" />
         <Brick />
-        <TinyPieChart {...arg} percent={22} label="22% 0.7 kWh" />
+        <TinyPieChart {...props} percent={22} label="22% 0.7 kWh" />
     </>
 );

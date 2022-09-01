@@ -12,7 +12,7 @@ import SearchURL from '../../assets/icons/search.svg';
 
 import './DropDownButton.scss';
 
-const SearchField = props => {
+const SearchField = (props) => {
     return (
         <div className="border-bottom search-field-wrapper">
             <Input iconUrl={SearchURL} {...props} />
@@ -20,7 +20,7 @@ const SearchField = props => {
     );
 };
 
-const DropDownBase = props => {
+const DropDownBase = (props) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,11 +32,11 @@ const DropDownBase = props => {
         setIsOpen(false);
     };
 
-    const handleSearchChange = event => {
+    const handleSearchChange = (event) => {
         setSearchQuery(event.target.value);
     };
 
-    const dropDownClasses = cx('DropDownButton-wrapper', {
+    const dropDownClasses = cx('drop-down-button-wrapper', {
         isOpen: isOpen,
     });
 
@@ -45,16 +45,16 @@ const DropDownBase = props => {
         .map(({ link, label, active, className, icon, key }) => {
             return (
                 <Link
-                    key={_.uniqueId('DropDownButton-link')}
+                    key={_.uniqueId('drop-down-button-link')}
                     to={link}
-                    className={cx('DropDownButton-list-item', {
+                    className={cx('drop-down-button-list-item', {
                         active,
                         [className]: !!className,
                     })}>
                     {icon &&
                         React.cloneElement(icon, {
                             ...icon.props,
-                            className: `${icon.props.className} DropDownButton-list-item-icon`,
+                            className: `${icon.props.className} drop-down-button-list-item-icon`,
                         })}
                     <Typography.Body size={Typography.Sizes.lg}>{label}</Typography.Body>
                     {key && (
@@ -73,9 +73,9 @@ const DropDownBase = props => {
                 triggerButton={React.cloneElement(props.triggerButton, { ...props.triggerButton.props })}
                 onOpen={setOpen}
                 onClose={setClose}>
-                <div className="DropDownButton-menu">
+                <div className="drop-down-button-menu">
                     {props.header && (
-                        <div className={cx('DropDownButton-menu-header', 'border-bottom', props.header.className)}>
+                        <div className={cx('drop-down-button-menu-header', 'border-bottom', props.header.className)}>
                             {React.cloneElement(props.header, { ...props.header.props })}
                         </div>
                     )}

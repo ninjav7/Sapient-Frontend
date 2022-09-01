@@ -5,7 +5,7 @@ import { mixColors } from '../helpers/helper';
 
 import './TinyBarChart.scss';
 
-const cleanPercentage = percent => {
+const cleanPercentage = (percent) => {
     if (Number.isNaN(percent) || percent === 'NaN') {
         return 0;
     }

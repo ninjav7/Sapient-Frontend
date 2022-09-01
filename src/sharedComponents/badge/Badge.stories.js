@@ -6,10 +6,4 @@ export default {
     component: Badge,
 };
 
-export const Default = () => {
-    return (
-        <div>
-            <Badge text="Office" />
-        </div>
-    );
-};
+export const Default = () => <Badge text="Office" />;

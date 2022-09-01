@@ -18,7 +18,7 @@ const TriggerButton = forwardRef((props, ref) => (
 
 TriggerButton.displayName = 'TriggerButton';
 
-const DropDownIcon = props => {
+const DropDownIcon = (props) => {
     return <DropDownBase triggerButton={<TriggerButton label={props.label} />} {...props} />;
 };
 

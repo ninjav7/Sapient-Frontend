@@ -67,9 +67,6 @@ export const Default = () => {
                     },
                 ]}
             />
-            
-            
-            
         </BrowserRouter>
     );
 };

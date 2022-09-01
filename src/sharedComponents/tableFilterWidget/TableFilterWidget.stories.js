@@ -175,9 +175,9 @@ const TableBody = () => (
     </Table.TBody>
 );
 
-export const Default = arg => {
+export const Default = (props) => {
     return (
-        <TableFilterWidget {...arg}>
+        <TableFilterWidget {...props}>
             <Table>
                 <TableHeader />
                 <TableBody />
@@ -192,5 +192,5 @@ Default.args = {
         { label: '7 Days', value: '7 days' },
         { label: '1 Year', value: '1 Year' },
     ],
-    onSelectColumn: column => alert(JSON.stringify(column)),
+    onSelectColumn: (column) => alert(JSON.stringify(column)),
 };

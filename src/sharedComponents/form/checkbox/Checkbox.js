@@ -48,7 +48,7 @@ const Checkbox = ({
         checkboxRef.current.indeterminate = indeterminate;
     }, [indeterminate]);
 
-    const classNameWrapper = cx('Checkbox-wrapper', size, { [value]: !!value, [type]: !!type });
+    const classNameWrapper = cx('checkbox-wrapper', size, { [value]: !!value, [type]: !!type });
     const classInputInner = cx('form-check-input', 'ml-0', 'mt-0', 'position-static', 'flex-shrink-0', classInput);
     const [labelSize, descriptionSize] =
         type === CHECKBOX_TYPES.dropDownCheckbox ? [Typography.Sizes.md] : textSizesMap[size];
@@ -68,7 +68,7 @@ const Checkbox = ({
                     <Typography.Body size={labelSize}>{label}</Typography.Body>
                     {description && type !== CHECKBOX_TYPES.dropDownCheckbox && (
                         <Typography.Body
-                            className="Checkbox-description"
+                            className="checkbox-description"
                             size={descriptionSize}
                             fontWeight={Typography.Types.Light}>
                             {description}

@@ -8,7 +8,7 @@ import AvatarUrl from '../../../assets/images/avatar.png';
 import Avatar2Url from '../../../assets/images/avatar2.png';
 import Avatar3Url from '../../../assets/images/avatar3.png';
 
-const Multi = arg => {
+const Multi = (arg) => {
     return (
         <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 30 }}>

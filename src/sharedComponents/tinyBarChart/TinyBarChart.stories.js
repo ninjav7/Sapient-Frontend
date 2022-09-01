@@ -6,11 +6,11 @@ export default {
     component: TinyBarChart,
 };
 
-export const Default = (arg) => {
+export const Default = (props) => {
     return (
         <>
-            Percent {arg.percent}
-            <TinyBarChart {...arg} />
+            Percent {props.percent}
+            <TinyBarChart {...props} />
         </>
     );
 };

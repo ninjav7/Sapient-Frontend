@@ -9,7 +9,7 @@ export default {
     component: Avatar,
 };
 
-export const Default = arg => <Avatar {...arg} />;
+export const Default = (props) => <Avatar {...props} />;
 
 Default.args = {
     userName: 'Olivia Rhye',

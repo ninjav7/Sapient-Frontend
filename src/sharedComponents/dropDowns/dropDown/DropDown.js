@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useLayer } from 'react-laag';
 import PropTypes from 'prop-types';
 
-import './DropDown.scss';
-
 const DropDown = ({ triggerButton, ...props }) => {
     const [isOpen, setOpen] = useState(props.isOpen);
 

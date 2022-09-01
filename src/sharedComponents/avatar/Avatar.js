@@ -13,7 +13,7 @@ const AVATAR_SIZES = Object.freeze({
     xl: 'xl',
 });
 
-const Avatar = props => {
+const Avatar = (props) => {
     const classNames = cx('Avatar-wrapper', {
         [props.size]: !!props.size,
     });
@@ -26,11 +26,11 @@ const Avatar = props => {
                 {/*<div className="Avatar-indicator"></div>*/}
             </div>
 
-            <div className="Avatar-details">
-                <Typography.Body size={Typography.Sizes.sm} className="Avatar-details-userName">
+            <div className="avatar-details">
+                <Typography.Body size={Typography.Sizes.sm} className="avatar-details-username">
                     {props.userName}
                 </Typography.Body>
-                <Typography.Body size={Typography.Sizes.xs} className="userEmail">
+                <Typography.Body size={Typography.Sizes.xs} className="avatar-details-useremail">
                     {props.userEmail}
                 </Typography.Body>
             </div>

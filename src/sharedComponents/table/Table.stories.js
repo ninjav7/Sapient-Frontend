@@ -7,7 +7,7 @@ export default {
     component: Table,
 };
 
-export const Default = (arg) => (
+export const Default = (props) => (
     <Table>
         <Table.THead>
             <Table.Cell>

@@ -13,15 +13,15 @@ import './TableFilterWidget.scss';
 
 const TableFilterWidget = ({ children, columns = [], onSelectColumn, selectedColumns }) => {
     return (
-        <div className="TableFilterWidget-wrapper">
-            <div className="TableFilterWidget-filters">
+        <div className="table-filter-widget-wrapper">
+            <div className="table-filter-widget-filters">
                 <Input iconUrl={SearchSVG} />
                 <Button label="Add Filter" type={Button.Type.SecondaryGrey} size={Button.Sizes.md} icon={<PlusSVG />} />
                 <Select.Multi
                     label="Columns"
                     options={columns}
                     onChange={onSelectColumn}
-                    className="TableFilterWidget-columns"
+                    className="table-filter-widget-columns"
                     value={selectedColumns}
                 />
             </div>
