@@ -1,5 +1,5 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-// export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+//export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
 //export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -112,6 +112,10 @@ export const getEnergyConsumption = '/api/energy/chart';
 // explore
 export const getExplore = '/api/explorer/chart';
 export const getExploreByBuilding = '/api/explorer/chart/by_building';
+export const getExploreBuildingList = '/api/explorer/building_list';
+export const getExploreBuildingChart = '/api/explorer/building_chart';
+export const getExploreEquipmentList = '/api/explorer/equipment_list';
+export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
 export const getEquipmentChart = '/api/explorer/equipment_chart';

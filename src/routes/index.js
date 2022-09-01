@@ -100,7 +100,7 @@ const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
 // explore
-const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
+// const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
