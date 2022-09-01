@@ -26,6 +26,7 @@ import {
     listSensor,
     searchEquipment,
 } from '../../services/Network';
+import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
@@ -1257,7 +1258,11 @@ const EquipmentTable = ({
                                                 <td>{record.sensor_number === 0 ? '-' : record.sensor_number}</td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                <td>{record.last_data === '' ? '-' : record.last_data}</td>
+                                                <td>
+                                                    {record.last_data === ''
+                                                        ? '-'
+                                                        : moment(record?.last_data).fromNow()}
+                                                </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'device_id') && (
                                                 <td className="font-weight-bold">{record.device_mac}</td>

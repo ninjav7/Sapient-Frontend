@@ -6,7 +6,6 @@ import { changeLayout } from '../redux/actions';
 import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker/PageTracker';
 import SideNav from '../components/SideNav/SideNav';
-import { Link, useLocation } from 'react-router-dom';
 import TopNav from '../components/TopNav/TopNav';
 
 // code splitting and lazy loading
@@ -48,7 +47,6 @@ class HorizontalLayout extends Component {
         const children = this.props.children || null;
         const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
         const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
-        // const location = useLocation();
 
         return (
             <React.Fragment>
@@ -61,35 +59,25 @@ class HorizontalLayout extends Component {
                         <PageTracker />
                     </div>
 
-                    {/* {!(location.pathname.split('/')[1] === 'explore') ? (
-                        
-                    ) : (
-                        
-                    )} */}
-
                     <div>
-                        {window.location.pathname!=="/explore/page"?(
-                        <div className="energy-side-nav">
-                            <SideNav />
-                        </div>):("")}
-                        <div className={window.location.pathname==="/explore/page"?"energy-page-content-full-screen":"energy-page-content"}>
+                        {!window.location.pathname.includes('/explore-page/') ? (
+                            <div className="energy-side-nav">
+                                <SideNav />
+                            </div>
+                        ) : (
+                            ''
+                        )}
+                        <div
+                            className={
+                                window.location.pathname.includes('/explore-page/')
+                                    ? 'energy-page-content-full-screen'
+                                    : 'energy-page-content'
+                            }>
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
                         </div>
                     </div>
-
-                    {/* <div>
-                            <div className="energy-page-content-full-screen">
-                                <Suspense fallback={loading()}>
-                                    <Card className="pl-1 pr-1 pt-0">{children}</Card>
-                                </Suspense>
-                            </div>
-                        </div> */}
-
-                    {/* <Suspense fallback={loading()}>
-                        <Footer />
-                    </Suspense> */}
                 </div>
             </React.Fragment>
         );

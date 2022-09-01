@@ -1430,7 +1430,6 @@ const BuildingOverview = () => {
                                 y: (record.y / 1000).toFixed(5),
                             });
                         });
-                        // console.log('newArray => ', newArray);
                         setBuildingConsumptionChart(newArray);
                     });
             } catch (error) {
@@ -1771,7 +1770,7 @@ const BuildingOverview = () => {
                                                         className="m-4">
                                                         <Link
                                                             to={{
-                                                                pathname: `/explore/page`,
+                                                                pathname: `/explore/by-building`,
                                                             }}>
                                                             <button
                                                                 type="button"

@@ -1,41 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
 import { faBuilding } from '@fortawesome/pro-solid-svg-icons';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { BuildingStore } from '../../store/BuildingStore';
-import { ComponentStore } from '../../store/ComponentStore';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import { Cookies } from 'react-cookie';
-import BuildingList from './BuildingList';
+import ExploreBuildingList from './ExploreBuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { buildingData } from '../../store/globalState';
 import { useAtom } from 'jotai';
 
-const PortfolioItem = ({ handlePortfolioClick }) => {
-    const location = useLocation();
+const PortfolioItem = ({ exploreBldName, exploreBldId }) => {
+    const history = useHistory();
     return (
         <div>
-            {location.pathname === '/energy/portfolio/overview' ? (
+            {exploreBldId === 'portfolio' ? (
                 <Dropdown.Item className="selected">
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-
-                            <Link to="/energy/portfolio/overview">
-                                <span
-                                    className="portfolio-txt-style"
-                                    onClick={() => {
-                                        handlePortfolioClick && handlePortfolioClick('Portfolio');
-                                    }}>
-                                    Portfolio
-                                </span>
-                            </Link>
+                            <span className="portfolio-txt-style">Portfolio</span>
                         </div>
                         <div className="dropdown-item-selected">
                             <CheckIcon />
@@ -45,15 +33,21 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
             ) : (
                 <Dropdown.Item>
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-                    <Link to="/energy/portfolio/overview">
-                        <span
-                            className="portfolio-txt-style"
-                            onClick={() => {
-                                handlePortfolioClick && handlePortfolioClick('Portfolio');
-                            }}>
-                            Portfolio
-                        </span>
-                    </Link>
+                    <span
+                        className="portfolio-txt-style"
+                        onClick={() => {
+                            localStorage.setItem('exploreBldId', 'portfolio');
+                            localStorage.setItem('exploreBldName', 'Portfolio');
+                            ExploreBuildingStore.update((s) => {
+                                s.exploreBldId = 'portfolio';
+                                s.exploreBldName = 'Portfolio';
+                            });
+                            history.push({
+                                pathname: `/explore-page/by-buildings`,
+                            });
+                        }}>
+                        Portfolio
+                    </span>
                 </Dropdown.Item>
             )}
         </div>
@@ -74,21 +68,16 @@ const FilterBuildings = ({ handleValueChange, value }) => {
     );
 };
 
-const BuildingSwitcher = () => {
+const ExploreBuildingSwitcher = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const location = useLocation();
-
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
-    const bldStoreId = BuildingStore.useState((s) => s.BldgId);
-    const bldStoreName = BuildingStore.useState((s) => s.BldgName);
-    const [portfolioName, setPortfolioName] = useState('');
+    const exploreBldId = ExploreBuildingStore.useState((s) => s.exploreBldId);
+    const exploreBldName = ExploreBuildingStore.useState((s) => s.exploreBldName);
 
     const [buildingListData] = useAtom(buildingData);
-
-    console.log(buildingList, 'buildingListNew');
 
     useEffect(() => {
         const getBuildingList = async () => {
@@ -97,30 +86,20 @@ const BuildingSwitcher = () => {
         getBuildingList();
     }, [buildingListData]);
 
-    useEffect(() => {
-        ComponentStore.update((s) => {
-            s.parent = 'portfolio';
-        });
-    }, [portfolioName]);
-
-    const dropDownTitle =
-        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
-            ? 'Portfolio'
-            : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });
 
     return (
         <div className="tracker-dropdown">
-            <FontAwesomeIcon icon={bldStoreName === 'Portfolio' ? faBuildings : faBuilding} size="lg" />
+            <FontAwesomeIcon icon={exploreBldName === 'Portfolio' ? faBuildings : faBuilding} size="lg" />
 
             <Dropdown>
                 <Dropdown.Toggle
                     id="bts-button-styling"
                     className="bts-btn-style page-tracker-dropdown-btn"
                     variant="secondary">
-                    <div className="page-tracker-dropdown-text">{dropDownTitle}</div>
+                    <div className="page-tracker-dropdown-text">{exploreBldName}</div>
 
                     <FontAwesomeIcon icon={faChevronDown} className="ml-2" />
                 </Dropdown.Toggle>
@@ -130,9 +109,9 @@ const BuildingSwitcher = () => {
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
                         <div className="tracker-dropdown-content">
-                            <PortfolioItem handlePortfolioClick={setPortfolioName} />
+                            <PortfolioItem exploreBldId={exploreBldId} exploreBldName={exploreBldName} />
 
-                            <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />
+                            <ExploreBuildingList buildingList={filteredBuildings} bldStoreId={exploreBldId} />
                         </div>
                     </div>
                 </Dropdown.Menu>
@@ -141,4 +120,4 @@ const BuildingSwitcher = () => {
     );
 };
 
-export default BuildingSwitcher;
+export default ExploreBuildingSwitcher;
