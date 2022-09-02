@@ -696,6 +696,7 @@ const ExploreByEquipment = () => {
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
+                        setSelectedEquipmentId('');
 
                         //setIsExploreDataLoading(false);
                     });

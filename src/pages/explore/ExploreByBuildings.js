@@ -556,6 +556,7 @@ const ExploreByBuildings = () => {
                         console.log(seriesData);
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
+                        setSelectedBuildingId('');
                     });
             } catch (error) {
                 console.log(error);
