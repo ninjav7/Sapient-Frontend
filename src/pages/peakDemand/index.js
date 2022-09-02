@@ -54,7 +54,7 @@ const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     );
 };
 
-const EquipmentTypePeaks = ({ equipTypeData, isTopPeakCategoriesLoading, setEquipUsageToFetch }) => {
+const EquipmentTypePeaks = ({ equipTypeData, isTopPeakCategoriesLoading }) => {
     return (
         <div className="m-2 mt-4">
             <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
@@ -101,10 +101,7 @@ const EquipmentTypePeaks = ({ equipTypeData, isTopPeakCategoriesLoading, setEqui
                         {equipTypeData?.map((record, index) => {
                             return (
                                 <tr key={index}>
-                                    <td
-                                        className="custom-equip-style"
-                                        style={{ color: '#2955e7' }}
-                                        onClick={setEquipUsageToFetch(record?.id)}>
+                                    <td className="custom-equip-style" style={{ color: '#2955e7' }}>
                                         {record?.name}
                                     </td>
                                     <td className="custom-usage-style muted">
@@ -267,13 +264,12 @@ const PeakDemand = () => {
 
     const [topBuildingPeaks, setTopBuildingPeaks] = useState([]);
     const [equipTypeToFetch, setEquipTypeToFetch] = useState('');
-    const [equipUsageToFetch, setEquipUsageToFetch] = useState('');
     const [equipTypeData, setEquipTypeData] = useState([]);
     const [equipUsageData, setEquipUsageData] = useState([]);
 
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
+    const peakDemandTrendOptions = {
         chart: {
             type: 'area',
             stacked: false,
@@ -338,7 +334,7 @@ const PeakDemand = () => {
                 },
             },
         },
-    });
+    };
 
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
@@ -454,12 +450,10 @@ const PeakDemand = () => {
         const fetchEquipTypeData = async (filterDate) => {
             if (filterDate === null || filterDate === '') {
                 setIsTopPeakCategoriesLoading(false);
-                setIsTopPeakContributersLoading(false);
                 return;
             }
             try {
                 setIsTopPeakCategoriesLoading(true);
-                setIsTopPeakContributersLoading(true);
                 let params = `?building_id=${bldgId}&consumption=energy`;
                 await axios
                     .post(
@@ -472,12 +466,6 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
-                        if (responseData?.length === 0) {
-                            setIsTopPeakCategoriesLoading(false);
-                            setIsTopPeakContributersLoading(false);
-                            return;
-                        }
-                        setEquipUsageToFetch(responseData[0].id);
                         setEquipTypeData(responseData);
                         setIsTopPeakCategoriesLoading(false);
                     });
@@ -487,18 +475,9 @@ const PeakDemand = () => {
                 setIsTopPeakCategoriesLoading(false);
             }
         };
-        fetchEquipTypeData(equipTypeToFetch);
-    }, [equipTypeToFetch]);
 
-    useEffect(() => {
-        const fetchEquipUsageData = async (equipId, filterDate) => {
+        const fetchEquipUsageData = async (filterDate) => {
             if (filterDate === null || filterDate === '') {
-                setIsTopPeakCategoriesLoading(false);
-                setIsTopPeakContributersLoading(false);
-                return;
-            }
-            if (equipId === '') {
-                setIsTopPeakCategoriesLoading(false);
                 setIsTopPeakContributersLoading(false);
                 return;
             }
@@ -516,11 +495,6 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
-                        if (responseData?.length === 0) {
-                            setIsTopPeakCategoriesLoading(false);
-                            setIsTopPeakContributersLoading(false);
-                            return;
-                        }
                         setEquipUsageData(responseData);
                         setIsTopPeakContributersLoading(false);
                     });
@@ -530,8 +504,10 @@ const PeakDemand = () => {
                 setIsTopPeakContributersLoading(false);
             }
         };
-        fetchEquipUsageData(equipUsageToFetch, equipTypeToFetch);
-    }, [equipUsageToFetch]);
+
+        fetchEquipTypeData(equipTypeToFetch);
+        fetchEquipUsageData(equipTypeToFetch);
+    }, [equipTypeToFetch]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -679,7 +655,6 @@ const PeakDemand = () => {
                     <EquipmentTypePeaks
                         equipTypeData={equipTypeData}
                         isTopPeakCategoriesLoading={isTopPeakCategoriesLoading}
-                        setEquipUsageToFetch={setEquipUsageToFetch}
                     />
                 </Col>
                 <Col xl={6}>
