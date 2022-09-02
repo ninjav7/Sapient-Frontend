@@ -19,7 +19,8 @@ import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-
+import LineColumnChart from '../charts/LineColumnChart';
+import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
     builidingAlerts,
@@ -31,7 +32,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler, timeZone } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -87,7 +88,8 @@ const BuildingOverview = () => {
         },
     });
 
-    const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
+    const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
+    const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
 
@@ -363,84 +365,54 @@ const BuildingOverview = () => {
         },
     ]);
 
-    const [lineChartOptions, setLineChartOptions] = useState({
+    const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
-            type: 'line',
-            zoom: {
-                enabled: false,
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true,
             },
             animations: {
                 enabled: false,
             },
         },
-        dataLabels: {
-            enabled: false,
-        },
-        toolbar: {
-            show: true,
-        },
-        colors: ['#87AADE'],
         stroke: {
+            width: 0.2,
+            show: true,
             curve: 'straight',
         },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5,
-            },
-        },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
-        },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                // format: 'dd/MMM - hh:mm TT',
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
         },
         xaxis: {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    let dateText = moment(timestamp).format('M/DD');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} ${dateText}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    // if (val >= 1000) {
-                    //     val = (val / 1000).toFixed(0) + ' K';
-                    // }
-                    return val + ' K';
+                formatter: function (val) {
+                    let print = val.toFixed(2);
+                    return `${print}k`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
@@ -1406,7 +1378,8 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=minute&building_id=${bldgId}`;
+                setIsEnergyConsumptionDataLoading(true);
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
@@ -1417,7 +1390,7 @@ const BuildingOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
+                        let response = res?.data;
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -1426,15 +1399,17 @@ const BuildingOverview = () => {
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(5),
+                                x: record?.x,
+                                y: (record?.y / 1000).toFixed(5),
                             });
                         });
-                        setBuildingConsumptionChart(newArray);
+                        setBuildingConsumptionChartData(newArray);
+                        setIsEnergyConsumptionDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Consumption Chart');
+                setIsEnergyConsumptionDataLoading(false);
             }
         };
 
@@ -1872,7 +1847,16 @@ const BuildingOverview = () => {
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                                <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
+                                {isEnergyConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <LineColumnChart
+                                        series={buildingConsumptionChartData}
+                                        options={buildingConsumptionChartOpts}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Row>

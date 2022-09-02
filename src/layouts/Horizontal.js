@@ -1,88 +1,65 @@
-import React, { Component, Suspense } from 'react';
-import { Card, Col, Container, Row } from 'reactstrap';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Card } from 'reactstrap';
 import { connect } from 'react-redux';
 import './style.css';
 import { changeLayout } from '../redux/actions';
-import * as layoutConstants from '../constants/layout';
 import PageTracker from '../components/PageTracker/PageTracker';
 import SideNav from '../components/SideNav/SideNav';
 import TopNav from '../components/TopNav/TopNav';
+import { useLocation } from 'react-router-dom';
 
-// code splitting and lazy loading
-// https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
-const Topbar = React.lazy(() => import('../components/Topbar'));
-const Navbar = React.lazy(() => import('../components/Navbar'));
-const RightSidebar = React.lazy(() => import('../components/RightSidebar'));
-const Footer = React.lazy(() => import('../components/Footer'));
 const loading = () => <div className="text-center"></div>;
 
-class HorizontalLayout extends Component {
-    constructor(props) {
-        super(props);
+const HorizontalLayout = (props) => {
+    const children = props.children || null;
+    const location = useLocation();
+    const [showSideNav, setShowSideNav] = useState(true);
 
-        this.openMenu = this.openMenu.bind(this);
-        this.state = {
-            isMenuOpened: false,
-        };
-    }
+    useEffect(() => {
+        if (!location.pathname.includes('/explore-page/')) {
+            setShowSideNav(true);
+        }
+        if (location.pathname.includes('/explore-page/')) {
+            setShowSideNav(false);
+        }
+    }, [location]);
 
-    /**
-     *
-     */
-    componentDidMount = () => {
-        console.log(this.props);
-        this.props.changeLayout(layoutConstants.LAYOUT_HORIZONTAL);
-    };
+    return (
+        <React.Fragment>
+            <div id="wrapper">
+                <div>
+                    <TopNav />
+                </div>
 
-    /**
-     * Opens the menu - mobile
-     */
-    openMenu = (e) => {
-        e.preventDefault();
-        this.setState({ isMenuOpened: !this.state.isMenuOpened });
-    };
+                <div>
+                    <PageTracker />
+                </div>
 
-    render() {
-        // get the child view which we would like to render
-        const children = this.props.children || null;
-        const isCondensed = this.props.layout.leftSideBarType === layoutConstants.LEFT_SIDEBAR_TYPE_CONDENSED;
-        const isLight = this.props.layout.leftSideBarTheme === layoutConstants.LEFT_SIDEBAR_THEME_DEFAULT;
+                <div>
+                    {showSideNav && (
+                        <div className="energy-side-nav">
+                            <SideNav />
+                        </div>
+                    )}
 
-        return (
-            <React.Fragment>
-                <div id="wrapper">
-                    <div>
-                        <TopNav />
-                    </div>
-
-                    <div>
-                        <PageTracker />
-                    </div>
-
-                    <div>
-                        {!window.location.pathname.includes('/explore-page/') ? (
-                            <div className="energy-side-nav">
-                                <SideNav />
-                            </div>
-                        ) : (
-                            ''
-                        )}
-                        <div
-                            className={
-                                window.location.pathname.includes('/explore-page/')
-                                    ? 'energy-page-content-full-screen'
-                                    : 'energy-page-content'
-                            }>
+                    {showSideNav ? (
+                        <div className="energy-page-content">
                             <Suspense fallback={loading()}>
                                 <Card className="energy-page-content-card shadow-none">{children}</Card>
                             </Suspense>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="energy-page-content-full-screen">
+                            <Suspense fallback={loading()}>
+                                <Card className="energy-page-content-card shadow-none">{children}</Card>
+                            </Suspense>
+                        </div>
+                    )}
                 </div>
-            </React.Fragment>
-        );
-    }
-}
+            </div>
+        </React.Fragment>
+    );
+};
 
 const mapStateToProps = (state) => {
     return {

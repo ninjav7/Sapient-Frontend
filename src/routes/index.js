@@ -100,7 +100,7 @@ const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
 // explore
-const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
+// const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
 const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
 const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
@@ -340,30 +340,6 @@ const portfolioRoutes = {
             visibility: true,
             parent: 'buildings',
         },
-        // {
-        //     path: '/energy/peak-demand/:bldgId',
-        //     name: 'Peak Demand',
-        //     component: PeakDemand,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
-        // {
-        //     path: '/energy/end-uses/:bldgId',
-        //     name: 'End Uses',
-        //     component: EndUses,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
-        {
-            path: '/energy/time-of-day/:bldgId',
-            name: 'Time Of Day',
-            component: TimeOfDay,
-            route: PrivateRoute,
-            visibility: true,
-            parent: 'buildings',
-        },
         {
             path: '/energy/end-uses/:endUseType/:bldgId',
             name: 'EndUseType',
@@ -372,9 +348,25 @@ const portfolioRoutes = {
             visibility: false,
         },
         {
+            path: '/energy/peak-demand/:bldgId',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
             path: '/energy/end-uses/:bldgId',
             name: 'End Uses',
             component: EndUses,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/time-of-day/:bldgId',
+            name: 'Time Of Day',
+            component: TimeOfDay,
             route: PrivateRoute,
             visibility: true,
             parent: 'buildings',

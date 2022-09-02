@@ -13,7 +13,7 @@ import {
     listSensor,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { dateFormatHandler } from '../../../utils/helper';
+import { dateFormatHandler, timeZone } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -78,8 +78,6 @@ const IndividualPassiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -102,7 +100,7 @@ const IndividualPassiveDevice = () => {
         setSensorData(obj);
         fetchSensorGraphData(id);
         setShowChart(true);
-    };    
+    };
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -118,7 +116,6 @@ const IndividualPassiveDevice = () => {
         return label;
     };
 
-    
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -448,7 +445,7 @@ const IndividualPassiveDevice = () => {
                                     {filtered.map((record, index) => {
                                         return (
                                             <>
-                                                {(record.equipment_id === '' && record.breaker_id === '') ? (
+                                                {record.equipment_id === '' && record.breaker_id === '' ? (
                                                     <div className="sensor-container-style-notAttached mt-3">
                                                         <div className="sensor-data-style">
                                                             <span className="sensor-data-no">{record.index}</span>

@@ -1,6 +1,5 @@
 export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
-//export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -28,7 +27,7 @@ export const addUser = '/api/user_role/user/add_user';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
-export const endUsesChart = '/api/energy/chart/end-uses';
+export const endUsesChart = '/api/energy/end_use/chart/end-uses';
 export const hvacUsageChart = '/api/energy/chart/hvac';
 // export const endUsesFloorChart = '/api/energy/chart/byfloor';
 export const endUsesUsageChart = '/api/energy/end_use/load_usage';
@@ -112,13 +111,20 @@ export const getEnergyConsumption = '/api/energy/chart';
 // explore
 export const getExplore = '/api/explorer/chart';
 export const getExploreByBuilding = '/api/explorer/chart/by_building';
+export const getExploreBuildingList = '/api/explorer/building_list';
+export const getExploreBuildingChart = '/api/explorer/building_chart';
+export const getExploreEquipmentList = '/api/explorer/equipment_list';
+export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
 export const getEquipmentChart = '/api/explorer/equipment_chart';
 
-// peakDemand Chart
+// Peak Demand
+export const peakDemand = '/api/energy/peak_demand';
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
+export const peakEquipType = '/api/energy/peak_demand/equipment_type';
+export const peakEquipUsage = '/api/energy/peak_demand/equipment';
 export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
 
 // sensors list

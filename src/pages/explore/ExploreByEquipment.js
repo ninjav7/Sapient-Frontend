@@ -4,7 +4,12 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BaseUrl, getExploreByEquipment } from '../../services/Network';
+import {
+    BaseUrl,
+    getExploreByEquipment,
+    getExploreEquipmentList,
+    getExploreEquipmentChart,
+} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +21,9 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
+import ApexCharts from 'apexcharts';
 import './style.css';
+import { remove } from 'lodash';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -25,7 +32,42 @@ const ExploreEquipmentTable = ({
     topPeakConsumption,
     handleChartOpen,
     setEquipmentFilter,
+    selectedEquipmentId,
+    setSelectedEquipmentId,
+    removeEquipmentId,
+    setRemovedEquipmentId,
+    equipmentListArray,
+    setEquipmentListArray,
 }) => {
+    const handleSelectionAll = (e) => {
+        var ischecked = document.getElementById('selection');
+        if (ischecked.checked == true) {
+            let arr = [];
+            for (var i = 0; i < exploreTableData.length; i++) {
+                arr.push(exploreTableData[i].equipment_id);
+                console.log(arr);
+
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked = ischecked.checked;
+            }
+            setEquipmentListArray(arr);
+        } else {
+            for (var i = 0; i < exploreTableData.length; i++) {
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked = ischecked.checked;
+            }
+            ischecked.checked = ischecked.checked;
+        }
+    };
+    const handleSelection = (e, id) => {
+        var isChecked = document.getElementById(id);
+        if (isChecked.checked == true) {
+            setSelectedEquipmentId(id);
+        } else {
+            setRemovedEquipmentId(id);
+        }
+    };
+
     return (
         <>
             <Card>
@@ -35,7 +77,14 @@ const ExploreEquipmentTable = ({
                             <thead>
                                 <tr>
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" />
+                                        <input
+                                            type="checkbox"
+                                            className="mr-4"
+                                            id="selection"
+                                            onClick={(e) => {
+                                                handleSelectionAll(e);
+                                            }}
+                                        />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
@@ -81,6 +130,15 @@ const ExploreEquipmentTable = ({
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-4"
+                                                            id={record?.equipment_id}
+                                                            value={record?.equipment_id}
+                                                            onClick={(e) => {
+                                                                handleSelection(e, record?.equipment_id);
+                                                            }}
+                                                        />
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -101,10 +159,10 @@ const ExploreEquipmentTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {(record?.energy_consumption?.now / 1000).toFixed(2)} kWh
+                                                        {(record?.consumption?.now / 1000).toFixed(2)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
-                                                            {index === 0 && record?.energy_consumption?.now === 0 && (
+                                                            {index === 0 && record?.consumption?.now === 0 && (
                                                                 <Line
                                                                     percent={0}
                                                                     strokeWidth="3"
@@ -113,10 +171,10 @@ const ExploreEquipmentTable = ({
                                                                     strokeLinecap="round"
                                                                 />
                                                             )}
-                                                            {index === 0 && record?.energy_consumption?.now > 0 && (
+                                                            {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -129,7 +187,7 @@ const ExploreEquipmentTable = ({
                                                             {index === 1 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -142,7 +200,7 @@ const ExploreEquipmentTable = ({
                                                             {index === 2 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -155,7 +213,7 @@ const ExploreEquipmentTable = ({
                                                             {index === 3 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -168,7 +226,7 @@ const ExploreEquipmentTable = ({
                                                             {index === 4 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -181,7 +239,7 @@ const ExploreEquipmentTable = ({
                                                             {index === 5 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
                                                                             100
                                                                     ).toFixed(2)}
@@ -195,32 +253,30 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     <td>
-                                                        {record?.energy_consumption?.now <=
-                                                            record?.energy_consumption?.old && (
+                                                        {record?.consumption?.now <= record?.consumption?.old && (
                                                             <button
                                                                 className="button-success text-success btn-font-style"
                                                                 style={{ width: 'auto' }}>
                                                                 <i className="uil uil-chart-down">
                                                                     <strong>
                                                                         {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
+                                                                            record?.consumption?.now,
+                                                                            record?.consumption?.old
                                                                         )}
                                                                         %
                                                                     </strong>
                                                                 </i>
                                                             </button>
                                                         )}
-                                                        {record?.energy_consumption?.now >
-                                                            record?.energy_consumption?.old && (
+                                                        {record?.consumption?.now > record?.consumption?.old && (
                                                             <button
                                                                 className="button-danger text-danger btn-font-style"
                                                                 style={{ width: 'auto', marginBottom: '4px' }}>
                                                                 <i className="uil uil-arrow-growth">
                                                                     <strong>
                                                                         {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
+                                                                            record?.consumption?.now,
+                                                                            record?.consumption?.old
                                                                         )}
                                                                         %
                                                                     </strong>
@@ -397,6 +453,7 @@ const ExploreByEquipment = () => {
 
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+    const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
@@ -456,6 +513,10 @@ const ExploreByEquipment = () => {
             toolbar: {
                 show: false,
             },
+
+            animations: {
+                enabled: false,
+            },
             type: 'area',
             brush: {
                 target: 'chart2',
@@ -469,7 +530,7 @@ const ExploreByEquipment = () => {
                 // },
             },
         },
-        colors: ['#008FFB'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -486,11 +547,18 @@ const ExploreByEquipment = () => {
         yaxis: {
             tickAmount: 2,
         },
+        legend: {
+            show: false,
+        },
     });
 
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+    const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
+    const [removeEquipmentId, setRemovedEquipmentId] = useState('');
+    const [equipmentListArray, setEquipmentListArray] = useState([]);
+    const [allEquipmentData, setAllEquipmenData] = useState([]);
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
@@ -520,7 +588,7 @@ const ExploreByEquipment = () => {
 
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreByEquipment}${params}`,
+                        `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -529,26 +597,10 @@ const ExploreByEquipment = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setTopEnergyConsumption(responseData[0].consumption.now);
                         setTopPeakConsumption(responseData[0].peak_power.now);
                         setExploreTableData(responseData);
-                        let data = responseData;
-                        let exploreData = [];
-                        data.forEach((record) => {
-                            if (record.equipment_name !== null) {
-                                let recordToInsert = {
-                                    name: record.equipment_name,
-                                    data: record.equipment_consumption,
-                                };
-                                exploreData.push(recordToInsert);
-                            }
-                        });
-                        setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
+
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -600,6 +652,155 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
+    useEffect(() => {
+        console.log('Entered selected Equipment id ', selectedEquipmentId);
+        if (selectedEquipmentId === '') {
+            return;
+        }
+        const fetchExploreChartData = async () => {
+            try {
+                // setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        console.log(responseData);
+                        let data = responseData.data;
+                        console.log(data);
+                        let arr = [];
+                        arr = exploreTableData.filter(function (item) {
+                            return item.equipment_id === selectedEquipmentId;
+                        });
+                        console.log(arr);
+                        let exploreData = [];
+
+                        let recordToInsert = {
+                            name: arr[0].equipment_name,
+                            data: data,
+                            id: arr[0].equipment_id,
+                        };
+                        console.log(recordToInsert);
+
+                        setSeriesData([...seriesData, recordToInsert]);
+                        setSeriesLineData([...seriesLineData, recordToInsert]);
+                        setSelectedEquipmentId('');
+
+                        //setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                //setIsExploreDataLoading(false);
+            }
+        };
+        fetchExploreChartData();
+    }, [selectedEquipmentId]);
+
+    useEffect(() => {
+        console.log('Entered Remove Equipment ', removeEquipmentId);
+        if (removeEquipmentId === '') {
+            return;
+        }
+        let arr1 = [];
+        arr1 = seriesData.filter(function (item) {
+            return item.id !== removeEquipmentId;
+        });
+        console.log(arr1);
+        setSeriesData(arr1);
+        setSeriesLineData(arr1);
+    }, [removeEquipmentId]);
+
+    const dataarr = [];
+
+    const fetchExploreAllChartData = async (id) => {
+        try {
+            // setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy&equipment_id=${id}`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentChart}${params}`,
+                    {
+                        date_from: dateFormatHandler(startDate),
+                        date_to: dateFormatHandler(endDate),
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    console.log(responseData);
+                    let data = responseData.data;
+                    console.log(data);
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.equipment_id === id;
+                    });
+                    console.log(arr);
+                    let exploreData = [];
+                    // data.forEach((record) => {
+                    //     if (record.building_name !== null) {
+                    let recordToInsert = {
+                        name: arr[0].equipment_name,
+                        data: data,
+                        id: arr[0].equipment_id,
+                    };
+                    console.log(recordToInsert);
+                    dataarr.push(recordToInsert);
+                    console.log(dataarr);
+                    setAllEquipmenData(dataarr);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            //setIsExploreDataLoading(false);
+        }
+    };
+    useEffect(() => {
+        console.log('building List Array ', equipmentListArray);
+        if (equipmentListArray.length === 0) {
+            return;
+        }
+        for (var i = 0; i < equipmentListArray.length; i++) {
+            let arr1 = [];
+            arr1 = seriesData.filter(function (item) {
+                return item.id === equipmentListArray[i];
+            });
+            console.log('Arr 1 ', arr1);
+            if (arr1.length === 0) {
+                fetchExploreAllChartData(equipmentListArray[i]);
+                console.log(dataarr);
+            }
+        }
+    }, [equipmentListArray]);
+    useEffect(() => {
+        if (allEquipmentData.length === 0) {
+            return;
+        }
+        console.log('allEquipmentSData ', allEquipmentData);
+        if (allEquipmentData.length === exploreTableData.length) {
+            console.log('All equipment Data set');
+            setSeriesData(allEquipmentData);
+            setSeriesLineData(allEquipmentData);
+        }
+    }, [allEquipmentData]);
+
     return (
         <>
             <Row className="ml-2 mt-2 mr-2 explore-filters-style">
@@ -638,7 +839,7 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-table-style">
-                    {isExploreDataLoading ? (
+                    {isExploreChartDataLoading ? (
                         <div className="loader-center-style" style={{ height: '400px' }}>
                             <Spinner className="m-2" color={'primary'} />
                         </div>
@@ -679,6 +880,12 @@ const ExploreByEquipment = () => {
                             topPeakConsumption={topPeakConsumption}
                             handleChartOpen={handleChartOpen}
                             setEquipmentFilter={setEquipmentFilter}
+                            selectedEquipmentId={selectedEquipmentId}
+                            setSelectedEquipmentId={setSelectedEquipmentId}
+                            removeEquipmentId={removeEquipmentId}
+                            setRemovedEquipmentId={setRemovedEquipmentId}
+                            equipmentListArray={equipmentListArray}
+                            setEquipmentListArray={setEquipmentListArray}
                         />
                     </Col>
                 </div>

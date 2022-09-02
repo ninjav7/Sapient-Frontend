@@ -17,7 +17,7 @@ import {
     linkActiveSensorToEquip,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
+import { timeZone, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -104,7 +104,6 @@ const IndividualActiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
