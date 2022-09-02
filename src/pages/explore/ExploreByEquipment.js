@@ -4,7 +4,7 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BaseUrl, getExploreByEquipment } from '../../services/Network';
+import { BaseUrl, getExploreByEquipment, getExploreEquipmentList, getExploreEquipmentChart } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,6 +16,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
+import ApexCharts from 'apexcharts';
 import './style.css';
 
 const ExploreEquipmentTable = ({
@@ -25,7 +26,80 @@ const ExploreEquipmentTable = ({
     topPeakConsumption,
     handleChartOpen,
     setEquipmentFilter,
+    setEquipmentListForChart
 }) => {
+    const [equipListArr, setEquipListArr] = useState([]);
+    const [equipmentListArr, setEquipmentListArr] = useState([]);
+    const handleSelectionAll = (e) => {
+        var ischecked = document.getElementById("selection");
+        if (ischecked.checked == true) {
+            let arr = [];
+            for (var i = 0; i < exploreTableData.length; i++) {
+                arr.push(exploreTableData[i].equipment_id)
+                console.log(arr);
+                //console.log(exploreTableData[i].equipment_id);
+                // ApexCharts.exec('chart2', 'showSeries', exploreTableData[i].equipment_id);
+                // ApexCharts.exec('chart1', 'showSeries', exploreTableData[i].equipment_id);
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked = ischecked.checked;
+            }
+            setEquipmentListForChart(arr)
+        }
+        else {
+            for (var i = 0; i < exploreTableData.length; i++) {
+                //console.log(exploreTableData[i].equipment_id);
+                // ApexCharts.exec('chart2', 'hideSeries', exploreTableData[i].equipment_id);
+                // ApexCharts.exec('chart1', 'hideSeries', exploreTableData[i].equipment_id);
+                var checking = document.getElementById(exploreTableData[i].equipment_id);
+                checking.checked = ischecked.checked;
+            }
+            ischecked.checked = ischecked.checked
+            setEquipmentListForChart([])
+        }
+
+    }
+    const handleSelection = (e, id) => {
+        var isChecked = document.getElementById(id);
+        //console.log(id)
+        // ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+        // ApexCharts.exec('chart1', 'toggleSeries', e.target.value);
+        if (isChecked.checked == true) {
+            equipmentListArr.push(id)
+            console.log(equipmentListArr)
+            setEquipListArr([...equipListArr, id])
+            // ApexCharts.exec('chart2', 'showSeries', e.target.value);
+            // ApexCharts.exec('chart1', 'showSeries', e.target.value);
+        }
+        else {
+            let arr = [];
+            arr = equipmentListArr.filter(function (item) {
+                return item !== id
+            })
+            console.log(arr);
+            setEquipListArr(arr);
+            setEquipmentListForChart(arr);
+            // ApexCharts.exec('chart2', 'hideSeries', e.target.value);
+            // ApexCharts.exec('chart1', 'hideSeries', e.target.value);
+        }
+        //     ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+
+        // }
+
+    }
+    //    useEffect(()=>{
+    //     var check = document.getElementById('selection');
+    //     check.checked=true;
+    //    },[])
+    useEffect(() => {
+        // for(var i=0;i<exploreTableData.length;i++){
+        //     var checking = document.getElementById(exploreTableData[i].equipment_id);
+        //     checking.checked= true;
+        // }
+        console.log(equipmentListArr)
+        console.log(equipListArr)
+        setEquipmentListForChart(equipListArr);
+    }, [equipListArr])
+
     return (
         <>
             <Card>
@@ -35,7 +109,7 @@ const ExploreEquipmentTable = ({
                             <thead>
                                 <tr>
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" />
+                                        <input type="checkbox" className="mr-4" id="selection" onClick={(e) => { handleSelectionAll(e) }} />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
@@ -81,6 +155,7 @@ const ExploreEquipmentTable = ({
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                        <input type="checkbox" className="mr-4" id={record?.equipment_id} value={record?.equipment_id} onClick={(e) => { handleSelection(e, record?.equipment_id) }} />
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -101,10 +176,10 @@ const ExploreEquipmentTable = ({
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {(record?.energy_consumption?.now / 1000).toFixed(2)} kWh
+                                                        {(record?.consumption?.now / 1000).toFixed(2)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
-                                                            {index === 0 && record?.energy_consumption?.now === 0 && (
+                                                            {index === 0 && record?.consumption?.now === 0 && (
                                                                 <Line
                                                                     percent={0}
                                                                     strokeWidth="3"
@@ -113,12 +188,12 @@ const ExploreEquipmentTable = ({
                                                                     strokeLinecap="round"
                                                                 />
                                                             )}
-                                                            {index === 0 && record?.energy_consumption?.now > 0 && (
+                                                            {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -129,9 +204,9 @@ const ExploreEquipmentTable = ({
                                                             {index === 1 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -142,9 +217,9 @@ const ExploreEquipmentTable = ({
                                                             {index === 2 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -155,9 +230,9 @@ const ExploreEquipmentTable = ({
                                                             {index === 3 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -168,9 +243,9 @@ const ExploreEquipmentTable = ({
                                                             {index === 4 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -181,9 +256,9 @@ const ExploreEquipmentTable = ({
                                                             {index === 5 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -195,38 +270,38 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     <td>
-                                                        {record?.energy_consumption?.now <=
-                                                            record?.energy_consumption?.old && (
-                                                            <button
-                                                                className="button-success text-success btn-font-style"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
-                                                                        )}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {record?.energy_consumption?.now >
-                                                            record?.energy_consumption?.old && (
-                                                            <button
-                                                                className="button-danger text-danger btn-font-style"
-                                                                style={{ width: 'auto', marginBottom: '4px' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
-                                                                        )}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
+                                                        {record?.consumption?.now <=
+                                                            record?.consumption?.old && (
+                                                                <button
+                                                                    className="button-success text-success btn-font-style"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-chart-down">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record?.consumption?.now,
+                                                                                record?.consumption?.old
+                                                                            )}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                        {record?.consumption?.now >
+                                                            record?.consumption?.old && (
+                                                                <button
+                                                                    className="button-danger text-danger btn-font-style"
+                                                                    style={{ width: 'auto', marginBottom: '4px' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record?.consumption?.now,
+                                                                                record?.consumption?.old
+                                                                            )}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
                                                     </td>
 
                                                     <td className="table-content-style font-weight-bold">
@@ -246,7 +321,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -258,7 +333,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -270,7 +345,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -282,7 +357,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -294,7 +369,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -306,7 +381,7 @@ const ExploreEquipmentTable = ({
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.peak_power?.now / topPeakConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -397,6 +472,8 @@ const ExploreByEquipment = () => {
 
     const [dateRange, setDateRange] = useState([null, null]);
     const [startDate, endDate] = dateRange;
+    const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
+
 
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
@@ -456,6 +533,10 @@ const ExploreByEquipment = () => {
             toolbar: {
                 show: false,
             },
+
+            animations: {
+                enabled: false,
+            },
             type: 'area',
             brush: {
                 target: 'chart2',
@@ -469,7 +550,7 @@ const ExploreByEquipment = () => {
                 // },
             },
         },
-        colors: ['#008FFB'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -486,11 +567,15 @@ const ExploreByEquipment = () => {
         yaxis: {
             tickAmount: 2,
         },
+        legend: {
+            show: false,
+        },
     });
 
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
+    const [equipmentListForChart, setEquipmentListForChart] = useState([]);
 
     const [exploreTableData, setExploreTableData] = useState([]);
 
@@ -520,7 +605,7 @@ const ExploreByEquipment = () => {
 
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreByEquipment}${params}`,
+                        `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
                             date_from: dateFormatHandler(startDate),
                             date_to: dateFormatHandler(endDate),
@@ -529,26 +614,29 @@ const ExploreByEquipment = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
+                        setTopEnergyConsumption(responseData[0].consumption.now);
                         setTopPeakConsumption(responseData[0].peak_power.now);
                         setExploreTableData(responseData);
-                        let data = responseData;
-                        let exploreData = [];
-                        data.forEach((record) => {
-                            if (record.equipment_name !== null) {
-                                let recordToInsert = {
-                                    name: record.equipment_name,
-                                    data: record.equipment_consumption,
-                                };
-                                exploreData.push(recordToInsert);
-                            }
-                        });
-                        setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
+                        // let data = responseData;
+                        // let exploreData = [];
+                        // data.forEach((record) => {
+                        //     if (record.equipment_name !== null) {
+                        //         let recordToInsert = {
+                        //             name: record.equipment_id,
+                        //             data: record.equipment_consumption,
+                        //         };
+                        //         exploreData.push(recordToInsert);
+                        //     }
+                        // });
+                        // setSeriesData(exploreData);
+                        // setSeriesLineData(exploreData);
+
+                        // ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
+                        // setSeriesLineData([
+                        //     {
+                        //         data: exploreData[0].data,
+                        //     },
+                        // ]);
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -600,6 +688,72 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
+    useEffect(() => {
+        console.log(equipmentListForChart);
+        console.log(seriesData);
+
+        const fetchExploreChartData = async (id) => {
+            try {
+                // setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?consumption=energy&equipment_id=${id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
+                        {
+                            date_from: dateFormatHandler(startDate),
+                            date_to: dateFormatHandler(endDate),
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        console.log(responseData);
+                        let data = responseData.data;
+                        console.log(data)
+                        let arr = [];
+                        arr = exploreTableData.filter(function (item) {
+                            return item.equipment_id === id
+                        })
+                        console.log(arr);
+                        let exploreData = [];
+                        // data.forEach((record) => {
+                        //     if (record.building_name !== null) {
+                        let recordToInsert = {
+                            name: arr[0].equipment_name,
+                            data: data,
+                        };
+                        console.log(recordToInsert);
+                        //exploreData.push(recordToInsert);
+                        //     }
+                        // });
+                        // expSeriesData.push(recordToInsert);
+                        // expSeriesLineData.push(recordToInsert);
+                        setSeriesData([...seriesData, recordToInsert]);
+                        setSeriesLineData([...seriesLineData, recordToInsert]);
+
+                        //setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                //setIsExploreDataLoading(false);
+            }
+
+        }
+
+        let i = 0;
+
+        for (i = 0; i < equipmentListForChart.length; i++)
+            fetchExploreChartData(equipmentListForChart[i]);
+    }, [equipmentListForChart])
+
+
+
     return (
         <>
             <Row className="ml-2 mt-2 mr-2 explore-filters-style">
@@ -638,7 +792,7 @@ const ExploreByEquipment = () => {
 
             <Row>
                 <div className="explore-table-style">
-                    {isExploreDataLoading ? (
+                    {isExploreChartDataLoading ? (
                         <div className="loader-center-style" style={{ height: '400px' }}>
                             <Spinner className="m-2" color={'primary'} />
                         </div>
@@ -679,6 +833,7 @@ const ExploreByEquipment = () => {
                             topPeakConsumption={topPeakConsumption}
                             handleChartOpen={handleChartOpen}
                             setEquipmentFilter={setEquipmentFilter}
+                            setEquipmentListForChart={setEquipmentListForChart}
                         />
                     </Col>
                 </div>
