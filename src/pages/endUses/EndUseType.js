@@ -118,24 +118,30 @@ const EndUseType = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD MMM - HH:mm');
+                    let dateText = moment(timestamp).format('M/DD');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} ${dateText}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    return val + ' K';
+                formatter: function (val) {
+                    let print = val.toFixed(2);
+                    return `${print}k`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
@@ -322,6 +328,7 @@ const EndUseType = () => {
                     )
                     .then((res) => {
                         let data = res.data;
+                        console.log('Sudhanshu => ', data);
                         let energyData = [
                             {
                                 name: 'CONSUMPTION',
@@ -335,6 +342,7 @@ const EndUseType = () => {
                             };
                             energyData[0].data.push(obj);
                         });
+                        console.log('Sudhanshu Rai => ', energyData);
                         setEnergyChartData(energyData);
                         setIsPlugLoadChartLoading(false);
                     });
@@ -360,7 +368,7 @@ const EndUseType = () => {
 
             {isEndUsesDataFetched ? (
                 <Row className="ml-3">
-                    <Skeleton count={1} color="#f9fafb" height={150} width={1500} />
+                    <Skeleton count={1} color="#f9fafb" height={150} width={1100} />
                 </Row>
             ) : (
                 <Row className="ml-3">
@@ -524,52 +532,73 @@ const EndUseType = () => {
                 </Row>
             )}
 
-            <Row>
-                <Col xl={6} className="mt-5 ml-3">
-                    <div className="plug-content-style">
-                        {endUseType === 'hvac' && <h6 className="card-title custom-title">HVAC Usage</h6>}
-                        {endUseType === 'lighting' && <h6 className="card-title custom-title">Lighting Usage</h6>}
-                        {endUseType === 'plug' && <h6 className="card-title custom-title">Plug Load Consumption</h6>}
-                        {endUseType === 'process' && <h6 className="card-title custom-title">Process Consumption</h6>}
-                        {endUseType === 'other' && (
-                            <h6 className="card-title custom-title">Other EndUses Consumption</h6>
-                        )}
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
-                        {isPlugLoadChartLoading ? (
-                            <div className="loader-center-style" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                            </div>
-                        ) : (
-                            <LineColumnChart
-                                energyChartData={energyChartData}
-                                energyChartOptions={energyChartOptions}
-                            />
-                        )}
-                    </div>
-                </Col>
+            {endUseType === 'hvac' ? (
+                <Row>
+                    <Col xl={12} className="mt-5 ml-3">
+                        <div className="plug-content-style">
+                            <h6 className="card-title custom-title">HVAC Consumption</h6>
 
-                <Col xl={5} className="mt-5 ml-3">
-                    <div className="plug-content-style">
-                        {endUseType === 'lighting' ? (
-                            <h6 className="card-title custom-title">Usage by Floor</h6>
-                        ) : (
-                            <h6 className="card-title custom-title">Usage by Equipment Type</h6>
-                        )}
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>
+                            {isPlugLoadChartLoading ? (
+                                <div className="loader-center-style" style={{ height: '400px' }}>
+                                    <Spinner className="m-2" color={'primary'} />
+                                </div>
+                            ) : (
+                                <LineColumnChart series={energyChartData} options={energyChartOptions} />
+                            )}
+                        </div>
+                    </Col>
+                </Row>
+            ) : (
+                <Row>
+                    <Col xl={6} className="mt-5 ml-3">
+                        <div className="plug-content-style">
+                            {endUseType === 'lighting' && (
+                                <h6 className="card-title custom-title">Lighting Consumption</h6>
+                            )}
+                            {endUseType === 'plug' && (
+                                <h6 className="card-title custom-title">Plug Load Consumption</h6>
+                            )}
+                            {endUseType === 'process' && (
+                                <h6 className="card-title custom-title">Process Consumption</h6>
+                            )}
+                            {endUseType === 'other' && (
+                                <h6 className="card-title custom-title">Other EndUses Consumption</h6>
+                            )}
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
+                            {isPlugLoadChartLoading ? (
+                                <div className="loader-center-style" style={{ height: '400px' }}>
+                                    <Spinner className="m-2" color={'primary'} />
+                                </div>
+                            ) : (
+                                <LineColumnChart series={energyChartData} options={energyChartOptions} />
+                            )}
+                        </div>
+                    </Col>
 
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
-                        {isEquipTypeChartLoading ? (
-                            <div className="loader-center-style" style={{ height: '400px' }}>
-                                <Spinner className="m-2" color={'primary'} />
-                            </div>
-                        ) : (
-                            <UsageBarChart
-                                equipTypeChartOptions={equipTypeChartOptions}
-                                equipTypeChartData={equipTypeChartData}
-                            />
-                        )}
-                    </div>
-                </Col>
-            </Row>
+                    <Col xl={5} className="mt-5 ml-3">
+                        <div className="plug-content-style">
+                            {endUseType === 'lighting' ? (
+                                <h6 className="card-title custom-title">Usage by Floor</h6>
+                            ) : (
+                                <h6 className="card-title custom-title">Usage by Equipment Type</h6>
+                            )}
+
+                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
+                            {isEquipTypeChartLoading ? (
+                                <div className="loader-center-style" style={{ height: '400px' }}>
+                                    <Spinner className="m-2" color={'primary'} />
+                                </div>
+                            ) : (
+                                <UsageBarChart
+                                    equipTypeChartOptions={equipTypeChartOptions}
+                                    equipTypeChartData={equipTypeChartData}
+                                />
+                            )}
+                        </div>
+                    </Col>
+                </Row>
+            )}
 
             {endUseType === 'hvac' && (
                 <>

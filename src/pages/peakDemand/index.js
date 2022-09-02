@@ -10,7 +10,7 @@ import {
     peakDemandTrendChart,
     peakDemandYearlyPeak,
 } from '../../services/Network';
-import LineAnnotationChart from '../charts/LineAnnotationChart';
+import TimeSeriesChart from '../charts/TimeSeriesChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
@@ -275,146 +275,72 @@ const PeakDemand = () => {
 
     const [peakDemandTrendOptions, setPeakDemandTrendOptions] = useState({
         chart: {
-            type: 'line',
+            type: 'area',
+            stacked: false,
+            zoom: {
+                type: 'x',
+                enabled: true,
+                autoScaleYaxis: true,
+            },
             toolbar: {
-                show: true,
+                autoSelected: 'zoom',
             },
         },
-        tooltip: {
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MMM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            'D/M/YY @ hh:mm A'
-                        )}</div>
-                    </div>`;
-            },
-        },
-        annotations: {
-            yaxis: [
-                {
-                    y: 8200,
-                    borderColor: '#0acf97',
-                    label: {
-                        borderColor: '#0acf97',
-                        style: {
-                            color: '#fff',
-                            background: '#0acf97',
-                        },
-                    },
-                },
-            ],
-            xaxis: [
-                {
-                    x: new Date('23 Nov 2017').getTime(),
-                    borderColor: '#775DD0',
-                    label: {
-                        borderColor: '#775DD0',
-                        style: {
-                            color: '#fff',
-                            background: '#775DD0',
-                        },
-                    },
-                },
-                {
-                    x: new Date('03 Dec 2017').getTime(),
-                    borderColor: '#ffbc00',
-                    label: {
-                        borderColor: '#ffbc00',
-                        style: {
-                            color: '#fff',
-                            background: '#ffbc00',
-                        },
-                        orientation: 'horizontal',
-                    },
-                },
-            ],
-        },
-        labels: [],
-        colors: ['#39afd1'],
         dataLabels: {
             enabled: false,
         },
-        animations: {
-            enabled: false,
+        markers: {
+            size: 0,
         },
         stroke: {
-            width: [3, 3],
-            curve: 'smooth',
+            width: 3,
         },
-        xaxis: {
-            labels: {
-                labels: {
-                    format: 'd',
-                },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                inverseColors: false,
+                opacityFrom: 0.5,
+                opacityTo: 0,
+                stops: [0, 90, 100],
             },
         },
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val + 'K';
+                    let print = val.toFixed(2);
+                    return `${print}k`;
                 },
             },
         },
-        grid: {
-            row: {
-                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.2,
-            },
-            borderColor: '#e9ecef',
-        },
-        responsive: [
-            {
-                breakpoint: 600,
-                options: {
-                    chart: {
-                        toolbar: {
-                            show: false,
-                        },
-                    },
-                    legend: {
-                        show: false,
-                    },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    let dateText = moment(timestamp).format('M/DD');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} ${dateText}`;
+                },
+                style: {
+                    colors: ['#1D2939'],
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
                 },
             },
-        ],
+        },
+        tooltip: {
+            shared: false,
+            y: {
+                formatter: function (val) {
+                    return `${val} K`;
+                },
+            },
+        },
     });
 
-    const [peakDemandTrendData, setPeakDemandTrendData] = useState([
-        {
-            name: 'Peak for Time Period',
-            data: [],
-        },
-    ]);
+    const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
     const [yearlyPeakData, setYearlyPeakData] = useState(null);
 
@@ -472,21 +398,19 @@ const PeakDemand = () => {
                     )
                     .then((res) => {
                         let responseData = res?.data;
-                        let newPeakData = [
+                        let newArray = [
                             {
                                 name: 'Peak for Time Period',
                                 data: [],
                             },
                         ];
-                        let newData = [];
-                        let newDateLabels = [];
-                        responseData.map((record) => {
-                            newData.push((record?.energy_consumption / 1000).toFixed(5));
-                            newDateLabels.push(moment(record?.date).format('LL'));
+                        responseData.forEach((record) => {
+                            newArray[0].data.push({
+                                x: record?.date,
+                                y: record?.energy_consumption / 1000,
+                            });
                         });
-                        newPeakData[0].data = newData;
-                        setPeakDemandTrendData(newPeakData);
-                        setPeakDemandTrendOptions({ ...peakDemandTrendOptions, labels: newDateLabels });
+                        setPeakDemandTrendData(newArray);
                         setIsPeakTrendChartLoading(false);
                     });
             } catch (error) {
@@ -643,7 +567,9 @@ const PeakDemand = () => {
                             <div className="card-body card-box-style">
                                 <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak</h5>
                                 <p className="card-text card-content-style custom-kw-style">
-                                    {yearlyPeakData?.energy_consumption?.now / 1000}
+                                    {yearlyPeakData?.energy_consumption?.now
+                                        ? yearlyPeakData?.energy_consumption?.now / 1000
+                                        : 0}
                                     <div className="card-unit-style ml-1 font-weight-bold mr-1">kW</div>
                                     <span className="card-unit-style">
                                         {yearlyPeakData?.energy_consumption?.now <=
@@ -695,7 +621,7 @@ const PeakDemand = () => {
                 )}
             </Row>
 
-            <Row className="ml-3 mt-3">
+            <Row className="ml-3 mt-3 mb-0">
                 <div>
                     <h6 className="card-title custom-title mb-1" style={{ display: 'inline-block' }}>
                         Top 5 Building Peaks
@@ -748,7 +674,7 @@ const PeakDemand = () => {
                 </div>
             </Row>
 
-            <Row className="equip-peak-container ml-3">
+            <Row className="equip-peak-container ml-3 mt-0">
                 <Col xl={6}>
                     <EquipmentTypePeaks
                         equipTypeData={equipTypeData}
@@ -777,10 +703,10 @@ const PeakDemand = () => {
                                     <Spinner className="m-2" color={'primary'} />
                                 </div>
                             ) : (
-                                <LineAnnotationChart
+                                <TimeSeriesChart
                                     height={350}
-                                    peakDemandTrendOptions={peakDemandTrendOptions}
-                                    peakDemandTrendData={peakDemandTrendData}
+                                    options={peakDemandTrendOptions}
+                                    series={peakDemandTrendData}
                                 />
                             )}
                         </div>

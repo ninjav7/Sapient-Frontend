@@ -8,8 +8,15 @@ import { configLineChartWidget } from './config';
 
 import './style.scss';
 
-
-const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width, isEnergyConsumptionHistoryLoading }) => {
+const LineChartWidget = ({
+    className = '',
+    series,
+    title,
+    subtitle,
+    height = 259,
+    width,
+    isEnergyConsumptionHistoryLoading,
+}) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
             <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>

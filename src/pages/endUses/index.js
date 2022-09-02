@@ -200,33 +200,7 @@ const EndUsesPage = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        let newArray = [];
-                        responseData.map((element) => {
-                            let newObj = {
-                                name: element.name,
-                                data: formatData(element.data),
-                            };
-                            newArray.push(newObj);
-                        });
-                        setBarChartData(newArray);
-                        let newXaxis = {
-                            categories: [],
-                        };
-                        let weeksArray = [];
-                        responseData.forEach((enduse) => {
-                            enduse.data.forEach((element) => {
-                                weeksArray.push(element._id);
-                            });
-                        });
-                        let uniqueSet = new Set(weeksArray);
-                        let newList = Array.from(uniqueSet);
-                        newList.sort(function (a, b) {
-                            return a - b;
-                        });
-                        newList.map((num) => {
-                            return newXaxis.categories.push(`Week ${num}`);
-                        });
-                        setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
+                        console.log('Sudhanshu => ', responseData);
                         setIsEndUsesChartLoading(false);
                     });
             } catch (error) {
