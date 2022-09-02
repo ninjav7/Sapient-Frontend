@@ -7,7 +7,7 @@ import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { percentageHandler, dateFormatHandler, fetchDiffDaysCount } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler, fetchDiffDaysCount, timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -19,7 +19,6 @@ import './style.css';
 const EndUsesPage = () => {
     const cookies = new Cookies();
     const userdata = cookies.get('user');
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -28,7 +27,7 @@ const EndUsesPage = () => {
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const [barChartOptions, setBarChartOptions] = useState({
+    const barChartOptions = {
         chart: {
             type: 'bar',
             stacked: true,
@@ -98,23 +97,10 @@ const EndUsesPage = () => {
         grid: {
             borderColor: '#f1f3fa',
         },
-    });
+    };
 
     const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
-
-    const sortArrayOfObj = (arr) => {
-        let newArr = arr.sort((a, b) => a._id - b._id);
-        return newArr;
-    };
-
-    const formatData = (arr) => {
-        let newData = [];
-        sortArrayOfObj(arr).forEach((item) => {
-            newData.push(item.energy_consumption);
-        });
-        return newData;
-    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

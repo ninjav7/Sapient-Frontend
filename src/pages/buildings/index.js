@@ -32,7 +32,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler, timeZone } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -1391,7 +1391,6 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         let response = res?.data;
-                        console.log('Sudhanshu => ', response);
                         let newArray = [
                             {
                                 name: 'Energy',

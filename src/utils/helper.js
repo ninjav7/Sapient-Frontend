@@ -39,3 +39,5 @@ export const fetchDiffDaysCount = (startDate, endDate) => {
     let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
     return Difference_In_Days.toFixed(0);
 };
+
+export const { timeZone } = Intl.DateTimeFormat().resolvedOptions();

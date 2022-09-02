@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { Row, Col, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
 import HvacUsesCard from './HvacUsesCard';
