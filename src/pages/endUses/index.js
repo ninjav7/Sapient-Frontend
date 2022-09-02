@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler, fetchDiffDaysCount } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -16,8 +17,9 @@ import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
 const EndUsesPage = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
+    const cookies = new Cookies();
+    const userdata = cookies.get('user');
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -48,27 +50,37 @@ const EndUsesPage = () => {
             show: false,
         },
         xaxis: {
-            categories: [],
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    let dateText = moment(timestamp).format('M/DD');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} ${dateText}`;
+                },
+                style: {
+                    colors: ['#1D2939'],
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+            },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                formatter: function (val) {
+                    let print = val.toFixed(0);
+                    return `${print}k`;
                 },
             },
         },
         tooltip: {
+            shared: false,
             y: {
                 formatter: function (val) {
-                    return val + 'k';
+                    return `${val} K`;
                 },
             },
-            theme: 'dark',
-            x: { show: false },
         },
         fill: {
             opacity: 1,
@@ -187,8 +199,23 @@ const EndUsesPage = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
+
                 setIsEndUsesChartLoading(true);
+
+                // let filter = '';
+                // let days = fetchDiffDaysCount(startDate, endDate);
+                // if (days <= 31) {
+                //     filter = 'hour';
+                // }
+                // if (days > 31 && days <= 365) {
+                //     filter = 'day';
+                // }
+                // if (days > 365) {
+                //     filter = 'month';
+                // }
+
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+
                 await axios
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
@@ -199,8 +226,13 @@ const EndUsesPage = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let responseData = res.data;
-                        console.log('Sudhanshu => ', responseData);
+                        let responseData = res?.data;
+                        responseData.forEach((endUse) => {
+                            endUse.data.forEach((record) => {
+                                record.y = record.y / 1000;
+                            });
+                        });
+                        setBarChartData(responseData);
                         setIsEndUsesChartLoading(false);
                     });
             } catch (error) {

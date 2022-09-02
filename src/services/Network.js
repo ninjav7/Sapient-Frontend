@@ -28,7 +28,7 @@ export const addUser = '/api/user_role/user/add_user';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
-export const endUsesChart = '/api/energy/chart/end-uses';
+export const endUsesChart = '/api/energy/end_use/chart/end-uses';
 export const hvacUsageChart = '/api/energy/chart/hvac';
 // export const endUsesFloorChart = '/api/energy/chart/byfloor';
 export const endUsesUsageChart = '/api/energy/end_use/load_usage';
