@@ -20,7 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
-
+import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
     builidingAlerts,
@@ -89,6 +89,7 @@ const BuildingOverview = () => {
     });
 
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
+    const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
 
@@ -1377,6 +1378,7 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setIsEnergyConsumptionDataLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
@@ -1403,10 +1405,12 @@ const BuildingOverview = () => {
                             });
                         });
                         setBuildingConsumptionChartData(newArray);
+                        setIsEnergyConsumptionDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Consumption Chart');
+                setIsEnergyConsumptionDataLoading(false);
             }
         };
 
@@ -1844,11 +1848,16 @@ const BuildingOverview = () => {
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                                {/* <LineChart options={lineChartOptions} series={buildingConsumptionChart} /> */}
-                                <LineColumnChart
-                                    series={buildingConsumptionChartData}
-                                    options={buildingConsumptionChartOpts}
-                                />
+                                {isEnergyConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <LineColumnChart
+                                        series={buildingConsumptionChartData}
+                                        options={buildingConsumptionChartOpts}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Row>

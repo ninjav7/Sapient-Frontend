@@ -328,7 +328,6 @@ const EndUseType = () => {
                     )
                     .then((res) => {
                         let data = res.data;
-                        console.log('Sudhanshu => ', data);
                         let energyData = [
                             {
                                 name: 'CONSUMPTION',
@@ -342,7 +341,6 @@ const EndUseType = () => {
                             };
                             energyData[0].data.push(obj);
                         });
-                        console.log('Sudhanshu Rai => ', energyData);
                         setEnergyChartData(energyData);
                         setIsPlugLoadChartLoading(false);
                     });
