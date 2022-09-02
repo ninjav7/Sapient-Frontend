@@ -18,12 +18,20 @@ import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import ApexCharts from 'apexcharts';
 import './style.css';
+import { ConstructionOutlined } from '@mui/icons-material';
 
-const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEnergyConsumption, buildingListForChart, setBuildingListForChart, setRemoveId, removeId }) => {
+const ExploreBuildingsTable = ({
+    exploreTableData,
+    isExploreDataLoading,
+    topEnergyConsumption,
+    selectedBuildingId,
+    setSelectedBuildingId,
+    removeBuildingId,
+    setRemovedBuildingId,
+    buildingListArray,
+    setBuildingListArray,
+}) => {
     const history = useHistory();
-    // let buildingListArr = [];
-    const [blgdListArr, setBlgdListArr] = useState([]);
-    const [buildingListArr, setBuildingListArr] = useState([]);
 
     const redirectToExploreEquipPage = (bldId, bldName) => {
         history.push({
@@ -37,78 +45,34 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
         });
     };
     const handleSelectionAll = (e) => {
-        var ischecked = document.getElementById("selection");
+        var ischecked = document.getElementById('selection');
         if (ischecked.checked == true) {
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
-                arr.push(exploreTableData[i].building_id)
+                arr.push(exploreTableData[i].building_id);
                 console.log(arr);
-                //console.log(exploreTableData[i].equipment_id);
-                // ApexCharts.exec('chart2', 'showSeries', exploreTableData[i].building_name);
-                // ApexCharts.exec('chart1', 'showSeries', exploreTableData[i].building_name);
-                var checking = document.getElementById(exploreTableData[i].building_id);
-                checking.checked = ischecked.checked;
-            }
-            setBuildingListForChart(arr);
-        }
-        else {
-            for (var i = 0; i < exploreTableData.length; i++) {
-                //console.log(exploreTableData[i].equipment_id);
-                // ApexCharts.exec('chart2', 'hideSeries', exploreTableData[i].building_name);
-                // ApexCharts.exec('chart1', 'hideSeries', exploreTableData[i].building_name);
-                var checking = document.getElementById(exploreTableData[i].building_id);
-                checking.checked = ischecked.checked;
-            }
-            ischecked.checked = ischecked.checked
-            setBuildingListForChart([]);
-        }
 
-    }
+                var checking = document.getElementById(exploreTableData[i].building_id);
+                checking.checked = ischecked.checked;
+            }
+            setBuildingListArray(arr);
+        } else {
+            for (var i = 0; i < exploreTableData.length; i++) {
+                var checking = document.getElementById(exploreTableData[i].building_id);
+                checking.checked = ischecked.checked;
+            }
+            ischecked.checked = ischecked.checked;
+        }
+    };
     const handleSelection = (e, id) => {
         var isChecked = document.getElementById(id);
-        //console.log(id)
-        // ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
-        // ApexCharts.exec('chart1', 'toggleSeries', e.target.value);
-
         if (isChecked.checked == true) {
-            buildingListArr.push(id)
-            console.log(buildingListArr)
-            setBlgdListArr([...blgdListArr, id])
-            // setBlgdListArr(buildingListArr);
-            // ApexCharts.exec('chart2', 'showSeries', e.target.value);
-            // ApexCharts.exec('chart1', 'showSeries', e.target.value);
+            console.log(id);
+            setSelectedBuildingId(id);
+        } else {
+            setRemovedBuildingId(id);
         }
-        else {
-            setRemoveId(id);
-            let arr = [];
-            arr = buildingListArr.filter(function (item) {
-                return item !== id
-            })
-            console.log(arr);
-            setBlgdListArr(arr);
-            setBuildingListForChart(arr);
-            // ApexCharts.exec('chart2', 'hideSeries', e.target.value);
-            // ApexCharts.exec('chart1', 'hideSeries', e.target.value);
-        }
-        //     ApexCharts.exec('chart2', 'toggleSeries', e.target.value);
-
-        // }
-
-    }
-    useEffect(() => {
-        // var check = document.getElementById('selection');
-        // check.checked = true;
-    }, [])
-    useEffect(() => {
-        // for (var i = 0; i < exploreTableData.length; i++) {
-        //     var checking = document.getElementById(exploreTableData[i].building_name);
-        //     checking.checked = true;
-        // }
-        console.log(buildingListArr)
-        console.log(blgdListArr)
-        setBuildingListForChart(blgdListArr);
-    }, [blgdListArr])
-
+    };
     return (
         <>
             <Card>
@@ -118,7 +82,14 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                             <thead>
                                 <tr>
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" id="selection" onClick={(e) => { handleSelectionAll(e) }} />
+                                        <input
+                                            type="checkbox"
+                                            className="mr-4"
+                                            id="selection"
+                                            onClick={(e) => {
+                                                handleSelectionAll(e);
+                                            }}
+                                        />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
@@ -154,7 +125,15 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
-                                                        <input type="checkbox" className="mr-4" id={record?.building_id} value={record?.building_id} onClick={(e) => { handleSelection(e, record?.building_id) }} />
+                                                        <input
+                                                            type="checkbox"
+                                                            className="mr-4"
+                                                            id={record?.building_id}
+                                                            value={record?.building_id}
+                                                            onClick={(e) => {
+                                                                handleSelection(e, record?.building_id);
+                                                            }}
+                                                        />
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -185,7 +164,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -198,7 +177,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -211,7 +190,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -224,7 +203,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -237,7 +216,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -250,7 +229,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     percent={parseFloat(
                                                                         (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                        100
+                                                                            100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -261,38 +240,36 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        {record?.consumption?.now <=
-                                                            record?.consumption?.old && (
-                                                                <button
-                                                                    className="button-success text-success btn-font-style"
-                                                                    style={{ width: 'auto' }}>
-                                                                    <i className="uil uil-chart-down">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                record?.consumption?.now,
-                                                                                record?.consumption?.old
-                                                                            )}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
-                                                        {record?.consumption?.now >
-                                                            record?.consumption?.old && (
-                                                                <button
-                                                                    className="button-danger text-danger btn-font-style"
-                                                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                                                    <i className="uil uil-arrow-growth">
-                                                                        <strong>
-                                                                            {percentageHandler(
-                                                                                record?.consumption?.now,
-                                                                                record?.consumption?.old
-                                                                            )}
-                                                                            %
-                                                                        </strong>
-                                                                    </i>
-                                                                </button>
-                                                            )}
+                                                        {record?.consumption?.now <= record?.consumption?.old && (
+                                                            <button
+                                                                className="button-success text-success btn-font-style"
+                                                                style={{ width: 'auto' }}>
+                                                                <i className="uil uil-chart-down">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record?.consumption?.now,
+                                                                            record?.consumption?.old
+                                                                        )}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
+                                                        {record?.consumption?.now > record?.consumption?.old && (
+                                                            <button
+                                                                className="button-danger text-danger btn-font-style"
+                                                                style={{ width: 'auto', marginBottom: '4px' }}>
+                                                                <i className="uil uil-arrow-growth">
+                                                                    <strong>
+                                                                        {percentageHandler(
+                                                                            record?.consumption?.now,
+                                                                            record?.consumption?.old
+                                                                        )}
+                                                                        %
+                                                                    </strong>
+                                                                </i>
+                                                            </button>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             );
@@ -315,7 +292,6 @@ const ExploreByBuildings = () => {
     const [startDate, endDate] = dateRange;
 
     const [exploreTableData, setExploreTableData] = useState([]);
-    const [removeId, setRemoveId] = useState('');
 
     const customDaySelect = [
         {
@@ -349,9 +325,11 @@ const ExploreByBuildings = () => {
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
-    const [buildingListForChart, setBuildingListForChart] = useState([]);
-
+    const [selectedBuildingId, setSelectedBuildingId] = useState('');
+    const [removeBuildingId, setRemovedBuildingId] = useState('');
+    const [buildingListArray, setBuildingListArray] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
+    const [allBuildingData, setAllBuildingData] = useState([]);
 
     const [optionsData, setOptionsData] = useState({
         chart: {
@@ -466,15 +444,6 @@ const ExploreByBuildings = () => {
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
-        // console.log(currentParentRoute);
-        // console.log(location);
-        // console.log(ComponentStore.getRawState())
-        // let parentState=ComponentStore.getRawState()
-        // if(parentState.parent==='explore'){
-        //     history.push('/explore-page/by-buildings');
-        //     window.location.reload();
-        // }
-        console.log("Building List ", buildingListForChart);
     }, []);
 
     useEffect(() => {
@@ -503,7 +472,7 @@ const ExploreByBuildings = () => {
         if (endDate === null) {
             return;
         }
-
+        let result = [];
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -525,20 +494,8 @@ const ExploreByBuildings = () => {
                     .then((res) => {
                         let responseData = res.data;
                         setExploreTableData(responseData);
+                        result = res.data;
                         setTopEnergyConsumption(responseData[0].consumption.now);
-                        // let data = responseData;
-                        // let exploreData = [];
-                        // data.forEach((record) => {
-                        //     if (record.building_name !== null) {
-                        //         let recordToInsert = {
-                        //             name: record.building_name,
-                        //             data: record.building_consumption,
-                        //         };
-                        //         exploreData.push(recordToInsert);
-                        //     }
-                        // });
-                        // setSeriesData(exploreData);
-                        // setSeriesLineData(exploreData);
 
                         setIsExploreDataLoading(false);
                     });
@@ -550,11 +507,12 @@ const ExploreByBuildings = () => {
         };
         exploreDataFetch();
     }, [startDate, endDate]);
-    const dataarr = [];
+
     useEffect(() => {
-        console.log(buildingListForChart);
-        console.log(seriesData);
-        console.log(removeId);
+        console.log('entered in selected Building ', selectedBuildingId);
+        if (selectedBuildingId === '') {
+            return;
+        }
 
         const fetchExploreChartData = async (id) => {
             try {
@@ -564,7 +522,7 @@ const ExploreByBuildings = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?consumption=energy&building_id=${id}`;
+                let params = `?consumption=energy&building_id=${selectedBuildingId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getExploreBuildingChart}${params}`,
@@ -578,11 +536,11 @@ const ExploreByBuildings = () => {
                         let responseData = res.data;
                         console.log(responseData);
                         let data = responseData.data;
-                        console.log(data)
+                        console.log(data);
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
-                            return item.building_id === id
-                        })
+                            return item.building_id === selectedBuildingId;
+                        });
                         console.log(arr);
                         let exploreData = [];
                         // data.forEach((record) => {
@@ -590,76 +548,109 @@ const ExploreByBuildings = () => {
                         let recordToInsert = {
                             name: arr[0].building_name,
                             data: data,
+                            id: arr[0].building_id,
                         };
                         console.log(recordToInsert);
-                        //exploreData.push(recordToInsert);
-                        //     }
-                        // });
 
-                        console.log("exploreChartData ", seriesData)
-                        let idrr = [];
-                        let arr1 = [];
-                        if (removeId !== "") {
-                            idrr = exploreTableData.filter(function (item) {
-                                return item.building_id === removeId
-                            })
-                            console.log("remove id", idrr);
-                            arr1 = seriesData.filter(function (item) {
-                                return item.name !== idrr[0].building_name
-                            })
-                            console.log(arr1);
-                            setSeriesData(arr1);
-                            setSeriesLineData(arr1);
-                            setRemoveId('');
-                        }
-                        else {
-                            if (exploreTableData.length === buildingListForChart.length) {
-                                // dataarr.push(recordToInsert);
-                                // console.log(dataarr);
-                                // setSeriesData(dataarr);
-                                // setSeriesLineData(dataarr);
-                                console.log(recordToInsert);
-                                console.log(seriesData);
-                                setSeriesData([...seriesData, recordToInsert]);
-                                setSeriesLineData([...seriesLineData, recordToInsert]);
-                            }
-                            else {
-                                console.log(recordToInsert);
-                                console.log(seriesData);
-                                setSeriesData([...seriesData, recordToInsert]);
-                                setSeriesLineData([...seriesLineData, recordToInsert]);
-                            }
-                        }
-                        // expSeriesData.push(recordToInsert);
-                        // expSeriesLineData.push(recordToInsert);
-                        //setIsExploreDataLoading(false);
+                        console.log(recordToInsert);
+                        console.log(seriesData);
+                        setSeriesData([...seriesData, recordToInsert]);
+                        setSeriesLineData([...seriesLineData, recordToInsert]);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Explore Data');
                 //setIsExploreDataLoading(false);
             }
+        };
 
+        fetchExploreChartData();
+    }, [selectedBuildingId]);
+
+    useEffect(() => {
+        console.log('Entered Removed building id ', removeBuildingId);
+        if (removeBuildingId === '') {
+            return;
         }
+        let arr1 = [];
+        arr1 = seriesData.filter(function (item) {
+            return item.id !== removeBuildingId;
+        });
+        console.log(arr1);
+        setSeriesData(arr1);
+        setSeriesLineData(arr1);
+    }, [removeBuildingId]);
 
-        let i = 0;
-        // while (expSeriesData.length > 0) {
-        //     expSeriesData.pop();
-        // }
-        // while (expSeriesLineData.length > 0) {
-        //     expSeriesLineData.pop();
-        // }
+    const dataarr = [];
 
-        for (i = 0; i < buildingListForChart.length; i++)
-            fetchExploreChartData(buildingListForChart[i]);
-        if (buildingListForChart.length === 0) {
-            setSeriesData([]);
-            setSeriesLineData([]);
+    const fetchExploreAllChartData = async (id) => {
+        try {
+            // setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy&building_id=${id}`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingChart}${params}`,
+                    {
+                        date_from: dateFormatHandler(startDate),
+                        date_to: dateFormatHandler(endDate),
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    console.log(responseData);
+                    let data = responseData.data;
+                    console.log(data);
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.building_id === id;
+                    });
+                    console.log(arr);
+                    let exploreData = [];
+                    // data.forEach((record) => {
+                    //     if (record.building_name !== null) {
+                    let recordToInsert = {
+                        name: arr[0].building_name,
+                        data: data,
+                        id: arr[0].building_id,
+                    };
+                    console.log(recordToInsert);
+                    dataarr.push(recordToInsert);
+                    console.log(dataarr);
+                    setAllBuildingData(dataarr);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            //setIsExploreDataLoading(false);
         }
-    }, [buildingListForChart])
+    };
 
+    useEffect(() => {
+        console.log('building List Array ', buildingListArray);
+        if (buildingListArray.length === 0) {
+            return;
+        }
+        for (var i = 0; i < buildingListArray.length; i++) {
+            fetchExploreAllChartData(buildingListArray[i]);
+        }
+    }, [buildingListArray]);
 
-
+    useEffect(() => {
+        if (allBuildingData.length === 0) {
+            return;
+        }
+        console.log('All Building Data ', allBuildingData);
+        console.log(allBuildingData.length);
+        console.log(exploreTableData.length);
+        setSeriesData(allBuildingData);
+        setSeriesLineData(allBuildingData);
+    }, [allBuildingData]);
 
     return (
         <>
@@ -737,10 +728,12 @@ const ExploreByBuildings = () => {
                             exploreTableData={exploreTableData}
                             isExploreDataLoading={isExploreDataLoading}
                             topEnergyConsumption={topEnergyConsumption}
-                            buildingListForChart={buildingListForChart}
-                            setBuildingListForChart={setBuildingListForChart}
-                            setRemoveId={setRemoveId}
-                            removeId={removeId}
+                            selectedBuildingId={selectedBuildingId}
+                            setSelectedBuildingId={setSelectedBuildingId}
+                            removeBuildingId={removeBuildingId}
+                            setRemovedBuildingId={setRemovedBuildingId}
+                            buildingListArray={buildingListArray}
+                            setBuildingListArray={setBuildingListArray}
                         />
                     </Col>
                 </div>
