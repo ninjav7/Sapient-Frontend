@@ -1117,8 +1117,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1147,8 +1147,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1239,8 +1239,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1379,13 +1379,13 @@ const BuildingOverview = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
