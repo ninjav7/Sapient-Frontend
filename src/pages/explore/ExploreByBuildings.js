@@ -42,7 +42,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
                 arr.push(exploreTableData[i].building_id)
-                console.log(arr);
+                // console.log(arr);
                 //console.log(exploreTableData[i].equipment_id);
                 // ApexCharts.exec('chart2', 'showSeries', exploreTableData[i].building_name);
                 // ApexCharts.exec('chart1', 'showSeries', exploreTableData[i].building_name);
@@ -72,7 +72,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
 
         if (isChecked.checked == true) {
             buildingListArr.push(id)
-            console.log(buildingListArr)
+            // console.log(buildingListArr)
             setBlgdListArr([...blgdListArr, id])
             // setBlgdListArr(buildingListArr);
             // ApexCharts.exec('chart2', 'showSeries', e.target.value);
@@ -84,7 +84,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
             arr = buildingListArr.filter(function (item) {
                 return item !== id
             })
-            console.log(arr);
+            // console.log(arr);
             setBlgdListArr(arr);
             setBuildingListForChart(arr);
             // ApexCharts.exec('chart2', 'hideSeries', e.target.value);
@@ -104,8 +104,8 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
         //     var checking = document.getElementById(exploreTableData[i].building_name);
         //     checking.checked = true;
         // }
-        console.log(buildingListArr)
-        console.log(blgdListArr)
+        // console.log(buildingListArr)
+        // console.log(blgdListArr)
         setBuildingListForChart(blgdListArr);
     }, [blgdListArr])
 
@@ -474,7 +474,7 @@ const ExploreByBuildings = () => {
         //     history.push('/explore-page/by-buildings');
         //     window.location.reload();
         // }
-        console.log("Building List ", buildingListForChart);
+        // console.log("Building List ", buildingListForChart);
     }, []);
 
     useEffect(() => {
@@ -483,7 +483,7 @@ const ExploreByBuildings = () => {
             let startCustomDate = new Date();
             //startCustomDate.setDate(startCustomDate.getDate() - date-1);
             startCustomDate.setDate(startCustomDate.getDate() - date);
-            console.log(date);
+            // console.log(date);
             if (date !== '0') endCustomDate.setDate(endCustomDate.getDate() - 1);
 
             setDateRange([startCustomDate, endCustomDate]);
@@ -552,9 +552,9 @@ const ExploreByBuildings = () => {
     }, [startDate, endDate]);
     const dataarr = [];
     useEffect(() => {
-        console.log(buildingListForChart);
-        console.log(seriesData);
-        console.log(removeId);
+        // console.log(buildingListForChart);
+        // console.log(seriesData);
+        // console.log(removeId);
 
         const fetchExploreChartData = async (id) => {
             try {
@@ -576,14 +576,14 @@ const ExploreByBuildings = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData);
+                        // console.log(responseData);
                         let data = responseData.data;
-                        console.log(data)
+                        // console.log(data)
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
                             return item.building_id === id
                         })
-                        console.log(arr);
+                        // console.log(arr);
                         let exploreData = [];
                         // data.forEach((record) => {
                         //     if (record.building_name !== null) {
@@ -591,23 +591,23 @@ const ExploreByBuildings = () => {
                             name: arr[0].building_name,
                             data: data,
                         };
-                        console.log(recordToInsert);
+                        // console.log(recordToInsert);
                         //exploreData.push(recordToInsert);
                         //     }
                         // });
 
-                        console.log("exploreChartData ", seriesData)
+                        // console.log("exploreChartData ", seriesData)
                         let idrr = [];
                         let arr1 = [];
                         if (removeId !== "") {
                             idrr = exploreTableData.filter(function (item) {
                                 return item.building_id === removeId
                             })
-                            console.log("remove id", idrr);
+                            // console.log("remove id", idrr);
                             arr1 = seriesData.filter(function (item) {
                                 return item.name !== idrr[0].building_name
                             })
-                            console.log(arr1);
+                            // console.log(arr1);
                             setSeriesData(arr1);
                             setSeriesLineData(arr1);
                             setRemoveId('');
@@ -618,14 +618,14 @@ const ExploreByBuildings = () => {
                                 // console.log(dataarr);
                                 // setSeriesData(dataarr);
                                 // setSeriesLineData(dataarr);
-                                console.log(recordToInsert);
-                                console.log(seriesData);
+                                // console.log(recordToInsert);
+                                // console.log(seriesData);
                                 setSeriesData([...seriesData, recordToInsert]);
                                 setSeriesLineData([...seriesLineData, recordToInsert]);
                             }
                             else {
-                                console.log(recordToInsert);
-                                console.log(seriesData);
+                                // console.log(recordToInsert);
+                                // console.log(seriesData);
                                 setSeriesData([...seriesData, recordToInsert]);
                                 setSeriesLineData([...seriesLineData, recordToInsert]);
                             }
