@@ -100,8 +100,8 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     .post(
                         `${BaseUrl}${equipmentGraphData}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -146,8 +146,8 @@ const EquipmentChartModel = ({ showChart, handleChartClose, sensorData }) => {
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

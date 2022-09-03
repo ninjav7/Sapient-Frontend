@@ -175,8 +175,8 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
@@ -233,8 +233,8 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

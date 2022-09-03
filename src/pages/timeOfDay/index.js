@@ -1172,8 +1172,8 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1252,8 +1252,8 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${avgDailyUsageByHour}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

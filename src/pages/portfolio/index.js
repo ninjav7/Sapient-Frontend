@@ -405,8 +405,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -431,8 +431,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -467,8 +467,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -508,8 +508,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioBuilidings}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

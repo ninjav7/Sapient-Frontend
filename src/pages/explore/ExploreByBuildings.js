@@ -486,8 +486,8 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -527,8 +527,8 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -597,8 +597,8 @@ const ExploreByBuildings = () => {
                 .post(
                     `${BaseUrl}${getExploreBuildingChart}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
