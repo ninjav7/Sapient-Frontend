@@ -135,8 +135,8 @@ const IndividualPassiveDevice = () => {
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

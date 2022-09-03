@@ -13,7 +13,7 @@ import {
 import TimeSeriesChart from '../charts/TimeSeriesChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler, timeZone } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -356,13 +356,13 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy`;
+                let params = `?building_id=${bldgId}&consumption=energy&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -382,13 +382,13 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -419,13 +419,13 @@ const PeakDemand = () => {
         const peakDemandYearlyData = async () => {
             try {
                 setIsPeakContentLoading(true);
-                let params = `?building_id=${bldgId}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

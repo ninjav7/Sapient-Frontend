@@ -152,8 +152,8 @@ const EquipChartModal = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
@@ -494,8 +494,8 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${equipmentGraphData}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -536,8 +536,8 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -583,8 +583,8 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

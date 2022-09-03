@@ -8,7 +8,7 @@ import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, endUses, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, timeZone } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
@@ -233,8 +233,8 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -264,8 +264,8 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -316,13 +316,13 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
