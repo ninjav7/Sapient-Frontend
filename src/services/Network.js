@@ -1,6 +1,6 @@
 // export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
-// export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -148,3 +148,4 @@ export const getPermissionSingleDetail = '/api/user_role/user-permission-role/pe
 export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
 export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
 export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
+export const assignUser = '/api/user_role/user-permission-role/assign-user-role';

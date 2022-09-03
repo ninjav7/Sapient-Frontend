@@ -75,12 +75,12 @@ const UserTable = ({ userData }) => {
                                             to={{
                                                 pathname: `/settings/user-profile`,
                                             }}>
-                                            <a>{record.name}</a>
+                                            <a>{record.name ? record.name : 'test user'}</a>
                                         </Link>
                                     </td>
-                                    <td className="">{record.buildingAccess}</td>
-                                    <td className="">{record.emailId}</td>
-                                    <td className="font-weight-bold">{record.lastActive}</td>
+                                    <td className="">-</td>
+                                    <td className="">-</td>
+                                    <td className="font-weight-bold">-</td>
                                 </tr>
                             );
                         })}
@@ -109,6 +109,7 @@ const SingleRoleNew = () => {
     const [controlControlChecked, setControlControlChecked] = useState(false);
 
     const [activeTab, setActiveTab] = useState('1');
+    const [userData, setUserData] = useState();
 
     const tabContents = [
         {
@@ -118,31 +119,31 @@ const SingleRoleNew = () => {
         },
         {
             id: '2',
-            title: 'Users (3)',
+            title: `Users (${userData?.length ? userData?.length : 0})`,
             icon: 'uil-user',
         },
     ];
 
-    const [userData, setUserData] = useState([
-        {
-            name: 'Michael Scott',
-            buildingAccess: 'All Buildings',
-            emailId: 'manager@dundermifflin.com',
-            lastActive: 'Today',
-        },
-        {
-            name: 'Jim Halpert',
-            buildingAccess: '2 Buildings',
-            emailId: 'jhalpert@dundermifflin.com',
-            lastActive: '4 days ago',
-        },
-        {
-            name: 'Dwight Schrute',
-            buildingAccess: '3 Buildings',
-            emailId: 'dschrute@dundermifflin.com',
-            lastActive: '10 mins ago',
-        },
-    ]);
+    // const [userData, setUserData] = useState([
+    //     {
+    //         name: 'Michael Scott',
+    //         buildingAccess: 'All Buildings',
+    //         emailId: 'manager@dundermifflin.com',
+    //         lastActive: 'Today',
+    //     },
+    //     {
+    //         name: 'Jim Halpert',
+    //         buildingAccess: '2 Buildings',
+    //         emailId: 'jhalpert@dundermifflin.com',
+    //         lastActive: '4 days ago',
+    //     },
+    //     {
+    //         name: 'Dwight Schrute',
+    //         buildingAccess: '3 Buildings',
+    //         emailId: 'dschrute@dundermifflin.com',
+    //         lastActive: '10 mins ago',
+    //     },
+    // ]);
 
     const toggleTab = (tab) => {
         if (activeTab !== tab) {
@@ -441,6 +442,7 @@ const SingleRoleNew = () => {
             .get(`${BaseUrl}${getPermissionSingleDetail}?permission_id=${roleId}`, { headers: header })
             .then((res) => {
                 setSinglePermissionDetail(res?.data?.data?.permission_details);
+                setUserData(res?.data?.data?.related_users);
             });
     };
 

@@ -24,6 +24,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { buildingData } from '../../store/globalState';
 import DropDownInput from '../../components/DropdownInput/DropDownInput';
+import { Prompt } from 'react-router-dom';
 
 const General = () => {
     let cookies = new Cookies();
@@ -34,6 +35,7 @@ const General = () => {
 
     // const [buildingData, setBuildingData] = useState({});
 
+    const [shouldBlockNavigation, setShouldBlockNavigation] = useState(false);
     const [operatingHours, setOperatingHours] = useState([]);
     const [allbuildingData, setAllBuildingData] = useState({});
     const [generalDateTimeData, setGeneralDateTimeData] = useState({});
@@ -562,6 +564,7 @@ const General = () => {
 
             setBuildingDateTime(obj);
         }
+        setShouldBlockNavigation(true);
     };
 
     const deleteBuildingHandler = () => {
@@ -620,17 +623,6 @@ const General = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // useEffect(() => {
-    //     const el = document.querySelector('ge-autocomplete');
-    //     // 'select' event handler - when a user selects an item from the suggestions
-    //     console.log(el);
-    //     if (el) {
-    //         el.addEventListener('select', (event) => {
-    //             console.log(event.detail, event);
-    //         });
-    //     }
-    // }, []);
-
     const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
     console.log(getResponseOfPlaces, 'getResponseOfPlaces');
     const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
@@ -646,28 +638,6 @@ const General = () => {
             });
     };
 
-    // const getGooglePlacesAutocomplete = async () => {
-    //     let header = {
-    //         'Content-Type': 'application/json',
-    //         accept: 'application/json',
-    //         Authorization: `Bearer ${userdata.token}`,
-    //     };
-
-    //     const params = `${textLocation.split(' ').join('+')}`;
-    //     let API_KEY = 'AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4';
-    //     await axios
-    //         .get(
-    //             `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=amoeba&types=establishment&location=37.76999%2C-122.44696&radius=500&key=AIzaSyDhNduZQBxLrO4xatcuiTUdgVvlVPrfzM4`,
-    //             {
-    //                 headers: header,
-    //             }
-    //         )
-    //         .then((res) => {
-    //             // setGetResponseOfPlaces(res?.data);
-    //             console.log(res, 'maps.googleapis.com');
-    //         });
-    // };
-
     useEffect(() => {
         getPlacesAutocomplete();
         // getGooglePlacesAutocomplete();
@@ -677,6 +647,7 @@ const General = () => {
 
     return (
         <React.Fragment>
+            <Prompt when={shouldBlockNavigation} message="Are you sure you want to leave the page?" />
             <Row className="page-title">
                 <Col lg={8}>
                     <div className="building-heading-container">
@@ -692,7 +663,7 @@ const General = () => {
                                         className="btn btn-default buildings-cancel-style"
                                         onClick={() => {
                                             setIsEditing(false);
-
+                                            setShouldBlockNavigation(false);
                                             fetchBuildingData();
                                         }}>
                                         Cancel
@@ -932,13 +903,7 @@ const General = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            // <ge-autocomplete
-                                            //     onChange={(e) => {
-                                            //         console.log(e, 'e');
-                                            //     }}
-                                            //     api_key="ge-2200db37475e4ed3"></ge-autocomplete>
                                         )}
-                                        {/* <div>{getResponseOfPlaces}</div> */}
                                     </FormGroup>
 
                                     <FormGroup>
@@ -959,8 +924,6 @@ const General = () => {
                                                     handleBldgSettingChanges('address_2', e.target.value);
                                                     localStorage.setItem('generalStreetAddress2', e.target.value);
                                                 }}
-                                                // onBlur={EditAddressHandler}
-
                                                 value={buildingAddress.address_2}
                                             />
                                         )}
@@ -989,7 +952,6 @@ const General = () => {
                                                         totalSelectedData?.properties?.locality
                                                     );
                                                 }}
-                                                // onBlur={EditAddressHandler}
                                                 value={totalSelectedData?.properties?.locality || buildingAddress.city}
                                             />
                                         )}
@@ -1015,7 +977,6 @@ const General = () => {
                                                         totalSelectedData?.properties?.region
                                                     );
                                                 }}
-                                                // onBlur={EditAddressHandler}
                                                 className="font-weight-bold"
                                             />
                                         )}
@@ -1039,8 +1000,6 @@ const General = () => {
                                                     handleBldgSettingChanges('zip_code', +e.target.value);
                                                     localStorage.setItem('generalZipCode', +e.target.value);
                                                 }}
-                                                // onBlur={EditAddressHandler}
-
                                                 className="font-weight-bold"
                                             />
                                         )}
