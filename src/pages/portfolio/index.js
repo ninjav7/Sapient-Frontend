@@ -21,7 +21,7 @@ import {
     portfolioOverall,
     getEnergyConsumption,
 } from '../../services/Network';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { timeZone, dateFormatHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
@@ -49,8 +49,6 @@ const PortfolioOverview = () => {
     const endDate = DateRangeStore.useState((s) => s.endDate);
     const [daysCount, setDaysCount] = useState(1);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
-
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
 
@@ -318,8 +316,8 @@ const PortfolioOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process','Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554','#D70040'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
         legend: {
             show: false,
         },

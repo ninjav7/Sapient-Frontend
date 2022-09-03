@@ -4,11 +4,11 @@ import Chart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
 
 // line column chart
-const LineColumnChart = ({ energyChartOptions, energyChartData }) => {
+const LineColumnChart = ({ options, series }) => {
     return (
         <Card>
             <CardBody>
-                <Chart options={energyChartOptions} series={energyChartData} type="bar" className="apex-charts" />
+                <Chart options={options} series={series} type="bar" className="apex-charts" />
             </CardBody>
         </Card>
     );

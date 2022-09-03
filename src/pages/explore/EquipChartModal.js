@@ -94,7 +94,6 @@ const EquipChartModal = ({
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
 
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
 
     const customDaySelect = [
