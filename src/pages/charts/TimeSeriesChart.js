@@ -7,7 +7,7 @@ import '../../sharedComponents/lineChartWidget/style.scss';
 
 const TimeSeriesChart = ({ height, options, series, className = '' }) => {
     return (
-        <div className={`bar-chart-widget-wrapper ${className}`}>
+        <div className={`line-chart-widget-wrapper ${className}`}>
             <Brick sizeInRem={1} />
             <ReactApexChart
                 options={options}
