@@ -366,7 +366,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
