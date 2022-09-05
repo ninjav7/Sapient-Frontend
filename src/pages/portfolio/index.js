@@ -51,6 +51,7 @@ const PortfolioOverview = () => {
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
+    const [isConsumpHistoryLoading, setIsConsumpHistoryLoading] = useState(false);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -456,10 +457,10 @@ const PortfolioOverview = () => {
 
         const energyConsumptionData = async () => {
             try {
+                setIsConsumpHistoryLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?aggregate=day&tz_info=${timeZone}`;
@@ -490,10 +491,12 @@ const PortfolioOverview = () => {
                             });
                         });
                         setEnergyConsumptionChart(newArray);
+                        setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Energy Consumption Data');
+                setIsConsumpHistoryLoading(false);
             }
         };
 
@@ -611,7 +614,10 @@ const PortfolioOverview = () => {
 
             <div className="portfolio-consume-widget-wrapper mt-5">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
-                <EnergyConsumptionHistory series={energyConsumptionChart} />
+                <EnergyConsumptionHistory
+                    series={energyConsumptionChart}
+                    isConsumpHistoryLoading={isConsumpHistoryLoading}
+                />
             </div>
         </>
     );

@@ -305,7 +305,7 @@ const PeakDemand = () => {
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = val.toFixed(2);
+                    let print = val.toFixed(0);
                     return `${print}k`;
                 },
             },
@@ -314,9 +314,9 @@ const PeakDemand = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('M/DD');
+                    let dateText = moment(timestamp).format('MMM D');
                     let weekText = moment(timestamp).format('ddd');
-                    return `${weekText} ${dateText}`;
+                    return `${weekText} - ${dateText}`;
                 },
                 style: {
                     colors: ['#1D2939'],
@@ -328,11 +328,44 @@ const PeakDemand = () => {
             },
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
             shared: false,
-            y: {
-                formatter: function (val) {
-                    return `${val} K`;
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
                 },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
             },
         },
     };
@@ -404,7 +437,7 @@ const PeakDemand = () => {
                         responseData.forEach((record) => {
                             newArray[0].data.push({
                                 x: record?.date,
-                                y: record?.energy_consumption / 1000,
+                                y: (record?.energy_consumption / 1000).toFixed(2),
                             });
                         });
                         setPeakDemandTrendData(newArray);
