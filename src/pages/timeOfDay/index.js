@@ -9,7 +9,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
 import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Network';
-import { dateFormatHandler } from '../../utils/helper';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';

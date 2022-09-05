@@ -13,7 +13,7 @@ import {
 import TimeSeriesChart from '../charts/TimeSeriesChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -460,8 +460,8 @@ const PeakDemand = () => {
                     .post(
                         `${BaseUrl}${peakEquipType}${params}`,
                         {
-                            date_from: dateFormatHandler(filterDate),
-                            date_to: dateFormatHandler(filterDate),
+                            date_from: filterDate,
+                            date_to: filterDate,
                         },
                         { headers }
                     )
@@ -489,8 +489,8 @@ const PeakDemand = () => {
                     .post(
                         `${BaseUrl}${peakEquipUsage}${params}`,
                         {
-                            date_from: dateFormatHandler(filterDate),
-                            date_to: dateFormatHandler(filterDate),
+                            date_from: filterDate,
+                            date_to: filterDate,
                         },
                         { headers }
                     )

@@ -21,7 +21,7 @@ import {
     portfolioOverall,
     getEnergyConsumption,
 } from '../../services/Network';
-import { timeZone, dateFormatHandler } from '../../utils/helper';
+import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';

@@ -10,7 +10,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';

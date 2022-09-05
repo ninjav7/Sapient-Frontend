@@ -17,7 +17,6 @@ import {
     linkActiveSensorToEquip,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
