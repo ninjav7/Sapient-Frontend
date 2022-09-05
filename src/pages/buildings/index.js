@@ -32,7 +32,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { percentageHandler, dateFormatHandler, timeZone } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -69,6 +69,8 @@ export function useHover() {
 const BuildingOverview = () => {
     // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [overview, setOverview] = useState({

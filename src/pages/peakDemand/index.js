@@ -13,7 +13,7 @@ import {
 import TimeSeriesChart from '../charts/TimeSeriesChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { percentageHandler, dateFormatHandler, timeZone } from '../../utils/helper';
+import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -248,6 +248,7 @@ const EquipmentUsagePeaks = ({ equipUsageData, isTopPeakContributersLoading }) =
 
 const PeakDemand = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
     const headers = {

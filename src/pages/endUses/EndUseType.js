@@ -8,7 +8,7 @@ import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, endUses, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
-import { percentageHandler, timeZone } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
@@ -25,6 +25,7 @@ const EndUseType = () => {
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -576,11 +577,7 @@ const EndUseType = () => {
 
                     <Col xl={5} className="mt-5 ml-3">
                         <div className="plug-content-style">
-                            {endUseType === 'lighting' ? (
-                                <h6 className="card-title custom-title">Usage by Floor</h6>
-                            ) : (
-                                <h6 className="card-title custom-title">Usage by Equipment Type</h6>
-                            )}
+                            <h6 className="card-title custom-title">Usage by Equipment Type</h6>
 
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
                             {isEquipTypeChartLoading ? (
