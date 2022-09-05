@@ -2,14 +2,21 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody } from 'reactstrap';
+import Brick from '../../sharedComponents/brick';
+import '../../sharedComponents/lineChartWidget/style.scss';
 
-const TimeSeriesChart = ({ height, options, series }) => {
+const TimeSeriesChart = ({ height, options, series, className = '' }) => {
     return (
-        <Card>
-            <CardBody>
-                <ReactApexChart options={options} series={series} type="area" height={height} />
-            </CardBody>
-        </Card>
+        <div className={`line-chart-widget-wrapper ${className}`}>
+            <Brick sizeInRem={1} />
+            <ReactApexChart
+                options={options}
+                series={series}
+                type="area"
+                height={height}
+                className="line-chart-widget"
+            />
+        </div>
     );
 };
 

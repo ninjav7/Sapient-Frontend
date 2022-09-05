@@ -48,9 +48,14 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                                     BuildingStore.update((s) => {
                                         s.BldgId = record.building_id;
                                         s.BldgName = record.building_name;
+                                        s.BldgTimeZone = record.timezone === '' ? 'US/Eastern' : record.timezone;
                                     });
                                     localStorage.setItem('buildingId', record.building_id);
                                     localStorage.setItem('buildingName', record.building_name);
+                                    localStorage.setItem(
+                                        'buildingTimeZone',
+                                        record.timezone === '' ? 'US/Eastern' : record.timezone
+                                    );
                                 }}>
                                 <div className="filter-bld-style">
                                     <div className="portfolio-txt-style">{record.building_name}</div>
