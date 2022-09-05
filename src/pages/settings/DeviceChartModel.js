@@ -10,7 +10,7 @@ import { DateRangeStore } from '../../store/DateRangeStore';
 import { faXmark, faEllipsisV } from '@fortawesome/pro-regular-svg-icons';
 import { BaseUrl, generalActiveDevices, getLocation, sensorGraphData, listSensor } from '../../services/Network';
 import axios from 'axios';
-import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';

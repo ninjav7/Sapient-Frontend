@@ -17,7 +17,6 @@ import {
     linkActiveSensorToEquip,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { timeZone, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -54,6 +53,7 @@ const IndividualActiveDevice = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
     const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeData, setActiveData] = useState({});
