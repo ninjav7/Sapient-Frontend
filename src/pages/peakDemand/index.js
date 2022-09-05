@@ -390,7 +390,7 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy&tz_info=${timeZone}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&consumption=energy&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
@@ -416,7 +416,7 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
@@ -453,7 +453,7 @@ const PeakDemand = () => {
         const peakDemandYearlyData = async () => {
             try {
                 setIsPeakContentLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
