@@ -8,9 +8,10 @@ import { BaseUrl, getExploreByEquipment, getExploreEquipmentList, getExploreEqui
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload  } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
+import { MultiSelect } from 'react-multi-select-component';
 import { Spinner } from 'reactstrap';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
@@ -83,8 +84,10 @@ const ExploreEquipmentTable = ({
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
                                     <th className="table-heading-style">% Change</th>
-                                    <th className="table-heading-style">Peak Power</th>
-                                    <th className="table-heading-style">% Change</th>
+                                    <th className="table-heading-style">Location</th>
+                                    <th className="table-heading-style">Location Type</th>
+                                    <th className="table-heading-style">Equipment Type</th>
+                                    <th className="table-heading-style">End Use Category</th>
                                 </tr>
                             </thead>
 
@@ -104,6 +107,13 @@ const ExploreEquipmentTable = ({
                                                 <Skeleton count={5} />
                                             </td>
 
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
+
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
                                             <td>
                                                 <Skeleton count={5} />
                                             </td>
@@ -272,8 +282,20 @@ const ExploreEquipmentTable = ({
                                                                 </button>
                                                             )}
                                                     </td>
+                                                    <td className='table-content-style font-weight-bold'>
+                                                        {record?.location}
+                                                    </td>
+                                                    <td className='table-content-style font-weight-bold'>
+                                                        {record?.location_type}
+                                                    </td>
+                                                    <td className='table-content-style font-weight-bold'>
+                                                        {record?.equipments_type}
+                                                    </td>
+                                                    <td className='table-content-style font-weight-bold'>
+                                                        {record?.end_user}
+                                                    </td>
 
-                                                    <td className="table-content-style font-weight-bold">
+                                                    {/* <td className="table-content-style font-weight-bold">
                                                         {(record?.peak_power?.now / 1000).toFixed(2)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
@@ -392,7 +414,7 @@ const ExploreEquipmentTable = ({
                                                                 </i>
                                                             </button>
                                                         )}
-                                                    </td>
+                                                    </td> */}
                                                 </tr>
                                             );
                                         })}
@@ -450,6 +472,17 @@ const ExploreByEquipment = () => {
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
+    const tableColumnOptions = [
+        { label: 'Energy Consumption', value: 'consumption' },
+        { label: 'Change', value: 'change' },
+        { label: 'Location', value: 'location' },
+        { label: 'Location Type', value: 'location_type' },
+        { label: 'Equipment Type', value: 'equip_type' },
+        { label: 'End Use Category', value: 'endUse_category' },
+    ];
+
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -518,6 +551,9 @@ const ExploreByEquipment = () => {
                 //     max: new Date('02 June 2022').getTime(),
                 // },
             },
+        },
+        legend: {
+            show: false,
         },
         colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
@@ -795,6 +831,14 @@ const ExploreByEquipment = () => {
         }
     }, [allEquipmentData])
 
+    const handleCloseFilter=(e, val)=>{
+        let arr=[];
+        arr = selectedOptions.filter(function (item) {
+            return item.value !== val
+        })
+        console.log(arr);
+        setSelectedOptions(arr);
+    }
 
 
     return (
@@ -851,19 +895,41 @@ const ExploreByEquipment = () => {
             </Row>
 
             <Row className="mt-3 mb-1">
+                <Col lg={11} style={{display:"flex",justifyContent:"flex-start"}}>
                 <div className="explore-search-filter-style">
                     <div className="explore-search mr-2">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                         <input className="search-box ml-2" type="search" name="search" placeholder="Search..." />
                     </div>
-                    <button
-                        type="button"
-                        className="btn btn-white d-inline font-weight-bold"
-                        style={{ height: '36px' }}>
-                        <i className="uil uil-plus mr-1 "></i>Add Filter
-                    </button>
+                    <div>
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
+
+                    {selectedOptions.map((el, index) => {
+                        return <><span
+                            className="btn btn-white d-inline btnHover"
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                           <button className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white"}}> All {el.label} </button><button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                        </span>
+                        </>;
+                    })}
+
                 </div>
-                <div></div>
+                </Col>
+                <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
+                <button className='btn btn-white d-inline btnHover font-weight-bold mr-2'> <FontAwesomeIcon icon={faTableColumns} size="md" /></button>
+                <button className='btn btn-white d-inline btnHover font-weight-bold'> <FontAwesomeIcon icon={faDownload} size="md" /></button>
+                </Col>
             </Row>
 
             <Row>

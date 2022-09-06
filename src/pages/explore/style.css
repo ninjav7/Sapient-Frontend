@@ -10,7 +10,9 @@
     align-items: stretch !important;
     align-content: stretch !important;
 }
-
+.btnHover:hover{
+    background-color: white;
+}
 .button-danger {
     position: static;
     width: 47px;

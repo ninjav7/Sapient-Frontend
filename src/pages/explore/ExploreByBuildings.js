@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col, Input, Card, CardBody, Table, Collapse, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
@@ -8,13 +8,14 @@ import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Spinner } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
+import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import ApexCharts from 'apexcharts';
@@ -75,12 +76,14 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
                                 <tr>
+
                                     <th className="table-heading-style">
                                         <input type="checkbox" className="mr-4" id="selection" onClick={(e) => { handleSelectionAll(e) }} />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
                                     <th className="table-heading-style">% Change</th>
+                                    <th className="table-heading-style">Building Type</th>
                                 </tr>
                             </thead>
 
@@ -99,6 +102,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             <td>
                                                 <Skeleton count={5} />
                                             </td>
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
                                         </tr>
                                     </SkeletonTheme>
                                 </tbody>
@@ -112,6 +118,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                        <div>
                                                         <input type="checkbox" className="mr-4" id={record?.building_id} value={record?.building_id} onClick={(e) => { handleSelection(e, record?.building_id) }} />
                                                         <a
                                                             className="building-name"
@@ -123,6 +130,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             }}>
                                                             {record?.building_name}
                                                         </a>
+                                                        </div>
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
@@ -252,6 +260,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                 </button>
                                                             )}
                                                     </td>
+                                                    <td className="table-content-style font-weight-bold">
+                                                            {record?.building_type}
+                                                    </td>
                                                 </tr>
                                             );
                                         })}
@@ -279,9 +290,19 @@ const ExploreByBuildings = () => {
         { label: 'Energy Consumption', value: 'consumption' },
         { label: 'Change', value: 'change' },
         { label: 'Square Footage', value: 'sq_ft' },
-        { label: 'Building Type', value: 'load' },
+        { label: 'Building Type', value: 'building_type' },
     ];
 
+    const [selectedBuildingOptions, setSelectedBuildingOptions] = useState([]);
+    
+    const buildingTypeOptions = [
+        { label: 'Office Building', value: 'office' },
+        { label: 'Residential Building', value: 'residential' },
+        
+    ];
+    const [isOpen, setIsOpen] = useState(false);
+
+  const toggle = () => setIsOpen(!isOpen);
 
     const customDaySelect = [
         {
@@ -389,6 +410,9 @@ const ExploreByBuildings = () => {
                 //     max: new Date('02 June 2022').getTime(),
                 // },
             },
+        },
+        legend: {
+            show: false,
         },
         colors: ['#008FFB'],
         fill: {
@@ -665,6 +689,15 @@ const ExploreByBuildings = () => {
         console.log("Selected Options ", selectedOptions);
     }, [selectedOptions])
 
+    const handleCloseFilter=(e, val)=>{
+        let arr=[];
+        arr = selectedOptions.filter(function (item) {
+            return item.value !== val
+        })
+        console.log(arr);
+        setSelectedOptions(arr);
+    }
+
     return (
         <>
             <Row className="ml-2 mt-2 mr-2 explore-filters-style">
@@ -719,6 +752,7 @@ const ExploreByBuildings = () => {
             </Row>
 
             <Row className="mt-3 mb-1">
+                <Col lg={11} style={{display:"flex",justifyContent:"flex-start"}}>
                 <div className="explore-search-filter-style">
                     <div className="explore-search mr-2">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
@@ -732,24 +766,79 @@ const ExploreByBuildings = () => {
                             labelledBy="Columns"
                             className="column-filter-styling"
                             valueRenderer={() => {
-                                return <><i className="uil uil-plus mr-1 "></i> Add Filter</>;
+                                return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
                             }}
                             ClearSelectedIcon={null}
                         />
                     </div>
 
                     {selectedOptions.map((el, index) => {
-                        return <button
-                            type="button"
-                            className="btn btn-white d-inline font-weight-bold"
+                        if(el.value!=="building_type"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
                             style={{ height: '36px', marginLeft: "1rem" }}>
-                            All {el.label} <i className="uil uil-multiply mr-1 "></i>
-                        </button>;
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                            <MultiSelect
+                            options={buildingTypeOptions}
+                            value={selectedBuildingOptions}
+                            onChange={setSelectedBuildingOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            // valueRenderer={() => {
+                            //     return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
+                            // }}
+                            ClearSelectedIcon={null}
+                        />
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                    {selectedOptions.map((el, index) => {
+                        if(el.value==="building_type"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            {/* <Dropdown.Menu className="dropdown-lg p-3">
+                            <MultiSelect
+                            options={buildingTypeOptions}
+                            value={selectedBuildingOptions}
+                            onChange={setSelectedBuildingOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            // valueRenderer={() => {
+                            //     return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
+                            // }}
+                            ClearSelectedIcon={null}
+                        />
+                        </Dropdown.Menu>*/}
+                        </Dropdown>
+                        </>);
                     })}
 
                 </div>
-                <div></div>
+                </Col>
+                <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
+                <button className='btn btn-white d-inline btnHover font-weight-bold mr-2'> <FontAwesomeIcon icon={faTableColumns} size="md" /></button>
+                <button className='btn btn-white d-inline btnHover font-weight-bold'> <FontAwesomeIcon icon={faDownload} size="md" /></button>
+                </Col>
             </Row>
+           
 
             <Row>
                 <div className="explore-table-style">
