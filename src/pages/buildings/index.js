@@ -92,6 +92,7 @@ const BuildingOverview = () => {
 
     const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
     const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
+    const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
 
@@ -1200,12 +1201,10 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
-                            // newArray.push(fixedConsumption);
                             newDonutData.push(fixedConsumption);
                         });
                         console.log(newDonutData);
@@ -1313,109 +1312,104 @@ const BuildingOverview = () => {
             }
         };
 
-        // // // // // // const builidingHourlyData = async () => {
-        // // // // // //     try {
-        // // // // // //         let headers = {
-        // // // // // //             'Content-Type': 'application/json',
-        // // // // // //             accept: 'application/json',
-        // // // // // //             Authorization: `Bearer ${userdata.token}`,
-        // // // // // //         };
-        // // // // // //         let params = `?building_id=${bldgId}`;
-        // // // // // //         await axios
-        // // // // // //             .post(
-        // // // // // //                 `${BaseUrl}${builidingHourly}${params}`,
-        // // // // // //                 {
-        // // // // // //                     date_from: dateFormatHandler(startDate),
-        // // // // // //                     date_to: dateFormatHandler(endDate),
-        // // // // // //                 },
-        // // // // // //                 { headers }
-        // // // // // //             )
-        // // // // // //             .then((res) => {
-        // // // // // //                 let response = res.data;
+        const builidingHourlyData = async () => {
+            try {
+                setIsAvgConsumptionDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingHourly}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res?.data;
+                        console.log('Sudhanshu => ', response);
+                        let weekDaysResData = response[0].weekdays;
+                        let weekEndResData = response[0].weekend;
 
-        // // // // // //                 let weekDaysResData = response[0].weekdays;
-        // // // // // //                 let weekEndResData = response[0].weekend;
+                        // console.log('weekDaysResData => ', weekDaysResData);
 
-        // // // // // //                 // console.log('weekDaysResData => ', weekDaysResData);
+                        const weekDaysData = weekDaysResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: (el.y / 1000).toFixed(2),
+                            };
+                        });
 
-        // // // // // //                 const weekDaysData = weekDaysResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const weekendsData = weekEndResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: (el.y / 1000).toFixed(2),
+                            };
+                        });
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const newWeekdaysData = [
+                            {
+                                name: 'Weekdays',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // //                     return {
-        // //                         x: parseInt(moment(el.x).format('HH')),
-        // //                         y: (el.y / 1000).toFixed(2),
-        // //                     };
-        // //                 });
+                        const newWeekendsData = [
+                            {
+                                name: 'Weekends',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const newWeekdaysData = [
-        // //                     {
-        // //                         name: 'Weekdays',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                        for (let i = 1; i <= 24; i++) {
+                            let matchedRecord = weekDaysData.find((record) => record.x === i);
 
-        // //                 const newWeekendsData = [
-        // //                     {
-        // //                         name: 'Weekends',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                            if (matchedRecord) {
+                                newWeekdaysData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekdaysData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
 
-        // //                 for (let i = 1; i <= 24; i++) {
-        // //                     let matchedRecord = weekDaysData.find((record) => record.x === i);
-
-        // // //                     if (matchedRecord) {
-        // // //                         newWeekdaysData[0].data.push(matchedRecord);
-        // // //                     } else {
-        // // //                         newWeekdaysData[0].data.push({
-        // // //                             x: i,
-        // // //                             y: 0,
-        // // //                         });
-        // // //                     }
-        // // //                 }
-
-        //                 for (let i = 0; i < 24; i++) {
-        //                     let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
-        //                     if (matchedRecord) {
-        //                         matchedRecord.x = i;
-        //                         // console.log('matchedRecord => ', matchedRecord);
-        //                         newWeekendsData[0].data.push(matchedRecord);
-        //                     } else {
-        //                         newWeekendsData[0].data.push({
-        //                             x: i,
-        //                             y: 0,
-        //                         });
-        //                     }
-        //                 }
-        //                 // console.log('newWeekendsData => ', newWeekendsData);
-        //                 setWeekDaysSeries(newWeekdaysData);
-        //                 setWeekEndsSeries(newWeekendsData);
-        //                 // setWeekEndsSeries([
-        //                 //     {
-        //                 //         name: 'Weekends',
-        //                 //         data: [
-        //                 //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-        //                 //         ],
-        //                 //     },
-        //                 // ]);
-        //             });
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch Building Hourly Data');
-        //     }
-        // };
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            if (matchedRecord) {
+                                matchedRecord.x = i;
+                                // console.log('matchedRecord => ', matchedRecord);
+                                newWeekendsData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekendsData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
+                        setWeekDaysSeries(newWeekdaysData);
+                        setWeekEndsSeries(newWeekendsData);
+                        setWeekEndsSeries([
+                            {
+                                name: 'Weekends',
+                                data: [
+                                    500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
+                                ],
+                            },
+                        ]);
+                        setIsAvgConsumptionDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Hourly Data');
+                setIsAvgConsumptionDataLoading(false);
+            }
+        };
 
         const buildingConsumptionChart = async () => {
             try {
@@ -1847,42 +1841,34 @@ const BuildingOverview = () => {
                     </Row> */}
 
                     {/* Hourly Average Consumption */}
-                    {/* {/* {/* <Row>
+                    {/* <Row>
                         <div className="card-body">
-                            <h6
-                                className="card-title custom-title"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Hourly Average Consumption
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/time-of-day/${bldgId}`,
-                                }}>
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
-                                    }}>
-                                    More Details
-                                </a>
-                            </Link>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                            <div className="hour-avg-consumtn p-1">
-                                <HeatMapChart
-                                    options={weekDaysOptions}
-                                    series={weekDaysSeries}
-                                    height={weekdaysChartHeight}
-                                />
-                                <span className="m-2"></span>
-                                <HeatMapChart
-                                    options={weekEndsOptions}
-                                    series={weekEndsSeries}
-                                    height={weekendsChartHeight}
-                                />
+                            <div className="total-eng-consumtn">
+                                <h6
+                                    className="card-title custom-title"
+                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                                    Hourly Average Consumption
+                                </h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
+                                {isAvgConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <HeatMapChart
+                                            options={weekDaysOptions}
+                                            series={weekDaysSeries}
+                                            height={weekdaysChartHeight}
+                                        />
+                                        <span className="m-2"></span>
+                                        <HeatMapChart
+                                            options={weekEndsOptions}
+                                            series={weekEndsSeries}
+                                            height={weekendsChartHeight}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </Row> */}
@@ -1907,7 +1893,6 @@ const BuildingOverview = () => {
                         </div>
                     </Row>
                 </div>
-                {/* </Col> */}
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
