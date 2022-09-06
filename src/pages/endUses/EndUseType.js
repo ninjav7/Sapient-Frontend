@@ -8,7 +8,7 @@ import LineColumnChart from '../charts/LineColumnChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import axios from 'axios';
 import { BaseUrl, endUses, endUsesEquipmentUsage, endUsesUsageChart } from '../../services/Network';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
@@ -25,6 +25,7 @@ const EndUseType = () => {
     let userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -114,13 +115,16 @@ const EndUseType = () => {
             enabled: true,
             enabledOnSeries: [1],
         },
+        animations: {
+            enabled: false,
+        },
         xaxis: {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('M/DD');
+                    let dateText = moment(timestamp).format('MMM D');
                     let weekText = moment(timestamp).format('ddd');
-                    return `${weekText} ${dateText}`;
+                    return `${weekText} - ${dateText}`;
                 },
             },
             style: {
@@ -179,6 +183,52 @@ const EndUseType = () => {
             ComponentStore.update((s) => {
                 s.parent = 'buildings';
             });
+            setEnergyChartOptions({
+                ...energyChartOptions,
+                tooltip: {
+                    //@TODO NEED?
+                    // enabled: false,
+                    shared: false,
+                    intersect: false,
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'Inter, Arial, sans-serif',
+                        fontWeight: 600,
+                        cssClass: 'apexcharts-xaxis-label',
+                    },
+                    x: {
+                        show: true,
+                        type: 'datetime',
+                        labels: {
+                            formatter: function (val, timestamp) {
+                                return moment(timestamp).format('DD/MMM - HH:mm');
+                            },
+                        },
+                    },
+                    y: {
+                        formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                            return value + ' K';
+                        },
+                    },
+                    marker: {
+                        show: false,
+                    },
+                    custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                        const { labels } = w.globals;
+                        const timestamp = labels[dataPointIndex];
+
+                        return `<div class="line-chart-widget-tooltip">
+                            <h6 class="line-chart-widget-tooltip-title">${endUseName} Consumption</h6>
+                            <div class="line-chart-widget-tooltip-value">${
+                                series[seriesIndex][dataPointIndex]
+                            } kWh</div>
+                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                                `MMM D 'YY @ hh:mm A`
+                            )}</div>
+                        </div>`;
+                    },
+                },
+            });
         };
         updateBreadcrumbStore();
     }, [endUseName]);
@@ -233,8 +283,8 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -264,8 +314,8 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -316,13 +366,13 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -576,11 +626,7 @@ const EndUseType = () => {
 
                     <Col xl={5} className="mt-5 ml-3">
                         <div className="plug-content-style">
-                            {endUseType === 'lighting' ? (
-                                <h6 className="card-title custom-title">Usage by Floor</h6>
-                            ) : (
-                                <h6 className="card-title custom-title">Usage by Equipment Type</h6>
-                            )}
+                            <h6 className="card-title custom-title">Usage by Equipment Type</h6>
 
                             <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Consumption</h6>
                             {isEquipTypeChartLoading ? (

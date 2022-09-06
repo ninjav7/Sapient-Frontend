@@ -7,7 +7,7 @@ import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { percentageHandler, dateFormatHandler, fetchDiffDaysCount, timeZone } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -21,6 +21,7 @@ const EndUsesPage = () => {
     const userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
@@ -142,8 +143,8 @@ const EndUsesPage = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -206,8 +207,8 @@ const EndUsesPage = () => {
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

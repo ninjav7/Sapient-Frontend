@@ -13,7 +13,6 @@ import {
     listSensor,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { dateFormatHandler, timeZone } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -50,6 +49,7 @@ const IndividualPassiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
@@ -135,8 +135,8 @@ const IndividualPassiveDevice = () => {
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

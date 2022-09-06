@@ -13,7 +13,7 @@ import {
 import TimeSeriesChart from '../charts/TimeSeriesChart';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -248,6 +248,7 @@ const EquipmentUsagePeaks = ({ equipUsageData, isTopPeakContributersLoading }) =
 
 const PeakDemand = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
     const headers = {
@@ -304,7 +305,7 @@ const PeakDemand = () => {
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = val.toFixed(2);
+                    let print = val.toFixed(0);
                     return `${print}k`;
                 },
             },
@@ -313,9 +314,9 @@ const PeakDemand = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('M/DD');
+                    let dateText = moment(timestamp).format('MMM D');
                     let weekText = moment(timestamp).format('ddd');
-                    return `${weekText} ${dateText}`;
+                    return `${weekText} - ${dateText}`;
                 },
                 style: {
                     colors: ['#1D2939'],
@@ -327,11 +328,44 @@ const PeakDemand = () => {
             },
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
             shared: false,
-            y: {
-                formatter: function (val) {
-                    return `${val} K`;
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
                 },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
             },
         },
     };
@@ -356,13 +390,13 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy`;
+                let params = `?building_id=${bldgId}&consumption=energy&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -382,13 +416,13 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -403,7 +437,7 @@ const PeakDemand = () => {
                         responseData.forEach((record) => {
                             newArray[0].data.push({
                                 x: record?.date,
-                                y: record?.energy_consumption / 1000,
+                                y: (record?.energy_consumption / 1000).toFixed(2),
                             });
                         });
                         setPeakDemandTrendData(newArray);
@@ -419,13 +453,13 @@ const PeakDemand = () => {
         const peakDemandYearlyData = async () => {
             try {
                 setIsPeakContentLoading(true);
-                let params = `?building_id=${bldgId}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -459,8 +493,8 @@ const PeakDemand = () => {
                     .post(
                         `${BaseUrl}${peakEquipType}${params}`,
                         {
-                            date_from: dateFormatHandler(filterDate),
-                            date_to: dateFormatHandler(filterDate),
+                            date_from: filterDate,
+                            date_to: filterDate,
                         },
                         { headers }
                     )
@@ -488,8 +522,8 @@ const PeakDemand = () => {
                     .post(
                         `${BaseUrl}${peakEquipUsage}${params}`,
                         {
-                            date_from: dateFormatHandler(filterDate),
-                            date_to: dateFormatHandler(filterDate),
+                            date_from: filterDate,
+                            date_to: filterDate,
                         },
                         { headers }
                     )

@@ -61,9 +61,15 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing })
                                                     onClick={() => {
                                                         localStorage.setItem('buildingId', record.building_id);
                                                         localStorage.setItem('buildingName', record.building_name);
+                                                        localStorage.setItem(
+                                                            'buildingTimeZone',
+                                                            record.timezone === '' ? 'US/Eastern' : record.timezone
+                                                        );
                                                         BuildingStore.update((s) => {
                                                             s.BldgId = record.building_id;
                                                             s.BldgName = record.building_name;
+                                                            s.BldgTimeZone =
+                                                                record.timezone === '' ? 'US/Eastern' : record.timezone;
                                                         });
                                                     }}>
                                                     {record.building_name}
@@ -192,27 +198,26 @@ const Buildings = () => {
         fetchBuildingData();
     }, [buildingListData]);
 
-    const fetchGeneralBuildingData = async()=>{
+    const fetchGeneralBuildingData = async () => {
         try {
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-          
+
             await axios.get(`${BaseUrl}${generalBuilding}`, { headers }).then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
-                setBuildingsData(res.data)
+                setBuildingsData(res.data);
             });
         } catch (error) {
             console.log('Failed to create Building');
         }
+    };
 
-    }
-
-    useEffect(()=>{
-          fetchGeneralBuildingData();
-    },[])
+    useEffect(() => {
+        fetchGeneralBuildingData();
+    }, []);
 
     return (
         <React.Fragment>

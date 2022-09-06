@@ -9,7 +9,6 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
 import { BaseUrl, builidingHourly, avgDailyUsageByHour } from '../../services/Network';
-import { dateFormatHandler } from '../../utils/helper';
 import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -1172,8 +1171,8 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1252,8 +1251,8 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${avgDailyUsageByHour}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

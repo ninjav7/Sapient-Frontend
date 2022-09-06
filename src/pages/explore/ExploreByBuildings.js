@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import { Row, Col, Input, Card, CardBody, Table, Collapse, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -510,8 +510,8 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -553,8 +553,8 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -627,8 +627,8 @@ const ExploreByBuildings = () => {
                 .post(
                     `${BaseUrl}${getExploreBuildingChart}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

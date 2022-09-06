@@ -29,7 +29,7 @@ import {
     sensorGraphData,
 } from '../../services/Network';
 import axios from 'axios';
-import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
 import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
@@ -175,8 +175,8 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
@@ -233,8 +233,8 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

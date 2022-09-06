@@ -615,8 +615,8 @@ const ExploreByEquipment = () => {
                     .post(
                         `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -695,8 +695,8 @@ const ExploreByEquipment = () => {
                     .post(
                         `${BaseUrl}${getExploreEquipmentChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -764,8 +764,8 @@ const ExploreByEquipment = () => {
                 .post(
                     `${BaseUrl}${getExploreEquipmentChart}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
