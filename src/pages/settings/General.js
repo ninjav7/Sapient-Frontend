@@ -13,6 +13,7 @@ import {
     generalDateTime,
     generalOperatingHours,
     generalBldgDelete,
+    singleBuildingDetail,
 } from '../../services/Network';
 import axios from 'axios';
 import moment from 'moment';
@@ -67,6 +68,9 @@ const General = () => {
 
     const [textLocation, settextLocation] = useState('');
     console.log('textLocation', textLocation.split(' ').join('+'));
+
+    // TODO:
+    const buildingId = localStorage.getItem('buildingId');
 
     const [timeZone, setTimeZone] = useState('');
 
@@ -262,6 +266,33 @@ const General = () => {
         }
     };
 
+    const [buildingDataList, setBuildingDataList] = useState();
+
+    // TODO:
+    const singleDataBuildingList = async () => {
+        let header = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        axios
+            .get(`${BaseUrl}${singleBuildingDetail}?building_id=${buildingId}`, {
+                headers: header,
+            })
+            .then((res) => {
+                console.log('buildingDataListNow', res?.data);
+                setBuildingDataList(res?.data?.data);
+            })
+            .catch((err) => {
+                console.log(err, 'buildinDataError');
+            });
+    };
+
+    useEffect(() => {
+        singleDataBuildingList();
+    }, []);
+
     const [buildingListData] = useAtom(buildingData);
 
     console.log('buildingListData', buildingListData);
@@ -274,7 +305,7 @@ const General = () => {
         if (fixing) {
             let data = {};
             if (bldgId) {
-                data = buildingListData.find((el) => el.building_id === bldgId);
+                data = buildingDataList;
                 if (data === undefined) {
                     return (fixing = false);
                 }
@@ -330,10 +361,10 @@ const General = () => {
     };
 
     useEffect(() => {
-        if (buildingListData) {
+        if (buildingDataList) {
             fetchBuildingData();
         }
-    }, [bldgId, buildingListData]);
+    }, [bldgId, buildingDataList]);
 
     useEffect(() => {
         let fixing = true;
@@ -343,7 +374,7 @@ const General = () => {
             if (fixing) {
                 let data = {};
                 if (bldgId) {
-                    data = buildingListData.find((el) => el.building_id === bldgId);
+                    data = buildingDataList;
                     if (data === undefined) {
                         return (fixing = false);
                     }
@@ -387,7 +418,7 @@ const General = () => {
         };
 
         fetchBuildingData();
-    }, [render]);
+    }, [render, buildingDataList]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
