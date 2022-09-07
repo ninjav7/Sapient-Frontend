@@ -16,13 +16,14 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 import moment from 'moment';
-import { BuildingStore } from '../../store/BuildingStore';
+import { BuildingStore, BuildingListStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { buildingData } from '../../store/globalState';
+import TimezoneSelect from 'react-timezone-select';
 import DropDownInput from '../../components/DropdownInput/DropDownInput';
 
 const General = () => {
@@ -30,6 +31,7 @@ const General = () => {
     let userdata = cookies.get('user');
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const _ = require('lodash');
+    const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
     // const [buildingData, setBuildingData] = useState({});
@@ -77,7 +79,11 @@ const General = () => {
         }
     }, [bldgData]);
 
-    console.log('timeZone', timeZone);
+    useEffect(() => {
+        if (selectedTimezone?.value) {
+            handleBldgSettingChanges('timezone', selectedTimezone?.value);
+        }
+    }, [selectedTimezone]);
 
     const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
@@ -247,6 +253,9 @@ const General = () => {
                         localStorage.removeItem('generalBuildingName');
                         localStorage.removeItem('generaltimeZone');
                         localStorage.removeItem('generalZipCode');
+                        BuildingListStore.update((s) => {
+                            s.fetchBuildingList = true;
+                        });
                     })
                 );
         } catch (error) {
@@ -577,6 +586,14 @@ const General = () => {
         }
 
         if (key === 'time_format') {
+            let obj = Object.assign({}, buildingDateTime);
+
+            obj[key] = value;
+
+            setBuildingDateTime(obj);
+        }
+
+        if (key === 'timezone') {
             let obj = Object.assign({}, buildingDateTime);
 
             obj[key] = value;
@@ -1093,7 +1110,13 @@ const General = () => {
                                         {isbuildingDetailsFetched ? (
                                             <Skeleton count={1} height={25} width={150} />
                                         ) : (
-                                            <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
+                                            <div className="select-wrapper font-weight-bold">
+                                                <TimezoneSelect
+                                                    value={buildingDateTime.timezone}
+                                                    onChange={setSelectedTimezone}
+                                                    labelStyle={'abbrev'}
+                                                />
+                                            </div>
                                         )}
                                     </div>
 
