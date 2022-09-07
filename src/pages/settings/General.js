@@ -426,9 +426,7 @@ const General = () => {
                 let newList = [
                     {
                         label: 'General',
-
                         path: '/settings/general',
-
                         active: true,
                     },
                 ];

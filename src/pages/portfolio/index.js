@@ -35,6 +35,8 @@ import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -585,40 +587,38 @@ const PortfolioOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
-    //     if (!buildingsEnergyConsume.length > 0) {
-    //         return;
-    //     }
-    //     let topVal = buildingsEnergyConsume[0].density;
-    //     setTopEnergyDensity(topVal);
-    // }, [buildingsEnergyConsume]);
+    const [userPermission] = useAtom(userPermissionData);
 
     return (
         <>
             <Header title="Portfolio Overview" />
-            <Row className="mt-2 mb-2">
-                <div className="col">
-                    <PortfolioKPIs
-                        daysCount={daysCount}
-                        totalBuilding={buildingsEnergyConsume.length}
-                        overalldata={overalldata}
-                    />
-                </div>
-            </Row>
+            {userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
+                <>
+                    <Row className="mt-2 mb-2">
+                        <div className="col">
+                            <PortfolioKPIs
+                                daysCount={daysCount}
+                                totalBuilding={buildingsEnergyConsume.length}
+                                overalldata={overalldata}
+                            />
+                        </div>
+                    </Row>
 
-            {/* <EnergyDensityMap
-                topEnergyDensity={topEnergyDensity}
-                markers={markers}
-                buildingsEnergyConsume={buildingsEnergyConsume}
-            /> */}
-
-            <div className="portfolio-consume-widget-wrapper mt-5">
-                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
-                <EnergyConsumptionHistory
-                    series={energyConsumptionChart}
-                    isConsumpHistoryLoading={isConsumpHistoryLoading}
-                />
-            </div>
+                    <div className="portfolio-consume-widget-wrapper mt-5">
+                        <EnergyConsumptionTotals
+                            series={series}
+                            options={options}
+                            energyConsumption={energyConsumption}
+                        />
+                        <EnergyConsumptionHistory
+                            series={energyConsumptionChart}
+                            isConsumpHistoryLoading={isConsumpHistoryLoading}
+                        />
+                    </div>
+                </>
+            ) : (
+                <p>You don't have the permission to view this page</p>
+            )}
         </>
     );
 };

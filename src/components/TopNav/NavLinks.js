@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -40,83 +40,124 @@ const NavLinks = () => {
         }
     };
 
-    const [userPermission] = useAtom(userPermissionData)
+    const [userPermission] = useAtom(userPermissionData);
 
-    console.log('userPermissionnowdatanow', userPermission)
+    console.log('userPermissionnowdatanow', userPermission);
+
+    const [userPermissionBuildingExplore, setuserPermissionBuildingExplore] = useState('');
+    const [userPermisionBuildingEnergy, setuserPermisionBuildingEnergy] = useState('');
+    const [userPermisionBuildingControl, setuserPermisionBuildingControl] = useState('');
+
+    console.log(
+        'userPermissionBuildingExplore',
+        userPermissionBuildingExplore,
+        'userPermisionBuildingEnergy',
+        userPermisionBuildingEnergy
+    );
+
+    useEffect(() => {
+        if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+            setuserPermissionBuildingExplore('Explore');
+        }
+        if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+            setuserPermisionBuildingEnergy('Energy');
+        }
+        if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
+            setuserPermisionBuildingControl('Control');
+        }
+        if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+            setuserPermissionBuildingExplore('');
+        }
+        if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+            setuserPermisionBuildingEnergy('');
+        }
+        if (userPermission?.permissions?.permissions?.control_control_permission?.view) {
+            setuserPermisionBuildingControl('');
+        }
+
+        // setuserPermissionBuilding((e) => [...el, userPermission])
+    }, [userPermission]);
 
     return (
         <div className="top-nav-routes-list">
-            {authProtectedRoutes.map((item, index) => {
-                console.log('item.visibility', item.visibility)
-                const Icon = item.icon || null;
-                if (!item.visibility) {
-                    return;
-                }
+            {authProtectedRoutes
+                .filter(
+                    (item) =>
+                        item?.name !== userPermissionBuildingExplore &&
+                        item?.name !== userPermisionBuildingEnergy &&
+                        item?.name !== userPermisionBuildingControl
+                )
+                .map((item, index) => {
+                    console.log('item.visibility', item.visibility);
+                    const Icon = item.icon || null;
+                    if (!item.visibility) {
+                        return;
+                    }
 
-                let str1 = item.path.split('/')[1];
-                let str2 = location.pathname.split('/')[1];
-                let active = str1.localeCompare(str2);
+                    let str1 = item.path.split('/')[1];
+                    let str2 = location.pathname.split('/')[1];
+                    let active = str1.localeCompare(str2);
 
-                return active === 0 ? (
-                    <div key={index} className="navbar-head-container active">
-                        <Link to={item.path}>
-                            <div className="d-flex align-items-center">
-                                {item.name === 'Energy' && (
-                                    <div className="font-icon-style active">
-                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                    return active === 0 ? (
+                        <div key={index} className="navbar-head-container active">
+                            <Link to={item.path}>
+                                <div className="d-flex align-items-center">
+                                    {item.name === 'Energy' && (
+                                        <div className="font-icon-style active">
+                                            <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                                        </div>
+                                    )}
+                                    {item.name === 'Control' && (
+                                        <div className="font-icon-style active">
+                                            <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                        </div>
+                                    )}
+                                    {item.name === 'Explore' && (
+                                        <div className="font-icon-style active">
+                                            <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                        </div>
+                                    )}
+                                    <div
+                                        onClick={() => {
+                                            setSideNavBar(item.name);
+                                        }}
+                                        className="navbar-heading active">
+                                        {item.name}
                                     </div>
-                                )}
-                                {item.name === 'Control' && (
-                                    <div className="font-icon-style active">
-                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
-                                    </div>
-                                )}
-                                {item.name === 'Explore' && (
-                                    <div className="font-icon-style active">
-                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
-                                    </div>
-                                )}
-                                <div
-                                    onClick={() => {
-                                        setSideNavBar(item.name);
-                                    }}
-                                    className="navbar-heading active">
-                                    {item.name}
                                 </div>
-                            </div>
-                        </Link>
-                    </div>
-                ) : (
-                    <div key={index} className="navbar-head-container">
-                        <Link to={item.path}>
-                            <div className="d-flex align-items-center">
-                                {item.name === 'Energy' && (
-                                    <div className="font-icon-style">
-                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                            </Link>
+                        </div>
+                    ) : (
+                        <div key={index} className="navbar-head-container">
+                            <Link to={item.path}>
+                                <div className="d-flex align-items-center">
+                                    {item.name === 'Energy' && (
+                                        <div className="font-icon-style">
+                                            <FontAwesomeIcon icon={faCircleBolt} size="lg" />
+                                        </div>
+                                    )}
+                                    {item.name === 'Control' && (
+                                        <div className="font-icon-style">
+                                            <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                        </div>
+                                    )}
+                                    {item.name === 'Explore' && (
+                                        <div className="font-icon-style">
+                                            <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                        </div>
+                                    )}
+                                    <div
+                                        onClick={() => {
+                                            setSideNavBar(item.name);
+                                        }}
+                                        className="navbar-heading">
+                                        {item.name}
                                     </div>
-                                )}
-                                {item.name === 'Control' && (
-                                    <div className="font-icon-style">
-                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
-                                    </div>
-                                )}
-                                {item.name === 'Explore' && (
-                                    <div className="font-icon-style">
-                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
-                                    </div>
-                                )}
-                                <div
-                                    onClick={() => {
-                                        setSideNavBar(item.name);
-                                    }}
-                                    className="navbar-heading">
-                                    {item.name}
                                 </div>
-                            </div>
-                        </Link>
-                    </div>
-                );
-            })}
+                            </Link>
+                        </div>
+                    );
+                })}
         </div>
     );
 };

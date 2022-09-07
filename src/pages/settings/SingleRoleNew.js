@@ -28,11 +28,14 @@ import {
     BaseUrl,
     createPermissionRole,
     getPermissionSingleDetail,
+    singleUserPermissionDetail,
     updatePermissionDetail,
 } from '../../services/Network';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import Skeleton from 'react-loading-skeleton';
+import { userPermissionData } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const UserTable = ({ userData }) => {
     useEffect(() => {
@@ -446,6 +449,20 @@ const SingleRoleNew = () => {
             });
     };
 
+    const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData);
+
+    const getUserPermissionDetail = async () => {
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        await axios.get(`${BaseUrl}${singleUserPermissionDetail}`, { headers }).then((res) => {
+            let data = res.data.data;
+            setUserPermissionDataNow(data);
+        });
+    };
+
     const updateSinglePermissionRoleFunc = async () => {
         let header = {
             'Content-Type': 'application/json',
@@ -457,8 +474,8 @@ const SingleRoleNew = () => {
                 headers: header,
             })
             .then((res) => {
-                // setSinglePermissionDetail(res?.data?.data?.permission_details);
                 console.log(res?.data?.data, 'permissionRoleUpdateSingle');
+                getUserPermissionDetail();
             });
     };
 
@@ -467,6 +484,10 @@ const SingleRoleNew = () => {
             getSinglePermissionRoleFunc();
         }
     }, [roleId]);
+
+    // useEffect(() => {
+    //     getUserPermissionDetail();
+    // },[])
 
     return (
         <React.Fragment>
@@ -488,7 +509,9 @@ const SingleRoleNew = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold ml-2"
-                                onClick={updateSinglePermissionRoleFunc}>
+                                onClick={() => {
+                                    updateSinglePermissionRoleFunc();
+                                }}>
                                 Save
                             </button>
                         </div>

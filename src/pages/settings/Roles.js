@@ -102,15 +102,19 @@ const Roles = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     const getPermissionRoleFunc = async () => {
-        let header = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
 
-        await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
-            setRoleDataList(res.data.data);
-        });
+            await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
+                setRoleDataList(res.data.data);
+            });
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     useEffect(() => {

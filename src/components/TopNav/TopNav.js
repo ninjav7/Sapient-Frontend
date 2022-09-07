@@ -11,7 +11,7 @@ import axios from 'axios';
 
 const TopNav = () => {
     const [buildingListData, setBuildingListData] = useAtom(buildingData);
-    const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData)
+    const [userPermissionDataNow, setUserPermissionDataNow] = useAtom(userPermissionData);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -39,15 +39,15 @@ const TopNav = () => {
         };
         await axios.get(`${BaseUrl}${singleUserPermissionDetail}`, { headers }).then((res) => {
             let data = res.data.data;
-            setUserPermissionDataNow(data)
+            setUserPermissionDataNow(data);
         });
-    }
+    };
 
     useEffect(() => {
         getUserPermissionDetail();
-    }, [])
+    }, []);
 
-    console.log('userPermissionDataNow', userPermissionDataNow)
+    console.log('userPermissionDataNow', userPermissionDataNow);
 
     // console.log(buildingListData, 'buildingListDataNowOrNever');
 
