@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
-import { allRoutes, authProtectedRoutes, allFlattenRoutes } from '../../routes';
+import { Link, useLocation } from 'react-router-dom';
+import { allFlattenRoutes } from '../../routes';
 import { ComponentStore } from '../../store/ComponentStore';
-import { BuildingStore } from '../../store/BuildingStore';
 
 import './SideNav.scss';
 
 const SideNav = () => {
-    const bldStoreId = BuildingStore.useState((s) => s.BldgId);
-    // const [bldgId, setBldgId] = useState(bldStoreId);
-    const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const location = useLocation();
@@ -23,10 +19,6 @@ const SideNav = () => {
             }
         });
         setActiveRoute(activeSideRoutes);
-        console.log(parentRoute);
-        if(parentRoute==="explore"){
-            window.location.reload();
-        }
     }, [parentRoute]);
 
     return (
@@ -45,7 +37,6 @@ const SideNav = () => {
                         <Link to={item.path} key={index}>
                             {active === 0 ? (
                                 <div
-                                    // className="side-nav-content"
                                     className="side-nav-content active"
                                     key={index}
                                     onClick={() => {
@@ -58,7 +49,6 @@ const SideNav = () => {
                             ) : (
                                 <div
                                     className="side-nav-content"
-                                    // className="side-nav-content-active"
                                     key={index}
                                     onClick={() => {
                                         ComponentStore.update((s) => {

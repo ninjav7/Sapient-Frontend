@@ -17,7 +17,6 @@ import {
     linkActiveSensorToEquip,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -54,6 +53,7 @@ const IndividualActiveDevice = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [locationData, setLocationData] = useState([]);
     const [isLocationFetched, setIsLocationFetched] = useState(true);
     const [activeData, setActiveData] = useState({});
@@ -104,7 +104,6 @@ const IndividualActiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -273,8 +272,8 @@ const IndividualActiveDevice = () => {
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )

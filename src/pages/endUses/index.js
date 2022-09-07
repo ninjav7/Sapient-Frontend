@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
 import StackedBarChart from '../charts/StackedBarChart';
 import EndUsesCard from './EndUsesCard';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -16,17 +17,18 @@ import Skeleton from 'react-loading-skeleton';
 import './style.css';
 
 const EndUsesPage = () => {
-    let cookies = new Cookies();
-    let userdata = cookies.get('user');
+    const cookies = new Cookies();
+    const userdata = cookies.get('user');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const [barChartOptions, setBarChartOptions] = useState({
+    const barChartOptions = {
         chart: {
             type: 'bar',
             stacked: true,
@@ -48,27 +50,37 @@ const EndUsesPage = () => {
             show: false,
         },
         xaxis: {
-            categories: [],
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    let dateText = moment(timestamp).format('M/DD');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} ${dateText}`;
+                },
+                style: {
+                    colors: ['#1D2939'],
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+            },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    if (val >= 1000) {
-                        val = (val / 1000).toFixed(0) + ' K';
-                    }
-                    return val;
+                formatter: function (val) {
+                    let print = val.toFixed(0);
+                    return `${print}k`;
                 },
             },
         },
         tooltip: {
+            shared: false,
             y: {
                 formatter: function (val) {
-                    return val + 'k';
+                    return `${val} K`;
                 },
             },
-            theme: 'dark',
-            x: { show: false },
         },
         fill: {
             opacity: 1,
@@ -86,23 +98,10 @@ const EndUsesPage = () => {
         grid: {
             borderColor: '#f1f3fa',
         },
-    });
+    };
 
     const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
-
-    const sortArrayOfObj = (arr) => {
-        let newArr = arr.sort((a, b) => a._id - b._id);
-        return newArr;
-    };
-
-    const formatData = (arr) => {
-        let newData = [];
-        sortArrayOfObj(arr).forEach((item) => {
-            newData.push(item.energy_consumption);
-        });
-        return newData;
-    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -144,8 +143,8 @@ const EndUsesPage = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -187,46 +186,40 @@ const EndUsesPage = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
+
                 setIsEndUsesChartLoading(true);
+
+                // let filter = '';
+                // let days = fetchDiffDaysCount(startDate, endDate);
+                // if (days <= 31) {
+                //     filter = 'hour';
+                // }
+                // if (days > 31 && days <= 365) {
+                //     filter = 'day';
+                // }
+                // if (days > 365) {
+                //     filter = 'month';
+                // }
+
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+
                 await axios
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
-                        let responseData = res.data;
-                        let newArray = [];
-                        responseData.map((element) => {
-                            let newObj = {
-                                name: element.name,
-                                data: formatData(element.data),
-                            };
-                            newArray.push(newObj);
-                        });
-                        setBarChartData(newArray);
-                        let newXaxis = {
-                            categories: [],
-                        };
-                        let weeksArray = [];
-                        responseData.forEach((enduse) => {
-                            enduse.data.forEach((element) => {
-                                weeksArray.push(element._id);
+                        let responseData = res?.data;
+                        responseData.forEach((endUse) => {
+                            endUse.data.forEach((record) => {
+                                record.y = record.y / 1000;
                             });
                         });
-                        let uniqueSet = new Set(weeksArray);
-                        let newList = Array.from(uniqueSet);
-                        newList.sort(function (a, b) {
-                            return a - b;
-                        });
-                        newList.map((num) => {
-                            return newXaxis.categories.push(`Week ${num}`);
-                        });
-                        setBarChartOptions({ ...barChartOptions, xaxis: newXaxis });
+                        setBarChartData(responseData);
                         setIsEndUsesChartLoading(false);
                     });
             } catch (error) {
@@ -251,17 +244,17 @@ const EndUsesPage = () => {
             ) : (
                 <Row className="ml-4">
                     <div className="card-group button-style mt-1 mb-0">
-                        {endUsesData.map((record, index) => {
+                        {endUsesData?.map((record, index) => {
                             return (
                                 <div className="card usage-card-box-style button-style">
                                     <div className="card-body">
                                         <div className="enduses-content-1">
-                                            <p className="dot" style={{ backgroundColor: record.color }}></p>
-                                            <span className="card-title card-title-style">{record.device}</span>
+                                            <p className="dot" style={{ backgroundColor: record?.color }}></p>
+                                            <span className="card-title card-title-style">{record?.device}</span>
                                         </div>
                                         <div className="enduses-content-2">
                                             <span className="card-text card-content-style">
-                                                {record.energy_consumption.now.toLocaleString(undefined, {
+                                                {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </span>
@@ -306,41 +299,41 @@ const EndUsesPage = () => {
                         </Row>
                     ) : (
                         <Row className="mt-4 energy-container">
-                            {endUsesData.slice(0, 5).map((usage, index) => {
+                            {endUsesData?.slice(0, 5).map((usage, index) => {
                                 return (
                                     <div className="usage-card">
                                         <EndUsesCard
                                             bldgId={bldgId}
                                             usage={usage}
                                             lastPeriodPerTotalHrs={percentageHandler(
-                                                usage.energy_consumption.now,
-                                                usage.energy_consumption.old
+                                                usage?.energy_consumption?.now,
+                                                usage?.energy_consumption?.old
                                             )}
                                             lastPeriodPerTotalHrsNormal={
-                                                usage.energy_consumption.now >= usage.energy_consumption.old
+                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.old
                                             }
                                             lastYearPerTotalHrs={percentageHandler(
-                                                usage.energy_consumption.now,
-                                                usage.energy_consumption.yearly
+                                                usage?.energy_consumption?.now,
+                                                usage?.energy_consumption?.yearly
                                             )}
                                             lastYearPerTotalHrsNormal={
-                                                usage.energy_consumption.now >= usage.energy_consumption.yearly
+                                                usage?.energy_consumption?.now >= usage?.energy_consumption?.yearly
                                             }
                                             lastPeriodPerAfterHrs={percentageHandler(
-                                                usage.after_hours_energy_consumption.now,
-                                                usage.after_hours_energy_consumption.old
+                                                usage?.after_hours_energy_consumption?.now,
+                                                usage?.after_hours_energy_consumption?.old
                                             )}
                                             lastPeriodPerAfterHrsNormal={
-                                                usage.after_hours_energy_consumption.now >=
-                                                usage.after_hours_energy_consumption.old
+                                                usage?.after_hours_energy_consumption?.now >=
+                                                usage?.after_hours_energy_consumption?.old
                                             }
                                             lastYearPerAfterHrs={percentageHandler(
-                                                usage.after_hours_energy_consumption.now,
-                                                usage.after_hours_energy_consumption.yearly
+                                                usage?.after_hours_energy_consumption?.now,
+                                                usage?.after_hours_energy_consumption?.yearly
                                             )}
                                             lastYearPerAfterHrsNormal={
-                                                usage.after_hours_energy_consumption.now >=
-                                                usage.after_hours_energy_consumption.yearly
+                                                usage?.after_hours_energy_consumption?.now >=
+                                                usage?.after_hours_energy_consumption?.yearly
                                             }
                                         />
                                     </div>
