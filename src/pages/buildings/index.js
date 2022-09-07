@@ -514,27 +514,8 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        //     type: 'category',
-        //     categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
-        // },
         xaxis: {
-            axisTicks: {
-                show: true,
-            },
-            tickAmount: 12,
-            range: 24,
-            labels: {
-                show: true,
-                type: 'category',
-                categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
-            },
+            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
     });
 
@@ -582,40 +563,14 @@ const BuildingOverview = () => {
         stroke: {
             width: 0.7,
         },
+        colors: ['#87AADE', '#F87171'],
         plotOptions: {
             heatmap: {
-                // shadeIntensity: 0.5,
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 1500,
-                            color: '#9bb4da',
-                        },
-                        {
-                            from: 1501,
-                            to: 3000,
-                            color: '#819dc9',
-                        },
-                        {
-                            from: 3001,
-                            to: 4500,
-                            color: '#128FD9',
-                        },
-                        {
-                            from: 4501,
-                            to: 6000,
-                            color: '#F87171',
-                        },
-                        {
-                            from: 6001,
-                            to: 7500,
-                            color: '#FF0000',
-                        },
-                    ],
-                },
             },
         },
         yaxis: {
@@ -623,50 +578,8 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        // },
         xaxis: {
-            axisTicks: {
-                show: true,
-            },
-            tickAmount: 6,
-            // range: 23,
-            type: 'category',
-            // categories: [
-            //     '12AM',
-            //     '1AM',
-            //     '2AM',
-            //     '3AM',
-            //     '4AM',
-            //     '5AM',
-            //     '6AM',
-            //     '7AM',
-            //     '8AM',
-            //     '9AM',
-            //     '10AM',
-            //     '11AM',
-            //     '12PM',
-            //     '1PM',
-            //     '2PM',
-            //     '3PM',
-            //     '4PM',
-            //     '5PM',
-            //     '6PM',
-            //     '7PM',
-            //     '8PM',
-            //     '9PM',
-            //     '10PM',
-            //     '11PM',
-            // ],
-            labels: {
-                show: true,
-            },
+            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
     });
 
@@ -1332,23 +1245,21 @@ const BuildingOverview = () => {
                     )
                     .then((res) => {
                         let response = res?.data;
-                        console.log('Sudhanshu => ', response);
-                        let weekDaysResData = response[0].weekdays;
-                        let weekEndResData = response[0].weekend;
 
-                        // console.log('weekDaysResData => ', weekDaysResData);
+                        let weekDaysResData = response[0]?.weekdays;
+                        let weekEndResData = response[0]?.weekend;
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
+                                y: el.y.toFixed(2),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
+                                y: el.y.toFixed(2),
                             };
                         });
 
@@ -1366,7 +1277,7 @@ const BuildingOverview = () => {
                             },
                         ];
 
-                        for (let i = 1; i <= 24; i++) {
+                        for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekDaysData.find((record) => record.x === i);
 
                             if (matchedRecord) {
@@ -1383,7 +1294,6 @@ const BuildingOverview = () => {
                             let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
-                                // console.log('matchedRecord => ', matchedRecord);
                                 newWeekendsData[0].data.push(matchedRecord);
                             } else {
                                 newWeekendsData[0].data.push({
@@ -1394,14 +1304,6 @@ const BuildingOverview = () => {
                         }
                         setWeekDaysSeries(newWeekdaysData);
                         setWeekEndsSeries(newWeekendsData);
-                        setWeekEndsSeries([
-                            {
-                                name: 'Weekends',
-                                data: [
-                                    500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-                                ],
-                            },
-                        ]);
                         setIsAvgConsumptionDataLoading(false);
                     });
             } catch (error) {
@@ -1463,10 +1365,8 @@ const BuildingOverview = () => {
         calculateDays();
         buildingOverallData();
         buildingEndUserData();
-        // // // buildingAlertsData();
-        //////buildingPeaksData();
         builidingEquipmentsData();
-        // builidingHourlyData();
+        builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1841,7 +1741,7 @@ const BuildingOverview = () => {
                     </Row> */}
 
                     {/* Hourly Average Consumption */}
-                    {/* <Row>
+                    <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
                                 <h6
@@ -1871,7 +1771,7 @@ const BuildingOverview = () => {
                                 )}
                             </div>
                         </div>
-                    </Row> */}
+                    </Row>
 
                     {/* Total Energy Consumption  */}
                     <Row>

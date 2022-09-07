@@ -4,7 +4,7 @@ import Header from '../../components/Header';
 import HeatMapChart from '../charts/HeatMapChart';
 import DonutChart from '../charts/DonutChart';
 import LineChart from '../charts/LineChart';
-import { useParams } from 'react-router-dom';
+import LineAreaChart from '../charts/LineAreaChart';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import axios from 'axios';
@@ -13,11 +13,10 @@ import moment from 'moment';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
-import { ConsoleView } from 'react-device-detect';
 import { Cookies } from 'react-cookie';
+import { Spinner } from 'reactstrap';
 
 const TimeOfDay = () => {
-    // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -25,92 +24,10 @@ const TimeOfDay = () => {
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
 
-    const apexLineChartWithLables = {
+    const areaChartOptions = {
         chart: {
             height: 380,
-            type: 'line',
-            zoom: {
-                enabled: false,
-            },
-            toolbar: {
-                show: false,
-            },
-        },
-        colors: ['#5369f8', '#43d39e', '#f77e53', '#1ce1ac', '#25c2e3', '#ffbe0b'],
-        tooltip: {
-            theme: 'dark',
-            x: { show: false },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            width: [3, 3],
-            curve: 'straight',
-        },
-        title: {
-            // text: 'Average High & Low Temperature',
-            align: 'left',
-            style: {
-                fontSize: '14px',
-            },
-        },
-        grid: {
-            row: {
-                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.2,
-            },
-            borderColor: '#f1f3fa',
-        },
-        // markers: {
-        //     style: 'inverted',
-        //     size: 6,
-        // },
-        xaxis: {
-            // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            categories: [],
-        },
-        yaxis: {
-            // min: 5,
-            // max: 40,
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'center',
-            floating: true,
-        },
-        responsive: [
-            {
-                breakpoint: 600,
-                options: {
-                    chart: {
-                        toolbar: {
-                            show: false,
-                        },
-                    },
-                    legend: {
-                        show: false,
-                    },
-                },
-            },
-        ],
-    };
-
-    const apexLineChartWithLablesData = [
-        {
-            name: 'Weekdays',
-            data: [9, 15, 18, 20, 24, 17, 16],
-        },
-        {
-            name: 'Weekends',
-            data: [5, 11, 14, 18, 17, 13, 13],
-        },
-    ];
-
-    const [lineChartOptions, setLineChartOptions] = useState({
-        chart: {
-            height: 380,
-            type: 'line',
+            type: 'area',
             zoom: {
                 enabled: false,
             },
@@ -130,30 +47,23 @@ const TimeOfDay = () => {
             width: [3, 3],
             curve: 'straight',
         },
-        // title: {
-        //     text: 'Average High & Low Temperature',
-        //     align: 'left',
-        //     style: {
-        //         fontSize: '14px',
-        //     },
-        // },
         grid: {
             row: {
-                colors: ['transparent', 'transparent'], // takes an array which will be repeated on columns
+                colors: ['transparent', 'transparent'],
                 opacity: 0.2,
             },
             borderColor: '#f1f3fa',
         },
-        // markers: {
-        //     style: 'inverted',
-        //     size: 6,
-        // },
         xaxis: {
-            categories: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
         yaxis: {
-            // min: 5,
-            // max: 40,
+            labels: {
+                formatter: function (val) {
+                    let print = val.toFixed(0);
+                    return `${print}k`;
+                },
+            },
         },
         legend: {
             show: true,
@@ -173,7 +83,6 @@ const TimeOfDay = () => {
                 onClick: { toggleDataSeries: false },
             },
         },
-
         responsive: [
             {
                 breakpoint: 600,
@@ -189,17 +98,9 @@ const TimeOfDay = () => {
                 },
             },
         ],
-    });
-    const [lineChartData, setLineChartData] = useState([
-        {
-            name: 'Weekdays',
-            data: [],
-        },
-        {
-            name: 'Weekends',
-            data: [],
-        },
-    ]);
+    };
+    const [areaChartData, setAreaChartData] = useState([]);
+    const [isAvgUsageChartLoading, setIsAvgUsageChartLoading] = useState(false);
 
     const weekdaysOptions = {
         chart: {
@@ -220,48 +121,59 @@ const TimeOfDay = () => {
         plotOptions: {
             heatmap: {
                 shadeIntensity: 0.5,
-                radius: 0,
+                enableShades: true,
+                distributed: true,
+                radius: 1,
                 useFillColorAsStroke: false,
-
-                // xaxis: {
-                //     range: 4,
-                // },
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 499,
-                            color: '#9bb4da',
-                            name: 'Low',
-                        },
-                        {
-                            from: 500,
-                            to: 999,
-                            color: '#819dc9',
-                            name: 'Medium',
-                        },
-                        {
-                            from: 1000,
-                            to: 1499,
-                            color: '#128FD9',
-                            name: 'High',
-                        },
-                        {
-                            from: 1500,
-                            to: 1999,
-                            color: '#F87171',
-                            name: 'Very High',
-                        },
-                        {
-                            from: 2000,
-                            to: 3999,
-                            color: '#FF0000',
-                            name: 'Extreme',
-                        },
-                    ],
-                },
             },
         },
+        // colors: ['#87AADE', '#F87171'],
+        colors: ['#87AADE'],
+        // plotOptions: {
+        //     heatmap: {
+        //         shadeIntensity: 0.5,
+        //         radius: 0,
+        //         useFillColorAsStroke: false,
+
+        //         // xaxis: {
+        //         //     range: 4,
+        //         // },
+        //         colorScale: {
+        //             ranges: [
+        //                 {
+        //                     from: 0,
+        //                     to: 499,
+        //                     color: '#9bb4da',
+        //                     name: 'Low',
+        //                 },
+        //                 {
+        //                     from: 500,
+        //                     to: 999,
+        //                     color: '#819dc9',
+        //                     name: 'Medium',
+        //                 },
+        //                 {
+        //                     from: 1000,
+        //                     to: 1499,
+        //                     color: '#128FD9',
+        //                     name: 'High',
+        //                 },
+        //                 {
+        //                     from: 1500,
+        //                     to: 1999,
+        //                     color: '#F87171',
+        //                     name: 'Very High',
+        //                 },
+        //                 {
+        //                     from: 2000,
+        //                     to: 3999,
+        //                     color: '#FF0000',
+        //                     name: 'Extreme',
+        //                 },
+        //             ],
+        //         },
+        //     },
+        // },
         yaxis: {
             labels: {
                 show: true,
@@ -306,716 +218,7 @@ const TimeOfDay = () => {
     };
 
     const [weekdaysSeries, setWeekdaysSeries] = useState([]);
-
-    // const weekdaysSeries = [
-    //     {
-    //         name: 'Monday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Tuesday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Wednesday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Thursday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Friday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Saturday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         name: 'Sunday',
-    //         data: [
-    //             {
-    //                 x: '1AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '2AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '3AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '4AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '5AM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '7AM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '8AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '9AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '10AM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '11AM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '12PM',
-    //                 y: 1000,
-    //             },
-    //             {
-    //                 x: '1PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '2PM',
-    //                 y: 2000,
-    //             },
-    //             {
-    //                 x: '3PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '4PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '5PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '6PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '7PM',
-    //                 y: 5000,
-    //             },
-    //             {
-    //                 x: '8PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '9PM',
-    //                 y: 4000,
-    //             },
-    //             {
-    //                 x: '10PM',
-    //                 y: 3000,
-    //             },
-    //             {
-    //                 x: '11PM',
-    //                 y: 2500,
-    //             },
-    //             {
-    //                 x: '12AM',
-    //                 y: 2000,
-    //             },
-    //         ],
-    //     },
-    // ];
+    const [isAvgHourlyChartLoading, setIsAvgHourlyChartLoading] = useState(false);
 
     const weekdaysChartHeight = 235;
 
@@ -1160,10 +363,10 @@ const TimeOfDay = () => {
         }
         const dailyUsageByHour = async () => {
             try {
+                setIsAvgUsageChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
@@ -1177,22 +380,31 @@ const TimeOfDay = () => {
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
-
-                        let weekDaysResData = response[0].weekdays;
-                        let weekEndResData = response[0].weekend;
+                        let response = res?.data;
+                        // let chartDataToDisplay = [
+                        //     {
+                        //         name: 'Weekdays',
+                        //         data: response[0]?.weekdays,
+                        //     },
+                        //     {
+                        //         name: 'Weekends',
+                        //         data: response[0]?.weekend,
+                        //     },
+                        // ];
+                        let weekDaysResData = response[0]?.weekdays;
+                        let weekEndResData = response[0]?.weekend;
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
+                                y: el.y.toFixed(2),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: (el.y / 1000).toFixed(2),
+                                y: el.y.toFixed(2),
                             };
                         });
 
@@ -1205,9 +417,9 @@ const TimeOfDay = () => {
                             data: [],
                         };
 
-                        const chartData = [];
+                        const chartDataToDisplay = [];
 
-                        for (let i = 1; i <= 24; i++) {
+                        for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekDaysData.find((record) => record.x === i);
                             if (matchedRecord) {
                                 newWeekdaysData.data.push(parseFloat(matchedRecord.y));
@@ -1216,9 +428,7 @@ const TimeOfDay = () => {
                             }
                         }
 
-                        // console.log('weedays data', newWeekdaysData);
-
-                        for (let i = 1; i <= 24; i++) {
+                        for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekendsData.find((record) => record.x === i);
 
                             if (matchedRecord) {
@@ -1227,14 +437,16 @@ const TimeOfDay = () => {
                                 newWeekendsData.data.push(0);
                             }
                         }
-                        // console.log('weekends data', newWeekendsData);
-                        chartData.push(newWeekdaysData);
-                        chartData.push(newWeekendsData);
-                        setLineChartData(chartData);
+                        chartDataToDisplay.push(newWeekdaysData);
+                        chartDataToDisplay.push(newWeekendsData);
+
+                        setAreaChartData(chartDataToDisplay);
+                        setIsAvgUsageChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Daily Usage Hour Data');
+                setIsAvgUsageChartLoading(false);
             }
         };
 
@@ -1243,9 +455,9 @@ const TimeOfDay = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
+                setIsAvgHourlyChartLoading(true);
                 let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
@@ -1398,8 +610,10 @@ const TimeOfDay = () => {
                         let fri = [];
                         let sat = [];
                         let sun = [];
+
                         // console.log('heat map raw ', response);
                         // Seperate record based on days
+
                         response.map((record) => {
                             if (record.timeline.weekday === 1) {
                                 sun.push(record);
@@ -1692,12 +906,14 @@ const TimeOfDay = () => {
                             }
                         });
 
-                        // console.log('heatMapData => ', heatMapData);
+                        console.log('heatMapData => ', heatMapData);
                         setWeekdaysSeries(heatMapData.reverse());
+                        setIsAvgHourlyChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Daily Usage Hour Data');
+                setIsAvgHourlyChartLoading(false);
             }
         };
 
@@ -1708,11 +924,12 @@ const TimeOfDay = () => {
     return (
         <React.Fragment>
             <Header title="Time of Day" />
-            <Row className="">
+
+            <Row>
                 <Col xl={3}>
                     <div className="card-body container-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Off Hours Energy
+                            After-Hours Energy
                         </h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                         <div className="mt-2 ">
@@ -1721,25 +938,40 @@ const TimeOfDay = () => {
                     </div>
                 </Col>
                 <Col xl={9}>
-                    <div className="card-body">
+                    <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                            Average Daily Usage by Hour
+                            Hourly Average Consumption
                         </h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour</h6>
-                        <HeatMapChart options={weekdaysOptions} series={weekdaysSeries} height={weekdaysChartHeight} />
+
+                        {isAvgHourlyChartLoading ? (
+                            <div className="loader-center-style" style={{ height: '400px' }}>
+                                <Spinner className="m-2" color={'primary'} />
+                            </div>
+                        ) : (
+                            <HeatMapChart
+                                options={weekdaysOptions}
+                                series={weekdaysSeries}
+                                height={weekdaysChartHeight}
+                            />
+                        )}
                     </div>
                 </Col>
             </Row>
 
             <Row className="mt-2">
                 <Col xl={11}>
-                    <div className="card-body ">
+                    <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
                         <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
-                        <div className="mt-2">
-                            {/* <LineChart title="" /> */}
-                            <LineChart title="" options={lineChartOptions} series={lineChartData} height={400} />
-                        </div>
+
+                        {isAvgUsageChartLoading ? (
+                            <div className="loader-center-style" style={{ height: '400px' }}>
+                                <Spinner className="m-2" color={'primary'} />
+                            </div>
+                        ) : (
+                            <LineAreaChart options={areaChartOptions} series={areaChartData} height={400} />
+                        )}
                     </div>
                 </Col>
             </Row>
