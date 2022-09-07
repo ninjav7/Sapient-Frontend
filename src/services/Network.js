@@ -149,3 +149,4 @@ export const updatePermissionDetail = '/api/user_role/user-permission-role/updat
 export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
 export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
 export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
+export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions'

@@ -47,6 +47,8 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
 import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
     const [selected, setSelected] = useState([]);
@@ -949,6 +951,8 @@ const EquipmentTable = ({
     const [lastDataOrder, setLastDataOrder] = useState(false);
     const [deviceIdOrder, setDeviceIdOrder] = useState(false);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     console.log(selectedOptions, 'selectedOptions');
 
     const handleColumnSort = (order, columnName) => {
@@ -1028,324 +1032,377 @@ const EquipmentTable = ({
     };
     const [equipData, setEquipData] = useState(null);
 
+    console.log(
+        'userPermission?.permissions?.permissionsbuilding_equipment_permission?.view',
+        userPermission?.permissions?.permissions
+    );
+
     return (
         <>
             <Card>
                 <CardBody>
-                    <Table className="mb-0 bordered table-hover">
-                        <thead>
-                            <tr className="mouse-pointer">
-                                {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
-                                {selectedOptions.some((record) => record.value === 'name') && (
-                                    <th className="active-device-header" onClick={() => setNameOrder(!nameOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Name</div>
-                                            {nameOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'equipments_name')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'equipments_name')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                    <th
-                                        className="active-device-header"
-                                        onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Equipment Type</div>
-                                            {equipTypeOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'equipments_type')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'equipments_type')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'location') && (
-                                    <th
-                                        className="active-device-header"
-                                        onClick={() => setLocationOrder(!locationOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Location</div>
-                                            {locationOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'location')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'location')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'tags') && (
-                                    <th className="active-device-header" onClick={() => setTagsOrder(!TagsOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Tags</div>
-                                            {TagsOrder ? (
-                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'tags')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div className="ml-2" onClick={() => handleColumnSort('dce', 'tags')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                    <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Sensor Number</div>
-                                            {sensorOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'sensor_number')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'sensor_number')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'last_data') && (
-                                    <th className="active-device-header">
-                                        <div className="active-device-flex">
-                                            <div>Last Data</div>
-                                        </div>
-                                    </th>
-                                )}
-                                {selectedOptions.some((record) => record.value === 'device_id') && (
-                                    <th
-                                        className="active-device-header"
-                                        onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
-                                        <div className="active-device-flex">
-                                            <div>Device ID</div>
-                                            {deviceIdOrder ? (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('ace', 'device_mac')}>
-                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    className="ml-2"
-                                                    onClick={() => handleColumnSort('dce', 'device_mac')}>
-                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    </th>
-                                )}
-                            </tr>
-                        </thead>
-                        {isEquipDataFetched ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                    </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                            <tbody>
-                                {equipmentData.map((record, index) => {
-                                    return (
-                                        <tr
-                                            key={index}
-                                            onClick={() => {
-                                                setEquipData(record);
-                                                Toggle(record);
-                                            }}
-                                            className="mouse-pointer">
-                                            {selectedOptions.some((record) => record.value === 'status') && (
-                                                <td className="text-center">
-                                                    <div>
-                                                        {record.status === 'Online' && (
-                                                            <div className="icon-bg-styling">
-                                                                <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                            </div>
-                                                        )}
-                                                        {record.status === 'Offline' && (
-                                                            <div className="icon-bg-styling-slash">
-                                                                <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'name') && (
-                                                <td className="font-weight-bold">
-                                                    {!(record.equipments_name === '') ? record.equipments_name : '-'}
-                                                </td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                                <td className="font-weight-bold">{record.equipments_type}</td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'location') && (
-                                                <td>
-                                                    {record.location === ' > '
-                                                        ? ' - '
-                                                        : record.location.split('>').reverse().join(' > ')}
-                                                </td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'tags') && (
-                                                <td>
-                                                    {
-                                                        <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                            {record.tags.length === 0 ? 'None' : record.tags[0]}
+                    {userPermission && userPermission?.permissions?.permissions?.building_equipment_permission?.view ? (
+                        <>
+                            <Table className="mb-0 bordered table-hover">
+                                <thead>
+                                    <tr className="mouse-pointer">
+                                        {selectedOptions.some((record) => record.value === 'status') && <th>Status</th>}
+                                        {selectedOptions.some((record) => record.value === 'name') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setNameOrder(!nameOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Name</div>
+                                                    {nameOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'equipments_name')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
                                                         </div>
-                                                    }
-                                                </td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                                <td>{record.sensor_number === 0 ? '-' : record.sensor_number}</td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'last_data') && (
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'equipments_name')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'equip_type') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setEquipTypeOrder(!equipTypeOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Equipment Type</div>
+                                                    {equipTypeOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'equipments_type')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'equipments_type')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'location') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setLocationOrder(!locationOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Location</div>
+                                                    {locationOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'location')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'location')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'tags') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setTagsOrder(!TagsOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Tags</div>
+                                                    {TagsOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'tags')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'tags')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'sensor_number') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setSensorOrder(!sensorOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Sensor Number</div>
+                                                    {sensorOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'sensor_number')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'sensor_number')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'last_data') && (
+                                            <th className="active-device-header">
+                                                <div className="active-device-flex">
+                                                    <div>Last Data</div>
+                                                </div>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'device_id') && (
+                                            <th
+                                                className="active-device-header"
+                                                onClick={() => setDeviceIdOrder(!deviceIdOrder)}>
+                                                <div className="active-device-flex">
+                                                    <div>Device ID</div>
+                                                    {deviceIdOrder ? (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('ace', 'device_mac')}>
+                                                            <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            className="ml-2"
+                                                            onClick={() => handleColumnSort('dce', 'device_mac')}>
+                                                            <FontAwesomeIcon
+                                                                icon={faAngleDown}
+                                                                color="grey"
+                                                                size="md"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </th>
+                                        )}
+                                    </tr>
+                                </thead>
+                                {isEquipDataFetched ? (
+                                    <tbody>
+                                        <SkeletonTheme color="#202020" height={35}>
+                                            <tr>
                                                 <td>
-                                                    {record.last_data === ''
-                                                        ? '-'
-                                                        : moment(record?.last_data).fromNow()}
+                                                    <Skeleton count={5} />
                                                 </td>
-                                            )}
-                                            {selectedOptions.some((record) => record.value === 'device_id') && (
-                                                <td className="font-weight-bold">{record.device_mac}</td>
-                                            )}
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        )}
-                    </Table>
-                    <div className="page-button-style">
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                paginationData.pagination !== undefined
-                                    ? paginationData.pagination.previous === null
-                                        ? true
-                                        : false
-                                    : false
-                            }
-                            onClick={() => {
-                                previousPageData(paginationData.pagination.previous);
-                            }}>
-                            Previous
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                paginationData.pagination !== undefined
-                                    ? paginationData.pagination.next === null
-                                        ? true
-                                        : false
-                                    : false
-                            }
-                            onClick={() => {
-                                nextPageData(paginationData.pagination.next);
-                            }}>
-                            Next
-                        </button>
-                        <div>
-                            <select
-                                value={pageSize}
-                                className="btn btn-md btn-light font-weight-bold mt-4"
-                                onChange={(e) => {
-                                    setPageSize(parseInt(e.target.value));
-                                }}>
-                                {[20, 50, 100].map((pageSize) => (
-                                    <option key={pageSize} value={pageSize} className="align-options-center">
-                                        Show {pageSize} devices
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+                                            </tr>
+                                        </SkeletonTheme>
+                                    </tbody>
+                                ) : (
+                                    <tbody>
+                                        {equipmentData.map((record, index) => {
+                                            return (
+                                                <tr
+                                                    key={index}
+                                                    onClick={() => {
+                                                        setEquipData(record);
+                                                        Toggle(record);
+                                                    }}
+                                                    className="mouse-pointer">
+                                                    {selectedOptions.some((record) => record.value === 'status') && (
+                                                        <td className="text-center">
+                                                            <div>
+                                                                {record.status === 'Online' && (
+                                                                    <div className="icon-bg-styling">
+                                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                                    </div>
+                                                                )}
+                                                                {record.status === 'Offline' && (
+                                                                    <div className="icon-bg-styling-slash">
+                                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some((record) => record.value === 'name') && (
+                                                        <td className="font-weight-bold">
+                                                            {!(record.equipments_name === '')
+                                                                ? record.equipments_name
+                                                                : '-'}
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'equip_type'
+                                                    ) && <td className="font-weight-bold">{record.equipments_type}</td>}
+                                                    {selectedOptions.some((record) => record.value === 'location') && (
+                                                        <td>
+                                                            {record.location === ' > '
+                                                                ? ' - '
+                                                                : record.location.split('>').reverse().join(' > ')}
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some((record) => record.value === 'tags') && (
+                                                        <td>
+                                                            {
+                                                                <div className="badge badge-light mr-2 font-weight-bold week-day-style">
+                                                                    {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                                                </div>
+                                                            }
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'sensor_number'
+                                                    ) && (
+                                                        <td>
+                                                            {record.sensor_number === 0 ? '-' : record.sensor_number}
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some((record) => record.value === 'last_data') && (
+                                                        <td>
+                                                            {record.last_data === ''
+                                                                ? '-'
+                                                                : moment(record?.last_data).fromNow()}
+                                                        </td>
+                                                    )}
+                                                    {selectedOptions.some((record) => record.value === 'device_id') && (
+                                                        <td className="font-weight-bold">{record.device_mac}</td>
+                                                    )}
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                )}
+                            </Table>
+                            <div className="page-button-style">
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-light font-weight-bold mt-4"
+                                    disabled={
+                                        paginationData.pagination !== undefined
+                                            ? paginationData.pagination.previous === null
+                                                ? true
+                                                : false
+                                            : false
+                                    }
+                                    onClick={() => {
+                                        previousPageData(paginationData.pagination.previous);
+                                    }}>
+                                    Previous
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-light font-weight-bold mt-4"
+                                    disabled={
+                                        paginationData.pagination !== undefined
+                                            ? paginationData.pagination.next === null
+                                                ? true
+                                                : false
+                                            : false
+                                    }
+                                    onClick={() => {
+                                        nextPageData(paginationData.pagination.next);
+                                    }}>
+                                    Next
+                                </button>
+                                <div>
+                                    <select
+                                        value={pageSize}
+                                        className="btn btn-md btn-light font-weight-bold mt-4"
+                                        onChange={(e) => {
+                                            setPageSize(parseInt(e.target.value));
+                                        }}>
+                                        {[20, 50, 100].map((pageSize) => (
+                                            <option key={pageSize} value={pageSize} className="align-options-center">
+                                                Show {pageSize} devices
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <p>You don't have view access</p>
+                    )}
                 </CardBody>
             </Card>
-            <div>
-                <EquipmentDeviceChartModel
-                    showChart={modal1}
-                    handleChartClose={Close1}
-                    equipData={equipData}
-                    equipmentTypeData={equipmentTypeData}
-                    endUse={endUse}
-                    fetchEquipmentData={fetchEquipmentData}
-                    showWindow={'configure'}
-                    deviceType={'active'}
-                />
-                <EquipmentDeviceChartModel
-                    showChart={modal2}
-                    handleChartClose={Close2}
-                    equipData={equipData}
-                    equipmentTypeData={equipmentTypeData}
-                    endUse={endUse}
-                    fetchEquipmentData={fetchEquipmentData}
-                    showWindow={'configure'}
-                    deviceType={'passive'}
-                    locationData={locationData}
-                />
-                {/* <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/> */}
-                {/* <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/> */}
-            </div>
+            {userPermission?.permissions?.permissions?.building_equipment_permission?.edit && (
+                <div>
+                    <EquipmentDeviceChartModel
+                        showChart={modal1}
+                        handleChartClose={Close1}
+                        equipData={equipData}
+                        equipmentTypeData={equipmentTypeData}
+                        endUse={endUse}
+                        fetchEquipmentData={fetchEquipmentData}
+                        showWindow={'configure'}
+                        deviceType={'active'}
+                    />
+                    <EquipmentDeviceChartModel
+                        showChart={modal2}
+                        handleChartClose={Close2}
+                        equipData={equipData}
+                        equipmentTypeData={equipmentTypeData}
+                        endUse={endUse}
+                        fetchEquipmentData={fetchEquipmentData}
+                        showWindow={'configure'}
+                        deviceType={'passive'}
+                        locationData={locationData}
+                    />
+                    {/* <SingleActiveEquipmentModal show={modal1} equipData={equipData} close={Close1} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData}/> */}
+                    {/* <SinglePassiveEquipmentModal show={modal2} equipData={equipData} close={Close2} equipmentTypeData={equipmentTypeData} endUse={endUse} fetchEquipmentData={fetchEquipmentData} locationData={locationData}/> */}
+                </div>
+            )}
         </>
     );
 };
@@ -1758,6 +1815,8 @@ const Equipment = () => {
         updateBreadcrumbStore();
     }, []);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -1766,14 +1825,16 @@ const Equipment = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Equipment
-                            </button>
+                            {userPermission?.permissions?.permissions?.building_equipment_permission?.create && (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Equipment
+                                </button>
+                            )}
                         </div>
                     </div>
                 </Col>

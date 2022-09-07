@@ -1,12 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import {Row, Col, Card, CardBody, Table, UncontrolledDropdown, DropdownMenu, DropdownToggle, DropdownItem, Button,Input,FormGroup, Spinner} from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Table,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownToggle,
+    DropdownItem,
+    Button,
+    Input,
+    FormGroup,
+    Spinner,
+} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DateRangeStore } from '../../store/DateRangeStore';
-import { faXmark, faEllipsisV, faPowerOff, faTrash} from '@fortawesome/pro-regular-svg-icons';
-import { BaseUrl, builidingAlerts, equipmentGraphData, updateEquipment, listSensor, sensorGraphData } from '../../services/Network';
+import { faXmark, faEllipsisV, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import {
+    BaseUrl,
+    builidingAlerts,
+    equipmentGraphData,
+    updateEquipment,
+    listSensor,
+    sensorGraphData,
+} from '../../services/Network';
 import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat, dateFormatHandler } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
@@ -14,7 +35,14 @@ import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-s
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from 'react-router-dom';
-import { generalEquipments, getLocation, equipmentType, createEquipment, getEndUseId, searchEquipment} from '../../services/Network';
+import {
+    generalEquipments,
+    getLocation,
+    equipmentType,
+    createEquipment,
+    getEndUseId,
+    searchEquipment,
+} from '../../services/Network';
 import { ComponentStore } from '../../store/ComponentStore';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
@@ -30,11 +58,21 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 
-const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equipData,equipmentTypeData,endUse,fetchEquipmentData, deviceType,locationData }) => {
+const EquipmentDeviceChartModel = ({
+    showChart,
+    handleChartClose,
+    showWindow,
+    equipData,
+    equipmentTypeData,
+    endUse,
+    fetchEquipmentData,
+    deviceType,
+    locationData,
+}) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     console.log(equipData);
-    
+
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
@@ -46,14 +84,14 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
     const [startDate, endDate] = dateRange;
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
-    const [metricClass, setMetricClass]=useState('mr-3 single-passive-tab-active tab-switch');
-    const [configureClass, setConfigureClass]=useState('mr-3 single-passive-tab tab-switch');
-    const [historyClass, setHistoryClass]=useState('mr-3 single-passive-tab tab-switch');
-    const [selected,setSelected]=useState([]);
-    const [selectedZones,setSelectedZones]=useState([]);
+    const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
+    const [configureClass, setConfigureClass] = useState('mr-3 single-passive-tab tab-switch');
+    const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
+    const [selected, setSelected] = useState([]);
+    const [selectedZones, setSelectedZones] = useState([]);
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
-    const [showTab, setShowTab] = useState("");
+    const [showTab, setShowTab] = useState('');
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
 
@@ -97,7 +135,6 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
         return label;
     };
 
-
     useEffect(() => {
         const setCustomDate = (date) => {
             let endCustomDate = new Date(); // today
@@ -124,10 +161,10 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
     }, [dateFilter]);
     const exploreDataFetch = async () => {
         try {
-            console.log(sensorData.length)
-            if (equipData.equipments_id === undefined ) {
+            console.log(sensorData.length);
+            if (equipData.equipments_id === undefined) {
                 return;
-             }
+            }
             setIsSensorChartLoading(true);
             let headers = {
                 'Content-Type': 'application/json',
@@ -220,23 +257,21 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
         if (endDate === null) {
             return;
         }
-   
-    if(sensorData.length!==0){
-        exploreDataFetch();
-        buildingAlertsData();
-    }
+
+        if (sensorData.length !== 0) {
+            exploreDataFetch();
+            buildingAlertsData();
+        }
     }, [startDate, endDate, selectedConsumption]);
 
     useEffect(() => {
-
-        if(showWindow==="configure"){
-            setShowTab("configure");
-            setConfigureClass("mr-3 single-passive-tab-active tab-switch");
-            setMetricClass("mr-3 single-passive-tab tab-switch");
-            setHistoryClass("mr-3 single-passive-tab tab-switch");   
+        if (showWindow === 'configure') {
+            setShowTab('configure');
+            setConfigureClass('mr-3 single-passive-tab-active tab-switch');
+            setMetricClass('mr-3 single-passive-tab tab-switch');
+            setHistoryClass('mr-3 single-passive-tab tab-switch');
         }
-        if(showWindow==="metrics")
-        setShowTab("metrics");
+        if (showWindow === 'metrics') setShowTab('metrics');
         //exploreDataFetch();
     }, []);
 
@@ -445,10 +480,10 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
 
     useEffect(() => {
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipData)
-            if(equipData!==null){
-                console.log(equipData.device_type)
-                if(equipData.device_type==="passive" || equipData.device_id===""){
+            console.log(equipData);
+            if (equipData !== null) {
+                console.log(equipData.device_type);
+                if (equipData.device_type === 'passive' || equipData.device_id === '') {
                     return;
                 }
             }
@@ -462,7 +497,9 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
                 axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setSensors(response);
-                    let sensorId =  response.find( ({ equipment_type_name }) => equipment_type_name === equipData.equipments_type )
+                    let sensorId = response.find(
+                        ({ equipment_type_name }) => equipment_type_name === equipData.equipments_type
+                    );
                     console.log(sensorId);
                     setSensorData(sensorId);
                 });
@@ -471,74 +508,74 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
                 console.log('Failed to fetch Active device sensor data');
             }
         };
-        console.log(equipData!==null?equipData.device_type:"")
-        if(equipData!==null){
-        if(equipData.device_type!=="passive"){
-           // fetchActiveDeviceSensorData();
+        console.log(equipData !== null ? equipData.device_type : '');
+        if (equipData !== null) {
+            if (equipData.device_type !== 'passive') {
+                // fetchActiveDeviceSensorData();
+            }
+            // exploreDataFetch();
         }
-       // exploreDataFetch();
-    }
     }, [equipData]);
-    var result=[];
-        if(equipData!==null && equipData!==undefined){
-            if(equipmentTypeData!==undefined)
-            result =  equipmentTypeData.find( ({ equipment_type }) => equipment_type === equipData.equipments_type )
-            // var x=document.getElementById('endUsePop');
-            // console.log(x);
-            // if(x!==null)
-            // x.value=result.end_use_name;
-            // console.log(result);
+    var result = [];
+    if (equipData !== null && equipData !== undefined) {
+        if (equipmentTypeData !== undefined)
+            result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
+        // var x=document.getElementById('endUsePop');
+        // console.log(x);
+        // if(x!==null)
+        // x.value=result.end_use_name;
+        // console.log(result);
+    }
+    console.log(equipData);
+    const handleSwitch = (val) => {
+        switch (val) {
+            case 'metrics':
+                setShowTab('metrics');
+                setMetricClass('mr-3 single-passive-tab-active tab-switch');
+                setConfigureClass('mr-3 single-passive-tab tab-switch');
+                setHistoryClass('mr-3 single-passive-tab tab-switch');
+                break;
+            case 'configure':
+                setShowTab('configure');
+                setMetricClass('mr-3 single-passive-tab tab-switch');
+                setConfigureClass('mr-3 single-passive-tab-active tab-switch');
+                setHistoryClass('mr-3 single-passive-tab tab-switch');
+                break;
+            case 'history':
+                setShowTab('history');
+                setMetricClass('mr-3 single-passive-tab tab-switch');
+                setConfigureClass('mr-3 single-passive-tab tab-switch');
+                setHistoryClass('mr-3 single-passive-tab-active tab-switch');
+                break;
         }
-        console.log(equipData)
-        const handleSwitch=(val)=>{
-            switch(val){
-                case "metrics":
-                    setShowTab("metrics");
-                    setMetricClass("mr-3 single-passive-tab-active tab-switch");
-                    setConfigureClass("mr-3 single-passive-tab tab-switch");
-                    setHistoryClass("mr-3 single-passive-tab tab-switch");
-                    break;
-                case "configure":
-                    setShowTab("configure");
-                    setMetricClass("mr-3 single-passive-tab tab-switch");
-                    setConfigureClass("mr-3 single-passive-tab-active tab-switch");
-                    setHistoryClass("mr-3 single-passive-tab tab-switch");
-                    break;
-                case "history":
-                    setShowTab("history");
-                    setMetricClass("mr-3 single-passive-tab tab-switch");
-                    setConfigureClass("mr-3 single-passive-tab tab-switch");
-                    setHistoryClass("mr-3 single-passive-tab-active tab-switch");
-                    break;
+    };
+    const handleChange = (key, value) => {
+        let obj = Object.assign({}, updateEqipmentData);
+        if (key === 'equipment_type') {
+            const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
+            // console.log(result1.end_use_name);
+            const eq_id = endUse.find(({ name }) => name === result1.end_use_name);
+            // console.log(eq_id);
+            if (deviceType === 'passive') {
+                var x = document.getElementById('endUsePop');
+                x.value = eq_id.end_user_id;
             }
+            obj['end_use'] = eq_id.end_user_id;
         }
-        const handleChange = (key, value) => {
-            let obj = Object.assign({}, updateEqipmentData);
-            if(key==="equipment_type"){
-                const result1 =  equipmentTypeData.find( ({ equipment_id }) => equipment_id === value );
-                // console.log(result1.end_use_name);
-                const eq_id=endUse.find(({name})=>name===result1.end_use_name);
-                // console.log(eq_id);
-                if(deviceType==="passive"){
-                var x=document.getElementById("endUsePop");
-                x.value=(eq_id.end_user_id);
-                }
-                obj['end_use']=eq_id.end_user_id;
-            }
-            obj[key] = value;
-            // console.log(obj);
-            setUpdateEqipmentData(obj);
-        };
-        const handleSave=()=>{
+        obj[key] = value;
+        // console.log(obj);
+        setUpdateEqipmentData(obj);
+    };
+    const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
-            obj['tag']=selected;
+            obj['tag'] = selected;
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params=`?equipment_id=${equipData.equipments_id}`
+            let params = `?equipment_id=${equipData.equipments_id}`;
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
@@ -547,28 +584,30 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
                     // console.log(res.data);
                     fetchEquipmentData();
                     handleChartClose();
-                
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
         }
-        }
+    };
 
     return (
         <Modal show={showChart} onHide={handleChartClose} dialogClassName="modal-container-style" centered>
-           
-            {deviceType==="active"?
-            <>
-            <Modal.Body>
-            <Row>
+            {deviceType === 'active' ? (
+                <>
+                    <Modal.Body>
+                        <Row>
                             <Col lg={12}>
-                                <h6 className="text-muted">{`${equipData!==null?equipData.location:""} > ${equipData!==null?equipData.equipments_type:""}`}</h6>
+                                <h6 className="text-muted">{`${equipData !== null ? equipData.location : ''} > ${
+                                    equipData !== null ? equipData.equipments_type : ''
+                                }`}</h6>
                             </Col>
                         </Row>
                         <Row>
                             <Col lg={9}>
                                 <div>
-                                    <span className="heading-style">{equipData!==null?equipData.equipments_type:""}</span>
+                                    <span className="heading-style">
+                                        {equipData !== null ? equipData.equipments_type : ''}
+                                    </span>
                                 </div>
                             </Col>
                             <Col lg={3}>
@@ -586,7 +625,10 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
                                         <button
                                             type="button"
                                             className="btn btn-md btn-light font-weight-bold mr-4"
-                                            onClick={(e)=>{handleChartClose(); setSensorData([]);}}>
+                                            onClick={(e) => {
+                                                handleChartClose();
+                                                setSensorData([]);
+                                            }}>
                                             Cancel
                                         </button>
                                     </div>
@@ -601,621 +643,695 @@ const EquipmentDeviceChartModel = ({ showChart, handleChartClose, showWindow,equ
                                 </div>
                             </Col>
                         </Row>
-                        </Modal.Body>
-                        </>
-                        :""}
-                         {(deviceType==="passive")?
-                            <>
-                             <Modal.Body>
+                    </Modal.Body>
+                </>
+            ) : (
+                ''
+            )}
+            {deviceType === 'passive' ? (
+                <>
+                    <Modal.Body>
                         <Row>
                             <Col lg={12}>
-                                <h6 className="text-muted">{`Floor 1 > 252 > ${equipData!==null?equipData.equipments_type:""}`}</h6>
+                                <h6 className="text-muted">{`Floor 1 > 252 > ${
+                                    equipData !== null ? equipData.equipments_type : ''
+                                }`}</h6>
                             </Col>
                         </Row>
                         <Row>
                             <Col lg={9}>
                                 <div>
-                                    <span className="heading-style">{equipData!==null?equipData.equipments_type:""}</span>
+                                    <span className="heading-style">
+                                        {equipData !== null ? equipData.equipments_type : ''}
+                                    </span>
                                 </div>
                             </Col>
                             <Col lg={3}>
-                           
-                                <div className='button-wrapper'>
-                                
-                                    
-                                <div>
-                                    <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={(e)=>{handleChartClose(); setSensorData([]);}}>
-                                        Cancel
-                                    </button>
-                                </div>
-                                <div>
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleSave}>
-                                        Save
-                                    </button>
-                                </div>
+                                <div className="button-wrapper">
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-light font-weight-bold mr-4"
+                                            onClick={(e) => {
+                                                handleChartClose();
+                                                setSensorData([]);
+                                            }}>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            onClick={handleSave}>
+                                            Save
+                                        </button>
+                                    </div>
                                 </div>
                             </Col>
                         </Row>
-                        </Modal.Body>
-                            </>:""}
+                    </Modal.Body>
+                </>
+            ) : (
+                ''
+            )}
             <div className="nav-header-container">
                 <div className="passive-page-header">
                     <div className="mt-2 single-passive-tabs-style">
-                        <button className={metricClass} onClick={(e)=>{handleSwitch("metrics"); exploreDataFetch();buildingAlertsData();}}>Metrics</button>
-                        <button className={configureClass} onClick={(e)=>{handleSwitch("configure")}}>Configure</button>
-                        <button className={historyClass} onClick={(e)=>{handleSwitch("history")}}>History</button>
+                        <button
+                            className={metricClass}
+                            onClick={(e) => {
+                                handleSwitch('metrics');
+                                exploreDataFetch();
+                                buildingAlertsData();
+                            }}>
+                            Metrics
+                        </button>
+                        <button
+                            className={configureClass}
+                            onClick={(e) => {
+                                handleSwitch('configure');
+                            }}>
+                            Configure
+                        </button>
+                        <button
+                            className={historyClass}
+                            onClick={(e) => {
+                                handleSwitch('history');
+                            }}>
+                            History
+                        </button>
                     </div>
                 </div>
             </div>
-            {showTab==="metrics"?
-             <Modal.Body>
-             <Row>
-             <Col lg={4}>
-                 <div className="single-consumption-container">
-                     <h6 className="top-equip-title">Top Consumption YTD</h6>
-                     <div className="font-weight-bold" style={{ color: 'black' }}>
-                         {topConsumption} kWh
-                     </div>
-                     <h6 className="top-equip-title">Peak kW YTD</h6>
-                     <div className="font-weight-bold" style={{ color: 'black' }}>
-                         {peak} kW
-                     </div>
-                 </div>
-
-                 <div className="equipment-alert-container" style={{ marginTop: '5rem' }}>
-                     <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
-                         Equipment Alerts
-                     </h6>
-                     <a
-                         rel="noopener noreferrer"
-                         className="link-primary mr-2"
-                         style={{
-                             display: 'inline-block',
-                             float: 'right',
-                             textDecoration: 'none',
-                             fontWeight: 'bold',
-                         }}></a>
-                     <span
-                         className="float-right mr-0 font-weight-bold"
-                         style={{ color: 'blue' }}
-                         onClick={() => setBuildingAlerts([])}>
-                         Clear
-                     </span>
-
-                     <div className="mt-2 alert-container">
-                         {buildingAlert.map((record) => {
-                             return (
-                                 <>
-                                     {record.type === 'building-add' && (
-                                         <div className="alert-card mb-2">
-                                             <div>
-                                                 <i className="uil uil-triangle" />
-                                                 <span className="alert-heading">
-                                                     <b> New Peak</b>
-                                                 </span>
-                                                 <br />
-                                                 <span className="alert-content">
-                                                     225.3 kW &nbsp; 3/3/22 @ 3:20 PM
-                                                 </span>
-                                                 <div className="float-right ml-4 alert-weekday">Today</div>
-                                             </div>
-                                         </div>
-                                     )}
-                                     {record.type === 'energy-trend' && (
-                                         <div className="alert-card mb-2">
-                                             <div>
-                                                 <i className="uil uil-arrow-growth" />
-                                                 <span className="alert-heading">
-                                                     <b> Energy Trend</b>
-                                                 </span>
-                                                 <br />
-                                                 <span className="alert-content">
-                                                     18% from last year this time
-                                                 </span>
-                                                 <div className="float-right ml-4 alert-weekday">Yesterday</div>
-                                             </div>
-                                         </div>
-                                     )}
-                                     {record.type === 'notification' && (
-                                         <div className="alert-card">
-                                             <div>
-                                                 <i className="uil uil-exclamation-triangle" />
-                                                 <span className="alert-heading">
-                                                     <b> Service Soon</b>
-                                                 </span>
-                                                 <br />
-                                                 <span className="alert-content">80 Run Hours in 45 days</span>
-                                                 <div className="float-right ml-4 alert-weekday">Yesterday</div>
-                                             </div>
-                                         </div>
-                                     )}
-                                 </>
-                             );
-                         })}
-                     </div>
-                 </div>
-             </Col>
-             <Col lg={8}>
-                 <div className="model-sensor-filters">
-                <div className="">
-                    <Input
-                        type="select"
-                        name="select"
-                        id="exampleSelect"
-                        onChange={(e) => {
-                            if (e.target.value === 'passive-power') {
-                                return;
-                            }
-                            setConsumption(e.target.value);
-                        }}
-                        className="font-weight-bold model-sensor-energy-filter mr-2"
-                        style={{ display: 'inline-block', width: 'fit-content' }}
-                        defaultValue={selectedConsumption}>
-                        {metric.map((record, index) => {
-                            return <option value={record.value}>{record.label}</option>;
-                        })}
-                    </Input>
-                </div>
-
-                <div>
-                    <Input
-                        type="select"
-                        name="select"
-                        id="exampleSelect"
-                        style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
-                        className="select-button form-control form-control-md model-sensor-energy-filter"
-                        onChange={(e) => {
-                            setDateFilter(+e.target.value);
-                        }}
-                        defaultValue={dateFilter}>
-                        {customDaySelect.map((el, index) => {
-                            return <option value={el.value}>{el.label}</option>;
-                        })}
-                    </Input>
-                </div>
-
-                <div>
-                    <DatePicker
-                        selectsRange={true}
-                        startDate={startDate}
-                        endDate={endDate}
-                        onChange={(update) => {
-                            setDateRange(update);
-                        }}
-                        dateFormat="MMMM d"
-                        className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                        placeholderText="Select Date Range"
-                    />
-                </div>
-
-                <div className="mr-3 sensor-chart-options">
-                    <Dropdown>
-                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                            <FontAwesomeIcon icon={faEllipsisV} size="lg" />
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                            <Dropdown.Item>
-                                <i className="uil uil-calendar-alt mr-2"></i>Configure Column
-                            </Dropdown.Item>
-
-                            <div className="mr-3">
-                                <CSVLink
-                                    style={{ color: 'black', paddingLeft: '1.5rem' }}
-                                    filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
-                                    target="_blank"
-                                    data={getCSVLinkData()}>
-                                    <i className="uil uil-download-alt mr-2"></i>
-                                    Download CSV
-                                </CSVLink>
+            {showTab === 'metrics' ? (
+                <Modal.Body>
+                    <Row>
+                        <Col lg={4}>
+                            <div className="single-consumption-container">
+                                <h6 className="top-equip-title">Top Consumption YTD</h6>
+                                <div className="font-weight-bold" style={{ color: 'black' }}>
+                                    {topConsumption} kWh
+                                </div>
+                                <h6 className="top-equip-title">Peak kW YTD</h6>
+                                <div className="font-weight-bold" style={{ color: 'black' }}>
+                                    {peak} kW
+                                </div>
                             </div>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </div>
-            </div>
 
-            {isSensorChartLoading ? (
-                <div className="loader-center-style">
-                    <Spinner className="m-2" color={'primary'} />
-                </div>
-            ) : (
-                <div>
-                    <BrushChart
-                        seriesData={deviceData}
-                        optionsData={options}
-                        seriesLineData={seriesData}
-                        optionsLineData={optionsLine}
-                    />
-                </div>
-            )}
-           </Col>
-           </Row>
-        </Modal.Body>
-            :""}
-            {(showTab==="configure" && deviceType==="active")?
-            <Modal.Body>
-            <Row>
-                <Col lg={8}>
-                    <Row>
-                        <Col lg={12}>
-                            <h4>Equipment Details</h4>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={6}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter Equipment Name"
-                                    className="font-weight-bold"
-                                    defaultValue={equipData!==null?equipData.equipments_name:""}
-                                    onChange={(e) => {
-                                        handleChange('name', e.target.value);
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col lg={6}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Type</Form.Label>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="exampleSelect"
-                                    className="font-weight-bold" 
-                                    defaultValue={result.length===0?"":result.equipment_id}
-                                    onChange={(e) => {
-                                        handleChange('equipment_type', e.target.value);
-                                    }}>
-                                     <option selected>Select Type</option>
-                                         {equipmentTypeData.map((record) => {
-                                                return <option value={record.equipment_id}>{record.equipment_type}</option>;
-                                            })}
-                                </Input>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Location</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    readOnly
-                                    placeholder="Enter Location"
-                                    className="font-weight-bold"
-                                    value={equipData!==null?equipData.location:""}
-                                />
-                                <Form.Label>Location this equipment is installed in.</Form.Label>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Applied Rule</Form.Label>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="exampleSelect"
-                                    className="font-weight-bold">
-                                    <option selected>Desktop PC</option>
-                                    <option>Refigerator</option>
-                                </Input>
-                                <Form.Label>
-                                    The rule applied to this equipment to control when it is on.
-                                </Form.Label>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Tags</Form.Label>
-                                <TagsInput
-                                     value={equipData!==null?equipData.tags:""}
-                                    onChange={setSelected}
-                                    name="tag"
-                                    placeHolder="+ Add Tag"
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Notes</Form.Label>
-                                <Input
-                                    type="textarea"
-                                    name="text"
-                                    id="exampleText"
-                                    rows="3"
-                                    placeholder="Enter a Note..."
-                                    defaultValue={equipData!==null?equipData.note:""}
-                                    onChange={(e) => {
-                                        handleChange('note', e.target.value);
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                </Col>
-                <Col lg={4}>
-                    <div className="modal-right-container">
-                    <div className="equip-socket-container">
-                    <div className="mt-2 sockets-slots-container">
-                        {sensors.map((record, index) => {
-                            return (
-                                <>
-                                    {record.status && (
-                                        <div>
-                                            <div className="power-off-style">
-                                                <FontAwesomeIcon
-                                                    icon={faPowerOff}
-                                                    size="lg"
-                                                    color="#3C6DF5"
-                                                />
-                                            </div>
-                                            {record.equipment_type_id === '' ? (
-                                                <div className="socket-rect">
-                                                    <img src={SocketLogo} alt="Socket" />
-                                                </div>
-                                            ) : (
-                                                <div className="online-socket-container">
-                                                    <img
-                                                        src={UnionLogo}
-                                                        alt="Union"
-                                                        className="union-icon-style"
-                                                        width="35vw"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {!record.status && (
-                                        <div>
-                                            <div className="power-off-style">
-                                                <FontAwesomeIcon
-                                                    icon={faPowerOff}
-                                                    size="lg"
-                                                    color="#EAECF0"
-                                                />
-                                            </div>
-                                            {record.equipment_type_id === '' ? (
-                                                <div className="socket-rect">
-                                                    <img src={SocketLogo} alt="Socket" />
-                                                </div>
-                                            ) : (
-                                                <div className="online-socket-container">
-                                                    <img
-                                                        src={UnionLogo}
-                                                        alt="Union"
-                                                        className="union-icon-style"
-                                                        width="35vw"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        })}
-                    </div>
-                </div>
-                        <div className="modal-right-card mt-2">
-                            <span className="modal-right-card-title">Power Strip Socket 2</span>
-                            <Link
-                                to={{
-                                    pathname: equipData!==null?equipData.device_id!==""?`/settings/active-devices/single/${equipData.device_id}`:`equipment/#`:"",
-                                }}>
-                            <button
-                                type="button"
-                                class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipData!==null?equipData.device_id===""?true:false:true}>
-                                View Devices
-                            </button>
-                            </Link>
-                        </div>
-                        <div>
-                            {equipData!==null?equipData.status === 'Online' && (
-                                <div className="icon-bg-pop-styling">
-                                    ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                </div>
-                            ):""}
-                            {equipData!==null?equipData.status === 'Offline' && (
-                                <div className="icon-bg-pop-styling-slash">
-                                    OFFLINE <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                </div>
-                            ):""}
-                        </div>
-                        <div className="mt-4 modal-right-group">
-                            <FormGroup>
-                                <div className="single-line-style">
-                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                        MAC Address
-                                    </h6>
-                                    <h6 className="card-title">{equipData!==null?equipData.device_mac:""}</h6>
-                                </div>
-                            </FormGroup>
-                            <FormGroup>
-                                <div className="single-line-style">
-                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                        Device type
-                                    </h6>
-                                    <h6 className="card-title">{equipData!==null?equipData.device_type:""}</h6>
-                                </div>
-                            </FormGroup>
-                        </div>
-                        <FormGroup>
-                            <div className="single-line-style">
-                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
-                                    Installed at
+                            <div className="equipment-alert-container" style={{ marginTop: '5rem' }}>
+                                <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
+                                    Equipment Alerts
                                 </h6>
-                                <h6 className="card-title">{equipData!==null?equipData.device_location:""}</h6>
+                                <a
+                                    rel="noopener noreferrer"
+                                    className="link-primary mr-2"
+                                    style={{
+                                        display: 'inline-block',
+                                        float: 'right',
+                                        textDecoration: 'none',
+                                        fontWeight: 'bold',
+                                    }}></a>
+                                <span
+                                    className="float-right mr-0 font-weight-bold"
+                                    style={{ color: 'blue' }}
+                                    onClick={() => setBuildingAlerts([])}>
+                                    Clear
+                                </span>
+
+                                <div className="mt-2 alert-container">
+                                    {buildingAlert.map((record) => {
+                                        return (
+                                            <>
+                                                {record.type === 'building-add' && (
+                                                    <div className="alert-card mb-2">
+                                                        <div>
+                                                            <i className="uil uil-triangle" />
+                                                            <span className="alert-heading">
+                                                                <b> New Peak</b>
+                                                            </span>
+                                                            <br />
+                                                            <span className="alert-content">
+                                                                225.3 kW &nbsp; 3/3/22 @ 3:20 PM
+                                                            </span>
+                                                            <div className="float-right ml-4 alert-weekday">Today</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {record.type === 'energy-trend' && (
+                                                    <div className="alert-card mb-2">
+                                                        <div>
+                                                            <i className="uil uil-arrow-growth" />
+                                                            <span className="alert-heading">
+                                                                <b> Energy Trend</b>
+                                                            </span>
+                                                            <br />
+                                                            <span className="alert-content">
+                                                                18% from last year this time
+                                                            </span>
+                                                            <div className="float-right ml-4 alert-weekday">
+                                                                Yesterday
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {record.type === 'notification' && (
+                                                    <div className="alert-card">
+                                                        <div>
+                                                            <i className="uil uil-exclamation-triangle" />
+                                                            <span className="alert-heading">
+                                                                <b> Service Soon</b>
+                                                            </span>
+                                                            <br />
+                                                            <span className="alert-content">
+                                                                80 Run Hours in 45 days
+                                                            </span>
+                                                            <div className="float-right ml-4 alert-weekday">
+                                                                Yesterday
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </FormGroup>
-                    </div>
-                </Col>
-            </Row>
-        </Modal.Body>
-            
-            :""}
-            {showTab==="configure" && deviceType==="passive"?
-            <Modal.Body>
-            <Row>
-                <Col lg={8}>
-                    <Row>
-                        <Col lg={12}>
-                            <h4>Equipment Details</h4>
+                        </Col>
+                        <Col lg={8}>
+                            <div className="model-sensor-filters">
+                                <div className="">
+                                    <Input
+                                        type="select"
+                                        name="select"
+                                        id="exampleSelect"
+                                        onChange={(e) => {
+                                            if (e.target.value === 'passive-power') {
+                                                return;
+                                            }
+                                            setConsumption(e.target.value);
+                                        }}
+                                        className="font-weight-bold model-sensor-energy-filter mr-2"
+                                        style={{ display: 'inline-block', width: 'fit-content' }}
+                                        defaultValue={selectedConsumption}>
+                                        {metric.map((record, index) => {
+                                            return <option value={record.value}>{record.label}</option>;
+                                        })}
+                                    </Input>
+                                </div>
+
+                                <div>
+                                    <Input
+                                        type="select"
+                                        name="select"
+                                        id="exampleSelect"
+                                        style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
+                                        className="select-button form-control form-control-md model-sensor-energy-filter"
+                                        onChange={(e) => {
+                                            setDateFilter(+e.target.value);
+                                        }}
+                                        defaultValue={dateFilter}>
+                                        {customDaySelect.map((el, index) => {
+                                            return <option value={el.value}>{el.label}</option>;
+                                        })}
+                                    </Input>
+                                </div>
+
+                                <div>
+                                    <DatePicker
+                                        selectsRange={true}
+                                        startDate={startDate}
+                                        endDate={endDate}
+                                        onChange={(update) => {
+                                            setDateRange(update);
+                                        }}
+                                        dateFormat="MMMM d"
+                                        className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
+                                        placeholderText="Select Date Range"
+                                    />
+                                </div>
+
+                                <div className="mr-3 sensor-chart-options">
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
+                                            <FontAwesomeIcon icon={faEllipsisV} size="lg" />
+                                        </Dropdown.Toggle>
+
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item>
+                                                <i className="uil uil-calendar-alt mr-2"></i>Configure Column
+                                            </Dropdown.Item>
+
+                                            <div className="mr-3">
+                                                <CSVLink
+                                                    style={{ color: 'black', paddingLeft: '1.5rem' }}
+                                                    filename={`active-device-${selectedConsumption}-${new Date().toUTCString()}.csv`}
+                                                    target="_blank"
+                                                    data={getCSVLinkData()}>
+                                                    <i className="uil uil-download-alt mr-2"></i>
+                                                    Download CSV
+                                                </CSVLink>
+                                            </div>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
+                            </div>
+
+                            {isSensorChartLoading ? (
+                                <div className="loader-center-style">
+                                    <Spinner className="m-2" color={'primary'} />
+                                </div>
+                            ) : (
+                                <div>
+                                    <BrushChart
+                                        seriesData={deviceData}
+                                        optionsData={options}
+                                        seriesLineData={seriesData}
+                                        optionsLineData={optionsLine}
+                                    />
+                                </div>
+                            )}
                         </Col>
                     </Row>
+                </Modal.Body>
+            ) : (
+                ''
+            )}
+            {showTab === 'configure' && deviceType === 'active' ? (
+                <Modal.Body>
                     <Row>
-                        <Col lg={4}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Name</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Enter Equipment Name"
-                                    className="font-weight-bold"
-                                    defaultValue={equipData!==null?equipData.equipments_name:""}
-                                    onChange={(e) => {
-                                        handleChange('name', e.target.value);
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col lg={4}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Type</Form.Label>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="exampleSelect"
-                                    className="font-weight-bold" defaultValue={result.length===0?"":result.equipment_id}
-                                    onChange={(e) => {
-                                        handleChange('equipment_type', e.target.value);
-                                    }}>
-                                     <option selected>Select Type</option>
-                                         {equipmentTypeData.map((record) => {
-                                                return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                        <Col lg={8}>
+                            <Row>
+                                <Col lg={12}>
+                                    <h4>Equipment Details</h4>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={6}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Name</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Enter Equipment Name"
+                                            className="font-weight-bold"
+                                            defaultValue={equipData !== null ? equipData.equipments_name : ''}
+                                            onChange={(e) => {
+                                                handleChange('name', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col lg={6}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Type</Form.Label>
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold"
+                                            defaultValue={result.length === 0 ? '' : result.equipment_id}
+                                            onChange={(e) => {
+                                                handleChange('equipment_type', e.target.value);
+                                            }}>
+                                            <option selected>Select Type</option>
+                                            {equipmentTypeData.map((record) => {
+                                                return (
+                                                    <option value={record.equipment_id}>{record.equipment_type}</option>
+                                                );
                                             })}
-                                </Input>
-                            </Form.Group>
+                                        </Input>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Location</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            readOnly
+                                            placeholder="Enter Location"
+                                            className="font-weight-bold"
+                                            value={equipData !== null ? equipData.location : ''}
+                                        />
+                                        <Form.Label>Location this equipment is installed in.</Form.Label>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Applied Rule</Form.Label>
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold">
+                                            <option selected>Desktop PC</option>
+                                            <option>Refigerator</option>
+                                        </Input>
+                                        <Form.Label>
+                                            The rule applied to this equipment to control when it is on.
+                                        </Form.Label>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Tags</Form.Label>
+                                        <TagsInput
+                                            value={equipData !== null ? equipData.tags : ''}
+                                            onChange={setSelected}
+                                            name="tag"
+                                            placeHolder="+ Add Tag"
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Notes</Form.Label>
+                                        <Input
+                                            type="textarea"
+                                            name="text"
+                                            id="exampleText"
+                                            rows="3"
+                                            placeholder="Enter a Note..."
+                                            defaultValue={equipData !== null ? equipData.note : ''}
+                                            onChange={(e) => {
+                                                handleChange('note', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
                         </Col>
                         <Col lg={4}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>End Use Category</Form.Label>
-                                <Input
-                                    type="select"
-                                    name="select"
-                                    id="endUsePop"
-                                    className="font-weight-bold"
-                                    defaultValue={result.length===0?"":result.end_use_id}>
-                                     <option selected>Select Category</option>
-                                         {endUse.map((record) => {
+                            <div className="modal-right-container">
+                                <div className="equip-socket-container">
+                                    <div className="mt-2 sockets-slots-container">
+                                        {sensors.map((record, index) => {
+                                            return (
+                                                <>
+                                                    {record.status && (
+                                                        <div>
+                                                            <div className="power-off-style">
+                                                                <FontAwesomeIcon
+                                                                    icon={faPowerOff}
+                                                                    size="lg"
+                                                                    color="#3C6DF5"
+                                                                />
+                                                            </div>
+                                                            {record.equipment_type_id === '' ? (
+                                                                <div className="socket-rect">
+                                                                    <img src={SocketLogo} alt="Socket" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="online-socket-container">
+                                                                    <img
+                                                                        src={UnionLogo}
+                                                                        alt="Union"
+                                                                        className="union-icon-style"
+                                                                        width="35vw"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {!record.status && (
+                                                        <div>
+                                                            <div className="power-off-style">
+                                                                <FontAwesomeIcon
+                                                                    icon={faPowerOff}
+                                                                    size="lg"
+                                                                    color="#EAECF0"
+                                                                />
+                                                            </div>
+                                                            {record.equipment_type_id === '' ? (
+                                                                <div className="socket-rect">
+                                                                    <img src={SocketLogo} alt="Socket" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="online-socket-container">
+                                                                    <img
+                                                                        src={UnionLogo}
+                                                                        alt="Union"
+                                                                        className="union-icon-style"
+                                                                        width="35vw"
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="modal-right-card mt-2">
+                                    <span className="modal-right-card-title">Power Strip Socket 2</span>
+                                    <Link
+                                        to={{
+                                            pathname:
+                                                equipData !== null
+                                                    ? equipData.device_id !== ''
+                                                        ? `/settings/active-devices/single/${equipData.device_id}`
+                                                        : `equipment/#`
+                                                    : '',
+                                        }}>
+                                        <button
+                                            type="button"
+                                            class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                            disabled={
+                                                equipData !== null ? (equipData.device_id === '' ? true : false) : true
+                                            }>
+                                            View Devices
+                                        </button>
+                                    </Link>
+                                </div>
+                                <div>
+                                    {equipData !== null
+                                        ? equipData.status === 'Online' && (
+                                              <div className="icon-bg-pop-styling">
+                                                  ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                              </div>
+                                          )
+                                        : ''}
+                                    {equipData !== null
+                                        ? equipData.status === 'Offline' && (
+                                              <div className="icon-bg-pop-styling-slash">
+                                                  OFFLINE <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                              </div>
+                                          )
+                                        : ''}
+                                </div>
+                                <div className="mt-4 modal-right-group">
+                                    <FormGroup>
+                                        <div className="single-line-style">
+                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                MAC Address
+                                            </h6>
+                                            <h6 className="card-title">
+                                                {equipData !== null ? equipData.device_mac : ''}
+                                            </h6>
+                                        </div>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <div className="single-line-style">
+                                            <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                Device type
+                                            </h6>
+                                            <h6 className="card-title">
+                                                {equipData !== null ? equipData.device_type : ''}
+                                            </h6>
+                                        </div>
+                                    </FormGroup>
+                                </div>
+                                <FormGroup>
+                                    <div className="single-line-style">
+                                        <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                            Installed at
+                                        </h6>
+                                        <h6 className="card-title">
+                                            {equipData !== null ? equipData.device_location : ''}
+                                        </h6>
+                                    </div>
+                                </FormGroup>
+                            </div>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+            ) : (
+                ''
+            )}
+            {showTab === 'configure' && deviceType === 'passive' ? (
+                <Modal.Body>
+                    <Row>
+                        <Col lg={8}>
+                            <Row>
+                                <Col lg={12}>
+                                    <h4>Equipment Details</h4>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={4}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Name</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            placeholder="Enter Equipment Name"
+                                            className="font-weight-bold"
+                                            defaultValue={equipData !== null ? equipData.equipments_name : ''}
+                                            onChange={(e) => {
+                                                handleChange('name', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                                <Col lg={4}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Type</Form.Label>
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold"
+                                            defaultValue={result.length === 0 ? '' : result.equipment_id}
+                                            onChange={(e) => {
+                                                handleChange('equipment_type', e.target.value);
+                                            }}>
+                                            <option selected>Select Type</option>
+                                            {equipmentTypeData.map((record) => {
+                                                return (
+                                                    <option value={record.equipment_id}>{record.equipment_type}</option>
+                                                );
+                                            })}
+                                        </Input>
+                                    </Form.Group>
+                                </Col>
+                                <Col lg={4}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>End Use Category</Form.Label>
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="endUsePop"
+                                            className="font-weight-bold"
+                                            defaultValue={result.length === 0 ? '' : result.end_use_id}>
+                                            <option selected>Select Category</option>
+                                            {endUse.map((record) => {
                                                 return <option value={record.end_user_id}>{record.name}</option>;
                                             })}
-                                </Input>
-                            </Form.Group>
+                                        </Input>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Equipment Location</Form.Label>
+                                        <Input
+                                            type="select"
+                                            name="select"
+                                            id="exampleSelect"
+                                            className="font-weight-bold"
+                                            // defaultValue={loc.length===0?"":loc.location_id}
+                                            onChange={(e) => {
+                                                handleChange('space_id', e.target.value);
+                                            }}>
+                                            <option value="" selected>
+                                                Select Location
+                                            </option>
+                                            {locationData.map((record) => {
+                                                return (
+                                                    <option value={record.location_id}>{record.location_name}</option>
+                                                );
+                                            })}
+                                        </Input>
+                                        <Form.Label>Location this equipment is installed in.</Form.Label>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Serves Zones</Form.Label>
+                                        <TagsInput
+                                            value={selectedZones}
+                                            onChange={setSelectedZones}
+                                            name="Zones"
+                                            placeHolder="+ Add Location"
+                                        />
+                                        <Form.Label>What area this piece of equipment services.</Form.Label>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Tags</Form.Label>
+                                        <TagsInput
+                                            value={equipData !== null ? equipData.tags : ''}
+                                            onChange={setSelected}
+                                            name="tag"
+                                            placeHolder="+ Add Tag"
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                        <Form.Label>Notes</Form.Label>
+                                        <Input
+                                            type="textarea"
+                                            name="text"
+                                            id="exampleText"
+                                            rows="3"
+                                            placeholder="Enter a Note..."
+                                            defaultValue={equipData !== null ? equipData.note : ''}
+                                            onChange={(e) => {
+                                                handleChange('note', e.target.value);
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Equipment Location</Form.Label>
-                                <Input
-                    type="select"
-                    name="select"
-                    id="exampleSelect"
-                    className="font-weight-bold"
-                    // defaultValue={loc.length===0?"":loc.location_id}
-                    onChange={(e) => {
-                        handleChange('space_id', e.target.value);
-                    }}>
-                    <option value="" selected>
-                        Select Location
-                    </option>
-                    {locationData.map((record) => {
-                        return <option value={record.location_id}>{record.location_name}</option>;
-                    })}
-                </Input>
-                                <Form.Label>Location this equipment is installed in.</Form.Label>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Serves Zones</Form.Label>
-                                <TagsInput
-                                    value={selectedZones}
-                                    onChange={setSelectedZones}
-                                    name="Zones"
-                                    placeHolder="+ Add Location"
-                                />
-                                <Form.Label>What area this piece of equipment services.</Form.Label>
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Tags</Form.Label>
-                                <TagsInput
-                                    value={equipData!==null?equipData.tags:""}
-                                    onChange={setSelected}
-                                    name="tag"
-                                    placeHolder="+ Add Tag"
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col lg={12}>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Notes</Form.Label>
-                                <Input
-                                    type="textarea"
-                                    name="text"
-                                    id="exampleText"
-                                    rows="3"
-                                    placeholder="Enter a Note..."
-                                    defaultValue={equipData!==null?equipData.note:""}
-                                    onChange={(e) => {
-                                        handleChange('note', e.target.value);
-                                    }}
-                                />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    </Col>
-                            <Col lg={4}>
-                                <div className="modal-right-container">
-                                    <div className="pic-container">
-                                        <div className="modal-right-pic"></div>
-                                        <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                            <span className="modal-right-card-title">Energy Monitoring</span>
-                                            
+                        <Col lg={4}>
+                            <div className="modal-right-container">
+                                <div className="pic-container">
+                                    <div className="modal-right-pic"></div>
+                                    <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
+                                        <span className="modal-right-card-title">Energy Monitoring</span>
+
                                         <Link
                                             to={{
-                                                pathname: equipData!==null?equipData.device_id!==""?`/settings/passive-devices/single/${equipData.device_id}`:`equipment/#`:"",
+                                                pathname:
+                                                    equipData !== null
+                                                        ? equipData.device_id !== ''
+                                                            ? `/settings/passive-devices/single/${equipData.device_id}`
+                                                            : `equipment/#`
+                                                        : '',
                                             }}>
                                             <button
                                                 type="button"
                                                 class="btn btn-light btn-md font-weight-bold float-right mr-2">
                                                 View
                                             </button>
-                                            </Link>
-                                        </div>
+                                        </Link>
                                     </div>
-                                    </div>
-                            </Col>
-                        </Row>
-                    </Modal.Body>
-            
-            :""}
-
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+            ) : (
+                ''
+            )}
         </Modal>
     );
 };

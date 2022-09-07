@@ -9,6 +9,8 @@ import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
 import { BaseUrl, updateAccount } from '../../services/Network';
 import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const AccountSettings = () => {
     const cookies = new Cookies();
@@ -16,6 +18,7 @@ const AccountSettings = () => {
 
     const accountName = UserStore.useState((s) => s.accountName);
     const [name, setName] = useState(accountName);
+    const [userPermission] = useAtom(userPermissionData);
 
     const updateAccountName = async () => {
         const accountName = name.trim();
@@ -110,6 +113,10 @@ const AccountSettings = () => {
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 onBlur={updateAccountName}
+                                                disabled={
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.account_general_permission?.edit
+                                                }
                                             />
                                         </div>
                                     </FormGroup>

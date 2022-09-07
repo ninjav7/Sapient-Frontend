@@ -10,9 +10,12 @@ import { Cookies } from 'react-cookie';
 import axios from 'axios';
 import { BaseUrl, getPermissionRole } from '../../services/Network';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const RoleTable = ({ roleDataList }) => {
-    console.log(roleDataList);
+    const [userPermission] = useAtom(userPermissionData);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -67,9 +70,14 @@ const RoleTable = ({ roleDataList }) => {
                                 return (
                                     <tr key={index}>
                                         <th scope="row">
+                                            {/* {userPermission?.permissions?.permissions?.account_roles_permission
+                                                ?.edit && ( */}
                                             <Link to={`/settings/roles/${record?._id}`}>
                                                 <a className="buildings-name">{record.name}</a>
                                             </Link>
+                                            {/* )}
+                                            {!userPermission?.permissions?.permissions?.account_roles_permission
+                                                ?.edit && <a className="buildings-name">{record.name}</a>} */}
                                         </th>
                                         <td className="font-weight-bold">-</td>
                                         <td className="font-weight-bold">-</td>
@@ -91,6 +99,7 @@ const Roles = () => {
     let userdata = cookies.get('user');
 
     const [roleDataList, setRoleDataList] = useState([]);
+    const [userPermission] = useAtom(userPermissionData);
 
     const getPermissionRoleFunc = async () => {
         let header = {
@@ -116,14 +125,16 @@ const Roles = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    history.push('/settings/roles/config');
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Role
-                            </button>
+                            {userPermission?.permissions?.permissions?.account_roles_permission?.create && (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        history.push('/settings/roles/config');
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Role
+                                </button>
+                            )}
                         </div>
                     </div>
                 </Col>

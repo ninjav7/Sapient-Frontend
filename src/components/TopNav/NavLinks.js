@@ -4,6 +4,8 @@ import { authProtectedRoutes } from '../../routes/index';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const NavLinks = () => {
     const location = useLocation();
@@ -38,9 +40,14 @@ const NavLinks = () => {
         }
     };
 
+    const [userPermission] = useAtom(userPermissionData)
+
+    console.log('userPermissionnowdatanow', userPermission)
+
     return (
         <div className="top-nav-routes-list">
             {authProtectedRoutes.map((item, index) => {
+                console.log('item.visibility', item.visibility)
                 const Icon = item.icon || null;
                 if (!item.visibility) {
                     return;

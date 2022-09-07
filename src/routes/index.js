@@ -30,6 +30,8 @@ import SingleRoleNew from '../pages/settings/SingleRoleNew';
 
 // controls
 import PlugRules from '../pages/controls/PlugRules';
+import { userPermissionData } from '../store/globalState';
+import { useAtom } from 'jotai';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -129,6 +131,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         }}
     />
 );
+
+// let userDetails = {};
+// const [userPermission] = useAtom(userPermissionData);
 
 // root routes
 const rootRoute = {

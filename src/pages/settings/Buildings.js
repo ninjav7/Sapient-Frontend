@@ -16,83 +16,116 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 import { useAtom } from 'jotai';
-import { buildingData } from '../../store/globalState';
+import { buildingData, userPermissionData } from '../../store/globalState';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { useQuery } from 'react-query';
 import { QueryClient } from 'react-query';
 
-const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing }) => {
+const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, error }) => {
+    const [userPermission] = useAtom(userPermissionData);
     return (
         <Card>
             <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Sq. Ft.</th>
-                            <th>Devices</th>
-                        </tr>
-                    </thead>
-                    {isDataProcessing ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {buildingsData.map((record, index) => {
-                                return (
-                                    <tr key={index} className="mouse-pointer">
-                                        <th scope="row">
-                                            <Link to="/settings/general">
-                                                <div
-                                                    className="buildings-name"
-                                                    onClick={() => {
-                                                        console.log(
-                                                            'recordBuilding_idName',
-                                                            record.building_id,
-                                                            record.building_name
-                                                        );
-                                                        localStorage.setItem('buildingId', record.building_id);
-                                                        localStorage.setItem('buildingName', record.building_name);
-                                                        BuildingStore.update((s) => {
-                                                            s.BldgId = record.building_id;
-                                                            s.BldgName = record.building_name;
-                                                        });
-                                                    }}>
-                                                    {record.building_name}
-                                                </div>
-                                            </Link>
-                                            <span className="badge badge-soft-secondary label-styling mr-2">
-                                                {record.building_type}
-                                            </span>
-                                        </th>
-                                        <td className="font-weight-bold">
-                                            {record.building_size.toLocaleString(undefined, {
-                                                maximumFractionDigits: 2,
-                                            })}
+                {error ? (
+                    <>
+                        <p>You don't have view access of this page</p>
+                    </>
+                ) : (
+                    <Table className="mb-0 bordered table-hover">
+                        <thead>
+                            <tr className="mouse-pointer">
+                                <th>Name</th>
+                                <th>Sq. Ft.</th>
+                                <th>Devices</th>
+                            </tr>
+                        </thead>
+                        {isDataProcessing ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td className="font-weight-bold">{record.num_of_devices}</td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {buildingsData.map((record, index) => {
+                                    return (
+                                        <tr key={index} className="mouse-pointer">
+                                            <th scope="row">
+                                                {userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit && (
+                                                    <Link to="/settings/general">
+                                                        <div
+                                                            className="buildings-name"
+                                                            onClick={() => {
+                                                                console.log(
+                                                                    'recordBuilding_idName',
+                                                                    record.building_id,
+                                                                    record.building_name
+                                                                );
+                                                                localStorage.setItem('buildingId', record.building_id);
+                                                                localStorage.setItem(
+                                                                    'buildingName',
+                                                                    record.building_name
+                                                                );
+                                                                BuildingStore.update((s) => {
+                                                                    s.BldgId = record.building_id;
+                                                                    s.BldgName = record.building_name;
+                                                                });
+                                                            }}>
+                                                            {record.building_name}
+                                                        </div>
+                                                    </Link>
+                                                )}
+                                                {!userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit && (
+                                                    <div
+                                                        className="buildings-name"
+                                                        onClick={() => {
+                                                            console.log(
+                                                                'recordBuilding_idName',
+                                                                record.building_id,
+                                                                record.building_name
+                                                            );
+                                                            localStorage.setItem('buildingId', record.building_id);
+                                                            localStorage.setItem('buildingName', record.building_name);
+                                                            BuildingStore.update((s) => {
+                                                                s.BldgId = record.building_id;
+                                                                s.BldgName = record.building_name;
+                                                            });
+                                                        }}>
+                                                        {record.building_name}
+                                                    </div>
+                                                )}
+                                                <span className="badge badge-soft-secondary label-styling mr-2">
+                                                    {record.building_type}
+                                                </span>
+                                            </th>
+                                            <td className="font-weight-bold">
+                                                {record.building_size.toLocaleString(undefined, {
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                            </td>
+                                            <td className="font-weight-bold">{record.num_of_devices}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
+                    </Table>
+                )}
             </CardBody>
         </Card>
     );
@@ -216,7 +249,8 @@ const Buildings = () => {
     };
     const { data, error, isError, isLoading } = useQuery('generalBuilding', fetchGeneralBuildingData);
 
-    console.log('data', data, 'isLoading', isLoading);
+    console.log('data', data, 'isLoading', isLoading, 'erro', error);
+    const [userPermission] = useAtom(userPermissionData);
 
     return (
         <React.Fragment>
@@ -226,15 +260,17 @@ const Buildings = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>
-                                Add Building
-                            </button>
+                            {userPermission?.permissions?.permissions?.account_buildings_permission?.create && (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>
+                                    Add Building
+                                </button>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -266,6 +302,7 @@ const Buildings = () => {
                         buildingsData={buildingsData}
                         isDataProcessing={isDataProcessing}
                         setIsDataProcessing={setIsDataProcessing}
+                        error={error}
                     />
                 </Col>
             </Row>

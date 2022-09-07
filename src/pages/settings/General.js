@@ -22,7 +22,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { buildingData } from '../../store/globalState';
+import { buildingData, userPermissionData } from '../../store/globalState';
 import DropDownInput from '../../components/DropdownInput/DropDownInput';
 import { Prompt } from 'react-router-dom';
 
@@ -643,6 +643,8 @@ const General = () => {
         // getGooglePlacesAutocomplete();
     }, [textLocation]);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     // update section end
 
     return (
@@ -690,447 +692,524 @@ const General = () => {
                     </div>
                 </Col>
             </Row>
+            {buildingDetails && userPermission?.permissions?.permissions?.building_details_permission?.view ? (
+                <>
+                    <Row>
+                        <Col lg={8}>
+                            <Card className="custom-card card-alignment">
+                                <CardHeader>
+                                    <h5 className="building-section-title" style={{ margin: '2px' }}>
+                                        Building Details
+                                    </h5>
+                                </CardHeader>
 
-            <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Building Details
-                            </h5>
-                        </CardHeader>
+                                <CardBody>
+                                    <Form>
+                                        <div className="grid-style-3">
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="building-content-title">Active</h6>
 
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-3">
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Active</h6>
+                                                    <h6
+                                                        className="building-content-subtitle mb-2"
+                                                        htmlFor="customSwitches">
+                                                        Non-admin users can only view active buildings.
+                                                    </h6>
+                                                </div>
+                                            </FormGroup>
 
-                                            <h6 className="building-content-subtitle mb-2" htmlFor="customSwitches">
-                                                Non-admin users can only view active buildings.
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={75} />
-                                        ) : (
-                                            <Switch
-                                                onChange={() => {
-                                                    handleSwitchChange();
-                                                }}
-                                                checked={buildingDetails.active}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Building Name</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                A human-friendly display name for this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="name"
-                                                    id="buildingName"
-                                                    onChange={(e) => {
-                                                        console.log(e.target.value, 'buildingObj');
-                                                        localStorage.setItem('generalBuildingName', e.target.value);
-                                                        handleBldgSettingChanges('name', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    placeholder="Enter Building Name"
-                                                    className="single-line-style font-weight-bold"
-                                                    value={buildingDetails.name}
-                                                />
-                                            </div>
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Type</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                The primary use/type of this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="select"
-                                                    name="typee"
-                                                    id="exampleSelect"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('typee', e.target.value);
-                                                        localStorage.setItem('generalBuildingType', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    value={buildingDetails.typee}
-                                                    className="font-weight-bold">
-                                                    <option>Office Building</option>
-
-                                                    <option>Residential Building</option>
-                                                </Input>
-                                            </div>
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <div className="single-line-style">
-                                            <h6 className="building-content-title">Square Footage</h6>
-
-                                            <h6 className="building-content-subtitle mb-2">
-                                                The total square footage of this building
-                                            </h6>
-                                        </div>
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={350} />
-                                        ) : (
-                                            <div className="singleline-box-style">
-                                                <Input
-                                                    type="text"
-                                                    name="square_footage"
-                                                    id="exampleNumber"
-                                                    placeholder="Enter value"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('square_footage', +e.target.value);
-                                                        localStorage.setItem('generalSquareFootage', e.target.value);
-                                                    }}
-                                                    // onBlur={EditBuildingHandler}
-
-                                                    value={buildingDetails.square_footage}
-                                                    className="font-weight-bold"
-                                                />
-                                            </div>
-                                        )}
-                                    </FormGroup>
-                                </div>
-                            </Form>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Address
-                            </h5>
-                        </CardHeader>
-
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-1">
-                                    <FormGroup>
-                                        <Label for="userAddress1" className="building-content-title">
-                                            Street Address
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <div style={{ position: 'absolute' }}>
-                                                <Input
-                                                    type="text"
-                                                    name="street_address"
-                                                    id="userAddress1"
-                                                    placeholder="Address 1"
-                                                    onChange={(e) => {
-                                                        handleBldgSettingChanges('street_address', e.target.value);
-                                                        settextLocation(e.target.value);
-                                                        console.log('e.target.valueBuildingAddress', e.target.value);
-                                                        if (getResponseOfPlaces) {
-                                                            setopenDropdown(true);
+                                            <FormGroup>
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={75} />
+                                                ) : (
+                                                    <Switch
+                                                        onChange={() => {
+                                                            handleSwitchChange();
+                                                        }}
+                                                        checked={buildingDetails.active}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
                                                         }
-                                                    }}
-                                                    className="font-weight-bold"
-                                                    value={selectedPlaceLabel || buildingAddress.street_address}
-                                                />
-                                                {openDropdown && (
-                                                    <div
-                                                        style={{
-                                                            backgroundColor: 'white',
-                                                            border: '1px solid black',
-                                                            zIndex: 1000,
-                                                        }}>
-                                                        {getResponseOfPlaces?.features?.map((item) => {
-                                                            return (
-                                                                <div
-                                                                    className="onchangedrowpdown"
-                                                                    onClick={() => {
-                                                                        console.log(item, 'clickedgetResponseOfPlaces');
-                                                                        setSelectedPlaceLabel(item?.properties?.label);
-                                                                        localStorage.setItem(
-                                                                            'generalStreetAddress',
-                                                                            item?.properties?.label
-                                                                        );
-                                                                        setTotalSelectedData(item);
-                                                                        setopenDropdown(false);
-                                                                    }}>
-                                                                    {item?.properties?.label}
-                                                                </div>
-                                                            );
-                                                        })}
+                                                    />
+                                                )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="building-content-title">Building Name</h6>
+
+                                                    <h6 className="building-content-subtitle mb-2">
+                                                        A human-friendly display name for this building
+                                                    </h6>
+                                                </div>
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={350} />
+                                                ) : (
+                                                    <div className="singleline-box-style">
+                                                        <Input
+                                                            type="text"
+                                                            name="name"
+                                                            id="buildingName"
+                                                            disabled={
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.building_details_permission?.edit === false
+                                                            }
+                                                            onChange={(e) => {
+                                                                console.log(e.target.value, 'buildingObj');
+                                                                localStorage.setItem(
+                                                                    'generalBuildingName',
+                                                                    e.target.value
+                                                                );
+                                                                handleBldgSettingChanges('name', e.target.value);
+                                                            }}
+                                                            // onBlur={EditBuildingHandler}
+
+                                                            placeholder="Enter Building Name"
+                                                            className="single-line-style font-weight-bold"
+                                                            value={buildingDetails.name}
+                                                        />
                                                     </div>
                                                 )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="building-content-title">Type</h6>
+
+                                                    <h6 className="building-content-subtitle mb-2">
+                                                        The primary use/type of this building
+                                                    </h6>
+                                                </div>
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={350} />
+                                                ) : (
+                                                    <div className="singleline-box-style">
+                                                        <Input
+                                                            type="select"
+                                                            name="typee"
+                                                            id="exampleSelect"
+                                                            disabled={
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.building_details_permission?.edit === false
+                                                            }
+                                                            onChange={(e) => {
+                                                                handleBldgSettingChanges('typee', e.target.value);
+                                                                localStorage.setItem(
+                                                                    'generalBuildingType',
+                                                                    e.target.value
+                                                                );
+                                                            }}
+                                                            // onBlur={EditBuildingHandler}
+
+                                                            value={buildingDetails.typee}
+                                                            className="font-weight-bold">
+                                                            <option>Office Building</option>
+
+                                                            <option>Residential Building</option>
+                                                        </Input>
+                                                    </div>
+                                                )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="building-content-title">Square Footage</h6>
+
+                                                    <h6 className="building-content-subtitle mb-2">
+                                                        The total square footage of this building
+                                                    </h6>
+                                                </div>
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={350} />
+                                                ) : (
+                                                    <div className="singleline-box-style">
+                                                        <Input
+                                                            type="text"
+                                                            name="square_footage"
+                                                            id="exampleNumber"
+                                                            placeholder="Enter value"
+                                                            disabled={
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.building_details_permission?.edit === false
+                                                            }
+                                                            onChange={(e) => {
+                                                                handleBldgSettingChanges(
+                                                                    'square_footage',
+                                                                    +e.target.value
+                                                                );
+                                                                localStorage.setItem(
+                                                                    'generalSquareFootage',
+                                                                    e.target.value
+                                                                );
+                                                            }}
+                                                            // onBlur={EditBuildingHandler}
+
+                                                            value={buildingDetails.square_footage}
+                                                            className="font-weight-bold"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </FormGroup>
+                                        </div>
+                                    </Form>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col lg={8}>
+                            <Card className="custom-card card-alignment">
+                                <CardHeader>
+                                    <h5 className="building-section-title" style={{ margin: '2px' }}>
+                                        Address
+                                    </h5>
+                                </CardHeader>
+
+                                <CardBody>
+                                    <Form>
+                                        <div className="grid-style-1">
+                                            <FormGroup>
+                                                <Label for="userAddress1" className="building-content-title">
+                                                    Street Address
+                                                </Label>
+
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={200} />
+                                                ) : (
+                                                    <div style={{ position: 'absolute' }}>
+                                                        <Input
+                                                            type="text"
+                                                            name="street_address"
+                                                            disabled={
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.building_details_permission?.edit === false
+                                                            }
+                                                            id="userAddress1"
+                                                            placeholder="Address 1"
+                                                            onChange={(e) => {
+                                                                handleBldgSettingChanges(
+                                                                    'street_address',
+                                                                    e.target.value
+                                                                );
+                                                                settextLocation(e.target.value);
+                                                                console.log(
+                                                                    'e.target.valueBuildingAddress',
+                                                                    e.target.value
+                                                                );
+                                                                if (getResponseOfPlaces) {
+                                                                    setopenDropdown(true);
+                                                                }
+                                                            }}
+                                                            className="font-weight-bold"
+                                                            value={selectedPlaceLabel || buildingAddress.street_address}
+                                                        />
+                                                        {openDropdown && (
+                                                            <div
+                                                                style={{
+                                                                    backgroundColor: 'white',
+                                                                    border: '1px solid black',
+                                                                    zIndex: 1000,
+                                                                }}>
+                                                                {getResponseOfPlaces?.features?.map((item) => {
+                                                                    return (
+                                                                        <div
+                                                                            className="onchangedrowpdown"
+                                                                            onClick={() => {
+                                                                                console.log(
+                                                                                    item,
+                                                                                    'clickedgetResponseOfPlaces'
+                                                                                );
+                                                                                setSelectedPlaceLabel(
+                                                                                    item?.properties?.label
+                                                                                );
+                                                                                localStorage.setItem(
+                                                                                    'generalStreetAddress',
+                                                                                    item?.properties?.label
+                                                                                );
+                                                                                setTotalSelectedData(item);
+                                                                                setopenDropdown(false);
+                                                                            }}>
+                                                                            {item?.properties?.label}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <Label for="userAddress2" className="building-content-title">
+                                                    Address 2 (optional)
+                                                </Label>
+
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={200} />
+                                                ) : (
+                                                    <Input
+                                                        type="text"
+                                                        name="address_2"
+                                                        id="userAddress2"
+                                                        placeholder="Address 2"
+                                                        className="font-weight-bold"
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
+                                                        }
+                                                        onChange={(e) => {
+                                                            handleBldgSettingChanges('address_2', e.target.value);
+                                                            localStorage.setItem(
+                                                                'generalStreetAddress2',
+                                                                e.target.value
+                                                            );
+                                                        }}
+                                                        value={buildingAddress.address_2}
+                                                    />
+                                                )}
+                                            </FormGroup>
+                                        </div>
+
+                                        <div className="grid-style-2">
+                                            <FormGroup>
+                                                <Label for="userCity" className="building-content-title">
+                                                    City
+                                                </Label>
+
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={200} />
+                                                ) : (
+                                                    <Input
+                                                        type="text"
+                                                        name="city"
+                                                        id="userCity"
+                                                        placeholder="Enter your city"
+                                                        className="font-weight-bold"
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
+                                                        }
+                                                        onChange={(e) => {
+                                                            handleBldgSettingChanges('city', e.target.value);
+                                                            localStorage.setItem(
+                                                                'generalCity',
+                                                                totalSelectedData?.properties?.locality
+                                                            );
+                                                        }}
+                                                        value={
+                                                            totalSelectedData?.properties?.locality ||
+                                                            buildingAddress.city
+                                                        }
+                                                    />
+                                                )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <Label for="userState" className="building-content-title">
+                                                    State
+                                                </Label>
+
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={200} />
+                                                ) : (
+                                                    <Input
+                                                        type="text"
+                                                        name="state"
+                                                        id="userState"
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
+                                                        }
+                                                        value={
+                                                            totalSelectedData?.properties?.region ||
+                                                            buildingAddress.state
+                                                        }
+                                                        onChange={(e) => {
+                                                            handleBldgSettingChanges('state', e.target.value);
+                                                            localStorage.setItem(
+                                                                'generalState',
+                                                                totalSelectedData?.properties?.region
+                                                            );
+                                                        }}
+                                                        className="font-weight-bold"
+                                                    />
+                                                )}
+                                            </FormGroup>
+
+                                            <FormGroup>
+                                                <Label for="useZipCode" className="building-content-title">
+                                                    Zip
+                                                </Label>
+
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={35} width={200} />
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        name="zip_code"
+                                                        id="useZipCode"
+                                                        placeholder="Enter zip code"
+                                                        value={buildingAddress.zip_code}
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
+                                                        }
+                                                        onChange={(e) => {
+                                                            handleBldgSettingChanges('zip_code', +e.target.value);
+                                                            localStorage.setItem('generalZipCode', +e.target.value);
+                                                        }}
+                                                        className="font-weight-bold"
+                                                    />
+                                                )}
+                                            </FormGroup>
+                                        </div>
+                                    </Form>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col lg={8}>
+                            <Card className="custom-card card-alignment">
+                                <CardHeader>
+                                    <h5 className="building-section-title" style={{ margin: '2px' }}>
+                                        Date & Time
+                                    </h5>
+                                </CardHeader>
+
+                                <CardBody>
+                                    <Form>
+                                        <div className="grid-style-4">
+                                            <div className="single-line-style">
+                                                <h6 className="building-content-title">Timezone</h6>
                                             </div>
-                                        )}
-                                    </FormGroup>
 
-                                    <FormGroup>
-                                        <Label for="userAddress2" className="building-content-title">
-                                            Address 2 (optional)
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="address_2"
-                                                id="userAddress2"
-                                                placeholder="Address 2"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('address_2', e.target.value);
-                                                    localStorage.setItem('generalStreetAddress2', e.target.value);
-                                                }}
-                                                value={buildingAddress.address_2}
-                                            />
-                                        )}
-                                    </FormGroup>
-                                </div>
-
-                                <div className="grid-style-2">
-                                    <FormGroup>
-                                        <Label for="userCity" className="building-content-title">
-                                            City
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="city"
-                                                id="userCity"
-                                                placeholder="Enter your city"
-                                                className="font-weight-bold"
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('city', e.target.value);
-                                                    localStorage.setItem(
-                                                        'generalCity',
-                                                        totalSelectedData?.properties?.locality
-                                                    );
-                                                }}
-                                                value={totalSelectedData?.properties?.locality || buildingAddress.city}
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label for="userState" className="building-content-title">
-                                            State
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="text"
-                                                name="state"
-                                                id="userState"
-                                                value={totalSelectedData?.properties?.region || buildingAddress.state}
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('state', e.target.value);
-                                                    localStorage.setItem(
-                                                        'generalState',
-                                                        totalSelectedData?.properties?.region
-                                                    );
-                                                }}
-                                                className="font-weight-bold"
-                                            />
-                                        )}
-                                    </FormGroup>
-
-                                    <FormGroup>
-                                        <Label for="useZipCode" className="building-content-title">
-                                            Zip
-                                        </Label>
-
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={35} width={200} />
-                                        ) : (
-                                            <Input
-                                                type="number"
-                                                name="zip_code"
-                                                id="useZipCode"
-                                                placeholder="Enter zip code"
-                                                value={buildingAddress.zip_code}
-                                                onChange={(e) => {
-                                                    handleBldgSettingChanges('zip_code', +e.target.value);
-                                                    localStorage.setItem('generalZipCode', +e.target.value);
-                                                }}
-                                                className="font-weight-bold"
-                                            />
-                                        )}
-                                    </FormGroup>
-                                </div>
-                            </Form>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Date & Time
-                            </h5>
-                        </CardHeader>
-
-                        <CardBody>
-                            <Form>
-                                <div className="grid-style-4">
-                                    <div className="single-line-style">
-                                        <h6 className="building-content-title">Timezone</h6>
-                                    </div>
-
-                                    <div className="single-line-style">
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={25} width={150} />
-                                        ) : (
-                                            <h6 className="building-content-title">{buildingDateTime.timezone}</h6>
-                                        )}
-                                    </div>
-
-                                    <div className="single-line-style">
-                                        <h6 className="building-content-title">Use 24-hour Clock</h6>
-                                    </div>
-
-                                    <div>
-                                        {isbuildingDetailsFetched ? (
-                                            <Skeleton count={1} height={25} width={150} />
-                                        ) : (
-                                            <Switch
-                                                onChange={(e) => {
-                                                    handleDateTimeSwitch();
-
-                                                    if (e) {
-                                                        setTimeZone('24');
-                                                        localStorage.setItem('generaltimeZone', '24');
-                                                    }
-
-                                                    if (!e) {
-                                                        setTimeZone('12');
-                                                        localStorage.setItem('generaltimeZone', '12');
-                                                    }
-                                                }}
-                                                checked={buildingDateTime.time_format}
-                                                onColor={'#2955E7'}
-                                                name="time_format"
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            </Form>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="building-section-title" style={{ margin: '2px' }}>
-                                Operating Hours
-                            </h5>
-                        </CardHeader>
-
-                        <CardBody>
-                            <Row>
-                                <div>
-                                    <>
-                                        {/* Monday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('mon', e);
-                                                    setSwitchPhrace({ ...switchPhrase, mon: e });
-                                                }}
-                                                checked={weekToggle['mon']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Mon
+                                            <div className="single-line-style">
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={25} width={150} />
+                                                ) : (
+                                                    <h6 className="building-content-title">
+                                                        {buildingDateTime.timezone}
+                                                    </h6>
+                                                )}
                                             </div>
-                                            <DatePicker
-                                                style={{ position: 'relative' }}
-                                                onChange={(date) => {
-                                                    console.log('moment(date)', moment(date).format('HH:MM'));
-                                                    operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                disabled={!weekToggle['mon']}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.monFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.monFrom)?.format('HH:MM')
-                                                }
-                                                timeIntervals={60}
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '24' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                            {console.log(timeValue?.monFrom, 'timeValue?.monFrom')}
 
-                                            {/* <input
+                                            <div className="single-line-style">
+                                                <h6 className="building-content-title">Use 24-hour Clock</h6>
+                                            </div>
+
+                                            <div>
+                                                {isbuildingDetailsFetched ? (
+                                                    <Skeleton count={1} height={25} width={150} />
+                                                ) : (
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            handleDateTimeSwitch();
+
+                                                            if (e) {
+                                                                setTimeZone('24');
+                                                                localStorage.setItem('generaltimeZone', '24');
+                                                            }
+
+                                                            if (!e) {
+                                                                setTimeZone('12');
+                                                                localStorage.setItem('generaltimeZone', '12');
+                                                            }
+                                                        }}
+                                                        checked={buildingDateTime.time_format}
+                                                        onColor={'#2955E7'}
+                                                        disabled={
+                                                            userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit === false
+                                                        }
+                                                        name="time_format"
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Form>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col lg={8}>
+                            <Card className="custom-card card-alignment">
+                                <CardHeader>
+                                    <h5 className="building-section-title" style={{ margin: '2px' }}>
+                                        Operating Hours
+                                    </h5>
+                                </CardHeader>
+
+                                <CardBody>
+                                    <Row>
+                                        <div>
+                                            <>
+                                                {/* Monday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('mon', e);
+                                                            setSwitchPhrace({ ...switchPhrase, mon: e });
+                                                        }}
+                                                        checked={weekToggle['mon']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Mon
+                                                    </div>
+                                                    <DatePicker
+                                                        style={{ position: 'relative' }}
+                                                        onChange={(date) => {
+                                                            console.log('moment(date)', moment(date).format('HH:MM'));
+                                                            operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                monFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        disabled={!weekToggle['mon']}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.monFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.monFrom)?.format('HH:MM')
+                                                        }
+                                                        timeIntervals={60}
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '24' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                    {console.log(timeValue?.monFrom, 'timeValue?.monFrom')}
+
+                                                    {/* <input
                                                 type="text"
                                                 readOnly
                                                 style={{
@@ -1144,521 +1223,535 @@ const General = () => {
                                                 }}
                                             /> */}
 
-                                            {/* TODO: */}
-                                            {/* <DropDownInput setWeekToggle={setWeekToggle} /> */}
+                                                    {/* TODO: */}
+                                                    {/* <DropDownInput setWeekToggle={setWeekToggle} /> */}
 
-                                            <div className="spacing"> to </div>
+                                                    <div className="spacing"> to </div>
 
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'mon').to}
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'mon').to}
 
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
 
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        monTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['mon']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.monTo)?.format('h:mm a')
-                                                        : moment(timeValue?.monTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                monTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['mon']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.monTo)?.format('h:mm a')
+                                                                : moment(timeValue?.monTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Tuesday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('tue', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                        }}
+                                                        checked={weekToggle['tue']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Tue
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'tue').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                tueFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['tue']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.tueFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.tueFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'tue').to}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                tueTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.tueTo)?.format('h:mm a')
+                                                                : moment(timeValue?.tueTo)?.format('HH:MM')
+                                                        }
+                                                        disabled={!weekToggle['tue']}
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Wednesday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('wed', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, wed: e });
+                                                        }}
+                                                        checked={weekToggle['wed']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Wed
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'wed').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                wedFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        disabled={!weekToggle['wed']}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.wedFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.wedFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'wed').to}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                wedTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['wed']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.wedTo)?.format('h:mm a')
+                                                                : moment(timeValue?.wedTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Thursday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('thu', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, thu: e });
+                                                        }}
+                                                        checked={weekToggle['thu']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Thu
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'thu').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                thuFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        disabled={!weekToggle['thu']}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.thuFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.thuFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'thu').to}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                thuTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        disabled={!weekToggle['thu']}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.thuTo)?.format('h:mm a')
+                                                                : moment(timeValue?.thuTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Friday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('fri', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, fri: e });
+                                                        }}
+                                                        checked={weekToggle['fri']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Fri
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'fri').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                friFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['fri']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.friFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.friFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'fri').to}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                friTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        disabled={!weekToggle['fri']}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.friTo)?.format('h:mm a')
+                                                                : moment(timeValue?.friTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Saturday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('sat', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, sat: e });
+                                                        }}
+                                                        checked={weekToggle['sat']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Sat
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'sat').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                satFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['sat']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.satFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.satFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'sat').to}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                satTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        disabled={!weekToggle['sat']}
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.satTo)?.format('h:mm a')
+                                                                : moment(timeValue?.satTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+
+                                                {/* Sunday */}
+
+                                                <div className="operate-hour-style">
+                                                    <Switch
+                                                        onChange={(e) => {
+                                                            checkDateTimeHandler('sun', e);
+
+                                                            setSwitchPhrace({ ...switchPhrase, tue: e });
+                                                        }}
+                                                        checked={weekToggle['sun']}
+                                                        onColor={'#2955E7'}
+                                                        uncheckedIcon={false}
+                                                        checkedIcon={false}
+                                                        className="react-switch"
+                                                    />
+
+                                                    <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
+                                                        Sun
+                                                    </div>
+
+                                                    <DatePicker
+                                                        // selected={dateHandler(inputField.operating_hours, 'sun').frm}
+
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                sunFrom: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        disabled={!weekToggle['sun']}
+                                                        showTimeSelect
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.sunFrom)?.format('h:mm a')
+                                                                : moment(timeValue?.sunFrom)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+
+                                                    <div className="spacing"> to </div>
+
+                                                    <DatePicker
+                                                        onChange={(date) => {
+                                                            operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
+
+                                                            setTimeValue({
+                                                                ...timeValue,
+                                                                sunTo: moment(date).format(),
+                                                            });
+                                                        }}
+                                                        showTimeSelect
+                                                        disabled={!weekToggle['sun']}
+                                                        showTimeSelectOnly
+                                                        timeIntervals={60}
+                                                        value={
+                                                            timeZone === '12'
+                                                                ? moment(timeValue?.sunTo)?.format('h:mm a')
+                                                                : moment(timeValue?.sunTo)?.format('HH:MM')
+                                                        }
+                                                        timeCaption="Time"
+                                                        dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
+                                                        className="time-picker-style"
+                                                    />
+                                                </div>
+                                            </>
                                         </div>
-
-                                        {/* Tuesday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('tue', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
-                                                }}
-                                                checked={weekToggle['tue']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Tue
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'tue').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['tue']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.tueFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.tueFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'tue').to}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        tueTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.tueTo)?.format('h:mm a')
-                                                        : moment(timeValue?.tueTo)?.format('HH:MM')
-                                                }
-                                                disabled={!weekToggle['tue']}
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-
-                                        {/* Wednesday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('wed', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, wed: e });
-                                                }}
-                                                checked={weekToggle['wed']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Wed
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'wed').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                disabled={!weekToggle['wed']}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.wedFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.wedFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'wed').to}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        wedTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['wed']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.wedTo)?.format('h:mm a')
-                                                        : moment(timeValue?.wedTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-
-                                        {/* Thursday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('thu', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, thu: e });
-                                                }}
-                                                checked={weekToggle['thu']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Thu
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'thu').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                disabled={!weekToggle['thu']}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.thuFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.thuFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'thu').to}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        thuTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                disabled={!weekToggle['thu']}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.thuTo)?.format('h:mm a')
-                                                        : moment(timeValue?.thuTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-
-                                        {/* Friday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('fri', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, fri: e });
-                                                }}
-                                                checked={weekToggle['fri']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Fri
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'fri').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['fri']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.friFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.friFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'fri').to}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        friTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                disabled={!weekToggle['fri']}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.friTo)?.format('h:mm a')
-                                                        : moment(timeValue?.friTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-
-                                        {/* Saturday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('sat', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, sat: e });
-                                                }}
-                                                checked={weekToggle['sat']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Sat
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'sat').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['sat']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.satFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.satFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'sat').to}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        satTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                disabled={!weekToggle['sat']}
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.satTo)?.format('h:mm a')
-                                                        : moment(timeValue?.satTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-
-                                        {/* Sunday */}
-
-                                        <div className="operate-hour-style">
-                                            <Switch
-                                                onChange={(e) => {
-                                                    checkDateTimeHandler('sun', e);
-
-                                                    setSwitchPhrace({ ...switchPhrase, tue: e });
-                                                }}
-                                                checked={weekToggle['sun']}
-                                                onColor={'#2955E7'}
-                                                uncheckedIcon={false}
-                                                checkedIcon={false}
-                                                className="react-switch"
-                                            />
-
-                                            <div className="badge badge-light ml-2 mr-2 font-weight-bold week-day-style">
-                                                Sun
-                                            </div>
-
-                                            <DatePicker
-                                                // selected={dateHandler(inputField.operating_hours, 'sun').frm}
-
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunFrom: moment(date).format(),
-                                                    });
-                                                }}
-                                                disabled={!weekToggle['sun']}
-                                                showTimeSelect
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.sunFrom)?.format('h:mm a')
-                                                        : moment(timeValue?.sunFrom)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-
-                                            <div className="spacing"> to </div>
-
-                                            <DatePicker
-                                                onChange={(date) => {
-                                                    operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
-
-                                                    setTimeValue({
-                                                        ...timeValue,
-                                                        sunTo: moment(date).format(),
-                                                    });
-                                                }}
-                                                showTimeSelect
-                                                disabled={!weekToggle['sun']}
-                                                showTimeSelectOnly
-                                                timeIntervals={60}
-                                                value={
-                                                    timeZone === '12'
-                                                        ? moment(timeValue?.sunTo)?.format('h:mm a')
-                                                        : moment(timeValue?.sunTo)?.format('HH:MM')
-                                                }
-                                                timeCaption="Time"
-                                                dateFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                timeFormat={timeZone === '12' ? 'h:mm aa' : 'HH:MM'}
-                                                className="time-picker-style"
-                                            />
-                                        </div>
-                                    </>
-                                </div>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
-
-            <Row>
-                <Col lg={8}>
-                    <Card className="custom-card card-alignment">
-                        <CardHeader>
-                            <h5 className="header-title" style={{ margin: '2px' }}>
-                                Danger Zone
-                            </h5>
-                        </CardHeader>
-
-                        <CardBody>
-                            <Form>
-                                <FormGroup>
-                                    {isbuildingDetailsFetched ? (
-                                        <Skeleton count={1} height={40} width={150} />
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={deleteBuildingHandler}
-                                            className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                            <i className="uil uil-trash mr-2"></i>Delete Building
-                                        </button>
-                                    )}
-                                </FormGroup>
-                            </Form>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Col lg={8}>
+                            <Card className="custom-card card-alignment">
+                                <CardHeader>
+                                    <h5 className="header-title" style={{ margin: '2px' }}>
+                                        Danger Zone
+                                    </h5>
+                                </CardHeader>
+
+                                <CardBody>
+                                    <Form>
+                                        <FormGroup>
+                                            {isbuildingDetailsFetched ? (
+                                                <Skeleton count={1} height={40} width={150} />
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={deleteBuildingHandler}
+                                                    disabled={
+                                                        userPermission?.permissions?.permissions
+                                                            ?.building_details_permission?.delete === false
+                                                    }
+                                                    className="btn btn-md btn-danger font-weight-bold trash-button-style">
+                                                    <i className="uil uil-trash mr-2"></i>Delete Building
+                                                </button>
+                                            )}
+                                        </FormGroup>
+                                    </Form>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    </Row>
+                </>
+            ) : (
+                <>
+                    {buildingDetails && userPermission ? (
+                        <p>You do not have the permision of this page</p>
+                    ) : (
+                        <Skeleton count={3} />
+                    )}
+                </>
+            )}
         </React.Fragment>
     );
 };

@@ -62,7 +62,7 @@ const UserProfileNew = () => {
         await axios
             .get(`${BaseUrl}${getSingleUserDetail}?member_user_id=${userId}`, { headers: header })
             .then((res) => {
-                setUserDetail(res?.data?.data);
+                setUserDetail(res?.data?.data?.user_details);
             });
     };
 
