@@ -4,7 +4,7 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BaseUrl, getExploreByEquipment, getExploreEquipmentList, getExploreEquipmentChart } from '../../services/Network';
+import { BaseUrl, getExploreByEquipment, getExploreEquipmentList, getExploreEquipmentChart, getFloors, equipmentType,getEndUseId} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,9 +17,11 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
+import Dropdown from 'react-bootstrap/Dropdown';
 import ApexCharts from 'apexcharts';
 import './style.css';
 import { remove } from 'lodash';
+import RangeSlider from './RangeSlider';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -283,10 +285,10 @@ const ExploreEquipmentTable = ({
                                                             )}
                                                     </td>
                                                     <td className='table-content-style font-weight-bold'>
-                                                        {record?.location}
+                                                        {record?.location===""?"-":record?.location}
                                                     </td>
                                                     <td className='table-content-style font-weight-bold'>
-                                                        {record?.location_type}
+                                                        {record?.location_type===""?"-":record?.location_type}
                                                     </td>
                                                     <td className='table-content-style font-weight-bold'>
                                                         {record?.equipments_type}
@@ -482,7 +484,8 @@ const ExploreByEquipment = () => {
         { label: 'Equipment Type', value: 'equip_type' },
         { label: 'End Use Category', value: 'endUse_category' },
     ];
-
+    const [equipOptions,setEquipOptions]=useState([]);
+    const [endUseOptions,setEndUseOptions]=useState([]);
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -577,6 +580,8 @@ const ExploreByEquipment = () => {
         },
     });
 
+    const [APIFlag, setAPIFlag]=useState(false);
+    const [APILocFlag, setAPILocFlag]=useState(false);
     const [showEquipmentChart, setShowEquipmentChart] = useState(false);
     const handleChartOpen = () => setShowEquipmentChart(true);
     const handleChartClose = () => setShowEquipmentChart(false);
@@ -589,18 +594,56 @@ const ExploreByEquipment = () => {
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
-
+    const [floorListAPI, setFloorListAPI] = useState([]);
+    const [selectedLocation,setSelectedLocation]=useState('');
+    const [selectedEquipType,setSelectedEquipType]=useState([]);
+    const [selectedEndUse,setSelectedEndUse]=useState([]);
     const [equipmentFilter, setEquipmentFilter] = useState({});
-
-    useEffect(() => {
-        if (startDate === null) {
-            return;
+    const [minConValue, set_minConValue] = useState(0);
+    const [maxConValue, set_maxConValue] = useState(0);
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(100);
+    
+    const handleSelectedEquip=(e)=>{
+        let selection=document.getElementById(e.target.value);
+        if(selection.checked===true)
+            setSelectedEquipType([...selectedEquipType,e.target.value]);
+        else
+        {
+            console.log(e.target.value);
+            let arr = selectedEquipType.filter(function (item) {
+                return item !== e.target.value
+            })
+            console.log(arr);
+            setSelectedEquipType(arr)
         }
-        if (endDate === null) {
-            return;
+    }
+    const handleSelectedEndUse=(e)=>{
+        let selection=document.getElementById(e.target.value);
+        if(selection.checked===true)
+            setSelectedEndUse([...selectedEndUse,e.target.value]);
+        else
+        {
+            console.log(e.target.value);
+            let arr = selectedEndUse.filter(function (item) {
+                return item !== e.target.value
+            })
+            console.log(arr);
+            setSelectedEndUse(arr)
         }
+    }
+    const handleInput = (values) => {
+            //console.log("values ",values);
+            set_minConValue(values[0]);
+            set_maxConValue(values[1]);
+        };
+        const handleInputPer = (values) => {
+            //console.log("values ",values);
+            set_minPerValue(values[0]);
+            set_maxPerValue(values[1]);
+        };
 
-        const exploreFilterDataFetch = async () => {
+        const exploreFilterDataFetch = async (bodyVal) => {
             try {
                 setIsExploreDataLoading(true);
                 let headers = {
@@ -614,17 +657,19 @@ const ExploreByEquipment = () => {
                 await axios
                     .post(
                         `${BaseUrl}${getExploreEquipmentList}${params}`,
-                        {
-                            date_from: startDate,
-                            date_to: endDate,
-                        },
+                       bodyVal,
                         { headers }
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        setTopEnergyConsumption(responseData[0].consumption.now);
-                        setTopPeakConsumption(responseData[0].peak_power.now);
-                        setExploreTableData(responseData);
+                        if(responseData.data.length!==0){
+                        setTopEnergyConsumption(responseData.data[0].consumption.now);
+                        setTopPeakConsumption(responseData.data[0].peak_power.now);
+                        set_minConValue(0);
+                        set_maxConValue(responseData.data[0].consumption.now)
+                        }
+                        setExploreTableData(responseData.data);
+                        
 
                         setIsExploreDataLoading(false);
                     });
@@ -634,8 +679,79 @@ const ExploreByEquipment = () => {
                 setIsExploreDataLoading(false);
             }
         };
+    useEffect(() => {
+        if (startDate === null) {
+            return;
+        }
+        if (endDate === null) {
+            return;
+        }
+            const headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            const params = `?building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
+                setFloorListAPI(res.data.data);
+            });
 
-        exploreFilterDataFetch();
+            const fetchEquipTypeData = async () => {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    let params = `?building_id=${bldgId}`;
+                    await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                        let response = res.data.data;
+                        let equipData=[];
+                        for(var i=0;i<response.length;i++){
+                            let rec={label:response[i].equipment_type, value:response[i].equipment_id}
+                            equipData.push(rec);
+                        }
+                        console.log("equipData ",equipData)
+                        setEquipOptions(equipData)
+                        // response.sort((a, b) => {
+                        //     return a.equipment_type.localeCompare(b.equipment_type);
+                        // });
+                        // setEquipmentTypeData(response);
+                    });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Failed to fetch Equipment Type Data');
+                }
+            };
+            const fetchEndUseData = async () => {
+                try {
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+                    await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
+                        let response = res.data;
+                        let equipData=[];
+                        for(var i=0;i<response.length;i++){
+                            let rec={label:response[i].name, value:response[i].end_user_id}
+                            equipData.push(rec);
+                        }
+                        console.log("equipData ",equipData)
+                        setEndUseOptions(equipData)
+                    });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Failed to fetch End Use Data');
+                }
+            };
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+        }
+        exploreFilterDataFetch(arr);
+        fetchEquipTypeData();
+        fetchEndUseData();
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
@@ -840,6 +956,71 @@ const ExploreByEquipment = () => {
         setSelectedOptions(arr);
     }
 
+    useEffect(()=>{
+        if(minConValue===0 && maxConValue===0 || maxConValue===1){
+            return;
+        }
+       let arr={
+        date_from: startDate,
+        date_to: endDate,
+        consumption_range: {
+            "gte": minConValue,
+            "lte": maxConValue
+          }
+    }
+
+        exploreFilterDataFetch(arr);
+
+    },[APIFlag])
+    useEffect(()=>{
+        if(selectedLocation===""){
+            return;
+        }
+       let arr={
+        date_from: startDate,
+        date_to: endDate,
+        location: [
+            selectedLocation
+          ]
+    }
+
+        exploreFilterDataFetch(arr);
+
+    },[APILocFlag])
+
+    const clearFilterData=()=>{
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+        }
+        exploreFilterDataFetch(arr);
+    }
+    useEffect(()=>{
+        console.log("Selected Equip ", selectedEquipType)
+        if(selectedEquipType.length===0){
+            return;
+        }
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+            equipment_types: selectedEquipType,
+        }
+        exploreFilterDataFetch(arr);
+
+    },[selectedEquipType])
+    useEffect(()=>{
+        console.log("Selected Equip ", selectedEndUse)
+        if(selectedEndUse.length===0){
+            return;
+        }
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+            end_use: selectedEndUse,
+        }
+        exploreFilterDataFetch(arr);
+
+    },[selectedEndUse])
 
     return (
         <>
@@ -916,13 +1097,214 @@ const ExploreByEquipment = () => {
                     </div>
 
                     {selectedOptions.map((el, index) => {
-                        return <><span
-                            className="btn btn-white d-inline btnHover"
+                        if(el.value!=="consumption"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
                             style={{ height: '36px', marginLeft: "1rem" }}>
-                           <button className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white"}}> All {el.label} </button><button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
-                        </span>
-                        </>;
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag)}}>kWh Used</a>
+                                    <button style={{border:"none", backgroundColor:"white", marginLeft:"5rem"}} onClick={clearFilterData}><i className="uil uil-multiply"></i></button>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minConValue}/>  <input className='pop-inputbox' type="text" value={maxConValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' MIN={0} range={[minConValue, maxConValue]}  MAX={topEnergyConsumption+100} onSelectionChange={handleInput}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
                     })}
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="change"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                 <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag)}}>Change Threshold</a>
+                                    <button style={{border:"none", backgroundColor:"white", marginLeft:"5rem"}} onClick={exploreFilterDataFetch}><i className="uil uil-multiply"></i></button>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minPerValue}/>  <input className='pop-inputbox' type="text" value={maxPerValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' MIN={0} range={[minPerValue, maxPerValue]}  MAX={100} onSelectionChange={handleInputPer}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="location"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-xlg p-3">
+                                <div>
+                                    <div className='pop-inputbox-wrapper'>
+                                    <div className="explore-search mr-2">
+                                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                        <input className="search-box ml-2" type="search" name="search" placeholder="Search Locations (floor, area,room)" />
+                                    </div>
+                                    <button className='btn btn-white d-inline' onClick={clearFilterData}>Cancel</button>
+                                    <button className='btn btn-primary d-inline ml-2' onClick={(e)=>{setAPILocFlag(!APILocFlag)}}>Save</button>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper mt-4 mb-2 p-1'><span className='pop-text'>{localStorage.getItem('exploreBldName')}</span></div>
+                                    {floorListAPI.map((record)=>{
+                                        
+                                            return(
+                                                <div className='floor-box'>
+                                                    <div>
+                                                    <input type="checkbox" className='mr-2' value={record.floor_id} onClick={(e)=>{setSelectedLocation(record.floor_id)}}/>
+                                                    <span>{record.name}</span>
+                                                    </div>
+                                                    <div style={{display:"flex"}}>
+                                                    <div className='room-box'> 12 Rooms </div>
+                                                    <button style={{border:"none", backgroundColor:"white"}}><i className="uil uil-angle-right"></i></button>
+                                                    </div>
+                                                </div>
+                                            )
+                                            
+                                    })}
+                                    <div>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="location_type"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                           
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="equip_type"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div>
+                                    <div className='m-1'>
+                                        <div className="explore-search mr-2">
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                            <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
+                                        </div>
+                                        <div style={{height:"250px",overflowY:"scroll"}}>
+                                        {equipOptions.map((record)=>{
+                                        
+                                        return(
+                                            <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id={record.value} value={record.value} onClick={(e)=>{handleSelectedEquip(e)}}/>
+                                                <span>{record.label}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                        
+                                      })}
+                                      </div>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="endUse_category"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                            <div>
+                                    <div className='m-1'>
+                                        <div className="explore-search mr-2">
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                            <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
+                                        </div>
+                                        <div style={{height:"250px",overflowY:"scroll"}}>
+                                        {endUseOptions.map((record)=>{
+                                        
+                                        return(
+                                            <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id={record.value} value={record.value} onClick={(e)=>{handleSelectedEndUse(e)}}/>
+                                                <span>{record.label}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                        
+                                      })}
+                                      </div>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                   
 
                 </div>
                 </Col>

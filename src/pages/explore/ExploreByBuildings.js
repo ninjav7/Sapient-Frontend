@@ -510,8 +510,10 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
+                            filters: {
                             date_from: startDate,
                             date_to: endDate,
+                            }
                         },
                         { headers }
                     )
