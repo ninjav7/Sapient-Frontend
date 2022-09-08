@@ -326,7 +326,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         let breaker = Object.assign({}, breakerData);
         if (key === 'equipment_link') {
             let arr = [];
-            arr.push(value);
+            if (value !== '') {
+                arr.push(value);
+            }
             value = arr;
         }
         if (value === 'Select Volts') {
@@ -468,6 +470,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         };
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
+
+    useEffect(() => {
+        console.log('SSR breakerData => ', breakerData);
+        console.log('SSR doubleBreakerData => ', doubleBreakerData);
+        console.log('SSR tripleBreakerData => ', tripleBreakerData);
+    });
 
     return (
         <React.Fragment>
