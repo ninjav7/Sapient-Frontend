@@ -665,8 +665,8 @@ const ExploreByEquipment = () => {
                         if(responseData.data.length!==0){
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
                         setTopPeakConsumption(responseData.data[0].peak_power.now);
-                        set_minConValue(0);
-                        set_maxConValue(responseData.data[0].consumption.now)
+                        // set_minConValue(0);
+                        // set_maxConValue(responseData.data[0].consumption.now)
                         }
                         setExploreTableData(responseData.data);
                         
@@ -745,11 +745,47 @@ const ExploreByEquipment = () => {
                     console.log('Failed to fetch End Use Data');
                 }
             };
+            const exploreDataFetch = async (bodyVal) => {
+                try {
+                    setIsExploreDataLoading(true);
+                    let headers = {
+                        'Content-Type': 'application/json',
+                        accept: 'application/json',
+                        Authorization: `Bearer ${userdata.token}`,
+                    };
+    
+                    let params = `?consumption=energy&building_id=${bldgId}`;
+    
+                    await axios
+                        .post(
+                            `${BaseUrl}${getExploreEquipmentList}${params}`,
+                           bodyVal,
+                            { headers }
+                        )
+                        .then((res) => {
+                            let responseData = res.data;
+                            if(responseData.data.length!==0){
+                            setTopEnergyConsumption(responseData.data[0].consumption.now);
+                            setTopPeakConsumption(responseData.data[0].peak_power.now);
+                            set_minConValue(0);
+                            set_maxConValue(responseData.data[0].consumption.now)
+                            }
+                            setExploreTableData(responseData.data);
+                            
+    
+                            setIsExploreDataLoading(false);
+                        });
+                } catch (error) {
+                    console.log(error);
+                    console.log('Failed to fetch Explore Data');
+                    setIsExploreDataLoading(false);
+                }
+            };
         let arr= {
             date_from: startDate,
             date_to: endDate,
         }
-        exploreFilterDataFetch(arr);
+        exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
     }, [startDate, endDate, bldgId]);
@@ -954,39 +990,122 @@ const ExploreByEquipment = () => {
         })
         console.log(arr);
         setSelectedOptions(arr);
+
+        let arr1 = {};
+        arr1['date_from'] = startDate;
+        arr1['date_to'] =endDate;
+        switch(val){
+            case 'consumption':
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
+                }
+                if(selectedEquipType.length!==0){
+                    arr1['equipment_types']=selectedEquipType;
+                }
+                if(selectedEndUse.length!==0){
+                    arr1['end_use']=selectedEndUse;
+                }
+                set_minConValue(0);
+                set_maxConValue(topEnergyConsumption);
+                break;
+            case 'location':
+                if(maxConValue > 1){
+                    arr1['consumption_range']= {
+                        "gte": minConValue,
+                        "lte": maxConValue
+                      };
+                }
+                if(selectedEquipType.length!==0){
+                    arr1['equipment_types']=selectedEquipType;
+                }
+                if(selectedEndUse.length!==0){
+                    arr1['end_use']=selectedEndUse;
+                }
+                break;
+            case 'equip_type':
+                if(maxConValue > 1){
+                    arr1['consumption_range']= {
+                        "gte": minConValue,
+                        "lte": maxConValue
+                      };
+                }
+                if(selectedEndUse.length!==0){
+                    arr1['end_use']=selectedEndUse;
+                }
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
+                }
+                break;
+            case 'endUse_category':
+                if(maxConValue > 1){
+                    arr1['consumption_range']= {
+                        "gte": minConValue,
+                        "lte": maxConValue
+                      };
+                }
+                if(selectedEquipType.length!==0){
+                    arr1['equipment_types']=selectedEquipType;
+                }
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
+                }
+                break;               
+
+        }
+        exploreFilterDataFetch(arr1);
+        
     }
 
+    // useEffect(()=>{
+    //     if(minConValue===0 && maxConValue===0 || maxConValue===1){
+    //         return;
+    //     }
+    //    let arr={
+    //     date_from: startDate,
+    //     date_to: endDate,
+    //     consumption_range: {
+    //         "gte": minConValue,
+    //         "lte": maxConValue
+    //       }
+    // }
+
+    //     exploreFilterDataFetch(arr);
+
+    // },[APIFlag])
     useEffect(()=>{
-        if(minConValue===0 && maxConValue===0 || maxConValue===1){
+
+        if(selectedLocation==="" && (maxConValue===0 || maxConValue===1) && selectedEquipType.length===0 && selectedEndUse.length===0){
             return;
         }
-       let arr={
-        date_from: startDate,
-        date_to: endDate,
-        consumption_range: {
-            "gte": minConValue,
-            "lte": maxConValue
-          }
-    }
-
-        exploreFilterDataFetch(arr);
-
-    },[APIFlag])
-    useEffect(()=>{
-        if(selectedLocation===""){
-            return;
+        let arr = {};
+        arr['date_from'] = startDate;
+        arr['date_to'] =endDate;
+        if(maxConValue > 1){
+            arr['consumption_range']= {
+                "gte": minConValue,
+                "lte": maxConValue
+              };
         }
-       let arr={
-        date_from: startDate,
-        date_to: endDate,
-        location: [
-            selectedLocation
-          ]
-    }
-
+        if(selectedLocation !==""){
+            arr['location']= [
+                selectedLocation
+              ];
+        }
+        if(selectedEquipType.length!==0){
+            arr['equipment_types']=selectedEquipType;
+        }
+        if(selectedEndUse.length!==0){
+            arr['end_use']=selectedEndUse;
+        }
         exploreFilterDataFetch(arr);
 
-    },[APILocFlag])
+    },[APIFlag,APILocFlag,selectedEquipType,selectedEndUse])
 
     const clearFilterData=()=>{
         let arr= {
@@ -995,32 +1114,32 @@ const ExploreByEquipment = () => {
         }
         exploreFilterDataFetch(arr);
     }
-    useEffect(()=>{
-        console.log("Selected Equip ", selectedEquipType)
-        if(selectedEquipType.length===0){
-            return;
-        }
-        let arr= {
-            date_from: startDate,
-            date_to: endDate,
-            equipment_types: selectedEquipType,
-        }
-        exploreFilterDataFetch(arr);
+    // useEffect(()=>{
+    //     console.log("Selected Equip ", selectedEquipType)
+    //     if(selectedEquipType.length===0){
+    //         return;
+    //     }
+    //     let arr= {
+    //         date_from: startDate,
+    //         date_to: endDate,
+    //         equipment_types: selectedEquipType,
+    //     }
+    //     exploreFilterDataFetch(arr);
 
-    },[selectedEquipType])
-    useEffect(()=>{
-        console.log("Selected Equip ", selectedEndUse)
-        if(selectedEndUse.length===0){
-            return;
-        }
-        let arr= {
-            date_from: startDate,
-            date_to: endDate,
-            end_use: selectedEndUse,
-        }
-        exploreFilterDataFetch(arr);
+    // },[selectedEquipType])
+    // useEffect(()=>{
+    //     console.log("Selected Equip ", selectedEndUse)
+    //     if(selectedEndUse.length===0){
+    //         return;
+    //     }
+    //     let arr= {
+    //         date_from: startDate,
+    //         date_to: endDate,
+    //         end_use: selectedEndUse,
+    //     }
+    //     exploreFilterDataFetch(arr);
 
-    },[selectedEndUse])
+    // },[selectedEndUse])
 
     return (
         <>
