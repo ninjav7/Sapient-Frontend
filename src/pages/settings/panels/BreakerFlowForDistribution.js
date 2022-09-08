@@ -18,9 +18,15 @@ const BreakersComponent = ({ data, id }) => {
     let userdata = cookies.get('user');
 
     const [breakerObj, setBreakerObj] = useState(data);
+
     const [breakerData, setBreakerData] = useState(data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
+
+    const [singleBreakerChanges, setSingleBreakerChanges] = useState({});
+    const [doubleBreakerChanges, setDoubleBreakerChanges] = useState({});
+    const [tripleBreakerChanges, setTripleBreakerChanges] = useState({});
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [linkedSensors, setLinkedSensors] = useState([]);
 
@@ -180,15 +186,8 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObj = {
+                ...singleBreakerChanges,
                 breaker_id: id,
-                name: breakerData.name,
-                breaker_number: breakerData.breaker_number,
-                phase_configuration: breakerData.phase_configuration,
-                rated_amps: breakerData.rated_amps,
-                voltage: breakerData.voltage,
-                sensor_link: breakerData.sensor_id,
-                device_link: breakerData.device_id,
-                equipment_link: breakerData.equipment_link,
             };
 
             await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then((res) => {
@@ -324,6 +323,7 @@ const BreakersComponent = ({ data, id }) => {
 
     const handleSingleBreakerChange = (id, key, value) => {
         let breaker = Object.assign({}, breakerData);
+        let breakerChanges = Object.assign({}, singleBreakerChanges);
         if (key === 'equipment_link') {
             let arr = [];
             if (value !== '') {
@@ -337,10 +337,13 @@ const BreakersComponent = ({ data, id }) => {
         if (key === 'device_id') {
             if (value === '') {
                 breaker.sensor_id = '';
+                breakerChanges.sensor_id = '';
             }
         }
         breaker[key] = value;
+        breakerChanges[key] = value;
         setBreakerData(breaker);
+        setSingleBreakerChanges(breakerChanges);
     };
 
     const handleDoubleBreakerChange = (id, key, value) => {
@@ -470,6 +473,18 @@ const BreakersComponent = ({ data, id }) => {
         };
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
+
+    // useEffect(() => {
+    //     console.log('SSR 1st breakerData => ', breakerData);
+    //     console.log('SSR 2nd doubleBreakerData => ', doubleBreakerData);
+    //     console.log('SSR 3rd tripleBreakerData => ', tripleBreakerData);
+    // });
+
+    useEffect(() => {
+        console.log('SSR 1st singleBreakerChanges => ', singleBreakerChanges);
+        // console.log('SSR 2nd doubleBreakerChanges => ', doubleBreakerChanges);
+        // console.log('SSR 3rd tripleBreakerChanges => ', tripleBreakerChanges);
+    });
 
     return (
         <React.Fragment>
