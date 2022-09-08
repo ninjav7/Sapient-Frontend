@@ -190,12 +190,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 breaker_id: id,
             };
 
-            if (breakerObj.device_id) {
+            if (breakerObj.device_id || breakerObj.device_id === '') {
                 breakerObj['device_link'] = breakerObj['device_id'];
                 delete breakerObj['device_id'];
             }
 
-            if (breakerObj.sensor_id) {
+            if (breakerObj.sensor_id || breakerObj.sensor_id === '') {
                 breakerObj['sensor_link'] = breakerObj['sensor_id'];
                 delete breakerObj['sensor_id'];
             }
@@ -235,22 +235,22 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 breaker_id: doubleBreakerData.id,
             };
 
-            if (breakerObjOne.device_id) {
+            if (breakerObjOne.device_id || breakerObjOne.device_id === '') {
                 breakerObjOne['device_link'] = breakerObjOne['device_id'];
                 delete breakerObjOne['device_id'];
             }
 
-            if (breakerObjOne.sensor_id) {
+            if (breakerObjOne.sensor_id || breakerObjOne.sensor_id === '') {
                 breakerObjOne['sensor_link'] = breakerObjOne['sensor_id'];
                 delete breakerObjOne['sensor_id'];
             }
 
-            if (breakerObjTwo.device_id) {
+            if (breakerObjTwo.device_id || breakerObjTwo.device_id === '') {
                 breakerObjTwo['device_link'] = breakerObjTwo['device_id'];
                 delete breakerObjTwo['device_id'];
             }
 
-            if (breakerObjTwo.sensor_id) {
+            if (breakerObjTwo.sensor_id || breakerObjTwo.sensor_id === '') {
                 breakerObjTwo['sensor_link'] = breakerObjTwo['sensor_id'];
                 delete breakerObjTwo['sensor_id'];
             }
@@ -305,34 +305,33 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 breakerObjThree.equipment_link = breakerObjOne.equipment_link;
             }
 
-            if (breakerObjOne.device_id) {
+            if (breakerObjOne.device_id || breakerObjOne.device_id === '') {
                 breakerObjOne['device_link'] = breakerObjOne['device_id'];
                 delete breakerObjOne['device_id'];
             }
 
-            if (breakerObjOne.sensor_id) {
+            if (breakerObjOne.sensor_id || breakerObjOne.sensor_id === '') {
                 breakerObjOne['sensor_link'] = breakerObjOne['sensor_id'];
                 delete breakerObjOne['sensor_id'];
             }
 
-            if (breakerObjTwo.device_id) {
+            if (breakerObjTwo.device_id || breakerObjTwo.device_id === '') {
                 breakerObjTwo['device_link'] = breakerObjTwo['device_id'];
                 delete breakerObjTwo['device_id'];
             }
 
-            if (breakerObjTwo.sensor_id) {
+            if (breakerObjTwo.sensor_id || breakerObjTwo.sensor_id === '') {
                 breakerObjTwo['sensor_link'] = breakerObjTwo['sensor_id'];
                 delete breakerObjTwo['sensor_id'];
             }
 
-            if (breakerObjThree.device_id) {
+            if (breakerObjThree.device_id || breakerObjThree.device_id === '') {
                 breakerObjThree['device_link'] = breakerObjThree['device_id'];
                 delete breakerObjThree['device_id'];
             }
 
-            if (breakerObjThree.sensor_id) {
+            if (breakerObjThree.sensor_id || breakerObjThree.sensor_id === '') {
                 breakerObjThree['sensor_link'] = breakerObjThree['sensor_id'];
-                delete breakerObjThree['sensor_id'];
             }
 
             await axios
