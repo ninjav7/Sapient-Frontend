@@ -232,11 +232,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         saveBreakersData(generatedPanelId);
     }, [generatedPanelId]);
 
-    useEffect(() => {
-        console.log('SSR panelObj => ', panelObj);
-        console.log('SSR breakersData => ', breakersData);
-    });
-
     return (
         <>
             <Modal show={showPanelModel} onHide={closeAddPanelModel} centered>
