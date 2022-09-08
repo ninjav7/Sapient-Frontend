@@ -216,27 +216,13 @@ const BreakersComponent = ({ data, id }) => {
             };
 
             let breakerObjOne = {
+                ...singleBreakerChanges,
                 breaker_id: id,
-                name: breakerData.name,
-                breaker_number: breakerData.breaker_number,
-                phase_configuration: breakerData.phase_configuration,
-                rated_amps: breakerData.rated_amps,
-                voltage: breakerData.voltage,
-                sensor_link: breakerData.sensor_id,
-                device_link: breakerData.device_id,
-                equipment_link: breakerData.equipment_link,
             };
 
             let breakerObjTwo = {
+                ...singleBreakerChanges,
                 breaker_id: doubleBreakerData.id,
-                name: doubleBreakerData.data.name,
-                breaker_number: doubleBreakerData.data.breaker_number,
-                phase_configuration: breakerData.phase_configuration,
-                rated_amps: breakerData.rated_amps,
-                voltage: breakerData.voltage,
-                sensor_link: breakerData.sensor_id,
-                device_link: breakerData.device_id,
-                equipment_link: breakerData.equipment_link,
             };
 
             await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then((res) => {
