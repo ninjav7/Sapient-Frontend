@@ -309,8 +309,8 @@ const BreakersComponent = ({ data, id }) => {
         }
         if (key === 'device_id') {
             if (value === '') {
-                breaker.sensor_link = '';
-                breakerChanges.sensor_link = '';
+                breaker.sensor_id = '';
+                breakerChanges.sensor_id = '';
             }
         }
         breaker[key] = value;
@@ -333,8 +333,8 @@ const BreakersComponent = ({ data, id }) => {
         let data = Object.assign({}, breaker.data);
         if (key === 'device_id') {
             if (value === '') {
-                data.sensor_link = '';
-                breakerTwo.sensor_link = '';
+                data.sensor_id = '';
+                breakerTwo.sensor_id = '';
             }
         }
         data[key] = value;
@@ -357,8 +357,8 @@ const BreakersComponent = ({ data, id }) => {
         let data = Object.assign({}, breaker.data);
         if (key === 'device_id') {
             if (value === '') {
-                data.sensor_link = '';
-                breakerThree.sensor_link = '';
+                data.sensor_id = '';
+                breakerThree.sensor_id = '';
             }
         }
         data[key] = value;
@@ -729,11 +729,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                 return;
                                                             }
                                                             handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(
-                                                                id,
-                                                                'sensor_link',
-                                                                e.target.value
-                                                            );
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={breakerData.sensor_id}>
                                                         <option>Select Sensor</option>
@@ -824,11 +820,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                 return;
                                                             }
                                                             handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(
-                                                                id,
-                                                                'sensor_link',
-                                                                e.target.value
-                                                            );
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={breakerData.sensor_id}>
                                                         <option>Select Sensor</option>
@@ -912,11 +904,7 @@ const BreakersComponent = ({ data, id }) => {
                                                                 doubleBreakerData?.data?.sensor_id,
                                                                 e.target.value
                                                             );
-                                                            handleDoubleBreakerChange(
-                                                                id,
-                                                                'sensor_link',
-                                                                e.target.value
-                                                            );
+                                                            handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
                                                         value={doubleBreakerData?.data?.sensor_id}>
                                                         <option>Select Sensor</option>
