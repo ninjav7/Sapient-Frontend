@@ -69,6 +69,15 @@ const SideNav = () => {
         if (userPermission?.permissions?.permissions?.building_panels_permission?.view) {
             setBuildingPermissionPanels('');
         }
+        if (userPermission?.permissions?.permissions === 'All Permissions') {
+            setUserPermissionListBuildings('');
+            setUserPermissionListGeneral('');
+            setUserPermissionListUsers('');
+            setBuildingPermissionDetails('');
+            setBuildingPermissionEquipments('');
+            setBuildingPermissionLayouts('');
+            setBuildingPermissionPanels('');
+        }
     }, [userPermission]);
 
     useEffect(() => {

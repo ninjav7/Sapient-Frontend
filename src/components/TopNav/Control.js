@@ -162,9 +162,17 @@ const Control = () => {
             );
             setRoute((el) => [...el, '/settings/roles']);
         }
+
+        if (userPermission?.permissions?.permissions === 'All Permissions') {
+            setRoute((el) => [...el, '/settings/account']);
+        }
     }, [userPermission]);
 
     useEffect(() => {
+        if (userPermission?.permissions?.permissions === 'All Permissions') {
+            setRoute((el) => [...el, '/settings/general']);
+        }
+
         if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
             setInternalRoute((el) =>
                 el.filter((current) => {
