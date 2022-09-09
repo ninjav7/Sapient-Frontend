@@ -17,7 +17,7 @@ import {
 } from '../../services/Network';
 import axios from 'axios';
 import moment from 'moment';
-import { BuildingStore } from '../../store/BuildingStore';
+import { BuildingStore, BuildingListStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
@@ -32,6 +32,7 @@ const General = () => {
     let userdata = cookies.get('user');
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const _ = require('lodash');
+    const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
     // const [buildingData, setBuildingData] = useState({});
@@ -83,7 +84,11 @@ const General = () => {
         }
     }, [bldgData]);
 
-    console.log('timeZone', timeZone);
+    useEffect(() => {
+        if (selectedTimezone?.value) {
+            handleBldgSettingChanges('timezone', selectedTimezone?.value);
+        }
+    }, [selectedTimezone]);
 
     const [loadButton, setLoadButton] = useState(false);
     const [switchPhrase, setSwitchPhrace] = useState({
@@ -259,6 +264,9 @@ const General = () => {
                         localStorage.removeItem('generalBuildingName');
                         localStorage.removeItem('generaltimeZone');
                         localStorage.removeItem('generalZipCode');
+                        BuildingListStore.update((s) => {
+                            s.fetchBuildingList = true;
+                        });
                     })
                 );
         } catch (error) {

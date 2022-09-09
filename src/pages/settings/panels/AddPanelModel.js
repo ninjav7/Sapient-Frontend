@@ -115,25 +115,14 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             if (value === '208/120') {
                 return 120;
             }
+            if (value === '120/240') {
+                return 120;
+            }
             if (value === '480') {
                 return 277;
             }
             if (value === '600') {
                 return 347;
-            }
-        }
-    };
-
-    const getPhaseConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '208/120') {
-                return 1;
-            }
-            if (value === '480') {
-                return 1;
-            }
-            if (value === '600') {
-                return 1;
             }
         }
     };
@@ -147,7 +136,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     breaker_number: index,
                     phase_configuration: 1,
                     rated_amps: 0,
-                    voltage: '',
+                    voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
                     equipment_link: [],
                     sensor_id: '',
                     device_id: '',
@@ -155,18 +144,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     parent_breaker: '',
                     is_linked: false,
                 };
-                if (panelObj.voltage === '120/240') {
-                    obj.voltage = '120';
-                }
-                if (panelObj.voltage === '208/120') {
-                    obj.voltage = '120';
-                }
-                if (panelObj.voltage === '480') {
-                    obj.voltage = '277';
-                }
-                if (panelObj.voltage === '600') {
-                    obj.voltage = '347';
-                }
                 newArray.push(obj);
             }
         }
@@ -176,7 +153,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 let obj = {
                     name: `Breaker ${index}`,
                     breaker_number: index,
-                    phase_configuration: getPhaseConfigValue(panelObj.voltage, 'single'),
+                    phase_configuration: 1,
                     rated_amps: 0,
                     voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
                     equipment_link: [],
@@ -349,8 +326,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     className="font-weight-bold"
                                     onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                    }}
-                                    onBlur={(e) => {
                                         handleBreakerChange('distribution', +e.target.value);
                                     }}
                                     min={0}
@@ -368,8 +343,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     value={panelObj.breaker_count}
                                     onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                    }}
-                                    onBlur={(e) => {
                                         handleBreakerChange('disconnect', +e.target.value);
                                     }}>
                                     {disconnectBreaker.map((record) => {
