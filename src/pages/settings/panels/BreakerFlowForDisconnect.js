@@ -372,6 +372,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 breakerChanges.sensor_id = '';
             }
         }
+        if (key === 'sensor_id') {
+            if (value === '') {
+                breaker.device_id = '';
+                breakerChanges.device_id = '';
+            }
+        }
         breaker[key] = value;
         breakerChanges[key] = value;
 
@@ -396,6 +402,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 breakerTwo.sensor_id = '';
             }
         }
+        if (key === 'sensor_id') {
+            if (value === '') {
+                data.device_id = '';
+                breakerTwo.device_id = '';
+            }
+        }
         data[key] = value;
         breaker['data'] = data;
         breakerTwo[key] = value;
@@ -418,6 +430,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             if (value === '') {
                 data.sensor_id = '';
                 breakerThree.sensor_id = '';
+            }
+        }
+        if (key === 'sensor_id') {
+            if (value === '') {
+                data.device_id = '';
+                breakerThree.device_id = '';
             }
         }
         data[key] = value;
