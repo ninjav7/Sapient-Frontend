@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, FormGroup, Label, Input, CardHeader } from 'reactstrap';
+import { Row, Col, Card, CardBody, FormGroup, Label, Input, CardHeader, Button } from 'reactstrap';
 import Switch from 'react-switch';
+import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import './style.css';
 
 import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
-import { BaseUrl, getSingleUserDetail, updateSingleUserDetail } from '../../services/Network';
+import {
+    assignUser,
+    BaseUrl,
+    getPermissionRole,
+    getSingleUserDetail,
+    updateSingleUserDetail,
+} from '../../services/Network';
 import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
+import { useAtom } from 'jotai';
+import { buildingData } from '../../store/globalState';
 
 const UserProfileNew = () => {
     let cookies = new Cookies();
@@ -31,7 +38,9 @@ const UserProfileNew = () => {
 
     const { userId } = useParams();
 
-    console.log('user_id', userId);
+    const [userPermissionList, setUserPermissionList] = useState();
+
+    console.log('userPermissionList', userPermissionList);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -52,6 +61,7 @@ const UserProfileNew = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // TODO:
     const getSingleUserDetailFunc = async () => {
         let header = {
             'Content-Type': 'application/json',
@@ -63,10 +73,10 @@ const UserProfileNew = () => {
             .get(`${BaseUrl}${getSingleUserDetail}?member_user_id=${userId}`, { headers: header })
             .then((res) => {
                 setUserDetail(res?.data?.data?.user_details);
+                setUserPermissionList(res?.data?.data?.user_permissions);
             });
     };
 
-    // ! Update User API
     const updateSingleUserDetailFunc = async () => {
         let header = {
             'Content-Type': 'application/json',
@@ -101,6 +111,71 @@ const UserProfileNew = () => {
 
     console.log('updateUserDetail', updateUserDetail);
 
+    const [roleDataList, setRoleDataList] = useState();
+
+    const [buildingListData] = useAtom(buildingData);
+    const [allBuildings, setAllBuildings] = useState([]);
+
+    const getPermissionRoleFunc = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
+                setRoleDataList(res.data.data);
+                return buildingListData?.map((item) => {
+                    setAllBuildings((el) => [...el, item?.building_id]);
+                });
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        getPermissionRoleFunc();
+    }, [buildingListData]);
+
+    console.log('allBuildings', allBuildings);
+
+    const [permissionValue, setPermissionValue] = useState('');
+    const [show, setShow] = useState(false);
+
+    console.log('buildingListData', buildingListData);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const assignUserRoleFunc = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            // const params = userId;
+            await axios
+                .post(
+                    `${BaseUrl}${assignUser}?member_user_id=${userId}`,
+                    {
+                        permission_role: permissionValue,
+                        buildings: allBuildings,
+                    },
+                    { headers: header }
+                )
+                .then((res) => {
+                    getSingleUserDetailFunc();
+                    setShow(false);
+                });
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -122,10 +197,7 @@ const UserProfileNew = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-light font-weight-bold cancel-btn-style"
-                                onClick={() => {}}>
+                            <button type="button" className="btn btn-md btn-light font-weight-bold cancel-btn-style">
                                 Cancel
                             </button>
                             <button
@@ -273,24 +345,43 @@ const UserProfileNew = () => {
                         <CardBody>
                             <Form>
                                 <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
-                                    <div className="user-role-style">
-                                        <h6 className="card-title admin-text-style">Account Administrator</h6>
-                                        <span className="view-role-style">View Role</span>
-                                    </div>
-
-                                    <Input
-                                        type="select"
-                                        name="select"
-                                        id="exampleSelect"
-                                        className="font-weight-bold user-role-textbox">
-                                        <option selected>All Buildings</option>
-                                    </Input>
+                                    {userPermissionList?.map((item) => {
+                                        return (
+                                            <>
+                                                <div className="user-role-style" style={{ marginTop: '15px' }}>
+                                                    <h6 className="card-title admin-text-style">
+                                                        {item?.permissions?.[0]?.permission_name}
+                                                    </h6>
+                                                    <Link
+                                                        to={`/settings/roles/${item?.permissions?.[0]?.permission_id}`}>
+                                                        <span className="view-role-style">View Role</span>
+                                                    </Link>
+                                                </div>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold user-role-textbox">
+                                                    <option selected>All Buildings</option>
+                                                    {item?.building_access?.map((item) => {
+                                                        return (
+                                                            <option value={item?.building_id}>
+                                                                {item?.building_name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Input>
+                                            </>
+                                        );
+                                    })}
                                 </FormGroup>
                                 <hr />
                                 <button
                                     type="button"
                                     className="btn btn-md btn-light font-weight-bold cancel-btn-style mr-1"
-                                    onClick={() => {}}>
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
                                     <i className="uil uil-plus mr-2" />
                                     Add Role
                                 </button>
@@ -322,6 +413,52 @@ const UserProfileNew = () => {
                     </Card>
                 </Col>
             </Row>
+
+            <Modal show={show} onHide={handleClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Add Role</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Row>
+                            <Col>
+                                <Form.Group className="" controlId="exampleForm.ControlInput1">
+                                    <Form.Label>Role</Form.Label>
+                                    <Input
+                                        type="select"
+                                        name="state"
+                                        id="userState"
+                                        // className="font-weight-bold selection-volts-style"
+                                        style={{ width: '100%' }}
+                                        placeholder="Select Volts"
+                                        onChange={(e) => {
+                                            if (e.target.value === 'Select Role') {
+                                                return;
+                                            }
+                                            setPermissionValue(e.target.value);
+                                        }}
+                                        value={permissionValue}>
+                                        <option>Select Role</option>
+                                        {roleDataList?.map((item) => {
+                                            return <option value={item?._id}>{item?.name}</option>;
+                                        })}
+                                        {/* <option value="480">480</option>
+                                        <option value="600">600</option> */}
+                                    </Input>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer style={{ display: 'flex', width: '100%', flexWrap: 'nowrap' }}>
+                    <Button variant="light" style={{ width: '50%' }} onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button style={{ width: '50%' }} variant="primary" onClick={assignUserRoleFunc}>
+                        Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </React.Fragment>
     );
 };

@@ -76,7 +76,7 @@ const UserTable = ({ userData }) => {
                                     <td className="font-weight-bold panel-name">
                                         <Link
                                             to={{
-                                                pathname: `/settings/user-profile`,
+                                                pathname: `/settings/user-profile/single/${record?.user_id}`,
                                             }}>
                                             <a>{record.name ? record.name : 'test user'}</a>
                                         </Link>
@@ -102,7 +102,18 @@ const SingleRoleNew = () => {
 
     console.log('roleId', roleId);
 
-    const [checked, setChecked] = useState(true);
+    const [checked, setChecked] = useState(false);
+    const [checkedBuildingConf, setCheckedBuildingConf] = useState(false);
+    const [checkedAdvancedConf, setCheckedAdvancedConf] = useState(false);
+
+    console.log(
+        'checked',
+        checked,
+        'checkedBuildingConf',
+        checkedBuildingConf,
+        'checkedAdvancedConf',
+        checkedAdvancedConf
+    );
 
     const [buildingViewChecked, setBuildingViewChecked] = useState(false);
     const [portfolioChecked, setPortfolioChecked] = useState(false);
@@ -113,6 +124,7 @@ const SingleRoleNew = () => {
 
     const [activeTab, setActiveTab] = useState('1');
     const [userData, setUserData] = useState();
+    const [loadingData, setLoadingData] = useState(false);
 
     const tabContents = [
         {
@@ -126,27 +138,6 @@ const SingleRoleNew = () => {
             icon: 'uil-user',
         },
     ];
-
-    // const [userData, setUserData] = useState([
-    //     {
-    //         name: 'Michael Scott',
-    //         buildingAccess: 'All Buildings',
-    //         emailId: 'manager@dundermifflin.com',
-    //         lastActive: 'Today',
-    //     },
-    //     {
-    //         name: 'Jim Halpert',
-    //         buildingAccess: '2 Buildings',
-    //         emailId: 'jhalpert@dundermifflin.com',
-    //         lastActive: '4 days ago',
-    //     },
-    //     {
-    //         name: 'Dwight Schrute',
-    //         buildingAccess: '3 Buildings',
-    //         emailId: 'dschrute@dundermifflin.com',
-    //         lastActive: '10 mins ago',
-    //     },
-    // ]);
 
     const toggleTab = (tab) => {
         if (activeTab !== tab) {
@@ -302,6 +293,106 @@ const SingleRoleNew = () => {
     const [singlePermissionDetail, setSinglePermissionDetail] = useState([]);
 
     console.log('singlePermissionDetail', singlePermissionDetail);
+
+    useEffect(() => {
+        if (checked) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                account_general_permission: {
+                    view: true,
+                    edit: true,
+                },
+                account_buildings_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                account_user_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                account_roles_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checked]);
+
+    useEffect(() => {
+        if (checkedBuildingConf) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                building_details_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_users_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_layout_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_equipment_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_utility_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_panels_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checkedBuildingConf]);
+
+    useEffect(() => {
+        if (checkedAdvancedConf) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                advanced_smart_plugs_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                advanced_smart_monitors_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                advanced_gateways_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checkedAdvancedConf]);
 
     useEffect(() => {
         setUserPermissionRoleBody({
@@ -460,10 +551,12 @@ const SingleRoleNew = () => {
         await axios.get(`${BaseUrl}${singleUserPermissionDetail}`, { headers }).then((res) => {
             let data = res.data.data;
             setUserPermissionDataNow(data);
+            setLoadingData(false);
         });
     };
 
     const updateSinglePermissionRoleFunc = async () => {
+        setLoadingData(true);
         let header = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -488,6 +581,8 @@ const SingleRoleNew = () => {
     // useEffect(() => {
     //     getUserPermissionDetail();
     // },[])
+
+    // TODO:
 
     return (
         <React.Fragment>
@@ -528,7 +623,7 @@ const SingleRoleNew = () => {
                             <h6 className="card-title">Role Name</h6>
                         </div>
 
-                        {!userPermissionRoleBody?.name ? (
+                        {!userPermissionRoleBody?.name || loadingData ? (
                             <Skeleton count={1} height={40} width={350} />
                         ) : (
                             <Input
@@ -1418,8 +1513,8 @@ const SingleRoleNew = () => {
                                         <Col lg={6}>
                                             <div className="full-access-header1 float-right">
                                                 <Switch
-                                                    onChange={() => setChecked(!checked)}
-                                                    checked={checked}
+                                                    onChange={() => setCheckedBuildingConf(!checkedBuildingConf)}
+                                                    checked={checkedBuildingConf}
                                                     onColor={'#2955E7'}
                                                     uncheckedIcon={false}
                                                     checkedIcon={false}
@@ -2052,8 +2147,8 @@ const SingleRoleNew = () => {
                                         <Col lg={6}>
                                             <div className="full-access-header1 float-right">
                                                 <Switch
-                                                    onChange={() => setChecked(!checked)}
-                                                    checked={checked}
+                                                    onChange={() => setCheckedAdvancedConf(!checkedAdvancedConf)}
+                                                    checked={checkedAdvancedConf}
                                                     onColor={'#2955E7'}
                                                     uncheckedIcon={false}
                                                     checkedIcon={false}

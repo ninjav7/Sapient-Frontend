@@ -60,7 +60,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         },
     ];
 
-    const handleVoltageChange = voltageValue => {
+    const handleVoltageChange = (voltageValue) => {
         if (panelObj.panel_type === 'disconnect') {
             return;
         }
@@ -70,7 +70,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         }
 
         let newArray = breakersData;
-        newArray.forEach(obj => {
+        newArray.forEach((obj) => {
             if (voltageValue === '120/240') {
                 obj.voltage = '120';
             }
@@ -209,7 +209,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                 .post(`${BaseUrl}${createPanel}${params}`, newPanel, {
                     headers: header,
                 })
-                .then(res => {
+                .then((res) => {
                     let response = res.data;
                     setGeneratedPanelId(response.id);
                 });
@@ -224,7 +224,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             return;
         }
 
-        const saveBreakersData = async panelID => {
+        const saveBreakersData = async (panelID) => {
             try {
                 let header = {
                     'Content-Type': 'application/json',
@@ -238,7 +238,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     .post(`${BaseUrl}${createBreaker}${params}`, breakersData, {
                         headers: header,
                     })
-                    .then(res => {
+                    .then((res) => {
                         let response = res.data;
                     });
 
@@ -271,7 +271,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             name="panelName"
                             id="panelName"
                             placeholder="Enter Panel Name"
-                            onChange={e => {
+                            onChange={(e) => {
                                 handleChange('name', e.target.value);
                             }}
                             className="font-weight-bold"
@@ -286,7 +286,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 type="number"
                                 placeholder="Enter Amperage"
                                 className="font-weight-bold"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handleChange('rated_amps', +e.target.value);
                                 }}
                                 value={panelObj.rated_amps}
@@ -301,7 +301,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 id="userState"
                                 className="font-weight-bold selection-volts-style"
                                 placeholder="Select Volts"
-                                onChange={e => {
+                                onChange={(e) => {
                                     if (e.target.value === 'Select Volts') {
                                         return;
                                     }
@@ -325,7 +325,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 name="state"
                                 id="userState"
                                 className="font-weight-bold selection-volts-style"
-                                onChange={e => {
+                                onChange={(e) => {
                                     if (e.target.value === 'Select Panel Type') {
                                         return;
                                     }
@@ -333,7 +333,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 }}
                                 value={panelObj.panel_type}>
                                 <option>Select Panel Type</option>
-                                {panelType.map(record => {
+                                {panelType.map((record) => {
                                     return <option value={record.value}>{record.name}</option>;
                                 })}
                             </Input>
@@ -347,10 +347,10 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     type="number"
                                     placeholder="Enter Amps"
                                     className="font-weight-bold"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
                                     }}
-                                    onBlur={e => {
+                                    onBlur={(e) => {
                                         handleBreakerChange('distribution', +e.target.value);
                                     }}
                                     min={0}
@@ -366,13 +366,13 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     id="userState"
                                     className="font-weight-bold breaker-no-width"
                                     value={panelObj.breaker_count}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
                                     }}
-                                    onBlur={e => {
+                                    onBlur={(e) => {
                                         handleBreakerChange('disconnect', +e.target.value);
                                     }}>
-                                    {disconnectBreaker.map(record => {
+                                    {disconnectBreaker.map((record) => {
                                         return <option value={record.value}>{record.name}</option>;
                                     })}
                                 </Input>
@@ -389,7 +389,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             name="state"
                             id="userState"
                             className="font-weight-bold"
-                            onChange={e => {
+                            onChange={(e) => {
                                 if (e.target.value === 'Select Location') {
                                     return;
                                 }
@@ -397,7 +397,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             }}
                             value={panelObj.space_id}>
                             <option>Select Location</option>
-                            {locationData.map(record => {
+                            {locationData.map((record) => {
                                 return <option value={record.location_id}>{record.location_name}</option>;
                             })}
                         </Input>
@@ -412,12 +412,12 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             name="state"
                             id="userState"
                             className="font-weight-bold"
-                            onChange={e => {
+                            onChange={(e) => {
                                 handleChange('parent_panel', e.target.value);
                             }}
                             value={panelObj.parent_panel}>
                             <option>None</option>
-                            {panelData.map(record => {
+                            {panelData.map((record) => {
                                 return <option value={record.panel_id}>{record.panel_name}</option>;
                             })}
                         </Input>

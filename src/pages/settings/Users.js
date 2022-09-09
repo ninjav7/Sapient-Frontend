@@ -339,16 +339,6 @@ const Users = () => {
                                 value={userObj.email}
                             />
                         </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Role</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold" disabled>
-                                <option selected>Member</option>
-                                <option>Phoenix Baker</option>
-                                <option>Olivia Rhye</option>
-                                <option>Lana Steiner</option>
-                            </Input>
-                        </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>

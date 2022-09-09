@@ -24,6 +24,97 @@ import { QueryClient } from 'react-query';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, error }) => {
     const [userPermission] = useAtom(userPermissionData);
+
+    const [internalRoute, setInternalRoute] = useState([
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/settings/active-devices',
+    ]);
+
+    useEffect(() => {
+        if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/general';
+                })
+            );
+        }
+        if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/layout';
+                })
+            );
+        }
+        if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/equipment';
+                })
+            );
+        }
+        if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/panels';
+                })
+            );
+            if (!internalRoute.includes('/settings/active-devices')) {
+                setInternalRoute((el) => [...el, '/settings/active-devices']);
+            }
+        }
+
+        if (
+            userPermission?.permissions?.permissions?.building_details_permission?.view &&
+            !internalRoute.includes('/settings/general')
+        ) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/active-devices';
+                })
+            );
+            setInternalRoute((el) => [...el, '/settings/general']);
+        }
+
+        if (
+            userPermission?.permissions?.permissions?.building_layout_permission?.view &&
+            !internalRoute.includes('/settings/layout')
+        ) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/active-devices';
+                })
+            );
+            setInternalRoute((el) => [...el, '/settings/layout']);
+        }
+
+        if (
+            userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
+            !internalRoute.includes('/settings/equipment')
+        ) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/active-devices';
+                })
+            );
+            setInternalRoute((el) => [...el, '/settings/equipment']);
+        }
+
+        if (
+            userPermission?.permissions?.permissions?.building_panels_permission?.view &&
+            !internalRoute.includes('/settings/panels')
+        ) {
+            setInternalRoute((el) =>
+                el.filter((current) => {
+                    return current !== '/settings/active-devices';
+                })
+            );
+            setInternalRoute((el) => [...el, '/settings/panels']);
+        }
+    }, [userPermission]);
+
     return (
         <Card>
             <CardBody>
@@ -66,7 +157,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                             <th scope="row">
                                                 {userPermission?.permissions?.permissions?.account_buildings_permission
                                                     ?.edit && (
-                                                    <Link to="/settings/general">
+                                                    <Link to={`${internalRoute[0]}`}>
                                                         <div
                                                             className="buildings-name"
                                                             onClick={() => {
