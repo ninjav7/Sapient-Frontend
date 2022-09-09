@@ -200,6 +200,12 @@ const BreakersComponent = ({ data, id }) => {
                 delete breakerObj['sensor_id'];
             }
 
+            if (breakerObj.sensor_link) {
+                if (!(breakerObj.device_link || breakerObj.device_link === '')) {
+                    breakerObj.device_link = breakerData.device_id;
+                }
+            }
+
             await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then((res) => {
                 setIsProcessing(false);
                 setTimeout(() => {
@@ -253,6 +259,18 @@ const BreakersComponent = ({ data, id }) => {
             if (breakerObjTwo.sensor_id || breakerObjTwo.sensor_id === '') {
                 breakerObjTwo['sensor_link'] = breakerObjTwo['sensor_id'];
                 delete breakerObjTwo['sensor_id'];
+            }
+
+            if (breakerObjOne.sensor_link) {
+                if (!(breakerObjOne.device_link || breakerObjOne.device_link === '')) {
+                    breakerObjOne.device_link = breakerData.device_id;
+                }
+            }
+
+            if (breakerObjTwo.sensor_link) {
+                if (!(breakerObjTwo.device_link || breakerObjTwo.device_link === '')) {
+                    breakerObjTwo.device_link = breakerData.device_id;
+                }
             }
 
             await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then((res) => {
@@ -332,6 +350,25 @@ const BreakersComponent = ({ data, id }) => {
 
             if (breakerObjThree.sensor_id || breakerObjThree.sensor_id === '') {
                 breakerObjThree['sensor_link'] = breakerObjThree['sensor_id'];
+                delete breakerObjThree['sensor_id'];
+            }
+
+            if (breakerObjOne.sensor_link) {
+                if (!(breakerObjOne.device_link || breakerObjOne.device_link === '')) {
+                    breakerObjOne.device_link = breakerData.device_id;
+                }
+            }
+
+            if (breakerObjTwo.sensor_link) {
+                if (!(breakerObjTwo.device_link || breakerObjTwo.device_link === '')) {
+                    breakerObjTwo.device_link = doubleBreakerData.data.device_id;
+                }
+            }
+
+            if (breakerObjThree.sensor_link) {
+                if (!(breakerObjThree.device_link || breakerObjThree.device_link === '')) {
+                    breakerObjThree.device_link = tripleBreakerData.data.device_id;
+                }
             }
 
             await axios

@@ -350,6 +350,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
             if (breakerObjThree.sensor_id || breakerObjThree.sensor_id === '') {
                 breakerObjThree['sensor_link'] = breakerObjThree['sensor_id'];
+                delete breakerObjThree['sensor_id'];
             }
 
             if (breakerObjOne.sensor_link) {
@@ -369,24 +370,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                     breakerObjThree.device_link = tripleBreakerData.data.device_id;
                 }
             }
-
-            // if (breakerObjOne.sensor_link) {
-            //     if (!(breakerObjOne.device_link || breakerObjOne.device_link === '')) {
-            //         breakerObjOne.sensor_link = breakerData.sensor_id;
-            //     }
-            // }
-
-            // if (breakerObjTwo.sensor_link) {
-            //     if (!(breakerObjTwo.device_link || breakerObjTwo.device_link === '')) {
-            //         breakerObjTwo.sensor_link = doubleBreakerData.data.sensor_id;
-            //     }
-            // }
-
-            // if (breakerObjThree.sensor_link) {
-            //     if (!(breakerObjThree.device_link || breakerObjThree.device_link === '')) {
-            //         breakerObjThree.sensor_link = tripleBreakerData.data.sensor_id;
-            //     }
-            // }
 
             await axios
                 .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
