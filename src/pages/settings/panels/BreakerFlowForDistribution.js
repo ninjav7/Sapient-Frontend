@@ -114,6 +114,80 @@ const BreakersComponent = ({ data, id }) => {
         }
     };
 
+    const fetchSingleSensorList = async (deviceId) => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === '') {
+            return;
+        }
+        try {
+            setIsSensorDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res?.data;
+                setSensorData(response);
+                setDoubleSensorData(response);
+                setTripleSensorData(response);
+                setIsSensorDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetched(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
+    const fetchMultipleSensorList = async (deviceId, number) => {
+        if (deviceId === null) {
+            return;
+        }
+        if (deviceId === '') {
+            return;
+        }
+        try {
+            // setIsSensorDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_id=${deviceId}`;
+            await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                let response = res?.data;
+                if (number === 'first') {
+                    setSensorData(response);
+                }
+                if (number === 'second') {
+                    setDoubleSensorData(response);
+                }
+                if (number === 'third') {
+                    setTripleSensorData(response);
+                }
+                // setIsSensorDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsSensorDataFetched(false);
+            console.log('Failed to fetch Sensor Data');
+        }
+    };
+
+    const fetchAllSensorData = (deviceOne, deviceTwo, deviceThree) => {
+        if (deviceOne === deviceTwo && deviceOne === deviceThree) {
+            fetchSingleSensorList(deviceOne);
+        } else {
+            fetchMultipleSensorList(deviceOne, 'first');
+            fetchMultipleSensorList(deviceTwo, 'second');
+            fetchMultipleSensorList(deviceThree, 'third');
+        }
+    };
+
     const fetchDeviceSensorDataForDouble = async (deviceId) => {
         if (deviceId === null) {
             return;
@@ -645,10 +719,18 @@ const BreakersComponent = ({ data, id }) => {
                                                 className="breaker-content-middle"
                                                 onClick={() => {
                                                     handleEditBreakerShow();
-                                                    if (data?.sensor_id === '') {
+                                                    if (
+                                                        data?.sensor_id === '' &&
+                                                        doubleBreakerData?.data?.device_id === '' &&
+                                                        tripleBreakerData?.data?.device_id === ''
+                                                    ) {
                                                         return;
                                                     }
-                                                    fetchDeviceSensorData(data?.device_id);
+                                                    fetchAllSensorData(
+                                                        data?.device_id,
+                                                        doubleBreakerData?.data?.device_id,
+                                                        tripleBreakerData?.data?.device_id
+                                                    );
                                                 }}>
                                                 <div className="edit-icon-bg-styling mr-2">
                                                     <i className="uil uil-pen"></i>
@@ -674,10 +756,18 @@ const BreakersComponent = ({ data, id }) => {
                                                 className="breaker-content-middle"
                                                 onClick={() => {
                                                     handleEditBreakerShow();
-                                                    if (data?.sensor_id === '') {
+                                                    if (
+                                                        data?.sensor_id === '' &&
+                                                        doubleBreakerData?.data?.device_id === '' &&
+                                                        tripleBreakerData?.data?.device_id === ''
+                                                    ) {
                                                         return;
                                                     }
-                                                    fetchDeviceSensorData(data?.device_id);
+                                                    fetchAllSensorData(
+                                                        data?.device_id,
+                                                        doubleBreakerData?.data?.device_id,
+                                                        tripleBreakerData?.data?.device_id
+                                                    );
                                                 }}>
                                                 <div className="edit-icon-bg-styling mr-2">
                                                     <i className="uil uil-pen"></i>
