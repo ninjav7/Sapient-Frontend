@@ -402,7 +402,40 @@ const EditBreakerPanel = () => {
                 console.log('Failed to fetch Breakers Data List');
             }
         };
+        const fetchEquipmentData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&occupancy_filter=true`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    let responseData = res.data.data;
+                    let equipArray = [];
+                    responseData.forEach((record) => {
+                        if (record.equipments_name === '') {
+                            return;
+                        }
+                        let obj = {
+                            label: record.equipments_name,
+                            value: record.equipments_id,
+                            breakerId: record.breaker_id,
+                        };
+                        equipArray.push(obj);
+                    });
+                    setEquipmentData(equipArray);
+                    BreakersStore.update((s) => {
+                        s.equipmentData = equipArray;
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Equipments Data');
+            }
+        };
         fetchBreakersData();
+        fetchEquipmentData();
     }, [isBreakerApiTrigerred]);
 
     useEffect(() => {
