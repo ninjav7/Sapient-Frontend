@@ -623,7 +623,7 @@ const SingleRoleNew = () => {
                             <h6 className="card-title">Role Name</h6>
                         </div>
 
-                        {!userPermissionRoleBody?.name || loadingData ? (
+                        {loadingData ? (
                             <Skeleton count={1} height={40} width={350} />
                         ) : (
                             <Input

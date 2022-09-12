@@ -258,7 +258,7 @@ const Users = () => {
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
                             {userPermission?.user_role === 'admin' ||
-                 new            userPermission?.permissions?.permissions?.account_user_permission?.create ? (
+                            userPermission?.permissions?.permissions?.account_user_permission?.create ? (
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"

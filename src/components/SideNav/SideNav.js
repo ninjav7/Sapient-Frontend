@@ -26,71 +26,61 @@ const SideNav = () => {
     // console.log('userPermissionListBuildings', userPermissionListBuildings);
 
     useEffect(() => {
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.account_buildings_permission?.view
-        ) {
-            setUserPermissionListBuildings('/settings/buildings');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.account_general_permission?.view
-        ) {
-            setUserPermissionListGeneral('/settings/account');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.account_user_permission?.view
-        ) {
-            setUserPermissionListUsers('/settings/users');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.building_details_permission?.view
-        ) {
-            setBuildingPermissionDetails('/settings/general');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.building_equipment_permission?.view
-        ) {
-            setBuildingPermissionEquipments('/settings/equipment');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.building_layout_permission?.view
-        ) {
-            setBuildingPermissionLayouts('/settings/layout');
-        }
-        if (
-            userPermission?.user_role === 'admin' ||
-            !userPermission?.permissions?.permissions?.building_panels_permission?.view
-        ) {
-            setBuildingPermissionPanels('/settings/panels');
-        }
+        if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
+                setUserPermissionListBuildings('/settings/buildings');
+            }
+            if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
+                setUserPermissionListGeneral('/settings/account');
+            }
+            if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
+                setUserPermissionListUsers('/settings/users');
+            }
+            if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+                setBuildingPermissionDetails('/settings/general');
+            }
+            if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+                setBuildingPermissionEquipments('/settings/equipment');
+            }
+            if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+                setBuildingPermissionLayouts('/settings/layout');
+            }
+            if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+                setBuildingPermissionPanels('/settings/panels');
+            }
 
-        if (userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
-            setUserPermissionListBuildings('');
+            if (userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
+                setUserPermissionListBuildings('');
+            }
+            if (userPermission?.permissions?.permissions?.account_general_permission?.view) {
+                setUserPermissionListGeneral('');
+            }
+            if (userPermission?.permissions?.permissions?.account_user_permission?.view) {
+                setUserPermissionListUsers('');
+            }
+            if (userPermission?.permissions?.permissions?.building_details_permission?.view) {
+                setBuildingPermissionDetails('');
+            }
+            if (userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+                setBuildingPermissionEquipments('');
+            }
+            if (userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+                setBuildingPermissionLayouts('');
+            }
+            if (userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+                setBuildingPermissionPanels('');
+            }
+            if (userPermission?.permissions?.permissions === 'All Permissions') {
+                setUserPermissionListBuildings('');
+                setUserPermissionListGeneral('');
+                setUserPermissionListUsers('');
+                setBuildingPermissionDetails('');
+                setBuildingPermissionEquipments('');
+                setBuildingPermissionLayouts('');
+                setBuildingPermissionPanels('');
+            }
         }
-        if (userPermission?.permissions?.permissions?.account_general_permission?.view) {
-            setUserPermissionListGeneral('');
-        }
-        if (userPermission?.permissions?.permissions?.account_user_permission?.view) {
-            setUserPermissionListUsers('');
-        }
-        if (userPermission?.permissions?.permissions?.building_details_permission?.view) {
-            setBuildingPermissionDetails('');
-        }
-        if (userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-            setBuildingPermissionEquipments('');
-        }
-        if (userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-            setBuildingPermissionLayouts('');
-        }
-        if (userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-            setBuildingPermissionPanels('');
-        }
-        if (userPermission?.permissions?.permissions === 'All Permissions') {
+        if (userPermission?.user_role === 'admin') {
             setUserPermissionListBuildings('');
             setUserPermissionListGeneral('');
             setUserPermissionListUsers('');

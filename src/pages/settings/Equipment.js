@@ -1378,31 +1378,33 @@ const EquipmentTable = ({
                 </CardBody>
             </Card>
             {userPermission?.user_role === 'admin' ||
-                (userPermission?.permissions?.permissions?.building_equipment_permission?.edit && (
-                    <div>
-                        <EquipmentDeviceChartModel
-                            showChart={modal1}
-                            handleChartClose={Close1}
-                            equipData={equipData}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUse}
-                            fetchEquipmentData={fetchEquipmentData}
-                            showWindow={'configure'}
-                            deviceType={'active'}
-                        />
-                        <EquipmentDeviceChartModel
-                            showChart={modal2}
-                            handleChartClose={Close2}
-                            equipData={equipData}
-                            equipmentTypeData={equipmentTypeData}
-                            endUse={endUse}
-                            fetchEquipmentData={fetchEquipmentData}
-                            showWindow={'configure'}
-                            deviceType={'passive'}
-                            locationData={locationData}
-                        />
-                    </div>
-                ))}
+            userPermission?.permissions?.permissions?.building_equipment_permission?.edit ? (
+                <div>
+                    <EquipmentDeviceChartModel
+                        showChart={modal1}
+                        handleChartClose={Close1}
+                        equipData={equipData}
+                        equipmentTypeData={equipmentTypeData}
+                        endUse={endUse}
+                        fetchEquipmentData={fetchEquipmentData}
+                        showWindow={'configure'}
+                        deviceType={'active'}
+                    />
+                    <EquipmentDeviceChartModel
+                        showChart={modal2}
+                        handleChartClose={Close2}
+                        equipData={equipData}
+                        equipmentTypeData={equipmentTypeData}
+                        endUse={endUse}
+                        fetchEquipmentData={fetchEquipmentData}
+                        showWindow={'configure'}
+                        deviceType={'passive'}
+                        locationData={locationData}
+                    />
+                </div>
+            ) : (
+                <></>
+            )}
         </>
     );
 };

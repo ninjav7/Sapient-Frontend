@@ -83,174 +83,182 @@ const Control = () => {
     const [userPermission] = useAtom(userPermissionData);
 
     useEffect(() => {
-        if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/account';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/buildings';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/users';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.account_roles_permission?.view) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/roles';
-                })
-            );
-            if (!route.includes('/settings/equipment-types')) {
-                setRoute((el) => [...el, '/settings/equipment-types']);
+        if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/account';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/buildings';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/users';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.account_roles_permission?.view) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/roles';
+                    })
+                );
+                if (!route.includes('/settings/equipment-types')) {
+                    setRoute((el) => [...el, '/settings/equipment-types']);
+                }
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.account_general_permission?.view &&
+                !route.includes('/settings/account')
+            ) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment-types';
+                    })
+                );
+                setRoute((el) => [...el, '/settings/account']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.account_buildings_permission?.view &&
+                !route.includes('/settings/buildings')
+            ) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment-types';
+                    })
+                );
+                setRoute((el) => [...el, '/settings/buildings']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.account_user_permission?.view &&
+                !route.includes('/settings/users')
+            ) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment-types';
+                    })
+                );
+                setRoute((el) => [...el, '/settings/users']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.account_roles_permission?.view &&
+                !route.includes('/settings/roles')
+            ) {
+                setRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment-types';
+                    })
+                );
+                setRoute((el) => [...el, '/settings/roles']);
             }
         }
-
-        if (
-            userPermission?.permissions?.permissions?.account_general_permission?.view &&
-            !route.includes('/settings/account')
-        ) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment-types';
-                })
-            );
-            setRoute((el) => [...el, '/settings/account']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.account_buildings_permission?.view &&
-            !route.includes('/settings/buildings')
-        ) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment-types';
-                })
-            );
-            setRoute((el) => [...el, '/settings/buildings']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.account_user_permission?.view &&
-            !route.includes('/settings/users')
-        ) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment-types';
-                })
-            );
-            setRoute((el) => [...el, '/settings/users']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.account_roles_permission?.view &&
-            !route.includes('/settings/roles')
-        ) {
-            setRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment-types';
-                })
-            );
-            setRoute((el) => [...el, '/settings/roles']);
-        }
-
-        if (userPermission?.permissions?.permissions === 'All Permissions') {
-            setRoute((el) => [...el, '/settings/account']);
+        if (userPermission?.user_role === 'admin') {
+            setRoute([]);
+            setRoute(['/settings/account']);
         }
     }, [userPermission]);
 
     useEffect(() => {
-        if (userPermission?.permissions?.permissions === 'All Permissions') {
-            setRoute((el) => [...el, '/settings/general']);
-        }
+        if (userPermission?.user_role !== 'admin') {
+            if (userPermission?.permissions?.permissions === 'All Permissions') {
+                setRoute((el) => [...el, '/settings/general']);
+            }
 
-        if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/general';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/layout';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/panels';
-                })
-            );
-            if (!route.includes('/settings/active-devices')) {
-                setInternalRoute((el) => [...el, '/settings/active-devices']);
+            if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/general';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/layout';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/panels';
+                    })
+                );
+                if (!route.includes('/settings/active-devices')) {
+                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                }
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_details_permission?.view &&
+                !route.includes('/settings/general')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/general']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_layout_permission?.view &&
+                !route.includes('/settings/layout')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/layout']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
+                !route.includes('/settings/equipment')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/equipment']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_panels_permission?.view &&
+                !route.includes('/settings/panels')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/panels']);
             }
         }
-
-        if (
-            userPermission?.permissions?.permissions?.building_details_permission?.view &&
-            !route.includes('/settings/general')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/general']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_layout_permission?.view &&
-            !route.includes('/settings/layout')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/layout']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
-            !route.includes('/settings/equipment')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/equipment']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_panels_permission?.view &&
-            !route.includes('/settings/panels')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/panels']);
+        if (userPermission?.user_role === 'admin') {
+            setInternalRoute([]);
+            setInternalRoute(['/settings/general']);
         }
     }, [userPermission]);
 

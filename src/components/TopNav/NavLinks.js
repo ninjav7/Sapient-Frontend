@@ -56,26 +56,31 @@ const NavLinks = () => {
     );
 
     useEffect(() => {
-        if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
-            setuserPermissionBuildingExplore('Explore');
+        if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+                setuserPermissionBuildingExplore('Explore');
+            }
+            if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+                setuserPermisionBuildingEnergy('Energy');
+            }
+            if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
+                setuserPermisionBuildingControl('Control');
+            }
+            if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+                setuserPermissionBuildingExplore('');
+            }
+            if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
+                setuserPermisionBuildingEnergy('');
+            }
+            if (userPermission?.permissions?.permissions?.control_control_permission?.view) {
+                setuserPermisionBuildingControl('');
+            }
         }
-        if (!userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
-            setuserPermisionBuildingEnergy('Energy');
-        }
-        if (!userPermission?.permissions?.permissions?.control_control_permission?.view) {
-            setuserPermisionBuildingControl('Control');
-        }
-        if (userPermission?.permissions?.permissions?.explore_general_permission?.view) {
+        if (userPermission?.user_role === 'admin') {
             setuserPermissionBuildingExplore('');
-        }
-        if (userPermission?.permissions?.permissions?.energy_portfolio_permission?.view) {
             setuserPermisionBuildingEnergy('');
-        }
-        if (userPermission?.permissions?.permissions?.control_control_permission?.view) {
             setuserPermisionBuildingControl('');
         }
-
-        // setuserPermissionBuilding((e) => [...el, userPermission])
     }, [userPermission]);
 
     return (

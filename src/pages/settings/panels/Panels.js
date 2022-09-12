@@ -35,7 +35,8 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
     return (
         <Card>
             <CardBody>
-                {userPermission?.permissions?.permissions?.building_panels_permission?.view ? (
+                {userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.building_panels_permission?.view ? (
                     <Table className="mb-0 bordered table-hover">
                         <thead>
                             <tr className="mouse-pointer">
@@ -87,8 +88,9 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                                         <tr key={record.panel_id} className="mouse-pointer">
                                             {selectedOptions.some((record) => record.value === 'name') && (
                                                 <td className="font-weight-bold panel-name">
-                                                    {userPermission?.permissions?.permissions
-                                                        ?.building_panels_permission?.edit ? (
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions?.building_panels_permission
+                                                        ?.edit ? (
                                                         <Link
                                                             to={{
                                                                 pathname: `/settings/panels/edit-panel/${record.panel_id}`,
@@ -242,7 +244,8 @@ const Panels = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            {userPermission?.permissions?.permissions?.building_panels_permission?.create && (
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.building_panels_permission?.create ? (
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
@@ -250,6 +253,8 @@ const Panels = () => {
                                     <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
                                     Add Panel
                                 </button>
+                            ) : (
+                                <></>
                             )}
                         </div>
                     </div>

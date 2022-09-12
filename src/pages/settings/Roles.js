@@ -129,7 +129,8 @@ const Roles = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            {userPermission?.permissions?.permissions?.account_roles_permission?.create && (
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_roles_permission?.create ? (
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
@@ -138,6 +139,8 @@ const Roles = () => {
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add Role
                                 </button>
+                            ) : (
+                                <></>
                             )}
                         </div>
                     </div>
