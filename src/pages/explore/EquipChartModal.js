@@ -28,6 +28,9 @@ import {
     listSensor,
     equipmentDetails,
     getExploreEquipmentYTDUsage,
+    getEndUseId,
+    equipmentType,
+    getLocation
 } from '../../services/Network';
 import axios from 'axios';
 import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
@@ -57,16 +60,14 @@ const EquipChartModal = ({
     handleChartOpen,
     equipData,
     handleChartClose,
-    equipmentTypeData,
-    endUse,
     fetchEquipmentData,
-    locationData,
     showWindow,
     equipmentFilter,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
+    const bldgId = localStorage.getItem("exploreBldId");
+    console.log("building id ", bldgId);
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -76,6 +77,10 @@ const EquipChartModal = ({
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ]);
 
+
+    const [equipmentTypeData, setEquipmentTypeData] = useState([]);
+    const [endUse, setEndUse] = useState([]);
+    const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
@@ -93,7 +98,9 @@ const EquipChartModal = ({
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
+    const [equipResult, setEquipResult] = useState([]);
 
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
 
     const customDaySelect = [
@@ -369,16 +376,8 @@ const EquipChartModal = ({
     };
     //Single Active Equipment Manipulation
 
-    var result = [];
-    if (equipData !== null && equipData !== undefined) {
-        if (equipmentTypeData !== undefined)
-            result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData?.equipments_type);
-        // var x=document.getElementById('endUsePop');
-        // console.log(x);
-        // if(x!==null)
-        // x.value=result.end_use_name;
-        // console.log(result);
-    }
+    //let equipResult = [];
+
     console.log(equipData);
     const handleSwitch = (val) => {
         switch (val) {
@@ -596,68 +595,212 @@ const EquipChartModal = ({
                 console.log('Failed to fetch Building Alert Data');
             }
         };
+        const fetchEndUseData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                await axios.get(`${BaseUrl}${getEndUseId}`, { headers }).then((res) => {
+                    setEndUse(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch End Use Data');
+            }
+        };
+
+        const fetchEquipTypeData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}`;
+                await axios.get(`${BaseUrl}${equipmentType}${params}`, { headers }).then((res) => {
+                    let response = res.data.data;
+                    response.sort((a, b) => {
+                        return a.equipment_type.localeCompare(b.equipment_type);
+                    });
+                    setEquipmentTypeData(response);
+
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Equipment Type Data');
+            }
+        };
+        const fetchLocationData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                await axios.get(`${BaseUrl}${getLocation}/${bldgId}`, { headers }).then((res) => {
+                    setLocationData(res.data);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Location Data');
+            }
+        };
+
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
+        fetchEndUseData();
+        fetchEquipTypeData();
+        fetchLocationData();
     }, [equipmentFilter]);
+    useEffect(() => {
+        if (equipmentTypeData.lenght === 0) {
+            return;
+        }
+        let res = [];
+        res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
+        setEquipResult(res);
+    }, [equipmentTypeData])
+    useEffect(() => {
+        if (equipmentData.length === 0) {
+            return;
+        }
+        const fetchActiveDeviceSensorData = async () => {
+            console.log(equipmentData)
+            if (equipmentData !== null) {
+                console.log(equipmentData.device_type)
+                if (equipmentData.device_type === "passive" || equipmentData.device_id === "" || equipmentData.device_id === undefined) {
+                    return;
+                }
+            }
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${equipmentData.device_id}`;
+                axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
+                    let response = res.data;
+                    setSensors(response);
+                    let sensorId = response.find(({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type)
+                    console.log(sensorId);
+                    setSensorData(sensorId);
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Active device sensor data');
+            }
+        };
+        if (equipmentData !== null) {
+            if (equipmentData.device_type !== "passive") {
+                fetchActiveDeviceSensorData();
+            }
+        }
+    }, [equipmentData])
 
     return (
         <Modal show={showEquipmentChart} onHide={handleChartClose} dialogClassName="modal-container-style" centered>
             <>
                 <Modal.Body>
-                    <Row>
-                        <Col lg={12}>
-                            <div className="eqip-modal-container">
-                                <div className="equip-modal-header">
+                    {equipmentData?.device_type === "active" ?
+                        <>
+                            <Row>
+                                <Col lg={12}>
+                                    <h6 className="text-muted">{equipmentData?.location} {">"} {equipmentData?.equipments_type}</h6>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={9}>
                                     <div>
-                                        <div className="mb-1">
-                                            <span className="plugrule-device-style">{equipmentData?.location}</span>
-                                        </div>
-                                        <div>
-                                            <span className="plugrule-device-name">
-                                                {equipmentData?.equipments_name}
-                                            </span>
-                                        </div>
+                                        <span className="heading-style">{equipmentData?.equipments_name}</span>
                                     </div>
-                                    <div className="plug-rule-right-flex">
+                                </Col>
+                                <Col lg={3}>
+                                    <div className="button-wrapper">
                                         <div>
                                             <button
                                                 type="button"
-                                                className="btn btn-default plugrule-cancel-style"
+                                                className="btn btn-md btn-outline-danger font-weight-bold mr-4">
+                                                <FontAwesomeIcon icon={faPowerOff} size="lg" style={{ color: 'red' }} />{' '}
+                                                Turn Off
+                                            </button>
+                                        </div>
+
+                                        <div>
+                                            <button
+                                                type="button"
+                                                className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={handleChartClose}>
                                                 Cancel
                                             </button>
+                                        </div>
+                                        <div>
                                             <button
                                                 type="button"
-                                                className="btn btn-primary plugrule-save-style ml-2"
+                                                className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={handleChartClose}>
                                                 Save
                                             </button>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="mt-2 mouse-pointer">
-                                    <span
-                                        className={selectedTab === 0 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                                        onClick={() => setSelectedTab(0)}>
-                                        Metrics
-                                    </span>
-                                    <span
-                                        className={selectedTab === 1 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                                        onClick={() => setSelectedTab(1)}>
-                                        Configure
-                                    </span>
-                                    <span
-                                        className={selectedTab === 2 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
-                                        onClick={() => setSelectedTab(2)}>
-                                        History
-                                    </span>
-                                </div>
-                            </div>
-                        </Col>
-                    </Row>
+                                </Col>
+                            </Row>
+                        </> : ""}
+                    {equipmentData?.device_type === "passive" ?
+                        <>
+                            <Row>
+                                <Col lg={12}>
+                                    <h6 className="text-muted">{equipmentData?.location} {">"} {equipmentData?.equipments_type}</h6>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={9}>
+                                    <div>
+                                        <span className="heading-style">{equipmentData?.equipments_name}</span>
+                                    </div>
+                                </Col>
+                                <Col lg={3}>
+
+                                    <div className='button-wrapper'>
+
+
+                                        <div>
+                                            <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={handleChartClose}>
+                                                Cancel
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleChartClose}>
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </>
+                        : ""}
+                    <div className="mt-2 mouse-pointer">
+                        <span
+                            className={selectedTab === 0 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
+                            onClick={() => setSelectedTab(0)}>
+                            Metrics
+                        </span>
+                        <span
+                            className={selectedTab === 1 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
+                            onClick={() => setSelectedTab(1)}>
+                            Configure
+                        </span>
+                        <span
+                            className={selectedTab === 2 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
+                            onClick={() => setSelectedTab(2)}>
+                            History
+                        </span>
+                    </div>
 
                     {selectedTab === 0 && (
                         <Row className="mt-2">
@@ -852,171 +995,400 @@ const EquipChartModal = ({
                         </Row>
                     )}
 
-                    {selectedTab === 1 && (
-                        <Row>
-                            <Col lg={8}>
-                                <Row>
-                                    <Col lg={12}>
-                                        <h4>Equipment Details</h4>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={4}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Name</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Enter Equipment Name"
-                                                className="font-weight-bold"
-                                                defaultValue={equipmentData?.equipments_name}
-                                                onChange={(e) => {
-                                                    handleChange('name', e.target.value);
-                                                }}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                    <Col lg={4}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Type</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold"
-                                                defaultValue={equipmentData?.equipments_id}
-                                                onChange={(e) => {
-                                                    handleChange('equipment_type', e.target.value);
-                                                }}>
-                                                <option selected>Select Type</option>
-                                                {equipmentTypeData?.map((record) => {
-                                                    return (
-                                                        <option value={record?.equipment_id}>
-                                                            {record?.equipment_type}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col lg={4}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>End Use Category</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="endUsePop"
-                                                className="font-weight-bold"
-                                                defaultValue="">
-                                                <option selected>Select Category</option>
-                                                {endUse?.map((record) => {
-                                                    return <option value={record?.end_user_id}>{record?.name}</option>;
-                                                })}
-                                            </Input>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Equipment Location</Form.Label>
-                                            <Input
-                                                type="select"
-                                                name="select"
-                                                id="exampleSelect"
-                                                className="font-weight-bold"
-                                                // defaultValue={loc.length===0?"":loc.location_id}
-                                                onChange={(e) => {
-                                                    handleChange('space_id', e.target.value);
-                                                }}>
-                                                <option value="" selected>
-                                                    Select Location
-                                                </option>
-                                                {locationData?.map((record) => {
-                                                    return (
-                                                        <option value={record?.location_id}>
-                                                            {record?.location_name}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </Input>
-                                            <Form.Label>Location this equipment is installed in.</Form.Label>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Serves Zones</Form.Label>
-                                            <TagsInput
-                                                value={selectedZones}
-                                                onChange={setSelectedZones}
-                                                name="Zones"
-                                                placeHolder="+ Add Location"
-                                            />
-                                            <Form.Label>What area this piece of equipment services.</Form.Label>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Tags</Form.Label>
-                                            <TagsInput
-                                                value={equipmentData !== null ? equipmentData?.tags : ''}
-                                                onChange={setSelected}
-                                                name="tag"
-                                                placeHolder="+ Add Tag"
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col lg={12}>
-                                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                            <Form.Label>Notes</Form.Label>
-                                            <Input
-                                                type="textarea"
-                                                name="text"
-                                                id="exampleText"
-                                                rows="3"
-                                                placeholder="Enter a Note..."
-                                                defaultValue={equipmentData !== null ? equipmentData?.note : ''}
-                                                onChange={(e) => {
-                                                    handleChange('note', e.target.value);
-                                                }}
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col lg={4}>
-                                <div className="modal-right-container">
-                                    <div className="pic-container">
-                                        <div className="modal-right-pic"></div>
-                                        <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
-                                            <span className="modal-right-card-title">Energy Monitoring</span>
+                    {selectedTab === 1 ?
+                        equipmentData?.device_type === "passive" ?
+                            <Row>
+                                <Col lg={8}>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <h4>Equipment Details</h4>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={4}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Name</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Enter Equipment Name"
+                                                    className="font-weight-bold"
+                                                    defaultValue={equipmentData?.equipments_name}
+                                                    onChange={(e) => {
+                                                        handleChange('name', e.target.value);
+                                                    }}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col lg={4}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Type</Form.Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold"
+                                                    defaultValue={equipResult.length === 0 ? "" : equipResult.equipment_id}
+                                                    onChange={(e) => {
+                                                        handleChange('equipment_type', e.target.value);
+                                                    }}>
+                                                    <option selected>Select Type</option>
+                                                    {equipmentTypeData?.map((record) => {
+                                                        return (
+                                                            <option value={record?.equipment_id}>
+                                                                {record?.equipment_type}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Input>
+                                            </Form.Group>
+                                        </Col>
+                                        <Col lg={4}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>End Use Category</Form.Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="endUsePop"
+                                                    className="font-weight-bold"
+                                                    defaultValue="">
+                                                    <option selected>Select Category</option>
+                                                    {endUse?.map((record) => {
+                                                        return <option value={record?.end_user_id}>{record?.name}</option>;
+                                                    })}
+                                                </Input>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Location</Form.Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold"
+                                                    // defaultValue={loc.length===0?"":loc.location_id}
+                                                    onChange={(e) => {
+                                                        handleChange('space_id', e.target.value);
+                                                    }}>
+                                                    <option value="" selected>
+                                                        Select Location
+                                                    </option>
+                                                    {locationData?.map((record) => {
+                                                        return (
+                                                            <option value={record?.location_id}>
+                                                                {record?.location_name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Input>
+                                                <Form.Label>Location this equipment is installed in.</Form.Label>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Serves Zones</Form.Label>
+                                                <TagsInput
+                                                    value={selectedZones}
+                                                    onChange={setSelectedZones}
+                                                    name="Zones"
+                                                    placeHolder="+ Add Location"
+                                                />
+                                                <Form.Label>What area this piece of equipment services.</Form.Label>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Tags</Form.Label>
+                                                <TagsInput
+                                                    value={equipmentData !== null ? equipmentData?.tags : ''}
+                                                    onChange={setSelected}
+                                                    name="tag"
+                                                    placeHolder="+ Add Tag"
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Notes</Form.Label>
+                                                <Input
+                                                    type="textarea"
+                                                    name="text"
+                                                    id="exampleText"
+                                                    rows="3"
+                                                    placeholder="Enter a Note..."
+                                                    defaultValue={equipmentData !== null ? equipmentData?.note : ''}
+                                                    onChange={(e) => {
+                                                        handleChange('note', e.target.value);
+                                                    }}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col lg={4}>
+                                    <div className="modal-right-container">
+                                        <div className="pic-container">
+                                            <div className="modal-right-pic"></div>
+                                            <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
+                                                <span className="modal-right-card-title">Energy Monitoring</span>
 
+                                                <Link
+                                                    to={{
+                                                        pathname:
+                                                            equipData !== null
+                                                                ? equipData?.device_id !== ''
+                                                                    ? `/settings/passive-devices/single/${equipmentData?.device_id}`
+                                                                    : `equipment/#`
+                                                                : '',
+                                                    }}>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2">
+                                                        View
+                                                    </button>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            </Row>
+                            : "" : ""}
+
+                    {selectedTab === 1 ?
+                        equipmentData?.device_type === "active" ?
+                            <Row>
+                                <Col lg={8}>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <h4>Equipment Details</h4>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={6}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Name</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Enter Equipment Name"
+                                                    className="font-weight-bold"
+                                                    defaultValue={equipmentData?.equipments_name}
+                                                    onChange={(e) => {
+                                                        handleChange('name', e.target.value);
+                                                    }}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col lg={6}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Type</Form.Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold"
+                                                    defaultValue={equipResult.length === 0 ? "" : equipResult.equipment_id}
+                                                    onChange={(e) => {
+                                                        handleChange('equipment_type', e.target.value);
+                                                    }}>
+                                                    <option selected>Select Type</option>
+                                                    {equipmentTypeData.map((record) => {
+                                                        return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                    })}
+                                                </Input>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Equipment Location</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly
+                                                    placeholder="Enter Location"
+                                                    className="font-weight-bold"
+                                                    value={equipmentData !== null ? equipmentData.location : ""}
+                                                />
+                                                <Form.Label>Location this equipment is installed in.</Form.Label>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Applied Rule</Form.Label>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold">
+                                                    <option selected>Desktop PC</option>
+                                                    <option>Refigerator</option>
+                                                </Input>
+                                                <Form.Label>
+                                                    The rule applied to this equipment to control when it is on.
+                                                </Form.Label>
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Tags</Form.Label>
+                                                <TagsInput
+                                                    value={equipmentData !== null ? equipmentData.tags : ""}
+                                                    onChange={setSelected}
+                                                    name="tag"
+                                                    placeHolder="+ Add Tag"
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                    <Row>
+                                        <Col lg={12}>
+                                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                                <Form.Label>Notes</Form.Label>
+                                                <Input
+                                                    type="textarea"
+                                                    name="text"
+                                                    id="exampleText"
+                                                    rows="3"
+                                                    placeholder="Enter a Note..."
+                                                    defaultValue={equipmentData !== null ? equipmentData?.note : ''}
+                                                    onChange={(e) => {
+                                                        handleChange('note', e.target.value);
+                                                    }}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                                <Col lg={4}>
+                                    <div className="modal-right-container">
+                                        <div className="equip-socket-container">
+                                            <div className="mt-2 sockets-slots-container">
+                                                {sensors.map((record, index) => {
+                                                    return (
+                                                        <>
+                                                            {record.status && (
+                                                                <div>
+                                                                    <div className="power-off-style">
+                                                                        <FontAwesomeIcon
+                                                                            icon={faPowerOff}
+                                                                            size="lg"
+                                                                            color="#3C6DF5"
+                                                                        />
+                                                                    </div>
+                                                                    {record.equipment_type_id === '' ? (
+                                                                        <div className="socket-rect">
+                                                                            <img src={SocketLogo} alt="Socket" />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="online-socket-container">
+                                                                            <img
+                                                                                src={UnionLogo}
+                                                                                alt="Union"
+                                                                                className="union-icon-style"
+                                                                                width="35vw"
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+
+                                                            {!record.status && (
+                                                                <div>
+                                                                    <div className="power-off-style">
+                                                                        <FontAwesomeIcon
+                                                                            icon={faPowerOff}
+                                                                            size="lg"
+                                                                            color="#EAECF0"
+                                                                        />
+                                                                    </div>
+                                                                    {record.equipment_type_id === '' ? (
+                                                                        <div className="socket-rect">
+                                                                            <img src={SocketLogo} alt="Socket" />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="online-socket-container">
+                                                                            <img
+                                                                                src={UnionLogo}
+                                                                                alt="Union"
+                                                                                className="union-icon-style"
+                                                                                width="35vw"
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                        <div className="modal-right-card mt-2">
+                                            <span className="modal-right-card-title">Power Strip Socket 2</span>
                                             <Link
                                                 to={{
-                                                    pathname:
-                                                        equipData !== null
-                                                            ? equipData?.device_id !== ''
-                                                                ? `/settings/passive-devices/single/${equipmentData?.device_id}`
-                                                                : `equipment/#`
-                                                            : '',
+                                                    pathname: equipmentData !== null ? equipmentData.device_id !== "" ? `/settings/active-devices/single/${equipmentData.device_id}` : `equipment/#` : "",
                                                 }}>
                                                 <button
                                                     type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                    View
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipmentData !== null ? equipmentData.device_id === "" ? true : false : true}>
+                                                    View Devices
                                                 </button>
                                             </Link>
                                         </div>
+                                        <div>
+                                            {equipmentData !== null ? equipmentData.status === 'Online' && (
+                                                <div className="icon-bg-pop-styling">
+                                                    ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                </div>
+                                            ) : ""}
+                                            {equipmentData !== null ? equipmentData.status === 'Offline' && (
+                                                <div className="icon-bg-pop-styling-slash">
+                                                    OFFLINE <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                </div>
+                                            ) : ""}
+                                        </div>
+                                        <div className="mt-4 modal-right-group">
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                        MAC Address
+                                                    </h6>
+                                                    <h6 className="card-title">{equipmentData !== null ? equipmentData.device_mac : ""}</h6>
+                                                </div>
+                                            </FormGroup>
+                                            <FormGroup>
+                                                <div className="single-line-style">
+                                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                        Device type
+                                                    </h6>
+                                                    <h6 className="card-title">{equipmentData !== null ? equipmentData.device_type : ""}</h6>
+                                                </div>
+                                            </FormGroup>
+                                        </div>
+                                        <FormGroup>
+                                            <div className="single-line-style">
+                                                <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    Installed at
+                                                </h6>
+                                                <h6 className="card-title">{equipmentData !== null ? equipmentData.device_location : ""}</h6>
+                                            </div>
+                                        </FormGroup>
                                     </div>
-                                </div>
-                            </Col>
-                        </Row>
-                    )}
+                                </Col>
+                            </Row>
+                            : "" : ""}
                 </Modal.Body>
             </>
         </Modal>
