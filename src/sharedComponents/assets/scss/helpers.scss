@@ -10,9 +10,29 @@
 
 .box-shadow {
     &-xl {
-        box-shadow: 0 10px 24px -4px rgba(16, 24, 40, 0.08), 0 6px 8px -4px rgba(16, 24, 40, 0.03);
+        box-shadow: 0 0.625rem 1.5rem -0.25rem rgba(16, 24, 40, 0.08), 0 0.375rem 0.5rem -0.25rem rgba(16, 24, 40, 0.03);
     }
     &-xs {
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 0 0 4px $primary-gray-100;
+        box-shadow: 0 0.0625rem 0.125rem rgba(16, 24, 40, 0.05), 0 0 0 0.25rem $primary-gray-100;
+    }
+}
+
+.borders {
+    border: 0.0625rem solid $primary-gray-200;
+
+    &-top {
+        border-top: 0.0625rem solid $primary-gray-200;
+    }
+
+    &-right {
+        border-bottom: 0.0625rem solid $primary-gray-200;
+    }
+
+    &-bottom {
+        border-bottom: 0.0625rem solid $primary-gray-200;
+    }
+
+    &-left {
+        border-bottom: 0.0625rem solid $primary-gray-200;
     }
 }

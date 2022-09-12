@@ -83,6 +83,8 @@ const DropDownBase = (props) => {
                     <nav>
                         {links.length ? (
                             links
+                        ) : props.children ? (
+                            props.children
                         ) : (
                             <Typography.Body size={Typography.Sizes.xs} className="p-2 text-center">
                                 No options

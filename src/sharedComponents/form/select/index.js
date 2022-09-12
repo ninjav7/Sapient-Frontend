@@ -32,7 +32,7 @@ const Select = ({
                 type={type}
                 options={options}
                 defaultValue={selectedOption}
-                components={{ DropdownIndicator, Control, Option, SingleValue }}
+                components={{ DropdownIndicator, Control, Option, SingleValue, ...props.components }}
                 className={selectClassName}
                 isSearchable={false}
             />
