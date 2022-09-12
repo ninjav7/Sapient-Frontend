@@ -442,10 +442,10 @@ const ExploreByEquipment = () => {
             label: 'Today',
             value: 0,
         },
-        // {
-        //     label: 'Last Day',
-        //     value: 1,
-        // },
+        {
+            label: 'Last Day',
+            value: 1,
+        },
         {
             label: 'Last 7 Days',
             value: 7,
@@ -691,6 +691,9 @@ const ExploreByEquipment = () => {
     const uniqueLocationIds = [];
     const [removeLocationDuplication, setRemoveLocationDuplication] = useState();
 
+    const uniqueSpaceTypeIds = [];
+    const [removeSpaceTypeDuplication, setRemoveSpaceTypeDuplication] = useState();
+
     const removeDuplicates = () => {
         const uniqueEqupimentTypes = exploreTableData.filter((element) => {
             const isDuplicate = uniqueIds.includes(element.equipments_type);
@@ -719,6 +722,15 @@ const ExploreByEquipment = () => {
             return false;
         });
 
+        const uniqueSpaceType = exploreTableData.filter((element) => {
+            const isDuplicate = uniqueSpaceTypeIds.includes(element?.location_type);
+
+            if (!isDuplicate) {
+                uniqueSpaceTypeIds.push(element?.locatio_type);
+                return true;
+            }
+            return false;
+        });
         setRemoveEndUseDuplication(uniqueEndUse);
         console.log("Unique End Use ",uniqueEndUse);
         console.log("Unique Equipment Type ", uniqueEqupimentTypes)
@@ -726,6 +738,7 @@ const ExploreByEquipment = () => {
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
         setRemoveLocationDuplication(uniqueLocation);
+        setRemoveSpaceTypeDuplication(uniqueSpaceType);
     };
 
 
@@ -939,7 +952,31 @@ const ExploreByEquipment = () => {
         setFilteredLocationOptionsCopy(rvmLocation);
     },[floorListAPI,removeLocationDuplication])
 
+    const [filteredSpaceTypeOptions,setFilteredSpaceTypeOptions]=useState([]);
+    const [filteredSpaceTypeOptionsCopy,setFilteredSpaceTypeOptionsCopy]=useState([]);
+    useEffect(()=>{
+        if(spaceType.length===0 || removeSpaceTypeDuplication.length===0){
+            setFilteredSpaceTypeOptions([]);
+            setFilteredSpaceTypeOptionsCopy([]);
+            return;
+        }
+        let rvmSpace=[];
+        for(var i=0;i<removeSpaceTypeDuplication.length;i++){
+            let arr=spaceType.filter(function(item){
+                return item.name===removeSpaceTypeDuplication[i].location_type
+            })
+            con
+            //let rec={label:arr[0].name, value:arr[0].id}
+            //rvmSpace.push(rec)
+            // arr1 = seriesData.filter(function (item) {
+            //     return item.id !== removeEquipmentId
+            // })
+        }
     
+        console.log(rvmSpace);
+        setFilteredSpaceTypeOptions(rvmSpace);
+        setFilteredSpaceTypeOptionsCopy(rvmSpace);
+    },[spaceType,removeSpaceTypeDuplication])
 
     useEffect(() => {
         const setCustomDate = (date) => {
@@ -1503,7 +1540,28 @@ const handleLocationSearch=(e)=>{
                                 <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
                             </span>
                             <Dropdown.Menu className="dropdown-lg p-3">
-                           
+                            <div>
+                                    <div className='m-1'>
+                                        <div className="explore-search mr-2">
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                            <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleSpaceTypeSearch(e)}}/>
+                                        </div>
+                                        <div  className={filteredSpaceTypeOptions.length>4?`hScroll`:`hHundredPercent`}>
+                                        {filteredSpaceTypeOptions.map((record)=>{
+                                        
+                                        return(
+                                            <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id={record.value} value={record.value} onClick={(e)=>{handleSelectedEquip(e)}}/>
+                                                <span>{record.label}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                        
+                                      })}
+                                      </div>
+                                    </div>
+                                </div>
                             </Dropdown.Menu>
                         </Dropdown>
                         </>);

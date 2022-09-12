@@ -1,9 +1,11 @@
 .auth-container{
     margin:0 auto !important;
-}
-
+    }
+    
 .authbackground {
     background-image: url('../../assets/images/login.jpg');
     background-repeat: no-repeat;
     background-size: 100% 100%;
-}
+    }
+    
+    
