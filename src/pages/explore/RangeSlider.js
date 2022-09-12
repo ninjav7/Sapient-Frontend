@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Range, getTrackBackground } from 'react-range';
 
-const STEP = 1;
+const STEP = 0.01;
 const COLORS = ['#0C2960', '#276EF1', '#9CBCF8', '#9CBCF9', '#ccc'];
 
 class RangeSlider extends React.Component {

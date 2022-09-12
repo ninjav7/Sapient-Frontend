@@ -225,6 +225,13 @@ display: flex;
 justify-content: space-between;
 flex-direction: row;
   }
+  .hScroll{
+    height:250px;
+    overflow-y: scroll;
+  }
+  .hHundredPercent{
+    height:100%;
+  }
   .room-box{
     display: flex;
 flex-direction: row;
