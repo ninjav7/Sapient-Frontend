@@ -309,10 +309,10 @@ const ExploreByBuildings = () => {
             label: 'Today',
             value: 0,
         },
-        {
-            label: 'Last Day',
-            value: 1,
-        },
+        // {
+        //     label: 'Last Day',
+        //     value: 1,
+        // },
         {
             label: 'Last 7 Days',
             value: 7,
