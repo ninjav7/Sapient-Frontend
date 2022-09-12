@@ -26,25 +26,46 @@ const SideNav = () => {
     // console.log('userPermissionListBuildings', userPermissionListBuildings);
 
     useEffect(() => {
-        if (!userPermission?.permissions?.permissions?.account_buildings_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.account_buildings_permission?.view
+        ) {
             setUserPermissionListBuildings('/settings/buildings');
         }
-        if (!userPermission?.permissions?.permissions?.account_general_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.account_general_permission?.view
+        ) {
             setUserPermissionListGeneral('/settings/account');
         }
-        if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.account_user_permission?.view
+        ) {
             setUserPermissionListUsers('/settings/users');
         }
-        if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.building_details_permission?.view
+        ) {
             setBuildingPermissionDetails('/settings/general');
         }
-        if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.building_equipment_permission?.view
+        ) {
             setBuildingPermissionEquipments('/settings/equipment');
         }
-        if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.building_layout_permission?.view
+        ) {
             setBuildingPermissionLayouts('/settings/layout');
         }
-        if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+        if (
+            userPermission?.user_role === 'admin' ||
+            !userPermission?.permissions?.permissions?.building_panels_permission?.view
+        ) {
             setBuildingPermissionPanels('/settings/panels');
         }
 

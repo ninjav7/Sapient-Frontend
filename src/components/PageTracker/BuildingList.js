@@ -15,7 +15,7 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
 
     return (
         <div>
-            {userPermission?.permissions?.permissions !== 'All Permissions' &&
+            {userPermission?.user_role === 'admin' ||
             userPermission?.permissions?.permissions?.energy_building_permission?.view ? (
                 <>
                     <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
@@ -80,7 +80,7 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
             ) : (
                 ''
             )}
-            {userPermission?.permissions?.permissions === 'All Permissions' && (
+            {/* {userPermission?.user_role === 'admin' && (
                 <>
                     <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
                     {buildingList.length === 0 && 'No Buildings found.'}
@@ -141,7 +141,7 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                         );
                     })}
                 </>
-            )}
+            )} */}
         </div>
     );
 };

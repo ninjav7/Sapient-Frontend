@@ -34,84 +34,90 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
     ]);
 
     useEffect(() => {
-        if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/general';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/layout';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/equipment';
-                })
-            );
-        }
-        if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/panels';
-                })
-            );
-            if (!internalRoute.includes('/settings/active-devices')) {
-                setInternalRoute((el) => [...el, '/settings/active-devices']);
+        if (userPermission?.user_role !== 'admin') {
+            if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/general';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_layout_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/layout';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_equipment_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/equipment';
+                    })
+                );
+            }
+            if (!userPermission?.permissions?.permissions?.building_panels_permission?.view) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/panels';
+                    })
+                );
+                if (!internalRoute.includes('/settings/active-devices')) {
+                    setInternalRoute((el) => [...el, '/settings/active-devices']);
+                }
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_details_permission?.view &&
+                !internalRoute.includes('/settings/general')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/general']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_layout_permission?.view &&
+                !internalRoute.includes('/settings/layout')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/layout']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
+                !internalRoute.includes('/settings/equipment')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/equipment']);
+            }
+
+            if (
+                userPermission?.permissions?.permissions?.building_panels_permission?.view &&
+                !internalRoute.includes('/settings/panels')
+            ) {
+                setInternalRoute((el) =>
+                    el.filter((current) => {
+                        return current !== '/settings/active-devices';
+                    })
+                );
+                setInternalRoute((el) => [...el, '/settings/panels']);
             }
         }
-
-        if (
-            userPermission?.permissions?.permissions?.building_details_permission?.view &&
-            !internalRoute.includes('/settings/general')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/general']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_layout_permission?.view &&
-            !internalRoute.includes('/settings/layout')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/layout']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_equipment_permission?.view &&
-            !internalRoute.includes('/settings/equipment')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/equipment']);
-        }
-
-        if (
-            userPermission?.permissions?.permissions?.building_panels_permission?.view &&
-            !internalRoute.includes('/settings/panels')
-        ) {
-            setInternalRoute((el) =>
-                el.filter((current) => {
-                    return current !== '/settings/active-devices';
-                })
-            );
-            setInternalRoute((el) => [...el, '/settings/panels']);
+        if (userPermission.user_role === 'admin') {
+            setInternalRoute([]);
+            setInternalRoute(['/settings/general']);
         }
     }, [userPermission]);
 
@@ -155,8 +161,9 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                     return (
                                         <tr key={index} className="mouse-pointer">
                                             <th scope="row">
-                                                {userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit && (
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_buildings_permission
+                                                    ?.edit ? (
                                                     <Link to={`${internalRoute[0]}`}>
                                                         <div
                                                             className="buildings-name"
@@ -179,9 +186,7 @@ const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, e
                                                             {record.building_name}
                                                         </div>
                                                     </Link>
-                                                )}
-                                                {!userPermission?.permissions?.permissions?.account_buildings_permission
-                                                    ?.edit && (
+                                                ) : (
                                                     <div
                                                         className="buildings-name"
                                                         onClick={() => {
@@ -351,7 +356,8 @@ const Buildings = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            {userPermission?.permissions?.permissions?.account_buildings_permission?.create && (
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_buildings_permission?.create ? (
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
@@ -361,6 +367,8 @@ const Buildings = () => {
                                     <i className="uil uil-plus mr-1"></i>
                                     Add Building
                                 </button>
+                            ) : (
+                                <></>
                             )}
                         </div>
                     </div>

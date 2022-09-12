@@ -10,7 +10,8 @@ const Logo = () => {
 
     return (
         <span className="logo-lg energy-logo-style">
-            {userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
+            {userPermission?.user_role === 'admin' ||
+            userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
                 <Link className="energy-logo-link-style" to="/">
                     <SapientLogo />
                 </Link>

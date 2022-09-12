@@ -93,8 +93,9 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
                                     return (
                                         <tr className="mouse-pointer">
                                             <td className="font-weight-bold panel-name">
-                                                {userPermission?.permissions?.permissions?.account_user_permission
-                                                    ?.edit && (
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_user_permission
+                                                    ?.edit ? (
                                                     <Link to={`/settings/user-profile/single/${record?._id}`}>
                                                         <a>
                                                             {record?.first_name
@@ -102,15 +103,23 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
                                                                 : record?.name}
                                                         </a>
                                                     </Link>
+                                                ) : (
+                                                    <>
+                                                        <a>
+                                                            {record?.first_name
+                                                                ? record?.first_name + ' ' + record?.last_name
+                                                                : record?.name}
+                                                        </a>
+                                                    </>
                                                 )}
-                                                {!userPermission?.permissions?.permissions?.account_user_permission
+                                                {/* {!userPermission?.permissions?.permissions?.account_user_permission
                                                     ?.edit && (
                                                     <a>
                                                         {record?.first_name
                                                             ? record?.first_name + ' ' + record?.last_name
                                                             : record?.name}
                                                     </a>
-                                                )}
+                                                )} */}
                                             </td>
                                             <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
                                             <td className="">{record?.email === '' ? '-' : record?.email}</td>
@@ -248,7 +257,8 @@ const Users = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            {userPermission?.permissions?.permissions?.account_user_permission?.create && (
+                            {userPermission?.user_role === 'admin' ||
+                 new            userPermission?.permissions?.permissions?.account_user_permission?.create ? (
                                 <button
                                     type="button"
                                     className="btn btn-md btn-primary font-weight-bold"
@@ -257,6 +267,8 @@ const Users = () => {
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add User
                                 </button>
+                            ) : (
+                                <></>
                             )}
                         </div>
                     </div>

@@ -104,20 +104,33 @@ const AccountSettings = () => {
 
                                     <FormGroup>
                                         <div className="singleline-box-style">
-                                            <Input
-                                                type="text"
-                                                name="buildingName"
-                                                id="buildingName"
-                                                placeholder="Enter Account Name"
-                                                className="single-line-style font-weight-bold"
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                onBlur={updateAccountName}
-                                                disabled={
-                                                    !userPermission?.permissions?.permissions
-                                                        ?.account_general_permission?.edit
-                                                }
-                                            />
+                                            {userPermission?.user_role === 'admin' ? (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    onBlur={updateAccountName}
+                                                />
+                                            ) : (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    onBlur={updateAccountName}
+                                                    disabled={
+                                                        !userPermission?.permissions?.permissions
+                                                            ?.account_general_permission?.edit
+                                                    }
+                                                />
+                                            )}
                                         </div>
                                     </FormGroup>
                                 </div>

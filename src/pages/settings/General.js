@@ -729,7 +729,8 @@ const General = () => {
                     </div>
                 </Col>
             </Row>
-            {buildingDetails && userPermission?.permissions?.permissions?.building_details_permission?.view ? (
+            {userPermission?.user_role === 'admin' ||
+            (buildingDetails && userPermission?.permissions?.permissions?.building_details_permission?.view) ? (
                 <>
                     <Row>
                         <Col lg={8}>

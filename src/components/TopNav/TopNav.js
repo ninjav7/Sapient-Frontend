@@ -8,6 +8,7 @@ import { buildingData, userPermissionData } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import { BaseUrl, getBuilding, singleUserPermissionDetail } from '../../services/Network';
 import axios from 'axios';
+import { BuildingListStore } from '../../store/BuildingStore';
 
 const TopNav = () => {
     const [buildingListData, setBuildingListData] = useAtom(buildingData);
