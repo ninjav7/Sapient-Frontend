@@ -117,6 +117,19 @@ const EditBreakerPanel = () => {
 
     const [isEditable, setIsEditable] = useState(true);
 
+    const [dynamicDistributeHeight, setDynamicDistributeHeight] = useState(300);
+    const [dynamicDisconnectHeight, setDynamicDisconnectHeight] = useState(300);
+
+    const [reactFlowDistributeStyle, setReactFlowDistributeStyle] = useState({
+        background: '#fafbfc',
+        height: `${dynamicDistributeHeight}px`,
+    });
+
+    const [reactFlowDisconnectStyle, setReactFlowDisconnectStyle] = useState({
+        background: '#fafbfc',
+        height: `${dynamicDisconnectHeight}px`,
+    });
+
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
         obj[key] = value;
@@ -277,7 +290,7 @@ const EditBreakerPanel = () => {
     // Get co-rodinates for Distributed Breakers
     const getYaxisCordinates = (index) => {
         let num = index;
-        let value = 90;
+        let value = 100;
 
         if (num === 1 || num === 2) {
             return value;
@@ -292,13 +305,13 @@ const EditBreakerPanel = () => {
 
     const getDiscYaxisCordinates = (index) => {
         if (index === 1) {
-            return 60;
+            return 25;
         }
         if (index === 2) {
-            return 150;
+            return 125;
         }
         if (index === 3) {
-            return 240;
+            return 225;
         }
     };
 
@@ -368,6 +381,19 @@ const EditBreakerPanel = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    useEffect(() => {
+        setReactFlowDisconnectStyle({ ...reactFlowDisconnectStyle, height: `${dynamicDisconnectHeight}px` });
+    }, [dynamicDisconnectHeight]);
+
+    useEffect(() => {
+        setReactFlowDistributeStyle({ ...reactFlowDistributeStyle, height: `${dynamicDistributeHeight}px` });
+    }, [dynamicDistributeHeight]);
+
+    useEffect(() => {
+        setDynamicDistributeHeight((breakersData?.length / 2) * 115);
+        setDynamicDisconnectHeight(breakersData?.length * 100);
+    }, [breakersData]);
 
     useEffect(() => {
         if (!isBreakerApiTrigerred) {
@@ -966,31 +992,28 @@ const EditBreakerPanel = () => {
 
                         {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
-                                <Row className="main-breaker-styling">
-                                    <FormGroup className="form-group row m-4">
-                                        <div className="breaker-container">
-                                            <div className="breaker-style">
-                                                <div className="breaker-content-middle">
-                                                    <div className="breaker-index font-weight-bold">M</div>
+                                <Row className="main-breaker-styling mb-0">
+                                    <div className="breaker-container">
+                                        <div className="breaker-style">
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-index font-weight-bold">M</div>
+                                            </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="dot-status"></div>
+                                            </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-content">
+                                                    <span>{panel.voltage === '' ? '' : `${panel.rated_amps}A`}</span>
+                                                    <span>
+                                                        {panel.voltage === '' && ''}
+                                                        {panel.voltage === '120/240' && '240V'}
+                                                        {panel.voltage === '208/120' && '120V'}
+                                                        {panel.voltage === '480' && '480V'}
+                                                        {panel.voltage === '600' && '600V'}
+                                                    </span>
                                                 </div>
-                                                <div className="breaker-content-middle">
-                                                    <div className="dot-status"></div>
-                                                </div>
-                                                <div className="breaker-content-middle">
-                                                    <div className="breaker-content">
-                                                        <span>
-                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
-                                                        </span>
-                                                        <span>
-                                                            {panel.voltage === '' && ''}
-                                                            {panel.voltage === '120/240' && '240V'}
-                                                            {panel.voltage === '208/120' && '120V'}
-                                                            {panel.voltage === '480' && '480V'}
-                                                            {panel.voltage === '600' && '600V'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {/* <div
+                                            </div>
+                                            {/* <div
                                             className="breaker-content-middle"
                                             onClick={() => {
                                                 handleMainShow();
@@ -1000,74 +1023,67 @@ const EditBreakerPanel = () => {
                                             </div>
                                             <span className="font-weight-bold edit-btn-styling">Edit</span>
                                         </div> */}
-                                            </div>
                                         </div>
-                                    </FormGroup>
+                                    </div>
                                 </Row>
 
-                                <div className="row">
-                                    {!panelDataFetched && (
-                                        <div className="col-sm">
-                                            <div className="row breaker-group-style">
-                                                {isEditable && (
-                                                    <ReactFlow
-                                                        nodes={distributedBreakersNodes}
-                                                        edges={distributedBreakersEdges}
-                                                        onNodesChange={onNodesChange}
-                                                        onEdgesChange={onEdgesChange}
-                                                        onConnect={onConnect}
-                                                        nodeTypes={nodeTypes}
-                                                        edgeTypes={edgeTypes}
-                                                        style={{ background: '#fafbfc' }}
-                                                        zoomOnScroll={false}
-                                                        panOnScroll={false}
-                                                        preventScrolling={false}
-                                                        onPaneScroll={false}
-                                                        panOnDrag={false}
-                                                    />
-                                                )}
-                                                {!isEditable && (
-                                                    <ReactFlow
-                                                        nodes={distributedBreakersNodes}
-                                                        onNodesChange={onNodesChange}
-                                                        onEdgesChange={onEdgesChange}
-                                                        onConnect={onConnect}
-                                                        nodeTypes={nodeTypes}
-                                                        edgeTypes={edgeTypes}
-                                                        style={{ background: '#fafbfc' }}
-                                                        zoomOnScroll={false}
-                                                        panOnScroll={false}
-                                                        preventScrolling={false}
-                                                        onPaneScroll={false}
-                                                        panOnDrag={false}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                {!panelDataFetched && (
+                                    <div className="row m-4">
+                                        {isEditable && (
+                                            <ReactFlow
+                                                nodes={distributedBreakersNodes}
+                                                edges={distributedBreakersEdges}
+                                                onNodesChange={onNodesChange}
+                                                onEdgesChange={onEdgesChange}
+                                                onConnect={onConnect}
+                                                nodeTypes={nodeTypes}
+                                                edgeTypes={edgeTypes}
+                                                style={reactFlowDistributeStyle}
+                                                zoomOnScroll={false}
+                                                panOnScroll={false}
+                                                preventScrolling={false}
+                                                onPaneScroll={false}
+                                                panOnDrag={false}
+                                            />
+                                        )}
+                                        {!isEditable && (
+                                            <ReactFlow
+                                                nodes={distributedBreakersNodes}
+                                                onNodesChange={onNodesChange}
+                                                onEdgesChange={onEdgesChange}
+                                                onConnect={onConnect}
+                                                nodeTypes={nodeTypes}
+                                                edgeTypes={edgeTypes}
+                                                style={reactFlowDistributeStyle}
+                                                zoomOnScroll={false}
+                                                panOnScroll={false}
+                                                preventScrolling={false}
+                                                onPaneScroll={false}
+                                                panOnDrag={false}
+                                            />
+                                        )}
+                                    </div>
+                                )}
                             </>
                         )}
 
                         {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
-                            <div className="row" style={{ width: '100%', height: '50vh', position: 'relative' }}>
-                                <div className="col-sm">
-                                    <ReactFlow
-                                        nodes={disconnectedBreakersNodes}
-                                        edges={disconnectedBreakersEdges}
-                                        onNodesChange={onNodesChangeForDisconnect}
-                                        onEdgesChange={onEdgesChangeForDisconnect}
-                                        onConnect={onConnectForDisconnect}
-                                        nodeTypes={nodeTypes}
-                                        edgeTypes={edgeTypes}
-                                        style={{ background: '#fafbfc' }}
-                                        zoomOnScroll={false}
-                                        panOnScroll={false}
-                                        preventScrolling={false}
-                                        onPaneScroll={false}
-                                        panOnDrag={false}
-                                    />
-                                </div>
+                            <div className="row m-4">
+                                <ReactFlow
+                                    nodes={disconnectedBreakersNodes}
+                                    edges={disconnectedBreakersEdges}
+                                    onNodesChange={onNodesChangeForDisconnect}
+                                    onEdgesChange={onEdgesChangeForDisconnect}
+                                    onConnect={onConnectForDisconnect}
+                                    nodeTypes={nodeTypes}
+                                    edgeTypes={edgeTypes}
+                                    style={reactFlowDisconnectStyle}
+                                    zoomOnScroll={false}
+                                    panOnScroll={false}
+                                    preventScrolling={false}
+                                    onPaneScroll={false}
+                                    panOnDrag={false}
+                                />
                             </div>
                         )}
                     </div>
