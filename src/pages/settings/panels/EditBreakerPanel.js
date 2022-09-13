@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
+import { Row, Col, Label, Input, FormGroup, Button, Card, CardHeader, CardBody } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -16,6 +16,7 @@ import {
     createBreaker,
     generalEquipments,
     listSensor,
+    resetBreakers,
 } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -26,6 +27,8 @@ import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakerFlowForDistribution';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkHorizontalSlash, faLinkHorizontal } from '@fortawesome/pro-regular-svg-icons';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
@@ -57,6 +60,11 @@ const EditBreakerPanel = () => {
     const handleMainClose = () => setShowMain(false);
     const handleMainShow = () => setShowMain(true);
 
+    // Unlink Alert Modal
+    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
+    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
+    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+
     const [equipmentData, setEquipmentData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
@@ -64,6 +72,7 @@ const EditBreakerPanel = () => {
     const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
 
     const [panel, setPanel] = useState({});
     const [breakersData, setBreakersData] = useState([]);
@@ -354,9 +363,36 @@ const EditBreakerPanel = () => {
         }
     };
 
+    const unLinkBreakersFromPanel = async () => {
+        try {
+            setIsResetting(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?panel_id=${panelId}`;
+            await axios.post(`${BaseUrl}${resetBreakers}${params}`, {}, { headers }).then((res) => {
+                let response = res.data;
+                setIsResetting(false);
+                handleUnlinkAlertClose();
+                triggerBreakerAPI();
+            });
+        } catch (error) {
+            setIsResetting(false);
+            console.log('Failed to unlink all Breakers from Panel');
+        }
+    };
+
     const getTargetBreakerId = (targetBreakerNo) => {
         let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
         return targetObj?.id;
+    };
+
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
     };
 
     useEffect(() => {
@@ -992,7 +1028,7 @@ const EditBreakerPanel = () => {
 
                         {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
-                                <Row className="main-breaker-styling mb-0">
+                                <Row className="main-breaker-styling">
                                     <div className="breaker-container">
                                         <div className="breaker-style">
                                             <div className="breaker-content-middle">
@@ -1086,6 +1122,31 @@ const EditBreakerPanel = () => {
                                 />
                             </div>
                         )}
+
+                        <Card className="custom-card ml-4 mr-4">
+                            <CardHeader>
+                                <h5 className="danger-zone-style">Danger Zone</h5>
+                            </CardHeader>
+
+                            <CardBody>
+                                <Form>
+                                    <FormGroup>
+                                        <button
+                                            type="button"
+                                            onClick={handleUnlinkAlertShow}
+                                            className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
+                                            <FontAwesomeIcon
+                                                icon={faLinkHorizontalSlash}
+                                                color="#FFFFFF"
+                                                size="md"
+                                                className="mr-1"
+                                            />
+                                            Unlink All Breakers
+                                        </button>
+                                    </FormGroup>
+                                </Form>
+                            </CardBody>
+                        </Card>
                     </div>
                 </Col>
             </Row>
@@ -1143,6 +1204,34 @@ const EditBreakerPanel = () => {
                             handleMainClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink All Breakers</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">
+                            Are you sure you want to unlink all breakers on this panel?
+                        </div>
+                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            unLinkBreakersFromPanel();
+                        }}
+                        className="unlink-reset-style">
+                        {isResetting ? 'Resetting' : 'Reset'}
                     </Button>
                 </Modal.Footer>
             </Modal>

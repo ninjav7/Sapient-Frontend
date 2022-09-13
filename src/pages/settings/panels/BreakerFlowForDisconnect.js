@@ -59,6 +59,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         if (deviceId === '') {
             return;
         }
+        if (deviceId === undefined) {
+            return;
+        }
         try {
             setIsSensorDataFetched(true);
             let headers = {
@@ -86,6 +89,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
             return;
         }
         if (deviceId === '') {
+            return;
+        }
+        if (deviceId === undefined) {
             return;
         }
         try {
