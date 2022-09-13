@@ -34,15 +34,19 @@ const TopNav = () => {
     }, []);
 
     const getUserPermissionDetail = async () => {
-        let headers = {
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-            Authorization: `Bearer ${userdata.token}`,
-        };
-        await axios.get(`${BaseUrl}${singleUserPermissionDetail}`, { headers }).then((res) => {
-            let data = res.data.data;
-            setUserPermissionDataNow(data);
-        });
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            await axios.get(`${BaseUrl}${singleUserPermissionDetail}`, { headers }).then((res) => {
+                let data = res.data.data;
+                setUserPermissionDataNow(data);
+            });
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     useEffect(() => {

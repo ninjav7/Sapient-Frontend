@@ -82,7 +82,7 @@ const UserTable = ({ userData }) => {
                                         </Link>
                                     </td>
                                     <td className="">-</td>
-                                    <td className="">-</td>
+                                    <td className="">{record.user_email}</td>
                                     <td className="font-weight-bold">-</td>
                                 </tr>
                             );
@@ -2166,11 +2166,11 @@ const SingleRoleNew = () => {
                                         <div className="grid-style-3">
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-title">Smart Plugs</h6>
+                                                    <h6 className="card-title">Active Devices</h6>
                                                     <h6
                                                         className="card-subtitle mb-2 text-muted"
                                                         htmlFor="customSwitches">
-                                                        Ability to manage smart plugs in an account.
+                                                        Ability to manage active devices in an account.
                                                     </h6>
                                                 </div>
                                             </FormGroup>
@@ -2266,11 +2266,11 @@ const SingleRoleNew = () => {
 
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-title">Smart Monitors</h6>
+                                                    <h6 className="card-title">Passive Devices</h6>
                                                     <h6
                                                         className="card-subtitle mb-2 text-muted"
                                                         htmlFor="customSwitches">
-                                                        Ability to manage smart monitors in a building.
+                                                        Ability to manage passive devices in a building.
                                                     </h6>
                                                 </div>
                                             </FormGroup>

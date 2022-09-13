@@ -80,7 +80,7 @@ const RoleTable = ({ roleDataList }) => {
                                                 ?.edit && <a className="buildings-name">{record.name}</a>} */}
                                         </th>
                                         <td className="font-weight-bold">-</td>
-                                        <td className="font-weight-bold">-</td>
+                                        <td className="font-weight-bold">{record.permissions_users}</td>
                                     </tr>
                                 );
                             })}

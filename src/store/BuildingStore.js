@@ -5,6 +5,7 @@ export const BuildingStore = new Store({
     BldgName: localStorage.getItem('buildingName'),
     BldgTimeZone: localStorage.getItem('buildingTimeZone'),
 });
+console.log('BuildingStore', BuildingStore);
 
 export const BuildingListStore = new Store({
     fetchBuildingList: false,

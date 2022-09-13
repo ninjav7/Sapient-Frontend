@@ -7,6 +7,7 @@ import { BaseUrl, createPanel, createBreaker } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
+import Select from 'react-select';
 import '../style.css';
 import './panel-style.css';
 
@@ -232,6 +233,18 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         saveBreakersData(generatedPanelId);
     }, [generatedPanelId]);
 
+    const voltsOption = [
+        { value: '120/240', label: '120/240' },
+        { value: '208/120', label: '208/120' },
+        { value: '480', label: '480' },
+        { value: '600', label: '600' },
+    ];
+
+    const panelOption = [
+        { value: 'distribution', label: 'Distribution' },
+        { value: 'disconnect', label: 'Disconnect' },
+    ];
+
     return (
         <>
             <Modal show={showPanelModel} onHide={closeAddPanelModel} centered>
@@ -272,7 +285,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Volts</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="state"
                                 id="userState"
@@ -290,14 +303,26 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 <option value="208/120">208/120</option>
                                 <option value="480">480</option>
                                 <option value="600">600</option>
-                            </Input>
+                            </Input> */}
+                            <Select
+                                id="exampleSelect"
+                                placeholder="Select Volts"
+                                name="state"
+                                isSearchable={true}
+                                defaultValue={'Select Volts'}
+                                options={voltsOption}
+                                onChange={(e) => {
+                                    handleChange('voltage', e.value);
+                                }}
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </div>
 
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Panel Type</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="state"
                                 id="userState"
@@ -313,7 +338,23 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 {panelType.map((record) => {
                                     return <option value={record.value}>{record.name}</option>;
                                 })}
-                            </Input>
+                            </Input> */}
+                            <div style={{ width: '200px' }}>
+                                <Select
+                                    id="exampleSelect"
+                                    name="state"
+                                    isSearchable={true}
+                                    defaultValue={'Select Panel Type'}
+                                    options={panelOption}
+                                    onChange={(e) => {
+                                        console.log('evolts', e.value);
+                                        handleChange('panel_type', e.value);
+                                    }}
+                                    className="font-weight-bold"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                />
+                            </div>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

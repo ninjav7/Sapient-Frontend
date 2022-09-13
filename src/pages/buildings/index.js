@@ -71,6 +71,8 @@ const BuildingOverview = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
+    console.log('timeZone', timeZone);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [overview, setOverview] = useState({
@@ -507,6 +509,47 @@ const BuildingOverview = () => {
                 distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
+            },
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value) {
+            //         return value + ' K';
+            //     },
+            // },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Average Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
             },
         },
         yaxis: {

@@ -26,6 +26,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { buildingData, userPermissionData } from '../../store/globalState';
 import DropDownInput from '../../components/DropdownInput/DropDownInput';
 import { Prompt } from 'react-router-dom';
+import Select from 'react-select';
 
 const General = () => {
     let cookies = new Cookies();
@@ -660,6 +661,11 @@ const General = () => {
         window.scrollTo(0, 0);
     }, []);
 
+    const typeOptions = [
+        { value: 'Office Building', label: 'Office Building' },
+        { value: 'Residential Building', label: 'Residential Building' },
+    ];
+
     const [getResponseOfPlaces, setGetResponseOfPlaces] = useState();
     console.log(getResponseOfPlaces, 'getResponseOfPlaces');
     const [selectedPlaceLabel, setSelectedPlaceLabel] = useState('');
@@ -833,7 +839,7 @@ const General = () => {
                                                     <Skeleton count={1} height={35} width={350} />
                                                 ) : (
                                                     <div className="singleline-box-style">
-                                                        <Input
+                                                        {/* <Input
                                                             type="select"
                                                             name="typee"
                                                             id="exampleSelect"
@@ -848,14 +854,31 @@ const General = () => {
                                                                     e.target.value
                                                                 );
                                                             }}
-                                                            // onBlur={EditBuildingHandler}
+                                                            
 
                                                             value={buildingDetails.typee}
                                                             className="font-weight-bold">
                                                             <option>Office Building</option>
 
                                                             <option>Residential Building</option>
-                                                        </Input>
+                                                        </Input> */}
+                                                        <Select
+                                                            id="exampleSelect"
+                                                            defaultValue={typeOptions[0]}
+                                                            options={typeOptions}
+                                                            name="typee"
+                                                            isSearchable={true}
+                                                            isDisabled={
+                                                                userPermission?.permissions?.permissions
+                                                                    ?.building_details_permission?.edit === false
+                                                            }
+                                                            onChange={(e) => {
+                                                                console.log('e', e.value);
+                                                                handleBldgSettingChanges('typee', e.value);
+                                                                localStorage.setItem('generalBuildingType', e.value);
+                                                            }}
+                                                            className="font-weight-bold"
+                                                        />
                                                     </div>
                                                 )}
                                             </FormGroup>

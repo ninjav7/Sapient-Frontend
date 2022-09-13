@@ -11,6 +11,7 @@ import {
     DropdownItem,
     Button,
     Input,
+    Dropdown,
 } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Link } from 'react-router-dom';
@@ -34,7 +35,10 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
+import ThreeDots from '../../../assets/images/threeDots.png';
 import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../../store/globalState';
 
 const PassiveDevicesTable = ({
     deviceData,
@@ -48,6 +52,8 @@ const PassiveDevicesTable = ({
     pageSize,
     setPageSize,
 }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -77,214 +83,275 @@ const PassiveDevicesTable = ({
         passiveDeviceDataWithFilter(order, columnName);
     };
 
+    const [toggleEdit, setToggleEdit] = useState(false);
+
     return (
-        <Card>
-            <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className='mouse-pointer'>
-                            {selectedOptions.some((record) => record.value === 'status') && (
+        <>
+            <Card>
+                <CardBody>
+                    <Table className="mb-0 bordered table-hover">
+                        <thead>
+                            <tr className="mouse-pointer">
+                                {selectedOptions.some((record) => record.value === 'status') && (
+                                    <th className="active-device-header">
+                                        <div className="passive-device-flex">
+                                            <div>Status</div>
+                                        </div>
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'identifier') && (
+                                    <th
+                                        className="active-device-header"
+                                        onClick={() => setIdentifierOrder(!identifierOrder)}>
+                                        <div className="passive-device-flex">
+                                            <div>Identifier (MAC)</div>
+                                            {identifierOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'mac_address')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'model') && (
+                                    <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
+                                        <div className="passive-device-flex">
+                                            <div>Model</div>
+                                            {modelOrder ? (
+                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'location') && (
+                                    <th
+                                        className="active-device-header"
+                                        onClick={() => setLocationOrder(!locationOrder)}>
+                                        <div className="passive-device-flex">
+                                            <div>Location</div>
+                                            {locationOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'location')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'location')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </th>
+                                )}
+                                {selectedOptions.some((record) => record.value === 'sensors') && (
+                                    <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
+                                        <div className="passive-device-flex">
+                                            <div>Sensors</div>
+                                            {sensorOrder ? (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                    <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className="ml-2"
+                                                    onClick={() => handleColumnSort('ace', 'sensor_count')}>
+                                                    <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </th>
+                                )}
                                 <th className="active-device-header">
                                     <div className="passive-device-flex">
-                                        <div>Status</div>
+                                        <div>Actions</div>
                                     </div>
                                 </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'identifier') && (
-                                <th
-                                    className="active-device-header"
-                                    onClick={() => setIdentifierOrder(!identifierOrder)}>
-                                    <div className="passive-device-flex">
-                                        <div>Identifier (MAC)</div>
-                                        {identifierOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'mac_address')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'model') && (
-                                <th className="active-device-header" onClick={() => setModelOrder(!modelOrder)}>
-                                    <div className="passive-device-flex">
-                                        <div>Model</div>
-                                        {modelOrder ? (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'model')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'location') && (
-                                <th className="active-device-header" onClick={() => setLocationOrder(!locationOrder)}>
-                                    <div className="passive-device-flex">
-                                        <div>Location</div>
-                                        {locationOrder ? (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div className="ml-2" onClick={() => handleColumnSort('ace', 'location')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                            {selectedOptions.some((record) => record.value === 'sensors') && (
-                                <th className="active-device-header" onClick={() => setSensorOrder(!sensorOrder)}>
-                                    <div className="passive-device-flex">
-                                        <div>Sensors</div>
-                                        {sensorOrder ? (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
-                                                <FontAwesomeIcon icon={faAngleUp} color="grey" size="md" />
-                                            </div>
-                                        ) : (
-                                            <div
-                                                className="ml-2"
-                                                onClick={() => handleColumnSort('ace', 'sensor_count')}>
-                                                <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
-                                            </div>
-                                        )}
-                                    </div>
-                                </th>
-                            )}
-                        </tr>
-                    </thead>
-                    {isDeviceProcessing ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                            </tr>
+                        </thead>
+                        {isDeviceProcessing ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {deviceData.map((record, index) => {
-                                return (
-                                    <tr key={index} className='mouse-pointer'>
-                                        {selectedOptions.some((record) => record.value === 'status') && (
-                                            <td scope="row" className="text-center">
-                                                {record.status === 'Online' && (
-                                                    <div className="icon-bg-styling">
-                                                        <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                                {record.status === 'Offline' && (
-                                                    <div className="icon-bg-styling-slash">
-                                                        <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                    </div>
-                                                )}
-                                            </td>
-                                        )}
-
-                                        <Link
-                                            to={{
-                                                pathname: `/settings/passive-devices/single/${record.equipments_id}`,
-                                            }}>
-                                            {selectedOptions.some((record) => record.value === 'identifier') && (
-                                                <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                            )}
-                                        </Link>
-
-                                        {selectedOptions.some((record) => record.value === 'model') && (
-                                            <td>{record.model.charAt(0).toUpperCase() + record.model.slice(1)}</td>
-                                        )}
-
-                                        {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td>
-                                                {record.location === ' > '
-                                                    ? ' - '
-                                                    : record.location.split('>').reverse().join(' > ')}
-                                            </td>
-                                        )}
-
-                                        {selectedOptions.some((record) => record.value === 'sensors') && (
-                                            <td>{record.sensor_number}</td>
-                                        )}
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {deviceData.map((record, index) => {
+                                    return (
+                                        <tr key={index} className="mouse-pointer">
+                                            {selectedOptions.some((record) => record.value === 'status') && (
+                                                <td scope="row" className="text-center">
+                                                    {record.status === 'Online' && (
+                                                        <div className="icon-bg-styling">
+                                                            <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                    {record.status === 'Offline' && (
+                                                        <div className="icon-bg-styling-slash">
+                                                            <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            )}
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.advanced_smart_monitors_permission
+                                                ?.edit ? (
+                                                <Link
+                                                    to={{
+                                                        pathname: `/settings/passive-devices/single/${record.equipments_id}`,
+                                                    }}>
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'identifier'
+                                                    ) && (
+                                                        <td className="font-weight-bold panel-name">
+                                                            {record.identifier}
+                                                        </td>
+                                                    )}
+                                                </Link>
+                                            ) : (
+                                                <>
+                                                    {selectedOptions.some(
+                                                        (record) => record.value === 'identifier'
+                                                    ) && (
+                                                        <td className="font-weight-bold panel-name">
+                                                            {record.identifier}
+                                                        </td>
+                                                    )}
+                                                </>
+                                            )}
 
-                <div className="page-button-style ml-2">
-                    <div>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
-                            onClick={() => {
-                                previousPageData(paginationData.pagination.previous);
-                            }}>
-                            Previous
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            onClick={() => {
-                                nextPageData(paginationData.pagination.next);
-                            }}>
-                            Next
-                        </button>
+                                            {selectedOptions.some((record) => record.value === 'model') && (
+                                                <td>{record.model.charAt(0).toUpperCase() + record.model.slice(1)}</td>
+                                            )}
+
+                                            {selectedOptions.some((record) => record.value === 'location') && (
+                                                <td>
+                                                    {record.location === ' > '
+                                                        ? ' - '
+                                                        : record.location.split('>').reverse().join(' > ')}
+                                                </td>
+                                            )}
+
+                                            {selectedOptions.some((record) => record.value === 'sensors') && (
+                                                <td>{record.sensor_number}</td>
+                                            )}
+                                            <td>
+                                                <img
+                                                    onClick={() => {
+                                                        setToggleEdit(true);
+                                                    }}
+                                                    style={{ width: '20px' }}
+                                                    src={ThreeDots}
+                                                />
+                                                <UncontrolledDropdown
+                                                    isOpen={toggleEdit}
+                                                    toggle={() => {
+                                                        setToggleEdit(!toggleEdit);
+                                                    }}
+                                                    className="align-self-center float-right">
+                                                    <DropdownToggle
+                                                        tag="button"
+                                                        className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
+                                                    <DropdownMenu right>
+                                                        <DropdownItem
+                                                            onClick={() => {
+                                                                setToggleEdit(false);
+                                                            }}>
+                                                            Add Floor
+                                                        </DropdownItem>
+                                                    </DropdownMenu>
+                                                </UncontrolledDropdown>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
+                    </Table>
+
+                    <div className="page-button-style ml-2">
+                        <div>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-light font-weight-bold mt-4 mr-2"
+                                onClick={() => {
+                                    previousPageData(paginationData.pagination.previous);
+                                }}>
+                                Previous
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onClick={() => {
+                                    nextPageData(paginationData.pagination.next);
+                                }}>
+                                Next
+                            </button>
+                        </div>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[10, 25, 50].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <select
-                            value={pageSize}
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            onChange={(e) => {
-                                setPageSize(parseInt(e.target.value));
-                            }}>
-                            {[10, 25, 50].map((pageSize) => (
-                                <option key={pageSize} value={pageSize} className="align-options-center">
-                                    Show {pageSize} devices
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </CardBody>
-        </Card>
+                </CardBody>
+            </Card>
+        </>
     );
 };
 
 const PassiveDevices = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -294,6 +361,7 @@ const PassiveDevices = () => {
         { label: 'Model', value: 'model' },
         { label: 'Location', value: 'location' },
         { label: 'Sensors', value: 'sensors' },
+        { label: 'Actions', value: 'actions' },
     ];
 
     const [selectedOptions, setSelectedOptions] = useState([]);
@@ -636,14 +704,19 @@ const PassiveDevices = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Passive Device
-                            </button>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.advanced_smart_monitors_permission?.create ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Passive Device
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
