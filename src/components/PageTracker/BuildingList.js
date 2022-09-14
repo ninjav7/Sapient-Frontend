@@ -1,6 +1,6 @@
 import React from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 import { useAtom } from 'jotai';
@@ -8,10 +8,34 @@ import { userPermissionData } from '../../store/globalState';
 
 const BuildingList = ({ buildingList = [], bldStoreId }) => {
     const location = useLocation();
-
-    console.log('buildingList', buildingList);
+    const history = useHistory();
 
     const [userPermission] = useAtom(userPermissionData);
+
+    const handleBldgSwitchFrmPortfolioPage = (bldgData) => {
+        BuildingStore.update((s) => {
+            s.BldgId = bldgData?.building_id;
+            s.BldgName = bldgData?.building_name;
+            s.BldgTimeZone = bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone;
+        });
+        localStorage.setItem('buildingId', bldgData?.building_id);
+        localStorage.setItem('buildingName', bldgData?.building_name);
+        localStorage.setItem('buildingTimeZone', bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone);
+        history.push({
+            pathname: `/energy/building/overview/${bldgData?.building_id}`,
+        });
+    };
+
+    const handleBldgChange = (bldgData) => {
+        BuildingStore.update((s) => {
+            s.BldgId = bldgData?.building_id;
+            s.BldgName = bldgData?.building_name;
+            s.BldgTimeZone = bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone;
+        });
+        localStorage.setItem('buildingId', bldgData?.building_id);
+        localStorage.setItem('buildingName', bldgData?.building_name);
+        localStorage.setItem('buildingTimeZone', bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone);
+    };
 
     return (
         <div>
@@ -33,40 +57,19 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                                 {location.pathname === '/energy/portfolio/overview' ? (
                                     <Dropdown.Item
                                         onClick={() => {
-                                            BuildingStore.update((s) => {
-                                                s.BldgId = record.building_id;
-                                                s.BldgName = record.building_name;
-                                            });
-                                            localStorage.setItem('buildingId', record.building_id);
-                                            localStorage.setItem('buildingName', record.building_name);
+                                            handleBldgSwitchFrmPortfolioPage(record);
                                         }}>
-                                        <Link
-                                            to={{
-                                                pathname: `/energy/building/overview/${record.building_id}`,
-                                            }}>
-                                            <div className="filter-bld-style">
-                                                <div className="portfolio-txt-style">{record.building_name}</div>
-                                                {location.pathname !== '/energy/portfolio/overview' &&
-                                                    record.building_id === bldStoreId && <CheckIcon />}
-                                            </div>
-                                        </Link>
+                                        <div className="filter-bld-style">
+                                            <div className="portfolio-txt-style">{record.building_name}</div>
+                                            {location.pathname !== '/energy/portfolio/overview' &&
+                                                record.building_id === bldStoreId && <CheckIcon />}
+                                        </div>
                                     </Dropdown.Item>
                                 ) : (
                                     <Dropdown.Item
                                         className={activeItem && 'selected'}
                                         onClick={() => {
-                                            BuildingStore.update((s) => {
-                                                s.BldgId = record.building_id;
-                                                s.BldgName = record.building_name;
-                                                s.BldgTimeZone =
-                                                    record.timezone === '' ? 'US/Eastern' : record.timezone;
-                                            });
-                                            localStorage.setItem('buildingId', record.building_id);
-                                            localStorage.setItem('buildingName', record.building_name);
-                                            localStorage.setItem(
-                                                'buildingTimeZone',
-                                                record.timezone === '' ? 'US/Eastern' : record?.timezone
-                                            );
+                                            handleBldgChange(record);
                                         }}>
                                         <div className="filter-bld-style">
                                             <div className="portfolio-txt-style">{record.building_name}</div>
