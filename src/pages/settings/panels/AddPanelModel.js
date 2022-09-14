@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, createPanel, createBreaker } from '../../../services/Network';
+import { BaseUrl, createPanel } from '../../../services/Network';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
@@ -31,10 +31,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         panel_type: 'distribution',
     });
 
-    const [breakersData, setBreakersData] = useState([]);
-
-    const [generatedPanelId, setGeneratedPanelId] = useState('');
-
     const panelType = [
         {
             name: 'Distribution',
@@ -61,33 +57,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         },
     ];
 
-    const handleVoltageChange = (voltageValue) => {
-        if (panelObj.panel_type === 'disconnect') {
-            return;
-        }
-
-        if (breakersData?.length === 0) {
-            return;
-        }
-
-        let newArray = breakersData;
-        newArray.forEach((obj) => {
-            if (voltageValue === '120/240') {
-                obj.voltage = '120';
-            }
-            if (voltageValue === '208/120') {
-                obj.voltage = '120';
-            }
-            if (voltageValue === '480') {
-                obj.voltage = '277';
-            }
-            if (voltageValue === '600') {
-                obj.voltage = '347';
-            }
-        });
-        setBreakersData(newArray);
-    };
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panelObj);
         if (value === 'None') {
@@ -98,83 +67,19 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             if (obj.voltage === '120/240') {
                 obj.voltage = '208/120';
             }
-            handleBreakerChange('disconnect', 3);
         }
         if (value === 'distribution') {
             obj.breaker_count = 0;
-            handleBreakerChange('distribution', 0);
-        }
-        if (key === 'voltage') {
-            handleVoltageChange(value);
         }
         obj[key] = value;
         setPanelObj(obj);
-    };
-
-    const getVoltageConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '208/120') {
-                return 120;
-            }
-            if (value === '120/240') {
-                return 120;
-            }
-            if (value === '480') {
-                return 277;
-            }
-            if (value === '600') {
-                return 347;
-            }
-        }
-    };
-
-    const handleBreakerChange = (panelType, breakerCount) => {
-        let newArray = [];
-        if (panelType === 'distribution') {
-            for (let index = 1; index <= breakerCount; index++) {
-                let obj = {
-                    name: `Breaker ${index}`,
-                    breaker_number: index,
-                    phase_configuration: 1,
-                    rated_amps: 0,
-                    voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                };
-                newArray.push(obj);
-            }
-        }
-
-        if (panelType === 'disconnect') {
-            for (let index = 1; index <= breakerCount; index++) {
-                let obj = {
-                    name: `Breaker ${index}`,
-                    breaker_number: index,
-                    phase_configuration: 1,
-                    rated_amps: 0,
-                    voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                };
-                newArray.push(obj);
-            }
-        }
-        setBreakersData(newArray);
     };
 
     const savePanelData = async () => {
         try {
             setIsProcessing(true);
 
-            let header = {
+            let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
@@ -183,55 +88,23 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             let newPanel = Object.assign({}, panelObj);
             let params = `?building_id=${bldgId}`;
 
-            await axios
-                .post(`${BaseUrl}${createPanel}${params}`, newPanel, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
-                    setGeneratedPanelId(response.id);
-                });
+            await axios.post(`${BaseUrl}${createPanel}${params}`, newPanel, { headers }).then((res) => {
+                let response = res.data;
+                let panelID = response.id;
+
+                setIsProcessing(false);
+
+                if (panelID !== '') {
+                    history.push({
+                        pathname: `/settings/panels/edit-panel/${panelID}`,
+                    });
+                }
+            });
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to Create Panel');
+            console.log('Failed to Create Panel & Breakers!');
         }
     };
-
-    useEffect(() => {
-        if (generatedPanelId === '') {
-            return;
-        }
-
-        const saveBreakersData = async (panelID) => {
-            try {
-                let header = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?panel_id=${panelID}`;
-
-                await axios
-                    .post(`${BaseUrl}${createBreaker}${params}`, breakersData, {
-                        headers: header,
-                    })
-                    .then((res) => {
-                        let response = res.data;
-                    });
-
-                setIsProcessing(false);
-
-                history.push({
-                    pathname: `/settings/panels/edit-panel/${panelID}`,
-                });
-            } catch (error) {
-                setIsProcessing(false);
-                console.log('Failed to Save Breakers');
-            }
-        };
-        saveBreakersData(generatedPanelId);
-    }, [generatedPanelId]);
 
     const voltsOption = [
         { value: '120/240', label: '120/240' },
@@ -348,7 +221,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     className="font-weight-bold"
                                     onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                        handleBreakerChange('distribution', +e.target.value);
                                     }}
                                     min={0}
                                     step={5}
@@ -365,7 +237,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     value={panelObj.breaker_count}
                                     onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                        handleBreakerChange('disconnect', +e.target.value);
                                     }}>
                                     {disconnectBreaker.map((record) => {
                                         return <option value={record.value}>{record.name}</option>;

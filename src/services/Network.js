@@ -72,6 +72,7 @@ export const updateBreaker = '/api/config/panels/update_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const resetBreakers = '/api/config/panels/reset/breakers';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
