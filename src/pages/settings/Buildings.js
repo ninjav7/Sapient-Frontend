@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { useQuery } from 'react-query';
 import { QueryClient } from 'react-query';
+import Select from 'react-select';
 
 const BuildingTable = ({ buildingsData, isDataProcessing, setIsDataProcessing, error }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -430,7 +431,7 @@ const Buildings = () => {
                                 Type
                             </Label>
                             <div>
-                                <Input
+                                {/* <Input
                                     type="select"
                                     name="typee"
                                     id="exampleSelect"
@@ -442,7 +443,16 @@ const Buildings = () => {
                                     {buildingType.map((record) => {
                                         return <option value={record.value}>{record.label}</option>;
                                     })}
-                                </Input>
+                                </Input> */}
+                                <Select
+                                    options={buildingType}
+                                    name="typee"
+                                    id="exampleSelect"
+                                    onChange={(e) => {
+                                        setBuildingTypeSelected(e.value);
+                                    }}
+                                    className="font-weight-bold"
+                                />
                             </div>
                         </FormGroup>
 

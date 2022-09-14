@@ -285,25 +285,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Volts</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="state"
-                                id="userState"
-                                className="font-weight-bold selection-volts-style"
-                                placeholder="Select Volts"
-                                onChange={(e) => {
-                                    if (e.target.value === 'Select Volts') {
-                                        return;
-                                    }
-                                    handleChange('voltage', e.target.value);
-                                }}
-                                value={panelObj.voltage}>
-                                <option>Select Volts</option>
-                                {panelObj.panel_type === 'distribution' && <option value="120/240">120/240</option>}
-                                <option value="208/120">208/120</option>
-                                <option value="480">480</option>
-                                <option value="600">600</option>
-                            </Input> */}
                             <Select
                                 id="exampleSelect"
                                 placeholder="Select Volts"
