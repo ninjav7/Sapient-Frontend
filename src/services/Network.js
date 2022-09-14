@@ -1,5 +1,6 @@
-export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net/';
 // export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -18,6 +19,7 @@ export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
+export const singleBuildingDetail = '/api/config/general/building-details';
 export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
@@ -70,6 +72,7 @@ export const updateBreaker = '/api/config/panels/update_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const resetBreakers = '/api/config/panels/reset/breakers';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
@@ -144,3 +147,15 @@ export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildi
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
 export const graphData = '/api/user_role/plug_rule/average-chart-calculation';
+
+// user permission and roles
+export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
+export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
+export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
+export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
+export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
+export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
+export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
+export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';

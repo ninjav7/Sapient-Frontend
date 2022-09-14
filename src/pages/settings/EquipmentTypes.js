@@ -37,6 +37,8 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }) => {
     let cookies = new Cookies();
@@ -151,6 +153,8 @@ const EquipmentTable = ({
     setPageSize,
     isDeviceProcessing,
 }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
     const records = [
         {
             name: 'Air Handling Unit',
@@ -218,8 +222,10 @@ const EquipmentTable = ({
                                         <tr
                                             key={index}
                                             onClick={() => {
-                                                setEquipData(record);
-                                                Toggle();
+                                                if (userPermission?.user_role === 'admin') {
+                                                    setEquipData(record);
+                                                    Toggle();
+                                                }
                                             }}
                                             className="mouse-pointer">
                                             <td className="equip-type-style">
@@ -521,6 +527,8 @@ const EquipmentTypes = () => {
         getEndUseIds();
     }, [bldgId]);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     return (
         <React.Fragment>
             <Row className="page-title ml-2">
@@ -529,14 +537,18 @@ const EquipmentTypes = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Equipment Type
-                            </button>
+                            {userPermission?.user_role === 'admin' ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Equipment Type
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>

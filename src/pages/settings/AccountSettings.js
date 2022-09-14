@@ -9,6 +9,8 @@ import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
 import { BaseUrl, updateAccount } from '../../services/Network';
 import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const AccountSettings = () => {
     const cookies = new Cookies();
@@ -16,6 +18,7 @@ const AccountSettings = () => {
 
     const accountName = UserStore.useState((s) => s.accountName);
     const [name, setName] = useState(accountName);
+    const [userPermission] = useAtom(userPermissionData);
 
     const updateAccountName = async () => {
         const accountName = name.trim();
@@ -101,16 +104,33 @@ const AccountSettings = () => {
 
                                     <FormGroup>
                                         <div className="singleline-box-style">
-                                            <Input
-                                                type="text"
-                                                name="buildingName"
-                                                id="buildingName"
-                                                placeholder="Enter Account Name"
-                                                className="single-line-style font-weight-bold"
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                onBlur={updateAccountName}
-                                            />
+                                            {userPermission?.user_role === 'admin' ? (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    onBlur={updateAccountName}
+                                                />
+                                            ) : (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={name}
+                                                    onChange={(e) => setName(e.target.value)}
+                                                    onBlur={updateAccountName}
+                                                    disabled={
+                                                        !userPermission?.permissions?.permissions
+                                                            ?.account_general_permission?.edit
+                                                    }
+                                                />
+                                            )}
                                         </div>
                                     </FormGroup>
                                 </div>

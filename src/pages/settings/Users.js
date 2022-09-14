@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listUsers, addUser } from '../../services/Network';
+import { BaseUrl, listUsers, addUser, addMemberUser, getMemberUser } from '../../services/Network';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
@@ -27,8 +27,12 @@ import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
-const UserTable = ({ userData, isUserDataFetched }) => {
+const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -51,61 +55,88 @@ const UserTable = ({ userData, isUserDataFetched }) => {
     return (
         <Card>
             <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            <th>Name</th>
-                            <th>Building Access</th>
-                            <th>Email</th>
-                            <th>Last Active</th>
-                        </tr>
-                    </thead>
-                    {isUserDataFetched ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {userData.map((record, index) => {
-                                return (
-                                    <tr className="mouse-pointer">
-                                        <td className="font-weight-bold panel-name">
-                                            <Link
-                                                to={{
-                                                    pathname: `/settings/user-profile/${record?.user_id}`,
-                                                }}>
-                                                <a>{record?.name === '' ? '-' : record?.name}</a>
-                                            </Link>
+                {dataFetched && userData?.length ? (
+                    <Table className="mb-0 bordered table-hover">
+                        <thead>
+                            <tr className="mouse-pointer">
+                                <th>Name</th>
+                                <th>Building Access</th>
+                                <th>Email</th>
+                                <th>Last Active</th>
+                            </tr>
+                        </thead>
+                        {isUserDataFetched ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
                                         </td>
-                                        <td className="">{record?.building_access.length === 0 ? '-' : ''}</td>
-                                        <td className="">{record?.email === '' ? '-' : record?.email}</td>
-                                        <td className="font-weight-bold">
-                                            {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
+
+                                        <td>
+                                            <Skeleton count={5} />
                                         </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {userData.map((record, index) => {
+                                    return (
+                                        <tr className="mouse-pointer">
+                                            <td className="font-weight-bold panel-name">
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.account_user_permission
+                                                    ?.edit ? (
+                                                    <Link to={`/settings/user-profile/single/${record?._id}`}>
+                                                        <a>
+                                                            {record?.first_name
+                                                                ? record?.first_name + ' ' + record?.last_name
+                                                                : record?.name}
+                                                        </a>
+                                                    </Link>
+                                                ) : (
+                                                    <>
+                                                        <a>
+                                                            {record?.first_name
+                                                                ? record?.first_name + ' ' + record?.last_name
+                                                                : record?.name}
+                                                        </a>
+                                                    </>
+                                                )}
+                                                {/* {!userPermission?.permissions?.permissions?.account_user_permission
+                                                    ?.edit && (
+                                                    <a>
+                                                        {record?.first_name
+                                                            ? record?.first_name + ' ' + record?.last_name
+                                                            : record?.name}
+                                                    </a>
+                                                )} */}
+                                            </td>
+                                            <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
+                                            <td className="">{record?.email === '' ? '-' : record?.email}</td>
+                                            <td className="font-weight-bold">
+                                                {record?.last_active === ''
+                                                    ? '-'
+                                                    : moment(record?.last_active).fromNow()}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
+                    </Table>
+                ) : (
+                    <>{dataFetched ? <p>You do not have the access of this page</p> : <Skeleton count={3} />}</>
+                )}
             </CardBody>
         </Card>
     );
@@ -116,6 +147,7 @@ const Users = () => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+    const [userPermission] = useAtom(userPermissionData);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -126,14 +158,16 @@ const Users = () => {
     const [generatedUserId, setGeneratedUserId] = useState('');
 
     const [userData, setUserData] = useState([]);
+    const [dataFetched, setDataFetched] = useState(false);
 
     const [userObj, setUserObj] = useState({
-        is_active: true,
         first_name: '',
         last_name: '',
         email: '',
-        user_role_id: '',
     });
+
+    console.log('userData', userData);
+    console.log('userObj', userObj);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, userObj);
@@ -154,7 +188,7 @@ const Users = () => {
             let userData = Object.assign({}, userObj);
 
             await axios
-                .post(`${BaseUrl}${addUser}`, userData, {
+                .post(`${BaseUrl}${addMemberUser}`, userData, {
                     headers: header,
                 })
                 .then((res) => {
@@ -177,14 +211,16 @@ const Users = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?ordered_by=name&sort_by=ace`;
-            await axios.get(`${BaseUrl}${listUsers}${params}`, { headers }).then((res) => {
+            // let params = `?ordered_by=name&sort_by=ace`;
+            await axios.get(`${BaseUrl}${getMemberUser}`, { headers }).then((res) => {
                 let response = res.data;
                 setUserData(response.data);
+                setDataFetched(true);
             });
             setIsUserDataFetched(false);
         } catch (error) {
             console.log(error);
+            setDataFetched(true);
             setIsUserDataFetched(false);
             console.log('Failed to fetch End Use Data');
         }
@@ -201,6 +237,18 @@ const Users = () => {
         getUsersList();
     }, [generatedUserId]);
 
+    // TODO:
+    const [addMemberUserBody, seTaddMemberUserBody] = useState({});
+
+    const createUserMember = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        axios.post(`${BaseUrl}${addMemberUser}`, { headers }).then((res) => {});
+    };
+
     return (
         <React.Fragment>
             <Row className="page-title ml-2">
@@ -209,14 +257,19 @@ const Users = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add User
-                            </button>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.account_user_permission?.create ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add User
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -244,7 +297,7 @@ const Users = () => {
 
             <Row>
                 <Col lg={8}>
-                    <UserTable userData={userData} isUserDataFetched={isUserDataFetched} />
+                    <UserTable userData={userData} isUserDataFetched={isUserDataFetched} dataFetched={dataFetched} />
                 </Col>
             </Row>
 
@@ -297,16 +350,6 @@ const Users = () => {
                                 }}
                                 value={userObj.email}
                             />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Role</Form.Label>
-                            <Input type="select" name="select" id="exampleSelect" className="font-weight-bold" disabled>
-                                <option selected>Member</option>
-                                <option>Phoenix Baker</option>
-                                <option>Olivia Rhye</option>
-                                <option>Lana Steiner</option>
-                            </Input>
                         </Form.Group>
                     </Form>
                 </Modal.Body>

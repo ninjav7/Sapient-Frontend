@@ -710,6 +710,10 @@
     justify-content: center;
 }
 
+.header-container {
+    display: flex;
+    justify-content: space-between;
+}
 .chart-border-style {
     background: #ffffff;
     border: 1px solid #eaecf0;
