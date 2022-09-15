@@ -1129,22 +1129,28 @@ const EditBreakerPanel = () => {
                             </CardHeader>
 
                             <CardBody>
-                                <Form>
-                                    <FormGroup>
-                                        <button
-                                            type="button"
-                                            onClick={handleUnlinkAlertShow}
-                                            className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
-                                            <FontAwesomeIcon
-                                                icon={faLinkHorizontalSlash}
-                                                color="#FFFFFF"
-                                                size="md"
-                                                className="mr-1"
-                                            />
-                                            Unlink All Breakers
-                                        </button>
-                                    </FormGroup>
-                                </Form>
+                                {isBreakerDataFetched ? (
+                                    <Form>
+                                        <Skeleton count={1} height={40} width={150} />
+                                    </Form>
+                                ) : (
+                                    <Form>
+                                        <FormGroup>
+                                            <button
+                                                type="button"
+                                                onClick={handleUnlinkAlertShow}
+                                                className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
+                                                <FontAwesomeIcon
+                                                    icon={faLinkHorizontalSlash}
+                                                    color="#FFFFFF"
+                                                    size="md"
+                                                    className="mr-1"
+                                                />
+                                                Unlink All Breakers
+                                            </button>
+                                        </FormGroup>
+                                    </Form>
+                                )}
                             </CardBody>
                         </Card>
                     </div>
