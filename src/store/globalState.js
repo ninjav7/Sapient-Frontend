@@ -64,7 +64,3 @@ export const currentFloorIdNow8 = atom('');
 export const currentFloorIdNow9 = atom('');
 
 // export const floor1 = atom(['Room', 'Area']);
-
-export const identifier = atom('');
-export const deviceId = atom('');
-export const passiveDeviceModal = atom('');
