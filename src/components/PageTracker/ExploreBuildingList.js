@@ -5,6 +5,7 @@ import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
 
 const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
+        console.log(buildingList);
     const history = useHistory();
     return (
         <div>
@@ -20,6 +21,7 @@ const ExploreBuildingList = ({ buildingList = [], bldStoreId }) => {
                             onClick={() => {
                                 localStorage.setItem('exploreBldId', record.building_id);
                                 localStorage.setItem('exploreBldName', record.building_name);
+                                localStorage.setItem('exploreBldTimeZone',record.timezone);
                                 ExploreBuildingStore.update((s) => {
                                     s.exploreBldId = record.building_id;
                                     s.exploreBldName = record.building_name;
