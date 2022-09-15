@@ -69,11 +69,11 @@ export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
-export const updateBreaker = '/api/config/panels/update_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
 export const resetBreakers = '/api/config/panels/reset/breakers';
+export const deletePanel = '/api/config/panels/delete';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
