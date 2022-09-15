@@ -82,7 +82,7 @@ const PassiveDevicesTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'status') && (
                                 <th className="active-device-header">
                                     <div className="passive-device-flex">
@@ -196,7 +196,7 @@ const PassiveDevicesTable = ({
                         <tbody>
                             {deviceData.map((record, index) => {
                                 return (
-                                    <tr key={index} className='mouse-pointer'>
+                                    <tr key={index} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'status') && (
                                             <td scope="row" className="text-center">
                                                 {record.status === 'Online' && (
@@ -504,13 +504,12 @@ const PassiveDevices = () => {
     };
 
     useEffect(() => {
-        console.log('createDeviceData :>> ', createDeviceData);
-    });
-
-    useEffect(() => {
         const fetchPassiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setPassiveDeviceData([]);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -567,6 +566,9 @@ const PassiveDevices = () => {
         const fetchPassiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setPassiveDeviceData([]);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
