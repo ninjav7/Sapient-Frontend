@@ -1,3 +1,4 @@
+export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-qa.azurewebsites.net/';

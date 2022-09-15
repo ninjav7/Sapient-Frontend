@@ -25,7 +25,7 @@ class RangeSlider extends React.Component {
       >
         <Range
           values={this.state.values}
-          step={STEP}
+          step={this.props.STEP}
           min={this.props.MIN}
           max={this.props.MAX}
           onChange={(values) => this.handleSelection(values)}
