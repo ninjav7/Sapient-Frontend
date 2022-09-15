@@ -60,7 +60,7 @@ export const configDonutChartWidget = (type) => {
                                         return Number(a) + Number(b);
                                     }, 0)
                                     .toFixed(3);
-                                return `${sum} ${UNITS.KWH}`;
+                                return `${parseFloat(sum)} ${UNITS.KWH}`;
                             },
                         },
                     },

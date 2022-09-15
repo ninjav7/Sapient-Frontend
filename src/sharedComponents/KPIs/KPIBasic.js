@@ -14,10 +14,7 @@ const KPIBasic = ({ title, value, className = '', classNameBody = '' }) => {
 
 KPIBasic.propTypes = {
     title: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-    ]).isRequired,
-}
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
 
 export default KPIBasic;

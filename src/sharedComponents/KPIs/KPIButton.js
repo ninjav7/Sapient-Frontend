@@ -1,11 +1,20 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { Button } from '../button';
 import { UncontrolledTooltip } from 'reactstrap';
-
 import { ReactComponent as TooltipIcon } from '../assets/icons/tooltip.svg';
 import { generateID } from '../helpers/helper';
-import PropTypes from "prop-types";
+import { Link } from 'react-router-dom';
 
-const KPIPrecentage = ({ className = '', classNameBody = '', title, value, tooltipText, tooltipId = generateID() }) => {
+const KPIButton = ({
+    title,
+    tooltipText,
+    tooltipId = generateID(),
+    labelButton,
+    linkButton,
+    className = '',
+    classNameBody = '',
+}) => {
     return (
         <div className={`KPI-component-wrapper ${className}`}>
             <div className={`KPI-component-body ${classNameBody}`}>
@@ -23,23 +32,18 @@ const KPIPrecentage = ({ className = '', classNameBody = '', title, value, toolt
                         </>
                     )}
                 </div>
-                <div className="d-flex">
-                    <p className="KPI-component-text"> {value} </p>
-                    <div className="KPI-component-unit"> % </div>
-                </div>
+                <Link className="text-decoration-none" to={linkButton}>
+                    <Button size={Button.Sizes.sm} label={labelButton} type={Button.Type.SecondaryGrey} />
+                </Link>
             </div>
         </div>
     );
 };
 
-KPIPrecentage.propTypes = {
+KPIButton.propTypes = {
     title: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.number,
-    ]).isRequired,
-    tooltipText: PropTypes.string,
-    tooltipId: PropTypes.string,
-}
+    labelButton: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    linkButton: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+};
 
-export default KPIPrecentage;
+export default KPIButton;
