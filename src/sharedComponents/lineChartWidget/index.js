@@ -17,7 +17,7 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 259
             <Typography.Body size={Typography.Sizes.xs} as="h6">
                 {subtitle}
             </Typography.Body>
-            <Brick sizeInRem={1} />
+            {/* <Brick sizeInRem={1} /> */}
             {isConsumpHistoryLoading ? (
                 <div className="loader-center-style">
                     <Spinner className="m-2" color={'primary'} />

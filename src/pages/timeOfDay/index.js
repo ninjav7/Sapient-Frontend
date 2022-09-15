@@ -56,6 +56,29 @@ const TimeOfDay = () => {
         },
         xaxis: {
             categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         let dateText = moment(timestamp).format('M/DD');
+            //         let weekText = moment(timestamp).format('ddd');
+            //         return `${weekText} ${dateText}`;
+            //     },
+            // },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
+                },
+            },
         },
         yaxis: {
             labels: {
@@ -98,6 +121,47 @@ const TimeOfDay = () => {
                 },
             },
         ],
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
+        },
     };
     const [areaChartData, setAreaChartData] = useState([]);
     const [isAvgUsageChartLoading, setIsAvgUsageChartLoading] = useState(false);
@@ -127,53 +191,7 @@ const TimeOfDay = () => {
                 useFillColorAsStroke: false,
             },
         },
-        // colors: ['#87AADE', '#F87171'],
         colors: ['#87AADE'],
-        // plotOptions: {
-        //     heatmap: {
-        //         shadeIntensity: 0.5,
-        //         radius: 0,
-        //         useFillColorAsStroke: false,
-
-        //         // xaxis: {
-        //         //     range: 4,
-        //         // },
-        //         colorScale: {
-        //             ranges: [
-        //                 {
-        //                     from: 0,
-        //                     to: 499,
-        //                     color: '#9bb4da',
-        //                     name: 'Low',
-        //                 },
-        //                 {
-        //                     from: 500,
-        //                     to: 999,
-        //                     color: '#819dc9',
-        //                     name: 'Medium',
-        //                 },
-        //                 {
-        //                     from: 1000,
-        //                     to: 1499,
-        //                     color: '#128FD9',
-        //                     name: 'High',
-        //                 },
-        //                 {
-        //                     from: 1500,
-        //                     to: 1999,
-        //                     color: '#F87171',
-        //                     name: 'Very High',
-        //                 },
-        //                 {
-        //                     from: 2000,
-        //                     to: 3999,
-        //                     color: '#FF0000',
-        //                     name: 'Extreme',
-        //                 },
-        //             ],
-        //         },
-        //     },
-        // },
         yaxis: {
             labels: {
                 show: true,
@@ -214,6 +232,45 @@ const TimeOfDay = () => {
                 '11PM',
             ],
             position: 'top',
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                return `<div class="line-chart-widget-tooltip">
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            2
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        Monday, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
         },
     };
 

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import {kFormatter} from "../helpers/helper";
+import { kFormatter } from '../helpers/helper';
 
 export const configLineChartWidget = {
     markers: {
@@ -25,7 +25,7 @@ export const configLineChartWidget = {
     toolbar: {
         show: true,
     },
-    
+
     colors: ['#5E94E4'],
     stroke: {
         width: [2, 2],
@@ -94,7 +94,7 @@ export const configLineChartWidget = {
             show: true,
             position: 'front',
             stroke: {
-                color: '#F04438',
+                color: '#7C879C',
                 width: 2,
                 dashArray: 0,
             },
