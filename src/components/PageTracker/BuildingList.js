@@ -3,8 +3,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory, useLocation } from 'react-router-dom';
 import { BuildingStore } from '../../store/BuildingStore';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
-import { useAtom } from 'jotai';
-import { userPermissionData } from '../../store/globalState';
 
 const BuildingList = ({ buildingList = [], bldStoreId }) => {
     const location = useLocation();
@@ -35,24 +33,16 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
         localStorage.setItem('buildingTimeZone', bldgData?.timezone === '' ? 'US/Eastern' : bldgData?.timezone);
     };
 
-    console.log('buildingList', buildingList);
-
-    const [userPermission] = useAtom(userPermissionData);
-
     return (
         <div>
-            {userPermission?.user_role === 'admin' ||
-            userPermission?.permissions?.permissions?.energy_building_permission?.view ? (
-                <>
-                    <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
-                    {buildingList.length === 0 && 'No Buildings found.'}
-                    {buildingList.map((record) => {
-                        console.log('buildingListTimeZone', record.timezone);
-                        const activeItem =
-                            // eslint-disable-next-line no-restricted-globals
-                            location.pathname !== '/energy/portfolio/overview' &&
-                            location.pathname !== '/energy/compare-buildings' &&
-                            record.building_id === bldStoreId;
+            <Dropdown.Header style={{ fontSize: '11px' }}>ALL BUILDINGS</Dropdown.Header>
+            {buildingList.length === 0 && 'No Buildings found.'}
+            {buildingList.map((record) => {
+                const activeItem =
+                    // eslint-disable-next-line no-restricted-globals
+                    location.pathname !== '/energy/portfolio/overview' &&
+                    location.pathname !== '/energy/compare-buildings' &&
+                    record.building_id === bldStoreId;
 
                 return (
                     <div key={record.building_id}>
