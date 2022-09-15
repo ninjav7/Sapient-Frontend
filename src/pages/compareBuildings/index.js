@@ -61,55 +61,7 @@ const useSortableData = (items, config = null) => {
     return { items: sortedItems, requestSort, sortConfig };
 };
 
-const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,isBuildingDataFetched }) => {
-    const records = [
-        {
-            name: '123 Main St. Portland OR',
-            energyDensity: 1.5,
-            energyPerChg: '22',
-            energyPerChgStatus: 'up',
-            hvacConsumption: 0.8,
-            hvacPerChg: '40',
-            hvacPerChgStatus: 'down',
-            totalConsumption: 25003,
-            totalPerChg: '4',
-            totalPerChgStatus: 'normal',
-            sqFt: 46332,
-            energyPer: 90,
-            consumtnPer: 100,
-        },
-        {
-            name: '123 Main St. Portland OR',
-            energyDensity: 1.5,
-            energyPerChg: '2',
-            energyPerChgStatus: 'normal',
-            hvacConsumption: 0.8,
-            hvacPerChg: '40',
-            hvacPerChgStatus: 'down',
-            totalConsumption: 25003,
-            totalPerChg: '40',
-            totalPerChgStatus: 'up',
-            sqFt: 46332,
-            energyPer: 75,
-            consumtnPer: 50,
-        },
-        {
-            name: '123 Main St. Portland OR',
-            energyDensity: 1.5,
-            energyPerChg: '22',
-            energyPerChgStatus: 'down',
-            hvacConsumption: 0.8,
-            hvacPerChg: '40',
-            hvacPerChgStatus: 'up',
-            totalConsumption: 25003,
-            totalPerChg: '4',
-            totalPerChgStatus: 'normal',
-            sqFt: 46332,
-            energyPer: 50,
-            consumtnPer: 20,
-        },
-    ];
-
+const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter, isBuildingDataFetched }) => {
     const [topEnergyDensity, setTopEnergyDensity] = useState(1);
     const [topHVACConsumption, setTopHVACConsumption] = useState(1);
     const [nameOrder, setNameOrder] = useState(false);
@@ -193,7 +145,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
             setTotalOrder(false);
             setNameOrder(false);
         }
-        
+
         buildingDataWithFilter(order, columnName);
     };
 
@@ -216,13 +168,16 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                         <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'name') && (
                                 <th className="table-heading-style" onClick={() => setNameOrder(!nameOrder)}>
-                                     <div className="active-device-flex">
-                                     <div  style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>Name</div>
+                                    <div className="active-device-flex">
+                                        <div
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'white',
+                                                fontWeight: 'bolder',
+                                                fontSize: '16px',
+                                            }}>
+                                            Name
+                                        </div>
                                         {nameOrder ? (
                                             <div
                                                 className="ml-2"
@@ -236,18 +191,21 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
-                                   </div>
+                                    </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'density') && (
                                 <th className="table-heading-style" onClick={() => setDensityOrder(!densityOrder)}>
                                     <div className="active-device-flex">
-                                    <div  style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>Energy Density </div>
+                                        <div
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'white',
+                                                fontWeight: 'bolder',
+                                                fontSize: '16px',
+                                            }}>
+                                            Energy Density{' '}
+                                        </div>
                                         {densityOrder ? (
                                             <div
                                                 className="ml-2"
@@ -261,7 +219,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
-                                        </div>
+                                    </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'per_change') && (
@@ -315,12 +273,15 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                             {selectedOptions.some((record) => record.value === 'total') && (
                                 <th className="table-heading-style" onClick={() => setTotalOrder(!totalOrder)}>
                                     <div className="active-device-flex">
-                                    <div  style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>Total Consumption </div>
+                                        <div
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'white',
+                                                fontWeight: 'bolder',
+                                                fontSize: '16px',
+                                            }}>
+                                            Total Consumption{' '}
+                                        </div>
                                         {totalOrder ? (
                                             <div
                                                 className="ml-2"
@@ -334,7 +295,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
-                                        </div>
+                                    </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'total_per') && (
@@ -356,12 +317,15 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                             {selectedOptions.some((record) => record.value === 'sq_ft') && (
                                 <th className="table-heading-style" onClick={() => setSquareFtOrder(!squareFtOrder)}>
                                     <div className="active-device-flex">
-                                   <div  style={{
-                                            border: 'none',
-                                            backgroundColor: 'white',
-                                            fontWeight: 'bolder',
-                                            fontSize: '16px',
-                                        }}>Sq. Ft. </div>
+                                        <div
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'white',
+                                                fontWeight: 'bolder',
+                                                fontSize: '16px',
+                                            }}>
+                                            Sq. Ft.{' '}
+                                        </div>
                                         {squareFtOrder ? (
                                             <div
                                                 className="ml-2"
@@ -375,7 +339,7 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                                 <FontAwesomeIcon icon={faAngleDown} color="grey" size="md" />
                                             </div>
                                         )}
-                                        </div>
+                                    </div>
                                 </th>
                             )}
                             {selectedOptions.some((record) => record.value === 'load') && (
@@ -397,176 +361,171 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                         </tr>
                     </thead>
                     {isBuildingDataFetched ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                    </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                    <tbody>
-                        {buildingsData.map((record, index) => {
-                            return (
-                                <tr key={record.building_id} className="mouse-pointer">
-                                    {selectedOptions.some((record) => record.value === 'name') && (
-                                        <th scope="row">
-                                            <Link
-                                                to={{
-                                                    pathname: `/energy/building/overview/${record.building_id}`,
-                                                }}>
-                                                <a className="building-name">{record.building_name}</a>
-                                            </Link>
-                                            <span className="badge badge-soft-secondary mr-2">Office</span>
-                                        </th>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'density') && (
-                                        <td className="table-content-style">
-                                            {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq. ft.
-                                            <br />
-                                            <div style={{ width: '100%', display: 'inline-block' }}>
-                                                {index === 0 && record.energy_density === 0 && (
-                                                    <Line
-                                                        percent={0}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#D14065`}
-                                                        strokeLinecap="round"
-                                                    />
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {buildingsData.map((record, index) => {
+                                return (
+                                    <tr key={record.building_id} className="mouse-pointer">
+                                        {selectedOptions.some((record) => record.value === 'name') && (
+                                            <th scope="row">
+                                                <Link
+                                                    to={{
+                                                        pathname: `/energy/building/overview/${record.building_id}`,
+                                                    }}>
+                                                    <a className="building-name">{record.building_name}</a>
+                                                </Link>
+                                                <span className="badge badge-soft-secondary mr-2">Office</span>
+                                            </th>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'density') && (
+                                            <td className="table-content-style">
+                                                {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq.
+                                                ft.
+                                                <br />
+                                                <div style={{ width: '100%', display: 'inline-block' }}>
+                                                    {index === 0 && record.energy_density === 0 && (
+                                                        <Line
+                                                            percent={0}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#D14065`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 0 && record.energy_density > 0 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#D14065`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 1 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#DF5775`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 2 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#EB6E87`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 3 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#EB6E87`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 4 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#FC9EAC`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 5 && (
+                                                        <Line
+                                                            percent={parseFloat(
+                                                                (record.energy_density / topEnergyDensity) * 100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#FFCFD6`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'per_change') && (
+                                            <td>
+                                                {record.energy_consumption.now >= record.energy_consumption.old ? (
+                                                    <button
+                                                        className="button-danger text-danger btn-font-style"
+                                                        style={{ width: 'auto', marginBottom: '4px' }}>
+                                                        <i className="uil uil-arrow-growth">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.energy_consumption.now,
+                                                                    record.energy_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="button-success text-success btn-font-style"
+                                                        style={{ width: 'auto' }}>
+                                                        <i className="uil uil-chart-down">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.energy_consumption.now,
+                                                                    record.energy_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
                                                 )}
-                                                {index === 0 && record.energy_density > 0 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#D14065`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 1 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#DF5775`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 2 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#EB6E87`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 3 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#EB6E87`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 4 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#FC9EAC`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 5 && (
-                                                    <Line
-                                                        percent={parseFloat(
-                                                            (record.energy_density / topEnergyDensity) * 100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#FFCFD6`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                            </div>
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'per_change') && (
-                                        <td>
-                                            {record.energy_consumption.now >= record.energy_consumption.old ? (
-                                                <button
-                                                    className="button-danger text-danger btn-font-style"
-                                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                                    <i className="uil uil-arrow-growth">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.energy_consumption.now,
-                                                                record.energy_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="button-success text-success btn-font-style"
-                                                    style={{ width: 'auto' }}>
-                                                    <i className="uil uil-chart-down">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.energy_consumption.now,
-                                                                record.energy_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            )}
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'hvac') && (
-                                        <td className="table-content-style">
-                                            {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq. ft.
-                                            <br />
-                                            <div style={{ width: '100%', display: 'inline-block' }}>
-                                                {/* <Line
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'hvac') && (
+                                            <td className="table-content-style">
+                                                {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq.
+                                                ft.
+                                                <br />
+                                                <div style={{ width: '100%', display: 'inline-block' }}>
+                                                    {/* <Line
                                                 percent={percentageHandler(
                                                     record.hvac_consumption.now,
                                                     record.hvac_consumption.old
@@ -576,171 +535,171 @@ const BuildingTable = ({ buildingsData, selectedOptions,buildingDataWithFilter,i
                                                 strokeColor="#C64245"
                                                 strokeLinecap="round"
                                             /> */}
-                                                {index === 0 && record.hvac_consumption.now === 0 && (
-                                                    <Line
-                                                        percent={0}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#D14065`}
-                                                        strokeLinecap="round"
-                                                    />
+                                                    {index === 0 && record.hvac_consumption.now === 0 && (
+                                                        <Line
+                                                            percent={0}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#D14065`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 0 && record.hvac_consumption.now > 0 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#D14065`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 1 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#DF5775`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 2 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#EB6E87`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 3 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#EB6E87`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 4 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#FC9EAC`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                    {index === 5 && (
+                                                        <Line
+                                                            percent={(
+                                                                (record.hvac_consumption.now / topHVACConsumption) *
+                                                                100
+                                                            ).toFixed(2)}
+                                                            strokeWidth="3"
+                                                            trailWidth="3"
+                                                            strokeColor={`#FFCFD6`}
+                                                            strokeLinecap="round"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'hvac_per') && (
+                                            <td>
+                                                {record.hvac_consumption.now >= record.hvac_consumption.old ? (
+                                                    <button
+                                                        className="button-danger text-danger btn-font-style"
+                                                        style={{ width: 'auto', marginBottom: '4px' }}>
+                                                        <i className="uil uil-arrow-growth">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.hvac_consumption.now,
+                                                                    record.hvac_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="button-success text-success btn-font-style"
+                                                        style={{ width: 'auto' }}>
+                                                        <i className="uil uil-chart-down">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.hvac_consumption.now,
+                                                                    record.hvac_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
                                                 )}
-                                                {index === 0 && record.hvac_consumption.now > 0 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#D14065`}
-                                                        strokeLinecap="round"
-                                                    />
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'total') && (
+                                            <td className="value-style">
+                                                {(record.total_consumption / 1000).toFixed(5)}
+                                                kWh
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'total_per') && (
+                                            <td>
+                                                {record.total_consumption >= record.energy_consumption.old ? (
+                                                    <button
+                                                        className="button-danger text-danger btn-font-style"
+                                                        style={{ width: 'auto', marginBottom: '4px' }}>
+                                                        <i className="uil uil-arrow-growth">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.total_consumption,
+                                                                    record.energy_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        className="button-success text-success btn-font-style"
+                                                        style={{ width: 'auto' }}>
+                                                        <i className="uil uil-chart-down">
+                                                            <strong>
+                                                                {percentageHandler(
+                                                                    record.total_consumption,
+                                                                    record.energy_consumption.old
+                                                                )}
+                                                                %
+                                                            </strong>
+                                                        </i>
+                                                    </button>
                                                 )}
-                                                {index === 1 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#DF5775`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 2 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#EB6E87`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 3 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#EB6E87`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 4 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#FC9EAC`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                                {index === 5 && (
-                                                    <Line
-                                                        percent={(
-                                                            (record.hvac_consumption.now / topHVACConsumption) *
-                                                            100
-                                                        ).toFixed(2)}
-                                                        strokeWidth="3"
-                                                        trailWidth="3"
-                                                        strokeColor={`#FFCFD6`}
-                                                        strokeLinecap="round"
-                                                    />
-                                                )}
-                                            </div>
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'hvac_per') && (
-                                        <td>
-                                            {record.hvac_consumption.now >= record.hvac_consumption.old ? (
-                                                <button
-                                                    className="button-danger text-danger btn-font-style"
-                                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                                    <i className="uil uil-arrow-growth">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.hvac_consumption.now,
-                                                                record.hvac_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="button-success text-success btn-font-style"
-                                                    style={{ width: 'auto' }}>
-                                                    <i className="uil uil-chart-down">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.hvac_consumption.now,
-                                                                record.hvac_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            )}
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'total') && (
-                                        <td className="value-style">
-                                            {(record.total_consumption / 1000).toFixed(5)}
-                                            kWh
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'total_per') && (
-                                        <td>
-                                            {record.total_consumption >= record.energy_consumption.old ? (
-                                                <button
-                                                    className="button-danger text-danger btn-font-style"
-                                                    style={{ width: 'auto', marginBottom: '4px' }}>
-                                                    <i className="uil uil-arrow-growth">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.total_consumption,
-                                                                record.energy_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="button-success text-success btn-font-style"
-                                                    style={{ width: 'auto' }}>
-                                                    <i className="uil uil-chart-down">
-                                                        <strong>
-                                                            {percentageHandler(
-                                                                record.total_consumption,
-                                                                record.energy_consumption.old
-                                                            )}
-                                                            %
-                                                        </strong>
-                                                    </i>
-                                                </button>
-                                            )}
-                                        </td>
-                                    )}
-                                    {selectedOptions.some((record) => record.value === 'sq_ft') && (
-                                        <td className="value-style">
-                                            {record.sq_ft.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                        </td>
-                                    )}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
+                                            </td>
+                                        )}
+                                        {selectedOptions.some((record) => record.value === 'sq_ft') && (
+                                            <td className="value-style">
+                                                {record.sq_ft.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                            </td>
+                                        )}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
                     )}
                 </Table>
             </CardBody>
@@ -765,7 +724,7 @@ const CompareBuildings = () => {
         { label: 'Monitored Load', value: 'load' },
     ];
 
-    const [isBuildingDataFetched,setIsBuildingDataFetched] = useState([]);
+    const [isBuildingDataFetched, setIsBuildingDataFetched] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
 
     useEffect(() => {
@@ -806,7 +765,6 @@ const CompareBuildings = () => {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
@@ -827,6 +785,7 @@ const CompareBuildings = () => {
         };
         compareBuildingsData();
     }, [daysCount]);
+
     const buildingDataWithFilter = async (order, filterBy) => {
         try {
             setIsBuildingDataFetched(true);
@@ -836,12 +795,12 @@ const CompareBuildings = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let count = parseInt(localStorage.getItem('dateFilter'));
-                let params = `?days=${count}&${filterBy}=${order}`;
+            let params = `?days=${count}&${filterBy}=${order}`;
             await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
                 let response = res.data;
-                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                    setBuildingsData(response);
-                    setIsBuildingDataFetched(false);
+                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response);
+                setIsBuildingDataFetched(false);
             });
         } catch (error) {
             console.log(error);
@@ -898,7 +857,12 @@ const CompareBuildings = () => {
             </Row>
             <Row>
                 <Col xl={12}>
-                    <BuildingTable buildingsData={buildingsData} selectedOptions={selectedOptions} buildingDataWithFilter={buildingDataWithFilter} isBuildingDataFetched={isBuildingDataFetched}/>
+                    <BuildingTable
+                        buildingsData={buildingsData}
+                        selectedOptions={selectedOptions}
+                        buildingDataWithFilter={buildingDataWithFilter}
+                        isBuildingDataFetched={isBuildingDataFetched}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

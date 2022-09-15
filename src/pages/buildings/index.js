@@ -448,6 +448,15 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
+                },
+            },
         },
         yaxis: {
             labels: {
@@ -1398,7 +1407,7 @@ const BuildingOverview = () => {
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now / 1000}
+                                description={overview?.total_consumption.now}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
@@ -1432,7 +1441,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={(overview.average_energy_density.now / 1000).toFixed(5)}
+                                description={overview.average_energy_density.now.toFixed(2)}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
