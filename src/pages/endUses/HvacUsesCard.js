@@ -7,11 +7,9 @@ const HvacUsesCard = ({
     bldgId,
     usage,
     lastPeriodPerTotalHrs,
-    lastYearPerTotalHrs,
     lastPeriodPerAfterHrs,
     lastYearPerAfterHrs,
     lastPeriodPerTotalHrsNormal,
-    lastYearPerTotalHrsNormal,
     lastPeriodPerAfterHrsNormal,
     lastYearPerAfterHrsNormal,
 }) => {

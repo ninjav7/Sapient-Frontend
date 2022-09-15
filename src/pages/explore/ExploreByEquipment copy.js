@@ -442,10 +442,10 @@ const ExploreByEquipment = () => {
             label: 'Today',
             value: 0,
         },
-        // {
-        //     label: 'Last Day',
-        //     value: 1,
-        // },
+        {
+            label: 'Last Day',
+            value: 1,
+        },
         {
             label: 'Last 7 Days',
             value: 7,
@@ -596,72 +596,28 @@ const ExploreByEquipment = () => {
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
     const [floorListAPI, setFloorListAPI] = useState([]);
-    const [selectedLocation,setSelectedLocation]=useState([]);
+    const [selectedLocation,setSelectedLocation]=useState('');
     const [selectedEquipType,setSelectedEquipType]=useState([]);
     const [selectedEndUse,setSelectedEndUse]=useState([]);
-    const [selectedSpaceType,setSelectedSpaceType]=useState([]);
     const [equipmentFilter, setEquipmentFilter] = useState({});
     const [minConValue, set_minConValue] = useState(0.00);
     const [maxConValue, set_maxConValue] = useState(0.00);
     const [minPerValue, set_minPerValue] = useState(0);
     const [maxPerValue, set_maxPerValue] = useState(100);
     const [spaceType,setSpaceType]=useState([]);
-    const [removeDuplicateFlag, setRemoveDuplicateFlag]=useState(false);
     
-    const handleAllEquip=(e)=>{
-        let slt = document.getElementById("allEquipType");
-        if(slt.checked===true){
-            let selectEquip=[];
-            for(let i=0;i<filteredEquipOptions.length;i++){
-                selectEquip.push(filteredEquipOptions[i].value);
-                let check=document.getElementById(filteredEquipOptions[i].value)
-                check.checked=slt.checked;
-            }
-            //console.log('selected Equip Type ',selectEquip);
-            setSelectedEquipType(selectEquip)
-        }
-        else{
-            setSelectedEquipType([]);
-            for(let i=0;i<filteredEquipOptions.length;i++){
-                let check=document.getElementById(filteredEquipOptions[i].value)
-                check.checked=slt.checked;
-            }
-        }
-    }
     const handleSelectedEquip=(e)=>{
         let selection=document.getElementById(e.target.value);
         if(selection.checked===true)
             setSelectedEquipType([...selectedEquipType,e.target.value]);
         else
         {
-            let slt = document.getElementById("allEquipType");
-            slt.checked=selection.checked;
-            //console.log(e.target.value);
+            console.log(e.target.value);
             let arr = selectedEquipType.filter(function (item) {
                 return item !== e.target.value
             })
-            //console.log(arr);
+            console.log(arr);
             setSelectedEquipType(arr)
-        }
-    }
-    const handleAllEndUse=(e)=>{
-        let slt = document.getElementById("allEndUse");
-        if(slt.checked===true){
-            let selectEndUse=[];
-            for(let i=0;i<filteredEndUseOptions.length;i++){
-                selectEndUse.push(filteredEndUseOptions[i].value);
-                let check=document.getElementById(filteredEndUseOptions[i].value)
-                check.checked=slt.checked;
-            }
-            //console.log('selected End Use ',selectEndUse);
-            setSelectedEndUse(selectEndUse)
-        }
-        else{
-            setSelectedEndUse([]);
-            for(let i=0;i<filteredEndUseOptions.length;i++){
-                let check=document.getElementById(filteredEndUseOptions[i].value)
-                check.checked=slt.checked;
-            }
         }
     }
     const handleSelectedEndUse=(e)=>{
@@ -670,85 +626,12 @@ const ExploreByEquipment = () => {
             setSelectedEndUse([...selectedEndUse,e.target.value]);
         else
         {
-            let slt = document.getElementById("allEndUse");
-            slt.checked=selection.checked;
-            //console.log(e.target.value);
+            console.log(e.target.value);
             let arr = selectedEndUse.filter(function (item) {
                 return item !== e.target.value
             })
-            //console.log(arr);
+            console.log(arr);
             setSelectedEndUse(arr)
-        }
-    }
-    const handleAllLocation=(e)=>{
-        let slt = document.getElementById("allLocation");
-        if(slt.checked===true){
-            let selectLoc=[];
-            for(let i=0;i<floorListAPI.length;i++){
-                //console.log(floorListAPI[i].floor_id)
-                selectLoc.push(floorListAPI[i].floor_id);
-                let check=document.getElementById(floorListAPI[i].floor_id)
-                check.checked=slt.checked;
-            }
-            //console.log('selected Space Type ',selectLoc);
-            setSelectedLocation(selectLoc)
-        }
-        else{
-            setSelectedLocation([]);
-            for(let i=0;i<floorListAPI.length;i++){
-                let check=document.getElementById(floorListAPI[i].floor_id)
-                check.checked=slt.checked;
-            }
-        }
-    }
-    const handleSelectedLocation=(e)=>{
-        let selection=document.getElementById(e.target.value);
-        if(selection.checked===true)
-            setSelectedLocation([...selectedLocation,e.target.value]);
-        else
-        {
-            //console.log(e.target.value);
-            let arr = selectedLocation.filter(function (item) {
-                return item !== e.target.value
-            })
-            //console.log(arr);
-            setSelectedLocation(arr)
-        }
-    }
-    const handleAllSpaceType=(e)=>{
-        let slt = document.getElementById("allSpaceType");
-        if(slt.checked===true){
-            let selectSpace=[];
-            for(let i=0;i<filteredSpaceTypeOptions.length;i++){
-                selectSpace.push(filteredSpaceTypeOptions[i].value);
-                let check=document.getElementById(filteredSpaceTypeOptions[i].value)
-                check.checked=slt.checked;
-            }
-            //console.log('selected Space Type ',selectSpace);
-            setSelectedSpaceType(selectSpace)
-        }
-        else{
-            setSelectedSpaceType([]);
-            for(let i=0;i<filteredSpaceTypeOptions.length;i++){
-                let check=document.getElementById(filteredSpaceTypeOptions[i].value)
-                check.checked=slt.checked;
-            }
-        }
-    }
-    const handleSelectedSpaceType=(e)=>{
-        let selection=document.getElementById(e.target.value);
-        if(selection.checked===true)
-            setSelectedSpaceType([...selectedSpaceType,e.target.value]);
-        else
-        {
-            let slt = document.getElementById("allSpaceType");
-            slt.checked=selection.checked;
-            //console.log(e.target.value);
-            let arr = selectedSpaceType.filter(function (item) {
-                return item !== e.target.value
-            })
-            //console.log(arr);
-            setSelectedSpaceType(arr)
         }
     }
     const handleInput = (values) => {
@@ -807,8 +690,9 @@ const ExploreByEquipment = () => {
 
     const uniqueLocationIds = [];
     const [removeLocationDuplication, setRemoveLocationDuplication] = useState();
+
     const uniqueSpaceTypeIds = [];
-    const [removeSpaceTypeDuplication, setRemoveSpaceTyepDuplication] = useState();
+    const [removeSpaceTypeDuplication, setRemoveSpaceTypeDuplication] = useState();
 
     const removeDuplicates = () => {
         const uniqueEqupimentTypes = exploreTableData.filter((element) => {
@@ -837,39 +721,37 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
+
         const uniqueSpaceType = exploreTableData.filter((element) => {
             const isDuplicate = uniqueSpaceTypeIds.includes(element?.location_type);
 
             if (!isDuplicate) {
-                uniqueSpaceTypeIds.push(element?.location_type);
+                uniqueSpaceTypeIds.push(element?.locatio_type);
                 return true;
             }
             return false;
         });
-
         setRemoveEndUseDuplication(uniqueEndUse);
-        // console.log("Unique End Use ",uniqueEndUse);
-        // console.log("Unique Equipment Type ", uniqueEqupimentTypes)
-        // console.log("Unique location ", uniqueLocation)
-        // console.log("Unique Space Type ",uniqueSpaceType)
+        console.log("Unique End Use ",uniqueEndUse);
+        console.log("Unique Equipment Type ", uniqueEqupimentTypes)
+        console.log("Unique location ", uniqueLocation)
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
         setRemoveLocationDuplication(uniqueLocation);
-        setRemoveSpaceTyepDuplication(uniqueSpaceType);
+        setRemoveSpaceTypeDuplication(uniqueSpaceType);
     };
 
 
     useEffect(() => {
-        // console.log("exploreTableData")
+        console.log("exploreTableData")
         if(exploreTableData.length===0){
             setRemoveEndUseDuplication([]);
             setRemoveEqupimentTypesDuplication([]);
             setRemoveLocationDuplication([]);
-            setRemoveSpaceTyepDuplication([]);
         }
         else
             removeDuplicates();
-    }, [removeDuplicateFlag]);
+    }, [exploreTableData]);
 
 
     useEffect(() => {
@@ -896,7 +778,7 @@ const ExploreByEquipment = () => {
             };
             axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
                 let response = res?.data?.data?.[0]?.generic_spacetypes;
-                // console.log(response);
+                console.log(response);
                 setSpaceType(response)
                 // response.sort((a, b) => {
                 //     return a.name.localeCompare(b.name);
@@ -919,7 +801,7 @@ const ExploreByEquipment = () => {
                             let rec={label:response[i].equipment_type, value:response[i].equipment_id}
                             equipData.push(rec);
                         }
-                        // console.log("equipData ",equipData)
+                        console.log("equipData ",equipData)
                         setEquipOptions(equipData)
                         // response.sort((a, b) => {
                         //     return a.equipment_type.localeCompare(b.equipment_type);
@@ -945,7 +827,7 @@ const ExploreByEquipment = () => {
                             let rec={label:response[i].name, value:response[i].end_user_id}
                             equipData.push(rec);
                         }
-                        // console.log("equipData ",equipData)
+                        console.log("equipData ",equipData)
                         setEndUseOptions(equipData)
                     });
                 } catch (error) {
@@ -980,7 +862,8 @@ const ExploreByEquipment = () => {
                             set_maxConValue(((responseData.data[0].consumption.now)/1000).toFixed(3))
                             }
                             setExploreTableData(responseData.data);
-                            setRemoveDuplicateFlag(!removeDuplicateFlag)
+                            
+    
                             setIsExploreDataLoading(false);
                         });
                 } catch (error) {
@@ -1017,7 +900,7 @@ const ExploreByEquipment = () => {
             //     return item.id !== removeEquipmentId
             // })
         }
-        // console.log(rvmEquip);
+        console.log(rvmEquip);
         setFilteredEquipOptions(rvmEquip);
         setFilteredEquipOptionsCopy(rvmEquip);
     },[equipOptions,removeEqupimentTypesDuplication])
@@ -1042,7 +925,7 @@ const ExploreByEquipment = () => {
             //     return item.id !== removeEquipmentId
             // })
         }
-        // console.log(rvmEndUse);
+        console.log(rvmEndUse);
         setFilteredEndUseOptions(rvmEndUse);
         setFilteredEndUseOptionsCopy(rvmEndUse);
     },[endUseOptions,removeEndUseDuplication])
@@ -1064,36 +947,35 @@ const ExploreByEquipment = () => {
          
          
         }
-        // console.log(rvmLocation);
+        console.log(rvmLocation);
         setFilteredLocationOptions(rvmLocation);
         setFilteredLocationOptionsCopy(rvmLocation);
     },[floorListAPI,removeLocationDuplication])
 
     const [filteredSpaceTypeOptions,setFilteredSpaceTypeOptions]=useState([]);
     const [filteredSpaceTypeOptionsCopy,setFilteredSpaceTypeOptionsCopy]=useState([]);
-
     useEffect(()=>{
         if(spaceType.length===0 || removeSpaceTypeDuplication.length===0){
-            setFilteredSpaceTypeOptions([])
-            setFilteredSpaceTypeOptionsCopy([])
+            setFilteredSpaceTypeOptions([]);
+            setFilteredSpaceTypeOptionsCopy([]);
             return;
         }
-        let rvmSpaceType=[];
+        let rvmSpace=[];
         for(var i=0;i<removeSpaceTypeDuplication.length;i++){
             let arr=spaceType.filter(function(item){
                 return item.name===removeSpaceTypeDuplication[i].location_type
             })
-            if(arr.length>0){
-            let rec={label:arr[0].name, value:arr[0].id}
-            rvmSpaceType.push(rec)
-            }
+            con
+            //let rec={label:arr[0].name, value:arr[0].id}
+            //rvmSpace.push(rec)
             // arr1 = seriesData.filter(function (item) {
             //     return item.id !== removeEquipmentId
             // })
         }
-        // console.log(rvmSpaceType);
-        setFilteredSpaceTypeOptions(rvmSpaceType);
-        setFilteredSpaceTypeOptionsCopy(rvmSpaceType);
+    
+        console.log(rvmSpace);
+        setFilteredSpaceTypeOptions(rvmSpace);
+        setFilteredSpaceTypeOptionsCopy(rvmSpace);
     },[spaceType,removeSpaceTypeDuplication])
 
     useEffect(() => {
@@ -1303,8 +1185,10 @@ const ExploreByEquipment = () => {
         let topVal=(topEnergyConsumption/1000).toFixed(3)
         switch(val){
             case 'consumption':
-                if(selectedLocation.length !==0){
-                    arr1['location']= selectedLocation;
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
                 }
                 if(selectedEquipType.length!==0){
                     arr1['equipment_types']=selectedEquipType;
@@ -1312,14 +1196,11 @@ const ExploreByEquipment = () => {
                 if(selectedEndUse.length!==0){
                     arr1['end_use']=selectedEndUse;
                 }
-                if(selectedSpaceType.length!==0){
-                    arr1['space_type']=selectedSpaceType;
-                }
                 set_minConValue(0.00);
                 set_maxConValue(topVal);
                 break;
             case 'location':
-                setSelectedLocation([])
+                setSelectedLocation('')
                 if(maxConValue > 0.01 && (maxConValue!==topVal || minConValue!==0.00)){
                     arr1['consumption_range']= {
                         "gte": minConValue*1000,
@@ -1331,9 +1212,6 @@ const ExploreByEquipment = () => {
                 }
                 if(selectedEndUse.length!==0){
                     arr1['end_use']=selectedEndUse;
-                }
-                if(selectedSpaceType.length!==0){
-                    arr1['space_type']=selectedSpaceType;
                 }
                 break;
             case 'equip_type':
@@ -1347,11 +1225,10 @@ const ExploreByEquipment = () => {
                 if(selectedEndUse.length!==0){
                     arr1['end_use']=selectedEndUse;
                 }
-                if(selectedLocation.length !==0){
-                    arr1['location']= selectedLocation;
-                }
-                if(selectedSpaceType.length!==0){
-                    arr1['space_type']=selectedSpaceType;
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
                 }
                 break;
             case 'endUse_category':
@@ -1365,31 +1242,12 @@ const ExploreByEquipment = () => {
                 if(selectedEquipType.length!==0){
                     arr1['equipment_types']=selectedEquipType;
                 }
-                if(selectedLocation.length !==0){
-                    arr1['location']=selectedLocation;
+                if(selectedLocation !==""){
+                    arr1['location']= [
+                        selectedLocation
+                      ];
                 }
-                if(selectedSpaceType.length!==0){
-                    arr1['space_type']=selectedSpaceType;
-                }
-                break; 
-            case 'location_type':
-                    setSelectedSpaceType([])
-                    if(maxConValue > 0.01  && (maxConValue!==topVal || minConValue!==0.00)){
-                        arr1['consumption_range']= {
-                            "gte": minConValue*1000,
-                            "lte": maxConValue*1000
-                          };
-                    }
-                    if(selectedEquipType.length!==0){
-                        arr1['equipment_types']=selectedEquipType;
-                    }
-                    if(selectedLocation.length !==0){
-                        arr1['location']= selectedLocation;
-                    }
-                    if(selectedEndUse.length!==0){
-                        arr1['end_use']=selectedEndUse;
-                    }
-                    break;               
+                break;               
 
         }
         exploreFilterDataFetch(arr1);
@@ -1414,7 +1272,7 @@ const ExploreByEquipment = () => {
     // },[APIFlag])
     useEffect(()=>{
 
-        if(selectedLocation.length===0 && (maxConValue===0.00 || maxConValue===0.01) && selectedEquipType.length===0 && selectedEndUse.length===0 && selectedSpaceType.length===0){
+        if(selectedLocation==="" && (maxConValue===0.00 || maxConValue===0.01) && selectedEquipType.length===0 && selectedEndUse.length===0){
             return;
         }
         let arr = {};
@@ -1426,8 +1284,10 @@ const ExploreByEquipment = () => {
                 "lte": maxConValue*1000
               };
         }
-        if(selectedLocation.length !==0){
-            arr['location']= selectedLocation;
+        if(selectedLocation !==""){
+            arr['location']= [
+                selectedLocation
+              ];
         }
         if(selectedEquipType.length!==0){
             arr['equipment_types']=selectedEquipType;
@@ -1435,12 +1295,9 @@ const ExploreByEquipment = () => {
         if(selectedEndUse.length!==0){
             arr['end_use']=selectedEndUse;
         }
-        if(selectedSpaceType.length!==0){
-            arr['space_type']=selectedSpaceType;
-        }
         exploreFilterDataFetch(arr);
 
-    },[APIFlag,APILocFlag,selectedEquipType,selectedEndUse,selectedSpaceType])
+    },[APIFlag,APILocFlag,selectedEquipType,selectedEndUse])
 
     const clearFilterData=()=>{
         let arr= {
@@ -1454,31 +1311,19 @@ const ExploreByEquipment = () => {
         if(txt!==""){
             var search = new RegExp(txt , 'i');
             let b = filteredEndUseOptions.filter(item => search.test(item.label));
-            // console.log(b);
+            console.log(b);
             setFilteredEndUseOptions(b);
         }
         else{
             setFilteredEndUseOptions(filteredEndUseOptionsCopy);
         }
    }
-   const handleSpaceTypeSearch=(e)=>{
-    let txt=e.target.value;
-    if(txt!==""){
-        var search = new RegExp(txt , 'i');
-        let b = filteredSpaceTypeOptions.filter(item => search.test(item.label));
-        // console.log(b);
-        setFilteredSpaceTypeOptions(b);
-    }
-    else{
-        setFilteredSpaceTypeOptions(filteredSpaceTypeOptionsCopy);
-    }
-}
    const handleEquipTypeSearch=(e)=>{
     let txt=e.target.value;
     if(txt!==""){
         var search = new RegExp(txt , 'i');
         let b = filteredEquipOptions.filter(item => search.test(item.label));
-        // console.log(b);
+        console.log(b);
         setFilteredEquipOptions(b);
     }
     else{
@@ -1491,7 +1336,7 @@ const handleLocationSearch=(e)=>{
     if(txt!==""){
         var search = new RegExp(txt , 'i');
         let b = filteredLocationOptions.filter(item => search.test(item.name));
-        // console.log(b);
+        console.log(b);
         setFilteredLocationOptions(b);
     }
     else{
@@ -1595,7 +1440,7 @@ const handleLocationSearch=(e)=>{
                                         <input className='pop-inputbox' type="text" value={minConValue}/>  <input className='pop-inputbox' type="text" value={maxConValue}/>
                                     </div>
                                     <div style={{marginTop:"2rem"}}>
-                                        <RangeSlider name='consumption' STEP={0.01} MIN={0} range={[minConValue, maxConValue]}  MAX={((topEnergyConsumption/1000)+0.5).toFixed(3)} onSelectionChange={handleInput}/>
+                                        <RangeSlider name='consumption' MIN={0} range={[minConValue, maxConValue]}  MAX={((topEnergyConsumption/1000)+0.5).toFixed(3)} onSelectionChange={handleInput}/>
                                     </div>
                                 </div>
                             </Dropdown.Menu>
@@ -1625,7 +1470,7 @@ const handleLocationSearch=(e)=>{
                                         <input className='pop-inputbox' type="text" value={minPerValue}/>  <input className='pop-inputbox' type="text" value={maxPerValue}/>
                                     </div>
                                     <div style={{marginTop:"2rem"}}>
-                                        <RangeSlider name='consumption' STEP={1} MIN={0} range={[minPerValue, maxPerValue]}  MAX={100} onSelectionChange={handleInputPer}/>
+                                        <RangeSlider name='consumption' MIN={0} range={[minPerValue, maxPerValue]}  MAX={100} onSelectionChange={handleInputPer}/>
                                     </div>
                                 </div>
                             </Dropdown.Menu>
@@ -1657,19 +1502,12 @@ const handleLocationSearch=(e)=>{
                                     <button className='btn btn-primary d-inline ml-2' onClick={(e)=>{setAPILocFlag(!APILocFlag)}}>Save</button>
                                     </div>
                                     <div className='pop-inputbox-wrapper mt-4 mb-2 p-1'><span className='pop-text'>{localStorage.getItem('exploreBldName')}</span></div>
-                                    <div className={floorListAPI.length>4?`hScroll`:`hHundredPercent`}>
-                                    <div className='floor-box'>
-                                                <div>
-                                                <input type="checkbox" className='mr-2' id="allLocation" onClick={(e)=>{handleAllLocation(e)}}/>
-                                                <span>Select All</span>
-                                                </div>
-                                            </div>
-                                    {floorListAPI.map((record)=>{
+                                    {filteredLocationOptions.map((record)=>{
                                         
                                             return(
                                                 <div className='floor-box'>
                                                     <div>
-                                                    <input type="checkbox" className='mr-2' id={record.floor_id} value={record.floor_id} onClick={(e)=>{handleSelectedLocation(e)}}/>
+                                                    <input type="checkbox" className='mr-2' value={record.floor_id} onClick={(e)=>{setSelectedLocation(record.floor_id)}}/>
                                                     <span>{record.name}</span>
                                                     </div>
                                                     <div style={{display:"flex"}}>
@@ -1680,7 +1518,6 @@ const handleLocationSearch=(e)=>{
                                             )
                                             
                                     })}
-                                    </div>
                                     <div>
                                     </div>
                                 </div>
@@ -1709,19 +1546,13 @@ const handleLocationSearch=(e)=>{
                                             <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                                             <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleSpaceTypeSearch(e)}}/>
                                         </div>
-                                        <div className={filteredSpaceTypeOptions.length>4?`hScroll`:`hHundredPercent`}>
-                                        <div className='floor-box'>
-                                                <div>
-                                                <input type="checkbox" className='mr-2' id="allSpaceType" onClick={(e)=>{handleAllSpaceType(e)}}/>
-                                                <span>Select All</span>
-                                                </div>
-                                            </div>
+                                        <div  className={filteredSpaceTypeOptions.length>4?`hScroll`:`hHundredPercent`}>
                                         {filteredSpaceTypeOptions.map((record)=>{
                                         
                                         return(
                                             <div className='floor-box'>
                                                 <div>
-                                                <input type="checkbox" className='mr-2' id={record.value} value={record.value} onClick={(e)=>{handleSelectedSpaceType(e)}}/>
+                                                <input type="checkbox" className='mr-2' id={record.value} value={record.value} onClick={(e)=>{handleSelectedEquip(e)}}/>
                                                 <span>{record.label}</span>
                                                 </div>
                                             </div>
@@ -1756,12 +1587,6 @@ const handleLocationSearch=(e)=>{
                                             <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleEquipTypeSearch(e)}}/>
                                         </div>
                                         <div  className={filteredEquipOptions.length>4?`hScroll`:`hHundredPercent`}>
-                                        <div className='floor-box'>
-                                                <div>
-                                                <input type="checkbox" className='mr-2' id="allEquipType" onClick={(e)=>{handleAllEquip(e)}}/>
-                                                <span>Select All</span>
-                                                </div>
-                                            </div>
                                         {filteredEquipOptions.map((record)=>{
                                         
                                         return(
@@ -1802,12 +1627,6 @@ const handleLocationSearch=(e)=>{
                                             <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleEndUseSearch(e)}}/>
                                         </div>
                                         <div className={filteredEndUseOptions.length>4?`hScroll`:`hHundredPercent`}>
-                                        <div className='floor-box'>
-                                                <div>
-                                                <input type="checkbox" className='mr-2' id="allEndUse" onClick={(e)=>{handleAllEndUse(e)}}/>
-                                                <span>Select All</span>
-                                                </div>
-                                            </div>
                                         {filteredEndUseOptions.map((record)=>{
                                         
                                         return(

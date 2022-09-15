@@ -1,16 +1,16 @@
 // @flow
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { Card, CardBody } from 'reactstrap';
+import Brick from '../../sharedComponents/brick';
+import '../../sharedComponents/lineChartWidget/style.scss';
 
 // line column chart
-const LineColumnChart = ({ energyChartOptions, energyChartData }) => {
+const LineColumnChart = ({ options, series, className = '' }) => {
     return (
-        <Card>
-            <CardBody>
-                <Chart options={energyChartOptions} series={energyChartData} type="bar" className="apex-charts" />
-            </CardBody>
-        </Card>
+        <div className={`line-chart-widget-wrapper ${className}`}>
+            <Brick sizeInRem={1} />
+            <Chart options={options} series={series} type="bar" className="line-chart-widget" />
+        </div>
     );
 };
 

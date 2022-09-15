@@ -19,7 +19,8 @@ import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-
+import LineColumnChart from '../charts/LineColumnChart';
+import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
     builidingAlerts,
@@ -31,7 +32,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -68,6 +69,8 @@ export function useHover() {
 const BuildingOverview = () => {
     // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [overview, setOverview] = useState({
@@ -87,7 +90,9 @@ const BuildingOverview = () => {
         },
     });
 
-    const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
+    const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
+    const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
+    const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
     const [buildingAlert, setBuildingAlerts] = useState([]);
 
@@ -363,41 +368,32 @@ const BuildingOverview = () => {
         },
     ]);
 
-    const [lineChartOptions, setLineChartOptions] = useState({
+    const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
-            type: 'line',
-            zoom: {
-                enabled: false,
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true,
             },
             animations: {
                 enabled: false,
             },
         },
-        dataLabels: {
-            enabled: false,
-        },
-        toolbar: {
-            show: true,
-        },
-        colors: ['#87AADE'],
         stroke: {
+            width: 0.2,
+            show: true,
             curve: 'straight',
         },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5,
-            },
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
         },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
+        animations: {
+            enabled: false,
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -408,39 +404,62 @@ const BuildingOverview = () => {
             },
             x: {
                 show: true,
-                // format: 'dd/MMM - hh:mm TT',
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                     return value + ' K';
                 },
             },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
         },
         xaxis: {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    let dateText = moment(timestamp).format('MMM D');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} - ${dateText}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    // if (val >= 1000) {
-                    //     val = (val / 1000).toFixed(0) + ' K';
-                    // }
-                    return val + ' K';
+                formatter: function (val) {
+                    let print = val.toFixed(2);
+                    return `${print}k`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
@@ -495,27 +514,8 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        //     type: 'category',
-        //     categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
-        // },
         xaxis: {
-            axisTicks: {
-                show: true,
-            },
-            tickAmount: 12,
-            range: 24,
-            labels: {
-                show: true,
-                type: 'category',
-                categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
-            },
+            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
     });
 
@@ -563,40 +563,14 @@ const BuildingOverview = () => {
         stroke: {
             width: 0.7,
         },
+        colors: ['#87AADE', '#F87171'],
         plotOptions: {
             heatmap: {
-                // shadeIntensity: 0.5,
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 1500,
-                            color: '#9bb4da',
-                        },
-                        {
-                            from: 1501,
-                            to: 3000,
-                            color: '#819dc9',
-                        },
-                        {
-                            from: 3001,
-                            to: 4500,
-                            color: '#128FD9',
-                        },
-                        {
-                            from: 4501,
-                            to: 6000,
-                            color: '#F87171',
-                        },
-                        {
-                            from: 6001,
-                            to: 7500,
-                            color: '#FF0000',
-                        },
-                    ],
-                },
             },
         },
         yaxis: {
@@ -604,50 +578,8 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        // },
         xaxis: {
-            axisTicks: {
-                show: true,
-            },
-            tickAmount: 6,
-            // range: 23,
-            type: 'category',
-            // categories: [
-            //     '12AM',
-            //     '1AM',
-            //     '2AM',
-            //     '3AM',
-            //     '4AM',
-            //     '5AM',
-            //     '6AM',
-            //     '7AM',
-            //     '8AM',
-            //     '9AM',
-            //     '10AM',
-            //     '11AM',
-            //     '12PM',
-            //     '1PM',
-            //     '2PM',
-            //     '3PM',
-            //     '4PM',
-            //     '5PM',
-            //     '6PM',
-            //     '7PM',
-            //     '8PM',
-            //     '9PM',
-            //     '10PM',
-            //     '11PM',
-            // ],
-            labels: {
-                show: true,
-            },
+            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
     });
 
@@ -1145,8 +1077,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1175,19 +1107,17 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
-                            // newArray.push(fixedConsumption);
                             newDonutData.push(fixedConsumption);
                         });
                         console.log(newDonutData);
@@ -1267,8 +1197,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1295,109 +1225,93 @@ const BuildingOverview = () => {
             }
         };
 
-        // // // // // // const builidingHourlyData = async () => {
-        // // // // // //     try {
-        // // // // // //         let headers = {
-        // // // // // //             'Content-Type': 'application/json',
-        // // // // // //             accept: 'application/json',
-        // // // // // //             Authorization: `Bearer ${userdata.token}`,
-        // // // // // //         };
-        // // // // // //         let params = `?building_id=${bldgId}`;
-        // // // // // //         await axios
-        // // // // // //             .post(
-        // // // // // //                 `${BaseUrl}${builidingHourly}${params}`,
-        // // // // // //                 {
-        // // // // // //                     date_from: dateFormatHandler(startDate),
-        // // // // // //                     date_to: dateFormatHandler(endDate),
-        // // // // // //                 },
-        // // // // // //                 { headers }
-        // // // // // //             )
-        // // // // // //             .then((res) => {
-        // // // // // //                 let response = res.data;
+        const builidingHourlyData = async () => {
+            try {
+                setIsAvgConsumptionDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingHourly}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res?.data;
 
-        // // // // // //                 let weekDaysResData = response[0].weekdays;
-        // // // // // //                 let weekEndResData = response[0].weekend;
+                        let weekDaysResData = response[0]?.weekdays;
+                        let weekEndResData = response[0]?.weekend;
 
-        // // // // // //                 // console.log('weekDaysResData => ', weekDaysResData);
+                        const weekDaysData = weekDaysResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: el.y.toFixed(2),
+                            };
+                        });
 
-        // // // // // //                 const weekDaysData = weekDaysResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const weekendsData = weekEndResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: el.y.toFixed(2),
+                            };
+                        });
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const newWeekdaysData = [
+                            {
+                                name: 'Weekdays',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // //                     return {
-        // //                         x: parseInt(moment(el.x).format('HH')),
-        // //                         y: (el.y / 1000).toFixed(2),
-        // //                     };
-        // //                 });
+                        const newWeekendsData = [
+                            {
+                                name: 'Weekends',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const newWeekdaysData = [
-        // //                     {
-        // //                         name: 'Weekdays',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekDaysData.find((record) => record.x === i);
 
-        // //                 const newWeekendsData = [
-        // //                     {
-        // //                         name: 'Weekends',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                            if (matchedRecord) {
+                                newWeekdaysData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekdaysData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
 
-        // //                 for (let i = 1; i <= 24; i++) {
-        // //                     let matchedRecord = weekDaysData.find((record) => record.x === i);
-
-        // // //                     if (matchedRecord) {
-        // // //                         newWeekdaysData[0].data.push(matchedRecord);
-        // // //                     } else {
-        // // //                         newWeekdaysData[0].data.push({
-        // // //                             x: i,
-        // // //                             y: 0,
-        // // //                         });
-        // // //                     }
-        // // //                 }
-
-        //                 for (let i = 0; i < 24; i++) {
-        //                     let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
-        //                     if (matchedRecord) {
-        //                         matchedRecord.x = i;
-        //                         // console.log('matchedRecord => ', matchedRecord);
-        //                         newWeekendsData[0].data.push(matchedRecord);
-        //                     } else {
-        //                         newWeekendsData[0].data.push({
-        //                             x: i,
-        //                             y: 0,
-        //                         });
-        //                     }
-        //                 }
-        //                 // console.log('newWeekendsData => ', newWeekendsData);
-        //                 setWeekDaysSeries(newWeekdaysData);
-        //                 setWeekEndsSeries(newWeekendsData);
-        //                 // setWeekEndsSeries([
-        //                 //     {
-        //                 //         name: 'Weekends',
-        //                 //         data: [
-        //                 //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-        //                 //         ],
-        //                 //     },
-        //                 // ]);
-        //             });
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch Building Hourly Data');
-        //     }
-        // };
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            if (matchedRecord) {
+                                matchedRecord.x = i;
+                                newWeekendsData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekendsData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
+                        setWeekDaysSeries(newWeekdaysData);
+                        setWeekEndsSeries(newWeekendsData);
+                        setIsAvgConsumptionDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Hourly Data');
+                setIsAvgConsumptionDataLoading(false);
+            }
+        };
 
         const buildingConsumptionChart = async () => {
             try {
@@ -1406,18 +1320,19 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=minute&building_id=${bldgId}`;
+                setIsEnergyConsumptionDataLoading(true);
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
+                        let response = res?.data;
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -1426,15 +1341,17 @@ const BuildingOverview = () => {
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(5),
+                                x: record?.x,
+                                y: (record?.y / 1000).toFixed(5),
                             });
                         });
-                        setBuildingConsumptionChart(newArray);
+                        setBuildingConsumptionChartData(newArray);
+                        setIsEnergyConsumptionDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Consumption Chart');
+                setIsEnergyConsumptionDataLoading(false);
             }
         };
 
@@ -1448,10 +1365,8 @@ const BuildingOverview = () => {
         calculateDays();
         buildingOverallData();
         buildingEndUserData();
-        // // // buildingAlertsData();
-        //////buildingPeaksData();
         builidingEquipmentsData();
-        // builidingHourlyData();
+        builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1826,45 +1741,37 @@ const BuildingOverview = () => {
                     </Row> */}
 
                     {/* Hourly Average Consumption */}
-                    {/* {/* {/* <Row>
+                    <Row>
                         <div className="card-body">
-                            <h6
-                                className="card-title custom-title"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Hourly Average Consumption
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/time-of-day/${bldgId}`,
-                                }}>
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
-                                    }}>
-                                    More Details
-                                </a>
-                            </Link>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                            <div className="hour-avg-consumtn p-1">
-                                <HeatMapChart
-                                    options={weekDaysOptions}
-                                    series={weekDaysSeries}
-                                    height={weekdaysChartHeight}
-                                />
-                                <span className="m-2"></span>
-                                <HeatMapChart
-                                    options={weekEndsOptions}
-                                    series={weekEndsSeries}
-                                    height={weekendsChartHeight}
-                                />
+                            <div className="total-eng-consumtn">
+                                <h6
+                                    className="card-title custom-title"
+                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
+                                    Hourly Average Consumption
+                                </h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
+                                {isAvgConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <HeatMapChart
+                                            options={weekDaysOptions}
+                                            series={weekDaysSeries}
+                                            height={weekdaysChartHeight}
+                                        />
+                                        <span className="m-2"></span>
+                                        <HeatMapChart
+                                            options={weekEndsOptions}
+                                            series={weekEndsSeries}
+                                            height={weekendsChartHeight}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    </Row> */}
+                    </Row>
 
                     {/* Total Energy Consumption  */}
                     <Row>
@@ -1872,12 +1779,20 @@ const BuildingOverview = () => {
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
-                                <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
+                                {isEnergyConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <LineColumnChart
+                                        series={buildingConsumptionChartData}
+                                        options={buildingConsumptionChartOpts}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Row>
                 </div>
-                {/* </Col> */}
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>

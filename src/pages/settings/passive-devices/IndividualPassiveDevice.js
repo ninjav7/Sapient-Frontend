@@ -13,7 +13,6 @@ import {
     listSensor,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -50,6 +49,7 @@ const IndividualPassiveDevice = () => {
     const [locationData, setLocationData] = useState([]);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
@@ -78,8 +78,6 @@ const IndividualPassiveDevice = () => {
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
-
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -102,7 +100,7 @@ const IndividualPassiveDevice = () => {
         setSensorData(obj);
         fetchSensorGraphData(id);
         setShowChart(true);
-    };    
+    };
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -118,7 +116,6 @@ const IndividualPassiveDevice = () => {
         return label;
     };
 
-    
     const fetchSensorGraphData = async (id) => {
         try {
             let endDate = new Date(); // today
@@ -138,8 +135,8 @@ const IndividualPassiveDevice = () => {
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
+                        date_from: startDate,
+                        date_to: endDate,
                     },
                     { headers }
                 )
@@ -448,7 +445,7 @@ const IndividualPassiveDevice = () => {
                                     {filtered.map((record, index) => {
                                         return (
                                             <>
-                                                {(record.equipment_id === '' && record.breaker_id === '') ? (
+                                                {record.equipment_id === '' && record.breaker_id === '' ? (
                                                     <div className="sensor-container-style-notAttached mt-3">
                                                         <div className="sensor-data-style">
                                                             <span className="sensor-data-no">{record.index}</span>

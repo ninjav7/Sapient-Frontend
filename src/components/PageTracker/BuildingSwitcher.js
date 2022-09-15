@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
@@ -19,23 +19,23 @@ import { useAtom } from 'jotai';
 
 const PortfolioItem = ({ handlePortfolioClick }) => {
     const location = useLocation();
+    const history = useHistory();
+
     return (
         <div>
             {location.pathname === '/energy/portfolio/overview' ? (
-                <Dropdown.Item className="selected">
+                <Dropdown.Item
+                    className="selected"
+                    onClick={() => {
+                        handlePortfolioClick && handlePortfolioClick('Portfolio');
+                        history.push({
+                            pathname: `/energy/portfolio/overview`,
+                        });
+                    }}>
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-
-                            <Link to="/energy/portfolio/overview">
-                                <span
-                                    className="portfolio-txt-style"
-                                    onClick={() => {
-                                        handlePortfolioClick && handlePortfolioClick('Portfolio');
-                                    }}>
-                                    Portfolio
-                                </span>
-                            </Link>
+                            <span className="portfolio-txt-style">Portfolio</span>
                         </div>
                         <div className="dropdown-item-selected">
                             <CheckIcon />
@@ -43,17 +43,15 @@ const PortfolioItem = ({ handlePortfolioClick }) => {
                     </div>
                 </Dropdown.Item>
             ) : (
-                <Dropdown.Item>
+                <Dropdown.Item
+                    onClick={() => {
+                        handlePortfolioClick && handlePortfolioClick('Portfolio');
+                        history.push({
+                            pathname: `/energy/portfolio/overview`,
+                        });
+                    }}>
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-                    <Link to="/energy/portfolio/overview">
-                        <span
-                            className="portfolio-txt-style"
-                            onClick={() => {
-                                handlePortfolioClick && handlePortfolioClick('Portfolio');
-                            }}>
-                            Portfolio
-                        </span>
-                    </Link>
+                    <span className="portfolio-txt-style">Portfolio</span>
                 </Dropdown.Item>
             )}
         </div>

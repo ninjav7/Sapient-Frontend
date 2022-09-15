@@ -21,7 +21,7 @@ import {
     portfolioOverall,
     getEnergyConsumption,
 } from '../../services/Network';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { timeZone } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
@@ -50,9 +50,8 @@ const PortfolioOverview = () => {
     const [daysCount, setDaysCount] = useState(1);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
+    const [isConsumpHistoryLoading, setIsConsumpHistoryLoading] = useState(false);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -318,8 +317,8 @@ const PortfolioOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process','Other'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554','#D70040'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
         legend: {
             show: false,
         },
@@ -407,8 +406,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -433,8 +432,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -458,10 +457,10 @@ const PortfolioOverview = () => {
 
         const energyConsumptionData = async () => {
             try {
+                setIsConsumpHistoryLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?aggregate=day&tz_info=${timeZone}`;
@@ -469,8 +468,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -492,10 +491,12 @@ const PortfolioOverview = () => {
                             });
                         });
                         setEnergyConsumptionChart(newArray);
+                        setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Energy Consumption Data');
+                setIsConsumpHistoryLoading(false);
             }
         };
 
@@ -510,8 +511,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioBuilidings}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -613,7 +614,10 @@ const PortfolioOverview = () => {
 
             <div className="portfolio-consume-widget-wrapper mt-5">
                 <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
-                <EnergyConsumptionHistory series={energyConsumptionChart} />
+                <EnergyConsumptionHistory
+                    series={energyConsumptionChart}
+                    isConsumpHistoryLoading={isConsumpHistoryLoading}
+                />
             </div>
         </>
     );

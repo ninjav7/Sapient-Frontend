@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
+import { Row, Col, Input, Card, CardBody, Table, Collapse, UncontrolledPopover, PopoverBody, PopoverHeader } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BaseUrl, getExploreByBuilding } from '../../services/Network';
+import { percentageHandler } from '../../utils/helper';
+import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Spinner } from 'reactstrap';
+import { MultiSelect } from 'react-multi-select-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { Line } from 'rc-progress';
+import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import ApexCharts from 'apexcharts';
+import RangeSlider from './RangeSlider';
 import './style.css';
+import { ConstructionOutlined } from '@mui/icons-material';
 
-const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEnergyConsumption }) => {
+const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEnergyConsumption, selectedBuildingId, setSelectedBuildingId, removeBuildingId, setRemovedBuildingId, buildingListArray, setBuildingListArray, selectedOptions }) => {
     const history = useHistory();
 
     const redirectToExploreEquipPage = (bldId, bldName) => {
@@ -32,7 +37,38 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
             s.exploreBldName = bldName;
         });
     };
+    const handleSelectionAll = (e) => {
+        var ischecked = document.getElementById("selection");
+        if (ischecked.checked == true) {
+            let arr = [];
+            for (var i = 0; i < exploreTableData.length; i++) {
+                arr.push(exploreTableData[i].building_id)
+                console.log(arr);
 
+                var checking = document.getElementById(exploreTableData[i].building_id);
+                checking.checked = ischecked.checked;
+            }
+            setBuildingListArray(arr);
+        }
+        else {
+            for (var i = 0; i < exploreTableData.length; i++) {
+                var checking = document.getElementById(exploreTableData[i].building_id);
+                checking.checked = ischecked.checked;
+            }
+            ischecked.checked = ischecked.checked
+        }
+
+    }
+    const handleSelection = (e, id) => {
+        var isChecked = document.getElementById(id);
+        if (isChecked.checked == true) {
+            console.log(id);
+            setSelectedBuildingId(id)
+        }
+        else {
+            setRemovedBuildingId(id)
+        }
+    }
     return (
         <>
             <Card>
@@ -41,12 +77,15 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                         <Table className="mb-0 bordered mouse-pointer">
                             <thead>
                                 <tr>
+
                                     <th className="table-heading-style">
-                                        <input type="checkbox" className="mr-4" />
+                                        <input type="checkbox" className="mr-4" id="selection" onClick={(e) => { handleSelectionAll(e) }} />
                                         Name
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
                                     <th className="table-heading-style">% Change</th>
+                                    <th className="table-heading-style">Square Footage</th>
+                                    <th className="table-heading-style">Building Type</th>
                                 </tr>
                             </thead>
 
@@ -65,6 +104,12 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             <td>
                                                 <Skeleton count={5} />
                                             </td>
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
                                         </tr>
                                     </SkeletonTheme>
                                 </tbody>
@@ -78,6 +123,8 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                             return (
                                                 <tr key={index}>
                                                     <th scope="row">
+                                                        <div>
+                                                        <input type="checkbox" className="mr-4" id={record?.building_id} value={record?.building_id} onClick={(e) => { handleSelection(e, record?.building_id) }} />
                                                         <a
                                                             className="building-name"
                                                             onClick={() => {
@@ -88,13 +135,14 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             }}>
                                                             {record?.building_name}
                                                         </a>
+                                                        </div>
                                                     </th>
 
                                                     <td className="table-content-style font-weight-bold">
-                                                        {(record?.energy_consumption.now / 1000).toFixed(2)} kWh
+                                                        {(record?.consumption.now / 1000).toFixed(2)} kWh
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
-                                                            {index === 0 && record?.energy_consumption?.now === 0 && (
+                                                            {index === 0 && record?.consumption?.now === 0 && (
                                                                 <Line
                                                                     percent={0}
                                                                     strokeWidth="3"
@@ -103,12 +151,12 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                                     strokeLinecap="round"
                                                                 />
                                                             )}
-                                                            {index === 0 && record?.energy_consumption?.now > 0 && (
+                                                            {index === 0 && record?.consumption?.now > 0 && (
                                                                 <Line
                                                                     percent={parseFloat(
                                                                         (record?.energy_consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -119,9 +167,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             {index === 1 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -132,9 +180,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             {index === 2 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -145,9 +193,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             {index === 3 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -158,9 +206,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             {index === 4 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -171,9 +219,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             {index === 5 && (
                                                                 <Line
                                                                     percent={parseFloat(
-                                                                        (record?.energy_consumption?.now /
+                                                                        (record?.consumption?.now /
                                                                             topEnergyConsumption) *
-                                                                            100
+                                                                        100
                                                                     ).toFixed(2)}
                                                                     strokeWidth="3"
                                                                     trailWidth="3"
@@ -184,38 +232,44 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        {record?.energy_consumption?.now <=
-                                                            record?.energy_consumption?.old && (
-                                                            <button
-                                                                className="button-success text-success btn-font-style"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
-                                                                        )}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {record?.energy_consumption?.now >
-                                                            record?.energy_consumption?.old && (
-                                                            <button
-                                                                className="button-danger text-danger btn-font-style"
-                                                                style={{ width: 'auto', marginBottom: '4px' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            record?.energy_consumption?.now,
-                                                                            record?.energy_consumption?.old
-                                                                        )}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
+                                                        {record?.consumption?.now <=
+                                                            record?.consumption?.old && (
+                                                                <button
+                                                                    className="button-success text-success btn-font-style"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-chart-down">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record?.consumption?.now,
+                                                                                record?.consumption?.old
+                                                                            )}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                        {record?.consumption?.now >
+                                                            record?.consumption?.old && (
+                                                                <button
+                                                                    className="button-danger text-danger btn-font-style"
+                                                                    style={{ width: 'auto', marginBottom: '4px' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                record?.consumption?.now,
+                                                                                record?.consumption?.old
+                                                                            )}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                    </td>
+                                                    <td className="table-content-style font-weight-bold">
+                                                            {record?.square_footage} sq. ft.
+                                                    </td>
+                                                    <td className="table-content-style font-weight-bold">
+                                                            {record?.building_type}
                                                     </td>
                                                 </tr>
                                             );
@@ -238,16 +292,40 @@ const ExploreByBuildings = () => {
     const [startDate, endDate] = dateRange;
 
     const [exploreTableData, setExploreTableData] = useState([]);
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
+    const tableColumnOptions = [
+        { label: 'Energy Consumption', value: 'consumption' },
+        { label: 'Change', value: 'change' },
+        { label: 'Square Footage', value: 'sq_ft' },
+        { label: 'Building Type', value: 'building_type' },
+    ];
+
+    const [selectedBuildingOptions, setSelectedBuildingOptions] = useState([]);
+    
+    const [buildingTypeOptions, setBuildingTypeOptions] = useState([
+        { label: 'Office Building', value: 'office' },
+        { label: 'Residential Building', value: 'residential' },
+        
+    ]);
+    const [buildingTypeOptionsCopy, setBuildingTypeOptionsCopy] = useState([
+        { label: 'Office Building', value: 'office' },
+        { label: 'Residential Building', value: 'residential' },
+        
+    ]);
+    const [isOpen, setIsOpen] = useState(false);
+
+  const toggle = () => setIsOpen(!isOpen);
 
     const customDaySelect = [
         {
             label: 'Today',
             value: 0,
         },
-        {
-            label: 'Last Day',
-            value: 1,
-        },
+        // {
+        //     label: 'Last Day',
+        //     value: 1,
+        // },
         {
             label: 'Last 7 Days',
             value: 7,
@@ -270,8 +348,14 @@ const ExploreByBuildings = () => {
     const [dateFilter, setDateFilter] = useState(dateValue);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
-
+    const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
+    const [selectedBuildingId, setSelectedBuildingId] = useState('');
+    const [removeBuildingId, setRemovedBuildingId] = useState('');
+    const [buildingListArray, setBuildingListArray] = useState([]);
     const [seriesData, setSeriesData] = useState([]);
+    const [allBuildingData, setAllBuildingData] = useState([]);
+
+
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -324,6 +408,9 @@ const ExploreByBuildings = () => {
             toolbar: {
                 show: false,
             },
+            animations: {
+                enabled: false,
+            },
             type: 'area',
             brush: {
                 target: 'chart2',
@@ -336,6 +423,9 @@ const ExploreByBuildings = () => {
                 //     max: new Date('02 June 2022').getTime(),
                 // },
             },
+        },
+        legend: {
+            show: false,
         },
         colors: ['#008FFB'],
         fill: {
@@ -356,7 +446,15 @@ const ExploreByBuildings = () => {
         },
     });
 
+    const [APIFlag, setAPIFlag]=useState(false);
+    const [Sq_FtFlag, setSq_FtFlag]=useState(false);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
+    const [minConValue, set_minConValue] = useState(0.00);
+    const [maxConValue, set_maxConValue] = useState(0.00);
+    const [minSq_FtValue, set_minSq_FtValue] = useState(0);
+    const [maxSq_FtValue, set_maxSq_FtValue] = useState(10);
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(100);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -382,14 +480,15 @@ const ExploreByBuildings = () => {
         };
         updateBreadcrumbStore();
         localStorage.removeItem('explorer');
-        // console.log(currentParentRoute);
-        // console.log(location);
-        // console.log(ComponentStore.getRawState())
-        // let parentState=ComponentStore.getRawState()
-        // if(parentState.parent==='explore'){
-        //     history.push('/explore-page/by-buildings');
-        //     window.location.reload();
-        // }
+        let arr = [
+            { label: 'Energy Consumption', value: 'consumption' },
+            { label: 'Change', value: 'change' },
+            // { label: 'Total % change', value: 'total_per' },
+            { label: 'Square Footage', value: 'sq_ft' },
+            { label: 'Building Type', value: 'load' },
+        ];
+        // setSelectedOptions(arr);
+
     }, []);
 
     useEffect(() => {
@@ -418,7 +517,7 @@ const ExploreByBuildings = () => {
         if (endDate === null) {
             return;
         }
-
+        let result = [];
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -430,34 +529,21 @@ const ExploreByBuildings = () => {
                 let params = `?consumption=energy`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreByBuilding}${params}`,
+                        `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
                         let responseData = res.data;
+                        console.log(responseData[0]);
                         setExploreTableData(responseData);
-                        setTopEnergyConsumption(responseData[0].energy_consumption.now);
-                        let data = responseData;
-                        let exploreData = [];
-                        data.forEach((record) => {
-                            if (record.building_name !== null) {
-                                let recordToInsert = {
-                                    name: record.building_name,
-                                    data: record.building_consumption,
-                                };
-                                exploreData.push(recordToInsert);
-                            }
-                        });
-                        setSeriesData(exploreData);
-                        setSeriesLineData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
+                        console.log("Consumption " ,((responseData[0].consumption.now)/1000).toFixed(3))
+                        setTopEnergyConsumption(responseData[0].consumption.now);
+                        set_minConValue(0.00);
+                        set_maxConValue(((responseData[0].consumption.now)/1000).toFixed(3))
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -468,6 +554,297 @@ const ExploreByBuildings = () => {
         };
         exploreDataFetch();
     }, [startDate, endDate]);
+
+    const exploreFilterDataFetch = async (bodyVal) => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingList}${params}`,
+                    bodyVal,
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    setExploreTableData(responseData);
+                    setTopEnergyConsumption(responseData[0].consumption.now);
+                    setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
+
+    useEffect(() => {
+
+        console.log("entered in selected Building ", selectedBuildingId)
+        if (selectedBuildingId === "") {
+            return;
+        }
+
+        const fetchExploreChartData = async (id) => {
+            try {
+                // setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?consumption=energy&building_id=${selectedBuildingId}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreBuildingChart}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        console.log(responseData);
+                        let data = responseData.data;
+                        console.log(data)
+                        let arr = [];
+                        arr = exploreTableData.filter(function (item) {
+                            return item.building_id === selectedBuildingId
+                        })
+                        console.log(arr);
+                        let exploreData = [];
+                        // data.forEach((record) => {
+                        //     if (record.building_name !== null) {
+                        let recordToInsert = {
+                            name: arr[0].building_name,
+                            data: data,
+                            id: arr[0].building_id,
+                        };
+                        console.log(recordToInsert);
+
+
+                        console.log(recordToInsert);
+                        console.log(seriesData);
+                        setSeriesData([...seriesData, recordToInsert]);
+                        setSeriesLineData([...seriesLineData, recordToInsert]);
+                        setSelectedBuildingId('');
+
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                //setIsExploreDataLoading(false);
+            }
+
+        }
+
+        fetchExploreChartData();
+    }, [selectedBuildingId])
+
+    useEffect(() => {
+        console.log("Entered Removed building id ", removeBuildingId)
+        if (removeBuildingId === "") {
+            return;
+        }
+        let arr1 = [];
+        arr1 = seriesData.filter(function (item) {
+            return item.id !== removeBuildingId
+        })
+        console.log(arr1);
+        setSeriesData(arr1);
+        setSeriesLineData(arr1);
+
+    }, [removeBuildingId])
+
+    const dataarr = [];
+
+    const fetchExploreAllChartData = async (id) => {
+        try {
+            // setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy&building_id=${id}`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingChart}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    console.log(responseData);
+                    let data = responseData.data;
+                    console.log(data)
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.building_id === id
+                    })
+                    console.log(arr);
+                    let exploreData = [];
+                    // data.forEach((record) => {
+                    //     if (record.building_name !== null) {
+                    let recordToInsert = {
+                        name: arr[0].building_name,
+                        data: data,
+                        id: arr[0].building_id,
+                    };
+                    console.log(recordToInsert);
+                    dataarr.push(recordToInsert);
+                    console.log(dataarr);
+                    setAllBuildingData(dataarr);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            //setIsExploreDataLoading(false);
+        }
+
+    }
+
+    useEffect(() => {
+        console.log("building List Array ", buildingListArray);
+        if (buildingListArray.length === 0) {
+            return;
+        }
+        for (var i = 0; i < buildingListArray.length; i++) {
+            fetchExploreAllChartData(buildingListArray[i]);
+        }
+
+    }, [buildingListArray])
+
+    useEffect(() => {
+
+        if (allBuildingData.length === 0) {
+            return;
+        }
+        console.log("All Building Data ", allBuildingData);
+        console.log(allBuildingData.length);
+        console.log(exploreTableData.length);
+        setSeriesData(allBuildingData);
+        setSeriesLineData(allBuildingData);
+    }, [allBuildingData])
+    useEffect(() => {
+        console.log("Selected Options ", selectedOptions);
+    }, [selectedOptions])
+
+    useEffect(()=>{
+
+        if((maxConValue===0.00 || maxConValue===0.01) && (maxSq_FtValue===10 || minSq_FtValue===0) && selectedBuildingOptions.length===0){
+            return;
+        }
+        let arr = {};
+        arr['date_from'] = startDate;
+        arr['date_to'] =endDate;
+        if(maxConValue > 0.01){
+            arr['consumption_range']= {
+                "gte": minConValue*1000,
+                "lte": maxConValue*1000
+              };
+        }
+        if(maxSq_FtValue > 10){
+            arr['sq_ft_range']= {
+                "gte": minSq_FtValue,
+                "lte": maxSq_FtValue
+              };
+        }
+        if(selectedBuildingOptions.length!==0){
+            arr['building_type']=selectedBuildingOptions
+        }
+        exploreFilterDataFetch(arr);
+
+    },[APIFlag,Sq_FtFlag,selectedBuildingOptions])
+
+
+    const handleCloseFilter=(e, val)=>{
+        let arr=[];
+        arr = selectedOptions.filter(function (item) {
+            return item.value !== val
+        })
+        console.log(arr);
+        setSelectedOptions(arr);
+    }
+    const handleInput = (values) => {
+        //console.log("values ",values);
+        set_minConValue(values[0]);
+        set_maxConValue(values[1]);
+    };
+    const handleInputPer = (values) => {
+        //console.log("values ",values);
+        set_minPerValue(values[0]);
+        set_maxPerValue(values[1]);
+    };
+    const handleSq_FtInput = (values) => {
+        //console.log("values ",values);
+        set_minSq_FtValue(values[0]);
+        set_maxSq_FtValue(values[1]);
+    };
+    const clearFilterData=()=>{
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+        }
+        exploreFilterDataFetch(arr);
+    }
+    const handleAllBuilgingType=(e)=>{
+        let slt = document.getElementById("buildingType");
+        if(slt.checked===true){
+            let selectBuilding=[];
+            for(let i=0;i<buildingTypeOptions.length;i++){
+                selectBuilding.push(buildingTypeOptions[i].label);
+                let check=document.getElementById(buildingTypeOptions[i].label)
+                check.checked=slt.checked;
+            }
+            //console.log('selected Space Type ',selectSpace);
+            setSelectedBuildingOptions(selectBuilding)
+        }
+        else{
+            setSelectedBuildingOptions([]);
+            for(let i=0;i<buildingTypeOptions.length;i++){
+                let check=document.getElementById(buildingTypeOptions[i].label)
+                check.checked=slt.checked;
+            }
+        }
+    }
+    const handleSelectedBuildingType=(e)=>{
+        let selection=document.getElementById(e.target.value);
+        if(selection.checked===true)
+            setSelectedBuildingOptions([...selectedBuildingOptions,e.target.value]);
+        else
+        {
+            let slt = document.getElementById("buildingType");
+            slt.checked=selection.checked;
+            //console.log(e.target.value);
+            let arr = selectedBuildingOptions.filter(function (item) {
+                return item !== e.target.value
+            })
+            //console.log(arr);
+            setSelectedBuildingOptions(arr)
+        }
+    }
+    const handleBuildingTypeSearch=(e)=>{
+        let txt=e.target.value;
+        if(txt!==""){
+            var search = new RegExp(txt , 'i');
+            let b = buildingTypeOptions.filter(item => search.test(item.label));
+            // console.log(b);
+            setBuildingTypeOptions(b);
+        }
+        else{
+            setBuildingTypeOptions(buildingTypeOptionsCopy);
+        }
+    }
 
     return (
         <>
@@ -507,7 +884,7 @@ const ExploreByBuildings = () => {
 
             <Row>
                 <div className="explore-table-style">
-                    {isExploreDataLoading ? (
+                    {isExploreChartDataLoading ? (
                         <div className="loader-center-style" style={{ height: '400px' }}>
                             <Spinner className="m-2" color={'primary'} />
                         </div>
@@ -523,20 +900,170 @@ const ExploreByBuildings = () => {
             </Row>
 
             <Row className="mt-3 mb-1">
+                <Col lg={11} style={{display:"flex",justifyContent:"flex-start"}}>
                 <div className="explore-search-filter-style">
                     <div className="explore-search mr-2">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                         <input className="search-box ml-2" type="search" name="search" placeholder="Search..." />
                     </div>
-                    <button
-                        type="button"
-                        className="btn btn-white d-inline font-weight-bold"
-                        style={{ height: '36px' }}>
-                        <i className="uil uil-plus mr-1 "></i>Add Filter
-                    </button>
+                    <div>
+                        <MultiSelect
+                            options={tableColumnOptions}
+                            value={selectedOptions}
+                            onChange={setSelectedOptions}
+                            labelledBy="Columns"
+                            className="column-filter-styling"
+                            valueRenderer={() => {
+                                return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
+                            }}
+                            ClearSelectedIcon={null}
+                        />
+                    </div>
+                    
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="consumption"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag)}}>kWh Used</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minConValue}/>  <input className='pop-inputbox' type="text" value={maxConValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={0.01} MIN={0} range={[minConValue, maxConValue]}  MAX={((topEnergyConsumption/1000)+0.5).toFixed(3)} onSelectionChange={handleInput}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="change"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                 <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text'>Change Threshold</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minPerValue}/>  <input className='pop-inputbox' type="text" value={maxPerValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={1} MIN={0} range={[minPerValue, maxPerValue]}  MAX={100} onSelectionChange={handleInputPer}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="sq_ft"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setSq_FtFlag(!Sq_FtFlag)}}>Square Footage</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minSq_FtValue}/>  <input className='pop-inputbox' type="text" value={maxSq_FtValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={1} MIN={0} range={[minSq_FtValue, maxSq_FtValue]}  MAX={10000} onSelectionChange={handleSq_FtInput}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="building_type"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                            <div>
+                                    <div className='m-1'>
+                                        <div className="explore-search mr-2">
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                            <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleBuildingTypeSearch(e)}}/>
+                                        </div>
+                                        <div className={buildingTypeOptions.length>4?`hScroll`:`hHundredPercent`}>
+                                        <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id="buildingType" onClick={(e)=>{handleAllBuilgingType(e)}}/>
+                                                <span>Select All</span>
+                                                </div>
+                                            </div>
+                                        {buildingTypeOptions.map((record)=>{
+                                        
+                                        return(
+                                            <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id={record.label} value={record.label} onClick={(e)=>{handleSelectedBuildingType(e)}}/>
+                                                <span>{record.label}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                        
+                                      })}
+                                      </div>
+                                    </div>
+                                </div>
+                            
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                    
+
                 </div>
-                <div></div>
+                </Col>
+                <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
+                <button className='btn btn-white d-inline btnHover font-weight-bold mr-2'> <FontAwesomeIcon icon={faTableColumns} size="md" /></button>
+                <button className='btn btn-white d-inline btnHover font-weight-bold'> <FontAwesomeIcon icon={faDownload} size="md" /></button>
+                </Col>
             </Row>
+           
 
             <Row>
                 <div className="explore-table-style">
@@ -545,6 +1072,13 @@ const ExploreByBuildings = () => {
                             exploreTableData={exploreTableData}
                             isExploreDataLoading={isExploreDataLoading}
                             topEnergyConsumption={topEnergyConsumption}
+                            selectedBuildingId={selectedBuildingId}
+                            setSelectedBuildingId={setSelectedBuildingId}
+                            removeBuildingId={removeBuildingId}
+                            setRemovedBuildingId={setRemovedBuildingId}
+                            buildingListArray={buildingListArray}
+                            setBuildingListArray={setBuildingListArray}
+                            selectedOptions={selectedOptions}
                         />
                     </Col>
                 </div>

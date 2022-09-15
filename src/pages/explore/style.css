@@ -10,7 +10,9 @@
     align-items: stretch !important;
     align-content: stretch !important;
 }
-
+.btnHover:hover{
+    background-color: white;
+}
 .button-danger {
     position: static;
     width: 47px;
@@ -131,3 +133,135 @@
     /* line-height: 22px; */
     color: #3c6df5;
 }
+
+.horizontal-slider {
+    width: 100%;
+    max-width: 500px;
+    height: 100vh;
+    margin: auto;
+  }
+  .example-thumb {
+    cursor: pointer;
+    position: absolute;
+    z-index: 100;
+    background: #ffffff;
+    border: 5px solid #3774ff;
+    border-radius: 100%;
+    display: block;
+    box-shadow: 0 0 2px 0 rgb(0 0 0 / 44%);
+  }
+  .example-thumb.active {
+    background-color: grey;
+  }
+  .example-track {
+    position: relative;
+    background: #ddd;
+  }
+  .example-track.example-track-0 {
+    background: #83a9ff;
+  }
+  .horizontal-slider .example-track {
+    top: 20px;
+    height: 4px;
+  }
+  .horizontal-slider .example-thumb {
+    top: 12px;
+    width: 10px;
+    outline: none;
+    height: 10px;
+    line-height: 38px;
+  }
+
+  .pop-text{
+    font-family: 'Inter';
+font-style: normal;
+font-weight: 500;
+font-size: 14px;
+line-height: 20px;
+color: #101828;
+  }
+  .pop-inputbox-wrapper{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .pop-inputbox{
+   margin: 0.5rem;
+padding: 8px 10px;
+gap: 8px;
+
+width: 111px;
+height: 36px;
+
+/* Base/White */
+
+background: #FFFFFF;
+/* Gray/250 (disabled) */
+
+border: 1px solid #D9DDE2;
+/* Shadow/xs */
+
+box-shadow: 0px 1px 0px rgba(16, 24, 40, 0.05);
+border-radius: 6px;
+
+/* Inside auto layout */
+
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 1;
+  }
+
+  .floor-box{
+    font-family: 'Inter';
+font-style: normal;
+font-weight: 600;
+font-size: 16px;
+line-height: 24px;
+padding: 1rem;
+border-bottom: 1px solid #EAECF0;
+color: #1D2939;
+display: flex;
+justify-content: space-between;
+flex-direction: row;
+  }
+  .hScroll{
+    height:250px;
+    overflow-y: scroll;
+  }
+  .hHundredPercent{
+    height:100%;
+  }
+  .room-box{
+    display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: flex-end;
+padding: 2px 8px;
+
+width: 63px;
+height: 20px;
+
+/* Gray/100 */
+
+background: #F2F4F7;
+border-radius: 16px;
+
+/* Inside auto layout */
+
+flex: none;
+order: 0;
+flex-grow: 0;
+font-family: 'Inter';
+font-style: normal;
+font-weight: 500;
+font-size: 10px;
+line-height: 16px;
+/* identical to box height, or 160% */
+
+text-align: center;
+
+/* Gray/950 */
+
+color: #070C17;
+  }

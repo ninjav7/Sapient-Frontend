@@ -44,9 +44,16 @@
     width: $dropdown-lg-width;
 }
 
+.dropdown-xlg{
+    width:$dropdown-xlg-width;
+}
+
 @include media-breakpoint-down(sm) {
     .dropdown-lg {
         width: 200px !important;
+    }
+    .dropdown-xlg {
+        width: 350px !important;
     }
 }
 

@@ -1,6 +1,7 @@
-export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
+// export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
-//export const BaseUrl = 'http://122.175.198.21:8000';
+// export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -9,7 +10,7 @@ export const portfolioEndUser = '/api/energy/portfolio/end-user';
 export const builidingOverview = '/api/energy/building/overview';
 export const builidingAlerts = '/api/energy/building/alerts';
 export const builidingPeak = '/api/energy/building/peak';
-export const builidingHourly = '/api/energy/building/hourly';
+export const builidingHourly = '/api/energy/time_of_day/hourly';
 export const builidingEquipments = '/api/energy/building/equipment';
 
 // utility bills
@@ -28,9 +29,8 @@ export const addUser = '/api/user_role/user/add_user';
 
 // end-uses
 export const endUses = '/api/energy/portfolio/end-user';
-export const endUsesChart = '/api/energy/chart/end-uses';
+export const endUsesChart = '/api/energy/end_use/chart/end-uses';
 export const hvacUsageChart = '/api/energy/chart/hvac';
-// export const endUsesFloorChart = '/api/energy/chart/byfloor';
 export const endUsesUsageChart = '/api/energy/end_use/load_usage';
 export const endUsesEquipmentUsage = '/api/energy/end_use/equipment_type_usage';
 export const equipmentDetails = '/api/config/equipments_details/by_id';
@@ -67,10 +67,11 @@ export const generalPanels = '/api/config/panels/';
 export const createPanel = '/api/config/panels/create_panel';
 export const updatePanel = '/api/config/panels/update_panel';
 export const createBreaker = '/api/config/panels/create_breaker';
-export const updateBreaker = '/api/config/panels/update_breaker';
 export const updateBreakers = '/api/config/panels/v2/update_breaker';
 export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
+export const resetBreakers = '/api/config/panels/reset/breakers';
+export const deletePanel = '/api/config/panels/delete';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';
@@ -112,14 +113,21 @@ export const getEnergyConsumption = '/api/energy/chart';
 // explore
 export const getExplore = '/api/explorer/chart';
 export const getExploreByBuilding = '/api/explorer/chart/by_building';
+export const getExploreBuildingList = '/api/explorer/building_list';
+export const getExploreBuildingChart = '/api/explorer/building_chart';
+export const getExploreEquipmentList = '/api/explorer/equipment_list';
+export const getExploreEquipmentChart = '/api/explorer/equipment_chart';
 export const getExploreByEquipment = '/api/explorer/chart/by_equipment';
 export const getExploreEquipmentYTDUsage = '/api/explorer/equipment_ytd_usage';
 export const getEquipmentChart = '/api/explorer/equipment_chart';
 
-// peakDemand Chart
+// Peak Demand
+export const peakDemand = '/api/energy/peak_demand';
 export const peakDemandTrendChart = '/api/energy/peak_demand/chart/peak';
 export const peakDemandYearlyPeak = '/api/energy/peak_demand/yearly_peaks';
-export const avgDailyUsageByHour = '/api/energy/building/chart/timeofday';
+export const peakEquipType = '/api/energy/peak_demand/equipment_type';
+export const peakEquipUsage = '/api/energy/peak_demand/equipment';
+export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
 
 // sensors list
 export const listSensor = '/api/config/sensor/list_sensor';
