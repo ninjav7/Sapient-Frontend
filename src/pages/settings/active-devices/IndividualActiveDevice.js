@@ -28,6 +28,7 @@ import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
+import Select from 'react-select';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
@@ -68,6 +69,9 @@ const IndividualActiveDevice = () => {
     const [selectedEquipTypeId, setSelectedEquipTypeId] = useState('');
     const [selectedSensorId, setSelectedSensorId] = useState('');
     const [newEquipTypeID, setNewEquipTypeID] = useState('');
+    const [newEquipTypeValue, setNewEquipTypeValue] = useState([]);
+
+    console.log('newEquipTypeID', newEquipTypeID);
 
     const [updatedSensorData, setUpdatedSensorData] = useState({});
 
@@ -81,6 +85,38 @@ const IndividualActiveDevice = () => {
             label: 'Breaker 2',
         },
     ]);
+
+    // locationData
+    const [locationDataNow, setLocationDataNow] = useState([]);
+    // equipmentTypeDevices
+    const [equipmentTypeDataNow, setEqupimentTypeDataNow] = useState([]);
+
+    const addLocationType = () => {
+        locationData.map((item) => {
+            setLocationDataNow((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    const addEquipmentType = () => {
+        equipmentTypeDevices.map((item) => {
+            setEqupimentTypeDataNow((el) => [
+                ...el,
+                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (locationData) {
+            addLocationType();
+        }
+    }, [locationData]);
+
+    useEffect(() => {
+        if (equipmentTypeDevices) {
+            addEquipmentType();
+        }
+    }, [equipmentTypeDevices]);
 
     // *********************************************************************************** //
 
@@ -470,6 +506,19 @@ const IndividualActiveDevice = () => {
                                                     );
                                                 })}
                                             </Input>
+                                            // locationDataNow
+                                            // <Select
+                                            //     id="exampleSelect"
+                                            //     placeholder="Select Location"
+                                            //     name="select"
+                                            //     isSearchable={true}
+                                            //     defaultValue={'Select Location'}
+                                            //     options={locationDataNow}
+                                            //     onChange={(e) => {
+                                            //         setActiveLocationId(e.value);
+                                            //     }}
+                                            //     className="basic-single font-weight-bold"
+                                            // />
                                         )}
 
                                         <Form.Label className="device-sub-label-style mt-1">
@@ -678,6 +727,7 @@ const IndividualActiveDevice = () => {
                                                             fetchEquipmentTypeData();
                                                             setSelectedEquipTypeId(record.equipment_type_id);
                                                             setNewEquipTypeID(record.equipment_type_id);
+                                                            setNewEquipTypeValue(record.equipment_type);
                                                             setSelectedSensorId(record.id);
                                                             handleEquipmentShow();
                                                         }}>
@@ -773,7 +823,7 @@ const IndividualActiveDevice = () => {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>Equipment Type</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
@@ -786,7 +836,21 @@ const IndividualActiveDevice = () => {
                                 {equipmentTypeDevices.map((record) => {
                                     return <option value={record.equipment_id}>{record.equipment_type}</option>;
                                 })}
-                            </Input>
+                            </Input> */}
+                            {/* equipmentTypeDataNow */}
+                            <Select
+                                id="exampleSelect"
+                                placeholder="Select Equipment Type"
+                                name="select"
+                                isSearchable={true}
+                                // defaultValue={'Select Equipment Type'}
+                                options={equipmentTypeDataNow}
+                                defaultValue={newEquipTypeValue}
+                                onChange={(e) => {
+                                    setNewEquipTypeID(e.value);
+                                }}
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

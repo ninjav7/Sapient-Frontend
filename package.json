@@ -42,6 +42,7 @@
         "jwt-decode": "^2.2.0",
         "leaflet": "^1.7.1",
         "lodash": "^4.17.21",
+        "lodash.debounce": "^4.0.8",
         "metismenujs": "^1.1.0",
         "moment": "^2.29.3",
         "plotly.js": "^2.11.1",

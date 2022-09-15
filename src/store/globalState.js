@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 
 export const buildingData = atom([]);
-export const userPermissionData = atom([])
+export const userPermissionData = atom([]);
 
 export const switchValue = atom({
     mon: false,
@@ -63,5 +63,10 @@ export const currentFloorIdNow6 = atom('');
 export const currentFloorIdNow7 = atom('');
 export const currentFloorIdNow8 = atom('');
 export const currentFloorIdNow9 = atom('');
+
+// Passive Device Identifier
+export const identifier = atom('');
+export const deviceId = atom('');
+export const passiveDeviceModal = atom('');
 
 // export const floor1 = atom(['Room', 'Area']);

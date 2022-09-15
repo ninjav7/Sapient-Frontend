@@ -33,6 +33,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 import './panel-style.css';
+import Select from 'react-select';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -123,6 +124,35 @@ const EditBreakerPanel = () => {
 
     const [activePanelType, setActivePanelType] = useState('distribution');
     const [panelsDataList, setPanelsDataList] = useState([]);
+
+    const [parentPanel, setParentPanel] = useState([]);
+    const [location, setLocation] = useState([]);
+
+    const addPanelData = () => {
+        panelsDataList.map((item) => {
+            setParentPanel((el) => [...el, { value: `${item?.panel_id}`, label: `${item?.panel_name}` }]);
+        });
+    };
+
+    const addLocationData = () => {
+        locationDataList.map((item) => {
+            setLocation((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (panelsDataList) {
+            addPanelData();
+        }
+    }, [panelsDataList]);
+
+    useEffect(() => {
+        if (locationDataList) {
+            addLocationData();
+        }
+    }, [locationDataList]);
+
+    console.log('parentPanel', parentPanel);
 
     const [isEditable, setIsEditable] = useState(true);
 
@@ -848,23 +878,20 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
+                                    isSearchable={true}
+                                    defaultValue={'Select Parent Panel'}
+                                    options={parentPanel}
                                     onChange={(e) => {
-                                        handleChange('parent_id', e.target.value);
+                                        handleChange('parent_id', e.value);
                                     }}
-                                    value={panel.parent_id}>
-                                    <option>None</option>
-                                    {panelsDataList.map((record) => {
-                                        if (record.panel_id === panelId) {
-                                            return;
-                                        }
-                                        return <option value={record.panel_id}>{record.panel_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
 
@@ -877,23 +904,37 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                // <Input
+                                //     type="select"
+                                //     name="state"
+                                //     id="userState"
+                                //     className="font-weight-bold"
+                                //     onChange={(e) => {
+                                //         if (e.target.value === 'Select Location') {
+                                //             return;
+                                //         }
+                                //         handleChange('location_id', e.target.value);
+                                //     }}
+                                //     value={panel.location_id}>
+                                //     <option>Select Location</option>
+                                //     {locationDataList.map((record) => {
+                                //         return <option value={record.location_id}>{record.location_name}</option>;
+                                //     })}
+                                // </Input>
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
+                                    isSearchable={true}
+                                    defaultValue={'Select Location Type'}
+                                    options={location}
                                     onChange={(e) => {
-                                        if (e.target.value === 'Select Location') {
-                                            return;
-                                        }
-                                        handleChange('location_id', e.target.value);
+                                        handleChange('location_id', e.value);
                                     }}
-                                    value={panel.location_id}>
-                                    <option>Select Location</option>
-                                    {locationDataList.map((record) => {
-                                        return <option value={record.location_id}>{record.location_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
                     </div>

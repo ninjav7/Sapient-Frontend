@@ -347,3 +347,10 @@
     color: black !important;
     font-weight: 600 !important;
 }
+
+.dropdownScrollaleDisable {
+    overflow: hidden;
+}
+.dropdownScrollaleDisable::-webkit-scrollbar {
+    display: none;
+  } 

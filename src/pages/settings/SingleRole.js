@@ -266,13 +266,13 @@ const SingleRole = () => {
             edit: false,
             delete: false,
         },
-        advanced_smart_plugs_permission: {
+        advanced_active_device_permission: {
             view: false,
             create: false,
             edit: false,
             delete: false,
         },
-        advanced_smart_monitors_permission: {
+        advanced_passive_device_permission: {
             view: false,
             create: false,
             edit: false,
@@ -395,17 +395,17 @@ const SingleRole = () => {
                 edit: singlePermissionDetail?.building_panels_permission?.edit,
                 delete: singlePermissionDetail?.building_panels_permission?.delete,
             },
-            advanced_smart_plugs_permission: {
-                view: singlePermissionDetail?.advanced_smart_plugs_permission?.view,
-                create: singlePermissionDetail?.advanced_smart_plugs_permission?.create,
-                edit: singlePermissionDetail?.advanced_smart_plugs_permission?.edit,
-                delete: singlePermissionDetail?.advanced_smart_plugs_permission?.delete,
+            advanced_active_device_permission: {
+                view: singlePermissionDetail?.advanced_active_device_permission?.view,
+                create: singlePermissionDetail?.advanced_active_device_permission?.create,
+                edit: singlePermissionDetail?.advanced_active_device_permission?.edit,
+                delete: singlePermissionDetail?.advanced_active_device_permission?.delete,
             },
-            advanced_smart_monitors_permission: {
-                view: singlePermissionDetail?.advanced_smart_monitors_permission?.view,
-                create: singlePermissionDetail?.advanced_smart_monitors_permission?.create,
-                edit: singlePermissionDetail?.advanced_smart_monitors_permission?.edit,
-                delete: singlePermissionDetail?.advanced_smart_monitors_permission?.delete,
+            advanced_passive_device_permission: {
+                view: singlePermissionDetail?.advanced_passive_device_permission?.view,
+                create: singlePermissionDetail?.advanced_passive_device_permission?.create,
+                edit: singlePermissionDetail?.advanced_passive_device_permission?.edit,
+                delete: singlePermissionDetail?.advanced_passive_device_permission?.delete,
             },
             advanced_gateways_permission: {
                 view: singlePermissionDetail?.advanced_gateways_permission?.view,
@@ -1987,14 +1987,14 @@ const SingleRole = () => {
                                                         label="View"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_plugs_permission
+                                                            userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.view
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_plugs_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_plugs_permission,
+                                                                advanced_active_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_active_device_permission,
                                                                     view: e.target.checked,
                                                                 },
                                                             });
@@ -2008,14 +2008,14 @@ const SingleRole = () => {
                                                         label="Create"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_plugs_permission
+                                                            userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_plugs_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_plugs_permission,
+                                                                advanced_active_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_active_device_permission,
                                                                     create: e.target.checked,
                                                                 },
                                                             });
@@ -2029,14 +2029,14 @@ const SingleRole = () => {
                                                         label="Edit"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_plugs_permission
+                                                            userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.edit
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_plugs_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_plugs_permission,
+                                                                advanced_active_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_active_device_permission,
                                                                     edit: e.target.checked,
                                                                 },
                                                             });
@@ -2050,14 +2050,14 @@ const SingleRole = () => {
                                                         label="Delete"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_plugs_permission
+                                                            userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_plugs_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_plugs_permission,
+                                                                advanced_active_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_active_device_permission,
                                                                     delete: e.target.checked,
                                                                 },
                                                             });
@@ -2085,14 +2085,14 @@ const SingleRole = () => {
                                                         label="View"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_monitors_permission
+                                                            userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.view
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_monitors_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_monitors_permission,
+                                                                advanced_passive_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_passive_device_permission,
                                                                     view: e.target.checked,
                                                                 },
                                                             });
@@ -2106,14 +2106,14 @@ const SingleRole = () => {
                                                         label="Create"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_monitors_permission
+                                                            userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_monitors_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_monitors_permission,
+                                                                advanced_passive_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_passive_device_permission,
                                                                     create: e.target.checked,
                                                                 },
                                                             });
@@ -2127,14 +2127,14 @@ const SingleRole = () => {
                                                         label="Edit"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_monitors_permission
+                                                            userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.edit
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_monitors_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_monitors_permission,
+                                                                advanced_passive_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_passive_device_permission,
                                                                     edit: e.target.checked,
                                                                 },
                                                             });
@@ -2148,14 +2148,14 @@ const SingleRole = () => {
                                                         label="Delete"
                                                         inline
                                                         checked={
-                                                            userPermissionRoleBody?.advanced_smart_monitors_permission
+                                                            userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
-                                                                advanced_smart_monitors_permission: {
-                                                                    ...userPermissionRoleBody.advanced_smart_monitors_permission,
+                                                                advanced_passive_device_permission: {
+                                                                    ...userPermissionRoleBody.advanced_passive_device_permission,
                                                                     delete: e.target.checked,
                                                                 },
                                                             });

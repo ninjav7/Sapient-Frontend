@@ -12,6 +12,7 @@ import { BuildingStore } from '../../../store/BuildingStore';
 import Skeleton from 'react-loading-skeleton';
 import '../style.css';
 import './panel-style.css';
+import Select from 'react-select';
 
 const DisconnectedBreakerComponent = ({ data, id }) => {
     let cookies = new Cookies();
@@ -51,6 +52,20 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [passiveDevicePageNo, setPassiveDevicePageNo] = useState(1);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const [deviceIdDataNow, setdeviceIdDataNow] = useState([]);
+
+    const addDevideIdType = () => {
+        passiveDeviceData.map((item) => {
+            setdeviceIdDataNow((el) => [...el, { value: `${item?.value}`, label: `${item?.label}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (passiveDeviceData) {
+            addDevideIdType();
+        }
+    }, [passiveDeviceData]);
 
     const fetchSingleSensorList = async (deviceId) => {
         if (deviceId === null) {
@@ -872,6 +887,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
+                                                {/* deviceIdDataNow
                                                 <Input
                                                     type="select"
                                                     name="state"
@@ -898,7 +914,20 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="exampleSelect"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataNow}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorData(e.value);
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">

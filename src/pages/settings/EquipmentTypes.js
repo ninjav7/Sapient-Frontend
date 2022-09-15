@@ -36,6 +36,7 @@ import { TagsInput } from 'react-tag-input-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import Select from 'react-select';
 import { Cookies } from 'react-cookie';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
@@ -324,6 +325,20 @@ const EquipmentTypes = () => {
     const [pageNo, setPageNo] = useState(1);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
 
+    const [endUseDataNow, setEndUseDataNow] = useState([]);
+
+    const addEndUseType = () => {
+        endUseData.map((item) => {
+            setEndUseDataNow((el) => [...el, { value: `${item?.end_user_id}`, label: `${item?.name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (endUseData) {
+            addEndUseType();
+        }
+    }, [endUseData]);
+
     const handleSearch = async (e) => {
         var txt = e.target.value;
         // console.log(e.target.value);
@@ -608,7 +623,7 @@ const EquipmentTypes = () => {
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
@@ -620,12 +635,20 @@ const EquipmentTypes = () => {
                                 {endUseData.map((record) => {
                                     return <option value={record.end_user_id}>{record.name}</option>;
                                 })}
-                                {/* <option selected>Select End Use</option>
-                                <option value="Plug">Plug</option>
-                                <option value="Process">Process</option>
-                                <option value="Lighting">Lighting</option>
-                                <option value="HVAC">HVAC</option> */}
-                            </Input>
+                            </Input> */}
+                            {/* endUseDataNow */}
+                            <Select
+                                id="exampleSelect"
+                                placeholder="Select End Use"
+                                name="select"
+                                isSearchable={true}
+                                defaultValue={'Select End Use'}
+                                options={endUseDataNow}
+                                onChange={(e) => {
+                                    handleChange('end_use', e.value);
+                                }}
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </Form>
                 </Modal.Body>

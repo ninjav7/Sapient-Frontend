@@ -160,47 +160,51 @@ const Panels = () => {
     const [isPanelDataFetched, setIsPanelDataFetched] = useState(true);
 
     const [locationData, setLocationData] = useState([]);
+    const [panelSearch, setPanelSearch] = useState('');
+
+    const fetchPanelsData = async () => {
+        try {
+            setIsPanelDataFetched(true);
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&panel_search=${panelSearch}`;
+            await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
+                setPanelData(res.data);
+                setIsPanelDataFetched(false);
+                console.log(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsPanelDataFetched(false);
+            console.log('Failed to fetch Panels Data List');
+        }
+    };
+
+    const fetchLocationData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `${bldgId}`;
+            await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
+                setLocationData(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Location Data');
+        }
+    };
 
     useEffect(() => {
-        const fetchPanelsData = async () => {
-            try {
-                setIsPanelDataFetched(true);
-                let header = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
-                    setPanelData(res.data);
-                    setIsPanelDataFetched(false);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                setIsPanelDataFetched(false);
-                console.log('Failed to fetch Panels Data List');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `${bldgId}`;
-                await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
         fetchPanelsData();
+    }, [bldgId, panelSearch]);
+
+    useEffect(() => {
         fetchLocationData();
     }, [bldgId]);
 
@@ -270,6 +274,10 @@ const Panels = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            value={panelSearch}
+                            onChange={(e) => {
+                                setPanelSearch(e.target.value);
+                            }}
                         />
                         <span class="input-group-text border-0" id="search-addon">
                             <Search className="icon-sm" />
