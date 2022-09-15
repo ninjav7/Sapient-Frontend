@@ -46,7 +46,7 @@ import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
-import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
+import EquipmentDeviceChartModel from './EquipmentDeviceChartModel';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
     const [selected, setSelected] = useState([]);
@@ -1247,7 +1247,11 @@ const EquipmentTable = ({
                                                 <td>
                                                     {
                                                         <div className="badge badge-light mr-2 font-weight-bold week-day-style">
-                                                            {record.tags.length === 0 ? 'None' : record.tags[0]}
+                                                            {record.tags.length === 0
+                                                                        ? 'None'
+                                                                        : `${record.tags[0]} + ${
+                                                                              record?.tags?.length - 1
+                                                                          }`}
                                                         </div>
                                                     }
                                                 </td>

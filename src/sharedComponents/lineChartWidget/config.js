@@ -94,7 +94,7 @@ export const configLineChartWidget = {
             show: true,
             position: 'front',
             stroke: {
-                color: '#F04438',
+                color: '#7C879C',
                 width: 2,
                 dashArray: 0,
             },

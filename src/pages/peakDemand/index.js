@@ -318,12 +318,21 @@ const PeakDemand = () => {
                     let weekText = moment(timestamp).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
-                style: {
-                    colors: ['#1D2939'],
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
                 },
             },
         },

@@ -1,12 +1,13 @@
 // @flow
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { Card, CardBody } from 'reactstrap';
+import Brick from '../../sharedComponents/brick';
+import '../../sharedComponents/lineChartWidget/style.scss';
 
-const HeatMapChart = ({ options, series, height }) => {
+const HeatMapChart = ({ options, series, height, className = '' }) => {
     return (
-        <div>
-            <Chart series={series} options={options} type="heatmap" height={height} className="apex-charts" />
+        <div className={`line-chart-widget-wrapper ${className}`} style={{ minHeight: '0vh' }}>
+            <Chart series={series} options={options} type="heatmap" height={height} className="line-chart-widget" />
         </div>
     );
 };

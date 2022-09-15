@@ -133,7 +133,7 @@ const Header = (props) => {
                             </DateRangePicker>
                         </div>
 
-                        {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
+                        {/* {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
                             <div className="float-right ml-2">
                                 <Link
                                     to={{
@@ -144,7 +144,7 @@ const Header = (props) => {
                                     </button>
                                 </Link>
                             </div>
-                        )}
+                        )} */}
                     </div>
                     {/* )} */}
                 </Col>

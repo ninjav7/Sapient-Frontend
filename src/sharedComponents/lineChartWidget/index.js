@@ -3,32 +3,34 @@ import Typography from '../typography';
 import Brick from '../brick';
 import Chart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-
+import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import { configLineChartWidget } from './config';
 
 import './style.scss';
 
-const LineChartWidget = ({ className = '', series, title, subtitle, height = 228, width }) => {
+const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width, isConsumpHistoryLoading }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
-            <div className="line-chart-widget-titles">
-                <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
-                    {title}
-                </Typography.Subheader>
-                <Typography.Body size={Typography.Sizes.xs} as="h6">
-                    {subtitle}
-                </Typography.Body>
-            </div>
-
-            <Brick sizeInRem={1} />
-
-            <Chart
-                className="line-chart-widget"
-                options={configLineChartWidget}
-                series={series}
-                {...{ height, width }}
-                type="line"
-            />
+            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
+                {title}
+            </Typography.Subheader>
+            <Typography.Body size={Typography.Sizes.xs} as="h6">
+                {subtitle}
+            </Typography.Body>
+            {/* <Brick sizeInRem={1} /> */}
+            {isConsumpHistoryLoading ? (
+                <div className="loader-center-style">
+                    <Spinner className="m-2" color={'primary'} />
+                </div>
+            ) : (
+                <Chart
+                    className="line-chart-widget"
+                    options={configLineChartWidget}
+                    series={series}
+                    {...{ height, width }}
+                    type="line"
+                />
+            )}
         </div>
     );
 };
@@ -36,7 +38,7 @@ const LineChartWidget = ({ className = '', series, title, subtitle, height = 228
 LineChartWidget.propTypes = {
     title: PropTypes.string.isRequired,
     subtitle: PropTypes.string.isRequired,
-    height: PropTypes.number,
+    height: PropTypes.string,
     width: PropTypes.string,
     series: PropTypes.arrayOf(
         PropTypes.shape({

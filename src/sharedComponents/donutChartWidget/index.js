@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import PropTypes from 'prop-types';
-
+import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 import Typography from '../typography';
 import Brick from '../brick';
 import { configDonutChartWidget } from './config';
@@ -15,32 +15,33 @@ export const DONUT_CHART_TYPES = Object.freeze({
     VERTICAL_NO_TOTAL: 'vertical no-total',
 });
 
-const Titles = ({ sizeBrick, title, subtitle, className }) => {
+const Titles = ({ sizeBrick, title, subtitle }) => {
     return (
-        <div className={className}>
+        <>
             <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
                 {title}
             </Typography.Subheader>
             <Typography.Body size={Typography.Sizes.xs} as="h6">
                 {subtitle}
             </Typography.Body>
-        </div>
+            <Brick sizeInRem={sizeBrick} />
+        </>
     );
 };
 
 const DonutChartWidget = ({
-    classNameContainer = '',
     className = '',
     id,
     type = DONUT_CHART_TYPES.HORIZONTAL,
     items,
     title,
     subtitle,
-    series,
+    isEnergyConsumptionChartLoading,
     ...props
 }) => {
     const labels = items.map(({ label }) => label);
     const colors = items.map(({ color }) => color);
+    const series = items.map(({ value }) => value);
 
     const options = {
         ...configDonutChartWidget(type),
@@ -48,11 +49,19 @@ const DonutChartWidget = ({
         colors,
         id,
     };
-
+    console.log(series);
+    console.log(items.map(({trendValue})=>trendValue));
     return (
-        <div className={`donut-chart-widget-container ${classNameContainer}`}>
-            <Titles className="donut-chart-widget-titles" sizeBrick={1.5625} {...{ title, subtitle }} />
-            <div className={`donut-chart-widget-wrapper ${type} ${className}`}>
+        <>
+        <div className='donut-main-wrapper'>
+            {type === DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1} {...{ title, subtitle }} />}
+            <div className={`donut-chart-widget-wrapper ${className} ${type}`} style={{width:"100%",justifyContent:"center"}}>
+                {type !== DONUT_CHART_TYPES.HORIZONTAL && <Titles sizeBrick={1.5625} {...{ title, subtitle }} />}
+                {/* {isEnergyConsumptionChartLoading ? (
+                <div className="loader-center-style">
+                    <Spinner className="m-2" color={'primary'} />
+                </div>
+            ) : (<> */}
                 <div className={`chart-wrapper ${type}`}>
                     <ReactApexChart options={options} {...props} series={series} type="donut" />
                 </div>
@@ -64,8 +73,10 @@ const DonutChartWidget = ({
                         labels={items}
                     />
                 </div>
+                {/* </>)} */}
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 
@@ -73,16 +84,15 @@ DonutChartWidget.propTypes = {
     id: PropTypes.string,
     type: PropTypes.oneOf(Object.values(DONUT_CHART_TYPES)),
     items: PropTypes.arrayOf(
-        PropTypes.shape({
-            label: PropTypes.string.isRequired,
-            color: PropTypes.string.isRequired,
-            value: PropTypes.string.isRequired,
-            unit: PropTypes.string.isRequired,
-            trendValue: PropTypes.number,
-            link: PropTypes.string,
+        PropTypes.shape({ 
+            label: PropTypes.string.isRequired, 
+            color: PropTypes.string.isRequired, 
+            value: PropTypes.any.isRequired, 
+            unit: PropTypes.string.isRequired, 
+            trendValue: PropTypes.number, 
+            link: PropTypes.string, 
         }).isRequired
-    ).isRequired,
-    series: PropTypes.arrayOf(PropTypes.number).isRequired,
-};
+    ).isRequired
+}
 
 export default DonutChartWidget;
