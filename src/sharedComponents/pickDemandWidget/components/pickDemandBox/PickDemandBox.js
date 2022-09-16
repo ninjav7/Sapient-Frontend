@@ -55,7 +55,6 @@ const PickDemandBox = ({ items = [], handleClick, ...props }) => {
                     {handleClick && (
                         <Button
                             onClick={handleClick}
-                            className="ml-4"
                             label="Explore"
                             size={Button.Sizes.md}
                             type={Button.Type.SecondaryGrey}
