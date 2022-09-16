@@ -21,7 +21,7 @@ import {
     portfolioOverall,
     getEnergyConsumption,
 } from '../../services/Network';
-import { timeZone } from '../../utils/helper';
+import { timeZone, numberWithCommas } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
@@ -43,6 +43,7 @@ const PortfolioOverview = () => {
     // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
+    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
     const startDate = DateRangeStore.useState((s) => s.startDate);
@@ -177,6 +178,7 @@ const PortfolioOverview = () => {
             old: 0,
         },
     });
+    const [isKPIsLoading, setIsKPIsLoading] = useState(false);
 
     // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
@@ -396,10 +398,10 @@ const PortfolioOverview = () => {
 
         const portfolioOverallData = async () => {
             try {
+                setIsKPIsLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
@@ -413,8 +415,10 @@ const PortfolioOverview = () => {
                     )
                     .then((res) => {
                         setOveralldata(res.data);
+                        setIsKPIsLoading(false);
                     });
             } catch (error) {
+                setIsKPIsLoading(false);
                 console.log(error);
                 console.log('Failed to fetch Portfolio Overall Data');
             }
@@ -422,10 +426,10 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             try {
+                setIsEnergyConsumptionChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
@@ -438,20 +442,21 @@ const PortfolioOverview = () => {
                         { headers }
                     )
                     .then((res) => {
-                        console.log('energy consumption', res.data);
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption / 1000));
+                            newDonutData.push(parseInt(fixedConsumption));
                         });
                         console.log(newDonutData);
                         setSeries(newDonutData);
+                        setIsEnergyConsumptionChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Portfolio EndUses Data');
+                setIsEnergyConsumptionChartLoading(false);
             }
         };
 
@@ -485,9 +490,8 @@ const PortfolioOverview = () => {
                             const d = new Date(record.x);
                             const milliseconds = d.getTime();
                             newArray[0].data.push({
-                                // x: moment(record.x).format('MMM D'),
                                 x: milliseconds,
-                                y: (record.y / 1000).toFixed(4),
+                                y: (record.y / 1000).toFixed(0),
                             });
                         });
                         setEnergyConsumptionChart(newArray);
@@ -602,6 +606,7 @@ const PortfolioOverview = () => {
                         daysCount={daysCount}
                         totalBuilding={buildingsEnergyConsume.length}
                         overalldata={overalldata}
+                        isKPIsLoading={isKPIsLoading}
                     />
                 </div>
             </Row>
@@ -612,8 +617,13 @@ const PortfolioOverview = () => {
                 buildingsEnergyConsume={buildingsEnergyConsume}
             /> */}
 
-            <div className="portfolio-consume-widget-wrapper mt-5">
-                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
+            <div className="portfolio-consume-widget-wrapper mt-5 ml-2">
+                <EnergyConsumptionTotals
+                    series={series}
+                    options={options}
+                    energyConsumption={energyConsumption}
+                    isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                />
                 <EnergyConsumptionHistory
                     series={energyConsumptionChart}
                     isConsumpHistoryLoading={isConsumpHistoryLoading}

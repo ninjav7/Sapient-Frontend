@@ -20,6 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
@@ -425,7 +426,10 @@ const BuildingOverview = () => {
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            0
+                        )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ hh:mm A`
                         )}</div>
@@ -1351,7 +1355,7 @@ const BuildingOverview = () => {
                         response.forEach((record) => {
                             newArray[0].data.push({
                                 x: record?.x,
-                                y: (record?.y / 1000).toFixed(5),
+                                y: (record?.y).toFixed(0),
                             });
                         });
                         setBuildingConsumptionChartData(newArray);

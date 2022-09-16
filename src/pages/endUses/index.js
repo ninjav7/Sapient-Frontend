@@ -31,9 +31,13 @@ const EndUsesPage = () => {
     const barChartOptions = {
         chart: {
             type: 'bar',
+            height: 400,
             stacked: true,
             toolbar: {
                 show: true,
+            },
+            animations: {
+                enabled: false,
             },
         },
         colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
@@ -49,6 +53,47 @@ const EndUsesPage = () => {
         stroke: {
             show: false,
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { labels } = w.globals;
+                const timestamp = labels[dataPointIndex];
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
+        },
         xaxis: {
             type: 'datetime',
             labels: {
@@ -57,12 +102,21 @@ const EndUsesPage = () => {
                     let weekText = moment(timestamp).format('ddd');
                     return `${weekText} ${dateText}`;
                 },
-                style: {
-                    colors: ['#1D2939'],
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
                 },
             },
         },
@@ -71,14 +125,6 @@ const EndUsesPage = () => {
                 formatter: function (val) {
                     let print = val.toFixed(0);
                     return `${print}k`;
-                },
-            },
-        },
-        tooltip: {
-            shared: false,
-            y: {
-                formatter: function (val) {
-                    return `${val} K`;
                 },
             },
         },
@@ -277,7 +323,7 @@ const EndUsesPage = () => {
                     </Col>
                 </Row>
             ) : (
-                <Row>
+                <Row className="ml-2 mt-4">
                     <Col xl={12}>
                         <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
                     </Col>
