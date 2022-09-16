@@ -68,3 +68,6 @@ export const currentFloorIdNow9 = atom('');
 export const identifier = atom('');
 export const deviceId = atom('');
 export const passiveDeviceModal = atom('');
+export const equipmentId = atom('');
+
+export const accountId = atom('');

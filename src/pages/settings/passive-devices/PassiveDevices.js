@@ -24,6 +24,7 @@ import {
     generalGateway,
     searchDevices,
     updateDevice,
+    deletePassiveDevice,
 } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -57,6 +58,7 @@ const PassiveDevicesTable = ({
     setPageSize,
     setIsEdit,
     isEdit,
+    setIsDelete,
 }) => {
     console.log('deviceData', deviceData, 'selectedOptions', selectedOptions);
 
@@ -113,8 +115,6 @@ const PassiveDevicesTable = ({
             y: event.clientY - event.target.offsetTop,
         });
     };
-
-    // console.log('globalCoords', globalCoords);
 
     const [toggleEdit, setToggleEdit] = useState(false);
     const [sensorId, setSensorId] = useState('');
@@ -348,6 +348,9 @@ const PassiveDevicesTable = ({
                                         </DropdownItem>
                                         <DropdownItem onClick={() => {}}>
                                             <div
+                                                onClick={() => {
+                                                    setIsDelete(true);
+                                                }}
                                                 style={{
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
@@ -483,9 +486,10 @@ const PassiveDevices = () => {
     };
 
     const [isEdit, setIsEdit] = useState(false);
-
     const handleEditClose = () => setIsEdit(false);
-    const handleEditShow = () => setIsEdit(true);
+
+    const [isDelete, setIsDelete] = useState(false);
+    const handleDeleteClose = () => setIsDelete(false);
 
     const saveDeviceData = async () => {
         try {
@@ -678,6 +682,29 @@ const PassiveDevices = () => {
                 .then((res) => {
                     passiveDeviceDataWithFilter('ace', 'mac_address');
                     handleEditClose();
+                });
+        } catch (error) {
+            console.log('error', error);
+            console.log('Failed to create Passive device data');
+        }
+    };
+
+    const deleteDeviceData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?device_id=${deviceIdVal}`;
+            await axios
+                .delete(`${BaseUrl}${deletePassiveDevice}${params}`, {
+                    headers: header,
+                })
+                .then((res) => {
+                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    handleDeleteClose();
                 });
         } catch (error) {
             console.log('error', error);
@@ -895,6 +922,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -911,6 +939,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -927,6 +956,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -997,6 +1027,38 @@ const PassiveDevices = () => {
                             updateDeviceData();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Delete Passive Device</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <span>Are you sure you want to delete the passive device</span>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                    }}>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
+                        onClick={handleDeleteClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}
+                        onClick={() => {
+                            deleteDeviceData();
+                        }}>
+                        Delete
                     </Button>
                 </Modal.Footer>
             </Modal>

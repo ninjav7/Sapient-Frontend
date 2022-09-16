@@ -25,6 +25,7 @@ import {
     updateEquipment,
     listSensor,
     searchEquipment,
+    deleteEquipment,
 } from '../../services/Network';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
@@ -47,6 +48,11 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { result } from 'lodash';
 import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
+import ThreeDots from '../../assets/images/threeDots.png';
+import Pen from '../../assets/images/pen.png';
+import Delete from '../../assets/images/delete.png';
+import { equipmentId } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
     const [selected, setSelected] = useState([]);
@@ -938,6 +944,8 @@ const EquipmentTable = ({
     paginationData,
     pageSize,
     setPageSize,
+    setIsDelete,
+    setIsEdit,
 }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
@@ -1025,6 +1033,9 @@ const EquipmentTable = ({
         }
     };
     const [equipData, setEquipData] = useState(null);
+
+    const [toggleEdit, setToggleEdit] = useState(false);
+    const [equpimentIdData, setEqupimentIdData] = useAtom(equipmentId);
 
     return (
         <>
@@ -1163,6 +1174,11 @@ const EquipmentTable = ({
                                         </div>
                                     </th>
                                 )}
+                                <th className="active-device-header">
+                                    <div className="active-device-flex">
+                                        <div>Actions</div>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         {isEquipDataFetched ? (
@@ -1209,11 +1225,14 @@ const EquipmentTable = ({
                                             key={index}
                                             onClick={() => {
                                                 setEquipData(record);
-                                                Toggle(record);
                                             }}
                                             className="mouse-pointer">
                                             {selectedOptions.some((record) => record.value === 'status') && (
-                                                <td className="text-center">
+                                                <td
+                                                    className="text-center"
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
                                                     <div>
                                                         {record.status === 'Online' && (
                                                             <div className="icon-bg-styling">
@@ -1229,22 +1248,38 @@ const EquipmentTable = ({
                                                 </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'name') && (
-                                                <td className="font-weight-bold">
+                                                <td
+                                                    className="font-weight-bold"
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
                                                     {!(record.equipments_name === '') ? record.equipments_name : '-'}
                                                 </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'equip_type') && (
-                                                <td className="font-weight-bold">{record.equipments_type}</td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}
+                                                    className="font-weight-bold">
+                                                    {record.equipments_type}
+                                                </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'location') && (
-                                                <td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
                                                     {record.location === ' > '
                                                         ? ' - '
                                                         : record.location.split('>').reverse().join(' > ')}
                                                 </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'tags') && (
-                                                <td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
                                                     {
                                                         <div className="badge badge-light mr-2 font-weight-bold week-day-style">
                                                             {record.tags.length === 0 ? 'None' : record.tags[0]}
@@ -1253,21 +1288,91 @@ const EquipmentTable = ({
                                                 </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'sensor_number') && (
-                                                <td>{record.sensor_number === 0 ? '-' : record.sensor_number}</td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
+                                                    {record.sensor_number === 0 ? '-' : record.sensor_number}
+                                                </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'last_data') && (
-                                                <td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}>
                                                     {record.last_data === ''
                                                         ? '-'
                                                         : moment(record?.last_data).fromNow()}
                                                 </td>
                                             )}
                                             {selectedOptions.some((record) => record.value === 'device_id') && (
-                                                <td className="font-weight-bold">{record.device_mac}</td>
+                                                <td
+                                                    onClick={() => {
+                                                        Toggle(record);
+                                                    }}
+                                                    className="font-weight-bold">
+                                                    {record.device_mac}
+                                                </td>
                                             )}
+                                            <td className="font-weight-bold">
+                                                <img
+                                                    style={{ width: '20px' }}
+                                                    src={ThreeDots}
+                                                    onClick={() => {
+                                                        console.log('equipments_name_plus', record?.equipments_id);
+                                                        setToggleEdit(true);
+                                                        setEqupimentIdData(record?.equipments_id);
+                                                    }}
+                                                />
+                                            </td>
                                         </tr>
                                     );
                                 })}
+                                <UncontrolledDropdown
+                                    style={{
+                                        width: '30px',
+                                        position: 'absolute',
+                                        top: '10px',
+                                        right: 0,
+                                    }}
+                                    isOpen={toggleEdit}
+                                    toggle={() => {
+                                        setToggleEdit(!toggleEdit);
+                                    }}>
+                                    <DropdownToggle
+                                        tag="button"
+                                        className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
+                                    <DropdownMenu right>
+                                        <DropdownItem>
+                                            <div
+                                                onClick={() => {
+                                                    setIsEdit(true);
+                                                }}
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                }}>
+                                                <img src={Pen} style={{ width: '20px' }} />
+                                                <span>Edit</span>
+                                            </div>
+                                        </DropdownItem>
+                                        <DropdownItem
+                                            onClick={() => {
+                                                setIsDelete(true);
+                                            }}>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                }}>
+                                                <img src={Delete} style={{ width: '20px' }} />
+                                                <span style={{ color: 'red' }}>Delete</span>
+                                            </div>
+                                        </DropdownItem>
+                                    </DropdownMenu>
+                                </UncontrolledDropdown>
                             </tbody>
                         )}
                     </Table>
@@ -1355,6 +1460,13 @@ const Equipment = () => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const [isDelete, setIsDelete] = useState(false);
+    const handleDeleteClose = () => setIsDelete(false);
+    // const handleEditShow = () => setIsDelete(true);
+
+    const [isEdit, setIsEdit] = useState(false);
+    const handleEditClose = () => setIsEdit(false);
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(true);
@@ -1630,41 +1742,6 @@ const Equipment = () => {
     };
 
     useEffect(() => {
-        const fetchOnlineEquipData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?stat=true&building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    setOnlineEquipData(res.data);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch online Equipments Data');
-            }
-        };
-
-        const fetchOfflineEquipData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?stat=false&building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
-                    setOfflineEquipData(res.data);
-                    // console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch offline Equipments Data');
-            }
-        };
         const fetchEndUseData = async () => {
             try {
                 let headers = {
@@ -1755,6 +1832,24 @@ const Equipment = () => {
         setSelectedOptions(arr);
         updateBreadcrumbStore();
     }, []);
+
+    const [equpimentIdData] = useAtom(equipmentId);
+    const [processdelete, setProcessdelete] = useState(false);
+
+    const deleteEquipmentFunc = async () => {
+        setProcessdelete(true);
+        let headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+        let params = `?equipment_id=${equpimentIdData}&building_id=${bldgId}`;
+        await axios.delete(`${BaseUrl}${deleteEquipment}${params}`, { headers }).then(() => {
+            setProcessdelete(false);
+            fetchEquipmentData();
+            setIsDelete(false);
+        });
+    };
 
     return (
         <React.Fragment>
@@ -1874,6 +1969,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            setIsDelete={setIsDelete}
+                            setIsEdit={setIsEdit}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -1891,6 +1988,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            setIsDelete={setIsDelete}
+                            setIsEdit={setIsEdit}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -1908,6 +2007,8 @@ const Equipment = () => {
                             paginationData={paginationData}
                             pageSize={pageSize}
                             setPageSize={setPageSize}
+                            setIsDelete={setIsDelete}
+                            setIsEdit={setIsEdit}
                         />
                     )}
                 </Col>
@@ -1998,6 +2099,39 @@ const Equipment = () => {
                         }}
                         disabled={isProcessing}>
                         {isProcessing ? 'Adding...' : 'Add'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Delete Equpiment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <span style={{ fontSize: '15px' }}>Are you sure you want to delete the Equipment?</span>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                    }}>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
+                        onClick={handleDeleteClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        disabled={processdelete}
+                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}
+                        onClick={() => {
+                            deleteEquipmentFunc();
+                        }}>
+                        {processdelete ? 'Deleting...' : 'Delete'}
                     </Button>
                 </Modal.Footer>
             </Modal>
