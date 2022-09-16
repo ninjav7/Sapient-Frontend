@@ -1,14 +1,14 @@
 import React from 'react';
-import LineChartWidget from "./index";
+import LineChartWidget from './index';
 
 export default {
     title: 'Components/LineChart Widget',
     component: LineChartWidget,
-}
+};
 
 const lineChartMock = [
     {
-        name: "Test",
+        name: 'Test',
         data: [
             {
                 x: new Date('2022-10-1').getTime(),
@@ -32,10 +32,8 @@ const lineChartMock = [
             },
         ],
     },
-]
+];
 
 export const Default = () => {
-    return (
-        <LineChartWidget subtitle='Subtitle' series={lineChartMock} title='Title' />
-    );
-}
+    return <LineChartWidget subtitle="Subtitle" series={lineChartMock} title="Title" />;
+};

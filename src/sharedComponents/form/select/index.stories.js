@@ -1,37 +1,13 @@
-import React from 'react';
-import Select from "./index";
+import Select from './index';
+import { Default } from './stories/single';
+import { Multi } from './stories/multi';
 
-export default  {
-    title: "Components/Select",
+export default {
+    title: 'Components/DropdownInput',
     component: Select,
-    argTypes: {
-        selectClassName: {
-            control: false,
-        },
-        className: {
-            control: false,
-        },
-        defaultValue: {
-            control: false,
-        }
+    parameters: {
+        controls: { disable: true },
     },
-}
-
-export const Default = (arg) => <Select {...arg} />
-
-Default.args = {
-   options: [
-       {
-           label: 'Today',
-           value: 0,
-       },
-       {
-           label: 'Last 7 Days',
-           value: 7,
-       },
-       {
-           label: 'Year',
-           value: 12,
-       },
-   ],
 };
+
+export { Default, Multi };
