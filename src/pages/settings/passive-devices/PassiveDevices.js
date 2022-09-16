@@ -317,6 +317,7 @@ const PassiveDevicesTable = ({
 
                                 <Dropdown
                                     style={{
+                                        width: '30px',
                                         position: 'absolute',
                                         top: '10px',
                                         right: 0,

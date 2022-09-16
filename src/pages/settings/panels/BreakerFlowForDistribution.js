@@ -1720,9 +1720,9 @@ const BreakersComponent = ({ data, id }) => {
                                 <Select
                                     name="state"
                                     id="userState"
-                                    placeholder="Select Equpiment"
+                                    placeholder="Select Equipment"
                                     isSearchable={true}
-                                    defaultValue={'Select Equpiment'}
+                                    defaultValue={'Select Equipment'}
                                     options={equipmentDataSearch}
                                     onChange={(e) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);

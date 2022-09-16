@@ -1332,7 +1332,7 @@ const EquipmentTable = ({
                                     style={{
                                         width: '30px',
                                         position: 'absolute',
-                                        top: '10px',
+                                        top: '100px',
                                         right: 0,
                                     }}
                                     isOpen={toggleEdit}
