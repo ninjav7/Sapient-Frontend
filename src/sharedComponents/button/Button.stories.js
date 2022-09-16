@@ -6,6 +6,7 @@ import Brick from '../brick';
 import { ReactComponent as PlusSVG } from '../assets/icons/plus.svg';
 
 import '../assets/scss/stories.scss';
+import { ButtonTertiary } from './ButtonTertiary';
 
 export default {
     title: 'Components/Button',
@@ -46,3 +47,11 @@ export const Primary = () => (
         <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.Primary} />
     </>
 );
+
+export const Tertiary = () => {
+    return (
+        <>
+            <ButtonTertiary label="Button {Tertiary} CTA {LG}" size={Button.Sizes.lg} type={Button.Type.Tertiary} />
+        </>
+    );
+};
