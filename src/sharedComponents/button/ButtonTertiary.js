@@ -11,7 +11,7 @@ const ButtonTertiary = (props) => {
     return (
         <Button
             {...props}
-            type={Button.Type.Tertiary}
+            type={Button.Type.tertiary}
             icon={<ArrowRight style={{ height: ICON_SIZES[props.size] }} />}
             iconAlignment={Button.IconAlignment.right}
         />

@@ -57,7 +57,7 @@ const PickDemandBox = ({ items = [], handleClick, ...props }) => {
                             onClick={handleClick}
                             label="Explore"
                             size={Button.Sizes.md}
-                            type={Button.Type.SecondaryGrey}
+                            type={Button.Type.secondaryGrey}
                             icon={<TelescopeSVG />}
                         />
                     )}

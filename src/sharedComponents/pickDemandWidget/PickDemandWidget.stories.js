@@ -12,11 +12,9 @@ export default {
 
 export const Default = (props) => {
     return (
-        <div>
-            <BrowserRouter>
-                <PickDemandWidget {...props} style={{ display: 'inline-block' }} />
-            </BrowserRouter>
-        </div>
+        <BrowserRouter>
+            <PickDemandWidget {...props} style={{ display: 'inline-block' }} />
+        </BrowserRouter>
     );
 };
 

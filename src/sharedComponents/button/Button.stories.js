@@ -16,9 +16,9 @@ export default {
 export const SecondaryGrey = () => (
     <>
         <h6>Without Icon</h6>
-        <Button label="Button CTA {MD}" size={Button.Sizes.md} type={Button.Type.SecondaryGrey} />
+        <Button label="Button CTA {MD}" size={Button.Sizes.md} type={Button.Type.secondaryGrey} />
         <Brick />
-        <Button label={'Button CTA {SM}'} size={Button.Sizes.sm} type={Button.Type.SecondaryGrey} />
+        <Button label={'Button CTA {SM}'} size={Button.Sizes.sm} type={Button.Type.secondaryGrey} />
 
         <Brick sizeInRem={2} />
 
@@ -27,14 +27,14 @@ export const SecondaryGrey = () => (
             <Button
                 label="Button CTA {MD}"
                 size={Button.Sizes.md}
-                type={Button.Type.SecondaryGrey}
+                type={Button.Type.secondaryGrey}
                 icon={<PlusSVG />}
             />
             <div className="p-2" />
             <Button
                 label="Button CTA {MD}"
                 size={Button.Sizes.md}
-                type={Button.Type.SecondaryGrey}
+                type={Button.Type.secondaryGrey}
                 icon={<PlusSVG />}
                 iconAlignment={Button.IconAlignment.right}
             />
@@ -42,16 +42,6 @@ export const SecondaryGrey = () => (
     </>
 );
 
-export const Primary = () => (
-    <>
-        <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.Primary} />
-    </>
-);
+export const Primary = () => <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.primary} />;
 
-export const Tertiary = () => {
-    return (
-        <>
-            <ButtonTertiary label="Button {Tertiary} CTA {LG}" size={Button.Sizes.lg} type={Button.Type.Tertiary} />
-        </>
-    );
-};
+export const tertiary = () => <ButtonTertiary label="Button {tertiary} CTA {LG}" size={Button.Sizes.lg} type={Button.Type.tertiary} />;
