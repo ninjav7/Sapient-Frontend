@@ -60,8 +60,6 @@ const PassiveDevicesTable = ({
     isEdit,
     setIsDelete,
 }) => {
-    console.log('deviceData', deviceData, 'selectedOptions', selectedOptions);
-
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -317,9 +315,8 @@ const PassiveDevicesTable = ({
                                     );
                                 })}
 
-                                <UncontrolledDropdown
+                                <Dropdown
                                     style={{
-                                        width: '30px',
                                         position: 'absolute',
                                         top: '10px',
                                         right: 0,
@@ -330,6 +327,7 @@ const PassiveDevicesTable = ({
                                     }}>
                                     <DropdownToggle
                                         tag="button"
+                                        size="sm"
                                         className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
                                     <DropdownMenu right>
                                         <DropdownItem
@@ -339,11 +337,11 @@ const PassiveDevicesTable = ({
                                             <div
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+                                                    // justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Pen} style={{ width: '20px' }} />
-                                                <span>Edit</span>
+                                                <span style={{ marginLeft: '20px', fontWeight: '700' }}>Edit</span>
                                             </div>
                                         </DropdownItem>
                                         <DropdownItem onClick={() => {}}>
@@ -353,15 +351,17 @@ const PassiveDevicesTable = ({
                                                 }}
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+                                                    // justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red' }}>Delete</span>
+                                                <span style={{ color: 'red', marginLeft: '20px', fontWeight: '700' }}>
+                                                    Delete
+                                                </span>
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>
-                                </UncontrolledDropdown>
+                                </Dropdown>
                             </tbody>
                         )}
                     </Table>
@@ -415,8 +415,6 @@ const PassiveDevices = () => {
     const [identifierVal, setIdentifierVal] = useAtom(identifier);
     const [deviceIdVal] = useAtom(deviceId);
     const [modalVal] = useAtom(passiveDeviceModal);
-
-    console.log('deviceIdVal', deviceIdVal);
 
     const tableColumnOptions = [
         { label: 'Status', value: 'status' },
@@ -1002,7 +1000,9 @@ const PassiveDevices = () => {
                                 borderRadius: '10px',
                                 border: 'none',
                             }}
-                            disabled={true}>
+                            onClick={() => {
+                                deleteDeviceData();
+                            }}>
                             <img style={{ marginTop: '10px', marginBottom: '10px' }} src={Delete} />
                             <span style={{ color: 'red', marginTop: '10px', marginBottom: '10px', marginLeft: '5px' }}>
                                 Delete Passive Device

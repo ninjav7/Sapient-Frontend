@@ -1350,11 +1350,11 @@ const EquipmentTable = ({
                                                 }}
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Pen} style={{ width: '20px' }} />
-                                                <span>Edit</span>
+                                                <span style={{ marginLeft: '20px', fontWeight: '700' }}>Edit</span>
                                             </div>
                                         </DropdownItem>
                                         <DropdownItem
@@ -1364,11 +1364,13 @@ const EquipmentTable = ({
                                             <div
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red' }}>Delete</span>
+                                                <span style={{ color: 'red', marginLeft: '20px', fontWeight: '700' }}>
+                                                    Delete
+                                                </span>
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>

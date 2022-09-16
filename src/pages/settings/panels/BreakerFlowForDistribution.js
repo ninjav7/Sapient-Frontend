@@ -701,7 +701,10 @@ const BreakersComponent = ({ data, id }) => {
 
     const sensorDataFunc = () => {
         sensorData.map((item) => {
-            setSensorDataSearch((el) => [...el, { value: `${item?.id}`, label: `${item?.name}` }]);
+            setSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
         });
     };
 
@@ -717,7 +720,10 @@ const BreakersComponent = ({ data, id }) => {
 
     const equpimentDataFunc = () => {
         equipmentData.map((item) => {
-            setEquipmentDataSearch((el) => [...el, { value: `${item?.value}`, label: `${item?.label}` }]);
+            setEquipmentDataSearch((el) => [
+                ...el,
+                { value: `${item?.value}`, label: `${item?.label}`, breaker_id: `${item?.breaker_id}` },
+            ]);
         });
     };
 
@@ -726,6 +732,8 @@ const BreakersComponent = ({ data, id }) => {
             equpimentDataFunc();
         }
     }, [equipmentData]);
+
+    console.log('equipmentDataSearch', equipmentDataSearch);
 
     return (
         <React.Fragment>
@@ -1061,6 +1069,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1178,6 +1190,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1294,6 +1310,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleDoubleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1416,6 +1436,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1532,6 +1556,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleDoubleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1648,6 +1676,10 @@ const BreakersComponent = ({ data, id }) => {
                                                             handleTripleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
                                                     />
                                                 )}
                                             </Form.Group>
@@ -1696,6 +1728,7 @@ const BreakersComponent = ({ data, id }) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);
                                     }}
                                     className="font-weight-bold"
+                                    isOptionDisabled={(option) => option.breaker_id !== 'undefined'}
                                 />
                             </Form.Group>
                         </Form>
