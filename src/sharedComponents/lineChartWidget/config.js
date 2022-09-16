@@ -66,8 +66,8 @@ export const configLineChartWidget = {
             show: false,
         },
         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-            const { labels } = w.globals;
-            const timestamp = labels[dataPointIndex];
+            const { seriesX } = w.globals;
+            const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
             return `<div class="line-chart-widget-tooltip">
                     <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>

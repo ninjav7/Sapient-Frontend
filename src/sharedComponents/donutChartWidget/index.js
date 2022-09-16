@@ -6,6 +6,7 @@ import Typography from '../typography';
 import Brick from '../brick';
 import { configDonutChartWidget } from './config';
 import DonutChartLabels from './DonutChartLabels';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 import './style.scss';
 

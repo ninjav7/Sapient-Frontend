@@ -14,6 +14,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -82,12 +83,15 @@ const EndUsesPage = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            0
+                        )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ hh:mm A`
                         )}</div>
@@ -124,7 +128,7 @@ const EndUsesPage = () => {
             labels: {
                 formatter: function (val) {
                     let print = val.toFixed(0);
-                    return `${print}k`;
+                    return `${print}`;
                 },
             },
         },
@@ -262,7 +266,7 @@ const EndUsesPage = () => {
                         let responseData = res?.data;
                         responseData.forEach((endUse) => {
                             endUse.data.forEach((record) => {
-                                record.y = record.y / 1000;
+                                record.y = parseInt(record.y / 1000);
                             });
                         });
                         setBarChartData(responseData);
@@ -301,7 +305,7 @@ const EndUsesPage = () => {
                                         <div className="enduses-content-2">
                                             <span className="card-text card-content-style">
                                                 {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
+                                                    maximumFractionDigits: 0,
                                                 })}
                                             </span>
                                             <span className="card-unit-style">kWh</span>
