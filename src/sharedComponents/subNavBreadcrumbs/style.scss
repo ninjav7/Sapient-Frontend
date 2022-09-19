@@ -1,5 +1,7 @@
 @import '../../assets/scss/colors';
 
+$gap-between-breadcrumbs: 0.75rem;
+
 .subnav-breadcrumbs-wrapper {
     margin: 0.375rem 0;
 
@@ -29,7 +31,7 @@
     }
 
     .breadcrumb-item + .breadcrumb-item {
-        padding-left: 0.75rem;
+        padding-left: $gap-between-breadcrumbs;
 
         &::before {
             width: 0.4375rem;
@@ -37,6 +39,20 @@
             content: ' ';
             background: url(../assets/icons/angle-right.svg) no-repeat center center;
             margin-right: 0.75rem;
+        }
+    }
+
+    .drop-down-button {
+        cursor: pointer;
+        background: none;
+        border: 0;
+        outline: none;
+        display: flex;
+        align-items: center;
+
+        &-icon {
+            margin-left: $gap-between-breadcrumbs;
+            transform: rotate(90deg);
         }
     }
 }

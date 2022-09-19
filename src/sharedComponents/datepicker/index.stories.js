@@ -1,15 +1,13 @@
-import React from "react";
-import Datepicker from "./index";
+import React from 'react';
+import Datepicker from './index';
 
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default {
     title: 'Components/Datepicker',
-    component: Datepicker
-}
+    component: Datepicker,
+};
 
 export const Default = () => {
-    return (
-        <Datepicker />
-    );
-}
+    return <Datepicker />;
+};

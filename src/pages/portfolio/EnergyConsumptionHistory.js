@@ -6,7 +6,7 @@ const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading }) =
         <LineChartWidget
             height={height}
             title="Energy Consumption History"
-            subtitle="Energy Totals by Day"
+            subtitle="Totals by Hour (kWh)"
             series={series}
             isConsumpHistoryLoading={isConsumpHistoryLoading}
         />

@@ -7,6 +7,7 @@ import { percentageHandler, dateFormatHandler } from '../../utils/helper';
 import { BaseUrl, getExploreByEquipment, getExploreEquipmentList, getExploreEquipmentChart, getFloors, equipmentType,getEndUseId, getSpaceTypes} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
+import { BuildingStore } from '../../store/BuildingStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faTableColumns, faDownload  } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
@@ -23,6 +24,9 @@ import './style.css';
 import { forEach, remove } from 'lodash';
 import RangeSlider from './RangeSlider';
 import { FilterList, FilterListSharp } from '@mui/icons-material';
+import moment from 'moment';
+import { CSVLink } from 'react-csv';
+
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -433,6 +437,7 @@ const ExploreEquipmentTable = ({
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
+    const timeZone = localStorage.getItem('exploreBldTimeZone');
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -526,8 +531,61 @@ const ExploreByEquipment = () => {
         markers: {
             size: 0,
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${(series[seriesIndex][dataPointIndex]/1000).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ HH:mm`
+                        )}</div>
+                    </div>`;
+            },
+        },
         xaxis: {
             type: 'datetime',
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
+            },
+        },
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000).toFixed(3) + ' K';
+            },
+        }
         },
     });
 
@@ -569,12 +627,19 @@ const ExploreByEquipment = () => {
         },
         xaxis: {
             type: 'datetime',
-            tooltip: {
-                enabled: false,
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
             },
         },
-        yaxis: {
-            tickAmount: 2,
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000) + ' K';
+            },
+        },
+        tickAmount:2,
         },
         legend: {
             show: false,
@@ -607,6 +672,7 @@ const ExploreByEquipment = () => {
     const [maxPerValue, set_maxPerValue] = useState(100);
     const [spaceType,setSpaceType]=useState([]);
     const [removeDuplicateFlag, setRemoveDuplicateFlag]=useState(false);
+    const [equipmentSearchTxt,setEquipmentSearchTxt]=useState('');
     
     const handleAllEquip=(e)=>{
         let slt = document.getElementById("allEquipType");
@@ -1148,7 +1214,7 @@ const ExploreByEquipment = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}`;
+                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getExploreEquipmentChart}${params}`,
@@ -1498,6 +1564,83 @@ const handleLocationSearch=(e)=>{
         setFilteredLocationOptions(filteredLocationOptionsCopy);
     }
 }
+
+const handleEquipmentSearch=(e)=>{
+    console.log(equipmentSearchTxt);
+
+    const exploreDataFetch = async () => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy&search_by_name=${equipmentSearchTxt}&building_id=${bldgId}`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentList}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    if(responseData.data.length!==0){
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption(responseData.data[0].peak_power.now);
+                    set_minConValue(0.00);
+                    set_maxConValue(((responseData.data[0].consumption.now)/1000).toFixed(3))
+                    }
+                    setExploreTableData(responseData.data);
+                    setRemoveDuplicateFlag(!removeDuplicateFlag)
+                    setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
+    exploreDataFetch();
+    
+}
+
+const getCSVLinkData = () => {
+    // console.log("csv entered");
+    let sData=[];
+    exploreTableData.map(function (obj) {
+        let change=percentageHandler(obj.consumption.now,obj.consumption.old) +"%"
+         sData.push([obj.equipment_name,(obj.consumption.now / 1000).toFixed(2)+ 'kWh',change,obj.location,obj.location_type,obj.equipments_type,obj.end_user]) ;
+      });
+      //console.log(sData)
+    //let arr = exploreTableData.length > 0 ? sData : [];
+    //console.log(exploreTableData);
+    //console.log([exploreTableData]);
+    let streamData = exploreTableData.length > 0 ? sData : [];
+
+    // streamData.unshift(['Timestamp', selectedConsumption])
+
+    return [['Name', 'Energy Consumption','% Change', 'Location', 'Location Type', 'Equipment Type', 'End Use Category'], ...streamData];
+};
+
+const getCSVLinkChartData = () => {
+    // console.log("csv entered");
+    let arr =  [];
+    console.log(seriesData);
+    seriesData.map(function (obj) {
+                arr.push([obj.name,obj.data]) ;
+      });
+    // console.log(sData);
+    let streamData = seriesData.length > 0 ? arr: [];
+
+    // streamData.unshift(['Timestamp', selectedConsumption])
+
+    return [['Equipment Name',['timestamp', 'energy']], ...streamData];
+};
+
     return (
         <>
             <Row className="ml-2 mt-2 mr-2 explore-filters-style">
@@ -1541,12 +1684,25 @@ const handleLocationSearch=(e)=>{
                             <Spinner className="m-2" color={'primary'} />
                         </div>
                     ) : (
+                        <>
+                         <Row>
+                            <Col lg={11}></Col>
+                            <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
+                                    <CSVLink
+                                                    style={{ color: 'black' }}
+                                                    className='btn btn-white d-inline btnHover font-weight-bold'
+                                                    filename={`explore-building-energy-${new Date().toUTCString()}.csv`}
+                                                    target="_blank"
+                                                    data={getCSVLinkChartData()}> <FontAwesomeIcon icon={faDownload} size="md" /></CSVLink>
+                            </Col>
+                        </Row>
                         <BrushChart
                             seriesData={seriesData}
                             optionsData={optionsData}
                             seriesLineData={seriesLineData}
                             optionsLineData={optionsLineData}
                         />
+                        </>
                     )}
                 </div>
             </Row>
@@ -1555,8 +1711,8 @@ const handleLocationSearch=(e)=>{
                 <Col lg={11} style={{display:"flex",justifyContent:"flex-start"}}>
                 <div className="explore-search-filter-style">
                     <div className="explore-search mr-2">
-                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                        <input className="search-box ml-2" type="search" name="search" placeholder="Search..." />
+                        <input className="search-box ml-2" type="search" name="search" placeholder="Search..." onChange={(e)=>{setEquipmentSearchTxt(e.target.value)}} />
+                        <button style={{border:"none",backgroundColor:"#fff"}} onClick={(e)=>{handleEquipmentSearch(e)}}><FontAwesomeIcon icon={faMagnifyingGlass} size="md" /></button>
                     </div>
                     <div>
                         <MultiSelect
@@ -1833,7 +1989,12 @@ const handleLocationSearch=(e)=>{
                 </Col>
                 <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
                 <button className='btn btn-white d-inline btnHover font-weight-bold mr-2'> <FontAwesomeIcon icon={faTableColumns} size="md" /></button>
-                <button className='btn btn-white d-inline btnHover font-weight-bold'> <FontAwesomeIcon icon={faDownload} size="md" /></button>
+                <CSVLink
+                                                    style={{ color: 'black' }}
+                                                    className='btn btn-white d-inline btnHover font-weight-bold'
+                                                    filename={`explore-building-list-${new Date().toUTCString()}.csv`}
+                                                    target="_blank"
+                                                    data={getCSVLinkData()}> <FontAwesomeIcon icon={faDownload} size="md" /></CSVLink>
                 </Col>
             </Row>
 

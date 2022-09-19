@@ -16,6 +16,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import './style.css';
 
 const EndUseType = () => {
@@ -118,6 +119,47 @@ const EndUseType = () => {
         animations: {
             enabled: false,
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
+        },
         xaxis: {
             type: 'datetime',
             labels: {
@@ -134,12 +176,21 @@ const EndUseType = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
+                },
+            },
         },
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = val.toFixed(2);
-                    return `${print}k`;
+                    let print = val.toFixed(0);
+                    return `${print}`;
                 },
             },
             style: {
@@ -219,9 +270,10 @@ const EndUseType = () => {
 
                         return `<div class="line-chart-widget-tooltip">
                             <h6 class="line-chart-widget-tooltip-title">${endUseName} Consumption</h6>
-                            <div class="line-chart-widget-tooltip-value">${
-                                series[seriesIndex][dataPointIndex]
-                            } kWh</div>
+                            <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                                series[seriesIndex][dataPointIndex],
+                                0
+                            )} kWh</div>
                             <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                                 `MMM D 'YY @ hh:mm A`
                             )}</div>
@@ -387,7 +439,7 @@ const EndUseType = () => {
                         data.map((record) => {
                             let obj = {
                                 x: record.date,
-                                y: record.energy_consumption / 1000,
+                                y: parseInt(record.energy_consumption / 1000),
                             };
                             energyData[0].data.push(obj);
                         });
@@ -427,8 +479,8 @@ const EndUseType = () => {
                                     Total Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {endUsesData?.energy_consumption?.now.toLocaleString(undefined, {
-                                        maximumFractionDigits: 2,
+                                    {(endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
+                                        maximumFractionDigits: 0,
                                     })}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
@@ -504,9 +556,12 @@ const EndUseType = () => {
                                     After-Hours Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {endUsesData?.after_hours_energy_consumption?.now.toLocaleString(undefined, {
-                                        maximumFractionDigits: 2,
-                                    })}
+                                    {(endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
+                                        undefined,
+                                        {
+                                            maximumFractionDigits: 0,
+                                        }
+                                    )}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
                                 {endUsesData?.after_hours_energy_consumption?.now >=

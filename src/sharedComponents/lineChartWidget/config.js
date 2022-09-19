@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { kFormatter } from '../helpers/helper';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 export const configLineChartWidget = {
     markers: {
@@ -65,12 +66,15 @@ export const configLineChartWidget = {
             show: false,
         },
         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-            const { labels } = w.globals;
-            const timestamp = labels[dataPointIndex];
+            const { seriesX } = w.globals;
+            const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
             return `<div class="line-chart-widget-tooltip">
-                    <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
-                    <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
+                    <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                    <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                        series[seriesIndex][dataPointIndex],
+                        0
+                    )} kWh</div>
                     <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                         'D/M/YY @ hh:mm A'
                     )}</div>
@@ -94,7 +98,7 @@ export const configLineChartWidget = {
             show: true,
             position: 'front',
             stroke: {
-                color: '#F04438',
+                color: '#7C879C',
                 width: 2,
                 dashArray: 0,
             },

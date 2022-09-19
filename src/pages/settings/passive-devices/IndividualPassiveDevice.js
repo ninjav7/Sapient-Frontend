@@ -185,14 +185,14 @@ const IndividualPassiveDevice = () => {
     };
 
     const updateActiveDeviceData = async () => {
-        if (passiveData.equipments_id) {
+        if (passiveData?.equipments_id) {
             try {
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?device_id=${passiveData.equipments_id}`;
+                let params = `?device_id=${passiveData?.equipments_id}`;
                 await axios
                     .post(
                         `${BaseUrl}${updateActivePassiveDevice}${params}`,
@@ -311,7 +311,7 @@ const IndividualPassiveDevice = () => {
                                     <span className="passive-device-style">Passive Device</span>
                                 </div>
                                 <div>
-                                    <span className="passive-device-name mr-3">{passiveData.identifier}</span>
+                                    <span className="passive-device-name mr-3">{passiveData?.identifier}</span>
                                     <span className="passive-sensor-count">{sensors.length} Sensors</span>
                                 </div>
                             </div>
@@ -330,7 +330,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                        activeLocationId === passiveData.location_id
+                                        activeLocationId === passiveData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -369,8 +369,8 @@ const IndividualPassiveDevice = () => {
                                                 <option>Select Location</option>
                                                 {locationData.map((record, index) => {
                                                     return (
-                                                        <option value={record.location_id}>
-                                                            {record.location_name}
+                                                        <option value={record?.location_id}>
+                                                            {record?.location_name}
                                                         </option>
                                                     );
                                                 })}
@@ -387,7 +387,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Identifier
                                         </h6>
-                                        <h6 className="passive-device-value">{passiveData.identifier}</h6>
+                                        <h6 className="passive-device-value">{passiveData?.identifier}</h6>
                                     </div>
                                     <div>
                                         <h6 className="device-label-style" htmlFor="customSwitches">

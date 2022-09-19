@@ -20,6 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
@@ -70,8 +71,6 @@ const BuildingOverview = () => {
     // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-
-    console.log('timeZone', timeZone);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -422,12 +421,15 @@ const BuildingOverview = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            4
+                        )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ hh:mm A`
                         )}</div>
@@ -450,12 +452,21 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
+                },
+            },
         },
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    let print = val.toFixed(2);
-                    return `${print}k`;
+                    let print = parseInt(val);
+                    return `${print}`;
                 },
             },
             style: {
@@ -511,54 +522,38 @@ const BuildingOverview = () => {
                 useFillColorAsStroke: false,
             },
         },
-        tooltip: {
-            //@TODO NEED?
-            // enabled: false,
-            shared: false,
-            intersect: false,
-            style: {
-                fontSize: '12px',
-                fontFamily: 'Inter, Arial, sans-serif',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value) {
-            //         return value + ' K';
-            //     },
-            // },
-            marker: {
-                show: false,
-            },
-            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
-
-                return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Average Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
-                    </div>`;
-            },
+        xaxis: {
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
         },
         yaxis: {
             labels: {
                 show: false,
             },
-        },
-        xaxis: {
-            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
         },
     });
 
@@ -622,7 +617,32 @@ const BuildingOverview = () => {
             },
         },
         xaxis: {
-            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
         },
     });
 
@@ -1295,14 +1315,14 @@ const BuildingOverview = () => {
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                y: parseInt(el.y / 1000),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
                                 x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                y: parseInt(el.y / 1000),
                             };
                         });
 
@@ -1385,9 +1405,10 @@ const BuildingOverview = () => {
                         response.forEach((record) => {
                             newArray[0].data.push({
                                 x: record?.x,
-                                y: (record?.y / 1000).toFixed(5),
+                                y: parseInt(record?.y / 1000),
                             });
                         });
+                        console.log('Sudhanshu :>> ', newArray);
                         setBuildingConsumptionChartData(newArray);
                         setIsEnergyConsumptionDataLoading(false);
                     });
@@ -1434,14 +1455,16 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <Header title="Building Overview" />
+            <div className="ml-2">
+                <Header title="Building Overview" />
+            </div>
             <Row xl={12} className="mt-2">
                 <div className="energy-summary-alignment">
                     <div className="card-box-style button-style">
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now / 1000}
+                                description={parseInt(overview?.total_consumption.now / 1000)}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
@@ -1475,7 +1498,7 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={(overview.average_energy_density.now / 1000).toFixed(5)}
+                                description={(overview.average_energy_density.now / 1000).toFixed(2)}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1821,7 +1844,9 @@ const BuildingOverview = () => {
                         <div className="card-body">
                             <div className="total-eng-consumtn">
                                 <h6 className="card-title custom-title">Total Energy Consumption</h6>
-                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                    Hourly Energy Consumption (kWh)
+                                </h6>
                                 {isEnergyConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
                                         <Spinner className="m-2" color={'primary'} />

@@ -440,10 +440,10 @@ const IndividualActiveDevice = () => {
                                 </div>
                                 <div>
                                     <span className="passive-device-name mr-3">
-                                        {activeData.description ? activeData.description : ''}
+                                        {activeData?.description ? activeData?.description : ''}
                                     </span>
                                     <span className="passive-sensor-count">
-                                        {activeData.identifier ? activeData.identifier : ''}
+                                        {activeData?.identifier ? activeData?.identifier : ''}
                                     </span>
                                 </div>
                             </div>
@@ -462,7 +462,7 @@ const IndividualActiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                        activeLocationId === activeData.location_id
+                                        activeLocationId === activeData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -500,8 +500,8 @@ const IndividualActiveDevice = () => {
                                                 <option>Select Location</option>
                                                 {locationData.map((record, index) => {
                                                     return (
-                                                        <option value={record.location_id}>
-                                                            {record.location_name}
+                                                        <option value={record?.location_id}>
+                                                            {record?.location_name}
                                                         </option>
                                                     );
                                                 })}
@@ -532,7 +532,7 @@ const IndividualActiveDevice = () => {
                                             Identifier
                                         </h6>
                                         <h6 className="passive-device-value">
-                                            {activeData.identifier ? activeData.identifier : ''}
+                                            {activeData?.identifier ? activeData?.identifier : ''}
                                         </h6>
                                     </div>
                                     <div>
@@ -540,7 +540,7 @@ const IndividualActiveDevice = () => {
                                             Device Model
                                         </h6>
                                         <h6 className="passive-device-value">
-                                            {activeData.model ? activeData.model : ''}
+                                            {activeData?.model ? activeData?.model : ''}
                                         </h6>
                                     </div>
                                 </div>
@@ -631,7 +631,7 @@ const IndividualActiveDevice = () => {
                                     {sensors.map((record, index) => {
                                         return (
                                             <>
-                                                {record.status && (
+                                                {record?.status && (
                                                     <div>
                                                         <div className="power-off-style">
                                                             <FontAwesomeIcon
@@ -640,7 +640,7 @@ const IndividualActiveDevice = () => {
                                                                 color="#3C6DF5"
                                                             />
                                                         </div>
-                                                        {record.equipment_type_id === '' ? (
+                                                        {record?.equipment_type_id === '' ? (
                                                             <div className="socket-rect">
                                                                 <img src={SocketLogo} alt="Socket" />
                                                             </div>
@@ -657,7 +657,7 @@ const IndividualActiveDevice = () => {
                                                     </div>
                                                 )}
 
-                                                {!record.status && (
+                                                {!record?.status && (
                                                     <div>
                                                         <div className="power-off-style">
                                                             <FontAwesomeIcon
@@ -666,7 +666,7 @@ const IndividualActiveDevice = () => {
                                                                 color="#EAECF0"
                                                             />
                                                         </div>
-                                                        {record.equipment_type_id === '' ? (
+                                                        {record?.equipment_type_id === '' ? (
                                                             <div className="socket-rect">
                                                                 <img src={SocketLogo} alt="Socket" />
                                                             </div>
@@ -700,8 +700,8 @@ const IndividualActiveDevice = () => {
                                                 <div className="sensor-data-style">
                                                     <span className="sensor-data-no">{record.index}</span>
                                                     <span className="sensor-data-title">
-                                                        {record.equipment_type_name
-                                                            ? record.equipment_type_name
+                                                        {record?.equipment_type_name
+                                                            ? record?.equipment_type_name
                                                             : 'No Equipment'}
                                                         {record.equipment_id === '' ? (
                                                             ''

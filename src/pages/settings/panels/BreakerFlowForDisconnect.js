@@ -3,7 +3,7 @@ import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices } from '../../../services/Network';
+import { BaseUrl, listSensor, updateBreakers, generalPassiveDevices, searchDevices } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import ReactFlow, { isEdge, removeElements, addEdge, MiniMap, Controls, Handle, Position } from 'react-flow-renderer';
 import { LoadingStore } from '../../../store/LoadingStore';
@@ -612,6 +612,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
+        console.log('previousSensorId', previousSensorId, 'newSensorId', newSensorId);
         if (previousSensorId === '') {
             let newSensorList = linkedSensors;
             newSensorList.push(newSensorId);
@@ -658,44 +659,87 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         }
     }, [breakerObj]);
 
-    useEffect(() => {
-        const fetchPassiveDeviceData = async () => {
-            if (passiveDevicePageNo === 1) {
-                return;
-            }
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}&page_size=100&page_no=${passiveDevicePageNo}`;
+    const fetchPassiveDeviceData = async () => {
+        if (passiveDevicePageNo === 1) {
+            return;
+        }
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&page_size=100&page_no=${passiveDevicePageNo}`;
 
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
-                    let responseData = res.data.data;
+            await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
+                let responseData = res.data.data;
 
-                    let newArray = [...passiveDeviceData];
-                    responseData.forEach((record) => {
-                        let obj = {
-                            label: record.identifier,
-                            value: record.equipments_id,
-                        };
-                        newArray.push(obj);
-                    });
-                    BreakersStore.update((s) => {
-                        s.passiveDeviceData = newArray;
-                    });
-                    BreakersStore.update((s) => {
-                        s.totalPassiveDeviceCount = res?.data?.total_data;
-                    });
+                let newArray = [...passiveDeviceData];
+                responseData.forEach((record) => {
+                    let obj = {
+                        label: record.identifier,
+                        value: record.equipments_id,
+                    };
+                    newArray.push(obj);
                 });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch all Passive devices');
-            }
-        };
+                BreakersStore.update((s) => {
+                    s.passiveDeviceData = newArray;
+                });
+                BreakersStore.update((s) => {
+                    s.totalPassiveDeviceCount = res?.data?.total_data;
+                });
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch all Passive devices');
+        }
+    };
+
+    useEffect(() => {
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
+
+    const [deviceIdDataLevelOne, setDeviceIdDataLevelOne] = useState([]);
+
+    const [sensorDataSearch, setSensorDataSearch] = useState([]);
+
+    const sensorDataFunc = () => {
+        sensorData.map((item) => {
+            setSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (sensorData) {
+            sensorDataFunc();
+        }
+    }, [sensorData]);
+
+    console.log('sensorDataSearch', sensorDataSearch);
+
+    const [equipmentDataSearch, setEquipmentDataSearch] = useState([]);
+
+    const equpimentDataFunc = () => {
+        equipmentData.map((item) => {
+            setEquipmentDataSearch((el) => [
+                ...el,
+                { value: `${item?.value}`, label: `${item?.label}`, breakerId: `${item?.breakerId}` },
+            ]);
+        });
+    };
+
+    console.log('equipmentData', equipmentData);
+
+    useEffect(() => {
+        if (equipmentData) {
+            equpimentDataFunc();
+        }
+    }, [equipmentData]);
+
+    console.log('linkedSensors', linkedSensors);
 
     return (
         <React.Fragment>
@@ -915,45 +959,19 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                {/* deviceIdDataNow
-                                                <Input
-                                                    type="select"
-                                                    name="state"
-                                                    id="userState"
-                                                    className="font-weight-bold breaker-phase-selection"
-                                                    placeholder="Select Device"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === 'Select Device') {
-                                                            return;
-                                                        }
-                                                        if (e.target.value === 'show-more') {
-                                                            setPassiveDevicePageNo(passiveDevicePageNo + 1);
-                                                            return;
-                                                        }
-                                                        fetchDeviceSensorData(e.target.value);
-                                                        handleSingleBreakerChange(id, 'device_id', e.target.value);
-                                                    }}
-                                                    value={breakerData.device_id}>
-                                                    <option>Select Device</option>
-                                                    {passiveDeviceData.map((record) => {
-                                                        return <option value={record.value}>{record.label}</option>;
-                                                    })}
-                                                    {breakerData.device_id !== '' && <option value="">None</option>}
-                                                    {totalPassiveDeviceCount !== passiveDeviceData.length && (
-                                                        <option value="show-more">Show More</option>
-                                                    )}
-                                                </Input> */}
+                                                {/* deviceIdDataLevelOne */}
                                                 <Select
                                                     id="exampleSelect"
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
-                                                    options={deviceIdDataNow}
+                                                    options={deviceIdDataLevelOne}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorData(e.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
                                                     }}
+                                                    // onInputChange={handleInputChange}
                                                     className="font-weight-bold"
                                                 />
                                             </Form.Group>
@@ -963,12 +981,47 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetched ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
-                                                        id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
-                                                        placeholder="Select Sensor"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    //         handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={breakerData.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {sensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {breakerData.sensor_id !== '' && <option value="">None</option>}
+                                                    // </Input>
+                                                    <Select
+                                                        id="exampleSelect"
+                                                        placeholder="Select Device"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
                                                             if (e.target.value === 'Select Sensor') {
                                                                 return;
@@ -976,27 +1029,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.target.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.target.value);
                                                         }}
-                                                        value={breakerData.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {sensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1013,7 +1051,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1042,7 +1080,24 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="userState"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
+                                                    onChange={(e) => {
+                                                        fetchSensorDataForSelectionOne(e.value, 'double');
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                        if (doubleBreakerData.data.device_id === '') {
+                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                    }}
+                                                    // onInputChange={handleInputChange}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1050,40 +1105,57 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetched ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    //         handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={breakerData.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {sensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {breakerData.sensor_id !== '' && <option value="">None</option>}
+                                                    // </Input>
+                                                    <Select
                                                         id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Sensor"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
-                                                            handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleLinkedSensor(breakerData.sensor_id, e.value);
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
-                                                        value={breakerData.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {sensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1095,7 +1167,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1123,7 +1195,21 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="userState"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForDouble(e.value);
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    // onInputChange={handleInputChange}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1131,45 +1217,65 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetchedForDouble ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(
+                                                    //             doubleBreakerData?.data?.sensor_id,
+                                                    //             e.target.value
+                                                    //         );
+                                                    //         handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={doubleBreakerData?.data?.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {doubleSensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {doubleBreakerData?.data?.sensor_id !== '' && (
+                                                    //         <option value="">None</option>
+                                                    //     )}
+                                                    // </Input>
+                                                    <Select
                                                         id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Sensor"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
-                                                                e.target.value
+                                                                e.value
                                                             );
-                                                            handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleDoubleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
-                                                        value={doubleBreakerData?.data?.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {doubleSensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {doubleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1185,7 +1291,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1217,7 +1323,27 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="userState"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
+                                                    onChange={(e) => {
+                                                        fetchSensorDataForSelectionOne(e.value, 'triple');
+                                                        handleSingleBreakerChange(id, 'device_id', e.value);
+                                                        if (doubleBreakerData.data.device_id === '') {
+                                                            handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                        if (tripleBreakerData.data.device_id === '') {
+                                                            handleTripleBreakerChange(id, 'device_id', e.value);
+                                                        }
+                                                    }}
+                                                    // onInputChange={handleInputChange}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1225,40 +1351,57 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetched ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(breakerData.sensor_id, e.target.value);
+                                                    //         handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={breakerData.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {sensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {breakerData.sensor_id !== '' && <option value="">None</option>}
+                                                    // </Input>
+                                                    <Select
                                                         id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Sensor"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
-                                                            handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleLinkedSensor(breakerData.sensor_id, e.value);
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
-                                                        value={breakerData.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {sensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {breakerData.sensor_id !== '' && <option value="">None</option>}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1270,7 +1413,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1298,7 +1441,21 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="userState"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForDouble(e.value);
+                                                        handleDoubleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    // onInputChange={handleInputChange}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1306,45 +1463,65 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetchedForDouble ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(
+                                                    //             doubleBreakerData?.data?.sensor_id,
+                                                    //             e.target.value
+                                                    //         );
+                                                    //         handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={doubleBreakerData?.data?.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {doubleSensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {doubleBreakerData?.data?.sensor_id !== '' && (
+                                                    //         <option value="">None</option>
+                                                    //     )}
+                                                    // </Input>
+                                                    <Select
                                                         id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Sensor"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
-                                                                e.target.value
+                                                                e.value
                                                             );
-                                                            handleDoubleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleDoubleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
-                                                        value={doubleBreakerData?.data?.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {doubleSensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {doubleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1356,7 +1533,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         <div className="panel-edit-grid ml-2 mr-2">
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Device ID</Form.Label>
-                                                <Input
+                                                {/* <Input
                                                     type="select"
                                                     name="state"
                                                     id="userState"
@@ -1388,7 +1565,21 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     {totalPassiveDeviceCount !== passiveDeviceData.length && (
                                                         <option value="show-more">Show More</option>
                                                     )}
-                                                </Input>
+                                                </Input> */}
+                                                <Select
+                                                    id="userState"
+                                                    placeholder="Select Device"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={'Select Device'}
+                                                    options={deviceIdDataLevelOne}
+                                                    onChange={(e) => {
+                                                        fetchDeviceSensorDataForTriple(e.value);
+                                                        handleTripleBreakerChange(id, 'device_id', e.value);
+                                                    }}
+                                                    // onInputChange={handleInputChange}
+                                                    className="font-weight-bold"
+                                                />
                                             </Form.Group>
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -1396,45 +1587,65 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                 {isSensorDataFetchedForTriple ? (
                                                     <Skeleton count={1} height={35} />
                                                 ) : (
-                                                    <Input
-                                                        type="select"
-                                                        name="state"
+                                                    // <Input
+                                                    //     type="select"
+                                                    //     name="state"
+                                                    //     id="userState"
+                                                    //     className="font-weight-bold breaker-phase-selection"
+                                                    //     placeholder="Select Sensor"
+                                                    //     onChange={(e) => {
+                                                    //         if (e.target.value === 'Select Sensor') {
+                                                    //             return;
+                                                    //         }
+                                                    //         handleLinkedSensor(
+                                                    //             tripleBreakerData?.data?.sensor_id,
+                                                    //             e.target.value
+                                                    //         );
+                                                    //         handleTripleBreakerChange(id, 'sensor_id', e.target.value);
+                                                    //     }}
+                                                    //     value={tripleBreakerData?.data?.sensor_id}>
+                                                    //     <option>Select Sensor</option>
+                                                    //     {tripleSensorData.map((record) => {
+                                                    //         return (
+                                                    //             <option
+                                                    //                 value={record.id}
+                                                    //                 disabled={
+                                                    //                     record.breaker_id !== '' ||
+                                                    //                     linkedSensors.includes(record.id)
+                                                    //                 }
+                                                    //                 className={
+                                                    //                     (record.breaker_id !== '' ||
+                                                    //                         linkedSensors.includes(record.id)) &&
+                                                    //                     'fields-disabled-style'
+                                                    //                 }>
+                                                    //                 {record.name}
+                                                    //             </option>
+                                                    //         );
+                                                    //     })}
+                                                    //     {tripleBreakerData?.data?.sensor_id !== '' && (
+                                                    //         <option value="">None</option>
+                                                    //     )}
+                                                    // </Input>
+                                                    <Select
                                                         id="userState"
-                                                        className="font-weight-bold breaker-phase-selection"
                                                         placeholder="Select Sensor"
+                                                        name="select"
+                                                        isSearchable={true}
+                                                        defaultValue={'Select Device'}
+                                                        options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
                                                             handleLinkedSensor(
                                                                 tripleBreakerData?.data?.sensor_id,
-                                                                e.target.value
+                                                                e.value
                                                             );
-                                                            handleTripleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleTripleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
-                                                        value={tripleBreakerData?.data?.sensor_id}>
-                                                        <option>Select Sensor</option>
-                                                        {tripleSensorData.map((record) => {
-                                                            return (
-                                                                <option
-                                                                    value={record.id}
-                                                                    disabled={
-                                                                        record.breaker_id !== '' ||
-                                                                        linkedSensors.includes(record.id)
-                                                                    }
-                                                                    className={
-                                                                        (record.breaker_id !== '' ||
-                                                                            linkedSensors.includes(record.id)) &&
-                                                                        'fields-disabled-style'
-                                                                    }>
-                                                                    {record.name}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                        {tripleBreakerData?.data?.sensor_id !== '' && (
-                                                            <option value="">None</option>
-                                                        )}
-                                                    </Input>
+                                                        className="font-weight-bold"
+                                                        isOptionDisabled={(option) =>
+                                                            option.breaker_id !== '' ||
+                                                            linkedSensors.includes(option.id)
+                                                        }
+                                                    />
                                                 )}
                                             </Form.Group>
                                         </div>
@@ -1445,7 +1656,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
                             <Form.Group className="m-2 mb-3" controlId="exampleForm.ControlInput1">
                                 <Form.Label>Equipment</Form.Label>
-                                <Input
+                                {/* <Input
                                     type="select"
                                     name="state"
                                     id="userState"
@@ -1470,14 +1681,21 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                         );
                                     })}
                                     {breakerData?.equipment_link?.length !== 0 && <option value="">None</option>}
-                                </Input>
-                                {/* <MultiSelect
-                                        options={equipmentData}
-                                        value={selectedEquipOptions}
-                                        onChange={setSelectedEquipOptions}
-                                        labelledBy="Columns"
-                                        hasSelectAll={false}
-                                    /> */}
+                                </Input> */}
+                                {/* equipmentDataSearch */}
+                                <Select
+                                    name="state"
+                                    id="userState"
+                                    placeholder="Select Equipment"
+                                    isSearchable={true}
+                                    defaultValue={'Select Equipment'}
+                                    options={equipmentDataSearch}
+                                    onChange={(e) => {
+                                        handleSingleBreakerChange(id, 'equipment_link', e.value);
+                                    }}
+                                    className="font-weight-bold"
+                                    isOptionDisabled={(option) => option.breakerId !== ''}
+                                />
                             </Form.Group>
                         </Form>
                     </Modal.Body>

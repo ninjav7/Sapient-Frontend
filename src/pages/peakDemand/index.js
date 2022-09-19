@@ -22,6 +22,7 @@ import { Cookies } from 'react-cookie';
 import moment from 'moment';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -35,7 +36,7 @@ const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
             </h5>
             <div className="bld-peak-content-style">
                 <div className="card-text card-content-style">
-                    <div>{peakData?.consumption?.now / 1000}</div>
+                    <div>{formatConsumptionValue(peakData?.consumption?.now / 1000000, 1)}</div>
                     <div className="card-unit-style ml-1">kW</div>
                 </div>
                 <div className="ml-2">
@@ -105,8 +106,8 @@ const EquipmentTypePeaks = ({ equipTypeData, isTopPeakCategoriesLoading }) => {
                                         {record?.name}
                                     </td>
                                     <td className="custom-usage-style muted">
-                                        {record?.consumption?.now.toLocaleString(undefined, {
-                                            maximumFractionDigits: 2,
+                                        {(record?.consumption?.now / 1000000).toLocaleString(undefined, {
+                                            maximumFractionDigits: 1,
                                         })}
                                     </td>
                                     <td>
@@ -201,8 +202,8 @@ const EquipmentUsagePeaks = ({ equipUsageData, isTopPeakContributersLoading }) =
                                         {record?.name}
                                     </td>
                                     <td className="custom-usage-style muted">
-                                        {record?.consumption?.now.toLocaleString(undefined, {
-                                            maximumFractionDigits: 2,
+                                        {(record?.consumption?.now / 1000000).toLocaleString(undefined, {
+                                            maximumFractionDigits: 1,
                                         })}
                                     </td>
                                     <td>
@@ -306,7 +307,7 @@ const PeakDemand = () => {
             labels: {
                 formatter: function (val) {
                     let print = val.toFixed(0);
-                    return `${print}k`;
+                    return `${print}`;
                 },
             },
         },
@@ -318,12 +319,21 @@ const PeakDemand = () => {
                     let weekText = moment(timestamp).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
-                style: {
-                    colors: ['#1D2939'],
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
                 },
             },
         },
@@ -356,8 +366,8 @@ const PeakDemand = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
@@ -390,7 +400,7 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&consumption=power&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
@@ -416,7 +426,7 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
@@ -437,7 +447,7 @@ const PeakDemand = () => {
                         responseData.forEach((record) => {
                             newArray[0].data.push({
                                 x: record?.date,
-                                y: (record?.energy_consumption / 1000).toFixed(2),
+                                y: (record?.energy_consumption / 1000000).toFixed(0),
                             });
                         });
                         setPeakDemandTrendData(newArray);
@@ -488,7 +498,7 @@ const PeakDemand = () => {
             }
             try {
                 setIsTopPeakCategoriesLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakEquipType}${params}`,
@@ -517,7 +527,7 @@ const PeakDemand = () => {
             }
             try {
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=energy`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakEquipUsage}${params}`,
@@ -578,7 +588,7 @@ const PeakDemand = () => {
                                 <h5 className="card-title custom-date-time-style">Current 12 Mo. Peak</h5>
                                 <p className="card-text card-content-style custom-kw-style">
                                     {yearlyPeakData?.energy_consumption?.now
-                                        ? yearlyPeakData?.energy_consumption?.now / 1000
+                                        ? formatConsumptionValue(yearlyPeakData?.energy_consumption?.now / 1000000, 1)
                                         : 0}
                                     <div className="card-unit-style ml-1 font-weight-bold mr-1">kW</div>
                                     <span className="card-unit-style">

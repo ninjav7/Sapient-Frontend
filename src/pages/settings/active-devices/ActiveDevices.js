@@ -629,6 +629,9 @@ const ActiveDevices = () => {
         const fetchActiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
+                setActiveDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -686,6 +689,9 @@ const ActiveDevices = () => {
         const fetchActiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
+                setActiveDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',

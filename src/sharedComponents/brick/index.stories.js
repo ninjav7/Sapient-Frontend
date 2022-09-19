@@ -1,18 +1,19 @@
 import React from 'react';
-import Brick from "./index";
+import Brick from './index';
 
 export default {
-    title: "Components/Brick",
+    title: 'Components/Brick',
     component: Brick,
-}
+};
 
-export const Default = (args) => <>
-    <div style={{backgroundColor: 'lightcoral'}}>Title</div>
-        <Brick {...args} />
-    <div style={{backgroundColor: 'lightblue'}}>Space 16px/1rem by default</div>
-</>;
-
+export const Default = (props) => (
+    <>
+        <div style={{ backgroundColor: 'lightcoral' }}>Title</div>
+        <Brick {...props} />
+        <div style={{ backgroundColor: 'lightblue' }}>Space 16px/1rem by default</div>
+    </>
+);
 
 Default.args = {
-    sizeInPixels: 16
+    sizeInPixels: 16,
 };

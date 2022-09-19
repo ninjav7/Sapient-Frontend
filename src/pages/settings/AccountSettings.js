@@ -11,6 +11,7 @@ import { BaseUrl, updateAccount } from '../../services/Network';
 import './style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { accountId } from '../../store/globalState';
 
 const AccountSettings = () => {
     const cookies = new Cookies();
@@ -18,15 +19,10 @@ const AccountSettings = () => {
 
     const accountName = UserStore.useState((s) => s.accountName);
     const [name, setName] = useState(accountName);
+    const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
     const [userPermission] = useAtom(userPermissionData);
 
     const updateAccountName = async () => {
-        const accountName = name.trim();
-
-        if (accountName === userdata.name) {
-            return;
-        }
-
         const headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
@@ -34,17 +30,13 @@ const AccountSettings = () => {
         };
 
         const accountData = {
-            name: accountName,
+            account_id: accoutnIdData,
         };
 
         await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
-            let response = res.data;
-            if (response.success) {
-                localStorage.setItem('accountName', accountName);
-                UserStore.update((s) => {
-                    s.accountName = accountName;
-                });
-            }
+            let response = res.data.data;
+            localStorage.setItem('accountId', response.account_id);
+            setAccoutnIdData(response.account_id);
         });
     };
 
@@ -72,13 +64,36 @@ const AccountSettings = () => {
         UserStore.update((s) => {
             s.accountName = userdata.name;
         });
+    }, [userdata]);
+
+    useEffect(() => {
+        setAccoutnIdData(localStorage.getItem('accountId'));
     }, []);
 
     return (
         <React.Fragment>
             <Row className="page-title ml-2">
-                <Col className="header-container">
+                <Col className="header-container" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="heading-style">General Account Settings</span>
+                    <div>
+                        <button
+                            onClick={() => {
+                                setAccoutnIdData(localStorage.getItem('accountId'));
+                            }}
+                            type="button"
+                            className="btn btn-default buildings-cancel-style">
+                            Cancel
+                        </button>
+
+                        <button
+                            onClick={(e) => {
+                                updateAccountName();
+                            }}
+                            type="button"
+                            className="btn btn-primary buildings-save-style ml-3">
+                            Save
+                        </button>
+                    </div>
                 </Col>
             </Row>
 
@@ -111,9 +126,10 @@ const AccountSettings = () => {
                                                     id="buildingName"
                                                     placeholder="Enter Account Name"
                                                     className="single-line-style font-weight-bold"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    onBlur={updateAccountName}
+                                                    value={accoutnIdData}
+                                                    onChange={(e) => {
+                                                        setAccoutnIdData(e.target.value);
+                                                    }}
                                                 />
                                             ) : (
                                                 <Input
@@ -122,9 +138,10 @@ const AccountSettings = () => {
                                                     id="buildingName"
                                                     placeholder="Enter Account Name"
                                                     className="single-line-style font-weight-bold"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    onBlur={updateAccountName}
+                                                    value={accoutnIdData}
+                                                    onChange={(e) => {
+                                                        setAccoutnIdData(e.target.value);
+                                                    }}
                                                     disabled={
                                                         !userPermission?.permissions?.permissions
                                                             ?.account_general_permission?.edit

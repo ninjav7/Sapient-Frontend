@@ -1193,8 +1193,8 @@ const EquipChartModal = ({
                                                 <Link
                                                     to={{
                                                         pathname:
-                                                            equipData !== null
-                                                                ? equipData?.device_id !== ''
+                                                            equipmentData !== null
+                                                                ? equipmentData?.device_id !== ''
                                                                     ? `/settings/passive-devices/single/${equipmentData?.device_id}`
                                                                     : `equipment/#`
                                                                 : '',
