@@ -16,7 +16,7 @@ const TableFilterWidget = ({ children, columns = [], onSelectColumn, selectedCol
         <div className="table-filter-widget-wrapper">
             <div className="table-filter-widget-filters">
                 <Input iconUrl={SearchSVG} />
-                <Button label="Add Filter" type={Button.Type.SecondaryGrey} size={Button.Sizes.md} icon={<PlusSVG />} />
+                <Button label="Add Filter" type={Button.Type.secondaryGrey} size={Button.Sizes.md} icon={<PlusSVG />} />
                 <Select.Multi
                     label="Columns"
                     options={columns}

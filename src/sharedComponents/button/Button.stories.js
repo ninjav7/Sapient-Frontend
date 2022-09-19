@@ -74,3 +74,5 @@ export const Default = () => (
         </div>
     </>
 );
+
+export const Primary = () => <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.primary} />;

@@ -225,6 +225,19 @@
             }
         }
 
+        &.tertiary {
+            color: $primary-indigo-600;
+            background: none;
+            border: 0.0625rem solid transparent;
+            box-shadow: none;
+
+            svg {
+                path {
+                    fill: $primary-indigo-600;
+                }
+            }
+        }
+
         &.sm {
             gap: 0.5625rem;
             font-weight: 500;

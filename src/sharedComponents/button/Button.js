@@ -21,7 +21,7 @@ const BUTTON_TYPES = Object.freeze({
     link: 'link',
 });
 
-const ButtonIconAlignment = Object.freeze({
+const BUTTON_ICON_ALIGNMENT = Object.freeze({
     left: 'left',
     right: 'right',
 });
@@ -43,12 +43,12 @@ const keysToExclude = new Set([
 
 const Button = (props) => {
     const typeButton = props.typeButton || 'button';
-    const type = props.type || BUTTON_TYPES.SecondaryGrey;
+    const type = props.type || BUTTON_TYPES.secondaryGrey;
 
     const hasIconWithLabel = props.icon && props.label;
-    const iconAlignedLeft = hasIconWithLabel && props.iconAlignment === ButtonIconAlignment.left;
+    const iconAlignedLeft = hasIconWithLabel && props.iconAlignment === BUTTON_ICON_ALIGNMENT.left;
     const iconAlignedRight =
-        hasIconWithLabel && (props.iconAlignment === ButtonIconAlignment.right || !iconAlignedLeft);
+        hasIconWithLabel && (props.iconAlignment === BUTTON_ICON_ALIGNMENT.right || !iconAlignedLeft);
 
     const iconClasses = ['aicon', 'cicon'];
     if (props.icon?.props?.className) {
@@ -56,7 +56,7 @@ const Button = (props) => {
     }
 
     const sideAlignedClass =
-        (iconAlignedLeft && ButtonIconAlignment.left) || (iconAlignedRight && ButtonIconAlignment.right);
+        (iconAlignedLeft && BUTTON_ICON_ALIGNMENT.left) || (iconAlignedRight && BUTTON_ICON_ALIGNMENT.right);
 
     const buttonClasses = cx('button', props.size, type, {
         disabled: props.disabled,
@@ -120,19 +120,19 @@ const Button = (props) => {
 
 Button.Type = BUTTON_TYPES;
 Button.Sizes = SIZES;
-Button.IconAlignment = ButtonIconAlignment;
+Button.IconAlignment = BUTTON_ICON_ALIGNMENT;
 
 Button.propTypes = {
     label: PropTypes.string.isRequired,
     type: PropTypes.oneOf(Object.values(BUTTON_TYPES)).isRequired,
     size: PropTypes.oneOf(Object.values(SIZES)).isRequired,
     icon: PropTypes.node,
-    iconAlignment: PropTypes.oneOf(Object.values(ButtonIconAlignment)),
+    iconAlignment: PropTypes.oneOf(Object.values(BUTTON_ICON_ALIGNMENT)),
     typeButton: PropTypes.string,
 };
 
 Button.defaultProps = {
-    iconAlignment: ButtonIconAlignment.left,
+    iconAlignment: BUTTON_ICON_ALIGNMENT.left,
 };
 
 export default Button;
