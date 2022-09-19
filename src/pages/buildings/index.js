@@ -1365,6 +1365,27 @@ const BuildingOverview = () => {
                                 });
                             }
                         }
+                        //console.log(newWeekdaysData);
+                        //console.log(newWeekendsData);
+                        for (let i=0;i<24;i++){
+                            if(i===0){
+                                newWeekdaysData[0].data[i].x="12AM";
+                                newWeekendsData[0].data[i].x="12AM";
+                            }
+                            else if(i===12){
+                                newWeekdaysData[0].data[i].x="12PM";
+                                newWeekendsData[0].data[i].x="12PM";
+                            }
+                            else if(i>12){
+                                let a=i%12;
+                                newWeekdaysData[0].data[i].x=a+"PM";
+                                newWeekendsData[0].data[i].x=a+"PM";
+                            }
+                            else{
+                                newWeekdaysData[0].data[i].x=i+"AM";
+                                newWeekendsData[0].data[i].x=i+"AM";
+                            }
+                        }
                         setWeekDaysSeries(newWeekdaysData);
                         setWeekEndsSeries(newWeekendsData);
                         setIsAvgConsumptionDataLoading(false);
