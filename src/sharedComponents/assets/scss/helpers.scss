@@ -38,6 +38,12 @@
     &-left {
         border-bottom: 0.0625rem solid $primary-gray-200;
     }
+    
+    &-base {
+        @extend .borders;
+        @extend .box-shadow-md;
+        border-radius: 0.5rem
+    }
 }
 
 .vertical-line {
