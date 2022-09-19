@@ -417,52 +417,48 @@ const ExploreByBuildings = () => {
                 show: true,
                 type: 'datetime',
                 labels: {
-                    formatter: function (val, timestamp) {
+                    formatter:  function ({ series, seriesIndex, dataPointIndex, w }) {
+                        const { seriesX } = w.globals;
+                        const timestamp = new Date(seriesX[0][dataPointIndex]);
                         return moment(timestamp).format('DD/MM - HH:mm');
                     },
                 },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
+                    return (value/1000) + ' K';
                 },
             },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
-                console.log(seriesIndex);
-                console.log(dataPointIndex);
-                console.log(w);
-                console.log(labels);
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${(series[seriesIndex][dataPointIndex]/1000).toFixed(3)} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY`
+                            `MMM D 'YY @ HH:mm`
                         )}</div>
                     </div>`;
             },
         },
         xaxis: {
             type: 'datetime',
-            // labels: {
-            //     formatter: function (val, timestamp) {
-            //         let dateText = moment(timestamp).format('MMM D');
-            //         let weekText = moment(timestamp).format('ddd');
-            //         return `${weekText} - ${dateText}`;
-            //     },
-            // },
-            // style: {
-            //     colors: ['#1D2939'],
-            //     fontSize: '12px',
-            //     fontFamily: 'Helvetica, Arial, sans-serif',
-            //     fontWeight: 600,
-            //     cssClass: 'apexcharts-xaxis-label',
-            // },
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
+            },
+        },
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000).toFixed(3) + ' K';
+            },
+        }
         },
     });
 
@@ -503,26 +499,19 @@ const ExploreByBuildings = () => {
         },
         xaxis: {
             type: 'datetime',
-            // labels: {
-            //     formatter: function (val, timestamp) {
-            //         let dateText = moment(timestamp).format('MMM D');
-            //         let weekText = moment(timestamp).format('ddd');
-            //         return `${weekText} - ${dateText}`;
-            //     },
-            // },
-            // style: {
-            //     colors: ['#1D2939'],
-            //     fontSize: '12px',
-            //     fontFamily: 'Helvetica, Arial, sans-serif',
-            //     fontWeight: 600,
-            //     cssClass: 'apexcharts-xaxis-label',
-            // },
-            // tooltip: {
-            //     enabled: false,
-            // },
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
+            },
         },
-        yaxis: {
-            tickAmount: 2,
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000) + ' K';
+            },
+        },
+        tickAmount:2,
         },
     });
 
@@ -599,6 +588,8 @@ const ExploreByBuildings = () => {
             return;
         }
         let result = [];
+        setSeriesData([]);
+        setSeriesLineData([]);
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
