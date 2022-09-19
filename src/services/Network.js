@@ -1,6 +1,7 @@
-export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
+// export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+export const BaseUrl = 'https://dev-uday.azurewebsites.net/';
 // export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -46,6 +47,7 @@ export const updateEquipment = '/api/config/equipments_details/update_equipment'
 export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
+export const deleteEquipment = `/api/config/equipments_details/delete-equipment`;
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -59,6 +61,7 @@ export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
 export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const updateDevice = '/api/config/devices/update_device';
+export const deletePassiveDevice = `/api/config/devices/delete/passive`;
 
 //gateway
 export const generalGateway = '/api/config/gateway';
