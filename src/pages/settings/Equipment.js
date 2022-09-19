@@ -1174,11 +1174,11 @@ const EquipmentTable = ({
                                         </div>
                                     </th>
                                 )}
-                                <th className="active-device-header">
+                                {/* <th className="active-device-header">
                                     <div className="active-device-flex">
                                         <div>Actions</div>
                                     </div>
-                                </th>
+                                </th> */}
                             </tr>
                         </thead>
                         {isEquipDataFetched ? (
@@ -1316,7 +1316,7 @@ const EquipmentTable = ({
                                                     {record.device_mac}
                                                 </td>
                                             )}
-                                            <td className="font-weight-bold">
+                                            {/* <td className="font-weight-bold">
                                                 <img
                                                     style={{ width: '20px' }}
                                                     src={ThreeDots}
@@ -1326,11 +1326,11 @@ const EquipmentTable = ({
                                                         setEqupimentIdData(record?.equipments_id);
                                                     }}
                                                 />
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     );
                                 })}
-                                <UncontrolledDropdown
+                                {/* <UncontrolledDropdown
                                     style={{
                                         width: '30px',
                                         position: 'absolute',
@@ -1376,7 +1376,7 @@ const EquipmentTable = ({
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>
-                                </UncontrolledDropdown>
+                                </UncontrolledDropdown> */}
                             </tbody>
                         )}
                     </Table>
@@ -2107,7 +2107,7 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
+            {/* <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
                 <Modal.Header>
                     <Modal.Title>Delete Equpiment</Modal.Title>
                 </Modal.Header>
@@ -2138,7 +2138,7 @@ const Equipment = () => {
                         {processdelete ? 'Deleting...' : 'Delete'}
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal> */}
         </React.Fragment>
     );
 };
