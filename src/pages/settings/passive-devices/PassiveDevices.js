@@ -317,7 +317,7 @@ const PassiveDevicesTable = ({
                                     );
                                 })}
 
-                                <UncontrolledDropdown
+                                <Dropdown
                                     style={{
                                         width: '30px',
                                         position: 'absolute',
@@ -358,7 +358,7 @@ const PassiveDevicesTable = ({
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>
-                                </UncontrolledDropdown>
+                                </Dropdown>
                             </tbody>
                         )}
                     </Table>
