@@ -1,1 +1,2 @@
-export const formatConsumptionValue = (value) => value.toLocaleString(undefined, { maximumFractionDigits: 5 });
+export const formatConsumptionValue = (value, fixed) =>
+    value.toLocaleString(undefined, { maximumFractionDigits: fixed });

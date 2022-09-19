@@ -55,7 +55,33 @@ const TimeOfDay = () => {
             borderColor: '#f1f3fa',
         },
         xaxis: {
-            categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            // categories: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23],
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
             // labels: {
             //     formatter: function (val, timestamp) {
             //         let dateText = moment(timestamp).format('M/DD');
@@ -84,7 +110,7 @@ const TimeOfDay = () => {
             labels: {
                 formatter: function (val) {
                     let print = val.toFixed(0);
-                    return `${print}k`;
+                    return `${print}`;
                 },
             },
         },
@@ -156,9 +182,6 @@ const TimeOfDay = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
                     </div>`;
             },
         },
@@ -263,8 +286,9 @@ const TimeOfDay = () => {
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            2
+                            0
                         )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">
                         Monday, ${w.globals.labels[dataPointIndex]}
@@ -438,16 +462,7 @@ const TimeOfDay = () => {
                     )
                     .then((res) => {
                         let response = res?.data;
-                        // let chartDataToDisplay = [
-                        //     {
-                        //         name: 'Weekdays',
-                        //         data: response[0]?.weekdays,
-                        //     },
-                        //     {
-                        //         name: 'Weekends',
-                        //         data: response[0]?.weekend,
-                        //     },
-                        // ];
+
                         let weekDaysResData = response[0]?.weekdays;
                         let weekEndResData = response[0]?.weekend;
 
@@ -479,7 +494,7 @@ const TimeOfDay = () => {
                         for (let i = 0; i < 24; i++) {
                             let matchedRecord = weekDaysData.find((record) => record.x === i);
                             if (matchedRecord) {
-                                newWeekdaysData.data.push(parseFloat(matchedRecord.y));
+                                newWeekdaysData.data.push(parseInt(matchedRecord.y / 1000));
                             } else {
                                 newWeekdaysData.data.push(0);
                             }
@@ -489,14 +504,13 @@ const TimeOfDay = () => {
                             let matchedRecord = weekendsData.find((record) => record.x === i);
 
                             if (matchedRecord) {
-                                newWeekendsData.data.push(parseFloat(matchedRecord.y));
+                                newWeekendsData.data.push(parseInt(matchedRecord.y / 1000));
                             } else {
                                 newWeekendsData.data.push(0);
                             }
                         }
                         chartDataToDisplay.push(newWeekdaysData);
                         chartDataToDisplay.push(newWeekendsData);
-
                         setAreaChartData(chartDataToDisplay);
                         setIsAvgUsageChartLoading(false);
                     });
@@ -718,7 +732,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -756,7 +770,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -794,7 +808,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -832,7 +846,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -870,7 +884,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -908,7 +922,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -946,7 +960,7 @@ const TimeOfDay = () => {
                                             // console.log('Inside if block');
                                             newData.push({
                                                 x: xval,
-                                                y: found.energy_consuption,
+                                                y: (found.energy_consuption / 1000).toFixed(0),
                                             });
                                         } else {
                                             // console.log('Inside else block');
@@ -963,7 +977,6 @@ const TimeOfDay = () => {
                             }
                         });
 
-                        console.log('heatMapData => ', heatMapData);
                         setWeekdaysSeries(heatMapData.reverse());
                         setIsAvgHourlyChartLoading(false);
                     });
@@ -980,11 +993,13 @@ const TimeOfDay = () => {
 
     return (
         <React.Fragment>
-            <Header title="Time of Day" />
+            <div className="ml-2">
+                <Header title="Time of Day" />
+            </div>
 
-            <Row>
+            <Row className="ml-2">
                 <Col xl={3}>
-                    <div className="card-body container-style">
+                    <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title" style={{ display: 'inline-block' }}>
                             After-Hours Energy
                         </h6>
@@ -1016,11 +1031,11 @@ const TimeOfDay = () => {
                 </Col>
             </Row>
 
-            <Row className="mt-2">
+            <Row className="mt-2 ml-2">
                 <Col xl={11}>
                     <div className="card-body timeofday-content-style">
                         <h6 className="card-title custom-title">Average Daily Usage by Hour</h6>
-                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour Trend</h6>
+                        <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Usage By Hour (kWh)</h6>
 
                         {isAvgUsageChartLoading ? (
                             <div className="loader-center-style" style={{ height: '400px' }}>

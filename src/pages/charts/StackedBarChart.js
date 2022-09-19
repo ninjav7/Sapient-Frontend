@@ -1,17 +1,16 @@
 // @flow
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { Card, CardBody } from 'reactstrap';
+import Brick from '../../sharedComponents/brick';
+import '../../sharedComponents/lineChartWidget/style.scss';
 
 // stacked bar chart
-const StackedBarChart = ({ title, options, series, height }) => {
+const StackedBarChart = ({ options, series, height, className = '' }) => {
     return (
-        <Card>
-            <CardBody>
-                <h4 className="header-title mt-0 mb-3">{title}</h4>
-                <Chart options={options} series={series} type="bar" className="apex-charts" height={height} />
-            </CardBody>
-        </Card>
+        <div className={`line-chart-widget-wrapper ${className}`}>
+            <Brick sizeInRem={1} />
+            <Chart options={options} series={series} type="bar" className="line-chart-widget" height={height} />
+        </div>
     );
 };
 
