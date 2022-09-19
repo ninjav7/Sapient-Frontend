@@ -76,6 +76,7 @@ export const getBreakers = '/api/config/panels/breakers';
 export const updateLinkBreakers = '/api/config/panels/link_breakers';
 export const resetBreakers = '/api/config/panels/reset/breakers';
 export const deletePanel = '/api/config/panels/delete';
+export const deleteBreaker = '/api/config/panels/delete/breaker';
 
 // getBuilding
 export const getBuilding = '/api/config/get_buildings';

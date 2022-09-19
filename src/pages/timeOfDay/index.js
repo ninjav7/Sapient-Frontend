@@ -21,8 +21,8 @@ const TimeOfDay = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const areaChartOptions = {
         chart: {
@@ -285,13 +285,17 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             0
                         )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">
-                        Monday, ${w.globals.labels[dataPointIndex]}
+                        ${day}, ${w.globals.labels[dataPointIndex]}
                         </div>
                     </div>`;
             },

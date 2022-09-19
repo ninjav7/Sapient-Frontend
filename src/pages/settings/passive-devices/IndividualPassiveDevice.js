@@ -166,7 +166,6 @@ const IndividualPassiveDevice = () => {
 
                     exploreData.push(recordToInsert);
 
-                    console.log('SSR exploreData => ', exploreData);
                     setDeviceData(exploreData);
 
                     console.log('UPDATED_CODE', seriesData);
