@@ -33,7 +33,7 @@ const KPIButton = ({
                     )}
                 </div>
                 <Link className="text-decoration-none" to={linkButton}>
-                    <Button size={Button.Sizes.sm} label={labelButton} type={Button.Type.SecondaryGrey} />
+                    <Button size={Button.Sizes.sm} label={labelButton} type={Button.Type.secondaryGrey} />
                 </Link>
             </div>
         </div>

@@ -8,7 +8,7 @@ import { ReactComponent as MoreVerticalSVG } from '../../assets/icons/more-verti
 const TriggerButton = forwardRef((props, ref) => (
     <Button
         iconAlignment={Button.IconAlignment.right}
-        type={Button.Type.SecondaryGrey}
+        type={Button.Type.secondaryGrey}
         size={Button.Sizes.md}
         icon={<MoreVerticalSVG className="more-vertical" />}
         buttonRef={ref}

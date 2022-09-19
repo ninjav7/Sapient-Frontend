@@ -1,0 +1,32 @@
+@import '../../../../assets/scss/colors';
+@import '../../../assets/scss/helpers';
+
+.pick-demand-box {
+    &-wrapper {
+        @extend .borders;
+
+        min-width: 15.1044rem;
+        padding: 1.4375rem;
+        border-radius: 0.5rem;
+    }
+
+    &-title {
+        color: $primary-gray-550 !important;
+    }
+
+    &-unit {
+        color: $primary-gray-550 !important;
+        display: inline-block;
+        margin-left: 0.25rem;
+    }
+
+    &-list-item {
+        margin-bottom: 0.5rem;
+
+        &-unit {
+            color: $primary-gray-550 !important;
+            display: inline-block;
+            margin-left: 0.125rem;
+        }
+    }
+}
