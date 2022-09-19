@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactSelect from 'react-select';
 import PropTypes from 'prop-types';
 
@@ -23,7 +23,7 @@ const Select = ({
     defaultValue,
     ...props
 }) => {
-    const selectedOption = options.find(({ value }) => value === defaultValue);
+    const selectedOption = options.filter(({ value }) => value === defaultValue);
 
     return (
         <div className={`react-select-wrapper ${className}`}>
@@ -31,7 +31,8 @@ const Select = ({
                 {...props}
                 type={type}
                 options={options}
-                defaultValue={selectedOption}
+                // defaultValue={selectedOption}
+                value={options.filter((option) => option.value === defaultValue)}
                 components={{ DropdownIndicator, Control, Option, SingleValue, ...props.components }}
                 className={selectClassName}
                 isSearchable={false}

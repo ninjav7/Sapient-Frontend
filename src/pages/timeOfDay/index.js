@@ -21,8 +21,8 @@ const TimeOfDay = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const areaChartOptions = {
         chart: {

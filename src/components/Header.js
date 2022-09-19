@@ -12,11 +12,13 @@ import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
 
 const Header = (props) => {
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
+    const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
+    const customStartDate = DateRangeStore.useState((s) => s.startDate);
+    const customEndDate = DateRangeStore.useState((s) => s.endDate);
 
-    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
+    const [startDate, setStartDate] = useState(customStartDate);
+    const [endDate, setEndDate] = useState(customEndDate);
 
     const customDaySelect = [
         {
@@ -51,6 +53,10 @@ const Header = (props) => {
             label: 'Year to Date',
             value: 365,
         },
+        {
+            label: 'Custom',
+            value: -1,
+        },
     ];
 
     const handleEvent = (event, picker) => {
@@ -58,27 +64,31 @@ const Header = (props) => {
         let end = picker.endDate._d;
         setStartDate(start);
         setEndDate(end);
+        localStorage.setItem('dateFilter', -1);
+        setDateFilter(-1);
     };
 
-    useEffect(() => {
-        const setCustomDate = (date) => {
-            let end = new Date();
-            let start = new Date();
-            localStorage.setItem('dateFilter', date);
-            if (date !== 0) {
-                end.setDate(end.getDate() - 1);
-            }
-            start.setDate(start.getDate() - date);
-            setStartDate(start);
-            setEndDate(end);
-            DateRangeStore.update((s) => {
-                s.dateFilter = date;
-                s.startDate = start;
-                s.endDate = end;
-            });
-        };
-        setCustomDate(dateFilter);
-    }, [dateFilter]);
+    const handleDateFilterChange = (value) => {
+        let end = new Date();
+        let start = new Date();
+        if (value !== 0) {
+            end.setDate(end.getDate() - 1);
+        }
+        start.setDate(start.getDate() - value);
+        setStartDate(start);
+        setEndDate(end);
+
+        localStorage.setItem('dateFilter', value);
+        localStorage.setItem('startDate', start);
+        localStorage.setItem('endDate', end);
+
+        DateRangeStore.update((s) => {
+            s.dateFilter = value;
+            s.startDate = start;
+            s.endDate = end;
+        });
+        setDateFilter(value);
+    };
 
     useEffect(() => {
         if (startDate === null || endDate === null) {
@@ -87,6 +97,10 @@ const Header = (props) => {
         const setCustomDate = (dates) => {
             let startCustomDate = dates[0];
             let endCustomDate = dates[1];
+
+            localStorage.setItem('startDate', startCustomDate);
+            localStorage.setItem('endDate', endCustomDate);
+
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
@@ -111,7 +125,10 @@ const Header = (props) => {
                                 options={customDaySelect}
                                 defaultValue={dateFilter}
                                 onChange={({ value }) => {
-                                    setDateFilter(value);
+                                    if (value === -1) {
+                                        return;
+                                    }
+                                    handleDateFilterChange(value);
                                 }}
                             />
                         </div>
