@@ -90,8 +90,8 @@ const LocationSelector = ({ buildingName, ...props }) => {
                         />
                     </div>
                     <div className="location-selector-control d-flex">
-                        <Button label="Cancel" type={Button.Type.SecondaryGrey} size={Button.Sizes.md} />
-                        <Button label="Save" type={Button.Type.Primary} size={Button.Sizes.md} />
+                        <Button label="Cancel" type={Button.Type.secondaryGrey} size={Button.Sizes.md} />
+                        <Button label="Save" type={Button.Type.primary} size={Button.Sizes.md} />
                     </div>
                 </div>
 
