@@ -176,12 +176,17 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
                     </div>`;
             },
         },
