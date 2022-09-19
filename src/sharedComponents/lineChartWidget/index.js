@@ -11,13 +11,16 @@ import './style.scss';
 const LineChartWidget = ({ className = '', series, title, subtitle, height = 259, width, isConsumpHistoryLoading }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
-            <Typography.Subheader size={Typography.Sizes.md} as="h5" fontWeight={Typography.Types.Medium}>
+            <Typography.Subheader
+                size={Typography.Sizes.md}
+                as="h5"
+                fontWeight={Typography.Types.Medium}
+                className="ml-3 mb-0 mt-3">
                 {title}
             </Typography.Subheader>
-            <Typography.Body size={Typography.Sizes.xs} as="h6">
+            <Typography.Body size={Typography.Sizes.xs} as="h6" className="ml-3 mt-1">
                 {subtitle}
             </Typography.Body>
-            {/* <Brick sizeInRem={1} /> */}
             {isConsumpHistoryLoading ? (
                 <div className="loader-center-style">
                     <Spinner className="m-2" color={'primary'} />

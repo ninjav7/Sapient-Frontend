@@ -246,7 +246,7 @@ const DeviceChartModel = ({
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
@@ -285,8 +285,8 @@ const DeviceChartModel = ({
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -360,7 +360,7 @@ const DeviceChartModel = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },

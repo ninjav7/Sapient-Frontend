@@ -97,9 +97,9 @@ const Header = (props) => {
 
     return (
         <React.Fragment>
-            <Row className="page-title ml-2">
+            <Row className="page-title">
                 <Col className="header-container">
-                    <span className="heading-style">{props.title}</span>
+                    <span className="heading-style ml-2">{props.title}</span>
 
                     <div
                         className="btn-group custom-button-group header-widget-styling"
