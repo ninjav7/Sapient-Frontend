@@ -9,6 +9,7 @@ import { floorIdState } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import axios from 'axios';
 import { BaseUrl, createFloors, getFloors, updateSpace } from '../../services/Network';
+import Delete from '../../assets/images/delete.png';
 
 const EditFloorModal = (props) => {
     let cookies = new Cookies();
@@ -67,15 +68,44 @@ const EditFloorModal = (props) => {
                     )}
                 </Modal.Header>
                 <Modal.Body>
-                    <Label>Name</Label>
-                    <Input
-                        className="mb-3 font-weight-bold"
-                        onChange={(e) => {
-                            setApiBody({ ...apiBody, name: e.target.value });
-                            setFloorName(e.target.value);
-                        }}
-                        autoFocus
-                    />
+                    {props.editFloor ? (
+                        <>
+                            <div>
+                                <Label>Name</Label>
+                                <Input
+                                    className="mb-3 font-weight-bold"
+                                    onChange={(e) => {
+                                        setApiBody({ ...apiBody, name: e.target.value });
+                                        setFloorName(e.target.value);
+                                    }}
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <Label>Type</Label>
+                                <Input className="mb-3 font-weight-bold" disabled />
+                                <span>Only Floors can be at the building root</span>
+                            </div>
+                            <div>
+                                <button>
+                                    <img src={Delete} alt="delete" />
+                                    <span>Delete Floor</span>
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Label>Name</Label>
+                            <Input
+                                className="mb-3 font-weight-bold"
+                                onChange={(e) => {
+                                    setApiBody({ ...apiBody, name: e.target.value });
+                                    setFloorName(e.target.value);
+                                }}
+                                autoFocus
+                            />
+                        </>
+                    )}
                     {/* <Label>Type</Label>
                     <Input id="font-weight-bold mb-3" name="select" type="select" disabled>
                         <option>Floors</option>

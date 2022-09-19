@@ -24,6 +24,7 @@ import {
     generalGateway,
     searchDevices,
     updateDevice,
+    deletePassiveDevice,
 } from '../../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -57,9 +58,8 @@ const PassiveDevicesTable = ({
     setPageSize,
     setIsEdit,
     isEdit,
+    setIsDelete,
 }) => {
-    console.log('deviceData', deviceData, 'selectedOptions', selectedOptions);
-
     const [identifierOrder, setIdentifierOrder] = useState(false);
     const [modelOrder, setModelOrder] = useState(false);
     const [locationOrder, setLocationOrder] = useState(false);
@@ -113,8 +113,6 @@ const PassiveDevicesTable = ({
             y: event.clientY - event.target.offsetTop,
         });
     };
-
-    // console.log('globalCoords', globalCoords);
 
     const [toggleEdit, setToggleEdit] = useState(false);
     const [sensorId, setSensorId] = useState('');
@@ -330,6 +328,7 @@ const PassiveDevicesTable = ({
                                     }}>
                                     <DropdownToggle
                                         tag="button"
+                                        size="sm"
                                         className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
                                     <DropdownMenu right>
                                         <DropdownItem
@@ -339,22 +338,27 @@ const PassiveDevicesTable = ({
                                             <div
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+                                                    // justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Pen} style={{ width: '20px' }} />
-                                                <span>Edit</span>
+                                                <span style={{ marginLeft: '20px', fontWeight: '700' }}>Edit</span>
                                             </div>
                                         </DropdownItem>
                                         <DropdownItem onClick={() => {}}>
                                             <div
+                                                onClick={() => {
+                                                    setIsDelete(true);
+                                                }}
                                                 style={{
                                                     display: 'flex',
-                                                    justifyContent: 'space-between',
+                                                    // justifyContent: 'space-between',
                                                     alignItems: 'center',
                                                 }}>
                                                 <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red' }}>Delete</span>
+                                                <span style={{ color: 'red', marginLeft: '20px', fontWeight: '700' }}>
+                                                    Delete
+                                                </span>
                                             </div>
                                         </DropdownItem>
                                     </DropdownMenu>
@@ -412,8 +416,6 @@ const PassiveDevices = () => {
     const [identifierVal, setIdentifierVal] = useAtom(identifier);
     const [deviceIdVal] = useAtom(deviceId);
     const [modalVal] = useAtom(passiveDeviceModal);
-
-    console.log('deviceIdVal', deviceIdVal);
 
     const tableColumnOptions = [
         { label: 'Status', value: 'status' },
@@ -483,9 +485,10 @@ const PassiveDevices = () => {
     };
 
     const [isEdit, setIsEdit] = useState(false);
-
     const handleEditClose = () => setIsEdit(false);
-    const handleEditShow = () => setIsEdit(true);
+
+    const [isDelete, setIsDelete] = useState(false);
+    const handleDeleteClose = () => setIsDelete(false);
 
     const saveDeviceData = async () => {
         try {
@@ -678,6 +681,29 @@ const PassiveDevices = () => {
                 .then((res) => {
                     passiveDeviceDataWithFilter('ace', 'mac_address');
                     handleEditClose();
+                });
+        } catch (error) {
+            console.log('error', error);
+            console.log('Failed to create Passive device data');
+        }
+    };
+
+    const deleteDeviceData = async () => {
+        try {
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?device_id=${deviceIdVal}`;
+            await axios
+                .delete(`${BaseUrl}${deletePassiveDevice}${params}`, {
+                    headers: header,
+                })
+                .then((res) => {
+                    passiveDeviceDataWithFilter('ace', 'mac_address');
+                    handleDeleteClose();
                 });
         } catch (error) {
             console.log('error', error);
@@ -895,6 +921,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -911,6 +938,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -927,6 +955,7 @@ const PassiveDevices = () => {
                             pageSize={pageSize}
                             setPageSize={setPageSize}
                             setIsEdit={setIsEdit}
+                            setIsDelete={setIsDelete}
                             isEdit={isEdit}
                         />
                     )}
@@ -972,7 +1001,9 @@ const PassiveDevices = () => {
                                 borderRadius: '10px',
                                 border: 'none',
                             }}
-                            disabled={true}>
+                            onClick={() => {
+                                deleteDeviceData();
+                            }}>
                             <img style={{ marginTop: '10px', marginBottom: '10px' }} src={Delete} />
                             <span style={{ color: 'red', marginTop: '10px', marginBottom: '10px', marginLeft: '5px' }}>
                                 Delete Passive Device
@@ -997,6 +1028,38 @@ const PassiveDevices = () => {
                             updateDeviceData();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Delete Passive Device</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <span>Are you sure you want to delete the passive device</span>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                    }}>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
+                        onClick={handleDeleteClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}
+                        onClick={() => {
+                            deleteDeviceData();
+                        }}>
+                        Delete
                     </Button>
                 </Modal.Footer>
             </Modal>
