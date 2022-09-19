@@ -402,6 +402,50 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
+        },
     });
 
     const [weekDaysSeries, setWeekDaysSeries] = useState([
@@ -490,6 +534,50 @@ const BuildingOverview = () => {
                 '10PM',
                 '11PM',
             ],
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
+            },
         },
     });
 
@@ -743,23 +831,20 @@ const BuildingOverview = () => {
                         }
                         //console.log(newWeekdaysData);
                         //console.log(newWeekendsData);
-                        for (let i=0;i<24;i++){
-                            if(i===0){
-                                newWeekdaysData[0].data[i].x="12AM";
-                                newWeekendsData[0].data[i].x="12AM";
-                            }
-                            else if(i===12){
-                                newWeekdaysData[0].data[i].x="12PM";
-                                newWeekendsData[0].data[i].x="12PM";
-                            }
-                            else if(i>12){
-                                let a=i%12;
-                                newWeekdaysData[0].data[i].x=a+"PM";
-                                newWeekendsData[0].data[i].x=a+"PM";
-                            }
-                            else{
-                                newWeekdaysData[0].data[i].x=i+"AM";
-                                newWeekendsData[0].data[i].x=i+"AM";
+                        for (let i = 0; i < 24; i++) {
+                            if (i === 0) {
+                                newWeekdaysData[0].data[i].x = '12AM';
+                                newWeekendsData[0].data[i].x = '12AM';
+                            } else if (i === 12) {
+                                newWeekdaysData[0].data[i].x = '12PM';
+                                newWeekendsData[0].data[i].x = '12PM';
+                            } else if (i > 12) {
+                                let a = i % 12;
+                                newWeekdaysData[0].data[i].x = a + 'PM';
+                                newWeekendsData[0].data[i].x = a + 'PM';
+                            } else {
+                                newWeekdaysData[0].data[i].x = i + 'AM';
+                                newWeekendsData[0].data[i].x = i + 'AM';
                             }
                         }
                         setWeekDaysSeries(newWeekdaysData);
