@@ -14,6 +14,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -31,9 +32,13 @@ const EndUsesPage = () => {
     const barChartOptions = {
         chart: {
             type: 'bar',
+            height: 400,
             stacked: true,
             toolbar: {
                 show: true,
+            },
+            animations: {
+                enabled: false,
             },
         },
         colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
@@ -49,6 +54,50 @@ const EndUsesPage = () => {
         stroke: {
             show: false,
         },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
+        },
         xaxis: {
             type: 'datetime',
             labels: {
@@ -57,12 +106,21 @@ const EndUsesPage = () => {
                     let weekText = moment(timestamp).format('ddd');
                     return `${weekText} ${dateText}`;
                 },
-                style: {
-                    colors: ['#1D2939'],
-                    fontSize: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
                 },
             },
         },
@@ -70,15 +128,7 @@ const EndUsesPage = () => {
             labels: {
                 formatter: function (val) {
                     let print = val.toFixed(0);
-                    return `${print}k`;
-                },
-            },
-        },
-        tooltip: {
-            shared: false,
-            y: {
-                formatter: function (val) {
-                    return `${val} K`;
+                    return `${print}`;
                 },
             },
         },
@@ -216,7 +266,7 @@ const EndUsesPage = () => {
                         let responseData = res?.data;
                         responseData.forEach((endUse) => {
                             endUse.data.forEach((record) => {
-                                record.y = record.y / 1000;
+                                record.y = parseInt(record.y / 1000);
                             });
                         });
                         setBarChartData(responseData);
@@ -255,7 +305,7 @@ const EndUsesPage = () => {
                                         <div className="enduses-content-2">
                                             <span className="card-text card-content-style">
                                                 {(record?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                                    maximumFractionDigits: 2,
+                                                    maximumFractionDigits: 0,
                                                 })}
                                             </span>
                                             <span className="card-unit-style">kWh</span>
@@ -277,7 +327,7 @@ const EndUsesPage = () => {
                     </Col>
                 </Row>
             ) : (
-                <Row>
+                <Row className="ml-2 mt-4">
                     <Col xl={12}>
                         <StackedBarChart options={barChartOptions} series={barChartData} height={400} />
                     </Col>

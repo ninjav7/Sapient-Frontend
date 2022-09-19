@@ -89,7 +89,7 @@ const TableBody = () => (
                 <Typography.Body size={Typography.Sizes.md}>46,332</Typography.Body>
             </Table.Cell>
             <Table.Cell>
-                <Button size={Button.Sizes.sm} type={Button.Type.SecondaryGrey} label="Add Utility Bill" />
+                <Button size={Button.Sizes.sm} type={Button.Type.secondaryGrey} label="Add Utility Bill" />
             </Table.Cell>
         </Table.Row>
 
