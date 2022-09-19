@@ -757,10 +757,6 @@ const BreakersComponent = ({ data, id }) => {
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
 
-    useEffect(() => {
-        console.log('Sudhanshu', distributedBreakersData);
-    });
-
     return (
         <React.Fragment>
             {/* Left Breaker Connection Point  */}

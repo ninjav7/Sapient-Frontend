@@ -757,10 +757,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         fetchPassiveDeviceData();
     }, [passiveDevicePageNo]);
 
-    useEffect(() => {
-        console.log('Sudhanshu', disconnectedBreakersData);
-    });
-
     return (
         <React.Fragment>
             <>

@@ -784,7 +784,6 @@ const BuildingOverview = () => {
                                 y: parseInt(record?.y / 1000),
                             });
                         });
-                        console.log('Sudhanshu :>> ', newArray);
                         setBuildingConsumptionChartData(newArray);
                         setIsEnergyConsumptionDataLoading(false);
                     });
