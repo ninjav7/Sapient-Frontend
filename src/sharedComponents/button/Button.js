@@ -11,8 +11,14 @@ const SIZES = Object.freeze({
 });
 
 const BUTTON_TYPES = Object.freeze({
-    SecondaryGrey: 'secondary-grey',
-    Primary: 'primary',
+    primary: 'primary',
+    secondary: 'secondary',
+    secondaryGrey: 'secondary-grey',
+    tertiary: 'tertiary',
+    tertiaryGrey: 'tertiary-grey',
+    primaryDistructive: 'primary-distructive',
+    secondaryDistructive: 'secondary-distructive',
+    link: 'link',
 });
 
 const ButtonIconAlignment = Object.freeze({

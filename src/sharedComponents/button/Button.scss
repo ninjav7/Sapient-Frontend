@@ -16,8 +16,8 @@
         &.secondary-grey {
             color: $primary-gray-800;
             background: $base-white;
-            border: 0.0625rem solid $primary-gray-250;
-            box-shadow: 0 0.0625rem 0 rgba(16, 24, 40, 0.05);
+            border: 1px solid $primary-gray-250;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
 
             &:hover {
                 background: $primary-gray-50;
@@ -28,16 +28,200 @@
                 outline: none;
                 @extend .box-shadow-xs;
             }
+            &[disabled] {
+                background-color: $base-white;
+                color: $primary-gray-200;
+                border: 1px solid $primary-gray-200;
+            }
         }
 
         &.primary {
             color: $base-white;
             background: $primary-indigo-600;
-            border: 0.0625rem solid $primary-indigo-600;
-            box-shadow: 0 0.0625rem 0 rgba(16, 24, 40, 0.05);
+            border: 1px solid $primary-indigo-600;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
 
             &:hover {
                 background: $primary-indigo-700;
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                @extend .box-shadow-xs;
+                border: 1px solid $primary-indigo-900;
+                box-shadow: 0 0.0625rem 0.125rem rgb(16 24 40 / 5%), 0 0 0 0.25rem $dataviz-blue-100;
+            }
+
+            &[disabled] {
+                background-color: $primary-indigo-200;
+                color: $base-white;
+                border: 1px solid $primary-indigo-200;
+            }
+        }
+
+        &.secondary {
+            background-color: $primary-indigo-50;
+            color: $primary-indigo-600;
+            border: 1px solid $primary-indigo-50;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
+
+            &:hover {
+                background: $primary-indigo-100;
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                @extend .box-shadow-xs;
+                border: 1px solid $primary-indigo-600;
+
+                box-shadow: 0 0.0625rem 0.125rem rgb(16 24 40 / 5%), 0 0 0 0.25rem $primary-indigo-50;
+            }
+
+            &[disabled] {
+                background-color: $primary-indigo-25;
+                color: $primary-indigo-200;
+            }
+        }
+
+        &.primary-distructive {
+            background-color: $error-600;
+            color: $base-white;
+            border: 1px solid $error-600;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
+
+            &:hover {
+                background: $error-700;
+            }
+
+            &[disabled] {
+                background-color: $error-200;
+                color: $base-white;
+                border: 1px solid $error-200;
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                border: 1px solid $error-800;
+                box-shadow: 0 0.0625rem 0.125rem rgb(16 24 40 / 5%), 0 0 0 0.25rem $error-100;
+            }
+        }
+
+        &.secondary-distructive {
+            background-color: $error-50;
+            color: $error-700;
+            border: 1px solid $error-50;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, 0.05);
+
+            &:hover {
+                background: $error-100;
+            }
+
+            &[disabled] {
+                background-color: $error-25;
+                color: $error-300;
+                border: 1px solid $error-25;
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                background-color: $error-50;
+                border: 1px solid $error-700;
+                box-shadow: 0 1px 0.125rem rgb(16 24 40 / 5%), 0 0 0 0.25rem $error-100;
+            }
+        }
+
+        &.tertiary {
+            color: $primary-indigo-600;
+            background: none;
+            border: 1px solid transparent;
+            box-shadow: none;
+
+            svg {
+                path {
+                    fill: $primary-indigo-600;
+                }
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                @extend .box-shadow-xs;
+                border: 1px solid $primary-indigo-500;
+                box-shadow: none;
+            }
+
+            &[disabled] {
+                color: $primary-gray-300;
+                svg {
+                    path {
+                        fill: $primary-gray-300;
+                    }
+                }
+            }
+        }
+
+        &.tertiary-grey {
+            color: $primary-gray-550;
+            background: none;
+            border: 0.0625rem solid transparent;
+            box-shadow: none;
+
+            &:hover {
+                background: $primary-gray-100;
+            }
+
+            &[disabled] {
+                background: none !important;
+                color: $primary-gray-300;
+                svg {
+                    path {
+                        fill: $primary-gray-300;
+                    }
+                }
+            }
+
+            &:focus,
+            &:active {
+                outline: none;
+                border: 1px solid $primary-gray-450;
+                box-shadow: none;
+            }
+
+            svg {
+                path {
+                    fill: $primary-gray-550;
+                }
+            }
+        }
+
+        &.link {
+            color: $primary-indigo-600;
+            background: none;
+            border: 1px solid transparent;
+            box-shadow: none;
+            text-decoration: underline;
+
+            &:hover {
+                color: $primary-indigo-400;
+            }
+
+            &:focus,
+            &:active {
+                color: $primary-indigo-700;
+            }
+
+            &[disabled] {
+                background: none !important;
+                color: $primary-gray-300;
+                svg {
+                    path {
+                        fill: $primary-gray-300;
+                    }
+                }
             }
         }
 
