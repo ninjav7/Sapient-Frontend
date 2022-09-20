@@ -1616,12 +1616,11 @@ const BreakersComponent = ({ data, id }) => {
                                 </div>
                                 {distributedBreakersData.length === breakerData.breaker_number && (
                                     <>
-                                        {breakerData.breakerType === 2 ||
-                                            (breakerData.breakerType === 3 && (
-                                                <div className="grouped-breaker-warn mt-2 mr-2">
-                                                    Grouped breakers cannot be deleted
-                                                </div>
-                                            ))}
+                                        {(breakerData.breakerType === 2 || breakerData.breakerType === 3) && (
+                                            <div className="grouped-breaker-warn mt-2 mr-2">
+                                                Grouped breakers cannot be deleted
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </FormGroup>
