@@ -5,10 +5,6 @@ import {
     Card,
     CardBody,
     Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
     Button,
     Input,
     FormGroup,
@@ -30,7 +26,7 @@ import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import './style.css';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -38,14 +34,13 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import { faXmark, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import { faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import { MultiSelect } from 'react-multi-select-component';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
-import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { result } from 'lodash';
+// import { result } from 'lodash';
 import EquipmentDeviceChartModel from './EquipmentDeviceChartModel';
 
 const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData, endUse, fetchEquipmentData }) => {
@@ -85,7 +80,7 @@ const SingleActiveEquipmentModal = ({ show, equipData, close, equipmentTypeData,
         // x.value=result.end_use_name;
         // console.log(result);
     }
-    console.log(equipData);
+    // console.log(equipData);
     const handleChange = (key, value) => {
         let obj = Object.assign({}, updateEqipmentData);
         if (key === 'equipment_type') {
@@ -437,9 +432,9 @@ const SinglePassiveEquipmentModal = ({
 
     var result = [];
     var loc = [];
-    console.log(locationData);
+    // console.log(locationData);
     if (equipData !== null) {
-        console.log(equipData.location);
+        // console.log(equipData.location);
         result = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipData.equipments_type);
         // loc = locationData.find(({location_name})=>location_name===equipData.location)
         // console.log(loc)
@@ -469,7 +464,7 @@ const SinglePassiveEquipmentModal = ({
         try {
             let obj = Object.assign({}, updateEqipmentData);
             obj['tag'] = selectedTags;
-            console.log(obj);
+            // console.log(obj);
             let header = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',

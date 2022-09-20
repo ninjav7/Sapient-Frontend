@@ -9,7 +9,7 @@ const SideNav = () => {
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const location = useLocation();
-    console.log(parentRoute);
+    // console.log(parentRoute);
 
     useEffect(() => {
         let activeSideRoutes = [];

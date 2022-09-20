@@ -62,7 +62,7 @@ const ExploreEquipmentTable = ({
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
                 arr.push(exploreTableData[i].equipment_id);
-                console.log(arr);
+                // console.log(arr);
 
                 var checking = document.getElementById(exploreTableData[i].equipment_id);
                 checking.checked = ischecked.checked;
@@ -1287,7 +1287,7 @@ const ExploreByEquipment = () => {
     }, []);
 
     useEffect(() => {
-        console.log('Entered selected Equipment id ', selectedEquipmentId);
+        // console.log('Entered selected Equipment id ', selectedEquipmentId);
         if (selectedEquipmentId === '') {
             return;
         }
@@ -1311,14 +1311,14 @@ const ExploreByEquipment = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData);
+                        // console.log(responseData);
                         let data = responseData.data;
-                        console.log(data);
+                        // console.log(data);
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
                             return item.equipment_id === selectedEquipmentId;
                         });
-                        console.log(arr);
+                        // console.log(arr);
                         let exploreData = [];
 
                         let recordToInsert = {
@@ -1326,7 +1326,7 @@ const ExploreByEquipment = () => {
                             data: data,
                             id: arr[0].equipment_id,
                         };
-                        console.log(recordToInsert);
+                        // console.log(recordToInsert);
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
@@ -1344,7 +1344,7 @@ const ExploreByEquipment = () => {
     }, [selectedEquipmentId]);
 
     useEffect(() => {
-        console.log('Entered Remove Equipment ', removeEquipmentId);
+        // console.log('Entered Remove Equipment ', removeEquipmentId);
         if (removeEquipmentId === '') {
             return;
         }
@@ -1352,7 +1352,7 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
-        console.log(arr1);
+        // console.log(arr1);
         setSeriesData(arr1);
         setSeriesLineData(arr1);
     }, [removeEquipmentId]);
@@ -1379,14 +1379,14 @@ const ExploreByEquipment = () => {
                 )
                 .then((res) => {
                     let responseData = res.data;
-                    console.log(responseData);
+                    // console.log(responseData);
                     let data = responseData.data;
-                    console.log(data);
+                    // console.log(data);
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.equipment_id === id;
                     });
-                    console.log(arr);
+                    // console.log(arr);
                     let exploreData = [];
                     // data.forEach((record) => {
                     //     if (record.building_name !== null) {
@@ -1395,9 +1395,9 @@ const ExploreByEquipment = () => {
                         data: data,
                         id: arr[0].equipment_id,
                     };
-                    console.log(recordToInsert);
+                    // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
-                    console.log(dataarr);
+                    // console.log(dataarr);
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
@@ -1407,7 +1407,7 @@ const ExploreByEquipment = () => {
         }
     };
     useEffect(() => {
-        console.log('building List Array ', equipmentListArray);
+        // console.log('building List Array ', equipmentListArray);
         if (equipmentListArray.length === 0) {
             return;
         }
@@ -1416,10 +1416,10 @@ const ExploreByEquipment = () => {
             arr1 = seriesData.filter(function (item) {
                 return item.id === equipmentListArray[i];
             });
-            console.log('Arr 1 ', arr1);
+            // console.log('Arr 1 ', arr1);
             if (arr1.length === 0) {
                 fetchExploreAllChartData(equipmentListArray[i]);
-                console.log(dataarr);
+                // console.log(dataarr);
             }
         }
     }, [equipmentListArray]);
@@ -1427,9 +1427,9 @@ const ExploreByEquipment = () => {
         if (allEquipmentData.length === 0) {
             return;
         }
-        console.log('allEquipmentSData ', allEquipmentData);
+        // console.log('allEquipmentSData ', allEquipmentData);
         if (allEquipmentData.length === exploreTableData.length) {
-            console.log('All equipment Data set');
+            // console.log('All equipment Data set');
             setSeriesData(allEquipmentData);
             setSeriesLineData(allEquipmentData);
         }
@@ -1440,7 +1440,7 @@ const ExploreByEquipment = () => {
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
-        console.log(arr);
+        // console.log(arr);
         setSelectedOptions(arr);
 
         let arr1 = {};
@@ -1644,7 +1644,7 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
-        console.log(equipmentSearchTxt);
+        // console.log(equipmentSearchTxt);
 
         const exploreDataFetch = async () => {
             try {
@@ -1725,7 +1725,7 @@ const ExploreByEquipment = () => {
     const getCSVLinkChartData = () => {
         // console.log("csv entered");
         let arr = [];
-        console.log(seriesData);
+        // console.log(seriesData);
         seriesData.map(function (obj) {
             arr.push([obj.name, obj.data]);
         });
