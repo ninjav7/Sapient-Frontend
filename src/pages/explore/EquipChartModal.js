@@ -1,25 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-    Spinner,
-} from 'reactstrap';
+import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
-import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import { faXmark, faEllipsisV, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
+import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -30,30 +13,23 @@ import {
     getExploreEquipmentYTDUsage,
     getEndUseId,
     equipmentType,
-    getLocation
+    getLocation,
 } from '../../services/Network';
 import axios from 'axios';
-import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
-import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from 'react-router-dom';
-import { ComponentStore } from '../../store/ComponentStore';
-import { ChevronDown, Search } from 'react-feather';
-import './style.css';
 import moment from 'moment';
 import { TagsInput } from 'react-tag-input-component';
-import { BuildingStore } from '../../store/BuildingStore';
-import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
-import { MultiSelect } from 'react-multi-select-component';
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import { result } from 'lodash';
-import Switch from 'react-switch';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import ModalHeader from '../../components/ModalHeader';
+import './style.css';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -66,25 +42,25 @@ const EquipChartModal = ({
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-    const bldgId = localStorage.getItem("exploreBldId");
-    console.log("building id ", bldgId);
+    const bldgId = localStorage.getItem('exploreBldId');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const [metric, setMetric] = useState([
+    const metric = [
         { value: 'energy', label: 'Energy (kWh)' },
         { value: 'peak-power', label: 'Peak Power (kW)' },
         { value: 'carbon-emissions', label: 'Carbon Emissions' },
-    ]);
-
+    ];
 
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
-    const [startDate, endDate] = dateRange;
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
@@ -99,31 +75,7 @@ const EquipChartModal = ({
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
-
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-    const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
-
-    const customDaySelect = [
-        {
-            label: 'Last 7 Days',
-            value: 7,
-        },
-        {
-            label: 'Last 5 Days',
-            value: 5,
-        },
-        {
-            label: 'Last 3 Days',
-            value: 3,
-        },
-        {
-            label: 'Last 1 Day',
-            value: 1,
-        },
-    ];
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
-    const [dateFilter, setDateFilter] = useState(dateValue);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const getRequiredConsumptionLabel = (value) => {
@@ -188,14 +140,13 @@ const EquipChartModal = ({
     };
 
     const handleRefresh = () => {
-        setDateFilter(dateValue);
         let endDate = new Date(); // today
         let startDate = new Date();
         startDate.setDate(startDate.getDate() - 7);
-        setDateRange([startDate, endDate]);
         setDeviceData([]);
         setSeriesData([]);
     };
+
     const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -378,7 +329,6 @@ const EquipChartModal = ({
 
     //let equipResult = [];
 
-    console.log(equipData);
     const handleSwitch = (val) => {
         switch (val) {
             case 'metrics':
@@ -418,6 +368,7 @@ const EquipChartModal = ({
         // // console.log(obj);
         // setUpdateEqipmentData(obj);
     };
+
     const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
@@ -441,24 +392,6 @@ const EquipChartModal = ({
             console.log('Failed to update Passive device data');
         }
     };
-
-    useEffect(() => {
-        const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
-            let startCustomDate = new Date();
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate());
-
-            setDateRange([startCustomDate, endCustomDate]);
-
-            DateRangeStore.update((s) => {
-                s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
-            });
-        };
-        setCustomDate(dateFilter);
-    }, [dateFilter]);
 
     useEffect(() => {
         if (startDate === null) {
@@ -625,7 +558,6 @@ const EquipChartModal = ({
                         return a.equipment_type.localeCompare(b.equipment_type);
                     });
                     setEquipmentTypeData(response);
-
                 });
             } catch (error) {
                 console.log(error);
@@ -648,7 +580,6 @@ const EquipChartModal = ({
             }
         };
 
-
         fetchEquipmentChart(equipmentFilter?.equipment_id);
         fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
@@ -657,6 +588,7 @@ const EquipChartModal = ({
         fetchEquipTypeData();
         fetchLocationData();
     }, [equipmentFilter]);
+
     useEffect(() => {
         if (equipmentTypeData.lenght === 0) {
             return;
@@ -664,16 +596,21 @@ const EquipChartModal = ({
         let res = [];
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
         setEquipResult(res);
-    }, [equipmentTypeData])
+    }, [equipmentTypeData]);
+
     useEffect(() => {
         if (equipmentData.length === 0) {
             return;
         }
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipmentData)
+            console.log(equipmentData);
             if (equipmentData !== null) {
-                console.log(equipmentData.device_type)
-                if (equipmentData.device_type === "passive" || equipmentData.device_id === "" || equipmentData.device_id === undefined) {
+                console.log(equipmentData.device_type);
+                if (
+                    equipmentData.device_type === 'passive' ||
+                    equipmentData.device_id === '' ||
+                    equipmentData.device_id === undefined
+                ) {
                     return;
                 }
             }
@@ -687,7 +624,9 @@ const EquipChartModal = ({
                 axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setSensors(response);
-                    let sensorId = response.find(({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type)
+                    let sensorId = response.find(
+                        ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
+                    );
                     console.log(sensorId);
                     setSensorData(sensorId);
                 });
@@ -697,21 +636,23 @@ const EquipChartModal = ({
             }
         };
         if (equipmentData !== null) {
-            if (equipmentData.device_type !== "passive") {
+            if (equipmentData.device_type !== 'passive') {
                 fetchActiveDeviceSensorData();
             }
         }
-    }, [equipmentData])
+    }, [equipmentData]);
 
     return (
         <Modal show={showEquipmentChart} onHide={handleChartClose} dialogClassName="modal-container-style" centered>
             <>
                 <Modal.Body>
-                    {equipmentData?.device_type === "active" ?
+                    {equipmentData?.device_type === 'active' ? (
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">{equipmentData?.location} {">"} {equipmentData?.equipments_type}</h6>
+                                    <h6 className="text-muted">
+                                        {equipmentData?.location} {'>'} {equipmentData?.equipments_type}
+                                    </h6>
                                 </Col>
                             </Row>
                             <Row>
@@ -750,12 +691,17 @@ const EquipChartModal = ({
                                     </div>
                                 </Col>
                             </Row>
-                        </> : ""}
-                    {equipmentData?.device_type === "passive" ?
+                        </>
+                    ) : (
+                        ''
+                    )}
+                    {equipmentData?.device_type === 'passive' ? (
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">{equipmentData?.location} {">"} {equipmentData?.equipments_type}</h6>
+                                    <h6 className="text-muted">
+                                        {equipmentData?.location} {'>'} {equipmentData?.equipments_type}
+                                    </h6>
                                 </Col>
                             </Row>
                             <Row>
@@ -765,17 +711,20 @@ const EquipChartModal = ({
                                     </div>
                                 </Col>
                                 <Col lg={3}>
-
-                                    <div className='button-wrapper'>
-
-
+                                    <div className="button-wrapper">
                                         <div>
-                                            <button type="button" className="btn btn-md btn-light font-weight-bold mr-4" onClick={handleChartClose}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-md btn-light font-weight-bold mr-4"
+                                                onClick={handleChartClose}>
                                                 Cancel
                                             </button>
                                         </div>
                                         <div>
-                                            <button type="button" className="btn btn-md btn-primary font-weight-bold mr-4" onClick={handleChartClose}>
+                                            <button
+                                                type="button"
+                                                className="btn btn-md btn-primary font-weight-bold mr-4"
+                                                onClick={handleChartClose}>
                                                 Save
                                             </button>
                                         </div>
@@ -783,7 +732,9 @@ const EquipChartModal = ({
                                 </Col>
                             </Row>
                         </>
-                        : ""}
+                    ) : (
+                        ''
+                    )}
                     <div className="mt-2 mouse-pointer">
                         <span
                             className={selectedTab === 0 ? 'mr-3 equip-tab-active' : 'mr-3 equip-tab'}
@@ -900,7 +851,7 @@ const EquipChartModal = ({
 
                             <Col lg={8}>
                                 <div className="model-sensor-filters">
-                                    <div className="">
+                                    <div>
                                         <Input
                                             type="select"
                                             name="select"
@@ -920,36 +871,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <div>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
-                                            className="select-button form-control form-control-md model-sensor-energy-filter"
-                                            onChange={(e) => {
-                                                setDateFilter(+e.target.value);
-                                            }}
-                                            defaultValue={dateFilter}>
-                                            {customDaySelect.map((el, index) => {
-                                                return <option value={el.value}>{el.label}</option>;
-                                            })}
-                                        </Input>
-                                    </div>
-
-                                    <div>
-                                        <DatePicker
-                                            selectsRange={true}
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            onChange={(update) => {
-                                                setDateRange(update);
-                                            }}
-                                            dateFormat="MMMM d"
-                                            className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                                            placeholderText="Select Date Range"
-                                        />
-                                    </div>
+                                    <ModalHeader />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>
@@ -995,8 +917,8 @@ const EquipChartModal = ({
                         </Row>
                     )}
 
-                    {selectedTab === 1 ?
-                        equipmentData?.device_type === "passive" ?
+                    {selectedTab === 1 ? (
+                        equipmentData?.device_type === 'passive' ? (
                             <Row>
                                 <Col lg={8}>
                                     <Row>
@@ -1027,7 +949,9 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
-                                                    defaultValue={equipResult.length === 0 ? "" : equipResult.equipment_id}
+                                                    defaultValue={
+                                                        equipResult.length === 0 ? '' : equipResult.equipment_id
+                                                    }
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
                                                     }}>
@@ -1053,7 +977,9 @@ const EquipChartModal = ({
                                                     defaultValue="">
                                                     <option selected>Select Category</option>
                                                     {endUse?.map((record) => {
-                                                        return <option value={record?.end_user_id}>{record?.name}</option>;
+                                                        return (
+                                                            <option value={record?.end_user_id}>{record?.name}</option>
+                                                        );
                                                     })}
                                                 </Input>
                                             </Form.Group>
@@ -1160,10 +1086,15 @@ const EquipChartModal = ({
                                     </div>
                                 </Col>
                             </Row>
-                            : "" : ""}
+                        ) : (
+                            ''
+                        )
+                    ) : (
+                        ''
+                    )}
 
-                    {selectedTab === 1 ?
-                        equipmentData?.device_type === "active" ?
+                    {selectedTab === 1 ? (
+                        equipmentData?.device_type === 'active' ? (
                             <Row>
                                 <Col lg={8}>
                                     <Row>
@@ -1194,13 +1125,19 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
-                                                    defaultValue={equipResult.length === 0 ? "" : equipResult.equipment_id}
+                                                    defaultValue={
+                                                        equipResult.length === 0 ? '' : equipResult.equipment_id
+                                                    }
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
                                                     }}>
                                                     <option selected>Select Type</option>
                                                     {equipmentTypeData.map((record) => {
-                                                        return <option value={record.equipment_id}>{record.equipment_type}</option>;
+                                                        return (
+                                                            <option value={record.equipment_id}>
+                                                                {record.equipment_type}
+                                                            </option>
+                                                        );
                                                     })}
                                                 </Input>
                                             </Form.Group>
@@ -1215,7 +1152,7 @@ const EquipChartModal = ({
                                                     readOnly
                                                     placeholder="Enter Location"
                                                     className="font-weight-bold"
-                                                    value={equipmentData !== null ? equipmentData.location : ""}
+                                                    value={equipmentData !== null ? equipmentData.location : ''}
                                                 />
                                                 <Form.Label>Location this equipment is installed in.</Form.Label>
                                             </Form.Group>
@@ -1244,7 +1181,7 @@ const EquipChartModal = ({
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Tags</Form.Label>
                                                 <TagsInput
-                                                    value={equipmentData !== null ? equipmentData.tags : ""}
+                                                    value={equipmentData !== null ? equipmentData.tags : ''}
                                                     onChange={setSelected}
                                                     name="tag"
                                                     placeHolder="+ Add Tag"
@@ -1338,42 +1275,67 @@ const EquipChartModal = ({
                                             <span className="modal-right-card-title">Power Strip Socket 2</span>
                                             <Link
                                                 to={{
-                                                    pathname: equipmentData !== null ? equipmentData.device_id !== "" ? `/settings/active-devices/single/${equipmentData.device_id}` : `equipment/#` : "",
+                                                    pathname:
+                                                        equipmentData !== null
+                                                            ? equipmentData.device_id !== ''
+                                                                ? `/settings/active-devices/single/${equipmentData.device_id}`
+                                                                : `equipment/#`
+                                                            : '',
                                                 }}>
                                                 <button
                                                     type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2" disabled={equipmentData !== null ? equipmentData.device_id === "" ? true : false : true}>
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    disabled={
+                                                        equipmentData !== null
+                                                            ? equipmentData.device_id === ''
+                                                                ? true
+                                                                : false
+                                                            : true
+                                                    }>
                                                     View Devices
                                                 </button>
                                             </Link>
                                         </div>
                                         <div>
-                                            {equipmentData !== null ? equipmentData.status === 'Online' && (
-                                                <div className="icon-bg-pop-styling">
-                                                    ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
-                                                </div>
-                                            ) : ""}
-                                            {equipmentData !== null ? equipmentData.status === 'Offline' && (
-                                                <div className="icon-bg-pop-styling-slash">
-                                                    OFFLINE <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
-                                                </div>
-                                            ) : ""}
+                                            {equipmentData !== null
+                                                ? equipmentData.status === 'Online' && (
+                                                      <div className="icon-bg-pop-styling">
+                                                          ONLINE <i className="uil uil-wifi mr-1 icon-styling"></i>
+                                                      </div>
+                                                  )
+                                                : ''}
+                                            {equipmentData !== null
+                                                ? equipmentData.status === 'Offline' && (
+                                                      <div className="icon-bg-pop-styling-slash">
+                                                          OFFLINE{' '}
+                                                          <i className="uil uil-wifi-slash mr-1 icon-styling"></i>
+                                                      </div>
+                                                  )
+                                                : ''}
                                         </div>
                                         <div className="mt-4 modal-right-group">
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    <h6
+                                                        className="card-subtitle mb-2 text-muted"
+                                                        htmlFor="customSwitches">
                                                         MAC Address
                                                     </h6>
-                                                    <h6 className="card-title">{equipmentData !== null ? equipmentData.device_mac : ""}</h6>
+                                                    <h6 className="card-title">
+                                                        {equipmentData !== null ? equipmentData.device_mac : ''}
+                                                    </h6>
                                                 </div>
                                             </FormGroup>
                                             <FormGroup>
                                                 <div className="single-line-style">
-                                                    <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
+                                                    <h6
+                                                        className="card-subtitle mb-2 text-muted"
+                                                        htmlFor="customSwitches">
                                                         Device type
                                                     </h6>
-                                                    <h6 className="card-title">{equipmentData !== null ? equipmentData.device_type : ""}</h6>
+                                                    <h6 className="card-title">
+                                                        {equipmentData !== null ? equipmentData.device_type : ''}
+                                                    </h6>
                                                 </div>
                                             </FormGroup>
                                         </div>
@@ -1382,13 +1344,20 @@ const EquipChartModal = ({
                                                 <h6 className="card-subtitle mb-2 text-muted" htmlFor="customSwitches">
                                                     Installed at
                                                 </h6>
-                                                <h6 className="card-title">{equipmentData !== null ? equipmentData.device_location : ""}</h6>
+                                                <h6 className="card-title">
+                                                    {equipmentData !== null ? equipmentData.device_location : ''}
+                                                </h6>
                                             </div>
                                         </FormGroup>
                                     </div>
                                 </Col>
                             </Row>
-                            : "" : ""}
+                        ) : (
+                            ''
+                        )
+                    ) : (
+                        ''
+                    )}
                 </Modal.Body>
             </>
         </Modal>
