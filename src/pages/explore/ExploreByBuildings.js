@@ -426,7 +426,7 @@ const ExploreByBuildings = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return (value/1000) + ' K';
+                    return (value/1000)+ ' kWH';
                 },
             },
             marker: {
@@ -456,7 +456,7 @@ const ExploreByBuildings = () => {
         yaxis:{
             labels: {
             formatter: function (value) {
-                return (value/1000).toFixed(3) + ' K';
+                return (value/1000).toFixed(3) + ' kWH';
             },
         }
         },
@@ -508,7 +508,7 @@ const ExploreByBuildings = () => {
         yaxis:{
             labels: {
             formatter: function (value) {
-                return (value/1000) + ' K';
+                return (value/1000) + ' kWH';
             },
         },
         tickAmount:2,
@@ -525,6 +525,9 @@ const ExploreByBuildings = () => {
     const [minPerValue, set_minPerValue] = useState(0);
     const [maxPerValue, set_maxPerValue] = useState(100);
     const [buildingSearchTxt,setBuildingSearchTxt]=useState('');
+    const [buildingTypeTxt,setBuildingTypeTxt]=useState('');
+    const [consumptionTxt,setConsumptionTxt]=useState('');
+    const [sq_ftTxt,setSq_FtTxt]=useState('');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -1083,13 +1086,13 @@ const ExploreByBuildings = () => {
                             <span
                             className=""
                             style={{ height: '36px', marginLeft: "1rem" }}>
-                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
-                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}>{consumptionTxt===""? `All ${el.label}`:consumptionTxt} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value);setConsumptionTxt('');}}><i className="uil uil-multiply"></i></button>
                             </span>
                             <Dropdown.Menu className="dropdown-lg p-3">
                                 <div style={{margin:"1rem"}}>
                                     <div>
-                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag)}}>kWh Used</a>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag);setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);}}>kWh Used</a>
                                     </div>
                                     <div className='pop-inputbox-wrapper'>
                                         <input className='pop-inputbox' type="text" value={minConValue}/>  <input className='pop-inputbox' type="text" value={maxConValue}/>
@@ -1141,13 +1144,13 @@ const ExploreByBuildings = () => {
                             <span
                             className=""
                             style={{ height: '36px', marginLeft: "1rem" }}>
-                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}>{sq_ftTxt===""? `All ${el.label}`:sq_ftTxt}</Dropdown.Toggle>
                                 <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
                             </span>
                             <Dropdown.Menu className="dropdown-lg p-3">
                                 <div style={{margin:"1rem"}}>
                                     <div>
-                                    <a className='pop-text' onClick={(e)=>{setSq_FtFlag(!Sq_FtFlag)}}>Square Footage</a>
+                                    <a className='pop-text' onClick={(e)=>{setSq_FtFlag(!Sq_FtFlag);setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);}}>Square Footage</a>
                                     </div>
                                     <div className='pop-inputbox-wrapper'>
                                         <input className='pop-inputbox' type="text" value={minSq_FtValue}/>  <input className='pop-inputbox' type="text" value={maxSq_FtValue}/>
