@@ -303,7 +303,7 @@ const ExploreEquipmentTable = ({
                                                     </td>
 
                                                     {/* <td className="table-content-style font-weight-bold">
-                                                        {(record?.peak_power?.now / 1000).toFixed(2)} kWh
+                                                        {(record?.peak_power?.now / 100000).toFixed(3)} kW
                                                         <br />
                                                         <div style={{ width: '100%', display: 'inline-block' }}>
                                                             {index === 0 && record?.peak_power?.now === 0 && (
@@ -553,7 +553,7 @@ const ExploreByEquipment = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
+                    return value + ' kWH';
                 },
             },
             marker: {
@@ -583,7 +583,7 @@ const ExploreByEquipment = () => {
         yaxis:{
             labels: {
             formatter: function (value) {
-                return (value/1000).toFixed(3) + ' K';
+                return (value/1000).toFixed(3) + ' kWH';
             },
         }
         },
@@ -636,7 +636,7 @@ const ExploreByEquipment = () => {
         yaxis:{
             labels: {
             formatter: function (value) {
-                return (value/1000) + ' K';
+                return (value/1000) + ' kWH';
             },
         },
         tickAmount:2,
@@ -674,6 +674,8 @@ const ExploreByEquipment = () => {
     const [removeDuplicateFlag, setRemoveDuplicateFlag]=useState(false);
     const [equipmentSearchTxt,setEquipmentSearchTxt]=useState('');
     
+    const [consumptionTxt,setConsumptionTxt]=useState('');
+
     const handleAllEquip=(e)=>{
         let slt = document.getElementById("allEquipType");
         if(slt.checked===true){
@@ -1041,7 +1043,7 @@ const ExploreByEquipment = () => {
                             let responseData = res.data;
                             if(responseData.data.length!==0){
                             setTopEnergyConsumption(responseData.data[0].consumption.now);
-                            setTopPeakConsumption(responseData.data[0].peak_power.now);
+                            setTopPeakConsumption(((responseData.data[0].peak_power.now)/100000).toFixed(3));
                             set_minConValue(0.00);
                             set_maxConValue(((responseData.data[0].consumption.now)/1000).toFixed(3))
                             }
@@ -1590,7 +1592,7 @@ const handleEquipmentSearch=(e)=>{
                     let responseData = res.data;
                     if(responseData.data.length!==0){
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption(responseData.data[0].peak_power.now);
+                    setTopPeakConsumption(((responseData.data[0].peak_power.now)/100000).toFixed(3));
                     set_minConValue(0.00);
                     set_maxConValue(((responseData.data[0].consumption.now)/1000).toFixed(3))
                     }
@@ -1738,13 +1740,13 @@ const getCSVLinkChartData = () => {
                             <span
                             className=""
                             style={{ height: '36px', marginLeft: "1rem" }}>
-                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
-                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}>{consumptionTxt===""? `All ${el.label}`:consumptionTxt}</Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value);setConsumptionTxt('');}}><i className="uil uil-multiply"></i></button>
                             </span>
                             <Dropdown.Menu className="dropdown-lg p-3">
                                 <div style={{margin:"1rem"}}>
                                     <div>
-                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag)}}>kWh Used</a>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag);setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);}}>kWh Used</a>
                                     <button style={{border:"none", backgroundColor:"white", marginLeft:"5rem"}} onClick={clearFilterData}><i className="uil uil-multiply"></i></button>
                                     </div>
                                     <div className='pop-inputbox-wrapper'>
