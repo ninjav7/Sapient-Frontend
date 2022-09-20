@@ -50,6 +50,11 @@ const ExploreEquipmentTable = ({
     setRemovedEquipmentId,
     equipmentListArray,
     setEquipmentListArray,
+    nextPageData,
+    previousPageData,
+    paginationData,
+    pageSize,
+    setPageSize,
 }) => {
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
@@ -445,6 +450,48 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
+                        <div className="page-button-style">
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.previous === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                true
+                            }
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[20, 50, 100].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                     </Col>
                 </CardBody>
             </Card>
@@ -478,6 +525,9 @@ const ExploreByEquipment = () => {
     ];
     const [equipOptions, setEquipOptions] = useState([]);
     const [endUseOptions, setEndUseOptions] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    const [pageSize, setPageSize] = useState(20);
+    const [pageNo, setPageNo] = useState(1);
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -539,7 +589,7 @@ const ExploreByEquipment = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' kWH';
+                    return value ;
                 },
             },
             marker: {
@@ -571,7 +621,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3) + ' kWH';
+                    return (value / 1000).toFixed(3);
                 },
             },
         },
@@ -624,7 +674,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             tickAmount: 2,
@@ -828,6 +878,9 @@ const ExploreByEquipment = () => {
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
+                setPaginationData(res.data);
+                setSeriesData([]);
+                        setSeriesLineData([]);
                 if (responseData.data.length !== 0) {
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption(responseData.data[0].peak_power.now);
@@ -1009,7 +1062,10 @@ const ExploreByEquipment = () => {
 
                 await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                     let responseData = res.data;
+                    setPaginationData(res.data);
                     if (responseData.data.length !== 0) {
+                        setSeriesData([]);
+                        setSeriesLineData([]);
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
                         setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
                         set_minConValue(0.0);
@@ -1034,6 +1090,85 @@ const ExploreByEquipment = () => {
         fetchEndUseData();
         fetchSpacetypes();
     }, [startDate, endDate, bldgId]);
+
+
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            setIsExploreDataLoading(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let arr = {
+                date_from: startDate,
+                date_to: endDate,
+            };
+            let params = `?consumption=energy&building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                if (responseData.data.length !== 0) {
+                    setSeriesData([]);
+                        setSeriesLineData([]);
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                }
+                setExploreTableData(responseData.data);
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore by equipment');
+            setIsExploreDataLoading(false);
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            setIsExploreDataLoading(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let arr = {
+                date_from: startDate,
+                date_to: endDate,
+            };
+            let params = `?consumption=energy&building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                if (responseData.data.length !== 0) {
+                    setSeriesData([]);
+                        setSeriesLineData([]);
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                }
+                setExploreTableData(responseData.data);
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore by equipment');
+            setIsExploreDataLoading(false);
+        }
+    };
+
 
     const [filteredEquipOptions, setFilteredEquipOptions] = useState([]);
     const [filteredEquipOptionsCopy, setFilteredEquipOptionsCopy] = useState([]);
@@ -2211,6 +2346,11 @@ const ExploreByEquipment = () => {
                             setRemovedEquipmentId={setRemovedEquipmentId}
                             equipmentListArray={equipmentListArray}
                             setEquipmentListArray={setEquipmentListArray}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                            paginationData={paginationData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
                         />
                     </Col>
                 </div>

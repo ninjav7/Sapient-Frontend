@@ -427,7 +427,7 @@ const ExploreByBuildings = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             marker: {
@@ -459,7 +459,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3) + ' kWH';
+                    return (value / 1000).toFixed(3);
                 },
             },
         },
@@ -511,7 +511,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             tickAmount: 2,
@@ -1243,6 +1243,7 @@ const ExploreByBuildings = () => {
                                                             type="search"
                                                             name="search"
                                                             placeholder="Search"
+                                                            autocomplete="off"
                                                             onChange={(e) => {
                                                                 handleBuildingTypeSearch(e);
                                                             }}
