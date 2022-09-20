@@ -978,7 +978,8 @@ const EditBreakerPanel = () => {
                                                         type="number"
                                                         name="breakers"
                                                         id="breakers"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers_linked}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
