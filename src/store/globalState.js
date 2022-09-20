@@ -3,6 +3,9 @@ import { atom } from 'jotai';
 export const buildingData = atom([]);
 export const userPermissionData = atom([]);
 
+export const equipmentDataGlobal = atom([]);
+export const allEquipmentDataGlobal = atom([]);
+
 export const switchValue = atom({
     mon: false,
     tue: false,

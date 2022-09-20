@@ -147,12 +147,14 @@ const SingleRoleNew = () => {
 
     const [roleName, setRoleName] = useState('Account Administrator');
 
+    console.log('roleName', roleName);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
-                        label: 'Account Administrator',
+                        label: `${roleName}`,
                         path: '/settings/role-config',
                         active: true,
                     },
@@ -164,7 +166,7 @@ const SingleRoleNew = () => {
             });
         };
         updateBreadcrumbStore();
-    }, []);
+    }, [roleName]);
 
     const [userPermissionRoleBody, setUserPermissionRoleBody] = useState({
         name: '',
@@ -537,6 +539,7 @@ const SingleRoleNew = () => {
             .then((res) => {
                 setSinglePermissionDetail(res?.data?.data?.permission_details);
                 setUserData(res?.data?.data?.related_users);
+                setRoleName(res?.data?.data?.permission_details?.name);
             });
     };
 
@@ -590,7 +593,7 @@ const SingleRoleNew = () => {
             <Row className="page-title">
                 <Col lg={10} className="header-container">
                     <div>
-                        <span className="heading-style">Account Administrator</span>
+                        <span className="heading-style">{roleName}</span>
                     </div>
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">

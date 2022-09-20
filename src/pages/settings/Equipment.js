@@ -26,6 +26,7 @@ import {
     listSensor,
     searchEquipment,
     deleteEquipment,
+    lastUsedEquimentDevice,
 } from '../../services/Network';
 import moment from 'moment';
 import Modal from 'react-bootstrap/Modal';
@@ -51,7 +52,7 @@ import EquipmentDeviceChartModel from '../settings/EquipmentDeviceChartModel';
 import ThreeDots from '../../assets/images/threeDots.png';
 import Pen from '../../assets/images/pen.png';
 import Delete from '../../assets/images/delete.png';
-import { equipmentId } from '../../store/globalState';
+import { allEquipmentDataGlobal, equipmentData, equipmentDataGlobal, equipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 import Select from 'react-select';
@@ -82,6 +83,10 @@ const EquipmentTable = ({
     const [sensorOrder, setSensorOrder] = useState(false);
     const [lastDataOrder, setLastDataOrder] = useState(false);
     const [deviceIdOrder, setDeviceIdOrder] = useState(false);
+
+    const [equpimentDataNow] = useAtom(equipmentDataGlobal);
+
+    console.log('equpimentDataNow', equpimentDataNow);
 
     const [userPermission] = useAtom(userPermissionData);
 
@@ -342,11 +347,11 @@ const EquipmentTable = ({
                                                 </div>
                                             </th>
                                         )}
-                                        {/* <th className="active-device-header">
-                                    <div className="active-device-flex">
-                                        <div>Actions</div>
-                                    </div>
-                                </th> */}
+                                        <th className="active-device-header">
+                                            <div className="active-device-flex">
+                                                <div>Actions</div>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </thead>
                                 {isEquipDataFetched ? (
@@ -492,67 +497,76 @@ const EquipmentTable = ({
                                                             {record.device_mac}
                                                         </td>
                                                     )}
-                                                    {/* <td className="font-weight-bold">
-                                                <img
-                                                    style={{ width: '20px' }}
-                                                    src={ThreeDots}
-                                                    onClick={() => {
-                                                        console.log('equipments_name_plus', record?.equipments_id);
-                                                        setToggleEdit(true);
-                                                        setEqupimentIdData(record?.equipments_id);
-                                                    }}
-                                                />
-                                            </td> */}
+                                                    <td className="font-weight-bold">
+                                                        <img
+                                                            style={{ width: '20px' }}
+                                                            src={ThreeDots}
+                                                            onClick={() => {
+                                                                console.log(
+                                                                    'equipments_name_plus',
+                                                                    record?.equipments_id
+                                                                );
+                                                                setToggleEdit(true);
+                                                                setEqupimentIdData(record?.equipments_id);
+                                                            }}
+                                                        />
+                                                    </td>
                                                 </tr>
                                             );
                                         })}
-                                        {/* <UncontrolledDropdown
-                                    style={{
-                                        width: '30px',
-                                        position: 'absolute',
-                                        top: '100px',
-                                        right: 0,
-                                    }}
-                                    isOpen={toggleEdit}
-                                    toggle={() => {
-                                        setToggleEdit(!toggleEdit);
-                                    }}>
-                                    <DropdownToggle
-                                        tag="button"
-                                        className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
-                                    <DropdownMenu right>
-                                        <DropdownItem>
-                                            <div
-                                                onClick={() => {
-                                                    setIsEdit(true);
-                                                }}
-                                                style={{
-                                                    display: 'flex',
-
-                                                    alignItems: 'center',
-                                                }}>
-                                                <img src={Pen} style={{ width: '20px' }} />
-                                                <span style={{ marginLeft: '20px', fontWeight: '700' }}>Edit</span>
-                                            </div>
-                                        </DropdownItem>
-                                        <DropdownItem
-                                            onClick={() => {
-                                                setIsDelete(true);
+                                        <UncontrolledDropdown
+                                            style={{
+                                                width: '30px',
+                                                position: 'absolute',
+                                                top: '100px',
+                                                right: 0,
+                                            }}
+                                            isOpen={toggleEdit}
+                                            toggle={() => {
+                                                setToggleEdit(!toggleEdit);
                                             }}>
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-
-                                                    alignItems: 'center',
-                                                }}>
-                                                <img src={Delete} style={{ width: '20px' }} />
-                                                <span style={{ color: 'red', marginLeft: '20px', fontWeight: '700' }}>
-                                                    Delete
-                                                </span>
-                                            </div>
-                                        </DropdownItem>
-                                    </DropdownMenu>
-                                </UncontrolledDropdown> */}
+                                            <DropdownToggle
+                                                tag="button"
+                                                className="btn btn-link p-0 dropdown-toggle text-muted"></DropdownToggle>
+                                            <DropdownMenu right>
+                                                <DropdownItem>
+                                                    <div
+                                                        onClick={() => {
+                                                            setIsEdit(true);
+                                                        }}
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                        }}>
+                                                        <img src={Pen} style={{ width: '20px' }} />
+                                                        <span style={{ marginLeft: '20px', fontWeight: '700' }}>
+                                                            Edit
+                                                        </span>
+                                                    </div>
+                                                </DropdownItem>
+                                                <DropdownItem
+                                                    disabled={equpimentDataNow?.includes(equpimentIdData)}
+                                                    onClick={() => {
+                                                        setIsDelete(true);
+                                                    }}>
+                                                    <div
+                                                        style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                        }}>
+                                                        <img src={Delete} style={{ width: '20px' }} />
+                                                        <span
+                                                            style={{
+                                                                color: 'red',
+                                                                marginLeft: '20px',
+                                                                fontWeight: '700',
+                                                            }}>
+                                                            Delete
+                                                        </span>
+                                                    </div>
+                                                </DropdownItem>
+                                            </DropdownMenu>
+                                        </UncontrolledDropdown>
                                     </tbody>
                                 )}
                             </Table>
@@ -936,6 +950,9 @@ const Equipment = () => {
         }
     };
 
+    const [equpimentDataNow, setEqupimentDataNow] = useAtom(equipmentDataGlobal);
+    const [allEqupimentDataNow, setAllEqupimentDataNow] = useAtom(allEquipmentDataGlobal);
+
     const fetchEquipmentData = async () => {
         try {
             setIsEquipDataFetched(true);
@@ -970,6 +987,19 @@ const Equipment = () => {
             console.log('Failed to fetch all Equipments Data');
         }
     };
+
+    const addEquimentData = () => {
+        generalEquipmentData.map((item) => {
+            if (item?.device_type === 'active') {
+                setEqupimentDataNow((el) => [...el, item?.equipments_id]);
+            }
+            setAllEqupimentDataNow((el) => [...el, item?.equipments_id]);
+        });
+    };
+
+    useEffect(() => {
+        addEquimentData();
+    }, [generalEquipmentData]);
 
     useEffect(() => {
         const fetchEndUseData = async () => {
@@ -1082,6 +1112,32 @@ const Equipment = () => {
             setIsDelete(false);
         });
     };
+
+    const equpimentLastUsed = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?building_id=${bldgId}`;
+            await axios
+                .post(`${BaseUrl}${lastUsedEquimentDevice}${params}`, allEqupimentDataNow, { headers })
+                .then((res) => {
+                    // setEndUseData(res.data);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch End Use Data');
+        }
+    };
+
+    useEffect(() => {
+        if (allEqupimentDataNow) {
+            equpimentLastUsed();
+        }
+    }, [allEqupimentDataNow]);
 
     return (
         <React.Fragment>
@@ -1379,7 +1435,7 @@ const Equipment = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
+            <Modal size="sm" show={isDelete} onHide={handleDeleteClose} centered>
                 <Modal.Header>
                     <Modal.Title>Delete Equpiment</Modal.Title>
                 </Modal.Header>
@@ -1410,7 +1466,7 @@ const Equipment = () => {
                         {processdelete ? 'Deleting...' : 'Delete'}
                     </Button>
                 </Modal.Footer>
-            </Modal> */}
+            </Modal>
         </React.Fragment>
     );
 };

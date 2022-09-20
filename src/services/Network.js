@@ -56,6 +56,7 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
 //search active and passive device
 export const searchDevices = '/api/config/devices/search_by_devices';
+export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';

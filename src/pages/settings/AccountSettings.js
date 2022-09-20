@@ -75,25 +75,30 @@ const AccountSettings = () => {
             <Row className="page-title ml-2">
                 <Col className="header-container" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="heading-style">General Account Settings</span>
-                    <div>
-                        <button
-                            onClick={() => {
-                                setAccoutnIdData(localStorage.getItem('accountId'));
-                            }}
-                            type="button"
-                            className="btn btn-default buildings-cancel-style">
-                            Cancel
-                        </button>
+                    {userPermission?.user_role === 'admin' ||
+                    userPermission?.permissions?.permissions?.account_general_permission?.edit ? (
+                        <div>
+                            <button
+                                onClick={() => {
+                                    setAccoutnIdData(localStorage.getItem('accountId'));
+                                }}
+                                type="button"
+                                className="btn btn-default buildings-cancel-style">
+                                Cancel
+                            </button>
 
-                        <button
-                            onClick={(e) => {
-                                updateAccountName();
-                            }}
-                            type="button"
-                            className="btn btn-primary buildings-save-style ml-3">
-                            Save
-                        </button>
-                    </div>
+                            <button
+                                onClick={(e) => {
+                                    updateAccountName();
+                                }}
+                                type="button"
+                                className="btn btn-primary buildings-save-style ml-3">
+                                Save
+                            </button>
+                        </div>
+                    ) : (
+                        ''
+                    )}
                 </Col>
             </Row>
 
@@ -119,7 +124,9 @@ const AccountSettings = () => {
 
                                     <FormGroup>
                                         <div className="singleline-box-style">
-                                            {userPermission?.user_role === 'admin' ? (
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_general_permission
+                                                ?.edit ? (
                                                 <Input
                                                     type="text"
                                                     name="buildingName"
@@ -138,14 +145,9 @@ const AccountSettings = () => {
                                                     id="buildingName"
                                                     placeholder="Enter Account Name"
                                                     className="single-line-style font-weight-bold"
+                                                    style={{ cursor: 'not-allowed' }}
                                                     value={accoutnIdData}
-                                                    onChange={(e) => {
-                                                        setAccoutnIdData(e.target.value);
-                                                    }}
-                                                    disabled={
-                                                        !userPermission?.permissions?.permissions
-                                                            ?.account_general_permission?.edit
-                                                    }
+                                                    disabled={true}
                                                 />
                                             )}
                                         </div>
