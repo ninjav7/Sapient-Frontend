@@ -17,9 +17,9 @@ const TabTitle = ({ dateText, value, unit, trendValue, trendType }) => {
             <Typography.Subheader size={Typography.Sizes.sm}>{dateText}</Typography.Subheader>
             <div className="d-flex">
                 <div className="buildings-peaks-widget-values">
-                    <Typography.Header size={Typography.Sizes.md} className="d-inline-block">
+                    <Typography.Header size={Typography.Sizes.md} className="d-inline-block mr-1">
                         {value}
-                    </Typography.Header>{' '}
+                    </Typography.Header>
                     <Typography.Subheader size={Typography.Sizes.md} className="d-inline-block">
                         {unit}
                     </Typography.Subheader>

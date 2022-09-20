@@ -51,11 +51,11 @@ const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], classNam
                         </div>
                         <div>
                             <Typography.Body
-                                className="d-inline"
+                                className="d-inline mr-1"
                                 size={Typography.Sizes.md}
                                 fontWeight={Typography.Types.SemiBold}>
                                 {value}
-                            </Typography.Body>{' '}
+                            </Typography.Body>
                             <Typography.Body className="d-inline" size={Typography.Sizes.xxs}>
                                 {unit}
                             </Typography.Body>
