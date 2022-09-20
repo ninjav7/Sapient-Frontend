@@ -568,31 +568,6 @@ const PassiveDevices = () => {
         }
     };
 
-    const handleSearch = async () => {
-        if (search !== '') {
-            try {
-                setIsDeviceProcessing(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_type=passive&building_id=${bldgId}&mac=${search}`;
-                await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    setPassiveDeviceData(res.data);
-                });
-                setIsDeviceProcessing(false);
-            } catch (error) {
-                console.log(error);
-                setIsDeviceProcessing(false);
-                console.log('Failed to fetch all Active Devices');
-            }
-        } else {
-            setPassiveDeviceData(duplicatePassiveDeviceData);
-        }
-    };
-
     const nextPageData = async (path) => {
         try {
             if (path === null) {
@@ -725,6 +700,8 @@ const PassiveDevices = () => {
 
     const [deviceSearch, setDeviceSearch] = useState('');
 
+    console.log('deviceSearch', deviceSearch);
+
     const fetchPassiveDeviceData = async () => {
         try {
             setIsDeviceProcessing(true);
@@ -756,6 +733,27 @@ const PassiveDevices = () => {
         }
     };
 
+    const handleSearch = async () => {
+        try {
+            setIsDeviceProcessing(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?device_type=passive&building_id=${bldgId}&mac=${deviceSearch}`;
+            await axios.post(`${BaseUrl}${searchDevices}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setPassiveDeviceData(res.data);
+            });
+            setIsDeviceProcessing(false);
+        } catch (error) {
+            console.log(error);
+            setIsDeviceProcessing(false);
+            console.log('Failed to fetch all Active Devices');
+        }
+    };
+
     const fetchLocationData = async () => {
         try {
             let headers = {
@@ -778,7 +776,7 @@ const PassiveDevices = () => {
 
     useEffect(() => {
         fetchPassiveDeviceData();
-    }, [pageRefresh, bldgId, deviceSearch]);
+    }, [pageRefresh, bldgId]);
 
     useEffect(() => {
         fetchLocationData();
@@ -852,7 +850,7 @@ const PassiveDevices = () => {
                             aria-label="Search"
                             aria-describedby="search-addon"
                             onChange={(e) => {
-                                setDeviceSearch(e);
+                                setDeviceSearch(e.target.value);
                             }}
                         />
                         <button class="input-group-text border-0" id="search-addon" onClick={handleSearch}>

@@ -108,6 +108,7 @@ export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
 export const updateSpace = '/api/config/layout/update-floor';
 export const deleteSpace = '/api/config/layout/delete-space';
+export const deleteFloor = '/api/config/layout/delete-floor';
 
 // getLocation
 export const getLocation = '/api/config/get_location';

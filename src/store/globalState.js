@@ -13,6 +13,8 @@ export const switchValue = atom({
     sun: false,
 });
 
+export const deleteFloor = atom(false);
+
 export const closedEditFloorModal = atom(false);
 export const closeEditSpaceModal = atom(false);
 export const floorList = atom([]);

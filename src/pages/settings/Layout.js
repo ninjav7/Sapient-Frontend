@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, UncontrolledDropdown, DropdownMenu, DropdownItem, DropdownToggle } from 'reactstrap';
+import {
+    Row,
+    Col,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownItem,
+    DropdownToggle,
+    Modal,
+    Form,
+    Button,
+} from 'reactstrap';
 import { useAtom } from 'jotai';
 import './style.css';
 import axios from 'axios';
@@ -21,6 +31,7 @@ import {
     currentFloorIdNow7,
     currentFloorIdNow8,
     currentFloorIdNow9,
+    deleteFloor,
     floorid,
     flooridNew,
     floorIdState,
@@ -76,7 +87,6 @@ const Layout = () => {
     console.log('flootListsuccess', flootListsuccess);
 
     const [modalShow, setModalShow] = useState(false);
-    const [floorId, setFloorId] = useState('');
     const [floorid, setFloorid] = useAtom(floorIdState);
 
     const [currentFloorId2, setCurrentFloorId2] = useAtom(currentFloorIdNow2);
@@ -151,6 +161,7 @@ const Layout = () => {
     const [modalSpaceShow20, setModalSpaceShow20] = useState(false);
 
     const [editFloor, setEditFloor] = useState(false);
+    const [editSpace2, setEditSpace2] = useState(false);
 
     const [closeModal] = useAtom(closeEditSpaceModal);
 
@@ -272,8 +283,63 @@ const Layout = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
+    const [deleteFloorModal, setDeleteFloorModal] = useState(false);
+
+    const [deletingFloor] = useAtom(deleteFloor);
+    const handleDeleteClose = () => setDeleteFloorModal(false);
+
+    useEffect(() => {
+        if (deletingFloor) {
+            setModalShow(false);
+            setDeleteFloorModal(deletingFloor);
+        }
+    }, [deletingFloor]);
+
+    console.log('deletingFloor', deletingFloor);
+
+    const DeleteFloorsFunc = () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        axios.delete(`${BaseUrl}${deleteFloor}/${floorid}`, { headers }).then((res) => {
+            console.log('res', res);
+        });
+    };
+
     return (
         <React.Fragment>
+            <Modal show={deleteFloorModal} onHide={handleDeleteClose} centered>
+                <Modal.Header>
+                    <Modal.Title>Delete Floor</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <span>Are you sure you want to floor</span>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer
+                    style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexWrap: 'nowrap',
+                    }}>
+                    <Button
+                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
+                        onClick={handleDeleteClose}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={DeleteFloorsFunc}
+                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             <EditFloorModal editFloor={editFloor} show={modalShow} onHide={() => setModalShow(false)} />
             <EditSpace currentFloorId={currentFloorId} show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <EditSpace
@@ -372,10 +438,10 @@ const Layout = () => {
                 <Col lg={12}>
                     <div className="layout-container mt-4">
                         {/* Floor List */}
-
                         <div className="container-column">
                             <div className="container-heading">
                                 <span>Building Root</span>
+
                                 <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                     <i className="uil uil-filter mr-3"></i>
 
@@ -383,8 +449,13 @@ const Layout = () => {
                                         <DropdownToggle
                                             tag="button"
                                             className="btn btn-link p-0 dropdown-toggle text-muted">
-                                            {userPermission?.permissions?.permissions?.building_layout_permission
-                                                ?.create && <i className="uil uil-plus mr-2"></i>}
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.building_layout_permission
+                                                ?.create ? (
+                                                <i className="uil uil-plus mr-2"></i>
+                                            ) : (
+                                                ''
+                                            )}
                                         </DropdownToggle>
                                         <DropdownMenu right>
                                             <DropdownItem
@@ -437,8 +508,11 @@ const Layout = () => {
                                             setEditFloor(true);
                                             setModalShow(true);
                                         }}>
-                                        {userPermission?.permissions?.permissions?.building_layout_permission?.edit && (
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.building_layout_permission?.edit ? (
                                             <i className="uil uil-pen mr-2"></i>
+                                        ) : (
+                                            ''
                                         )}
                                     </div>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
@@ -448,8 +522,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -495,6 +574,19 @@ const Layout = () => {
                             <div className="container-column">
                                 <div className="container-heading">
                                     <span>{getSpaceName2}</span>
+                                    <div
+                                        className="ml-2"
+                                        onClick={() => {
+                                            setEditSpace2(true);
+                                            setModalShow(true);
+                                        }}>
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.building_layout_permission?.edit ? (
+                                            <i className="uil uil-pen mr-2"></i>
+                                        ) : (
+                                            ''
+                                        )}
+                                    </div>
                                     <div className="mr-2" style={{ marginLeft: 'auto' }}>
                                         <i className="uil uil-filter mr-3"></i>
 
@@ -502,8 +594,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -550,8 +647,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -599,8 +701,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -648,8 +755,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -699,8 +811,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -750,8 +867,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -801,8 +923,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -851,8 +978,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -901,8 +1033,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -951,8 +1088,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1001,8 +1143,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1051,8 +1198,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1101,8 +1253,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1151,8 +1308,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1201,8 +1363,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1251,8 +1418,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
@@ -1301,8 +1473,13 @@ const Layout = () => {
                                             <DropdownToggle
                                                 tag="button"
                                                 className="btn btn-link p-0 dropdown-toggle text-muted">
-                                                {userPermission?.permissions?.permissions?.building_layout_permission
-                                                    ?.create && <i className="uil uil-plus mr-2"></i>}
+                                                {userPermission?.user_role === 'admin' ||
+                                                userPermission?.permissions?.permissions?.building_layout_permission
+                                                    ?.create ? (
+                                                    <i className="uil uil-plus mr-2"></i>
+                                                ) : (
+                                                    ''
+                                                )}
                                             </DropdownToggle>
                                             <DropdownMenu right>
                                                 <DropdownItem
