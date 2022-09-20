@@ -21,11 +21,15 @@ import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     let history = useHistory();
 
@@ -118,10 +122,6 @@ const IndividualPassiveDevice = () => {
 
     const fetchSensorGraphData = async (id) => {
         try {
-            let endDate = new Date(); // today
-            let startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
-
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
