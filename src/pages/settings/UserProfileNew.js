@@ -11,6 +11,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
+import Select from 'react-select';
 import {
     assignUser,
     BaseUrl,
@@ -112,6 +113,20 @@ const UserProfileNew = () => {
     console.log('updateUserDetail', updateUserDetail);
 
     const [roleDataList, setRoleDataList] = useState();
+
+    const [locationDataNow, setLocationDataNow] = useState([]);
+
+    const addLocationType = () => {
+        roleDataList.map((item) => {
+            setLocationDataNow((el) => [...el, { value: `${item?._id}`, label: `${item?.name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (roleDataList) {
+            addLocationType();
+        }
+    }, [roleDataList]);
 
     const [buildingListData] = useAtom(buildingData);
     const [allBuildings, setAllBuildings] = useState([]);
@@ -424,27 +439,18 @@ const UserProfileNew = () => {
                             <Col>
                                 <Form.Group className="" controlId="exampleForm.ControlInput1">
                                     <Form.Label>Role</Form.Label>
-                                    <Input
-                                        type="select"
-                                        name="state"
-                                        id="userState"
-                                        // className="font-weight-bold selection-volts-style"
-                                        style={{ width: '100%' }}
-                                        placeholder="Select Volts"
+                                    <Select
+                                        id="exampleSelect"
+                                        placeholder="Select Role"
+                                        name="select"
+                                        isSearchable={true}
+                                        defaultValue={'Select Role'}
+                                        options={locationDataNow}
                                         onChange={(e) => {
-                                            if (e.target.value === 'Select Role') {
-                                                return;
-                                            }
-                                            setPermissionValue(e.target.value);
+                                            setPermissionValue(e.value);
                                         }}
-                                        value={permissionValue}>
-                                        <option>Select Role</option>
-                                        {roleDataList?.map((item) => {
-                                            return <option value={item?._id}>{item?.name}</option>;
-                                        })}
-                                        {/* <option value="480">480</option>
-                                        <option value="600">600</option> */}
-                                    </Input>
+                                        className="font-weight-bold"
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>

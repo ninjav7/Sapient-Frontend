@@ -1,0 +1,32 @@
+@import '../../assets/scss/colors';
+
+.Avatar {
+    &-wrapper {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        &.sm {
+            .Avatar-image-wrapper {
+                .Avatar-image {
+                    width: 2.5rem;
+                }
+
+                position: relative;
+
+                .Avatar-indicator {
+                    width: 0.625rem;
+                    height: 0.625rem;
+                    border-radius: 100%;
+                    overflow: hidden;
+                    background: $success-600;
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    box-sizing: content-box;
+                    border: 0.0938rem solid $base-white;
+                }
+            }
+        }
+    }
+}

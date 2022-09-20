@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
@@ -118,6 +118,36 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         { value: 'disconnect', label: 'Disconnect' },
     ];
 
+    // const locationOption = [];
+    const [location, setLocation] = useState([]);
+    const [parentPanel, setParentPanel] = useState([]);
+
+    const addLocationData = () => {
+        locationData.map((item) => {
+            setLocation((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    const addPanelData = () => {
+        panelData.map((item) => {
+            setParentPanel((el) => [...el, { value: `${item?.panel_id}`, label: `${item?.panel_name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (locationData) {
+            addLocationData();
+        }
+    }, [locationData]);
+
+    useEffect(() => {
+        if (panelData) {
+            addPanelData();
+        }
+    }, [panelData]);
+
+    console.log('location', location);
+
     return (
         <>
             <Modal show={showPanelModel} onHide={closeAddPanelModel} centered>
@@ -176,23 +206,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Panel Type</Form.Label>
-                            {/* <Input
-                                type="select"
-                                name="state"
-                                id="userState"
-                                className="font-weight-bold selection-volts-style"
-                                onChange={(e) => {
-                                    if (e.target.value === 'Select Panel Type') {
-                                        return;
-                                    }
-                                    handleChange('panel_type', e.target.value);
-                                }}
-                                value={panelObj.panel_type}>
-                                <option>Select Panel Type</option>
-                                {panelType.map((record) => {
-                                    return <option value={record.value}>{record.name}</option>;
-                                })}
-                            </Input> */}
                             <div style={{ width: '200px' }}>
                                 <Select
                                     id="exampleSelect"
@@ -250,43 +263,39 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                         <Label for="location" className="card-title">
                             Location
                         </Label>
-                        <Input
-                            type="select"
-                            name="state"
-                            id="userState"
-                            className="font-weight-bold"
-                            onChange={(e) => {
-                                if (e.target.value === 'Select Location') {
-                                    return;
-                                }
-                                handleChange('space_id', e.target.value);
-                            }}
-                            value={panelObj.space_id}>
-                            <option>Select Location</option>
-                            {locationData.map((record) => {
-                                return <option value={record.location_id}>{record.location_name}</option>;
-                            })}
-                        </Input>
+
+                        <div style={{ width: '100%' }}>
+                            <Select
+                                isSearchable={true}
+                                defaultValue={'Select Location Type'}
+                                options={location}
+                                onChange={(e) => {
+                                    handleChange('space_id', e.value);
+                                }}
+                                className="font-weight-bold dropdownScrollaleDisable"
+                                menuPlacement="auto"
+                                menuPosition="fixed"
+                                menuShouldBlockScroll={true}
+                            />
+                        </div>
                     </FormGroup>
 
                     <FormGroup className="m-2 mt-3">
                         <Label for="userState" className="card-title">
                             Parent Panel
                         </Label>
-                        <Input
-                            type="select"
-                            name="state"
-                            id="userState"
-                            className="font-weight-bold"
+                        <Select
+                            isSearchable={true}
+                            defaultValue={'Select Parent Panel'}
+                            options={parentPanel}
                             onChange={(e) => {
-                                handleChange('parent_panel', e.target.value);
+                                handleChange('parent_panel', e.value);
                             }}
-                            value={panelObj.parent_panel}>
-                            <option>None</option>
-                            {panelData.map((record) => {
-                                return <option value={record.panel_id}>{record.panel_name}</option>;
-                            })}
-                        </Input>
+                            className="font-weight-bold dropdownScrollaleDisable"
+                            menuPlacement="auto"
+                            menuPosition="fixed"
+                            menuShouldBlockScroll={true}
+                        />
                     </FormGroup>
                 </Form>
                 <Modal.Footer>

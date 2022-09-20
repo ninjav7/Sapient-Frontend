@@ -94,7 +94,6 @@ const BuildingList = ({ buildingList = [], bldStoreId }) => {
                             location.pathname !== '/energy/portfolio/overview' &&
                             location.pathname !== '/energy/compare-buildings' &&
                             record.building_id === bldStoreId;
-
                         return (
                             <div key={record.building_id}>
                                 {location.pathname === '/energy/portfolio/overview' ? (

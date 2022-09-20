@@ -29,6 +29,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import './style.css';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import debounce from 'lodash.debounce';
 
 const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
     const [userPermission] = useAtom(userPermissionData);
@@ -160,6 +161,8 @@ const Users = () => {
     const [userData, setUserData] = useState([]);
     const [dataFetched, setDataFetched] = useState(false);
 
+    const [userSearchInfo, setUserSearchInfo] = useState('');
+
     const [userObj, setUserObj] = useState({
         first_name: '',
         last_name: '',
@@ -211,8 +214,9 @@ const Users = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            // let params = `?ordered_by=name&sort_by=ace`;
-            await axios.get(`${BaseUrl}${getMemberUser}`, { headers }).then((res) => {
+
+            let params = `?user_info=${userSearchInfo}`;
+            await axios.get(`${BaseUrl}${getMemberUser}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setUserData(response.data);
                 setDataFetched(true);
@@ -226,9 +230,13 @@ const Users = () => {
         }
     };
 
-    useEffect(() => {
+    const debouncedFetchData = debounce(() => {
         getUsersList();
-    }, [bldgId]);
+    }, 1000);
+
+    useEffect(() => {
+        debouncedFetchData();
+    }, [bldgId, userSearchInfo]);
 
     useEffect(() => {
         if (generatedUserId === '') {
@@ -286,8 +294,10 @@ const Users = () => {
                                     type="search"
                                     name="search"
                                     placeholder="Search..."
-                                    // value={searchSensor}
-                                    // onChange={handleSearchChange}
+                                    value={userSearchInfo}
+                                    onChange={(e) => {
+                                        setUserSearchInfo(e.target.value);
+                                    }}
                                 />
                             </div>
                         </div>

@@ -8,7 +8,7 @@ import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload, faKissWinkHeart } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Spinner } from 'reactstrap';
@@ -19,8 +19,12 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 import ApexCharts from 'apexcharts';
+import RangeSlider from './RangeSlider';
 import './style.css';
 import { ConstructionOutlined } from '@mui/icons-material';
+import moment from 'moment';
+import { timeZone } from '../../utils/helper';
+import { CSVLink } from 'react-csv';
 
 const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEnergyConsumption, selectedBuildingId, setSelectedBuildingId, removeBuildingId, setRemovedBuildingId, buildingListArray, setBuildingListArray, selectedOptions }) => {
     const history = useHistory();
@@ -83,6 +87,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                     </th>
                                     <th className="table-heading-style">Energy Consumption</th>
                                     <th className="table-heading-style">% Change</th>
+                                    <th className="table-heading-style">Square Footage</th>
                                     <th className="table-heading-style">Building Type</th>
                                 </tr>
                             </thead>
@@ -99,6 +104,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                 <Skeleton count={5} />
                                             </td>
 
+                                            <td>
+                                                <Skeleton count={5} />
+                                            </td>
                                             <td>
                                                 <Skeleton count={5} />
                                             </td>
@@ -261,6 +269,9 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
                                                             )}
                                                     </td>
                                                     <td className="table-content-style font-weight-bold">
+                                                            {record?.square_footage} sq. ft.
+                                                    </td>
+                                                    <td className="table-content-style font-weight-bold">
                                                             {record?.building_type}
                                                     </td>
                                                 </tr>
@@ -277,6 +288,7 @@ const ExploreBuildingsTable = ({ exploreTableData, isExploreDataLoading, topEner
 };
 
 const ExploreByBuildings = () => {
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -295,11 +307,16 @@ const ExploreByBuildings = () => {
 
     const [selectedBuildingOptions, setSelectedBuildingOptions] = useState([]);
     
-    const buildingTypeOptions = [
+    const [buildingTypeOptions, setBuildingTypeOptions] = useState([
         { label: 'Office Building', value: 'office' },
         { label: 'Residential Building', value: 'residential' },
         
-    ];
+    ]);
+    const [buildingTypeOptionsCopy, setBuildingTypeOptionsCopy] = useState([
+        { label: 'Office Building', value: 'office' },
+        { label: 'Residential Building', value: 'residential' },
+        
+    ]);
     const [isOpen, setIsOpen] = useState(false);
 
   const toggle = () => setIsOpen(!isOpen);
@@ -382,8 +399,66 @@ const ExploreByBuildings = () => {
         markers: {
             size: 0,
         },
+        animations: {
+            enabled: false,
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            x: {
+                show: true,
+                type: 'datetime',
+                labels: {
+                    formatter:  function ({ series, seriesIndex, dataPointIndex, w }) {
+                        const { seriesX } = w.globals;
+                        const timestamp = new Date(seriesX[0][dataPointIndex]);
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return (value/1000)+ ' kWH';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${(series[seriesIndex][dataPointIndex]/1000).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ HH:mm`
+                        )}</div>
+                    </div>`;
+            },
+        },
         xaxis: {
             type: 'datetime',
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
+            },
+        },
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000).toFixed(3) + ' kWH';
+            },
+        }
         },
     });
 
@@ -414,7 +489,7 @@ const ExploreByBuildings = () => {
         legend: {
             show: false,
         },
-        colors: ['#008FFB'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             type: 'gradient',
             gradient: {
@@ -424,16 +499,35 @@ const ExploreByBuildings = () => {
         },
         xaxis: {
             type: 'datetime',
-            tooltip: {
-                enabled: false,
+            labels: {
+                formatter:  function (val, timestamp) {
+                    return moment(timestamp).format('DD/MM - HH:mm');
+                },
             },
         },
-        yaxis: {
-            tickAmount: 2,
+        yaxis:{
+            labels: {
+            formatter: function (value) {
+                return (value/1000) + ' kWH';
+            },
+        },
+        tickAmount:2,
         },
     });
 
+    const [APIFlag, setAPIFlag]=useState(false);
+    const [Sq_FtFlag, setSq_FtFlag]=useState(false);
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
+    const [minConValue, set_minConValue] = useState(0.00);
+    const [maxConValue, set_maxConValue] = useState(0.00);
+    const [minSq_FtValue, set_minSq_FtValue] = useState(0);
+    const [maxSq_FtValue, set_maxSq_FtValue] = useState(10);
+    const [minPerValue, set_minPerValue] = useState(0);
+    const [maxPerValue, set_maxPerValue] = useState(100);
+    const [buildingSearchTxt,setBuildingSearchTxt]=useState('');
+    const [buildingTypeTxt,setBuildingTypeTxt]=useState('');
+    const [consumptionTxt,setConsumptionTxt]=useState('');
+    const [sq_ftTxt,setSq_FtTxt]=useState('');
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -497,6 +591,8 @@ const ExploreByBuildings = () => {
             return;
         }
         let result = [];
+        setSeriesData([]);
+        setSeriesLineData([]);
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -517,11 +613,12 @@ const ExploreByBuildings = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
+                        console.log(responseData[0]);
                         setExploreTableData(responseData);
-                        result = res.data;
+                        console.log("Consumption " ,((responseData[0].consumption.now)/1000).toFixed(3))
                         setTopEnergyConsumption(responseData[0].consumption.now);
-
-
+                        set_minConValue(0.00);
+                        set_maxConValue(((responseData[0].consumption.now)/1000).toFixed(3))
                         setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -532,6 +629,34 @@ const ExploreByBuildings = () => {
         };
         exploreDataFetch();
     }, [startDate, endDate]);
+
+    const exploreFilterDataFetch = async (bodyVal) => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingList}${params}`,
+                    bodyVal,
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    setExploreTableData(responseData);
+                    setTopEnergyConsumption(responseData[0].consumption.now);
+                    setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
 
     useEffect(() => {
 
@@ -551,7 +676,7 @@ const ExploreByBuildings = () => {
                 let params = `?consumption=energy&building_id=${selectedBuildingId}`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}`,
+                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}`,
                         {
                             date_from: startDate,
                             date_to: endDate,
@@ -689,6 +814,34 @@ const ExploreByBuildings = () => {
         console.log("Selected Options ", selectedOptions);
     }, [selectedOptions])
 
+    useEffect(()=>{
+
+        if((maxConValue===0.00 || maxConValue===0.01) && (maxSq_FtValue===10 || minSq_FtValue===0) && selectedBuildingOptions.length===0){
+            return;
+        }
+        let arr = {};
+        arr['date_from'] = startDate;
+        arr['date_to'] =endDate;
+        if(maxConValue > 0.01){
+            arr['consumption_range']= {
+                "gte": minConValue*1000,
+                "lte": maxConValue*1000
+              };
+        }
+        if(maxSq_FtValue > 10){
+            arr['sq_ft_range']= {
+                "gte": minSq_FtValue,
+                "lte": maxSq_FtValue
+              };
+        }
+        if(selectedBuildingOptions.length!==0){
+            arr['building_type']=selectedBuildingOptions
+        }
+        exploreFilterDataFetch(arr);
+
+    },[APIFlag,Sq_FtFlag,selectedBuildingOptions])
+
+
     const handleCloseFilter=(e, val)=>{
         let arr=[];
         arr = selectedOptions.filter(function (item) {
@@ -697,6 +850,144 @@ const ExploreByBuildings = () => {
         console.log(arr);
         setSelectedOptions(arr);
     }
+    const handleInput = (values) => {
+        //console.log("values ",values);
+        set_minConValue(values[0]);
+        set_maxConValue(values[1]);
+    };
+    const handleInputPer = (values) => {
+        //console.log("values ",values);
+        set_minPerValue(values[0]);
+        set_maxPerValue(values[1]);
+    };
+    const handleSq_FtInput = (values) => {
+        //console.log("values ",values);
+        set_minSq_FtValue(values[0]);
+        set_maxSq_FtValue(values[1]);
+    };
+    const clearFilterData=()=>{
+        let arr= {
+            date_from: startDate,
+            date_to: endDate,
+        }
+        exploreFilterDataFetch(arr);
+    }
+    const handleAllBuilgingType=(e)=>{
+        let slt = document.getElementById("buildingType");
+        if(slt.checked===true){
+            let selectBuilding=[];
+            for(let i=0;i<buildingTypeOptions.length;i++){
+                selectBuilding.push(buildingTypeOptions[i].label);
+                let check=document.getElementById(buildingTypeOptions[i].label)
+                check.checked=slt.checked;
+            }
+            //console.log('selected Space Type ',selectSpace);
+            setSelectedBuildingOptions(selectBuilding)
+        }
+        else{
+            setSelectedBuildingOptions([]);
+            for(let i=0;i<buildingTypeOptions.length;i++){
+                let check=document.getElementById(buildingTypeOptions[i].label)
+                check.checked=slt.checked;
+            }
+        }
+    }
+    const handleSelectedBuildingType=(e)=>{
+        let selection=document.getElementById(e.target.value);
+        if(selection.checked===true)
+            setSelectedBuildingOptions([...selectedBuildingOptions,e.target.value]);
+        else
+        {
+            let slt = document.getElementById("buildingType");
+            slt.checked=selection.checked;
+            //console.log(e.target.value);
+            let arr = selectedBuildingOptions.filter(function (item) {
+                return item !== e.target.value
+            })
+            //console.log(arr);
+            setSelectedBuildingOptions(arr)
+        }
+    }
+    const handleBuildingTypeSearch=(e)=>{
+        let txt=e.target.value;
+        if(txt!==""){
+            var search = new RegExp(txt , 'i');
+            let b = buildingTypeOptions.filter(item => search.test(item.label));
+            // console.log(b);
+            setBuildingTypeOptions(b);
+        }
+        else{
+            setBuildingTypeOptions(buildingTypeOptionsCopy);
+        }
+    }
+    const handleBuildingSearch=(e)=>{
+        console.log(buildingSearchTxt);
+
+        const exploreDataFetch = async () => {
+            try {
+                setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?consumption=energy&search_by_name=${buildingSearchTxt}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreBuildingList}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        console.log(responseData[0]);
+                        setExploreTableData(responseData);
+                        console.log("Consumption " ,((responseData[0].consumption.now)/1000).toFixed(3))
+                        setTopEnergyConsumption(responseData[0].consumption.now);
+                        set_minConValue(0.00);
+                        set_maxConValue(((responseData[0].consumption.now)/1000).toFixed(3))
+                        setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                setIsExploreDataLoading(false);
+            }
+        };
+        exploreDataFetch();
+        
+    }
+    const getCSVLinkData = () => {
+        // console.log("csv entered");
+        let sData=[];
+        exploreTableData.map(function (obj) {
+            let change=percentageHandler(obj.consumption.now,obj.consumption.old) +"%"
+             sData.push([obj.building_name,(obj.consumption.now / 1000).toFixed(2)+ 'kWh',change,obj.square_footage+' sq.ft.',obj.building_type]) ;
+          });
+          //console.log(sData)
+        //let arr = exploreTableData.length > 0 ? sData : [];
+        //console.log(exploreTableData);
+        //console.log([exploreTableData]);
+        let streamData = exploreTableData.length > 0 ? sData : [];
+
+        // streamData.unshift(['Timestamp', selectedConsumption])
+
+        return [['Name', 'Energy Consumption','% Change', 'Square Footage', 'Building Type'], ...streamData];
+    };
+    const getCSVLinkChartData = () => {
+        // console.log("csv entered");
+        let arr = seriesData.length > 0 ? seriesData[0].data : [];
+        // console.log(arr);
+        // console.log(sData);
+        let streamData = seriesData.length > 0 ? seriesData[0].data : [];
+
+        // streamData.unshift(['Timestamp', selectedConsumption])
+
+        return [['timestamp', 'energy'], ...streamData];
+    };
 
     return (
         <>
@@ -741,12 +1032,25 @@ const ExploreByBuildings = () => {
                             <Spinner className="m-2" color={'primary'} />
                         </div>
                     ) : (
+                    <>
+                        <Row>
+                            <Col lg={11}></Col>
+                            <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
+                                    <CSVLink
+                                                    style={{ color: 'black' }}
+                                                    className='btn btn-white d-inline btnHover font-weight-bold'
+                                                    filename={`explore-building-energy-${new Date().toUTCString()}.csv`}
+                                                    target="_blank"
+                                                    data={getCSVLinkChartData()}> <FontAwesomeIcon icon={faDownload} size="md" /></CSVLink>
+                            </Col>
+                        </Row>
                         <BrushChart
                             seriesData={seriesData}
                             optionsData={optionsData}
                             seriesLineData={seriesLineData}
                             optionsLineData={optionsLineData}
                         />
+                        </>
                     )}
                 </div>
             </Row>
@@ -755,8 +1059,8 @@ const ExploreByBuildings = () => {
                 <Col lg={11} style={{display:"flex",justifyContent:"flex-start"}}>
                 <div className="explore-search-filter-style">
                     <div className="explore-search mr-2">
-                        <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
-                        <input className="search-box ml-2" type="search" name="search" placeholder="Search..." />
+                        <input className="search-box ml-2" type="search" name="search" placeholder="Search..."  onChange={(e)=>{setBuildingSearchTxt(e.target.value)}}/>
+                        <button style={{border:"none",backgroundColor:"#fff"}} onClick={(e)=>{handleBuildingSearch(e)}}><FontAwesomeIcon icon={faMagnifyingGlass} size="md" /></button>
                     </div>
                     <div>
                         <MultiSelect
@@ -771,7 +1075,94 @@ const ExploreByBuildings = () => {
                             ClearSelectedIcon={null}
                         />
                     </div>
-
+                    
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="consumption"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}>{consumptionTxt===""? `All ${el.label}`:consumptionTxt} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value);setConsumptionTxt('');}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setAPIFlag(!APIFlag);setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);}}>kWh Used</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minConValue}/>  <input className='pop-inputbox' type="text" value={maxConValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={0.01} MIN={0} range={[minConValue, maxConValue]}  MAX={((topEnergyConsumption/1000)+0.5).toFixed(3)} onSelectionChange={handleInput}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                     {selectedOptions.map((el, index) => {
+                        if(el.value!=="change"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                 <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text'>Change Threshold</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minPerValue}/>  <input className='pop-inputbox' type="text" value={maxPerValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={1} MIN={0} range={[minPerValue, maxPerValue]}  MAX={100} onSelectionChange={handleInputPer}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
+                    {selectedOptions.map((el, index) => {
+                        if(el.value!=="sq_ft"){
+                            return
+                        }
+                        return (                        
+                        <> 
+                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                            <span
+                            className=""
+                            style={{ height: '36px', marginLeft: "1rem" }}>
+                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}>{sq_ftTxt===""? `All ${el.label}`:sq_ftTxt}</Dropdown.Toggle>
+                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
+                            </span>
+                            <Dropdown.Menu className="dropdown-lg p-3">
+                                <div style={{margin:"1rem"}}>
+                                    <div>
+                                    <a className='pop-text' onClick={(e)=>{setSq_FtFlag(!Sq_FtFlag);setSq_FtTxt(`${minSq_FtValue} Sq.ft. - ${maxSq_FtValue} Sq.ft.`);}}>Square Footage</a>
+                                    </div>
+                                    <div className='pop-inputbox-wrapper'>
+                                        <input className='pop-inputbox' type="text" value={minSq_FtValue}/>  <input className='pop-inputbox' type="text" value={maxSq_FtValue}/>
+                                    </div>
+                                    <div style={{marginTop:"2rem"}}>
+                                        <RangeSlider name='consumption' STEP={1} MIN={0} range={[minSq_FtValue, maxSq_FtValue]}  MAX={10000} onSelectionChange={handleSq_FtInput}/>
+                                    </div>
+                                </div>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        </>);
+                    })}
                     {selectedOptions.map((el, index) => {
                         if(el.value!=="building_type"){
                             return
@@ -786,56 +1177,51 @@ const ExploreByBuildings = () => {
                                 <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
                             </span>
                             <Dropdown.Menu className="dropdown-lg p-3">
-                            <MultiSelect
-                            options={buildingTypeOptions}
-                            value={selectedBuildingOptions}
-                            onChange={setSelectedBuildingOptions}
-                            labelledBy="Columns"
-                            className="column-filter-styling"
-                            // valueRenderer={() => {
-                            //     return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
-                            // }}
-                            ClearSelectedIcon={null}
-                        />
+                            <div>
+                                    <div className='m-1'>
+                                        <div className="explore-search mr-2">
+                                            <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
+                                            <input className="search-box ml-2" type="search" name="search" placeholder="Search" onChange={(e)=>{handleBuildingTypeSearch(e)}}/>
+                                        </div>
+                                        <div className={buildingTypeOptions.length>4?`hScroll`:`hHundredPercent`}>
+                                        <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id="buildingType" onClick={(e)=>{handleAllBuilgingType(e)}}/>
+                                                <span>Select All</span>
+                                                </div>
+                                            </div>
+                                        {buildingTypeOptions.map((record)=>{
+                                        
+                                        return(
+                                            <div className='floor-box'>
+                                                <div>
+                                                <input type="checkbox" className='mr-2' id={record.label} value={record.label} onClick={(e)=>{handleSelectedBuildingType(e)}}/>
+                                                <span>{record.label}</span>
+                                                </div>
+                                            </div>
+                                        )
+                                        
+                                      })}
+                                      </div>
+                                    </div>
+                                </div>
+                            
                             </Dropdown.Menu>
                         </Dropdown>
                         </>);
                     })}
-                    {selectedOptions.map((el, index) => {
-                        if(el.value==="building_type"){
-                            return
-                        }
-                        return (                        
-                        <> 
-                        <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover">
-                            <span
-                            className=""
-                            style={{ height: '36px', marginLeft: "1rem" }}>
-                                <Dropdown.Toggle className='font-weight-bold' id="PopoverClick" type="button" style={{border:"none", backgroundColor:"white", color:"black"}}> All {el.label} </Dropdown.Toggle>
-                                <button style={{border:"none", backgroundColor:"white"}} onClick={(e)=>{handleCloseFilter(e,el.value)}}><i className="uil uil-multiply"></i></button>
-                            </span>
-                            {/* <Dropdown.Menu className="dropdown-lg p-3">
-                            <MultiSelect
-                            options={buildingTypeOptions}
-                            value={selectedBuildingOptions}
-                            onChange={setSelectedBuildingOptions}
-                            labelledBy="Columns"
-                            className="column-filter-styling"
-                            // valueRenderer={() => {
-                            //     return <><i className="uil uil-plus mr-1 " style={{color:"black", fontSize:"1rem"}}></i> <b style={{color:"black", fontSize:"1rem"}}>Add Filter</b></>;
-                            // }}
-                            ClearSelectedIcon={null}
-                        />
-                        </Dropdown.Menu>*/}
-                        </Dropdown>
-                        </>);
-                    })}
+                    
 
                 </div>
                 </Col>
                 <Col lg={1} style={{display:"flex",justifyContent:"flex-end"}}>
                 <button className='btn btn-white d-inline btnHover font-weight-bold mr-2'> <FontAwesomeIcon icon={faTableColumns} size="md" /></button>
-                <button className='btn btn-white d-inline btnHover font-weight-bold'> <FontAwesomeIcon icon={faDownload} size="md" /></button>
+                <CSVLink
+                                                    style={{ color: 'black' }}
+                                                    className='btn btn-white d-inline btnHover font-weight-bold'
+                                                    filename={`explore-building-list-${new Date().toUTCString()}.csv`}
+                                                    target="_blank"
+                                                    data={getCSVLinkData()}> <FontAwesomeIcon icon={faDownload} size="md" /></CSVLink>
                 </Col>
             </Row>
            

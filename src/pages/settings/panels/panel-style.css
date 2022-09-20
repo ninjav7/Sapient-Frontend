@@ -55,6 +55,7 @@
     justify-content: center;
     align-items: center;
     margin-left: 350px;
+    margin-bottom: 50px;
 }
 
 .panel-first-row-style {
@@ -347,3 +348,10 @@
     color: black !important;
     font-weight: 600 !important;
 }
+
+.dropdownScrollaleDisable {
+    overflow: hidden;
+}
+.dropdownScrollaleDisable::-webkit-scrollbar {
+    display: none;
+  } 

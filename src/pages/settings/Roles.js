@@ -100,6 +100,7 @@ const Roles = () => {
 
     const [roleDataList, setRoleDataList] = useState([]);
     const [userPermission] = useAtom(userPermissionData);
+    const [permissionNameSearch, setPermissionNameSearch] = useState('');
 
     const getPermissionRoleFunc = async () => {
         try {
@@ -109,7 +110,8 @@ const Roles = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            await axios.get(`${BaseUrl}${getPermissionRole}`, { headers: header }).then((res) => {
+            let params = `?permission_name=${permissionNameSearch}`;
+            await axios.get(`${BaseUrl}${getPermissionRole}${params}`, { headers: header }).then((res) => {
                 setRoleDataList(res.data.data);
             });
         } catch (err) {
@@ -119,7 +121,7 @@ const Roles = () => {
 
     useEffect(() => {
         getPermissionRoleFunc();
-    }, []);
+    }, [permissionNameSearch]);
 
     return (
         <React.Fragment>
@@ -158,8 +160,10 @@ const Roles = () => {
                                     type="search"
                                     name="search"
                                     placeholder="Search..."
-                                    // value={searchSensor}
-                                    // onChange={handleSearchChange}
+                                    value={permissionNameSearch}
+                                    onChange={(e) => {
+                                        setPermissionNameSearch(e.target.value);
+                                    }}
                                 />
                             </div>
                         </div>

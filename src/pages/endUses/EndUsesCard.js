@@ -48,7 +48,7 @@ const EndUsesCard = ({
                         Total Consumption
                     </p>
                     <p className="card-text usage-card-content-style">
-                        {(usage.energy_consumption.now / 1000).toLocaleString(undefined, { maximumFractionDigits: 2 })}{' '}
+                        {(usage.energy_consumption.now / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}{' '}
                         <span className="card-unit-style ml-1">kWh</span>
                     </p>
                     {lastPeriodPerTotalHrsNormal && (
@@ -113,7 +113,7 @@ const EndUsesCard = ({
                     </p>
                     <p className="card-text usage-card-content-style">
                         {(usage.after_hours_energy_consumption.now / 1000).toLocaleString(undefined, {
-                            maximumFractionDigits: 2,
+                            maximumFractionDigits: 0,
                         })}{' '}
                         <span className="card-unit-style">&nbsp;kWh</span>
                     </p>

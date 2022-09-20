@@ -323,7 +323,7 @@ const ActiveDevicesTable = ({
                                             </td>
                                         )}
                                         {userPermission?.user_role === 'admin' ||
-                                        userPermission?.permissions?.permissions?.advanced_smart_plugs_permission
+                                        userPermission?.permissions?.permissions?.advanced_active_device_permission
                                             ?.edit ? (
                                             <Link
                                                 to={{
@@ -629,6 +629,9 @@ const ActiveDevices = () => {
         const fetchActiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
+                setActiveDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -686,6 +689,9 @@ const ActiveDevices = () => {
         const fetchActiveDeviceData = async () => {
             try {
                 setIsDeviceProcessing(true);
+                setOnlineDeviceData([]);
+                setOfflineDeviceData([]);
+                setActiveDeviceData([]);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -767,7 +773,7 @@ const ActiveDevices = () => {
                                     pathname: `/settings/active-devices/provision`,
                                 }}>
                                 {userPermission?.user_role === 'admin' ||
-                                userPermission?.permissions?.permissions?.advanced_smart_plugs_permission?.create ? (
+                                userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
                                     <button
                                         type="button"
                                         className="btn btn-md btn-primary font-weight-bold"
