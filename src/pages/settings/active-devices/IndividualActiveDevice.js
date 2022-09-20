@@ -26,12 +26,16 @@ import { Cookies } from 'react-cookie';
 import SocketLogo from '../../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../../assets/images/active-devices/Union.svg';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import 'react-loading-skeleton/dist/skeleton.css';
 import './style.css';
 
 const IndividualActiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     let history = useHistory();
 
@@ -257,10 +261,6 @@ const IndividualActiveDevice = () => {
 
     const fetchSensorGraphData = async (id) => {
         try {
-            let endDate = new Date(); // today
-            let startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
-
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',

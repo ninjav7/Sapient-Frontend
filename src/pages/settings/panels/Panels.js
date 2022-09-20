@@ -33,7 +33,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr className='mouse-pointer'>
+                        <tr className="mouse-pointer">
                             {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
                             {selectedOptions.some((record) => record.value === 'type') && <th>Type</th>}
                             {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
@@ -79,7 +79,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                         <tbody>
                             {generalPanelData.map((record, index) => {
                                 return (
-                                    <tr key={record.panel_id} className='mouse-pointer'>
+                                    <tr key={record.panel_id} className="mouse-pointer">
                                         {selectedOptions.some((record) => record.value === 'name') && (
                                             <td className="font-weight-bold panel-name">
                                                 <Link
@@ -99,7 +99,7 @@ const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) 
                                             <td className="">{record.location}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'breakers') && (
-                                            <td className="font-weight-bold">{record.breakers}</td>
+                                            <td className="font-weight-bold">{record.breakers_linked}</td>
                                         )}
                                         {selectedOptions.some((record) => record.value === 'parent') && (
                                             <>
@@ -148,6 +148,7 @@ const Panels = () => {
     useEffect(() => {
         const fetchPanelsData = async () => {
             try {
+                setPanelData([]);
                 setIsPanelDataFetched(true);
                 let header = {
                     'Content-Type': 'application/json',

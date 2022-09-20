@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { Row, Col } from 'reactstrap';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar } from '@fortawesome/pro-regular-svg-icons';
 import { DateRangeStore } from '../store/DateRangeStore';
