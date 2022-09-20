@@ -1,30 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Progress,
-} from 'reactstrap';
+import {Row, Col, Card, CardBody, Table} from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+//import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings, sortCompareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
-import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';

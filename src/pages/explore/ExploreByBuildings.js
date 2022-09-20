@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import {
-    Row,
-    Col,
-    Input,
-    Card,
-    CardBody,
-    Table,
-    Collapse,
-    UncontrolledPopover,
-    PopoverBody,
-    PopoverHeader,
-} from 'reactstrap';
+// import DatePicker from 'react-datepicker';
+import { Row, Col, Card, CardBody, Table} from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
@@ -19,7 +8,7 @@ import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload, faKissWinkHeart } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Spinner } from 'reactstrap';
@@ -29,10 +18,10 @@ import { Line } from 'rc-progress';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
-import ApexCharts from 'apexcharts';
+// import ApexCharts from 'apexcharts';
 import RangeSlider from './RangeSlider';
 import './style.css';
-import { ConstructionOutlined } from '@mui/icons-material';
+// import { ConstructionOutlined } from '@mui/icons-material';
 import moment from 'moment';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
