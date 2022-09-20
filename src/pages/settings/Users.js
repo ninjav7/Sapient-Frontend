@@ -178,34 +178,6 @@ const Users = () => {
         setUserObj(obj);
     };
 
-    const saveUserData = async () => {
-        try {
-            setIsProcessing(true);
-
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let userData = Object.assign({}, userObj);
-
-            await axios
-                .post(`${BaseUrl}${addMemberUser}`, userData, {
-                    headers: header,
-                })
-                .then((res) => {
-                    let response = res.data;
-                    setGeneratedUserId(response.id);
-                });
-            setIsProcessing(false);
-            handleClose();
-        } catch (error) {
-            setIsProcessing(false);
-            console.log('Failed to Create Panel');
-        }
-    };
-
     const getUsersList = async () => {
         try {
             setIsUserDataFetched(true);
@@ -227,6 +199,35 @@ const Users = () => {
             setDataFetched(true);
             setIsUserDataFetched(false);
             console.log('Failed to fetch End Use Data');
+        }
+    };
+
+    const saveUserData = async () => {
+        try {
+            setIsProcessing(true);
+
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let userData = Object.assign({}, userObj);
+
+            await axios
+                .post(`${BaseUrl}${addMemberUser}`, userData, {
+                    headers: header,
+                })
+                .then((res) => {
+                    let response = res.data;
+                    setGeneratedUserId(response.id);
+                    getUsersList();
+                });
+            setIsProcessing(false);
+            handleClose();
+        } catch (error) {
+            setIsProcessing(false);
+            console.log('Failed to Create Panel');
         }
     };
 

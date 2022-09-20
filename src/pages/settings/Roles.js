@@ -13,7 +13,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
 
-const RoleTable = ({ roleDataList }) => {
+const RoleTable = ({ roleDataList, permissionData, setProcessing }) => {
     const [userPermission] = useAtom(userPermissionData);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const RoleTable = ({ roleDataList }) => {
                             <th>Total Users</th>
                         </tr>
                     </thead>
-                    {roleDataList?.length === 0 ? (
+                    {setProcessing ? (
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
                                 <tr>
@@ -65,26 +65,32 @@ const RoleTable = ({ roleDataList }) => {
                             </SkeletonTheme>
                         </tbody>
                     ) : (
-                        <tbody>
-                            {roleDataList.map((record, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <th scope="row">
-                                            {/* {userPermission?.permissions?.permissions?.account_roles_permission
+                        <>
+                            {permissionData ? (
+                                <tbody>
+                                    {roleDataList.map((record, index) => {
+                                        return (
+                                            <tr key={index}>
+                                                <th scope="row">
+                                                    {/* {userPermission?.permissions?.permissions?.account_roles_permission
                                                 ?.edit && ( */}
-                                            <Link to={`/settings/roles/${record?._id}`}>
-                                                <a className="buildings-name">{record.name}</a>
-                                            </Link>
-                                            {/* )}
+                                                    <Link to={`/settings/roles/${record?._id}`}>
+                                                        <a className="buildings-name">{record.name}</a>
+                                                    </Link>
+                                                    {/* )}
                                             {!userPermission?.permissions?.permissions?.account_roles_permission
                                                 ?.edit && <a className="buildings-name">{record.name}</a>} */}
-                                        </th>
-                                        <td className="font-weight-bold">-</td>
-                                        <td className="font-weight-bold">{record.permissions_users}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
+                                                </th>
+                                                <td className="font-weight-bold">-</td>
+                                                <td className="font-weight-bold">{record.permissions_users}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            ) : (
+                                <span style={{ marginTop: '10px' }}>You don't have the permission to this page</span>
+                            )}
+                        </>
                     )}
                 </Table>
             </CardBody>
@@ -101,8 +107,11 @@ const Roles = () => {
     const [roleDataList, setRoleDataList] = useState([]);
     const [userPermission] = useAtom(userPermissionData);
     const [permissionNameSearch, setPermissionNameSearch] = useState('');
+    const [permissionData, setPermissionData] = useState(false);
+    const [setProcessing, setSetProcessing] = useState(false);
 
     const getPermissionRoleFunc = async () => {
+        setSetProcessing(true);
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -113,9 +122,13 @@ const Roles = () => {
             let params = `?permission_name=${permissionNameSearch}`;
             await axios.get(`${BaseUrl}${getPermissionRole}${params}`, { headers: header }).then((res) => {
                 setRoleDataList(res.data.data);
+                setPermissionData(true);
+                setSetProcessing(false);
             });
         } catch (err) {
             console.log(err);
+
+            setSetProcessing(false);
         }
     };
 
@@ -173,7 +186,11 @@ const Roles = () => {
 
             <Row>
                 <Col lg={6}>
-                    <RoleTable roleDataList={roleDataList} />
+                    <RoleTable
+                        roleDataList={roleDataList}
+                        permissionData={permissionData}
+                        setProcessing={setProcessing}
+                    />
                 </Col>
             </Row>
         </React.Fragment>

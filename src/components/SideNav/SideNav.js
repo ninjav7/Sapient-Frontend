@@ -17,6 +17,7 @@ const SideNav = () => {
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');
     const [userPermissionListGeneral, setUserPermissionListGeneral] = useState('');
     const [userPermissionListUsers, setUserPermissionListUsers] = useState('');
+    const [userPermissionListRoles, setUserPermissionListRoles] = useState('');
 
     const [buildingPermissionDetails, setBuildingPermissionDetails] = useState('');
     const [buildingPermissionEquipments, setBuildingPermissionEquipments] = useState('');
@@ -35,6 +36,9 @@ const SideNav = () => {
             }
             if (!userPermission?.permissions?.permissions?.account_user_permission?.view) {
                 setUserPermissionListUsers('/settings/users');
+            }
+            if (!userPermission?.permissions?.permissions?.account_roles_permission?.view) {
+                setUserPermissionListRoles('/settings/roles');
             }
             if (!userPermission?.permissions?.permissions?.building_details_permission?.view) {
                 setBuildingPermissionDetails('/settings/general');
@@ -58,6 +62,9 @@ const SideNav = () => {
             if (userPermission?.permissions?.permissions?.account_user_permission?.view) {
                 setUserPermissionListUsers('');
             }
+            if (userPermission?.permissions?.permissions?.account_roles_permission?.view) {
+                setUserPermissionListRoles('');
+            }
             if (userPermission?.permissions?.permissions?.building_details_permission?.view) {
                 setBuildingPermissionDetails('');
             }
@@ -70,10 +77,12 @@ const SideNav = () => {
             if (userPermission?.permissions?.permissions?.building_panels_permission?.view) {
                 setBuildingPermissionPanels('');
             }
+
             if (userPermission?.permissions?.permissions === 'All Permissions') {
                 setUserPermissionListBuildings('');
                 setUserPermissionListGeneral('');
                 setUserPermissionListUsers('');
+                setUserPermissionListRoles('');
                 setBuildingPermissionDetails('');
                 setBuildingPermissionEquipments('');
                 setBuildingPermissionLayouts('');
@@ -84,12 +93,15 @@ const SideNav = () => {
             setUserPermissionListBuildings('');
             setUserPermissionListGeneral('');
             setUserPermissionListUsers('');
+            setUserPermissionListRoles('');
             setBuildingPermissionDetails('');
             setBuildingPermissionEquipments('');
             setBuildingPermissionLayouts('');
             setBuildingPermissionPanels('');
         }
     }, [userPermission]);
+
+    console.log('userPermissionListRoles', userPermissionListRoles);
 
     useEffect(() => {
         let activeSideRoutes = [];
@@ -99,6 +111,7 @@ const SideNav = () => {
                     item?.path !== userPermissionListBuildings &&
                     item?.path !== userPermissionListGeneral &&
                     item?.path !== userPermissionListUsers &&
+                    item?.path !== userPermissionListRoles &&
                     item?.path !== buildingPermissionDetails &&
                     item?.path !== buildingPermissionEquipments &&
                     item?.path !== buildingPermissionLayouts &&
@@ -117,6 +130,7 @@ const SideNav = () => {
         userPermissionListBuildings,
         userPermissionListGeneral,
         userPermissionListUsers,
+        userPermissionListRoles,
         buildingPermissionDetails,
         buildingPermissionEquipments,
         buildingPermissionLayouts,

@@ -698,40 +698,45 @@ const General = () => {
                     <div className="building-heading-container">
                         <div className="heading-style">General Building Settings</div>
 
-                        <div>
-                            {isbuildingDetailsFetched ? (
-                                <Skeleton count={1} height={40} width={150} />
-                            ) : (
-                                <>
-                                    <button
-                                        type="button"
-                                        className="btn btn-default buildings-cancel-style"
-                                        onClick={() => {
-                                            setIsEditing(false);
-                                            setShouldBlockNavigation(false);
-                                            fetchBuildingData();
-                                        }}>
-                                        Cancel
-                                    </button>
-                                    {loadButton ? (
-                                        <Button color="primary" disabled>
-                                            <Spinner size="sm">Loading...</Spinner>
-                                            <span> Saving</span>
-                                        </Button>
-                                    ) : (
+                        {userPermission?.user_role === 'admin' ||
+                        userPermission?.permissions?.permissions?.building_details_permission?.edit ? (
+                            <div>
+                                {isbuildingDetailsFetched ? (
+                                    <Skeleton count={1} height={40} width={150} />
+                                ) : (
+                                    <>
                                         <button
                                             type="button"
-                                            className="btn btn-primary buildings-save-style ml-3"
+                                            className="btn btn-default buildings-cancel-style"
                                             onClick={() => {
-                                                setLoadButton(true);
-                                                saveBuildingSettings();
+                                                setIsEditing(false);
+                                                setShouldBlockNavigation(false);
+                                                fetchBuildingData();
                                             }}>
-                                            Save
+                                            Cancel
                                         </button>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                                        {loadButton ? (
+                                            <Button color="primary" disabled>
+                                                <Spinner size="sm">Loading...</Spinner>
+                                                <span> Saving</span>
+                                            </Button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary buildings-save-style ml-3"
+                                                onClick={() => {
+                                                    setLoadButton(true);
+                                                    saveBuildingSettings();
+                                                }}>
+                                                Save
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        ) : (
+                            ''
+                        )}
                     </div>
                 </Col>
             </Row>
