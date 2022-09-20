@@ -46,8 +46,10 @@ const PortfolioOverview = () => {
     const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [daysCount, setDaysCount] = useState(1);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
