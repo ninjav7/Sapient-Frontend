@@ -231,9 +231,46 @@ const EquipChartModal = ({
             },
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
-                format: 'MM/dd HH:mm',
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value ;
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${(
+                            series[seriesIndex][dataPointIndex] / 1000
+                        ).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ HH:mm`
+                        )}</div>
+                    </div>`;
             },
         },
     });
@@ -603,9 +640,9 @@ const EquipChartModal = ({
             return;
         }
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipmentData);
+            // console.log(equipmentData);
             if (equipmentData !== null) {
-                console.log(equipmentData.device_type);
+                // console.log(equipmentData.device_type);
                 if (
                     equipmentData.device_type === 'passive' ||
                     equipmentData.device_id === '' ||
@@ -627,8 +664,8 @@ const EquipChartModal = ({
                     let sensorId = response.find(
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
-                    console.log(sensorId);
-                    setSensorData(sensorId);
+                    // console.log(sensorId);
+                    // setSensorData(sensorId);
                 });
             } catch (error) {
                 console.log(error);

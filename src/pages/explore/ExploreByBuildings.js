@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import {
-    Row,
-    Col,
-    Input,
-    Card,
-    CardBody,
-    Table,
-    Collapse,
-    UncontrolledPopover,
-    PopoverBody,
-    PopoverHeader,
-} from 'reactstrap';
+// import DatePicker from 'react-datepicker';
+import { Row, Col, Card, CardBody, Table} from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
@@ -19,7 +8,7 @@ import { BaseUrl, getExploreBuildingList, getExploreBuildingChart } from '../../
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faTableColumns, faDownload, faKissWinkHeart } from '@fortawesome/pro-regular-svg-icons';
+import { faMagnifyingGlass, faTableColumns, faDownload } from '@fortawesome/pro-regular-svg-icons';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Spinner } from 'reactstrap';
@@ -29,10 +18,10 @@ import { Line } from 'rc-progress';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { useHistory } from 'react-router-dom';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
-import ApexCharts from 'apexcharts';
+// import ApexCharts from 'apexcharts';
 import RangeSlider from './RangeSlider';
 import './style.css';
-import { ConstructionOutlined } from '@mui/icons-material';
+// import { ConstructionOutlined } from '@mui/icons-material';
 import moment from 'moment';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
@@ -70,7 +59,7 @@ const ExploreBuildingsTable = ({
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
                 arr.push(exploreTableData[i].building_id);
-                console.log(arr);
+                // console.log(arr);
 
                 var checking = document.getElementById(exploreTableData[i].building_id);
                 checking.checked = ischecked.checked;
@@ -88,7 +77,7 @@ const ExploreBuildingsTable = ({
     const handleSelection = (e, id) => {
         var isChecked = document.getElementById(id);
         if (isChecked.checked == true) {
-            console.log(id);
+            // console.log(id);
             setSelectedBuildingId(id);
         } else {
             setRemovedBuildingId(id);
@@ -427,7 +416,7 @@ const ExploreByBuildings = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             marker: {
@@ -459,7 +448,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3) + ' kWH';
+                    return (value / 1000).toFixed(3);
                 },
             },
         },
@@ -511,7 +500,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             tickAmount: 2,
@@ -596,9 +585,9 @@ const ExploreByBuildings = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData[0]);
+                        // console.log(responseData[0]);
                         setExploreTableData(responseData);
-                        console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
+                        // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
                         set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
@@ -660,14 +649,14 @@ const ExploreByBuildings = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData);
+                        // console.log(responseData);
                         let data = responseData.data;
-                        console.log(data);
+                        // console.log(data);
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
                             return item.building_id === selectedBuildingId;
                         });
-                        console.log(arr);
+                        // console.log(arr);
                         let exploreData = [];
                         // data.forEach((record) => {
                         //     if (record.building_name !== null) {
@@ -676,10 +665,10 @@ const ExploreByBuildings = () => {
                             data: data,
                             id: arr[0].building_id,
                         };
-                        console.log(recordToInsert);
+                        // console.log(recordToInsert);
 
-                        console.log(recordToInsert);
-                        console.log(seriesData);
+                        // console.log(recordToInsert);
+                        // console.log(seriesData);
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedBuildingId('');
@@ -702,7 +691,7 @@ const ExploreByBuildings = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeBuildingId;
         });
-        console.log(arr1);
+        // console.log(arr1);
         setSeriesData(arr1);
         setSeriesLineData(arr1);
     }, [removeBuildingId]);
@@ -729,14 +718,14 @@ const ExploreByBuildings = () => {
                 )
                 .then((res) => {
                     let responseData = res.data;
-                    console.log(responseData);
+                    // console.log(responseData);
                     let data = responseData.data;
-                    console.log(data);
+                    // console.log(data);
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.building_id === id;
                     });
-                    console.log(arr);
+                    // console.log(arr);
                     let exploreData = [];
                     // data.forEach((record) => {
                     //     if (record.building_name !== null) {
@@ -745,9 +734,9 @@ const ExploreByBuildings = () => {
                         data: data,
                         id: arr[0].building_id,
                     };
-                    console.log(recordToInsert);
+                    // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
-                    console.log(dataarr);
+                    // console.log(dataarr);
                     setAllBuildingData(dataarr);
                 });
         } catch (error) {
@@ -770,9 +759,9 @@ const ExploreByBuildings = () => {
         if (allBuildingData.length === 0) {
             return;
         }
-        console.log('All Building Data ', allBuildingData);
-        console.log(allBuildingData.length);
-        console.log(exploreTableData.length);
+        // console.log('All Building Data ', allBuildingData);
+        // console.log(allBuildingData.length);
+        // console.log(exploreTableData.length);
         setSeriesData(allBuildingData);
         setSeriesLineData(allBuildingData);
     }, [allBuildingData]);
@@ -811,7 +800,7 @@ const ExploreByBuildings = () => {
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
-        console.log(arr);
+        // console.log(arr);
         setSelectedOptions(arr);
     };
 
@@ -889,7 +878,7 @@ const ExploreByBuildings = () => {
     };
 
     const handleBuildingSearch = (e) => {
-        console.log(buildingSearchTxt);
+        // console.log(buildingSearchTxt);
 
         const exploreDataFetch = async () => {
             try {
@@ -911,9 +900,9 @@ const ExploreByBuildings = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData[0]);
+                        // console.log(responseData[0]);
                         setExploreTableData(responseData);
-                        console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
+                        // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
                         setTopEnergyConsumption(responseData[0].consumption.now);
                         set_minConValue(0.0);
                         set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
@@ -1243,6 +1232,7 @@ const ExploreByBuildings = () => {
                                                             type="search"
                                                             name="search"
                                                             placeholder="Search"
+                                                            autocomplete="off"
                                                             onChange={(e) => {
                                                                 handleBuildingTypeSearch(e);
                                                             }}
