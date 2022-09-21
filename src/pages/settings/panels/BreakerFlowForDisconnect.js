@@ -700,10 +700,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const addDevideIdType = () => {
         passiveDeviceData.map((item) => {
-            setDeviceIdDataLevelOne((el) => [
-                ...el,
-                { value: `${item?.value}`, label: `${item?.label}`, equipment_id: `${item?.equipments_id}` },
-            ]);
+            setDeviceIdDataLevelOne((el) => [...el, { value: `${item?.value}`, label: `${item?.label}` }]);
         });
     };
 
@@ -724,19 +721,37 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         sensorData.map((item) => {
             setSensorDataSearch((el) => [
                 ...el,
-                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
             ]);
         });
         doubleSensorData.map((item) => {
             setDoubleSensorDataSearch((el) => [
                 ...el,
-                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
             ]);
         });
         tripleSensorData.map((item) => {
             setTripleSensorDataSearch((el) => [
                 ...el,
-                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+                {
+                    value: `${item?.id}`,
+                    label: `${item?.name}`,
+                    breaker_id: `${item?.breaker_id}`,
+                    id: `${item?.id}`,
+                    device_linked_id: `${item?.device_linked_id}`,
+                },
             ]);
         });
     };
@@ -994,14 +1009,16 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
-                                                    defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
-                                                    // value={option}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorData(e.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
                                                     }}
                                                     // onInputChange={handleInputChange}
+
                                                     className="font-weight-bold"
                                                 />
                                             </Form.Group>
@@ -1053,6 +1070,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
@@ -1114,8 +1134,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     placeholder="Select Device"
                                                     name="select"
                                                     isSearchable={true}
-                                                    defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    defaultValue={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'double');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
@@ -1174,6 +1196,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
@@ -1231,6 +1256,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForDouble(e.value);
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
@@ -1289,8 +1317,10 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
                                                         options={doubleSensorDataSearch}
+                                                        value={doubleSensorDataSearch.filter((option) => {
+                                                            return option.value === doubleBreakerData?.data?.sensor_id;
+                                                        })}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1305,6 +1335,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         }
                                                     />
                                                 )}
+                                                {}
                                             </Form.Group>
                                         </div>
                                     </>
@@ -1359,6 +1390,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === breakerData.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchSensorDataForSelectionOne(e.value, 'triple');
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
@@ -1420,6 +1454,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
+                                                        value={sensorDataSearch.filter(
+                                                            (option) => option.value === breakerData.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(breakerData.sensor_id, e.value);
                                                             handleSingleBreakerChange(id, 'sensor_id', e.value);
@@ -1477,6 +1514,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === doubleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForDouble(e.value);
                                                         handleDoubleBreakerChange(id, 'device_id', e.value);
@@ -1535,8 +1575,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
                                                         options={doubleSensorDataSearch}
+                                                        value={doubleSensorDataSearch.filter(
+                                                            (option) =>
+                                                                option.value === doubleBreakerData?.data?.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1601,6 +1644,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    value={deviceIdDataLevelOne.filter(
+                                                        (option) => option.value === tripleBreakerData?.data?.device_id
+                                                    )}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorDataForTriple(e.value);
                                                         handleTripleBreakerChange(id, 'device_id', e.value);
@@ -1659,8 +1705,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         placeholder="Select Sensor"
                                                         name="select"
                                                         isSearchable={true}
-                                                        defaultValue={'Select Device'}
                                                         options={tripleSensorDataSearch}
+                                                        value={tripleSensorDataSearch.filter(
+                                                            (option) =>
+                                                                option.value === tripleBreakerData?.data?.sensor_id
+                                                        )}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 tripleBreakerData?.data?.sensor_id,
@@ -1716,7 +1765,9 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                     id="userState"
                                     placeholder="Select Equipment"
                                     isSearchable={true}
-                                    defaultValue={'Select Equipment'}
+                                    value={equipmentDataSearch.filter(
+                                        (option) => option.value === breakerData.equipment_link[0]
+                                    )}
                                     options={equipmentDataSearch}
                                     onChange={(e) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);
