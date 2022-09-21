@@ -504,7 +504,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
@@ -597,7 +597,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
@@ -1019,7 +1019,8 @@ const EditBreakerPanel = () => {
                                                         type="number"
                                                         name="breakers"
                                                         id="breakers"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers_linked}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
@@ -1038,7 +1039,8 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,

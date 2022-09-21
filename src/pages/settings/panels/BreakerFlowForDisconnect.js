@@ -21,6 +21,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [breakerObj, setBreakerObj] = useState(data);
 
     const [breakerData, setBreakerData] = useState(data);
+
+    console.log('data', data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
 
@@ -40,6 +42,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [doubleSensorData, setDoubleSensorData] = useState([]);
     const [tripleSensorData, setTripleSensorData] = useState([]);
 
+    console.log('tripleSensorData', tripleSensorData);
+
     const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
     const [isSensorDataFetchedForTriple, setIsSensorDataFetchedForTriple] = useState(false);
@@ -52,20 +56,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [passiveDevicePageNo, setPassiveDevicePageNo] = useState(1);
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
-    const [deviceIdDataNow, setdeviceIdDataNow] = useState([]);
-
-    const addDevideIdType = () => {
-        passiveDeviceData.map((item) => {
-            setdeviceIdDataNow((el) => [...el, { value: `${item?.value}`, label: `${item?.label}` }]);
-        });
-    };
-
-    useEffect(() => {
-        if (passiveDeviceData) {
-            addDevideIdType();
-        }
-    }, [passiveDeviceData]);
 
     const fetchSingleSensorList = async (deviceId) => {
         if (deviceId === null) {
@@ -327,7 +317,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then((res) => {
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${updateBreakers}${params}`, [breakerObj], { headers }).then((res) => {
                 setIsProcessing(false);
                 setTimeout(() => {
                     triggerBreakerAPI();
@@ -402,13 +393,16 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then((res) => {
-                setIsProcessing(false);
-                setTimeout(() => {
-                    triggerBreakerAPI();
-                }, 1000);
-                handleEditBreakerClose();
-            });
+            let params = `?building_id=${bldgId}`;
+            await axios
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
+                .then((res) => {
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
+                });
         } catch (error) {
             console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
@@ -500,8 +494,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                 }
             }
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
+                    headers,
+                })
                 .then((res) => {
                     setIsProcessing(false);
                     setTimeout(() => {
@@ -701,11 +698,43 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [deviceIdDataLevelOne, setDeviceIdDataLevelOne] = useState([]);
 
+    const addDevideIdType = () => {
+        passiveDeviceData.map((item) => {
+            setDeviceIdDataLevelOne((el) => [
+                ...el,
+                { value: `${item?.value}`, label: `${item?.label}`, equipment_id: `${item?.equipments_id}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (passiveDeviceData) {
+            addDevideIdType();
+        }
+    }, [passiveDeviceData]);
+
     const [sensorDataSearch, setSensorDataSearch] = useState([]);
+    const [doubleSensorDataSearch, setDoubleSensorDataSearch] = useState([]);
+    const [tripleSensorDataSearch, setTripleSensorDataSearch] = useState([]);
 
     const sensorDataFunc = () => {
+        setSensorDataSearch([]);
+        setDoubleSensorDataSearch([]);
+        setTripleSensorDataSearch([]);
         sensorData.map((item) => {
             setSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
+        });
+        doubleSensorData.map((item) => {
+            setDoubleSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
+        });
+        tripleSensorData.map((item) => {
+            setTripleSensorDataSearch((el) => [
                 ...el,
                 { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
             ]);
@@ -713,12 +742,12 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     useEffect(() => {
-        if (sensorData) {
+        if (sensorData || doubleSensorData) {
             sensorDataFunc();
         }
-    }, [sensorData]);
+    }, [sensorData, doubleSensorData, tripleSensorData]);
 
-    console.log('sensorDataSearch', sensorDataSearch);
+    console.log('doubleSensorDataSearch', doubleSensorDataSearch);
 
     const [equipmentDataSearch, setEquipmentDataSearch] = useState([]);
 
@@ -967,6 +996,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     isSearchable={true}
                                                     defaultValue={'Select Device'}
                                                     options={deviceIdDataLevelOne}
+                                                    // value={option}
                                                     onChange={(e) => {
                                                         fetchDeviceSensorData(e.value);
                                                         handleSingleBreakerChange(id, 'device_id', e.value);
@@ -975,6 +1005,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                     className="font-weight-bold"
                                                 />
                                             </Form.Group>
+                                            {/* {console.log('breakerData.device_id', breakerData.device_id)} */}
 
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Sensor #</Form.Label>
@@ -1023,11 +1054,8 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         defaultValue={'Select Device'}
                                                         options={sensorDataSearch}
                                                         onChange={(e) => {
-                                                            if (e.target.value === 'Select Sensor') {
-                                                                return;
-                                                            }
-                                                            handleLinkedSensor(breakerData.sensor_id, e.target.value);
-                                                            handleSingleBreakerChange(id, 'sensor_id', e.target.value);
+                                                            handleLinkedSensor(breakerData.sensor_id, e.value);
+                                                            handleSingleBreakerChange(id, 'sensor_id', e.value);
                                                         }}
                                                         className="font-weight-bold"
                                                         isOptionDisabled={(option) =>
@@ -1262,7 +1290,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1508,7 +1536,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1632,7 +1660,7 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={tripleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 tripleBreakerData?.data?.sensor_id,

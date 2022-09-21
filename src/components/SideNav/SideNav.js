@@ -11,7 +11,7 @@ const SideNav = () => {
     const [activeRoute, setActiveRoute] = useState([]);
     const parentRoute = ComponentStore.useState((s) => s.parent);
     const location = useLocation();
-    console.log(parentRoute);
+    // console.log(parentRoute);
 
     const [userPermission] = useAtom(userPermissionData);
     const [userPermissionListBuildings, setUserPermissionListBuildings] = useState('');

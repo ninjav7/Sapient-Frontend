@@ -1,38 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-    FormGroup,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button, Input} from 'reactstrap';
 import axios from 'axios';
-import {
-    BaseUrl,
-    generalEquipments,
-    getLocation,
-    equipmentType,
-    getEquipmentType,
-    addEquipmentType,
-    updateEquipmentType,
-    getEndUseId,
-    createEquipment,
-} from '../../services/Network';
+import { BaseUrl, equipmentType, getEquipmentType, addEquipmentType, updateEquipmentType, getEndUseId } from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import Form from 'react-bootstrap/Form';
-import { ChevronDown, Search } from 'react-feather';
+// import { ChevronDown, Search } from 'react-feather';
 import './style.css';
-import { TagsInput } from 'react-tag-input-component';
+// import { TagsInput } from 'react-tag-input-component';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';

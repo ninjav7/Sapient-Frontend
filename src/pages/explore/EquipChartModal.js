@@ -13,6 +13,7 @@ import {
     Input,
     FormGroup,
     Spinner,
+    ModalHeader,
 } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
@@ -68,7 +69,10 @@ const EquipChartModal = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const bldgId = localStorage.getItem('exploreBldId');
-    console.log('building id ', bldgId);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -84,7 +88,6 @@ const EquipChartModal = ({
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
-    const [startDate, endDate] = dateRange;
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
@@ -139,6 +142,7 @@ const EquipChartModal = ({
         },
     ];
     const [buildingAlert, setBuildingAlerts] = useState([]);
+    const [equipFilter, setEquipFilter] = useState(equipmentFilter);
     const dateValue = DateRangeStore.useState((s) => s.dateFilter);
     const [dateFilter, setDateFilter] = useState(dateValue);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
@@ -297,9 +301,46 @@ const EquipChartModal = ({
             },
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
             x: {
                 show: true,
-                format: 'MM/dd HH:mm',
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value;
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${(
+                            series[seriesIndex][dataPointIndex] / 1000
+                        ).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ HH:mm`
+                        )}</div>
+                    </div>`;
             },
         },
     });
@@ -395,7 +436,6 @@ const EquipChartModal = ({
 
     //let equipResult = [];
 
-    console.log(equipData);
     const handleSwitch = (val) => {
         switch (val) {
             case 'metrics':
@@ -460,24 +500,10 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-        const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
-            let startCustomDate = new Date();
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate());
-
-            setDateRange([startCustomDate, endCustomDate]);
-
-            DateRangeStore.update((s) => {
-                s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
-            });
-        };
-        setCustomDate(dateFilter);
-    }, [dateFilter]);
-
-    useEffect(() => {
+        console.log(equipmentFilter);
+        if (!equipmentFilter?.equipment_id) {
+            return;
+        }
         if (startDate === null) {
             return;
         }
@@ -489,55 +515,57 @@ const EquipChartModal = ({
         if (sensorData.length !== 0) {
             buildingAlertsData();
         }
-    }, [startDate, endDate, selectedConsumption]);
+        fetchEquipmentChart(equipmentFilter?.equipment_id);
+    }, [endDate, selectedConsumption]);
+    const fetchEquipmentChart = async (equipId) => {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?equipment_id=${equipId}&consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${equipmentGraphData}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+                    let data = response.data;
+                    let exploreData = [];
+                    let recordToInsert = {
+                        data: data,
+                        name: 'AHUs',
+                    };
+                    exploreData.push(recordToInsert);
+                    setDeviceData(exploreData);
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsEquipDataFetched(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsEquipDataFetched(false);
+        }
+    };
 
     useEffect(() => {
+        console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
 
-        const fetchEquipmentChart = async (equipId) => {
-            try {
-                setIsEquipDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?equipment_id=${equipId}&consumption=energy`;
-                await axios
-                    .post(
-                        `${BaseUrl}${equipmentGraphData}${params}`,
-                        {
-                            date_from: startDate,
-                            date_to: endDate,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data;
-                        let data = response.data;
-                        let exploreData = [];
-                        let recordToInsert = {
-                            data: data,
-                            name: 'AHUs',
-                        };
-                        exploreData.push(recordToInsert);
-                        setDeviceData(exploreData);
-                        setSeriesData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
-                        setIsEquipDataFetched(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                setIsEquipDataFetched(false);
-            }
-        };
         const fetchEquipmentYTDUsageData = async (equipId) => {
             try {
                 let headers = {
@@ -665,13 +693,14 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        //fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
         fetchEndUseData();
         fetchEquipTypeData();
         fetchLocationData();
     }, [equipmentFilter]);
+
     useEffect(() => {
         if (equipmentTypeData.lenght === 0) {
             return;
@@ -680,14 +709,15 @@ const EquipChartModal = ({
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
         setEquipResult(res);
     }, [equipmentTypeData]);
+
     useEffect(() => {
         if (equipmentData.length === 0) {
             return;
         }
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipmentData);
+            // console.log(equipmentData);
             if (equipmentData !== null) {
-                console.log(equipmentData.device_type);
+                // console.log(equipmentData.device_type);
                 if (
                     equipmentData.device_type === 'passive' ||
                     equipmentData.device_id === '' ||
@@ -709,8 +739,8 @@ const EquipChartModal = ({
                     let sensorId = response.find(
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
-                    console.log(sensorId);
-                    setSensorData(sensorId);
+                    // console.log(sensorId);
+                    // setSensorData(sensorId);
                 });
             } catch (error) {
                 console.log(error);
@@ -933,7 +963,7 @@ const EquipChartModal = ({
 
                             <Col lg={8}>
                                 <div className="model-sensor-filters">
-                                    <div className="">
+                                    <div>
                                         <Input
                                             type="select"
                                             name="select"
@@ -953,36 +983,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <div>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
-                                            className="select-button form-control form-control-md model-sensor-energy-filter"
-                                            onChange={(e) => {
-                                                setDateFilter(+e.target.value);
-                                            }}
-                                            defaultValue={dateFilter}>
-                                            {customDaySelect.map((el, index) => {
-                                                return <option value={el.value}>{el.label}</option>;
-                                            })}
-                                        </Input>
-                                    </div>
-
-                                    <div>
-                                        <DatePicker
-                                            selectsRange={true}
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            onChange={(update) => {
-                                                setDateRange(update);
-                                            }}
-                                            dateFormat="MMMM d"
-                                            className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                                            placeholderText="Select Date Range"
-                                        />
-                                    </div>
+                                    <ModalHeader />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>

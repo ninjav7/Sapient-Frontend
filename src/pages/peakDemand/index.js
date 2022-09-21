@@ -252,6 +252,9 @@ const PeakDemand = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const headers = {
         'Content-Type': 'application/json',
         accept: 'application/json',
@@ -383,9 +386,6 @@ const PeakDemand = () => {
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
     const [yearlyPeakData, setYearlyPeakData] = useState(null);
-
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
         if (startDate === null) {

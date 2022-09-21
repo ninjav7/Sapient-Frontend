@@ -164,6 +164,7 @@ const Panels = () => {
 
     const fetchPanelsData = async () => {
         try {
+            setPanelData([]);
             setIsPanelDataFetched(true);
             let header = {
                 'Content-Type': 'application/json',
