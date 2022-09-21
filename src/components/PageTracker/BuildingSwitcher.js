@@ -99,6 +99,16 @@ const BuildingSwitcher = () => {
 
     const location = useLocation();
 
+    const accountRoutes = [
+        '/energy/portfolio/overview',
+        '/energy/compare-buildings',
+        '/settings/account',
+        '/settings/buildings',
+        '/settings/users',
+        '/settings/roles',
+        '/settings/equipment-types',
+    ];
+
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
@@ -120,10 +130,8 @@ const BuildingSwitcher = () => {
         });
     }, [portfolioName]);
 
-    const dropDownTitle =
-        location.pathname === '/energy/portfolio/overview' || location.pathname === '/energy/compare-buildings'
-            ? 'Portfolio'
-            : bldStoreName;
+    const dropDownTitle = accountRoutes.includes(location.pathname) ? 'Portfolio' : bldStoreName;
+
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });
