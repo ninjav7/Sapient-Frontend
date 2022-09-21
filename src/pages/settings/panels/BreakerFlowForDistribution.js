@@ -253,12 +253,16 @@ const BreakersComponent = ({ data, id }) => {
                 breakersList.push(doubleBreakerData.id);
                 breakersList.push(tripleBreakerData.id);
             }
-            await axios.post(`${BaseUrl}${resetBreakers}`, { breaker_id: breakersList }, { headers }).then((res) => {
-                let response = res.data;
-                setIsResetting(false);
-                handleUnlinkAlertClose();
-                triggerBreakerAPI();
-            });
+
+            let params = `?building_id=${bldgId}`;
+            await axios
+                .post(`${BaseUrl}${resetBreakers}${params}`, { breaker_id: breakersList }, { headers })
+                .then((res) => {
+                    let response = res.data;
+                    setIsResetting(false);
+                    handleUnlinkAlertClose();
+                    triggerBreakerAPI();
+                });
         } catch (error) {
             setIsResetting(false);
             console.log('Failed to unlink Breaker from Panel');
