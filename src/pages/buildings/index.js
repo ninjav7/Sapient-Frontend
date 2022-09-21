@@ -223,6 +223,9 @@ const BuildingOverview = () => {
             toolbar: {
                 show: true,
             },
+            zoom: {
+                enabled: false,
+            },
             animations: {
                 enabled: false,
             },

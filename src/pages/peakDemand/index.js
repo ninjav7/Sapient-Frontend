@@ -280,7 +280,7 @@ const PeakDemand = () => {
             stacked: false,
             zoom: {
                 type: 'x',
-                enabled: true,
+                enabled: false,
                 autoScaleYaxis: true,
             },
             toolbar: {
