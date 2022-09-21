@@ -76,6 +76,7 @@ const EquipChartModal = ({
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
     const [buildingAlert, setBuildingAlerts] = useState([]);
+    const [equipFilter,setEquipFilter]=useState(equipmentFilter);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const getRequiredConsumptionLabel = (value) => {
@@ -431,6 +432,10 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
+        console.log(equipmentFilter);
+        if (!equipmentFilter?.equipment_id) {
+            return;
+        }
         if (startDate === null) {
             return;
         }
@@ -442,55 +447,59 @@ const EquipChartModal = ({
         if (sensorData.length !== 0) {
             buildingAlertsData();
         }
-    }, [startDate, endDate, selectedConsumption]);
+        fetchEquipmentChart(equipmentFilter?.equipment_id);
+    }, [endDate, selectedConsumption]);
+    const fetchEquipmentChart = async (equipId) => {
+        try {
+            setIsEquipDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?equipment_id=${equipId}&consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${equipmentGraphData}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+                    let data = response.data;
+                    let exploreData = [];
+                    let recordToInsert = {
+                        data: data,
+                        name: 'AHUs',
+                    };
+                    exploreData.push(recordToInsert);
+                    setDeviceData(exploreData);
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsEquipDataFetched(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsEquipDataFetched(false);
+        }
+    };
 
     useEffect(() => {
+
+        console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
 
-        const fetchEquipmentChart = async (equipId) => {
-            try {
-                setIsEquipDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?equipment_id=${equipId}&consumption=energy`;
-                await axios
-                    .post(
-                        `${BaseUrl}${equipmentGraphData}${params}`,
-                        {
-                            date_from: startDate,
-                            date_to: endDate,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let response = res.data;
-                        let data = response.data;
-                        let exploreData = [];
-                        let recordToInsert = {
-                            data: data,
-                            name: 'AHUs',
-                        };
-                        exploreData.push(recordToInsert);
-                        setDeviceData(exploreData);
-                        setSeriesData([
-                            {
-                                data: exploreData[0].data,
-                            },
-                        ]);
-                        setIsEquipDataFetched(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                setIsEquipDataFetched(false);
-            }
-        };
+      
         const fetchEquipmentYTDUsageData = async (equipId) => {
             try {
                 let headers = {
@@ -618,7 +627,7 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        //fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
         fetchEndUseData();
