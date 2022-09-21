@@ -37,6 +37,9 @@ const EndUseType = () => {
             toolbar: {
                 show: true,
             },
+            zoom: {
+                enabled: false,
+            },
         },
         plotOptions: {
             bar: {
@@ -105,6 +108,9 @@ const EndUseType = () => {
             height: 350,
             toolbar: {
                 show: true,
+            },
+            zoom: {
+                enabled: false,
             },
         },
         stroke: {

@@ -40,6 +40,9 @@ const EndUsesPage = () => {
             animations: {
                 enabled: false,
             },
+            zoom: {
+                enabled: false,
+            },
         },
         colors: ['#66A4CE', '#FBE384', '#59BAA4', '#80E1D9', '#847CB5'],
         plotOptions: {
