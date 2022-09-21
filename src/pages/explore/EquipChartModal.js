@@ -68,7 +68,10 @@ const EquipChartModal = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const bldgId = localStorage.getItem('exploreBldId');
-    console.log('building id ', bldgId);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
@@ -395,7 +398,6 @@ const EquipChartModal = ({
 
     //let equipResult = [];
 
-    console.log(equipData);
     const handleSwitch = (val) => {
         switch (val) {
             case 'metrics':
@@ -672,6 +674,7 @@ const EquipChartModal = ({
         fetchEquipTypeData();
         fetchLocationData();
     }, [equipmentFilter]);
+
     useEffect(() => {
         if (equipmentTypeData.lenght === 0) {
             return;
@@ -680,6 +683,7 @@ const EquipChartModal = ({
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
         setEquipResult(res);
     }, [equipmentTypeData]);
+
     useEffect(() => {
         if (equipmentData.length === 0) {
             return;
@@ -933,7 +937,7 @@ const EquipChartModal = ({
 
                             <Col lg={8}>
                                 <div className="model-sensor-filters">
-                                    <div className="">
+                                    <div>
                                         <Input
                                             type="select"
                                             name="select"
@@ -953,36 +957,7 @@ const EquipChartModal = ({
                                         </Input>
                                     </div>
 
-                                    <div>
-                                        <Input
-                                            type="select"
-                                            name="select"
-                                            id="exampleSelect"
-                                            style={{ color: 'black', fontWeight: 'bold', width: 'fit-content' }}
-                                            className="select-button form-control form-control-md model-sensor-energy-filter"
-                                            onChange={(e) => {
-                                                setDateFilter(+e.target.value);
-                                            }}
-                                            defaultValue={dateFilter}>
-                                            {customDaySelect.map((el, index) => {
-                                                return <option value={el.value}>{el.label}</option>;
-                                            })}
-                                        </Input>
-                                    </div>
-
-                                    <div>
-                                        <DatePicker
-                                            selectsRange={true}
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            onChange={(update) => {
-                                                setDateRange(update);
-                                            }}
-                                            dateFormat="MMMM d"
-                                            className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                                            placeholderText="Select Date Range"
-                                        />
-                                    </div>
+                                    <ModalHeader />
 
                                     <div className="mr-3 sensor-chart-options">
                                         <Dropdown>

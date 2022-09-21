@@ -1019,7 +1019,8 @@ const EditBreakerPanel = () => {
                                                         type="number"
                                                         name="breakers"
                                                         id="breakers"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers_linked}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
@@ -1038,7 +1039,8 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        value={panel.breakers}
+                                                        // value={panel.breakers}
+                                                        value={breakersData?.length}
                                                         onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,
