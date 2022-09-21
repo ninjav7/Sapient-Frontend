@@ -30,7 +30,8 @@ const EditFloorModal = (props) => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createFloors}`, apiBody, { headers }).then((res) => {
+        let params = `?building_id=${bldgId}`;
+        axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {
             console.log('res', res);
         });
     };

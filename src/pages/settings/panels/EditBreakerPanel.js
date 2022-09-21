@@ -504,7 +504,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
@@ -597,7 +597,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
                 await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;

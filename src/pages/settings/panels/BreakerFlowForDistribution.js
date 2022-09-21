@@ -88,7 +88,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
@@ -121,7 +121,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setSensorData(response);
@@ -157,7 +157,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res?.data;
                 setSensorData(response);
@@ -201,7 +201,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res?.data;
                 if (breakerNo === 'first') {
@@ -310,7 +310,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setDoubleSensorData(response);
@@ -337,7 +337,7 @@ const BreakersComponent = ({ data, id }) => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?device_id=${deviceId}`;
+            let params = `?device_id=${deviceId}&building_id=${bldgId}`;
             await axios.get(`${BaseUrl}${listSensor}${params}`, { headers }).then((res) => {
                 let response = res.data;
                 setTripleSensorData(response);
@@ -388,7 +388,8 @@ const BreakersComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObj], { headers }).then((res) => {
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${updateBreakers}${params}`, [breakerObj], { headers }).then((res) => {
                 setIsProcessing(false);
                 setTimeout(() => {
                     triggerBreakerAPI();
@@ -463,13 +464,16 @@ const BreakersComponent = ({ data, id }) => {
                 }
             }
 
-            await axios.post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo], { headers }).then((res) => {
-                setIsProcessing(false);
-                setTimeout(() => {
-                    triggerBreakerAPI();
-                }, 1000);
-                handleEditBreakerClose();
-            });
+            let params = `?building_id=${bldgId}`;
+            await axios
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
+                .then((res) => {
+                    setIsProcessing(false);
+                    setTimeout(() => {
+                        triggerBreakerAPI();
+                    }, 1000);
+                    handleEditBreakerClose();
+                });
         } catch (error) {
             console.log('Failed to update Double Breakers!');
             setIsProcessing(false);
@@ -561,8 +565,11 @@ const BreakersComponent = ({ data, id }) => {
                 }
             }
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
+                .post(`${BaseUrl}${updateBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
+                    headers,
+                })
                 .then((res) => {
                     setIsProcessing(false);
                     setTimeout(() => {
@@ -773,10 +780,27 @@ const BreakersComponent = ({ data, id }) => {
     }, [passiveDeviceData]);
 
     const [sensorDataSearch, setSensorDataSearch] = useState([]);
+    const [doubleSensorDataSearch, setDoubleSensorDataSearch] = useState([]);
+    const [tripleSensorDataSearch, setTripleSensorDataSearch] = useState([]);
 
     const sensorDataFunc = () => {
+        setSensorDataSearch([]);
+        setDoubleSensorDataSearch([]);
+        setTripleSensorDataSearch([]);
         sensorData.map((item) => {
             setSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
+        });
+        doubleSensorData.map((item) => {
+            setDoubleSensorDataSearch((el) => [
+                ...el,
+                { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
+            ]);
+        });
+        tripleSensorData.map((item) => {
+            setTripleSensorDataSearch((el) => [
                 ...el,
                 { value: `${item?.id}`, label: `${item?.name}`, breaker_id: `${item?.breaker_id}`, id: `${item?.id}` },
             ]);
@@ -784,10 +808,10 @@ const BreakersComponent = ({ data, id }) => {
     };
 
     useEffect(() => {
-        if (sensorData) {
+        if (sensorData || doubleSensorData || tripleSensorData) {
             sensorDataFunc();
         }
-    }, [sensorData]);
+    }, [sensorData, doubleSensorData, tripleSensorData]);
 
     console.log('sensorDataSearch', sensorDataSearch);
 
@@ -1376,7 +1400,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1622,7 +1646,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={doubleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 doubleBreakerData?.data?.sensor_id,
@@ -1742,7 +1766,7 @@ const BreakersComponent = ({ data, id }) => {
                                                         name="select"
                                                         isSearchable={true}
                                                         defaultValue={'Select Device'}
-                                                        options={sensorDataSearch}
+                                                        options={tripleSensorDataSearch}
                                                         onChange={(e) => {
                                                             handleLinkedSensor(
                                                                 tripleBreakerData?.data?.sensor_id,
