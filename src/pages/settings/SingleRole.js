@@ -93,6 +93,8 @@ const SingleRole = () => {
     console.log('roleId', roleId);
 
     const [checked, setChecked] = useState(false);
+    const [checkedBuildingConf, setCheckedBuildingConf] = useState(false);
+    const [checkedAdvancedConf, setCheckedAdvancedConf] = useState(false);
 
     const [buildingViewChecked, setBuildingViewChecked] = useState(false);
     const [portfolioChecked, setPortfolioChecked] = useState(false);
@@ -291,6 +293,106 @@ const SingleRole = () => {
     const [singlePermissionDetail, setSinglePermissionDetail] = useState([]);
 
     console.log('singlePermissionDetail', singlePermissionDetail);
+
+    useEffect(() => {
+        if (checked) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                account_general_permission: {
+                    view: true,
+                    edit: true,
+                },
+                account_buildings_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                account_user_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                account_roles_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checked]);
+
+    useEffect(() => {
+        if (checkedBuildingConf) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                building_details_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_users_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_layout_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_equipment_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_utility_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                building_panels_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checkedBuildingConf]);
+
+    useEffect(() => {
+        if (checkedAdvancedConf) {
+            setUserPermissionRoleBody({
+                ...userPermissionRoleBody,
+                advanced_active_device_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                advanced_passive_device_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+                advanced_gateways_permission: {
+                    view: true,
+                    create: true,
+                    edit: true,
+                    delete: true,
+                },
+            });
+        }
+    }, [checkedAdvancedConf]);
 
     useEffect(() => {
         setUserPermissionRoleBody({
@@ -1347,8 +1449,8 @@ const SingleRole = () => {
                                     <Col lg={6}>
                                         <div className="full-access-header1 float-right">
                                             <Switch
-                                                onChange={() => setChecked(!checked)}
-                                                checked={checked}
+                                                onChange={() => setCheckedBuildingConf(!checkedBuildingConf)}
+                                                checked={checkedBuildingConf}
                                                 onColor={'#2955E7'}
                                                 uncheckedIcon={false}
                                                 checkedIcon={false}
@@ -1953,8 +2055,8 @@ const SingleRole = () => {
                                     <Col lg={6}>
                                         <div className="full-access-header1 float-right">
                                             <Switch
-                                                onChange={() => setChecked(!checked)}
-                                                checked={checked}
+                                                onChange={() => setCheckedAdvancedConf(!checkedAdvancedConf)}
+                                                checked={checkedAdvancedConf}
                                                 onColor={'#2955E7'}
                                                 uncheckedIcon={false}
                                                 checkedIcon={false}

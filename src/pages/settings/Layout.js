@@ -240,7 +240,7 @@ const Layout = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            const params = `?floor_id=${floorid}`;
+            const params = `?floor_id=${floorid}&building_id=${bldgId}`;
             axios.get(`${BaseUrl}${getSpaces}${params}`, { headers }).then((res) => {
                 if (modelToShow >= 2) {
                     setSpaceListAPI(res.data.data);
@@ -257,7 +257,8 @@ const Layout = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {});
+        let params = `?building_id=${bldgId}`;
+        axios.post(`${BaseUrl}${createSpace}${params}`, spaceBody, { headers }).then((res) => {});
     };
 
     useEffect(() => {
@@ -266,7 +267,8 @@ const Layout = () => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
+        let params = `?building_id=${bldgId}`;
+        axios.get(`${BaseUrl}${getSpaceTypes}${params}`, { headers }).then((res) => {
             let response = res?.data?.data?.[0]?.generic_spacetypes;
             response.sort((a, b) => {
                 return a.name.localeCompare(b.name);
