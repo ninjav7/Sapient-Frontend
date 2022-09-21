@@ -1012,7 +1012,7 @@ const BuildingOverview = () => {
                             />
                         </div>
                     </div> */}
-                    <div className="card-box-style button-style">
+                    {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
@@ -1028,14 +1028,14 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            {/* {/* <Link
+                            {<Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link> */}
+                            </Link>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </Row>
 
