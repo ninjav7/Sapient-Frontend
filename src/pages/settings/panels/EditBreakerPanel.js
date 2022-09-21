@@ -408,7 +408,8 @@ const EditBreakerPanel = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            await axios.post(`${BaseUrl}${resetBreakers}`, { panel_id: panelId }, { headers }).then((res) => {
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
                 let response = res.data;
                 setIsResetting(false);
                 handleUnlinkAlertClose();
