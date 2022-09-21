@@ -27,6 +27,7 @@ import RangeSlider from './RangeSlider';
 import moment from 'moment';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
+import { set } from 'lodash';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -704,6 +705,10 @@ const ExploreByEquipment = () => {
     const [equipmentSearchTxt, setEquipmentSearchTxt] = useState('');
 
     const [consumptionTxt, setConsumptionTxt] = useState('');
+    const [locationTxt, setLocationTxt] = useState('');
+    const [spaceTxt, setSpaceTxt] = useState('');
+    const [equipmentTxt, setEquipmentTxt] = useState('');
+    const [endUseTxt, setEndUseTxt] = useState('');
 
     const handleAllEquip = (e) => {
         let slt = document.getElementById('allEquipType');
@@ -714,6 +719,15 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredEquipOptions[i].value);
                 check.checked = slt.checked;
             }
+            if(filteredEquipOptions.length===1){
+                setEquipmentTxt(`${filteredEquipOptions[0].label}`)
+            }
+            else if(filteredEquipOptions.length===0){
+                setEquipmentTxt('')
+            }
+            else{
+                setEquipmentTxt(`${filteredEquipOptions.length} Equipment Types`)
+            }
             //console.log('selected Equip Type ',selectEquip);
             setSelectedEquipType(selectEquip);
         } else {
@@ -722,15 +736,42 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredEquipOptions[i].value);
                 check.checked = slt.checked;
             }
+            setEquipmentTxt('');
         }
     };
 
-    const handleSelectedEquip = (e) => {
+    const handleSelectedEquip = (e,equipName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true) setSelectedEquipType([...selectedEquipType, e.target.value]);
+        if (selection.checked === true){
+            if(selectedEquipType.length===0){
+                setEquipmentTxt(`${equipName}`)
+            }
+            else{
+                setEquipmentTxt(`${selectedEquipType.length+1} Equipment Types`)
+            }
+            setSelectedEquipType([...selectedEquipType, e.target.value]);
+        }
         else {
             let slt = document.getElementById('allEquipType');
             slt.checked = selection.checked;
+            if(selectedEquipType.length===1){
+                setEquipmentTxt("")
+            }
+            else if(selectedEquipType.length===2){
+                let arr = selectedEquipType.filter(function (item) {
+                    return item !== e.target.value;
+                });
+                let arr1 = filteredEquipOptions.filter(function (item) {
+                    return item.value === arr[0];
+                });
+                console.log(arr1);
+                console.log(arr);
+
+                setEquipmentTxt(`${arr1[0].label}`)
+            }
+            else{
+                setEquipmentTxt(`${selectedEquipType.length-1} Equipment Types`)
+            }
             //console.log(e.target.value);
             let arr = selectedEquipType.filter(function (item) {
                 return item !== e.target.value;
@@ -749,6 +790,16 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredEndUseOptions[i].value);
                 check.checked = slt.checked;
             }
+
+            if(filteredEndUseOptions.length===1){
+                setEndUseTxt(`${filteredEndUseOptions[0].label}`)
+            }
+            else if(filteredEndUseOptions.length===0){
+                setEndUseTxt('')
+            }
+            else{
+                setEndUseTxt(`${filteredEndUseOptions.length} End Use Category`)
+            }
             //console.log('selected End Use ',selectEndUse);
             setSelectedEndUse(selectEndUse);
         } else {
@@ -757,16 +808,43 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredEndUseOptions[i].value);
                 check.checked = slt.checked;
             }
+            setEndUseTxt('');
         }
     };
 
-    const handleSelectedEndUse = (e) => {
+    const handleSelectedEndUse = (e, endUseName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true) setSelectedEndUse([...selectedEndUse, e.target.value]);
+        if (selection.checked === true){
+            if(selectedEndUse.length===0){
+                setEndUseTxt(`${endUseName}`)
+            }
+            else{
+                setEndUseTxt(`${selectedEndUse.length+1} End Use Category`)
+            }
+            setSelectedEndUse([...selectedEndUse, e.target.value]);
+        }
         else {
             let slt = document.getElementById('allEndUse');
             slt.checked = selection.checked;
             //console.log(e.target.value);
+            if(selectedEndUse.length===1){
+                setEndUseTxt("")
+            }
+            else if(selectedEndUse.length===2){
+                let arr = selectedEndUse.filter(function (item) {
+                    return item !== e.target.value;
+                });
+                let arr1 = filteredEndUseOptions.filter(function (item) {
+                    return item.value === arr[0];
+                });
+                console.log(arr1);
+                console.log(arr);
+
+                setEndUseTxt(`${arr1[0].label}`)
+            }
+            else{
+                setEndUseTxt(`${selectedEndUse.length-1} End Use category`)
+            }
             let arr = selectedEndUse.filter(function (item) {
                 return item !== e.target.value;
             });
@@ -785,6 +863,15 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
             }
+            if(floorListAPI.length===1){
+                setLocationTxt(`${floorListAPI[0].name}`)
+            }
+            else if(floorListAPI.length===0){
+                setLocationTxt('')
+            }
+            else{
+                setLocationTxt(`${floorListAPI.length} Locations`)
+            }
             //console.log('selected Space Type ',selectLoc);
             setSelectedLocation(selectLoc);
         } else {
@@ -793,13 +880,40 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
             }
+            setLocationTxt('');
         }
     };
 
-    const handleSelectedLocation = (e) => {
+    const handleSelectedLocation = (e, locName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true) setSelectedLocation([...selectedLocation, e.target.value]);
+        if (selection.checked === true){
+            if(selectedLocation.length===0){
+                setLocationTxt(`${locName}`)
+            }
+            else{
+                setLocationTxt(`${selectedLocation.length+1} Locations`)
+            }
+            setSelectedLocation([...selectedLocation, e.target.value]);
+        }
         else {
+            if(selectedLocation.length===1){
+                setLocationTxt("")
+            }
+            else if(selectedLocation.length===2){
+                let arr = selectedLocation.filter(function (item) {
+                    return item !== e.target.value;
+                });
+                let arr1 = floorListAPI.filter(function (item) {
+                    return item.floor_id === arr[0];
+                });
+                console.log(arr1);
+                console.log(arr);
+
+                setLocationTxt(`${arr1[0].name}`)
+            }
+            else{
+                setLocationTxt(`${selectedLocation.length-1} Locations`)
+            }
             //console.log(e.target.value);
             let arr = selectedLocation.filter(function (item) {
                 return item !== e.target.value;
@@ -818,6 +932,15 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredSpaceTypeOptions[i].value);
                 check.checked = slt.checked;
             }
+            if(filteredSpaceTypeOptions.length===1){
+                setSpaceTxt(`${filteredSpaceTypeOptions[0].label}`)
+            }
+            else if(filteredSpaceTypeOptions.length===0){
+                setSpaceTxt('')
+            }
+            else{
+                setSpaceTxt(`${filteredSpaceTypeOptions.length} Space Types`)
+            }
             //console.log('selected Space Type ',selectSpace);
             setSelectedSpaceType(selectSpace);
         } else {
@@ -826,15 +949,43 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredSpaceTypeOptions[i].value);
                 check.checked = slt.checked;
             }
+            setSpaceTxt('')
         }
     };
 
-    const handleSelectedSpaceType = (e) => {
+    const handleSelectedSpaceType = (e,spaceName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true) setSelectedSpaceType([...selectedSpaceType, e.target.value]);
+        if (selection.checked === true){
+            if(selectedSpaceType.length===0){
+                setSpaceTxt(`${spaceName}`)
+            }
+            else{
+                setSpaceTxt(`${selectedSpaceType.length+1} Space Types`)
+            }
+            setSelectedSpaceType([...selectedSpaceType, e.target.value]);
+        } 
         else {
             let slt = document.getElementById('allSpaceType');
             slt.checked = selection.checked;
+            if(selectedSpaceType.length===1){
+                setSpaceTxt("")
+            }
+            else if(selectedSpaceType.length===2){
+                let arr = selectedSpaceType.filter(function (item) {
+                    return item !== e.target.value;
+                });
+                let arr1 = filteredSpaceTypeOptions.filter(function (item) {
+                    return item.value === arr[0];
+                });
+                console.log(arr1);
+                console.log(arr);
+
+                setSpaceTxt(`${arr1[0].label}`)
+            }
+            else{
+                setSpaceTxt(`${selectedSpaceType.length-1} Space Types`)
+            }
+
             //console.log(e.target.value);
             let arr = selectedSpaceType.filter(function (item) {
                 return item !== e.target.value;
@@ -1955,12 +2106,13 @@ const ExploreByEquipment = () => {
                                                 type="button"
                                                 style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {locationTxt === '' ? `All ${el.label}` : locationTxt}{' '}
                                             </Dropdown.Toggle>
                                             <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
+                                                    setLocationTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2023,7 +2175,7 @@ const ExploreByEquipment = () => {
                                                                         id={record.floor_id}
                                                                         value={record.floor_id}
                                                                         onClick={(e) => {
-                                                                            handleSelectedLocation(e);
+                                                                            handleSelectedLocation(e, record.name);
                                                                         }}
                                                                     />
                                                                     <span>{record.name}</span>
@@ -2064,12 +2216,13 @@ const ExploreByEquipment = () => {
                                                 type="button"
                                                 style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {spaceTxt === '' ? `All ${el.label}` : spaceTxt}{' '}
                                             </Dropdown.Toggle>
                                             <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
+                                                    setSpaceTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2118,7 +2271,7 @@ const ExploreByEquipment = () => {
                                                                             id={record.value}
                                                                             value={record.value}
                                                                             onClick={(e) => {
-                                                                                handleSelectedSpaceType(e);
+                                                                                handleSelectedSpaceType(e, record.label);
                                                                             }}
                                                                         />
                                                                         <span>{record.label}</span>
@@ -2148,12 +2301,13 @@ const ExploreByEquipment = () => {
                                                 type="button"
                                                 style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {equipmentTxt === '' ? `All ${el.label}` : equipmentTxt}{' '}
                                             </Dropdown.Toggle>
                                             <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
+                                                    setEquipmentTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2202,7 +2356,7 @@ const ExploreByEquipment = () => {
                                                                             id={record.value}
                                                                             value={record.value}
                                                                             onClick={(e) => {
-                                                                                handleSelectedEquip(e);
+                                                                                handleSelectedEquip(e, record.label);
                                                                             }}
                                                                         />
                                                                         <span>{record.label}</span>
@@ -2232,12 +2386,13 @@ const ExploreByEquipment = () => {
                                                 type="button"
                                                 style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {endUseTxt === '' ? `All ${el.label}` : endUseTxt}{' '}
                                             </Dropdown.Toggle>
                                             <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
+                                                    setEndUseTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2286,7 +2441,7 @@ const ExploreByEquipment = () => {
                                                                             id={record.value}
                                                                             value={record.value}
                                                                             onClick={(e) => {
-                                                                                handleSelectedEndUse(e);
+                                                                                handleSelectedEndUse(e, record.label);
                                                                             }}
                                                                         />
                                                                         <span>{record.label}</span>
