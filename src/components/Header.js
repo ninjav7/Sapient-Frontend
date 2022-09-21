@@ -40,18 +40,18 @@ const Header = (props) => {
             label: 'Last 12 Months',
             value: 365,
         },
-        {
-            label: 'Month to Date',
-            value: 30,
-        },
-        {
-            label: 'Quarter to Date',
-            value: 120,
-        },
-        {
-            label: 'Year to Date',
-            value: 365,
-        },
+        // {
+        //     label: 'Month to Date',
+        //     value: 30,
+        // },
+        // {
+        //     label: 'Quarter to Date',
+        //     value: 120,
+        // },
+        // {
+        //     label: 'Year to Date',
+        //     value: 365,
+        // },
         {
             label: 'Custom',
             value: -1,

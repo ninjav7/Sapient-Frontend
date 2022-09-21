@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
+//import DatePicker from 'react-datepicker';
 import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import {
-    BaseUrl,
-    getExploreByEquipment,
-    getExploreEquipmentList,
-    getExploreEquipmentChart,
-    getFloors,
-    equipmentType,
-    getEndUseId,
-    getSpaceTypes,
-} from '../../services/Network';
+import { BaseUrl, getExploreEquipmentList, getExploreEquipmentChart, getFloors, equipmentType, getEndUseId, getSpaceTypes} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -28,11 +19,11 @@ import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
 import Dropdown from 'react-bootstrap/Dropdown';
-import ApexCharts from 'apexcharts';
+//import ApexCharts from 'apexcharts';
 import './style.css';
-import { forEach, remove } from 'lodash';
+//import { forEach, remove } from 'lodash';
 import RangeSlider from './RangeSlider';
-import { FilterList, FilterListSharp } from '@mui/icons-material';
+//import { FilterList, FilterListSharp } from '@mui/icons-material';
 import moment from 'moment';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
@@ -50,6 +41,11 @@ const ExploreEquipmentTable = ({
     setRemovedEquipmentId,
     equipmentListArray,
     setEquipmentListArray,
+    nextPageData,
+    previousPageData,
+    paginationData,
+    pageSize,
+    setPageSize,
 }) => {
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
@@ -57,7 +53,7 @@ const ExploreEquipmentTable = ({
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
                 arr.push(exploreTableData[i].equipment_id);
-                console.log(arr);
+                // console.log(arr);
 
                 var checking = document.getElementById(exploreTableData[i].equipment_id);
                 checking.checked = ischecked.checked;
@@ -445,6 +441,48 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
+                    {/* <div className="page-button-style">
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                paginationData.pagination !== undefined
+                                    ? paginationData.pagination.previous === null
+                                        ? true
+                                        : false
+                                    : false
+                            }
+                            onClick={() => {
+                                previousPageData(paginationData.pagination.previous);
+                            }}>
+                            Previous
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-md btn-light font-weight-bold mt-4"
+                            disabled={
+                                true
+                            }
+                            onClick={() => {
+                                nextPageData(paginationData.pagination.next);
+                            }}>
+                            Next
+                        </button>
+                        <div>
+                            <select
+                                value={pageSize}
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                onChange={(e) => {
+                                    setPageSize(parseInt(e.target.value));
+                                }}>
+                                {[20, 50, 100].map((pageSize) => (
+                                    <option key={pageSize} value={pageSize} className="align-options-center">
+                                        Show {pageSize} devices
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div> */}
                     </Col>
                 </CardBody>
             </Card>
@@ -478,6 +516,9 @@ const ExploreByEquipment = () => {
     ];
     const [equipOptions, setEquipOptions] = useState([]);
     const [endUseOptions, setEndUseOptions] = useState([]);
+    const [paginationData, setPaginationData] = useState({});
+    const [pageSize, setPageSize] = useState(20);
+    const [pageNo, setPageNo] = useState(1);
     const [optionsData, setOptionsData] = useState({
         chart: {
             id: 'chart2',
@@ -539,7 +580,7 @@ const ExploreByEquipment = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' kWH';
+                    return value ;
                 },
             },
             marker: {
@@ -571,7 +612,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3) + ' kWH';
+                    return (value / 1000).toFixed(3);
                 },
             },
         },
@@ -624,7 +665,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000 + ' kWH';
+                    return value / 1000;
                 },
             },
             tickAmount: 2,
@@ -828,6 +869,9 @@ const ExploreByEquipment = () => {
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
+                setPaginationData(res.data);
+                setSeriesData([]);
+                        setSeriesLineData([]);
                 if (responseData.data.length !== 0) {
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption(responseData.data[0].peak_power.now);
@@ -1009,7 +1053,10 @@ const ExploreByEquipment = () => {
 
                 await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                     let responseData = res.data;
+                    setPaginationData(res.data);
                     if (responseData.data.length !== 0) {
+                        setSeriesData([]);
+                        setSeriesLineData([]);
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
                         setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
                         set_minConValue(0.0);
@@ -1034,6 +1081,85 @@ const ExploreByEquipment = () => {
         fetchEndUseData();
         fetchSpacetypes();
     }, [startDate, endDate, bldgId]);
+
+
+    const nextPageData = async (path) => {
+        // console.log("next path ",path);
+        try {
+            setIsExploreDataLoading(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let arr = {
+                date_from: startDate,
+                date_to: endDate,
+            };
+            let params = `?consumption=energy&building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                if (responseData.data.length !== 0) {
+                    setSeriesData([]);
+                        setSeriesLineData([]);
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                }
+                setExploreTableData(responseData.data);
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore by equipment');
+            setIsExploreDataLoading(false);
+        }
+    };
+
+    const previousPageData = async (path) => {
+        try {
+            setIsExploreDataLoading(true);
+            if (path === null) {
+                return;
+            }
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let arr = {
+                date_from: startDate,
+                date_to: endDate,
+            };
+            let params = `?consumption=energy&building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                if (responseData.data.length !== 0) {
+                    setSeriesData([]);
+                        setSeriesLineData([]);
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                }
+                setExploreTableData(responseData.data);
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore by equipment');
+            setIsExploreDataLoading(false);
+        }
+    };
+
 
     const [filteredEquipOptions, setFilteredEquipOptions] = useState([]);
     const [filteredEquipOptionsCopy, setFilteredEquipOptionsCopy] = useState([]);
@@ -1152,7 +1278,7 @@ const ExploreByEquipment = () => {
     }, []);
 
     useEffect(() => {
-        console.log('Entered selected Equipment id ', selectedEquipmentId);
+        // console.log('Entered selected Equipment id ', selectedEquipmentId);
         if (selectedEquipmentId === '') {
             return;
         }
@@ -1176,14 +1302,14 @@ const ExploreByEquipment = () => {
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        console.log(responseData);
+                        // console.log(responseData);
                         let data = responseData.data;
-                        console.log(data);
+                        // console.log(data);
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
                             return item.equipment_id === selectedEquipmentId;
                         });
-                        console.log(arr);
+                        // console.log(arr);
                         let exploreData = [];
 
                         let recordToInsert = {
@@ -1191,7 +1317,7 @@ const ExploreByEquipment = () => {
                             data: data,
                             id: arr[0].equipment_id,
                         };
-                        console.log(recordToInsert);
+                        // console.log(recordToInsert);
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
@@ -1209,7 +1335,7 @@ const ExploreByEquipment = () => {
     }, [selectedEquipmentId]);
 
     useEffect(() => {
-        console.log('Entered Remove Equipment ', removeEquipmentId);
+        // console.log('Entered Remove Equipment ', removeEquipmentId);
         if (removeEquipmentId === '') {
             return;
         }
@@ -1217,7 +1343,7 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
-        console.log(arr1);
+        // console.log(arr1);
         setSeriesData(arr1);
         setSeriesLineData(arr1);
     }, [removeEquipmentId]);
@@ -1244,14 +1370,14 @@ const ExploreByEquipment = () => {
                 )
                 .then((res) => {
                     let responseData = res.data;
-                    console.log(responseData);
+                    // console.log(responseData);
                     let data = responseData.data;
-                    console.log(data);
+                    // console.log(data);
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.equipment_id === id;
                     });
-                    console.log(arr);
+                    // console.log(arr);
                     let exploreData = [];
                     // data.forEach((record) => {
                     //     if (record.building_name !== null) {
@@ -1260,9 +1386,9 @@ const ExploreByEquipment = () => {
                         data: data,
                         id: arr[0].equipment_id,
                     };
-                    console.log(recordToInsert);
+                    // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
-                    console.log(dataarr);
+                    // console.log(dataarr);
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
@@ -1272,7 +1398,7 @@ const ExploreByEquipment = () => {
         }
     };
     useEffect(() => {
-        console.log('building List Array ', equipmentListArray);
+        // console.log('building List Array ', equipmentListArray);
         if (equipmentListArray.length === 0) {
             return;
         }
@@ -1281,10 +1407,10 @@ const ExploreByEquipment = () => {
             arr1 = seriesData.filter(function (item) {
                 return item.id === equipmentListArray[i];
             });
-            console.log('Arr 1 ', arr1);
+            // console.log('Arr 1 ', arr1);
             if (arr1.length === 0) {
                 fetchExploreAllChartData(equipmentListArray[i]);
-                console.log(dataarr);
+                // console.log(dataarr);
             }
         }
     }, [equipmentListArray]);
@@ -1292,9 +1418,9 @@ const ExploreByEquipment = () => {
         if (allEquipmentData.length === 0) {
             return;
         }
-        console.log('allEquipmentSData ', allEquipmentData);
+        // console.log('allEquipmentSData ', allEquipmentData);
         if (allEquipmentData.length === exploreTableData.length) {
-            console.log('All equipment Data set');
+            // console.log('All equipment Data set');
             setSeriesData(allEquipmentData);
             setSeriesLineData(allEquipmentData);
         }
@@ -1305,7 +1431,7 @@ const ExploreByEquipment = () => {
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
-        console.log(arr);
+        // console.log(arr);
         setSelectedOptions(arr);
 
         let arr1 = {};
@@ -1509,7 +1635,7 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
-        console.log(equipmentSearchTxt);
+        // console.log(equipmentSearchTxt);
 
         const exploreDataFetch = async () => {
             try {
@@ -1590,7 +1716,7 @@ const ExploreByEquipment = () => {
     const getCSVLinkChartData = () => {
         // console.log("csv entered");
         let arr = [];
-        console.log(seriesData);
+        // console.log(seriesData);
         seriesData.map(function (obj) {
             arr.push([obj.name, obj.data]);
         });
@@ -2211,6 +2337,11 @@ const ExploreByEquipment = () => {
                             setRemovedEquipmentId={setRemovedEquipmentId}
                             equipmentListArray={equipmentListArray}
                             setEquipmentListArray={setEquipmentListArray}
+                            pageSize={pageSize}
+                            setPageSize={setPageSize}
+                            paginationData={paginationData}
+                            nextPageData={nextPageData}
+                            previousPageData={previousPageData}
                         />
                     </Col>
                 </div>
