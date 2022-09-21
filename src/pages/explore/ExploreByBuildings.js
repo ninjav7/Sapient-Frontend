@@ -767,6 +767,9 @@ const ExploreByBuildings = () => {
     }, [allBuildingData]);
 
     useEffect(() => {
+        if(selectedBuildingOptions.length===0){
+            setBuildingTypeTxt('');
+        }
         if (
             (maxConValue === 0.0 || maxConValue === 0.01) &&
             (maxSq_FtValue === 10 || minSq_FtValue === 0) &&
@@ -790,6 +793,12 @@ const ExploreByBuildings = () => {
             };
         }
         if (selectedBuildingOptions.length !== 0) {
+            if(selectedBuildingOptions.length===1){
+                setBuildingTypeTxt(`${selectedBuildingOptions[0]}`)
+            }
+            else{
+                setBuildingTypeTxt(`${selectedBuildingOptions.length} Building Types`)
+            }
             arr['building_type'] = selectedBuildingOptions;
         }
         exploreFilterDataFetch(arr);
@@ -1212,12 +1221,13 @@ const ExploreByBuildings = () => {
                                                 type="button"
                                                 style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {' '}
-                                                All {el.label}{' '}
+                                                {buildingTypeTxt === '' ? `All ${el.label}` : buildingTypeTxt}{' '}
                                             </Dropdown.Toggle>
                                             <button
                                                 style={{ border: 'none', backgroundColor: 'white' }}
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
+                                                    setBuildingTypeTxt('');
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
