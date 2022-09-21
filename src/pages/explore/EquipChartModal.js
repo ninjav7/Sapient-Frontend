@@ -13,6 +13,7 @@ import {
     Input,
     FormGroup,
     Spinner,
+    ModalHeader,
 } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
@@ -87,7 +88,6 @@ const EquipChartModal = ({
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
-    const [startDate, endDate] = dateRange;
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
