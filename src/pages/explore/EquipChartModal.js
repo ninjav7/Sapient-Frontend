@@ -640,9 +640,9 @@ const EquipChartModal = ({
             return;
         }
         const fetchActiveDeviceSensorData = async () => {
-            console.log(equipmentData);
+            // console.log(equipmentData);
             if (equipmentData !== null) {
-                console.log(equipmentData.device_type);
+                // console.log(equipmentData.device_type);
                 if (
                     equipmentData.device_type === 'passive' ||
                     equipmentData.device_id === '' ||
@@ -664,8 +664,8 @@ const EquipChartModal = ({
                     let sensorId = response.find(
                         ({ equipment_type_name }) => equipment_type_name === equipmentData.equipments_type
                     );
-                    console.log(sensorId);
-                    setSensorData(sensorId);
+                    // console.log(sensorId);
+                    // setSensorData(sensorId);
                 });
             } catch (error) {
                 console.log(error);

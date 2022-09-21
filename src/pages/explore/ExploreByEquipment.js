@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
+//import DatePicker from 'react-datepicker';
 import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import {
-    BaseUrl,
-    getExploreByEquipment,
-    getExploreEquipmentList,
-    getExploreEquipmentChart,
-    getFloors,
-    equipmentType,
-    getEndUseId,
-    getSpaceTypes,
-} from '../../services/Network';
+import { BaseUrl, getExploreEquipmentList, getExploreEquipmentChart, getFloors, equipmentType, getEndUseId, getSpaceTypes} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -28,11 +19,11 @@ import { Line } from 'rc-progress';
 import { useParams } from 'react-router-dom';
 import EquipChartModal from './EquipChartModal';
 import Dropdown from 'react-bootstrap/Dropdown';
-import ApexCharts from 'apexcharts';
+//import ApexCharts from 'apexcharts';
 import './style.css';
-import { forEach, remove } from 'lodash';
+//import { forEach, remove } from 'lodash';
 import RangeSlider from './RangeSlider';
-import { FilterList, FilterListSharp } from '@mui/icons-material';
+//import { FilterList, FilterListSharp } from '@mui/icons-material';
 import moment from 'moment';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
@@ -450,7 +441,7 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                        <div className="page-button-style">
+                    {/* <div className="page-button-style">
                         <button
                             type="button"
                             className="btn btn-md btn-light font-weight-bold mt-4"
@@ -491,7 +482,7 @@ const ExploreEquipmentTable = ({
                                 ))}
                             </select>
                         </div>
-                    </div>
+                    </div> */}
                     </Col>
                 </CardBody>
             </Card>
