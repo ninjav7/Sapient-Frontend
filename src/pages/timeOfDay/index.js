@@ -24,6 +24,26 @@ const TimeOfDay = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
+    // temperory soln
+    const getTimeData = (value) => {
+        if (value === 1) {
+            return '12AM';
+        }
+        if (value === 13) {
+            return '12PM';
+        }
+        if (value >= 2 && value <= 12) {
+            let num = value - 1;
+            let time = `${num}AM`;
+            return time;
+        }
+        if (value >= 14) {
+            let num = value - 13;
+            let time = `${num}PM`;
+            return time;
+        }
+    };
+
     const areaChartOptions = {
         chart: {
             height: 380,
@@ -181,11 +201,11 @@ const TimeOfDay = () => {
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            0
-                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][
+                            dataPointIndex
+                        ].toLocaleString(undefined, { maximumFractionDigits: 3 })} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        ${day}, ${getTimeData(w.globals.labels[dataPointIndex])}
                         </div>
                     </div>`;
             },

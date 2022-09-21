@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { authProtectedRoutes } from '../../routes/index';
 import { ComponentStore } from '../../store/ComponentStore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTelescope, faToggleOn, faCircleBolt } from '@fortawesome/pro-regular-svg-icons';
 import { useAtom } from 'jotai';
 import { userPermissionData } from '../../store/globalState';
+import { BuildingStore } from '../../store/BuildingStore';
 
 const NavLinks = () => {
     const location = useLocation();
+    const history = useHistory();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
+    const configRoutes = [
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/active-devices',
+        '/settings/passive-devices',
+    ];
 
     const setSideNavBar = (componentName) => {
         if (componentName === 'Energy') {
@@ -83,6 +95,26 @@ const NavLinks = () => {
         }
     }, [userPermission]);
 
+    const navigateToPath = (pathName) => {
+        if (pathName === '/energy/portfolio/overview') {
+            if (configRoutes.includes(location.pathname)) {
+                history.push({
+                    pathname: `/energy/building/overview/${bldgId}`,
+                });
+            } else {
+                history.push({
+                    pathname: `${pathName}`,
+                });
+            }
+        }
+
+        if (pathName !== '/energy/portfolio/overview') {
+            history.push({
+                pathname: `${pathName}`,
+            });
+        }
+    };
+
     return (
         <div className="top-nav-routes-list">
             {authProtectedRoutes
@@ -104,62 +136,60 @@ const NavLinks = () => {
                     let active = str1.localeCompare(str2);
 
                     return active === 0 ? (
-                        <div key={index} className="navbar-head-container active">
-                            <Link to={item.path}>
-                                <div className="d-flex align-items-center">
-                                    {item.name === 'Energy' && (
-                                        <div className="font-icon-style active">
-                                            <FontAwesomeIcon icon={faCircleBolt} size="lg" />
-                                        </div>
-                                    )}
-                                    {item.name === 'Control' && (
-                                        <div className="font-icon-style active">
-                                            <FontAwesomeIcon icon={faToggleOn} size="lg" />
-                                        </div>
-                                    )}
-                                    {item.name === 'Explore' && (
-                                        <div className="font-icon-style active">
-                                            <FontAwesomeIcon icon={faTelescope} size="lg" />
-                                        </div>
-                                    )}
-                                    <div
-                                        onClick={() => {
-                                            setSideNavBar(item.name);
-                                        }}
-                                        className="navbar-heading active">
-                                        {item.name}
+                        <div key={index} className="navbar-head-container active mouse-pointer">
+                            <div className="d-flex align-items-center">
+                                {item.name === 'Energy' && (
+                                    <div className="font-icon-style active">
+                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                     </div>
+                                )}
+                                {item.name === 'Control' && (
+                                    <div className="font-icon-style active">
+                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                    </div>
+                                )}
+                                {item.name === 'Explore' && (
+                                    <div className="font-icon-style active">
+                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                    </div>
+                                )}
+                                <div
+                                    onClick={() => {
+                                        setSideNavBar(item.name);
+                                        navigateToPath(item.path);
+                                    }}
+                                    className="navbar-heading active">
+                                    {item.name}
                                 </div>
-                            </Link>
+                            </div>
                         </div>
                     ) : (
-                        <div key={index} className="navbar-head-container">
-                            <Link to={item.path}>
-                                <div className="d-flex align-items-center">
-                                    {item.name === 'Energy' && (
-                                        <div className="font-icon-style">
-                                            <FontAwesomeIcon icon={faCircleBolt} size="lg" />
-                                        </div>
-                                    )}
-                                    {item.name === 'Control' && (
-                                        <div className="font-icon-style">
-                                            <FontAwesomeIcon icon={faToggleOn} size="lg" />
-                                        </div>
-                                    )}
-                                    {item.name === 'Explore' && (
-                                        <div className="font-icon-style">
-                                            <FontAwesomeIcon icon={faTelescope} size="lg" />
-                                        </div>
-                                    )}
-                                    <div
-                                        onClick={() => {
-                                            setSideNavBar(item.name);
-                                        }}
-                                        className="navbar-heading">
-                                        {item.name}
+                        <div key={index} className="navbar-head-container mouse-pointer">
+                            <div className="d-flex align-items-center">
+                                {item.name === 'Energy' && (
+                                    <div className="font-icon-style">
+                                        <FontAwesomeIcon icon={faCircleBolt} size="lg" />
                                     </div>
+                                )}
+                                {item.name === 'Control' && (
+                                    <div className="font-icon-style">
+                                        <FontAwesomeIcon icon={faToggleOn} size="lg" />
+                                    </div>
+                                )}
+                                {item.name === 'Explore' && (
+                                    <div className="font-icon-style">
+                                        <FontAwesomeIcon icon={faTelescope} size="lg" />
+                                    </div>
+                                )}
+                                <div
+                                    onClick={() => {
+                                        setSideNavBar(item.name);
+                                        navigateToPath(item.path);
+                                    }}
+                                    className="navbar-heading">
+                                    {item.name}
                                 </div>
-                            </Link>
+                            </div>
                         </div>
                     );
                 })}
