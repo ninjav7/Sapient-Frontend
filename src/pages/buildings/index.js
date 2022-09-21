@@ -1294,11 +1294,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6
-                                    className="card-title custom-title"
-                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                    Hourly Average Consumption
-                                </h6>
+                                <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
                                 {isAvgConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
@@ -1327,7 +1323,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                                <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                     Hourly Energy Consumption (kWh)
                                 </h6>
