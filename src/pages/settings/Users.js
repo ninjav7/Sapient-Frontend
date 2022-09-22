@@ -56,64 +56,63 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
     return (
         <Card>
             <CardBody>
-                {dataFetched && userData?.length ? (
-                    <Table className="mb-0 bordered table-hover">
-                        <thead>
-                            <tr className="mouse-pointer">
-                                <th>Name</th>
-                                <th>Building Access</th>
-                                <th>Email</th>
-                                <th>Last Active</th>
-                            </tr>
-                        </thead>
-                        {isUserDataFetched ? (
-                            <tbody>
-                                <SkeletonTheme color="#202020" height={35}>
-                                    <tr>
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                {/* {dataFetched ? ( */}
+                <Table className="mb-0 bordered table-hover">
+                    <thead>
+                        <tr className="mouse-pointer">
+                            <th>Name</th>
+                            <th>Building Access</th>
+                            <th>Email</th>
+                            <th>Last Active</th>
+                        </tr>
+                    </thead>
+                    {isUserDataFetched ? (
+                        <tbody>
+                            <SkeletonTheme color="#202020" height={35}>
+                                <tr>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
 
-                                        <td>
-                                            <Skeleton count={5} />
-                                        </td>
-                                    </tr>
-                                </SkeletonTheme>
-                            </tbody>
-                        ) : (
-                            <tbody>
-                                {userData.map((record, index) => {
-                                    return (
-                                        <tr className="mouse-pointer">
-                                            <td className="font-weight-bold panel-name">
-                                                {userPermission?.user_role === 'admin' ||
-                                                userPermission?.permissions?.permissions?.account_user_permission
-                                                    ?.edit ? (
-                                                    <Link to={`/settings/user-profile/single/${record?._id}`}>
-                                                        <a>
-                                                            {record?.first_name
-                                                                ? record?.first_name + ' ' + record?.last_name
-                                                                : record?.name}
-                                                        </a>
-                                                    </Link>
-                                                ) : (
-                                                    <>
-                                                        <a>
-                                                            {record?.first_name
-                                                                ? record?.first_name + ' ' + record?.last_name
-                                                                : record?.name}
-                                                        </a>
-                                                    </>
-                                                )}
-                                                {/* {!userPermission?.permissions?.permissions?.account_user_permission
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+                                </tr>
+                            </SkeletonTheme>
+                        </tbody>
+                    ) : (
+                        <tbody>
+                            {userData.map((record, index) => {
+                                return (
+                                    <tr className="mouse-pointer">
+                                        <td className="font-weight-bold panel-name">
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_user_permission?.edit ? (
+                                                <Link to={`/settings/user-profile/single/${record?._id}`}>
+                                                    <a>
+                                                        {record?.first_name
+                                                            ? record?.first_name + ' ' + record?.last_name
+                                                            : record?.name}
+                                                    </a>
+                                                </Link>
+                                            ) : (
+                                                <>
+                                                    <a>
+                                                        {record?.first_name
+                                                            ? record?.first_name + ' ' + record?.last_name
+                                                            : record?.name}
+                                                    </a>
+                                                </>
+                                            )}
+                                            {/* {!userPermission?.permissions?.permissions?.account_user_permission
                                                     ?.edit && (
                                                     <a>
                                                         {record?.first_name
@@ -121,23 +120,18 @@ const UserTable = ({ userData, isUserDataFetched, dataFetched }) => {
                                                             : record?.name}
                                                     </a>
                                                 )} */}
-                                            </td>
-                                            <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
-                                            <td className="">{record?.email === '' ? '-' : record?.email}</td>
-                                            <td className="font-weight-bold">
-                                                {record?.last_active === ''
-                                                    ? '-'
-                                                    : moment(record?.last_active).fromNow()}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        )}
-                    </Table>
-                ) : (
-                    <>{dataFetched ? <p>You do not have the access of this page</p> : <Skeleton count={3} />}</>
-                )}
+                                        </td>
+                                        <td className="">{record?.building_access?.length === 0 ? '-' : '-'}</td>
+                                        <td className="">{record?.email === '' ? '-' : record?.email}</td>
+                                        <td className="font-weight-bold">
+                                            {record?.last_active === '' ? '-' : moment(record?.last_active).fromNow()}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    )}
+                </Table>
             </CardBody>
         </Card>
     );
