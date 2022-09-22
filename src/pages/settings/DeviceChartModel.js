@@ -216,7 +216,6 @@ const DeviceChartModel = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    // return moment(timestamp).format('DD/MMM');
                     return '';
                 },
             },
