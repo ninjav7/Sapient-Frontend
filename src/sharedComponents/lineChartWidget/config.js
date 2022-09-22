@@ -85,7 +85,8 @@ export const configLineChartWidget = {
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment(timestamp).format('DD/MMM - HH:mm');
+                // return moment(timestamp).format('DD/MMM - HH:mm');
+                return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
             },
         },
         style: {

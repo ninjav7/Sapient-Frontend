@@ -592,12 +592,13 @@ const PortfolioOverview = () => {
     }, []);
 
     // useEffect(() => {
-    //     if (!buildingsEnergyConsume.length > 0) {
-    //         return;
-    //     }
-    //     let topVal = buildingsEnergyConsume[0].density;
-    //     setTopEnergyDensity(topVal);
-    // }, [buildingsEnergyConsume]);
+    //     console.log('SSR startDate :>> ', startDate);
+    //     console.log('SSR endDate :>> ', endDate);
+    //     const start = moment(startDate);
+    //     const end = moment(endDate);
+    //     const days = end.diff(start, 'days');
+    //     console.log('SSR days :>> ', days + 1);
+    // });
 
     return (
         <>

@@ -75,13 +75,14 @@ const IndividualPassiveDevice = () => {
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
-        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
-        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
-        { value: 'power', label: 'power' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA' },
+        { value: 'power', label: 'Power (W)', unit: 'W' },
     ]);
 
     const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -529,6 +530,8 @@ const IndividualPassiveDevice = () => {
                 setMetric={setMetric}
                 selectedConsumption={selectedConsumption}
                 setConsumption={setConsumption}
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
