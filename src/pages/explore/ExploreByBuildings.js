@@ -586,6 +586,8 @@ const ExploreByBuildings = () => {
                     .then((res) => {
                         let responseData = res.data;
                         // console.log(responseData[0]);
+                        setSeriesData([]);
+                        setSeriesLineData([]);
                         setExploreTableData(responseData);
                         // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
                         setTopEnergyConsumption(responseData[0].consumption.now);
@@ -613,6 +615,8 @@ const ExploreByBuildings = () => {
             let params = `?consumption=energy`;
             await axios.post(`${BaseUrl}${getExploreBuildingList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
+                setSeriesData([]);
+                        setSeriesLineData([]);
                 setExploreTableData(responseData);
                 setTopEnergyConsumption(responseData[0].consumption.now);
                 setIsExploreDataLoading(false);
