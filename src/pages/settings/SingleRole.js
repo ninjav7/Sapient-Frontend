@@ -87,6 +87,8 @@ const SingleRole = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const [formValidation, setFormValidation] = useState(false);
+
     const { roleId } = useParams();
     let history = useHistory();
 
@@ -287,6 +289,14 @@ const SingleRole = () => {
             delete: false,
         },
     });
+
+    useEffect(() => {
+        if (userPermissionRoleBody.name) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [userPermissionRoleBody]);
 
     console.log('userPermissionRoleBody', userPermissionRoleBody);
 
@@ -577,13 +587,16 @@ const SingleRole = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold cancel-btn-style"
-                                onClick={() => {}}>
+                                onClick={() => {
+                                    setFormValidation(false);
+                                }}>
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold ml-2"
-                                onClick={createPermissionRoleFunc}>
+                                onClick={createPermissionRoleFunc}
+                                disabled={!formValidation}>
                                 Save
                             </button>
                         </div>

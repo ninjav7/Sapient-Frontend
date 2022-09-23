@@ -25,6 +25,8 @@ export const spaceId = atom('');
 
 export const showSkeletonNow = atom(false);
 
+export const getFloorsData = atom([]);
+
 export const spaceName = atom('');
 export const spaceName2 = atom('');
 export const spaceName3 = atom('');
@@ -75,3 +77,5 @@ export const passiveDeviceModal = atom('');
 export const equipmentId = atom('');
 
 export const accountId = atom('');
+
+// Layout

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Button, Input} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button, Input } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, equipmentType, getEquipmentType, addEquipmentType, updateEquipmentType, getEndUseId } from '../../services/Network';
+import {
+    BaseUrl,
+    equipmentType,
+    getEquipmentType,
+    addEquipmentType,
+    updateEquipmentType,
+    getEndUseId,
+} from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -283,6 +290,8 @@ const EquipmentTypes = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const [formValidation, setFormValidation] = useState(false);
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -294,7 +303,19 @@ const EquipmentTypes = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentTypeData, setGeneralEquipmentTypeData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
-    const [createEqipmentData, setCreateEqipmentData] = useState({});
+    const [createEqipmentData, setCreateEqipmentData] = useState({
+        name: '',
+        end_use: '',
+    });
+
+    useEffect(() => {
+        if (createEqipmentData.name.length > 0 && createEqipmentData.end_use.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [createEqipmentData]);
+
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
@@ -346,23 +367,12 @@ const EquipmentTypes = () => {
         }
     };
 
+    // const [first, setfirst] = useState(second);
+
     const handleChange = (key, value) => {
-        // let endUseId=""
-        // if(key==="end_use"){
-        //     endUseData.forEach(ele=>{
-        //         if(ele.name===value){
-        //             endUseId=ele.end_user_id;
-        //         }
-        //     })
-        //     let obj = Object.assign({}, createEqipmentData);
-        // obj[key] = endUseId;
-        // setCreateEqipmentData(obj);
-        // }
-        // else{
         let obj = Object.assign({}, createEqipmentData);
         obj[key] = value;
         setCreateEqipmentData(obj);
-        // }
     };
 
     const saveDeviceData = async () => {
@@ -370,7 +380,6 @@ const EquipmentTypes = () => {
         obj['building_id'] = bldgId;
         obj['is_active'] = true;
         setCreateEqipmentData(obj);
-        // console.log(obj);
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -387,6 +396,7 @@ const EquipmentTypes = () => {
                 .then((res) => {
                     // console.log(res.data);
                     fetchEquipTypeData();
+                    setFormValidation(false);
                 });
 
             setIsProcessing(false);
@@ -415,6 +425,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(response.data);
                 setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -441,6 +452,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(response.data);
                 setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -482,6 +494,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(res.data.data);
                 setEquipmentTypeData(res.data.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -630,18 +643,23 @@ const EquipmentTypes = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                            handleClose();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={handleClose}>
+                            Cancel
+                        </Button>
+
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            onClick={() => {
+                                saveDeviceData();
+                                handleClose();
+                            }}
+                            disabled={!formValidation}>
+                            {isProcessing ? 'Adding...' : 'Add'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

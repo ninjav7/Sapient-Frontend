@@ -421,6 +421,8 @@ const PassiveDevices = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const [formValidation, setFormValidation] = useState(false);
+
     const [userPermission] = useAtom(userPermissionData);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
@@ -471,7 +473,18 @@ const PassiveDevices = () => {
     const [locationData, setLocationData] = useState([]);
     const [createDeviceData, setCreateDeviceData] = useState({
         device_type: 'passive',
+        mac_address: '',
     });
+
+    useEffect(() => {
+        if (createDeviceData.mac_address.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [createDeviceData]);
+
+    console.log('createDeviceData', createDeviceData);
     const [search, setSearch] = useState('');
 
     const [locationDataNow, setLocationDataNow] = useState([]);
@@ -829,6 +842,7 @@ const PassiveDevices = () => {
                                     className="btn btn-md btn-primary font-weight-bold"
                                     onClick={() => {
                                         handleShow();
+                                        setFormValidation(false);
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add Passive Device
                                 </button>
@@ -1003,6 +1017,7 @@ const PassiveDevices = () => {
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     setIdentifierVal(e.target.value);
+                                    setFormValidation(true);
                                 }}
                                 value={identifierVal}
                                 autoFocus
@@ -1093,6 +1108,7 @@ const PassiveDevices = () => {
                                 className="font-weight-bold"
                                 onChange={(e) => {
                                     handleChange('mac_address', e.target.value);
+                                    // setFormValidation(true);
                                 }}
                                 autoFocus
                             />
@@ -1159,18 +1175,23 @@ const PassiveDevices = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                            handleClose();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            onClick={() => {
+                                saveDeviceData();
+                                handleClose();
+                            }}
+                            disabled={!formValidation}>
+                            {isProcessing ? 'Adding...' : 'Add'}
+                        </Button>
+                        {console.log('formValidation', formValidation)}
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

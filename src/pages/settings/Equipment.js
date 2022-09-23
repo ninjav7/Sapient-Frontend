@@ -73,6 +73,8 @@ const EquipmentTable = ({
     setPageSize,
     setIsDelete,
     setIsEdit,
+    formValidation,
+    setFormValidation,
 }) => {
     const [modal1, setModal1] = useState(false);
     const [modal2, setModal2] = useState(false);
@@ -398,6 +400,7 @@ const EquipmentTable = ({
                                                     key={index}
                                                     onClick={() => {
                                                         setEquipData(record);
+                                                        setFormValidation(false);
                                                     }}
                                                     className="mouse-pointer">
                                                     {selectedOptions.some((record) => record.value === 'status') && (
@@ -634,6 +637,8 @@ const EquipmentTable = ({
                         fetchEquipmentData={fetchEquipmentData}
                         showWindow={'configure'}
                         deviceType={'active'}
+                        formValidation={formValidation}
+                        setFormValidation={setFormValidation}
                     />
                     <EquipmentDeviceChartModel
                         showChart={modal2}
@@ -645,6 +650,8 @@ const EquipmentTable = ({
                         showWindow={'configure'}
                         deviceType={'passive'}
                         locationData={locationData}
+                        formValidation={formValidation}
+                        setFormValidation={setFormValidation}
                     />
                 </div>
             ) : (
@@ -661,6 +668,8 @@ const Equipment = () => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+
+    const [formValidation, setFormValidation] = useState(false);
 
     const [isDelete, setIsDelete] = useState(false);
     const handleDeleteClose = () => setIsDelete(false);
@@ -680,7 +689,26 @@ const Equipment = () => {
     const [offlineEquipData, setOfflineEquipData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [equipmentSelectedTypeData, setEquipmentSelectedTypeData] = useState([]);
-    const [createEqipmentData, setCreateEqipmentData] = useState({});
+    const [createEqipmentData, setCreateEqipmentData] = useState({
+        name: '',
+        equipment_type: '',
+        end_use: '',
+        space_id: '',
+    });
+
+    useEffect(() => {
+        if (
+            createEqipmentData.name.length > 0 &&
+            createEqipmentData?.equipment_type?.length > 0 &&
+            createEqipmentData?.end_use?.length > 0
+        ) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [createEqipmentData]);
+
+    console.log('createEqipmentData', createEqipmentData);
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
@@ -831,6 +859,7 @@ const Equipment = () => {
                     setTimeout(function () {
                         fetchEquipmentData();
                     }, 0);
+                    setFormValidation(false);
                 });
 
             setIsProcessing(false);
@@ -904,6 +933,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -942,6 +972,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -980,6 +1011,7 @@ const Equipment = () => {
                 setOnlineEquipData(onlineEquip);
                 setOfflineEquipData(offlineEquip);
                 setIsEquipDataFetched(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -1154,6 +1186,13 @@ const Equipment = () => {
                                     className="btn btn-md btn-primary font-weight-bold"
                                     onClick={() => {
                                         handleShow();
+                                        setCreateEqipmentData({
+                                            name: '',
+                                            equipment_type: '',
+                                            end_use: '',
+                                            space_id: '',
+                                        });
+                                        setFormValidation(false);
                                     }}>
                                     <i className="uil uil-plus mr-1"></i>Add Equipment
                                 </button>
@@ -1264,6 +1303,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            formValidation={formValidation}
+                            setFormValidation={setFormValidation}
                         />
                     )}
                     {selectedTab === 1 && (
@@ -1283,6 +1324,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            formValidation={formValidation}
+                            setFormValidation={setFormValidation}
                         />
                     )}
                     {selectedTab === 2 && (
@@ -1302,6 +1345,8 @@ const Equipment = () => {
                             setPageSize={setPageSize}
                             setIsDelete={setIsDelete}
                             setIsEdit={setIsEdit}
+                            formValidation={formValidation}
+                            setFormValidation={setFormValidation}
                         />
                     )}
                 </Col>
@@ -1421,17 +1466,21 @@ const Equipment = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            onClick={() => {
+                                saveDeviceData();
+                            }}
+                            disabled={!formValidation}>
+                            {isProcessing ? 'Adding...' : 'Add'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
 

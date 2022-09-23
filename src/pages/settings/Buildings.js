@@ -234,6 +234,8 @@ const Buildings = () => {
     const location = useLocation();
     const controller = new AbortController();
 
+    const [formalidation, setFormalidation] = useState(false);
+
     const queryClient = new QueryClient();
 
     // Modal states
@@ -250,7 +252,13 @@ const Buildings = () => {
         { value: 'Residential Building', label: 'Residential Building' },
     ]);
     const [buildingName, setBuildingName] = useState('');
-    const [buildingTypeSelected, setBuildingTypeSelected] = useState(buildingType[0].value);
+    const [buildingTypeSelected, setBuildingTypeSelected] = useState('');
+
+    useEffect(() => {
+        if (buildingName.length > 0 && buildingTypeSelected.length > 0) {
+            setFormalidation(true);
+        }
+    }, [buildingName, buildingTypeSelected]);
 
     const [createBuildingData, setCreateBuildingData] = useState({});
 
@@ -280,15 +288,10 @@ const Buildings = () => {
             console.log(createBuildingData);
             await axios.post(`${BaseUrl}${createBuilding}`, buildingData, { headers }).then((res) => {
                 console.log('createBuilding sending data to API => ', res.data);
-                // console.log('setOverview => ', res.data);
                 handleClose();
+                fetchGeneralBuildingData();
                 fetchBuildingData();
             });
-            // axios.post(`${BaseUrl}${createBuilding}`, createBuildingData, { header }).then((res) => {
-            //     console.log('createBuilding sending data to API => ', res.data);
-
-            // });
-
             setIsProcessing(false);
         } catch (error) {
             setIsProcessing(false);
@@ -320,8 +323,6 @@ const Buildings = () => {
     const fetchBuildingData = async () => {
         try {
             setIsDataProcessing(true);
-
-            //setBuildingsData(buildingListData);
             setIsDataProcessing(false);
         } catch (error) {
             console.log(error);
@@ -334,13 +335,13 @@ const Buildings = () => {
         fetchBuildingData();
     }, [buildingListData]);
 
-    const fetchGeneralBuildingData = async ({ signal }) => {
+    const fetchGeneralBuildingData = async () => {
         let headers = {
             'Content-Type': 'application/json',
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        const { data } = await axios.get(`${BaseUrl}${generalBuilding}`, { headers }, signal);
+        const { data } = await axios.get(`${BaseUrl}${generalBuilding}`, { headers });
         setBuildingsData(data);
         return data;
     };
@@ -387,8 +388,6 @@ const Buildings = () => {
                                     type="search"
                                     name="search"
                                     placeholder="Search..."
-                                    // value={searchSensor}
-                                    // onChange={handleSearchChange}
                                 />
                             </div>
                         </div>
@@ -431,19 +430,6 @@ const Buildings = () => {
                                 Type
                             </Label>
                             <div>
-                                {/* <Input
-                                    type="select"
-                                    name="typee"
-                                    id="exampleSelect"
-                                    onChange={(e) => {
-                                        setBuildingTypeSelected(e.target.value);
-                                    }}
-                                    className="font-weight-bold">
-                                    <option>Select Building Type</option>
-                                    {buildingType.map((record) => {
-                                        return <option value={record.value}>{record.label}</option>;
-                                    })}
-                                </Input> */}
                                 <Select
                                     options={buildingType}
                                     name="typee"
@@ -455,29 +441,38 @@ const Buildings = () => {
                                 />
                             </div>
                         </FormGroup>
-
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>Area (Sq. Ft.)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                placeholder="Enter Area in Sq. Ft."
-                                className="font-weight-bold"
-                            />
-                        </Form.Group> */}
-
-                        {/* <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label>No of Devices</Form.Label>
-                            <Form.Control type="number" placeholder="Enter Devices" className="font-weight-bold" />
-                        </Form.Group> */}
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="primary" disabled={isProcessing} onClick={saveBuilding}>
-                        {isProcessing ? 'Adding...' : 'Add Building'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={() => {
+                                setFormalidation(false);
+                                handleClose();
+                            }}>
+                            Cancel
+                        </Button>
+                        <div style={{ width: '50%' }}>
+                            {!formalidation ? (
+                                <Button
+                                    style={{ width: '100%', backgroundColor: '#444CE7', border: 'none' }}
+                                    variant="primary"
+                                    disabled={true}
+                                    onClick={saveBuilding}>
+                                    {isProcessing ? 'Adding...' : 'Add Building'}
+                                </Button>
+                            ) : (
+                                <Button
+                                    style={{ width: '100%', backgroundColor: '#444CE7', border: 'none' }}
+                                    variant="primary"
+                                    disabled={isProcessing}
+                                    onClick={saveBuilding}>
+                                    {isProcessing ? 'Adding...' : 'Add Building'}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>
