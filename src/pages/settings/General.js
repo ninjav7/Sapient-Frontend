@@ -36,6 +36,10 @@ const General = () => {
     const [selectedTimezone, setSelectedTimezone] = useState({});
     const [isEditing, setIsEditing] = useState(false);
 
+    const [formValidation, setFormValidation] = useState(false);
+
+    console.log('formValidation', formValidation);
+
     // const [buildingData, setBuildingData] = useState({});
 
     const [shouldBlockNavigation, setShouldBlockNavigation] = useState(false);
@@ -255,6 +259,7 @@ const General = () => {
                 .then(
                     axios.spread((data1, data2, data3) => {
                         setLoadButton(false);
+                        setFormValidation(false);
                         console.log('Data1 => ', data1);
 
                         console.log('Data2 => ', data2);
@@ -290,6 +295,7 @@ const General = () => {
                 headers: header,
             })
             .then((res) => {
+                setFormValidation(false);
                 console.log('buildingDataListNow', res?.data);
                 setBuildingDataList(res?.data?.data);
             })
@@ -712,6 +718,7 @@ const General = () => {
                                                 setIsEditing(false);
                                                 setShouldBlockNavigation(false);
                                                 fetchBuildingData();
+                                                setFormValidation(false);
                                             }}>
                                             Cancel
                                         </button>
@@ -724,6 +731,7 @@ const General = () => {
                                             <button
                                                 type="button"
                                                 className="btn btn-primary buildings-save-style ml-3"
+                                                disabled={!formValidation}
                                                 onClick={() => {
                                                     setLoadButton(true);
                                                     saveBuildingSettings();
@@ -774,6 +782,7 @@ const General = () => {
                                                     <Switch
                                                         onChange={() => {
                                                             handleSwitchChange();
+                                                            setFormValidation(true);
                                                         }}
                                                         checked={buildingDetails.active}
                                                         onColor={'#2955E7'}
@@ -818,6 +827,7 @@ const General = () => {
                                                                     e.target.value
                                                                 );
                                                                 handleBldgSettingChanges('name', e.target.value);
+                                                                setFormValidation(true);
                                                             }}
                                                             // onBlur={EditBuildingHandler}
 
@@ -844,29 +854,6 @@ const General = () => {
                                                     <Skeleton count={1} height={35} width={350} />
                                                 ) : (
                                                     <div className="singleline-box-style">
-                                                        {/* <Input
-                                                            type="select"
-                                                            name="typee"
-                                                            id="exampleSelect"
-                                                            disabled={
-                                                                userPermission?.permissions?.permissions
-                                                                    ?.building_details_permission?.edit === false
-                                                            }
-                                                            onChange={(e) => {
-                                                                handleBldgSettingChanges('typee', e.target.value);
-                                                                localStorage.setItem(
-                                                                    'generalBuildingType',
-                                                                    e.target.value
-                                                                );
-                                                            }}
-                                                            
-
-                                                            value={buildingDetails.typee}
-                                                            className="font-weight-bold">
-                                                            <option>Office Building</option>
-
-                                                            <option>Residential Building</option>
-                                                        </Input> */}
                                                         <Select
                                                             id="exampleSelect"
                                                             defaultValue={typeOptions[0]}
@@ -881,6 +868,7 @@ const General = () => {
                                                                 console.log('e', e.value);
                                                                 handleBldgSettingChanges('typee', e.value);
                                                                 localStorage.setItem('generalBuildingType', e.value);
+                                                                setFormValidation(true);
                                                             }}
                                                             className="font-weight-bold"
                                                         />
@@ -921,6 +909,7 @@ const General = () => {
                                                                     'generalSquareFootage',
                                                                     e.target.value
                                                                 );
+                                                                setFormValidation(true);
                                                             }}
                                                             // onBlur={EditBuildingHandler}
 
@@ -968,6 +957,7 @@ const General = () => {
                                                             id="userAddress1"
                                                             placeholder="Address 1"
                                                             onChange={(e) => {
+                                                                setFormValidation(true);
                                                                 handleBldgSettingChanges(
                                                                     'street_address',
                                                                     e.target.value
@@ -1040,6 +1030,7 @@ const General = () => {
                                                         }
                                                         onChange={(e) => {
                                                             handleBldgSettingChanges('address_2', e.target.value);
+                                                            setFormValidation(true);
                                                             localStorage.setItem(
                                                                 'generalStreetAddress2',
                                                                 e.target.value
@@ -1072,6 +1063,7 @@ const General = () => {
                                                         }
                                                         onChange={(e) => {
                                                             handleBldgSettingChanges('city', e.target.value);
+                                                            setFormValidation(true);
                                                             localStorage.setItem(
                                                                 'generalCity',
                                                                 totalSelectedData?.properties?.locality
@@ -1107,6 +1099,7 @@ const General = () => {
                                                         }
                                                         onChange={(e) => {
                                                             handleBldgSettingChanges('state', e.target.value);
+                                                            setFormValidation(true);
                                                             localStorage.setItem(
                                                                 'generalState',
                                                                 totalSelectedData?.properties?.region
@@ -1138,6 +1131,7 @@ const General = () => {
                                                         onChange={(e) => {
                                                             handleBldgSettingChanges('zip_code', +e.target.value);
                                                             localStorage.setItem('generalZipCode', +e.target.value);
+                                                            setFormValidation(true);
                                                         }}
                                                         className="font-weight-bold"
                                                     />
@@ -1187,7 +1181,7 @@ const General = () => {
                                                     <Switch
                                                         onChange={(e) => {
                                                             handleDateTimeSwitch();
-
+                                                            setFormValidation(true);
                                                             if (e) {
                                                                 setTimeZone('24');
                                                                 localStorage.setItem('generaltimeZone', '24');
@@ -1238,6 +1232,7 @@ const General = () => {
                                                         onChange={(e) => {
                                                             checkDateTimeHandler('mon', e);
                                                             setSwitchPhrace({ ...switchPhrase, mon: e });
+                                                            setFormValidation(true);
                                                         }}
                                                         checked={weekToggle['mon']}
                                                         onColor={'#2955E7'}
@@ -1252,6 +1247,7 @@ const General = () => {
                                                     <DatePicker
                                                         style={{ position: 'relative' }}
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             console.log('moment(date)', moment(date).format('HH:MM'));
                                                             operatingHoursChangeHandler(date, 'mon', 'frm', 'to');
                                                             setTimeValue({
@@ -1275,29 +1271,14 @@ const General = () => {
                                                     />
                                                     {console.log(timeValue?.monFrom, 'timeValue?.monFrom')}
 
-                                                    {/* <input
-                                                type="text"
-                                                readOnly
-                                                style={{
-                                                    width: '77px',
-                                                    borderRadius: '0.2rem',
-                                                    border: '1px solid #d9dde2',
-                                                    height: '32px',
-                                                    boxShadow: '0px 1px 0px rgb(16 24 40 / 5%)',
-                                                    position: 'absolute',
-                                                    left: '132px',
-                                                }}
-                                            /> */}
-
                                                     {/* TODO: */}
                                                     {/* <DropDownInput setWeekToggle={setWeekToggle} /> */}
 
                                                     <div className="spacing"> to </div>
 
                                                     <DatePicker
-                                                        // selected={dateHandler(inputField.operating_hours, 'mon').to}
-
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'mon', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1326,6 +1307,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('tue', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, tue: e });
@@ -1345,6 +1327,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'tue').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'tue', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1373,6 +1356,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'tue').to}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'tue', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1401,6 +1385,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('wed', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, wed: e });
@@ -1420,6 +1405,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'wed').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'wed', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1448,6 +1434,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'wed').to}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'wed', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1476,6 +1463,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('thu', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, thu: e });
@@ -1495,6 +1483,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'thu').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'thu', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1523,6 +1512,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'thu').to}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'thu', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1551,6 +1541,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('fri', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, fri: e });
@@ -1570,6 +1561,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'fri').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'fri', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1598,6 +1590,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'fri').to}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'fri', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1626,6 +1619,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('sat', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, sat: e });
@@ -1645,6 +1639,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'sat').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'sat', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1673,6 +1668,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'sat').to}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'sat', 'to', 'frm');
 
                                                             setTimeValue({
@@ -1701,6 +1697,7 @@ const General = () => {
                                                 <div className="operate-hour-style">
                                                     <Switch
                                                         onChange={(e) => {
+                                                            setFormValidation(true);
                                                             checkDateTimeHandler('sun', e);
 
                                                             setSwitchPhrace({ ...switchPhrase, tue: e });
@@ -1720,6 +1717,7 @@ const General = () => {
                                                         // selected={dateHandler(inputField.operating_hours, 'sun').frm}
 
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'sun', 'frm', 'to');
 
                                                             setTimeValue({
@@ -1746,6 +1744,7 @@ const General = () => {
 
                                                     <DatePicker
                                                         onChange={(date) => {
+                                                            setFormValidation(true);
                                                             operatingHoursChangeHandler(date, 'sun', 'to', 'frm');
 
                                                             setTimeValue({

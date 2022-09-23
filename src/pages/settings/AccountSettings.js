@@ -37,6 +37,7 @@ const AccountSettings = () => {
             let response = res.data.data;
             localStorage.setItem('accountId', response.account_id);
             setAccoutnIdData(response.account_id);
+            setInputValidation(false);
         });
     };
 
@@ -70,6 +71,8 @@ const AccountSettings = () => {
         setAccoutnIdData(localStorage.getItem('accountId'));
     }, []);
 
+    const [inputValidation, setInputValidation] = useState(false);
+
     return (
         <React.Fragment>
             <Row className="page-title ml-2">
@@ -81,9 +84,11 @@ const AccountSettings = () => {
                             <button
                                 onClick={() => {
                                     setAccoutnIdData(localStorage.getItem('accountId'));
+                                    setInputValidation(false);
                                 }}
                                 type="button"
-                                className="btn btn-default buildings-cancel-style">
+                                className="btn btn-default buildings-cancel-style"
+                                disabled={!inputValidation}>
                                 Cancel
                             </button>
 
@@ -92,7 +97,8 @@ const AccountSettings = () => {
                                     updateAccountName();
                                 }}
                                 type="button"
-                                className="btn btn-primary buildings-save-style ml-3">
+                                className="btn btn-primary buildings-save-style ml-3"
+                                disabled={!inputValidation}>
                                 Save
                             </button>
                         </div>
@@ -136,6 +142,7 @@ const AccountSettings = () => {
                                                     value={accoutnIdData}
                                                     onChange={(e) => {
                                                         setAccoutnIdData(e.target.value);
+                                                        setInputValidation(true);
                                                     }}
                                                 />
                                             ) : (

@@ -6,7 +6,7 @@ import {
     DropdownMenu,
     DropdownItem,
     DropdownToggle,
-    Modal,
+    // Modal,
     Form,
     Button,
 } from 'reactstrap';
@@ -37,6 +37,7 @@ import {
     floorIdState,
     floorState,
     floorStaticId,
+    getFloorsData,
     iterationDataList,
     iterationNumber,
     reloadSpaces,
@@ -67,6 +68,8 @@ import {
 import InfiniteSpae from '../../components/Layouts/InfiniteSpace';
 import EditSpace from '../../components/Layouts/EditSpace';
 import InfiniteSpace from '../../components/Layouts/InfiniteSpace';
+import Edit from '../../assets/icon/pencil.png';
+import { Modal } from 'antd';
 
 const Layout = () => {
     let cookies = new Cookies();
@@ -174,7 +177,7 @@ const Layout = () => {
         building_id: bldgId,
     });
 
-    useEffect(() => {
+    const getFloorsFunc = () => {
         try {
             const headers = {
                 'Content-Type': 'application/json',
@@ -185,11 +188,18 @@ const Layout = () => {
             axios.get(`${BaseUrl}${getFloors}${params}`, { headers }).then((res) => {
                 setFloorListAPI(res.data.data);
                 setFlootListsuccess(true);
+                setFloorData(res.data.data);
             });
         } catch (err) {
             console.log(err, 'errLayout');
         }
+    };
+
+    useEffect(() => {
+        getFloorsFunc();
     }, [bldgId]);
+
+    const [floorData, setFloorData] = useAtom(getFloorsData);
 
     // Call only when floor create modal is completed
     useEffect(() => {
@@ -285,19 +295,23 @@ const Layout = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
-    const [deleteFloorModal, setDeleteFloorModal] = useState(false);
+    // const [deleteFloorModal, setDeleteFloorModal] = useState(false);
 
-    const [deletingFloor] = useAtom(deleteFloor);
-    const handleDeleteClose = () => setDeleteFloorModal(false);
-
-    useEffect(() => {
-        if (deletingFloor) {
-            setModalShow(false);
-            setDeleteFloorModal(deletingFloor);
-        }
-    }, [deletingFloor]);
+    const [deletingFloor, setDeletingFloorModal] = useAtom(deleteFloor);
+    const handleDeleteClose = () => {
+        setDeletingFloorModal(false);
+    };
 
     console.log('deletingFloor', deletingFloor);
+
+    // useEffect(() => {
+    //     if (deletingFloor && modalShow) {
+    //         setModalShow(false);
+    //         setDeleteFloorModal(deletingFloor);
+    //     }
+    // }, [deletingFloor, modalShow]);
+
+    // console.log('deleteFloorModal', deleteFloorModal);
 
     const DeleteFloorsFunc = () => {
         const headers = {
@@ -311,38 +325,25 @@ const Layout = () => {
         });
     };
 
+    const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const handleDeleteAlertClose = () => setShowDeleteAlert(false);
+    const handleDeleteAlertShow = () => setShowDeleteAlert(true);
+
+    console.log('showDeleteAlert', showDeleteAlert);
+
+    const [floorName, setFloorName] = useState('');
+
     return (
         <React.Fragment>
-            <Modal show={deleteFloorModal} onHide={handleDeleteClose} centered>
-                <Modal.Header>
-                    <Modal.Title>Delete Floor</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <span>Are you sure you want to floor</span>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        flexWrap: 'nowrap',
-                    }}>
-                    <Button
-                        style={{ width: '50%', backgroundColor: '#ffffff', borderColor: '#000000', color: '#000000' }}
-                        onClick={handleDeleteClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={DeleteFloorsFunc}
-                        style={{ width: '50%', backgroundColor: '#b42318', borderColor: '#b42318' }}>
-                        Delete
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-            <EditFloorModal editFloor={editFloor} show={modalShow} onHide={() => setModalShow(false)} />
+            <EditFloorModal
+                editFloor={editFloor}
+                show={modalShow}
+                floorName={floorName}
+                setModalShow={setModalShow}
+                handleDeleteAlertShow={handleDeleteAlertShow}
+                onHide={() => setModalShow(false)}
+            />
+
             <EditSpace currentFloorId={currentFloorId} show={modalSpaceShow} onHide={() => setModalSpaceShow(false)} />
             <EditSpace
                 show={modalSpaceShow2}
@@ -463,6 +464,7 @@ const Layout = () => {
                                             <DropdownItem
                                                 onClick={() => {
                                                     setModalShow(true);
+                                                    setEditFloor(false);
                                                 }}>
                                                 Add Floor
                                             </DropdownItem>
@@ -477,21 +479,18 @@ const Layout = () => {
                                     <>
                                         {floorListAPI.map((floorName, i) => (
                                             <div
-                                                className="container-single-content "
+                                                key={i}
+                                                className="container-single-content"
                                                 style={{ cursor: 'pointer' }}
                                                 onClick={() => {
-                                                    // setFloorId(floorName?.floor_id);
+                                                    setFloorName(floorName?.name);
                                                     setFloorid(floorName?.floor_id);
-                                                    // setSpaceID(floorName?.floor_id);
                                                     setCurrentFloorId(floorName?.floor_id);
                                                     setGetSpaceName(floorName?.name);
                                                     setFloorIdNow(floorName?.floor_id);
                                                     setModelToShow(2);
                                                 }}>
                                                 <span> {floorName?.name}</span>
-                                                {/* <span class="badge badge-light mr-4 font-weight-bold float-right ">
-                                                    {spaceName?.type}
-                                                </span> */}
                                             </div>
                                         ))}
                                     </>
@@ -1569,6 +1568,44 @@ const Layout = () => {
                     </div>
                 </Col>
             </Row>
+            {/* {showDeleteAlert} */}
+            {/* {showDeleteAlert && ( */}
+            {/* <Modal show={showDeleteAlert} onHide={handleDeleteAlertClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Breaker</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">Are you sure you want to delete the Breaker?</div>
+                        <div className="unlink-alert-styling">
+                            This will remove the breaker from the panel and is not recoverable.
+                        </div>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="light"
+                        onClick={() => {
+                            handleDeleteAlertClose();
+                            // handleEditBreakerShow();
+                        }}
+                        className="unlink-cancel-style">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        // onClick={() => {
+                        //     deleteCurrentBreaker();
+                        // }}
+                        className="unlink-reset-style">
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal> */}
+
+            {/* {showDeleteAlert && <div>manas</div>} */}
+            {/* )} */}
         </React.Fragment>
     );
 };

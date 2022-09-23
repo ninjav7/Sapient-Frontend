@@ -144,6 +144,8 @@ const Users = () => {
     const handleShow = () => setShow(true);
     const [userPermission] = useAtom(userPermissionData);
 
+    const [formValidation, setFormValidation] = useState(false);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
@@ -162,6 +164,24 @@ const Users = () => {
         last_name: '',
         email: '',
     });
+
+    // setFormValidation
+    useEffect(() => {
+        if (
+            userObj.first_name.length > 0 &&
+            userObj.last_name.length > 0 &&
+            userObj.email.length > 0 &&
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)
+        ) {
+            setFormValidation(true);
+        }
+    }, [userObj]);
+
+    useEffect(() => {
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userObj.email)) {
+            setFormValidation(false);
+        }
+    }, [userObj]);
 
     console.log('userData', userData);
     console.log('userObj', userObj);
@@ -359,16 +379,25 @@ const Users = () => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveUserData();
-                        }}>
-                        {isProcessing ? 'Adding User...' : 'Add User'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={() => {
+                                handleClose();
+                                setFormValidation(false);
+                            }}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            variant="primary"
+                            disabled={!formValidation}
+                            onClick={() => {
+                                saveUserData();
+                            }}>
+                            {isProcessing ? 'Adding User...' : 'Add User'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

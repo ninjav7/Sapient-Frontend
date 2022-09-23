@@ -15,6 +15,8 @@ const EditFloorModal = (props) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    console.log('props.floorName', props.floorName);
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     // API Body
@@ -22,15 +24,17 @@ const EditFloorModal = (props) => {
 
     console.log('apiBody', apiBody);
 
-    const [floorName, setFloorName] = useState('');
+    const [floorsName, setFloorName] = useState('');
     const [floors, setFloors] = useAtom(floorList);
     const [floorModal, setFloorModal] = useAtom(closedEditFloorModal);
     const [floorid] = useAtom(floorIdState);
     const [floorNameApi, setFloorNameApi] = useState();
 
+    console.log('floorsName', floorsName);
+
     useEffect(() => {
-        setFloorNameApi({ name: floorName });
-    }, [floorName]);
+        setFloorNameApi({ name: floorsName });
+    }, [floorsName]);
 
     const createFloorsFunc = () => {
         const headers = {
@@ -77,6 +81,7 @@ const EditFloorModal = (props) => {
                                 <Label>Name</Label>
                                 <Input
                                     className="mb-3 font-weight-bold"
+                                    defaultValue={props.floorName}
                                     onChange={(e) => {
                                         setApiBody({ ...apiBody, name: e.target.value });
                                         setFloorName(e.target.value);
@@ -86,14 +91,17 @@ const EditFloorModal = (props) => {
                             </div>
                             <div>
                                 <Label>Type</Label>
-                                <Input className="mb-3 font-weight-bold" disabled />
+                                <Input className="mb-3 font-weight-bold" disabled value="Floor" />
                                 <span>Only Floors can be at the building root</span>
                             </div>
-                            <div style={{ marginTop: '20px' }}>
+                            <div
+                                style={{ marginTop: '20px' }}
+                                onClick={() => {
+                                    props.onHide();
+                                    props.handleDeleteAlertShow();
+                                }}>
                                 <span
-                                    onClick={() => {
-                                        setDeletingFloor(true);
-                                    }}
+                                    onClick={() => {}}
                                     style={{
                                         backgroundColor: '#fdebea',
                                         padding: '10px 15px',
@@ -117,20 +125,23 @@ const EditFloorModal = (props) => {
                                 }}
                                 autoFocus
                             />
+                            <Label>Type</Label>
+                            <Input
+                                style={{ color: 'grey' }}
+                                className="mb-3 font-weight-bold"
+                                disabled={true}
+                                value="Floor"
+                            />
+                            <span style={{ marginBottom: '10px' }}>Only Floors can be at the building root</span>
                         </>
                     )}
-                    {/* <Label>Type</Label>
-                    <Input id="font-weight-bold mb-3" name="select" type="select" disabled>
-                        <option>Floors</option>
-                    </Input>
-                    <span>Only floors can be at the building root</span> */}
                 </Modal.Body>
 
                 <Modal.Footer>
                     <Button onClick={props.onHide}>Cancel</Button>
                     <Button
                         onClick={() => {
-                            setFloors((el) => [...el, floorName]);
+                            setFloors((el) => [...el, floorsName]);
                             if (props.editFloor) {
                                 updateFloorsFunc();
                             }

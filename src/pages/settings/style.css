@@ -280,25 +280,28 @@
 .container-content-group {
     padding-left: 10px;
     display: flex;
-
     flex-direction: column;
 }
 
-.container-single-content:hover {
+/* .container-single-content:hover { */
+    /* background: #f3f4f7; */
+    /* font-weight: 700; */
+    /* background-image: url('../../assets/icon/pencil.png'); */
+    /* background-repeat: no-repeat; */
+    /* background-position: 225px 10px; */
+/* } */
+.hover-image-delete:hover {
     background: #f3f4f7;
-    font-weight: 700;
-    background-image: url('../../assets/icon/arrow.svg');
-    background-repeat: no-repeat;
-    background-position: 225px 10px;
+    background-image: url('../../assets/icon/pencil.png');
 }
 
-.container-single-content:active {
+/* .container-single-content:active {
     background: #f2f4f7;
     font-weight: 700;
     background-image: url('../../assets/icon/arrow.svg');
     background-repeat: no-repeat;
     background-position: 225px 10px;
-}
+} */
 
 .container-single-content {
     padding-top: 5px;

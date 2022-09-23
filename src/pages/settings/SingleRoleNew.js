@@ -100,6 +100,8 @@ const SingleRoleNew = () => {
 
     const { roleId } = useParams();
 
+    const [formValidation, setFormValidation] = useState(false);
+
     console.log('roleId', roleId);
 
     const [checked, setChecked] = useState(false);
@@ -289,6 +291,14 @@ const SingleRoleNew = () => {
             delete: false,
         },
     });
+
+    useEffect(() => {
+        if (userPermissionRoleBody.name) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [userPermissionRoleBody]);
 
     console.log('userPermissionRoleBody', userPermissionRoleBody);
 
@@ -540,6 +550,7 @@ const SingleRoleNew = () => {
                 setSinglePermissionDetail(res?.data?.data?.permission_details);
                 setUserData(res?.data?.data?.related_users);
                 setRoleName(res?.data?.data?.permission_details?.name);
+                setFormValidation(false);
             });
     };
 
@@ -572,6 +583,7 @@ const SingleRoleNew = () => {
             .then((res) => {
                 console.log(res?.data?.data, 'permissionRoleUpdateSingle');
                 getUserPermissionDetail();
+                setFormValidation(false);
             });
     };
 
@@ -601,7 +613,9 @@ const SingleRoleNew = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-light font-weight-bold cancel-btn-style"
-                                onClick={() => {}}>
+                                onClick={() => {
+                                    setFormValidation(false);
+                                }}>
                                 Cancel
                             </button>
                             <button
@@ -609,7 +623,8 @@ const SingleRoleNew = () => {
                                 className="btn btn-md btn-primary font-weight-bold ml-2"
                                 onClick={() => {
                                     updateSinglePermissionRoleFunc();
-                                }}>
+                                }}
+                                disabled={!formValidation}>
                                 Save
                             </button>
                         </div>
@@ -637,6 +652,7 @@ const SingleRoleNew = () => {
                                 onChange={(e) => {
                                     setRoleName(e.target.value);
                                     setUserPermissionRoleBody({ ...userPermissionRoleBody, name: e.target.value });
+                                    // setFormValidation(true);
                                 }}
                                 value={userPermissionRoleBody?.name}></Input>
                         )}

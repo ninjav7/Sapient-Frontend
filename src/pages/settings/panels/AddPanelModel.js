@@ -18,6 +18,11 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [formValidation, setFormValidation] = useState(false);
+
+    useEffect(() => {
+        setFormValidation(false);
+    }, []);
 
     const [panelObj, setPanelObj] = useState({
         name: '',
@@ -29,6 +34,20 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         rated_amps: 0,
         breaker_count: 0,
         panel_type: 'distribution',
+    });
+
+    useEffect(() => {
+        if (
+            panelObj.name.length > 0 &&
+            panelObj.rated_amps > 0 &&
+            panelObj.voltage.length > 0 &&
+            panelObj.panel_type.length > 0 &&
+            panelObj.breaker_count > 0
+        ) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
     });
 
     const panelType = [
@@ -299,16 +318,21 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                     </FormGroup>
                 </Form>
                 <Modal.Footer>
-                    <Button variant="light" onClick={closeAddPanelModel}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            savePanelData();
-                        }}>
-                        {isProcessing ? 'Saving...' : 'Save'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={closeAddPanelModel}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            disabled={!formValidation}
+                            onClick={() => {
+                                savePanelData();
+                            }}>
+                            {isProcessing ? 'Saving...' : 'Save'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </>
