@@ -51,11 +51,12 @@ const EquipChartModal = ({
     const [selectedTab, setSelectedTab] = useState(0);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)' },
-        { value: 'peak-power', label: 'Peak Power (kW)' },
-        { value: 'carbon-emissions', label: 'Carbon Emissions' },
+        { value: 'energy', label: 'Energy (kWh)', unit:'kWh' },
+        { value: 'power', label: 'Power (kW)', unit:'kW' },
+        // { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ];
 
+    const [selectedUnit,setSelectedUnit]=useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -93,6 +94,11 @@ const EquipChartModal = ({
         return label;
     };
 
+    const handleUnitChange = (value) => {
+        let obj = metric.find((record) => record.value === value);
+        setSelectedUnit(obj.unit);
+        console.log(obj.unit);
+    };
     const buildingAlertsData = async () => {
         if (startDate === null) {
             return;
@@ -265,9 +271,8 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${(
-                            series[seriesIndex][dataPointIndex] / 1000
-                        ).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit==='kWh'?(series[seriesIndex][dataPointIndex] / 1000).toFixed(3):(series[seriesIndex][dataPointIndex] / 1000000).toFixed(3)} 
+                         ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
@@ -276,19 +281,19 @@ const EquipChartModal = ({
         },
     });
 
-    const [seriesLine, setSeriesLine] = useState([
-        {
-            data: [
-                [1650874614695, 784.55],
-                [1650874694654, 169],
-                [1650782931595, 210],
-                [1650874587699, 825],
-                [1650955774141, 234.55],
-                [1650874722069, 240],
-                [1650874733485, 989.55],
-            ],
-        },
-    ]);
+    // const [seriesLine, setSeriesLine] = useState([
+    //     {
+    //         data: [
+    //             [1650874614695, 784.55],
+    //             [1650874694654, 169],
+    //             [1650782931595, 210],
+    //             [1650874587699, 825],
+    //             [1650955774141, 234.55],
+    //             [1650874722069, 240],
+    //             [1650874733485, 989.55],
+    //         ],
+    //     },
+    // ]);
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -346,7 +351,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return (val / 1000000).toFixed(2);
                 },
             },
         },
@@ -458,7 +463,7 @@ const EquipChartModal = ({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?equipment_id=${equipId}&consumption=energy`;
+            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
@@ -475,6 +480,7 @@ const EquipChartModal = ({
                     let recordToInsert = {
                         data: data,
                         name: 'AHUs',
+                        unit: selectedUnit
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -641,6 +647,7 @@ const EquipChartModal = ({
         }
         let res = [];
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
+        console.log(res);
         setEquipResult(res);
     }, [equipmentTypeData]);
 
@@ -722,7 +729,7 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={handleChartClose}>
+                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -730,7 +737,7 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={handleChartClose}>
+                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
                                                 Save
                                             </button>
                                         </div>
@@ -762,7 +769,7 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={handleChartClose}>
+                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -770,7 +777,7 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={handleChartClose}>
+                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
                                                 Save
                                             </button>
                                         </div>
@@ -907,6 +914,7 @@ const EquipChartModal = ({
                                                     return;
                                                 }
                                                 setConsumption(e.target.value);
+                                                handleUnitChange(e.target.value);
                                             }}
                                             className="font-weight-bold model-sensor-energy-filter mr-2"
                                             style={{ display: 'inline-block', width: 'fit-content' }}
@@ -996,7 +1004,7 @@ const EquipChartModal = ({
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
                                                     defaultValue={
-                                                        equipResult.length === 0 ? '' : equipResult.equipment_id
+                                                    equipResult?.equipment_id
                                                     }
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
@@ -1020,7 +1028,9 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="endUsePop"
                                                     className="font-weight-bold"
-                                                    defaultValue="">
+                                                    defaultValue={
+                                                        equipResult?.end_use_id
+                                                    }>
                                                     <option selected>Select Category</option>
                                                     {endUse?.map((record) => {
                                                         return (

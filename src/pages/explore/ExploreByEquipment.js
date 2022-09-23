@@ -442,7 +442,7 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                    {/* <div className="page-button-style">
+                    <div className="page-button-style">
                         <button
                             type="button"
                             className="btn btn-md btn-light font-weight-bold mt-4"
@@ -483,7 +483,7 @@ const ExploreEquipmentTable = ({
                                 ))}
                             </select>
                         </div>
-                    </div> */}
+                    </div>
                     </Col>
                 </CardBody>
             </Card>
@@ -529,14 +529,21 @@ const ExploreByEquipment = () => {
                 autoSelected: 'pan',
                 show: false,
             },
-
             animations: {
                 enabled: false,
             },
+            zoom: {
+                type: 'x',
+                enabled: true,
+                autoScaleYaxis: true
+              },
         },
         legend: {
             position: 'top',
             horizontalAlign: 'left',
+            showForSingleSeries: true,
+            // showForNullSeries: false,
+            // showForZeroSeries: false,
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
@@ -606,9 +613,12 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM - HH:mm');
+                    return moment(timestamp).format('DD/MM HH:00');
+                    // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
+            tickAmount: 24,
+            tickPlacement: 'between',
         },
         yaxis: {
             labels: {
@@ -659,7 +669,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM - HH:mm');
+                    return moment(timestamp).format('DD/MM');
                 },
             },
         },
@@ -709,6 +719,16 @@ const ExploreByEquipment = () => {
     const [spaceTxt, setSpaceTxt] = useState('');
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
+    const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
+
+    const [showDropdown, setShowDropdown] = useState(false);
+    const setDropdown = () => {
+        setShowDropdown(!showDropdown)
+        if(minConValue!==0 && maxConValue!==topEnergyConsumption && (!showDropdown!==true)){
+            setAPIFlag(!APIFlag);
+            setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`)
+        }
+    }
 
     const handleAllEquip = (e) => {
         let slt = document.getElementById('allEquipType');
@@ -1007,7 +1027,7 @@ const ExploreByEquipment = () => {
         set_maxPerValue(values[1]);
     };
 
-    const exploreFilterDataFetch = async (bodyVal) => {
+    const exploreFilterDataFetch = async (bodyVal,txt) => {
         try {
             setIsExploreDataLoading(true);
             let headers = {
@@ -1020,12 +1040,14 @@ const ExploreByEquipment = () => {
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
-                setPaginationData(res.data);
-                setSeriesData([]);
+                        setPaginationData(res.data);
+                        setSeriesData([]);
                         setSeriesLineData([]);
+                        if(txt==="consumption" || txt==="endUse")
+                            removeDuplicatesEndUse(txt, responseData.data);
                 if (responseData.data.length !== 0) {
-                    setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption(responseData.data[0].peak_power.now);
+                    //setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    //setTopPeakConsumption(responseData.data[0].peak_power.now);
                     // set_minConValue(0);
                     // set_maxConValue(responseData.data[0].consumption.now)
                 }
@@ -1209,9 +1231,9 @@ const ExploreByEquipment = () => {
                         setSeriesData([]);
                         setSeriesLineData([]);
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
-                        setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                        setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                         set_minConValue(0.0);
-                        set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                        set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                     }
                     setExploreTableData(responseData.data);
                     setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1258,9 +1280,9 @@ const ExploreByEquipment = () => {
                     setSeriesData([]);
                         setSeriesLineData([]);
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
-                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1296,9 +1318,9 @@ const ExploreByEquipment = () => {
                     setSeriesData([]);
                         setSeriesLineData([]);
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(3));
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
-                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(3));
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
                 }
                 setExploreTableData(responseData.data);
                 setRemoveDuplicateFlag(!removeDuplicateFlag);
@@ -1469,6 +1491,8 @@ const ExploreByEquipment = () => {
                             id: arr[0].equipment_id,
                         };
                         // console.log(recordToInsert);
+                        const arrayColumn = (arr, n) => arr.map(x => x[n]);
+                        console.log(arrayColumn(data, 0))
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
@@ -1584,7 +1608,7 @@ const ExploreByEquipment = () => {
         });
         // console.log(arr);
         setSelectedOptions(arr);
-
+        let txt="";
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
@@ -1603,6 +1627,7 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                txt="consumption"
                 set_minConValue(0.0);
                 set_maxConValue(topVal);
                 break;
@@ -1659,6 +1684,7 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
+                txt="endUse"
                 break;
             case 'location_type':
                 setSelectedSpaceType([]);
@@ -1679,7 +1705,7 @@ const ExploreByEquipment = () => {
                 }
                 break;
         }
-        exploreFilterDataFetch(arr1);
+        exploreFilterDataFetch(arr1,txt);
     };
 
     // useEffect(()=>{
@@ -1709,6 +1735,7 @@ const ExploreByEquipment = () => {
             return;
         }
         let arr = {};
+        let txt="";
         arr['date_from'] = startDate;
         arr['date_to'] = endDate;
         if (maxConValue > 0.01) {
@@ -1716,6 +1743,7 @@ const ExploreByEquipment = () => {
                 gte: minConValue * 1000,
                 lte: maxConValue * 1000,
             };
+            txt="consumption";
         }
         if (selectedLocation.length !== 0) {
             arr['location'] = selectedLocation;
@@ -1725,11 +1753,12 @@ const ExploreByEquipment = () => {
         }
         if (selectedEndUse.length !== 0) {
             arr['end_use'] = selectedEndUse;
+            txt="endUse";
         }
         if (selectedSpaceType.length !== 0) {
             arr['space_type'] = selectedSpaceType;
         }
-        exploreFilterDataFetch(arr);
+        exploreFilterDataFetch(arr,txt);
     }, [APIFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
 
     const clearFilterData = () => {
@@ -1879,6 +1908,68 @@ const ExploreByEquipment = () => {
         return [['Equipment Name', ['timestamp', 'energy']], ...streamData];
     };
 
+    useEffect(()=>{
+            console.log("showDropdown",showDropdown);
+    },[showDropdown])
+
+    const removeDuplicatesEndUse=(txt,tabledata)=>{
+        uniqueIds.length=0
+        uniqueLocationIds.length=0
+        uniqueSpaceTypeIds.length=0
+        if(txt==="consumption")
+            uniqueEndUseIds.length=0
+        const uniqueEqupimentTypes = tabledata.filter((element) => {
+            const isDuplicate = uniqueIds.includes(element.equipments_type);
+            if (!isDuplicate) {
+                uniqueIds.push(element.equipments_type);
+                return true;
+            }
+            return false;
+        });
+        const uniqueLocation = tabledata.filter((element) => {
+            const isDuplicate = uniqueLocationIds.includes(element?.location);
+
+            if (!isDuplicate) {
+                uniqueLocationIds.push(element?.location);
+                return true;
+            }
+            return false;
+        });
+        const uniqueSpaceType = tabledata.filter((element) => {
+            const isDuplicate = uniqueSpaceTypeIds.includes(element?.location_type);
+
+            if (!isDuplicate) {
+                uniqueSpaceTypeIds.push(element?.location_type);
+                return true;
+            }
+            return false;
+        });
+        if(txt==="consumption"){
+        const uniqueEndUse = tabledata.filter((element) => {
+            const isDuplicate = uniqueEndUseIds.includes(element?.end_user);
+
+            if (!isDuplicate) {
+                uniqueEndUseIds.push(element?.end_user);
+                return true;
+            }
+            return false;
+        });
+        
+        setRemoveEndUseDuplication(uniqueEndUse)
+    }
+
+        // console.log("Unique End Use ",uniqueEndUse);
+        // console.log("Unique Equipment Type ", uniqueEqupimentTypes)
+        // console.log("Unique location ", uniqueLocation)
+        // console.log("Unique Space Type ",uniqueSpaceType)
+
+        setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
+        setRemoveLocationDuplication(uniqueLocation);
+        setRemoveSpaceTyepDuplication(uniqueSpaceType);
+    }
+    
+    
+
     return (
         <>
             <Row className="ml-2 mt-2 explore-filters-style">
@@ -1966,13 +2057,14 @@ const ExploreByEquipment = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end">
+                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end" onToggle={setDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
+                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}
+                                                >
                                                 {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}
                                             </Dropdown.Toggle>
                                             <button
@@ -1989,15 +2081,10 @@ const ExploreByEquipment = () => {
                                                 <div>
                                                     <a
                                                         className="pop-text"
-                                                        onClick={(e) => {
-                                                            setAPIFlag(!APIFlag);
-                                                            setConsumptionTxt(
-                                                                `${minConValue} - ${maxConValue} kWh Used`
-                                                            );
-                                                        }}>
+                                                        >
                                                         kWh Used
                                                     </a>
-                                                    <button
+                                                    {/* <button
                                                         style={{
                                                             border: 'none',
                                                             backgroundColor: 'white',
@@ -2005,7 +2092,7 @@ const ExploreByEquipment = () => {
                                                         }}
                                                         onClick={clearFilterData}>
                                                         <i className="uil uil-multiply"></i>
-                                                    </button>
+                                                    </button> */}
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minConValue} />{' '}
@@ -2014,10 +2101,10 @@ const ExploreByEquipment = () => {
                                                 <div style={{ marginTop: '2rem' }}>
                                                     <RangeSlider
                                                         name="consumption"
-                                                        STEP={0.01}
+                                                        STEP={1}
                                                         MIN={0}
                                                         range={[minConValue, maxConValue]}
-                                                        MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(3)}
+                                                        MAX={(topEnergyConsumption / 1000 + 0.5).toFixed(2)}
                                                         onSelectionChange={handleInput}
                                                     />
                                                 </div>
