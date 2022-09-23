@@ -351,7 +351,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return (val / 1000000).toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },

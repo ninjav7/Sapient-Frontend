@@ -541,7 +541,7 @@ const ExploreByEquipment = () => {
         legend: {
             position: 'top',
             horizontalAlign: 'left',
-            showForSingleSeries: true,
+            //showForSingleSeries: true,
             // showForNullSeries: false,
             // showForZeroSeries: false,
             fontSize: '18px',
