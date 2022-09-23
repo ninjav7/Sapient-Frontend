@@ -220,6 +220,28 @@ const EndUseType = () => {
 
     const [hvacUsageData, setHvacUsageData] = useState([]);
 
+    const fetchEndUseType = (end_uses_type) => {
+        if (end_uses_type === 'hvac') {
+            return 'HVAC';
+        }
+
+        if (end_uses_type === 'lighting') {
+            return 'Lighting';
+        }
+
+        if (end_uses_type === 'plug') {
+            return 'Plug';
+        }
+
+        if (end_uses_type === 'process') {
+            return 'Process';
+        }
+
+        if (end_uses_type === 'other') {
+            return 'Other';
+        }
+    };
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -318,15 +340,14 @@ const EndUseType = () => {
     }, [endUseType]);
 
     useEffect(() => {
-        if (endUseName === '') {
-            return;
-        }
         if (startDate === null) {
             return;
         }
         if (endDate === null) {
             return;
         }
+
+        let endUseTypeRequest = fetchEndUseType(endUseType);
 
         const endUsesDataFetch = async () => {
             try {
@@ -336,7 +357,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEndUsesDataFetched(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUses}${params}`,
@@ -348,7 +369,8 @@ const EndUseType = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        let data = response.find((element) => element.device === endUseName);
+                        let requestEndUseType = fetchEndUseType(endUseType);
+                        let data = response.find((element) => element.device === requestEndUseType);
                         setEndUsesData(data);
                         setIsEndUsesDataFetched(false);
                     });
@@ -367,7 +389,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEquipTypeChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
@@ -424,7 +446,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
@@ -485,9 +507,11 @@ const EndUseType = () => {
                                     Total Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {(endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                        maximumFractionDigits: 0,
-                                    })}
+                                    {endUsesData?.energy_consumption?.now === 0
+                                        ? 0
+                                        : (endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
+                                              maximumFractionDigits: 0,
+                                          })}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
                                 {endUsesData?.energy_consumption?.now >= endUsesData?.energy_consumption?.old ? (
@@ -562,12 +586,14 @@ const EndUseType = () => {
                                     After-Hours Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {(endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
-                                        undefined,
-                                        {
-                                            maximumFractionDigits: 0,
-                                        }
-                                    )}
+                                    {endUsesData?.after_hours_energy_consumption?.now === 0
+                                        ? 0
+                                        : (endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
+                                              undefined,
+                                              {
+                                                  maximumFractionDigits: 0,
+                                              }
+                                          )}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
                                 {endUsesData?.after_hours_energy_consumption?.now >=
