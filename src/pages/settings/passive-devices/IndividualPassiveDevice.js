@@ -71,7 +71,9 @@ const IndividualPassiveDevice = () => {
     const [deviceData, setDeviceData] = useState([]);
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const CONVERSION_ALLOWED_UNITS = ['power'];
+
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([

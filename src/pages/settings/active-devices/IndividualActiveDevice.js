@@ -91,7 +91,8 @@ const IndividualActiveDevice = () => {
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
 
-    const CONVERSION_ALLOWED_UNITS = ['mAh', 'power'];
+    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
 

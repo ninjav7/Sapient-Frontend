@@ -12,6 +12,7 @@ import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import ModalHeader from '../../components/ModalHeader';
+import { formatConsumptionValue } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
 
@@ -355,7 +356,8 @@ const DeviceChartModel = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
                             0
                         )} ${selectedUnit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
