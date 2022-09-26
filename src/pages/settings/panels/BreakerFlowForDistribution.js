@@ -1866,7 +1866,7 @@ const BreakersComponent = ({ data, id }) => {
                                     options={equipmentDataSearch}
                                     // value={(option) => option.value === breakerData.equipment_link[0]}
                                     value={equipmentDataSearch.filter(
-                                        (option) => option.value === breakerData.equipment_link[0]
+                                        (option) => (option.value === record.breakerId) !== ''
                                     )}
                                     onChange={(e) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);
