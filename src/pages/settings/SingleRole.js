@@ -25,6 +25,8 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Cookies } from 'react-cookie';
 import axios from 'axios';
 import { BaseUrl, createPermissionRole, getPermissionSingleDetail } from '../../services/Network';
+import { userPermissionData } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const UserTable = ({ userData }) => {
     useEffect(() => {
@@ -563,6 +565,7 @@ const SingleRole = () => {
             .get(`${BaseUrl}${getPermissionSingleDetail}?permission_id=${roleId}`, { headers: header })
             .then((res) => {
                 setSinglePermissionDetail(res?.data?.data?.permission_details);
+                console.log('res?.data?.data', res?.data?.data);
                 setRoleName(res?.data?.data?.permission_details?.name);
             });
     };
@@ -572,6 +575,10 @@ const SingleRole = () => {
             getSinglePermissionRoleFunc();
         }
     }, [roleId]);
+
+    const [userPermission] = useAtom(userPermissionData);
+
+    console.log('userPermissionDataIn', userPermission);
 
     return (
         <React.Fragment>
@@ -696,6 +703,7 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={20}
                                                 width={36}
+                                                disabled={userPermission?.user_role === 'member'}
                                             />
                                             <span className="ml-2 full-access-font">Full Access</span>
                                         </div>
@@ -720,6 +728,11 @@ const SingleRole = () => {
                                                     <CustomInput
                                                         type="checkbox"
                                                         id="view"
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_general_permission?.view
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_general_permission?.view
                                                         }
@@ -747,10 +760,14 @@ const SingleRole = () => {
                                                         id="edit"
                                                         label="Edit"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_general_permission?.edit
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_general_permission?.edit
                                                         }
-                                                        disabled={false}
                                                         onChange={(e) => {
                                                             // setAccount_general_permission({
                                                             //     ...account_general_permission,
@@ -788,7 +805,11 @@ const SingleRole = () => {
                                                         id="BuildingsView"
                                                         label="View"
                                                         inline
-                                                        disabled={false}
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.view
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_buildings_permission?.view
                                                         }
@@ -809,7 +830,11 @@ const SingleRole = () => {
                                                         id="BuildingsCreate"
                                                         label="Create"
                                                         inline
-                                                        disabled={false}
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.create
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_buildings_permission?.create
                                                         }
@@ -830,7 +855,11 @@ const SingleRole = () => {
                                                         id="BuildingsEdit"
                                                         label="Edit"
                                                         inline
-                                                        disabled={false}
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.edit
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_buildings_permission?.edit
                                                         }
@@ -851,7 +880,11 @@ const SingleRole = () => {
                                                         id="BuildingsDelete"
                                                         label="Delete"
                                                         inline
-                                                        disabled={false}
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_buildings_permission?.delete
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_buildings_permission?.delete
                                                         }
@@ -886,6 +919,11 @@ const SingleRole = () => {
                                                         id="usersView"
                                                         label="View"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_user_permission?.view
+                                                        }
                                                         checked={userPermissionRoleBody?.account_user_permission?.view}
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -904,6 +942,11 @@ const SingleRole = () => {
                                                         id="usersCreate"
                                                         label="Create"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_user_permission?.create
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_user_permission?.create
                                                         }
@@ -925,6 +968,11 @@ const SingleRole = () => {
                                                         label="Edit"
                                                         inline
                                                         checked={userPermissionRoleBody?.account_user_permission?.edit}
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_user_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -942,6 +990,11 @@ const SingleRole = () => {
                                                         id="usersDelete"
                                                         label="Delete"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_user_permission?.delete
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_user_permission?.delete
                                                         }
@@ -976,6 +1029,11 @@ const SingleRole = () => {
                                                         id="rolesview"
                                                         label="View"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_roles_permission?.view
+                                                        }
                                                         checked={userPermissionRoleBody?.account_roles_permission?.view}
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -994,6 +1052,11 @@ const SingleRole = () => {
                                                         id="rolescreate"
                                                         label="Create"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_roles_permission?.create
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_roles_permission?.create
                                                         }
@@ -1014,6 +1077,11 @@ const SingleRole = () => {
                                                         id="rolesedit"
                                                         label="Edit"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_roles_permission?.edit
+                                                        }
                                                         checked={userPermissionRoleBody?.account_roles_permission?.edit}
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1032,6 +1100,11 @@ const SingleRole = () => {
                                                         id="rolesdelete"
                                                         label="Delete"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.account_roles_permission?.delete
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.account_roles_permission?.delete
                                                         }
@@ -1102,6 +1175,11 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.energy_building_permission?.view
+                                                }
                                                 onChange={(e) => {
                                                     setBuildingViewChecked(!buildingViewChecked);
                                                     setUserPermissionRoleBody({
@@ -1133,6 +1211,11 @@ const SingleRole = () => {
                                                 onColor={'#2955E7'}
                                                 uncheckedIcon={false}
                                                 checkedIcon={false}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.energy_portfolio_permission?.view
+                                                }
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
@@ -1189,6 +1272,11 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.workspace_planning_permission?.view
+                                                }
                                                 onChange={(e) => {
                                                     setWorkspacePlanningChecked(!workspacePlanningChecked);
                                                     setUserPermissionRoleBody({
@@ -1223,6 +1311,11 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.workspace_portfolio_permission?.view
+                                                }
                                                 onChange={(e) => {
                                                     setPortfolioViewChecked(!portfolioViewChecked);
                                                     setUserPermissionRoleBody({
@@ -1276,6 +1369,11 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.explore_general_permission?.view
+                                                }
                                                 onChange={(e) => {
                                                     setExploreChecked(!exploreChecked);
                                                     setUserPermissionRoleBody({
@@ -1329,6 +1427,11 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={24}
                                                 width={44}
+                                                disabled={
+                                                    userPermission?.user_role === 'member' &&
+                                                    !userPermission?.permissions?.permissions
+                                                        ?.control_control_permission?.view
+                                                }
                                                 onChange={(e) => {
                                                     setControlControlChecked(!controlControlChecked);
                                                     setUserPermissionRoleBody({
@@ -1362,6 +1465,11 @@ const SingleRole = () => {
                                                         id="plugRulesview"
                                                         label="View"
                                                         inline
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.control_plug_rule_permission?.view
+                                                        }
                                                         checked={
                                                             userPermissionRoleBody?.control_plug_rule_permission?.view
                                                         }
@@ -1385,6 +1493,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.control_plug_rule_permission?.create
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.control_plug_rule_permission?.create
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1405,6 +1518,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.control_plug_rule_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.control_plug_rule_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1424,6 +1542,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.control_plug_rule_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.control_plug_rule_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1470,6 +1593,7 @@ const SingleRole = () => {
                                                 className="react-switch"
                                                 height={20}
                                                 width={36}
+                                                disabled={userPermission?.user_role === 'member'}
                                             />
                                             <span className="ml-2 full-access-font">Full Access</span>
                                         </div>
@@ -1499,6 +1623,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_details_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1518,6 +1647,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_details_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1539,6 +1673,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_details_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1558,6 +1697,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_details_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_details_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1593,6 +1737,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_users_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_users_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1612,6 +1761,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_users_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_users_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1633,6 +1787,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_users_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_users_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1652,6 +1811,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_users_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_users_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1687,6 +1851,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_layout_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1706,6 +1875,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_layout_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1727,6 +1901,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_layout_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1746,6 +1925,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_layout_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1781,6 +1965,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_equipment_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1802,6 +1991,11 @@ const SingleRole = () => {
                                                             userPermissionRoleBody?.building_equipment_permission
                                                                 ?.create
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.create
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1821,6 +2015,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_equipment_permission?.edit
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.edit
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1842,6 +2041,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_equipment_permission
                                                                 ?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_layout_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1877,6 +2081,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_utility_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_utility_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1896,6 +2105,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_utility_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_utility_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1917,6 +2131,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_utility_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_utility_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1936,6 +2155,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_utility_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_utility_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -1971,6 +2195,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_panels_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_panels_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -1990,6 +2219,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_panels_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_panels_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2011,6 +2245,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.building_panels_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_panels_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2030,6 +2269,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.building_panels_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.building_panels_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2068,6 +2312,7 @@ const SingleRole = () => {
                                     <Col lg={6}>
                                         <div className="full-access-header1 float-right">
                                             <Switch
+                                                disabled={userPermission?.user_role === 'member'}
                                                 onChange={() => setCheckedAdvancedConf(!checkedAdvancedConf)}
                                                 checked={checkedAdvancedConf}
                                                 onColor={'#2955E7'}
@@ -2106,6 +2351,11 @@ const SingleRole = () => {
                                                             userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_active_device_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2126,6 +2376,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_active_device_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2148,6 +2403,11 @@ const SingleRole = () => {
                                                             userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_active_device_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2168,6 +2428,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_active_device_permission
                                                                 ?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_active_device_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2204,6 +2469,11 @@ const SingleRole = () => {
                                                             userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_passive_device_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2224,6 +2494,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_passive_device_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2246,6 +2521,11 @@ const SingleRole = () => {
                                                             userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_passive_device_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2266,6 +2546,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_passive_device_permission
                                                                 ?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_passive_device_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2301,6 +2586,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_gateways_permission?.view
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_gateways_permission?.view
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2320,6 +2610,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.advanced_gateways_permission?.create
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_gateways_permission?.create
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2341,6 +2636,11 @@ const SingleRole = () => {
                                                         checked={
                                                             userPermissionRoleBody?.advanced_gateways_permission?.edit
                                                         }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_gateways_permission?.edit
+                                                        }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
                                                                 ...userPermissionRoleBody,
@@ -2360,6 +2660,11 @@ const SingleRole = () => {
                                                         inline
                                                         checked={
                                                             userPermissionRoleBody?.advanced_gateways_permission?.delete
+                                                        }
+                                                        disabled={
+                                                            userPermission?.user_role === 'member' &&
+                                                            !userPermission?.permissions?.permissions
+                                                                ?.advanced_gateways_permission?.delete
                                                         }
                                                         onChange={(e) => {
                                                             setUserPermissionRoleBody({
@@ -2397,7 +2702,7 @@ const SingleRole = () => {
                                         <button
                                             type="button"
                                             className="btn btn-md btn-danger font-weight-bold trash-button-style">
-                                            <i className="uil uil-trash mr-2"></i>Delete Building
+                                            <i className="uil uil-trash mr-2"></i>Delete Role
                                         </button>
                                     </FormGroup>
                                 </Form>
