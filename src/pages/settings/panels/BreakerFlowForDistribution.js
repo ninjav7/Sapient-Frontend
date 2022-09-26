@@ -817,15 +817,13 @@ const BreakersComponent = ({ data, id }) => {
         }
     }, [sensorData, doubleSensorData, tripleSensorData]);
 
-    console.log('sensorDataSearch', sensorDataSearch);
-
     const [equipmentDataSearch, setEquipmentDataSearch] = useState([]);
 
     const equpimentDataFunc = () => {
         equipmentData.map((item) => {
             setEquipmentDataSearch((el) => [
                 ...el,
-                { value: `${item?.value}`, label: `${item?.label}`, breaker_id: `${item?.breaker_id}` },
+                { value: `${item?.value}`, label: `${item?.label}`, breakerId: `${item?.breakerId}` },
             ]);
         });
     };
@@ -835,8 +833,6 @@ const BreakersComponent = ({ data, id }) => {
             equpimentDataFunc();
         }
     }, [equipmentData]);
-
-    console.log('equipmentDataSearch', equipmentDataSearch);
 
     return (
         <React.Fragment>
@@ -1866,13 +1862,13 @@ const BreakersComponent = ({ data, id }) => {
                                     options={equipmentDataSearch}
                                     // value={(option) => option.value === breakerData.equipment_link[0]}
                                     value={equipmentDataSearch.filter(
-                                        (option) => (option.value === record.breakerId) !== ''
+                                        (option) => option.value === breakerData.equipment_link[0]
                                     )}
                                     onChange={(e) => {
                                         handleSingleBreakerChange(id, 'equipment_link', e.value);
                                     }}
                                     className="font-weight-bold"
-                                    isOptionDisabled={(option) => option.breaker_id !== 'undefined'}
+                                    isOptionDisabled={(option) => option.breakerId !== ''}
                                 />
                             </Form.Group>
 
