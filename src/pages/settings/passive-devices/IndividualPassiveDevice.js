@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
+import moment from 'moment';
 import axios from 'axios';
 import {
     BaseUrl,
@@ -145,30 +146,31 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-
+                    console.log('SSR 1 => ', response);
                     let data = response;
 
                     let exploreData = [];
 
                     let recordToInsert = {
                         data: data,
-
                         name: getRequiredConsumptionLabel(selectedConsumption),
                     };
 
                     try {
                         recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
                             _data[0] = new Date(_data[0]);
+                            // moment(_data[0]).tz(timeZone).format();
+
                             if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
                                 _data[1] = _data[1] / UNIT_DIVIDER;
                             }
-
                             return _data;
                         });
                     } catch (error) {}
 
                     exploreData.push(recordToInsert);
-
+                    console.log('SSR 2 => ', exploreData);
                     setDeviceData(exploreData);
 
                     console.log('UPDATED_CODE', seriesData);
