@@ -26,96 +26,112 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import AddPanelModel from './AddPanelModel';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../../store/globalState';
 
 const PanelsTable = ({ generalPanelData, selectedOptions, isPanelDataFetched }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
     return (
         <Card>
             <CardBody>
-                <Table className="mb-0 bordered table-hover">
-                    <thead>
-                        <tr className="mouse-pointer">
-                            {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
-                            {selectedOptions.some((record) => record.value === 'type') && <th>Type</th>}
-                            {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
-                            {selectedOptions.some((record) => record.value === 'breakers') && <th>Breakers</th>}
-                            {selectedOptions.some((record) => record.value === 'parent') && <th>Parent</th>}
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    {isPanelDataFetched ? (
-                        <tbody>
-                            <SkeletonTheme color="#202020" height={35}>
-                                <tr>
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                {userPermission?.user_role === 'admin' ||
+                userPermission?.permissions?.permissions?.building_panels_permission?.view ? (
+                    <Table className="mb-0 bordered table-hover">
+                        <thead>
+                            <tr className="mouse-pointer">
+                                {selectedOptions.some((record) => record.value === 'name') && <th>Name</th>}
+                                {selectedOptions.some((record) => record.value === 'type') && <th>Type</th>}
+                                {selectedOptions.some((record) => record.value === 'location') && <th>Location</th>}
+                                {selectedOptions.some((record) => record.value === 'breakers') && <th>Breakers</th>}
+                                {selectedOptions.some((record) => record.value === 'parent') && <th>Parent</th>}
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        {isPanelDataFetched ? (
+                            <tbody>
+                                <SkeletonTheme color="#202020" height={35}>
+                                    <tr>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
 
-                                    <td>
-                                        <Skeleton count={5} />
-                                    </td>
-                                </tr>
-                            </SkeletonTheme>
-                        </tbody>
-                    ) : (
-                        <tbody>
-                            {generalPanelData.map((record, index) => {
-                                return (
-                                    <tr key={record.panel_id} className="mouse-pointer">
-                                        {selectedOptions.some((record) => record.value === 'name') && (
-                                            <td className="font-weight-bold panel-name">
-                                                <Link
-                                                    to={{
-                                                        pathname: `/settings/panels/edit-panel/${record.panel_id}`,
-                                                    }}>
-                                                    <a>{record.panel_name}</a>
-                                                </Link>
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'type') && (
-                                            <td className="">
-                                                {record.panel_type.charAt(0).toUpperCase() + record.panel_type.slice(1)}
-                                            </td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'location') && (
-                                            <td className="">{record.location}</td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'breakers') && (
-                                            <td className="font-weight-bold">{record.breakers_linked}</td>
-                                        )}
-                                        {selectedOptions.some((record) => record.value === 'parent') && (
-                                            <>
-                                                {record.parent === null ? (
-                                                    <td className="font-weight-bold">-</td>
-                                                ) : (
-                                                    <td className="font-weight-bold">{record.parent}</td>
-                                                )}
-                                            </>
-                                        )}
+                                        <td>
+                                            <Skeleton count={5} />
+                                        </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    )}
-                </Table>
+                                </SkeletonTheme>
+                            </tbody>
+                        ) : (
+                            <tbody>
+                                {generalPanelData.map((record, index) => {
+                                    return (
+                                        <tr key={record.panel_id} className="mouse-pointer">
+                                            {selectedOptions.some((record) => record.value === 'name') && (
+                                                <td className="font-weight-bold panel-name">
+                                                    {userPermission?.user_role === 'admin' ||
+                                                    userPermission?.permissions?.permissions?.building_panels_permission
+                                                        ?.edit ? (
+                                                        <Link
+                                                            to={{
+                                                                pathname: `/settings/panels/edit-panel/${record.panel_id}`,
+                                                            }}>
+                                                            <a>{record.panel_name}</a>
+                                                        </Link>
+                                                    ) : (
+                                                        <a>{record.panel_name}</a>
+                                                    )}
+                                                </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'type') && (
+                                                <td className="">
+                                                    {record.panel_type.charAt(0).toUpperCase() +
+                                                        record.panel_type.slice(1)}
+                                                </td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'location') && (
+                                                <td className="">{record.location}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'breakers') && (
+                                                <td className="font-weight-bold">{record.breakers}</td>
+                                            )}
+                                            {selectedOptions.some((record) => record.value === 'parent') && (
+                                                <>
+                                                    {record.parent === null ? (
+                                                        <td className="font-weight-bold">-</td>
+                                                    ) : (
+                                                        <td className="font-weight-bold">{record.parent}</td>
+                                                    )}
+                                                </>
+                                            )}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        )}
+                    </Table>
+                ) : (
+                    <p>You dont have read access</p>
+                )}
             </CardBody>
         </Card>
     );
@@ -144,48 +160,52 @@ const Panels = () => {
     const [isPanelDataFetched, setIsPanelDataFetched] = useState(true);
 
     const [locationData, setLocationData] = useState([]);
+    const [panelSearch, setPanelSearch] = useState('');
+
+    const fetchPanelsData = async () => {
+        try {
+            setPanelData([]);
+            setIsPanelDataFetched(true);
+            let header = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}&panel_search=${panelSearch}`;
+            await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
+                setPanelData(res.data);
+                setIsPanelDataFetched(false);
+                console.log(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsPanelDataFetched(false);
+            console.log('Failed to fetch Panels Data List');
+        }
+    };
+
+    const fetchLocationData = async () => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `${bldgId}`;
+            await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
+                setLocationData(res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Location Data');
+        }
+    };
 
     useEffect(() => {
-        const fetchPanelsData = async () => {
-            try {
-                setPanelData([]);
-                setIsPanelDataFetched(true);
-                let header = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers: header }).then((res) => {
-                    setPanelData(res.data);
-                    setIsPanelDataFetched(false);
-                    console.log(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                setIsPanelDataFetched(false);
-                console.log('Failed to fetch Panels Data List');
-            }
-        };
-
-        const fetchLocationData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `${bldgId}`;
-                await axios.get(`${BaseUrl}${getLocation}/${params}`, { headers }).then((res) => {
-                    setLocationData(res.data);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Location Data');
-            }
-        };
-
         fetchPanelsData();
+    }, [bldgId, panelSearch]);
+
+    useEffect(() => {
         fetchLocationData();
     }, [bldgId]);
 
@@ -217,6 +237,8 @@ const Panels = () => {
         setSelectedOptions(arr);
     }, []);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     return (
         <React.Fragment>
             <Row className="page-title">
@@ -227,13 +249,18 @@ const Panels = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={openAddPanelModel}>
-                                <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
-                                Add Panel
-                            </button>
+                            {userPermission?.user_role === 'admin' ||
+                            userPermission?.permissions?.permissions?.building_panels_permission?.create ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={openAddPanelModel}>
+                                    <FontAwesomeIcon icon={faPlus} size="md" color="#FFFFFF" className="mr-1" />
+                                    Add Panel
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -248,6 +275,10 @@ const Panels = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            value={panelSearch}
+                            onChange={(e) => {
+                                setPanelSearch(e.target.value);
+                            }}
                         />
                         <span class="input-group-text border-0" id="search-addon">
                             <Search className="icon-sm" />

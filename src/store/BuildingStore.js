@@ -8,6 +8,7 @@ export const BuildingStore = new Store({
             ? 'US/Eastern'
             : localStorage.getItem('buildingTimeZone'),
 });
+console.log('BuildingStore', BuildingStore);
 
 export const BuildingListStore = new Store({
     fetchBuildingList: false,

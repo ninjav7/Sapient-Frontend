@@ -1,8 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Table,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownToggle,
+    DropdownItem,
+    Button,
+    Input,
+    FormGroup,
+    Spinner,
+    ModalHeader,
+} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
-import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { faXmark, faEllipsisV, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -15,21 +33,29 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
+import Select from 'react-select';
 import axios from 'axios';
+import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
+import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from 'react-router-dom';
+import { ComponentStore } from '../../store/ComponentStore';
+import { ChevronDown, Search } from 'react-feather';
+import './style.css';
 import moment from 'moment';
 import { TagsInput } from 'react-tag-input-component';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
+import { MultiSelect } from 'react-multi-select-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import ModalHeader from '../../components/ModalHeader';
-import './style.css';
+import { result } from 'lodash';
+import Switch from 'react-switch';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -50,17 +76,18 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit:'kWh' },
-        { value: 'power', label: 'Power (kW)', unit:'kW' },
+    const [metric, setMetric] = useState([
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
+        { value: 'power', label: 'Power (kW)', unit: 'kW' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
-    ];
+    ]);
 
-    const [selectedUnit,setSelectedUnit]=useState(metric[0].unit);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
+    const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
@@ -76,8 +103,49 @@ const EquipChartModal = ({
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
+
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
+
+    const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
+
+    const addEquimentType = () => {
+        equipmentTypeData.map((item) => {
+            setEquipmentTypeDataNow((el) => [
+                ...el,
+                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (equipmentTypeData) {
+            addEquimentType();
+        }
+    }, [equipmentTypeData]);
+
+    const customDaySelect = [
+        {
+            label: 'Last 7 Days',
+            value: 7,
+        },
+        {
+            label: 'Last 5 Days',
+            value: 5,
+        },
+        {
+            label: 'Last 3 Days',
+            value: 3,
+        },
+        {
+            label: 'Last 1 Day',
+            value: 1,
+        },
+    ];
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const [equipFilter,setEquipFilter]=useState(equipmentFilter);
+    const [equipFilter, setEquipFilter] = useState(equipmentFilter);
+    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
+    const [dateFilter, setDateFilter] = useState(dateValue);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const getRequiredConsumptionLabel = (value) => {
@@ -147,13 +215,14 @@ const EquipChartModal = ({
     };
 
     const handleRefresh = () => {
+        setDateFilter(dateValue);
         let endDate = new Date(); // today
         let startDate = new Date();
         startDate.setDate(startDate.getDate() - 7);
+        setDateRange([startDate, endDate]);
         setDeviceData([]);
         setSeriesData([]);
     };
-
     const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -259,7 +328,7 @@ const EquipChartModal = ({
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value ;
+                    return value;
                 },
             },
             marker: {
@@ -271,7 +340,11 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit==='kWh'?(series[seriesIndex][dataPointIndex] / 1000).toFixed(3):(series[seriesIndex][dataPointIndex] / 1000000).toFixed(3)} 
+                        <div class="line-chart-widget-tooltip-value">${
+                            w.config.series[0].unit === 'kWh'
+                                ? (series[seriesIndex][dataPointIndex] / 1000).toFixed(3)
+                                : (series[seriesIndex][dataPointIndex] / 1000000).toFixed(3)
+                        } 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
@@ -411,7 +484,6 @@ const EquipChartModal = ({
         // // console.log(obj);
         // setUpdateEqipmentData(obj);
     };
-
     const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
@@ -480,7 +552,7 @@ const EquipChartModal = ({
                     let recordToInsert = {
                         data: data,
                         name: 'AHUs',
-                        unit: selectedUnit
+                        unit: selectedUnit,
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -499,13 +571,11 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-
         console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
 
-      
         const fetchEquipmentYTDUsageData = async (equipId) => {
             try {
                 let headers = {
@@ -729,7 +799,10 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -737,7 +810,10 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Save
                                             </button>
                                         </div>
@@ -769,7 +845,10 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -777,7 +856,10 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Save
                                             </button>
                                         </div>
@@ -998,14 +1080,13 @@ const EquipChartModal = ({
                                         <Col lg={4}>
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Equipment Type</Form.Label>
+                                                {/* equipmentTypeDataNow */}
                                                 <Input
                                                     type="select"
                                                     name="select"
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
-                                                    defaultValue={
-                                                    equipResult?.equipment_id
-                                                    }
+                                                    defaultValue={equipResult?.equipment_id}
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
                                                     }}>
@@ -1018,6 +1099,18 @@ const EquipChartModal = ({
                                                         );
                                                     })}
                                                 </Input>
+                                                {/* <Select
+                                                    id="exampleSelect"
+                                                    placeholder="Select Type"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
+                                                    options={equipmentTypeDataNow}
+                                                    onChange={(e) => {
+                                                        handleChange('equipment_type', e.value);
+                                                    }}
+                                                    className="basic-single font-weight-bold"
+                                                /> */}
                                             </Form.Group>
                                         </Col>
                                         <Col lg={4}>
@@ -1028,9 +1121,7 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="endUsePop"
                                                     className="font-weight-bold"
-                                                    defaultValue={
-                                                        equipResult?.end_use_id
-                                                    }>
+                                                    defaultValue={equipResult?.end_use_id}>
                                                     <option selected>Select Category</option>
                                                     {endUse?.map((record) => {
                                                         return (

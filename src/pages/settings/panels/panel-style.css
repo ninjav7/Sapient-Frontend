@@ -355,6 +355,12 @@
     font-weight: 600 !important;
 }
 
+.dropdownScrollaleDisable {
+    overflow: hidden;
+}
+.dropdownScrollaleDisable::-webkit-scrollbar {
+    display: none;
+  } 
 .unlink-breaker-style {
     display: flex !important;
     flex-direction: row !important;

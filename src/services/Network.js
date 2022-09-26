@@ -1,6 +1,7 @@
-export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
+// export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 // export const BaseUrl = 'https://energy-service-dev.azurewebsites.net';
-// export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+export const BaseUrl = 'https://energy-service-dev-internal.azurewebsites.net';
+//export const BaseUrl = 'https://dev-uday.azurewebsites.net/';
 // export const BaseUrl = 'http://122.175.198.21:8000';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -19,6 +20,7 @@ export const updateUtilityBill = '/api/config/utility_bills';
 
 // general settings
 export const generalBuildingDetail = '/api/config/general/building_details';
+export const singleBuildingDetail = '/api/config/general/building-details';
 export const generalBuildingAddress = '/api/config/general/address';
 export const generalDateTime = '/api/config/general/date_time';
 export const generalOperatingHours = '/api/config/general/operating_hours';
@@ -46,6 +48,7 @@ export const updateEquipment = '/api/config/equipments_details/update_equipment'
 export const searchEquipment = '/api/config/equipments_details/search_by_equipments';
 export const getEndUseId = '/api/config/get_end_use';
 export const linkActiveSensorToEquip = '/api/config/sensor/active/lnk_act_snr_to_eqt';
+export const deleteEquipment = `/api/config/equipments_details/delete-equipment`;
 
 // active
 export const generalActiveDevices = '/api/config/devices/active';
@@ -53,12 +56,14 @@ export const updateActivePassiveDevice = '/api/config/devices/update_device';
 
 //search active and passive device
 export const searchDevices = '/api/config/devices/search_by_devices';
+export const lastUsedEquimentDevice = '/api/config/equipments_details/equipments_last_used';
 
 // passive
 export const generalPassiveDevices = '/api/config/devices/passive';
 export const sensorGraphData = '/api/config/sensor/graph';
 export const equipmentGraphData = '/api/explorer/equipment_chart';
 export const updateDevice = '/api/config/devices/update_device';
+export const deletePassiveDevice = `/api/config/devices/delete/passive`;
 
 //gateway
 export const generalGateway = '/api/config/gateway';
@@ -105,6 +110,7 @@ export const getSpaceTypes = '/api/config/layout/get-spacetype';
 export const createSpace = '/api/config/layout/create-space';
 export const updateSpace = '/api/config/layout/update-floor';
 export const deleteSpace = '/api/config/layout/delete-space';
+export const deleteFloor = '/api/config/layout/delete-floor';
 
 // getLocation
 export const getLocation = '/api/config/get_location';
@@ -148,3 +154,18 @@ export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildi
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
 export const graphData = '/api/user_role/plug_rule/average-chart-calculation';
+
+// user permission and roles
+export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
+export const getMemberUser = '/api/user_role/user-permission-role/all-member-users';
+export const createPermissionRole = '/api/user_role/user-permission-role/create-permission-role';
+export const getPermissionRole = '/api/user_role/user-permission-role/permission-roles-list';
+export const getPermissionSingleDetail = '/api/user_role/user-permission-role/permission-details';
+export const updatePermissionDetail = '/api/user_role/user-permission-role/update-permission-role';
+export const getSingleUserDetail = '/api/user_role/user-permission-role/member-user-info';
+export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
+export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
+export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';
+
+// Search
+export const serachUser = '/api/user_role/user-permission-role/all-member-users';

@@ -40,6 +40,8 @@ const EditSpace = (props) => {
     const [spaceBody, setSpaceBody] = useState({
         building_id: bldgId,
     });
+
+    console.log('spaceBody', spaceBody);
     console.log('props.currentFloorId', props.currentFloorId);
 
     useEffect(() => {
@@ -64,7 +66,8 @@ const EditSpace = (props) => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createSpace}`, spaceBody, { headers }).then((res) => {
+        let params = `?building_id=${bldgId}`;
+        axios.post(`${BaseUrl}${createSpace}${params}`, spaceBody, { headers }).then((res) => {
             setLoading(false);
             setReloadSpace('true');
             props.onHide();
@@ -99,7 +102,7 @@ const EditSpace = (props) => {
                         <option>--Select any type--</option>
                         {floor2?.map((item) => {
                             return (
-                                <option key={item._id} value={item._id}>
+                                <option key={item.id} value={item.id}>
                                     {item.name}
                                 </option>
                             );
