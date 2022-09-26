@@ -76,3 +76,35 @@ export const Default = () => (
 );
 
 export const Primary = () => <Button label="Button CTA {LG}" size={Button.Sizes.lg} type={Button.Type.primary} />;
+export const Secondary = () => <Button label="Secondary" size={Button.Sizes.lg} type={Button.Type.secondary} />;
+export const SecondaryGrey = () => (
+    <Button label="Secondary grey" size={Button.Sizes.lg} type={Button.Type.secondaryGrey} />
+);
+export const Tertiary = () => (
+    <Button
+        label="Tertiary"
+        size={Button.Sizes.lg}
+        icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+        type={Button.Type.tertiary}
+        iconAlignment={Button.IconAlignment.right}
+    />
+);
+
+export const TertiaryGrey = () => (
+    <Button
+        label="Tertiary grey"
+        icon={<ArrowRight style={{ height: ICON_SIZES[Button.Sizes.lg] }} />}
+        iconAlignment={Button.IconAlignment.right}
+        size={Button.Sizes.lg}
+        type={Button.Type.tertiaryGrey}
+    />
+);
+export const LinkStyle = () => <Button label="Link Style" size={Button.Sizes.lg} type={Button.Type.link} />;
+
+export const PrimaryDistructive = () => (
+    <Button label="Primary Distructive" size={Button.Sizes.lg} type={Button.Type.primaryDistructive} />
+);
+
+export const SecondaryDistructive = () => (
+    <Button label="Secondary Distructive" size={Button.Sizes.lg} type={Button.Type.secondaryDistructive} />
+);

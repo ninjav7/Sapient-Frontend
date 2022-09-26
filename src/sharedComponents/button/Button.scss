@@ -154,6 +154,10 @@
                 box-shadow: none;
             }
 
+            &:hover {
+                background: $primary-indigo-50;
+            }
+
             &[disabled] {
                 color: $primary-gray-300;
                 svg {
