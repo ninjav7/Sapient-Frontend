@@ -51,12 +51,12 @@ const EquipChartModal = ({
     const [selectedTab, setSelectedTab] = useState(0);
 
     const metric = [
-        { value: 'energy', label: 'Energy (kWh)', unit:'kWh' },
-        { value: 'power', label: 'Power (W)', unit:'W' },
+        { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
+        { value: 'power', label: 'Power (W)', unit: 'W' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ];
 
-    const [selectedUnit,setSelectedUnit]=useState(metric[0].unit);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
@@ -77,7 +77,7 @@ const EquipChartModal = ({
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
     const [buildingAlert, setBuildingAlerts] = useState([]);
-    const [equipFilter,setEquipFilter]=useState(equipmentFilter);
+    const [equipFilter, setEquipFilter] = useState(equipmentFilter);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const getRequiredConsumptionLabel = (value) => {
@@ -259,7 +259,7 @@ const EquipChartModal = ({
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value ;
+                    return value;
                 },
             },
             marker: {
@@ -271,7 +271,11 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit==='kWh'?(series[seriesIndex][dataPointIndex]).toFixed(3):(series[seriesIndex][dataPointIndex]).toFixed(3)} 
+                        <div class="line-chart-widget-tooltip-value">${
+                            w.config.series[0].unit === 'kWh'
+                                ? series[seriesIndex][dataPointIndex].toFixed(3)
+                                : series[seriesIndex][dataPointIndex].toFixed(3)
+                        } 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
@@ -480,7 +484,7 @@ const EquipChartModal = ({
                     let recordToInsert = {
                         data: data,
                         name: 'AHUs',
-                        unit: selectedUnit
+                        unit: selectedUnit,
                     };
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
@@ -499,13 +503,11 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-
         console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
             return;
         }
 
-      
         const fetchEquipmentYTDUsageData = async (equipId) => {
             try {
                 let headers = {
@@ -729,7 +731,11 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    setSelectedTab(0);
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -737,7 +743,11 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    setSelectedTab(0);
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Save
                                             </button>
                                         </div>
@@ -769,7 +779,11 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    setSelectedTab(0);
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Cancel
                                             </button>
                                         </div>
@@ -777,7 +791,11 @@ const EquipChartModal = ({
                                             <button
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
-                                                onClick={()=>{handleChartClose();setEquipResult([]);}}>
+                                                onClick={() => {
+                                                    setSelectedTab(0);
+                                                    handleChartClose();
+                                                    setEquipResult([]);
+                                                }}>
                                                 Save
                                             </button>
                                         </div>
@@ -1003,9 +1021,7 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="exampleSelect"
                                                     className="font-weight-bold"
-                                                    defaultValue={
-                                                    equipResult?.equipment_id
-                                                    }
+                                                    defaultValue={equipResult?.equipment_id}
                                                     onChange={(e) => {
                                                         handleChange('equipment_type', e.target.value);
                                                     }}>
@@ -1028,9 +1044,7 @@ const EquipChartModal = ({
                                                     name="select"
                                                     id="endUsePop"
                                                     className="font-weight-bold"
-                                                    defaultValue={
-                                                        equipResult?.end_use_id
-                                                    }>
+                                                    defaultValue={equipResult?.end_use_id}>
                                                     <option selected>Select Category</option>
                                                     {endUse?.map((record) => {
                                                         return (
