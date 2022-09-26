@@ -53,6 +53,7 @@ const PortfolioOverview = () => {
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const [daysCount, setDaysCount] = useState(1);
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
@@ -595,6 +596,14 @@ const PortfolioOverview = () => {
 
     const [userPermission] = useAtom(userPermissionData);
 
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        // console.log('SSR days :>> ', days + 1);
+        setStartEndDayCount(days + 1);
+    });
+
     return (
         <>
             <Header title="Portfolio Overview" />
@@ -622,6 +631,7 @@ const PortfolioOverview = () => {
                         <EnergyConsumptionHistory
                             series={energyConsumptionChart}
                             isConsumpHistoryLoading={isConsumpHistoryLoading}
+                            startEndDayCount={startEndDayCount}
                         />
                     </div>
                 </>

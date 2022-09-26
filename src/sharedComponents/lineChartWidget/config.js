@@ -12,10 +12,10 @@ export const configLineChartWidget = {
         },
         type: 'line',
         zoom: {
-            enabled: false,
+            type: 'x',
+            enabled: true,
+            autoScaleYaxis: true,
         },
-        // offsetX: -10,
-        offsetY: 0,
     },
     animations: {
         enabled: false,
@@ -85,15 +85,15 @@ export const configLineChartWidget = {
         type: 'datetime',
         labels: {
             formatter: function (val, timestamp) {
-                return moment(timestamp).format('DD/MMM - HH:mm');
+                return `${moment(timestamp).format('HH:00')}`;
             },
         },
+        tickAmount: 9,
         style: {
             fontSize: '12px',
             fontWeight: 600,
             cssClass: 'apexcharts-xaxis-label',
         },
-
         crosshairs: {
             show: true,
             position: 'front',
@@ -103,14 +103,12 @@ export const configLineChartWidget = {
                 dashArray: 0,
             },
         },
+        offsetX: 0,
     },
     yaxis: {
         labels: {
             formatter: function (value) {
                 var val = Math.abs(value);
-                // if (val >= 1000) {
-                //     val = (val / 1000).toFixed(0) + ' K';
-                // }
                 return kFormatter(val);
             },
         },
@@ -120,7 +118,6 @@ export const configLineChartWidget = {
             cssClass: 'apexcharts-xaxis-label',
         },
     },
-
     grid: {
         padding: {
             top: 0,
