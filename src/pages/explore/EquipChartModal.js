@@ -52,7 +52,7 @@ const EquipChartModal = ({
 
     const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit:'kWh' },
-        { value: 'power', label: 'Power (kW)', unit:'kW' },
+        { value: 'power', label: 'Power (W)', unit:'W' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
     ];
 
@@ -271,7 +271,7 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit==='kWh'?(series[seriesIndex][dataPointIndex] / 1000).toFixed(3):(series[seriesIndex][dataPointIndex] / 1000000).toFixed(3)} 
+                        <div class="line-chart-widget-tooltip-value">${w.config.series[0].unit==='kWh'?(series[seriesIndex][dataPointIndex]).toFixed(3):(series[seriesIndex][dataPointIndex]).toFixed(3)} 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
@@ -351,7 +351,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return val.toFixed(2);
                 },
             },
         },
@@ -366,7 +366,7 @@ const EquipChartModal = ({
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
-        return [['timestamp', selectedConsumption], ...streamData];
+        return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
     //Single Active Equipment Manipulation
 
@@ -463,7 +463,7 @@ const EquipChartModal = ({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}`;
+            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,

@@ -416,7 +416,7 @@ const ExploreByBuildings = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value / 1000;
+                    return value ;
                 },
             },
             marker: {
@@ -429,7 +429,7 @@ const ExploreByBuildings = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${(
-                            series[seriesIndex][dataPointIndex] / 1000
+                            series[seriesIndex][dataPointIndex]
                         ).toFixed(3)} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
@@ -448,7 +448,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3);
+                    return (value).toFixed(3);
                 },
             },
         },
@@ -500,7 +500,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000;
+                    return value ;
                 },
             },
             tickAmount: 2,
@@ -644,7 +644,7 @@ const ExploreByBuildings = () => {
                 let params = `?consumption=energy&building_id=${selectedBuildingId}`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}`,
+                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}&divisible_by=1000`,
                         {
                             date_from: startDate,
                             date_to: endDate,
