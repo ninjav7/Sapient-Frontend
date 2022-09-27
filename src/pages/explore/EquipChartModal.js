@@ -13,7 +13,6 @@ import {
     Input,
     FormGroup,
     Spinner,
-    ModalHeader,
 } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
@@ -56,6 +55,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 import Switch from 'react-switch';
+import ModalHeader from '../../components/ModalHeader';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -526,6 +526,7 @@ const EquipChartModal = ({
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
     }, [endDate, selectedConsumption]);
+
     const fetchEquipmentChart = async (equipId) => {
         try {
             setIsEquipDataFetched(true);

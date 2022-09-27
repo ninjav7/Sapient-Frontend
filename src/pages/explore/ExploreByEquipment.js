@@ -4,7 +4,15 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { BaseUrl, getExploreEquipmentList, getExploreEquipmentChart, getFloors, equipmentType, getEndUseId, getSpaceTypes} from '../../services/Network';
+import {
+    BaseUrl,
+    getExploreEquipmentList,
+    getExploreEquipmentChart,
+    getFloors,
+    equipmentType,
+    getEndUseId,
+    getSpaceTypes,
+} from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BuildingStore } from '../../store/BuildingStore';
@@ -442,48 +450,46 @@ const ExploreEquipmentTable = ({
                                 </tbody>
                             )}
                         </Table>
-                    <div className="page-button-style">
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                paginationData.pagination !== undefined
-                                    ? paginationData.pagination.previous === null
-                                        ? true
-                                        : false
-                                    : false
-                            }
-                            onClick={() => {
-                                previousPageData(paginationData.pagination.previous);
-                            }}>
-                            Previous
-                        </button>
-                        <button
-                            type="button"
-                            className="btn btn-md btn-light font-weight-bold mt-4"
-                            disabled={
-                                true
-                            }
-                            onClick={() => {
-                                nextPageData(paginationData.pagination.next);
-                            }}>
-                            Next
-                        </button>
-                        <div>
-                            <select
-                                value={pageSize}
+                        <div className="page-button-style">
+                            <button
+                                type="button"
                                 className="btn btn-md btn-light font-weight-bold mt-4"
-                                onChange={(e) => {
-                                    setPageSize(parseInt(e.target.value));
+                                disabled={
+                                    paginationData.pagination !== undefined
+                                        ? paginationData.pagination.previous === null
+                                            ? true
+                                            : false
+                                        : false
+                                }
+                                onClick={() => {
+                                    previousPageData(paginationData.pagination.previous);
                                 }}>
-                                {[20, 50, 100].map((pageSize) => (
-                                    <option key={pageSize} value={pageSize} className="align-options-center">
-                                        Show {pageSize} devices
-                                    </option>
-                                ))}
-                            </select>
+                                Previous
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-md btn-light font-weight-bold mt-4"
+                                disabled={true}
+                                onClick={() => {
+                                    nextPageData(paginationData.pagination.next);
+                                }}>
+                                Next
+                            </button>
+                            <div>
+                                <select
+                                    value={pageSize}
+                                    className="btn btn-md btn-light font-weight-bold mt-4"
+                                    onChange={(e) => {
+                                        setPageSize(parseInt(e.target.value));
+                                    }}>
+                                    {[20, 50, 100].map((pageSize) => (
+                                        <option key={pageSize} value={pageSize} className="align-options-center">
+                                            Show {pageSize} devices
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                    </div>
                     </Col>
                 </CardBody>
             </Card>
@@ -535,15 +541,15 @@ const ExploreByEquipment = () => {
             zoom: {
                 type: 'x',
                 enabled: true,
-                autoScaleYaxis: true
-              },
+                autoScaleYaxis: true,
+            },
         },
         legend: {
             position: 'top',
             horizontalAlign: 'left',
-            //showForSingleSeries: true,
-            // showForNullSeries: false,
-            // showForZeroSeries: false,
+            showForSingleSeries: true,
+            showForNullSeries: false,
+            showForZeroSeries: true,
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
@@ -588,7 +594,7 @@ const ExploreByEquipment = () => {
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value ;
+                    return value;
                 },
             },
             marker: {
@@ -600,9 +606,9 @@ const ExploreByEquipment = () => {
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${(
-                            series[seriesIndex][dataPointIndex]
-                        ).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            3
+                        )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
@@ -623,7 +629,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value).toFixed(3);
+                    return value.toFixed(3);
                 },
             },
         },
@@ -676,7 +682,7 @@ const ExploreByEquipment = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value ;
+                    return value;
                 },
             },
             tickAmount: 2,
@@ -723,12 +729,12 @@ const ExploreByEquipment = () => {
 
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
-        setShowDropdown(!showDropdown)
-        if(minConValue!==0 && maxConValue!==topEnergyConsumption && (!showDropdown!==true)){
+        setShowDropdown(!showDropdown);
+        if (minConValue !== 0 && maxConValue !== topEnergyConsumption && !showDropdown !== true) {
             setAPIFlag(!APIFlag);
-            setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`)
+            setConsumptionTxt(`${minConValue} - ${maxConValue} kWh Used`);
         }
-    }
+    };
 
     const handleAllEquip = (e) => {
         let slt = document.getElementById('allEquipType');
@@ -739,14 +745,12 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredEquipOptions[i].value);
                 check.checked = slt.checked;
             }
-            if(filteredEquipOptions.length===1){
-                setEquipmentTxt(`${filteredEquipOptions[0].label}`)
-            }
-            else if(filteredEquipOptions.length===0){
-                setEquipmentTxt('')
-            }
-            else{
-                setEquipmentTxt(`${filteredEquipOptions.length} Equipment Types`)
+            if (filteredEquipOptions.length === 1) {
+                setEquipmentTxt(`${filteredEquipOptions[0].label}`);
+            } else if (filteredEquipOptions.length === 0) {
+                setEquipmentTxt('');
+            } else {
+                setEquipmentTxt(`${filteredEquipOptions.length} Equipment Types`);
             }
             //console.log('selected Equip Type ',selectEquip);
             setSelectedEquipType(selectEquip);
@@ -760,24 +764,21 @@ const ExploreByEquipment = () => {
         }
     };
 
-    const handleSelectedEquip = (e,equipName) => {
+    const handleSelectedEquip = (e, equipName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true){
-            if(selectedEquipType.length===0){
-                setEquipmentTxt(`${equipName}`)
-            }
-            else{
-                setEquipmentTxt(`${selectedEquipType.length+1} Equipment Types`)
+        if (selection.checked === true) {
+            if (selectedEquipType.length === 0) {
+                setEquipmentTxt(`${equipName}`);
+            } else {
+                setEquipmentTxt(`${selectedEquipType.length + 1} Equipment Types`);
             }
             setSelectedEquipType([...selectedEquipType, e.target.value]);
-        }
-        else {
+        } else {
             let slt = document.getElementById('allEquipType');
             slt.checked = selection.checked;
-            if(selectedEquipType.length===1){
-                setEquipmentTxt("")
-            }
-            else if(selectedEquipType.length===2){
+            if (selectedEquipType.length === 1) {
+                setEquipmentTxt('');
+            } else if (selectedEquipType.length === 2) {
                 let arr = selectedEquipType.filter(function (item) {
                     return item !== e.target.value;
                 });
@@ -787,10 +788,9 @@ const ExploreByEquipment = () => {
                 console.log(arr1);
                 console.log(arr);
 
-                setEquipmentTxt(`${arr1[0].label}`)
-            }
-            else{
-                setEquipmentTxt(`${selectedEquipType.length-1} Equipment Types`)
+                setEquipmentTxt(`${arr1[0].label}`);
+            } else {
+                setEquipmentTxt(`${selectedEquipType.length - 1} Equipment Types`);
             }
             //console.log(e.target.value);
             let arr = selectedEquipType.filter(function (item) {
@@ -811,14 +811,12 @@ const ExploreByEquipment = () => {
                 check.checked = slt.checked;
             }
 
-            if(filteredEndUseOptions.length===1){
-                setEndUseTxt(`${filteredEndUseOptions[0].label}`)
-            }
-            else if(filteredEndUseOptions.length===0){
-                setEndUseTxt('')
-            }
-            else{
-                setEndUseTxt(`${filteredEndUseOptions.length} End Use Category`)
+            if (filteredEndUseOptions.length === 1) {
+                setEndUseTxt(`${filteredEndUseOptions[0].label}`);
+            } else if (filteredEndUseOptions.length === 0) {
+                setEndUseTxt('');
+            } else {
+                setEndUseTxt(`${filteredEndUseOptions.length} End Use Category`);
             }
             //console.log('selected End Use ',selectEndUse);
             setSelectedEndUse(selectEndUse);
@@ -834,23 +832,20 @@ const ExploreByEquipment = () => {
 
     const handleSelectedEndUse = (e, endUseName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true){
-            if(selectedEndUse.length===0){
-                setEndUseTxt(`${endUseName}`)
-            }
-            else{
-                setEndUseTxt(`${selectedEndUse.length+1} End Use Category`)
+        if (selection.checked === true) {
+            if (selectedEndUse.length === 0) {
+                setEndUseTxt(`${endUseName}`);
+            } else {
+                setEndUseTxt(`${selectedEndUse.length + 1} End Use Category`);
             }
             setSelectedEndUse([...selectedEndUse, e.target.value]);
-        }
-        else {
+        } else {
             let slt = document.getElementById('allEndUse');
             slt.checked = selection.checked;
             //console.log(e.target.value);
-            if(selectedEndUse.length===1){
-                setEndUseTxt("")
-            }
-            else if(selectedEndUse.length===2){
+            if (selectedEndUse.length === 1) {
+                setEndUseTxt('');
+            } else if (selectedEndUse.length === 2) {
                 let arr = selectedEndUse.filter(function (item) {
                     return item !== e.target.value;
                 });
@@ -860,10 +855,9 @@ const ExploreByEquipment = () => {
                 console.log(arr1);
                 console.log(arr);
 
-                setEndUseTxt(`${arr1[0].label}`)
-            }
-            else{
-                setEndUseTxt(`${selectedEndUse.length-1} End Use category`)
+                setEndUseTxt(`${arr1[0].label}`);
+            } else {
+                setEndUseTxt(`${selectedEndUse.length - 1} End Use category`);
             }
             let arr = selectedEndUse.filter(function (item) {
                 return item !== e.target.value;
@@ -883,14 +877,12 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
             }
-            if(floorListAPI.length===1){
-                setLocationTxt(`${floorListAPI[0].name}`)
-            }
-            else if(floorListAPI.length===0){
-                setLocationTxt('')
-            }
-            else{
-                setLocationTxt(`${floorListAPI.length} Locations`)
+            if (floorListAPI.length === 1) {
+                setLocationTxt(`${floorListAPI[0].name}`);
+            } else if (floorListAPI.length === 0) {
+                setLocationTxt('');
+            } else {
+                setLocationTxt(`${floorListAPI.length} Locations`);
             }
             //console.log('selected Space Type ',selectLoc);
             setSelectedLocation(selectLoc);
@@ -906,20 +898,17 @@ const ExploreByEquipment = () => {
 
     const handleSelectedLocation = (e, locName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true){
-            if(selectedLocation.length===0){
-                setLocationTxt(`${locName}`)
-            }
-            else{
-                setLocationTxt(`${selectedLocation.length+1} Locations`)
+        if (selection.checked === true) {
+            if (selectedLocation.length === 0) {
+                setLocationTxt(`${locName}`);
+            } else {
+                setLocationTxt(`${selectedLocation.length + 1} Locations`);
             }
             setSelectedLocation([...selectedLocation, e.target.value]);
-        }
-        else {
-            if(selectedLocation.length===1){
-                setLocationTxt("")
-            }
-            else if(selectedLocation.length===2){
+        } else {
+            if (selectedLocation.length === 1) {
+                setLocationTxt('');
+            } else if (selectedLocation.length === 2) {
                 let arr = selectedLocation.filter(function (item) {
                     return item !== e.target.value;
                 });
@@ -929,10 +918,9 @@ const ExploreByEquipment = () => {
                 console.log(arr1);
                 console.log(arr);
 
-                setLocationTxt(`${arr1[0].name}`)
-            }
-            else{
-                setLocationTxt(`${selectedLocation.length-1} Locations`)
+                setLocationTxt(`${arr1[0].name}`);
+            } else {
+                setLocationTxt(`${selectedLocation.length - 1} Locations`);
             }
             //console.log(e.target.value);
             let arr = selectedLocation.filter(function (item) {
@@ -952,14 +940,12 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredSpaceTypeOptions[i].value);
                 check.checked = slt.checked;
             }
-            if(filteredSpaceTypeOptions.length===1){
-                setSpaceTxt(`${filteredSpaceTypeOptions[0].label}`)
-            }
-            else if(filteredSpaceTypeOptions.length===0){
-                setSpaceTxt('')
-            }
-            else{
-                setSpaceTxt(`${filteredSpaceTypeOptions.length} Space Types`)
+            if (filteredSpaceTypeOptions.length === 1) {
+                setSpaceTxt(`${filteredSpaceTypeOptions[0].label}`);
+            } else if (filteredSpaceTypeOptions.length === 0) {
+                setSpaceTxt('');
+            } else {
+                setSpaceTxt(`${filteredSpaceTypeOptions.length} Space Types`);
             }
             //console.log('selected Space Type ',selectSpace);
             setSelectedSpaceType(selectSpace);
@@ -969,28 +955,25 @@ const ExploreByEquipment = () => {
                 let check = document.getElementById(filteredSpaceTypeOptions[i].value);
                 check.checked = slt.checked;
             }
-            setSpaceTxt('')
+            setSpaceTxt('');
         }
     };
 
-    const handleSelectedSpaceType = (e,spaceName) => {
+    const handleSelectedSpaceType = (e, spaceName) => {
         let selection = document.getElementById(e.target.value);
-        if (selection.checked === true){
-            if(selectedSpaceType.length===0){
-                setSpaceTxt(`${spaceName}`)
-            }
-            else{
-                setSpaceTxt(`${selectedSpaceType.length+1} Space Types`)
+        if (selection.checked === true) {
+            if (selectedSpaceType.length === 0) {
+                setSpaceTxt(`${spaceName}`);
+            } else {
+                setSpaceTxt(`${selectedSpaceType.length + 1} Space Types`);
             }
             setSelectedSpaceType([...selectedSpaceType, e.target.value]);
-        } 
-        else {
+        } else {
             let slt = document.getElementById('allSpaceType');
             slt.checked = selection.checked;
-            if(selectedSpaceType.length===1){
-                setSpaceTxt("")
-            }
-            else if(selectedSpaceType.length===2){
+            if (selectedSpaceType.length === 1) {
+                setSpaceTxt('');
+            } else if (selectedSpaceType.length === 2) {
                 let arr = selectedSpaceType.filter(function (item) {
                     return item !== e.target.value;
                 });
@@ -1000,10 +983,9 @@ const ExploreByEquipment = () => {
                 console.log(arr1);
                 console.log(arr);
 
-                setSpaceTxt(`${arr1[0].label}`)
-            }
-            else{
-                setSpaceTxt(`${selectedSpaceType.length-1} Space Types`)
+                setSpaceTxt(`${arr1[0].label}`);
+            } else {
+                setSpaceTxt(`${selectedSpaceType.length - 1} Space Types`);
             }
 
             //console.log(e.target.value);
@@ -1027,7 +1009,7 @@ const ExploreByEquipment = () => {
         set_maxPerValue(values[1]);
     };
 
-    const exploreFilterDataFetch = async (bodyVal,txt) => {
+    const exploreFilterDataFetch = async (bodyVal, txt) => {
         try {
             setIsExploreDataLoading(true);
             let headers = {
@@ -1040,11 +1022,10 @@ const ExploreByEquipment = () => {
 
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
-                        setPaginationData(res.data);
-                        setSeriesData([]);
-                        setSeriesLineData([]);
-                        if(txt==="consumption" || txt==="endUse")
-                            removeDuplicatesEndUse(txt, responseData.data);
+                setPaginationData(res.data);
+                setSeriesData([]);
+                setSeriesLineData([]);
+                if (txt === 'consumption' || txt === 'endUse') removeDuplicatesEndUse(txt, responseData.data);
                 if (responseData.data.length !== 0) {
                     //setTopEnergyConsumption(responseData.data[0].consumption.now);
                     //setTopPeakConsumption(responseData.data[0].peak_power.now);
@@ -1255,7 +1236,6 @@ const ExploreByEquipment = () => {
         fetchSpacetypes();
     }, [startDate, endDate, bldgId]);
 
-
     const nextPageData = async (path) => {
         // console.log("next path ",path);
         try {
@@ -1273,12 +1253,12 @@ const ExploreByEquipment = () => {
                 date_to: endDate,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
-                        setSeriesLineData([]);
+                    setSeriesLineData([]);
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
@@ -1311,12 +1291,12 @@ const ExploreByEquipment = () => {
                 date_to: endDate,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
-            await axios.post(`${BaseUrl}${path}`, arr ,{ headers }).then((res) => {
+            await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
                 if (responseData.data.length !== 0) {
                     setSeriesData([]);
-                        setSeriesLineData([]);
+                    setSeriesLineData([]);
                     setTopEnergyConsumption(responseData.data[0].consumption.now);
                     setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                     set_minConValue(0.0);
@@ -1332,7 +1312,6 @@ const ExploreByEquipment = () => {
             setIsExploreDataLoading(false);
         }
     };
-
 
     const [filteredEquipOptions, setFilteredEquipOptions] = useState([]);
     const [filteredEquipOptionsCopy, setFilteredEquipOptionsCopy] = useState([]);
@@ -1491,8 +1470,8 @@ const ExploreByEquipment = () => {
                             id: arr[0].equipment_id,
                         };
                         // console.log(recordToInsert);
-                        const arrayColumn = (arr, n) => arr.map(x => x[n]);
-                        console.log(arrayColumn(data, 0))
+                        const arrayColumn = (arr, n) => arr.map((x) => x[n]);
+                        console.log(arrayColumn(data, 0));
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
@@ -1608,7 +1587,7 @@ const ExploreByEquipment = () => {
         });
         // console.log(arr);
         setSelectedOptions(arr);
-        let txt="";
+        let txt = '';
         let arr1 = {};
         arr1['date_from'] = startDate;
         arr1['date_to'] = endDate;
@@ -1627,7 +1606,7 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                txt="consumption"
+                txt = 'consumption';
                 set_minConValue(0.0);
                 set_maxConValue(topVal);
                 break;
@@ -1684,7 +1663,7 @@ const ExploreByEquipment = () => {
                 if (selectedSpaceType.length !== 0) {
                     arr1['space_type'] = selectedSpaceType;
                 }
-                txt="endUse"
+                txt = 'endUse';
                 break;
             case 'location_type':
                 setSelectedSpaceType([]);
@@ -1705,7 +1684,7 @@ const ExploreByEquipment = () => {
                 }
                 break;
         }
-        exploreFilterDataFetch(arr1,txt);
+        exploreFilterDataFetch(arr1, txt);
     };
 
     // useEffect(()=>{
@@ -1735,7 +1714,7 @@ const ExploreByEquipment = () => {
             return;
         }
         let arr = {};
-        let txt="";
+        let txt = '';
         arr['date_from'] = startDate;
         arr['date_to'] = endDate;
         if (maxConValue > 0.01) {
@@ -1743,7 +1722,7 @@ const ExploreByEquipment = () => {
                 gte: minConValue * 1000,
                 lte: maxConValue * 1000,
             };
-            txt="consumption";
+            txt = 'consumption';
         }
         if (selectedLocation.length !== 0) {
             arr['location'] = selectedLocation;
@@ -1753,12 +1732,12 @@ const ExploreByEquipment = () => {
         }
         if (selectedEndUse.length !== 0) {
             arr['end_use'] = selectedEndUse;
-            txt="endUse";
+            txt = 'endUse';
         }
         if (selectedSpaceType.length !== 0) {
             arr['space_type'] = selectedSpaceType;
         }
-        exploreFilterDataFetch(arr,txt);
+        exploreFilterDataFetch(arr, txt);
     }, [APIFlag, APILocFlag, selectedEquipType, selectedEndUse, selectedSpaceType]);
 
     const clearFilterData = () => {
@@ -1908,16 +1887,15 @@ const ExploreByEquipment = () => {
         return [['Equipment Name', ['timestamp', 'energy']], ...streamData];
     };
 
-    useEffect(()=>{
-            console.log("showDropdown",showDropdown);
-    },[showDropdown])
+    useEffect(() => {
+        console.log('showDropdown', showDropdown);
+    }, [showDropdown]);
 
-    const removeDuplicatesEndUse=(txt,tabledata)=>{
-        uniqueIds.length=0
-        uniqueLocationIds.length=0
-        uniqueSpaceTypeIds.length=0
-        if(txt==="consumption")
-            uniqueEndUseIds.length=0
+    const removeDuplicatesEndUse = (txt, tabledata) => {
+        uniqueIds.length = 0;
+        uniqueLocationIds.length = 0;
+        uniqueSpaceTypeIds.length = 0;
+        if (txt === 'consumption') uniqueEndUseIds.length = 0;
         const uniqueEqupimentTypes = tabledata.filter((element) => {
             const isDuplicate = uniqueIds.includes(element.equipments_type);
             if (!isDuplicate) {
@@ -1944,19 +1922,19 @@ const ExploreByEquipment = () => {
             }
             return false;
         });
-        if(txt==="consumption"){
-        const uniqueEndUse = tabledata.filter((element) => {
-            const isDuplicate = uniqueEndUseIds.includes(element?.end_user);
+        if (txt === 'consumption') {
+            const uniqueEndUse = tabledata.filter((element) => {
+                const isDuplicate = uniqueEndUseIds.includes(element?.end_user);
 
-            if (!isDuplicate) {
-                uniqueEndUseIds.push(element?.end_user);
-                return true;
-            }
-            return false;
-        });
-        
-        setRemoveEndUseDuplication(uniqueEndUse)
-    }
+                if (!isDuplicate) {
+                    uniqueEndUseIds.push(element?.end_user);
+                    return true;
+                }
+                return false;
+            });
+
+            setRemoveEndUseDuplication(uniqueEndUse);
+        }
 
         // console.log("Unique End Use ",uniqueEndUse);
         // console.log("Unique Equipment Type ", uniqueEqupimentTypes)
@@ -1966,9 +1944,7 @@ const ExploreByEquipment = () => {
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
         setRemoveLocationDuplication(uniqueLocation);
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
-    }
-    
-    
+    };
 
     return (
         <>
@@ -2057,14 +2033,16 @@ const ExploreByEquipment = () => {
                             }
                             return (
                                 <>
-                                    <Dropdown className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover" align="end" onToggle={setDropdown}>
+                                    <Dropdown
+                                        className="mt-2 me-1 ml-2 btn btn-white d-inline btnHover"
+                                        align="end"
+                                        onToggle={setDropdown}>
                                         <span className="" style={{ height: '36px', marginLeft: '1rem' }}>
                                             <Dropdown.Toggle
                                                 className="font-weight-bold"
                                                 id="PopoverClick"
                                                 type="button"
-                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}
-                                                >
+                                                style={{ border: 'none', backgroundColor: 'white', color: 'black' }}>
                                                 {consumptionTxt === '' ? `All ${el.label}` : consumptionTxt}
                                             </Dropdown.Toggle>
                                             <button
@@ -2079,11 +2057,7 @@ const ExploreByEquipment = () => {
                                         <Dropdown.Menu className="dropdown-lg p-3">
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
-                                                    <a
-                                                        className="pop-text"
-                                                        >
-                                                        kWh Used
-                                                    </a>
+                                                    <a className="pop-text">kWh Used</a>
                                                     {/* <button
                                                         style={{
                                                             border: 'none',
@@ -2358,7 +2332,10 @@ const ExploreByEquipment = () => {
                                                                             id={record.value}
                                                                             value={record.value}
                                                                             onClick={(e) => {
-                                                                                handleSelectedSpaceType(e, record.label);
+                                                                                handleSelectedSpaceType(
+                                                                                    e,
+                                                                                    record.label
+                                                                                );
                                                                             }}
                                                                         />
                                                                         <span>{record.label}</span>
