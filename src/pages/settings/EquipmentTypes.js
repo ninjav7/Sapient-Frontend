@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, CardBody, Table, Button, Input} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button, Input } from 'reactstrap';
 import axios from 'axios';
-import { BaseUrl, equipmentType, getEquipmentType, addEquipmentType, updateEquipmentType, getEndUseId } from '../../services/Network';
+import {
+    BaseUrl,
+    equipmentType,
+    getEquipmentType,
+    addEquipmentType,
+    updateEquipmentType,
+    getEndUseId,
+} from '../../services/Network';
 import Modal from 'react-bootstrap/Modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
@@ -13,7 +20,10 @@ import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
+import Select from 'react-select';
 import { Cookies } from 'react-cookie';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const SingleEquipmentModal = ({ show, equipData, close, endUseData, getDevices }) => {
     let cookies = new Cookies();
@@ -128,6 +138,8 @@ const EquipmentTable = ({
     setPageSize,
     isDeviceProcessing,
 }) => {
+    const [userPermission] = useAtom(userPermissionData);
+
     const records = [
         {
             name: 'Air Handling Unit',
@@ -195,8 +207,10 @@ const EquipmentTable = ({
                                         <tr
                                             key={index}
                                             onClick={() => {
-                                                setEquipData(record);
-                                                Toggle();
+                                                if (userPermission?.user_role === 'admin') {
+                                                    setEquipData(record);
+                                                    Toggle();
+                                                }
                                             }}
                                             className="mouse-pointer">
                                             <td className="equip-type-style">
@@ -276,6 +290,8 @@ const EquipmentTypes = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
+    const [formValidation, setFormValidation] = useState(false);
+
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -287,13 +303,39 @@ const EquipmentTypes = () => {
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const [generalEquipmentTypeData, setGeneralEquipmentTypeData] = useState([]);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
-    const [createEqipmentData, setCreateEqipmentData] = useState({});
+    const [createEqipmentData, setCreateEqipmentData] = useState({
+        name: '',
+        end_use: '',
+    });
+
+    useEffect(() => {
+        if (createEqipmentData.name.length > 0 && createEqipmentData.end_use.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, [createEqipmentData]);
+
     const [locationData, setLocationData] = useState([]);
     const [endUseData, setEndUseData] = useState([]);
     const [paginationData, setPaginationData] = useState({});
     const [pageSize, setPageSize] = useState(20);
     const [pageNo, setPageNo] = useState(1);
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+
+    const [endUseDataNow, setEndUseDataNow] = useState([]);
+
+    const addEndUseType = () => {
+        endUseData.map((item) => {
+            setEndUseDataNow((el) => [...el, { value: `${item?.end_user_id}`, label: `${item?.name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (endUseData) {
+            addEndUseType();
+        }
+    }, [endUseData]);
 
     const handleSearch = async (e) => {
         var txt = e.target.value;
@@ -325,23 +367,12 @@ const EquipmentTypes = () => {
         }
     };
 
+    // const [first, setfirst] = useState(second);
+
     const handleChange = (key, value) => {
-        // let endUseId=""
-        // if(key==="end_use"){
-        //     endUseData.forEach(ele=>{
-        //         if(ele.name===value){
-        //             endUseId=ele.end_user_id;
-        //         }
-        //     })
-        //     let obj = Object.assign({}, createEqipmentData);
-        // obj[key] = endUseId;
-        // setCreateEqipmentData(obj);
-        // }
-        // else{
         let obj = Object.assign({}, createEqipmentData);
         obj[key] = value;
         setCreateEqipmentData(obj);
-        // }
     };
 
     const saveDeviceData = async () => {
@@ -349,7 +380,6 @@ const EquipmentTypes = () => {
         obj['building_id'] = bldgId;
         obj['is_active'] = true;
         setCreateEqipmentData(obj);
-        // console.log(obj);
         try {
             let header = {
                 'Content-Type': 'application/json',
@@ -366,6 +396,7 @@ const EquipmentTypes = () => {
                 .then((res) => {
                     // console.log(res.data);
                     fetchEquipTypeData();
+                    setFormValidation(false);
                 });
 
             setIsProcessing(false);
@@ -394,6 +425,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(response.data);
                 setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -420,6 +452,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(response.data);
                 setEquipmentTypeData(response.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -461,6 +494,7 @@ const EquipmentTypes = () => {
                 setGeneralEquipmentTypeData(res.data.data);
                 setEquipmentTypeData(res.data.data);
                 setIsDeviceProcessing(false);
+                setFormValidation(false);
             });
         } catch (error) {
             console.log(error);
@@ -498,6 +532,8 @@ const EquipmentTypes = () => {
         getEndUseIds();
     }, [bldgId]);
 
+    const [userPermission] = useAtom(userPermissionData);
+
     return (
         <React.Fragment>
             <Row className="page-title ml-2">
@@ -506,14 +542,18 @@ const EquipmentTypes = () => {
 
                     <div className="btn-group custom-button-group float-right" role="group" aria-label="Basic example">
                         <div className="mr-2">
-                            <button
-                                type="button"
-                                className="btn btn-md btn-primary font-weight-bold"
-                                onClick={() => {
-                                    handleShow();
-                                }}>
-                                <i className="uil uil-plus mr-1"></i>Add Equipment Type
-                            </button>
+                            {userPermission?.user_role === 'admin' ? (
+                                <button
+                                    type="button"
+                                    className="btn btn-md btn-primary font-weight-bold"
+                                    onClick={() => {
+                                        handleShow();
+                                    }}>
+                                    <i className="uil uil-plus mr-1"></i>Add Equipment Type
+                                </button>
+                            ) : (
+                                <></>
+                            )}
                         </div>
                     </div>
                 </Col>
@@ -573,7 +613,7 @@ const EquipmentTypes = () => {
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>End Use</Form.Label>
-                            <Input
+                            {/* <Input
                                 type="select"
                                 name="select"
                                 id="exampleSelect"
@@ -585,28 +625,41 @@ const EquipmentTypes = () => {
                                 {endUseData.map((record) => {
                                     return <option value={record.end_user_id}>{record.name}</option>;
                                 })}
-                                {/* <option selected>Select End Use</option>
-                                <option value="Plug">Plug</option>
-                                <option value="Process">Process</option>
-                                <option value="Lighting">Lighting</option>
-                                <option value="HVAC">HVAC</option> */}
-                            </Input>
+                            </Input> */}
+                            {/* endUseDataNow */}
+                            <Select
+                                id="exampleSelect"
+                                placeholder="Select End Use"
+                                name="select"
+                                isSearchable={true}
+                                defaultValue={'Select End Use'}
+                                options={endUseDataNow}
+                                onChange={(e) => {
+                                    handleChange('end_use', e.value);
+                                }}
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="light" onClick={handleClose}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            saveDeviceData();
-                            handleClose();
-                        }}
-                        disabled={isProcessing}>
-                        {isProcessing ? 'Adding...' : 'Add'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={handleClose}>
+                            Cancel
+                        </Button>
+
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            onClick={() => {
+                                saveDeviceData();
+                                handleClose();
+                            }}
+                            disabled={!formValidation}>
+                            {isProcessing ? 'Adding...' : 'Add'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </React.Fragment>

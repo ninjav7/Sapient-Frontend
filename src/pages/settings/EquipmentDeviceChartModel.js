@@ -69,10 +69,16 @@ const EquipmentDeviceChartModel = ({
     fetchEquipmentData,
     deviceType,
     locationData,
+    formValidation,
+    setFormValidation,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     console.log(equipData);
+
+    console.log('formValidation', formValidation);
+
+    // const [formValidation, setFormValidation] = useState(false);
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -91,6 +97,15 @@ const EquipmentDeviceChartModel = ({
     const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
+
+    useEffect(() => {
+        if (selectedZones?.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, []);
+
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [showTab, setShowTab] = useState('');
@@ -632,6 +647,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -679,6 +695,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -921,6 +938,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -936,6 +954,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1171,6 +1190,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -1186,6 +1206,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1225,6 +1246,7 @@ const EquipmentDeviceChartModel = ({
                                             // defaultValue={loc.length===0?"":loc.location_id}
                                             onChange={(e) => {
                                                 handleChange('space_id', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option value="" selected>
                                                 Select Location

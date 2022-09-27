@@ -8,6 +8,7 @@ import { Cookies } from 'react-cookie';
 import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
 import { LoadingStore } from '../../../store/LoadingStore';
 import './panel-style.css';
+import { BuildingStore } from '../../../store/BuildingStore';
 
 const foreignObjectSize = 30;
 
@@ -37,12 +38,14 @@ export default function CustomEdge({
         targetY,
     });
 
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const disconnectBreakerLinkData = BreakersStore.useState(s => s.disconnectBreakerLinkData);
-    const disconnectedBreakersData = BreakersStore.useState(s => s.disconnectedBreakersData);
-    const panelData = BreakersStore.useState(s => s.panelData);
+    const disconnectBreakerLinkData = BreakersStore.useState((s) => s.disconnectBreakerLinkData);
+    const disconnectedBreakersData = BreakersStore.useState((s) => s.disconnectedBreakersData);
+    const panelData = BreakersStore.useState((s) => s.panelData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
 
@@ -50,7 +53,7 @@ export default function CustomEdge({
     const [targetBreakerObj, setTargetBreakerObj] = useState({});
 
     const triggerBreakerAPI = () => {
-        LoadingStore.update(s => {
+        LoadingStore.update((s) => {
             s.isBreakerDataFetched = true;
         });
     };
@@ -150,9 +153,10 @@ export default function CustomEdge({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateLinkBreakers}`, [breakerObjOne, breakerObjTwo], { headers })
-                .then(res => {
+                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
+                .then((res) => {
                     let response = res?.data;
                     setTimeout(() => {
                         triggerBreakerAPI();
@@ -171,9 +175,12 @@ export default function CustomEdge({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateLinkBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
-                .then(res => {
+                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
+                    headers,
+                })
+                .then((res) => {
                     let response = res?.data;
                     setTimeout(() => {
                         triggerBreakerAPI();
@@ -197,7 +204,7 @@ export default function CustomEdge({
             if (panelData?.voltage === '600') {
                 if (targetBreakerObj?.data?.breaker_number + 1 === 3) {
                     let thirdBreakerObj = disconnectedBreakersData.find(
-                        record => record?.data?.breaker_number === targetBreakerObj?.data?.breaker_number + 1
+                        (record) => record?.data?.breaker_number === targetBreakerObj?.data?.breaker_number + 1
                     );
 
                     if (sourceBreakerObj?.data?.breakerType === 3) {
@@ -251,7 +258,9 @@ export default function CustomEdge({
                 }
 
                 if (targetBreakerObj?.data?.breaker_number + 1 === 4) {
-                    let parentBreakerObj = disconnectedBreakersData.find(record => record?.data?.breaker_number === 1);
+                    let parentBreakerObj = disconnectedBreakersData.find(
+                        (record) => record?.data?.breaker_number === 1
+                    );
 
                     if (sourceBreakerObj?.data?.breakerType === 3) {
                         alert(
@@ -342,7 +351,7 @@ export default function CustomEdge({
             }
             if (sourceBreakerObj?.data?.breakerType === 2) {
                 let parentBreakerObj = disconnectedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -375,7 +384,7 @@ export default function CustomEdge({
             }
             if (targetBreakerObj?.data?.breakerType === 2) {
                 let thirdBreakerObj = disconnectedBreakersData.find(
-                    record => record?.data.parentBreaker === targetBreakerObj?.id
+                    (record) => record?.data.parentBreaker === targetBreakerObj?.id
                 );
 
                 let breakerObjOne = {
@@ -414,7 +423,7 @@ export default function CustomEdge({
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
                 let linkedBreakerObjs = disconnectedBreakersData.filter(
-                    record => record?.data?.parentBreaker === sourceBreakerObj?.id
+                    (record) => record?.data?.parentBreaker === sourceBreakerObj?.id
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
@@ -452,7 +461,7 @@ export default function CustomEdge({
                     return;
                 }
                 let parentBreakerObj = disconnectedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -489,7 +498,7 @@ export default function CustomEdge({
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
                 let linkedBreakerObjs = disconnectedBreakersData.filter(
-                    record => record?.data?.parentBreaker === sourceBreakerObj?.id
+                    (record) => record?.data?.parentBreaker === sourceBreakerObj?.id
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
@@ -527,7 +536,7 @@ export default function CustomEdge({
                     return;
                 }
                 let parentBreakerObj = disconnectedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -581,13 +590,13 @@ export default function CustomEdge({
     };
 
     useEffect(() => {
-        let fetchedObj = disconnectBreakerLinkData.find(record => record?.id === id);
+        let fetchedObj = disconnectBreakerLinkData.find((record) => record?.id === id);
         setBreakerLinkObj(fetchedObj);
     }, [disconnectBreakerLinkData]);
 
     useEffect(() => {
-        let sourceObj = disconnectedBreakersData.find(record => record?.id === breakerLinkObj?.source);
-        let targetObj = disconnectedBreakersData.find(record => record?.id === breakerLinkObj?.target);
+        let sourceObj = disconnectedBreakersData.find((record) => record?.id === breakerLinkObj?.source);
+        let targetObj = disconnectedBreakersData.find((record) => record?.id === breakerLinkObj?.target);
         setSourceBreakerObj(sourceObj);
         setTargetBreakerObj(targetObj);
     }, [breakerLinkObj]);

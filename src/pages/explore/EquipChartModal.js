@@ -1,8 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Input, FormGroup, Spinner } from 'reactstrap';
+import {
+    Row,
+    Col,
+    Card,
+    CardBody,
+    Table,
+    UncontrolledDropdown,
+    DropdownMenu,
+    DropdownToggle,
+    DropdownItem,
+    Button,
+    Input,
+    FormGroup,
+    Spinner,
+    ModalHeader,
+} from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
+import DatePicker from 'react-datepicker';
 import Form from 'react-bootstrap/Form';
-import { faEllipsisV, faPowerOff } from '@fortawesome/pro-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DateRangeStore } from '../../store/DateRangeStore';
+import { faXmark, faEllipsisV, faPowerOff, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import {
     BaseUrl,
     builidingAlerts,
@@ -15,21 +33,29 @@ import {
     equipmentType,
     getLocation,
 } from '../../services/Network';
+import Select from 'react-select';
 import axios from 'axios';
+import { percentageHandler, convert24hourTo12HourFormat } from '../../utils/helper';
 import BrushChart from '../charts/BrushChart';
+import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from 'react-router-dom';
+import { ComponentStore } from '../../store/ComponentStore';
+import { ChevronDown, Search } from 'react-feather';
+import './style.css';
 import moment from 'moment';
 import { TagsInput } from 'react-tag-input-component';
+import { BuildingStore } from '../../store/BuildingStore';
+import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import SocketLogo from '../../assets/images/active-devices/Sockets.svg';
 import UnionLogo from '../../assets/images/active-devices/Union.svg';
+import { MultiSelect } from 'react-multi-select-component';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { DateRangeStore } from '../../store/DateRangeStore';
-import ModalHeader from '../../components/ModalHeader';
-import './style.css';
+import { result } from 'lodash';
+import Switch from 'react-switch';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -54,13 +80,14 @@ const EquipChartModal = ({
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
         { value: 'power', label: 'Power (W)', unit: 'W' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
-    ];
+    ]);
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
     const [endUse, setEndUse] = useState([]);
     const [locationData, setLocationData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
+    const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
@@ -76,8 +103,49 @@ const EquipChartModal = ({
     const [sensorData, setSensorData] = useState([]);
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
+
+    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
+
+    const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
+
+    const addEquimentType = () => {
+        equipmentTypeData.map((item) => {
+            setEquipmentTypeDataNow((el) => [
+                ...el,
+                { value: `${item?.equipment_id}`, label: `${item?.equipment_type}` },
+            ]);
+        });
+    };
+
+    useEffect(() => {
+        if (equipmentTypeData) {
+            addEquimentType();
+        }
+    }, [equipmentTypeData]);
+
+    const customDaySelect = [
+        {
+            label: 'Last 7 Days',
+            value: 7,
+        },
+        {
+            label: 'Last 5 Days',
+            value: 5,
+        },
+        {
+            label: 'Last 3 Days',
+            value: 3,
+        },
+        {
+            label: 'Last 1 Day',
+            value: 1,
+        },
+    ];
     const [buildingAlert, setBuildingAlerts] = useState([]);
     const [equipFilter, setEquipFilter] = useState(equipmentFilter);
+    const dateValue = DateRangeStore.useState((s) => s.dateFilter);
+    const [dateFilter, setDateFilter] = useState(dateValue);
     const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
     const UNIT_DIVIDER = 1000;
     const getRequiredConsumptionLabel = (value) => {
@@ -147,13 +215,14 @@ const EquipChartModal = ({
     };
 
     const handleRefresh = () => {
+        setDateFilter(dateValue);
         let endDate = new Date(); // today
         let startDate = new Date();
         startDate.setDate(startDate.getDate() - 7);
+        setDateRange([startDate, endDate]);
         setDeviceData([]);
         setSeriesData([]);
     };
-
     const generateDayWiseTimeSeries1 = (baseval, count, yrange) => {
         var i = 0;
         var series = [];
@@ -415,7 +484,6 @@ const EquipChartModal = ({
         // // console.log(obj);
         // setUpdateEqipmentData(obj);
     };
-
     const handleSave = () => {
         try {
             let obj = Object.assign({}, updateEqipmentData);
@@ -1016,6 +1084,7 @@ const EquipChartModal = ({
                                         <Col lg={4}>
                                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                                 <Form.Label>Equipment Type</Form.Label>
+                                                {/* equipmentTypeDataNow */}
                                                 <Input
                                                     type="select"
                                                     name="select"
@@ -1034,6 +1103,18 @@ const EquipChartModal = ({
                                                         );
                                                     })}
                                                 </Input>
+                                                {/* <Select
+                                                    id="exampleSelect"
+                                                    placeholder="Select Type"
+                                                    name="select"
+                                                    isSearchable={true}
+                                                    defaultValue={equipResult ? equipResult.equipment_id : ''}
+                                                    options={equipmentTypeDataNow}
+                                                    onChange={(e) => {
+                                                        handleChange('equipment_type', e.value);
+                                                    }}
+                                                    className="basic-single font-weight-bold"
+                                                /> */}
                                             </Form.Group>
                                         </Col>
                                         <Col lg={4}>

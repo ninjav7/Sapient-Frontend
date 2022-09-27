@@ -8,6 +8,7 @@ import { Cookies } from 'react-cookie';
 import { BaseUrl, updateLinkBreakers } from '../../../services/Network';
 import { LoadingStore } from '../../../store/LoadingStore';
 import './panel-style.css';
+import { BuildingStore } from '../../../store/BuildingStore';
 
 const foreignObjectSize = 30;
 
@@ -37,12 +38,14 @@ export default function CustomEdge({
         targetY,
     });
 
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const breakerLinkData = BreakersStore.useState(s => s.breakerLinkData);
-    const distributedBreakersData = BreakersStore.useState(s => s.distributedBreakersData);
-    const panelData = BreakersStore.useState(s => s.panelData);
+    const breakerLinkData = BreakersStore.useState((s) => s.breakerLinkData);
+    const distributedBreakersData = BreakersStore.useState((s) => s.distributedBreakersData);
+    const panelData = BreakersStore.useState((s) => s.panelData);
 
     const [breakerLinkObj, setBreakerLinkObj] = useState({});
 
@@ -50,7 +53,7 @@ export default function CustomEdge({
     const [targetBreakerObj, setTargetBreakerObj] = useState({});
 
     const triggerBreakerAPI = () => {
-        LoadingStore.update(s => {
+        LoadingStore.update((s) => {
             s.isBreakerDataFetched = true;
         });
     };
@@ -162,9 +165,10 @@ export default function CustomEdge({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateLinkBreakers}`, [breakerObjOne, breakerObjTwo], { headers })
-                .then(res => {
+                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo], { headers })
+                .then((res) => {
                     let response = res?.data;
                     setTimeout(() => {
                         triggerBreakerAPI();
@@ -183,9 +187,12 @@ export default function CustomEdge({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
+            let params = `?building_id=${bldgId}`;
             await axios
-                .post(`${BaseUrl}${updateLinkBreakers}`, [breakerObjOne, breakerObjTwo, breakerObjThree], { headers })
-                .then(res => {
+                .post(`${BaseUrl}${updateLinkBreakers}${params}`, [breakerObjOne, breakerObjTwo, breakerObjThree], {
+                    headers,
+                })
+                .then((res) => {
                     let response = res?.data;
                     setTimeout(() => {
                         triggerBreakerAPI();
@@ -216,7 +223,7 @@ export default function CustomEdge({
                 }
 
                 let thirdBreakerObj = distributedBreakersData.find(
-                    record => record?.data?.breaker_number === targetBreakerObj?.data?.breaker_number + 2
+                    (record) => record?.data?.breaker_number === targetBreakerObj?.data?.breaker_number + 2
                 );
 
                 if (sourceBreakerObj?.data?.breakerType === 3) {
@@ -307,7 +314,7 @@ export default function CustomEdge({
             }
             if (sourceBreakerObj?.data?.breakerType === 2) {
                 let parentBreakerObj = distributedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -340,7 +347,7 @@ export default function CustomEdge({
             }
             if (targetBreakerObj?.data?.breakerType === 2) {
                 let thirdBreakerObj = distributedBreakersData.find(
-                    record => record?.data.parentBreaker === targetBreakerObj?.id
+                    (record) => record?.data.parentBreaker === targetBreakerObj?.id
                 );
 
                 let breakerObjOne = {
@@ -379,7 +386,7 @@ export default function CustomEdge({
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
                 let linkedBreakerObjs = distributedBreakersData.filter(
-                    record => record?.data?.parentBreaker === sourceBreakerObj?.id
+                    (record) => record?.data?.parentBreaker === sourceBreakerObj?.id
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
@@ -417,7 +424,7 @@ export default function CustomEdge({
                     return;
                 }
                 let parentBreakerObj = distributedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -455,7 +462,7 @@ export default function CustomEdge({
             // Parent Breaker in Triple Linking
             if (sourceBreakerObj?.data?.parentBreaker === '') {
                 let linkedBreakerObjs = distributedBreakersData.filter(
-                    record => record?.data?.parentBreaker === sourceBreakerObj?.id
+                    (record) => record?.data?.parentBreaker === sourceBreakerObj?.id
                 );
                 let thirdBreakerObj = linkedBreakerObjs[1];
 
@@ -493,7 +500,7 @@ export default function CustomEdge({
                     return;
                 }
                 let parentBreakerObj = distributedBreakersData.find(
-                    record => record?.id === sourceBreakerObj?.data?.parentBreaker
+                    (record) => record?.id === sourceBreakerObj?.data?.parentBreaker
                 );
 
                 let breakerObjOne = {
@@ -547,13 +554,13 @@ export default function CustomEdge({
     };
 
     useEffect(() => {
-        let fetchedObj = breakerLinkData.find(record => record?.id === id);
+        let fetchedObj = breakerLinkData.find((record) => record?.id === id);
         setBreakerLinkObj(fetchedObj);
     }, [breakerLinkData]);
 
     useEffect(() => {
-        let sourceObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.source);
-        let targetObj = distributedBreakersData.find(record => record?.id === breakerLinkObj?.target);
+        let sourceObj = distributedBreakersData.find((record) => record?.id === breakerLinkObj?.source);
+        let targetObj = distributedBreakersData.find((record) => record?.id === breakerLinkObj?.target);
         setSourceBreakerObj(sourceObj);
         setTargetBreakerObj(targetObj);
     }, [breakerLinkObj]);
