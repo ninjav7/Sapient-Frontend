@@ -177,12 +177,25 @@ const ExploreEquipmentTable = ({
                                                             value={record?.equipment_id}
                                                             checked={totalEquipmentId.includes(record?.equipment_id)}
                                                             onClick={(e) => {
+                                                                console.log(
+                                                                    e.currentTarget.checked,
+                                                                    'e.currentTarget.checked'
+                                                                );
                                                                 handleSelection(record?.equipment_id);
                                                                 setEqupimentIdSelection(record?.equipment_id);
-                                                                setTotalEquipmentId((el) => [
-                                                                    ...el,
-                                                                    record?.equipment_id,
-                                                                ]);
+                                                                if (e.target.checked) {
+                                                                    setTotalEquipmentId((el) => [
+                                                                        ...el,
+                                                                        record?.equipment_id,
+                                                                    ]);
+                                                                }
+                                                                if (!e.target.checked) {
+                                                                    setTotalEquipmentId((el) =>
+                                                                        el.filter((item) => {
+                                                                            return item !== record?.equipment_id;
+                                                                        })
+                                                                    );
+                                                                }
                                                             }}
                                                         />
                                                         <a
@@ -578,9 +591,9 @@ const ExploreByEquipment = () => {
         legend: {
             position: 'top',
             horizontalAlign: 'left',
-            //showForSingleSeries: true,
-            // showForNullSeries: false,
-            // showForZeroSeries: false,
+            showForSingleSeries: true,
+            showForNullSeries: false,
+            showForZeroSeries: true,
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
