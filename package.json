@@ -45,6 +45,7 @@
         "lodash.debounce": "^4.0.8",
         "metismenujs": "^1.1.0",
         "moment": "^2.29.3",
+        "moment-timezone": "^0.5.37",
         "plotly.js": "^2.11.1",
         "pluralize": "^8.0.0",
         "pullstate": "^1.24.0",
