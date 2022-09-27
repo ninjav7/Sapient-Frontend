@@ -5,15 +5,13 @@ export const percentageHandler = (v1, v2) => {
     if (v2 === 0) {
         return 100;
     }
-    let percentage=0.0;
-    if(v1>v2){
+    let percentage = 0.0;
+    if (v1 > v2) {
         percentage = ((v1 - v2) / v1) * 100;
-    }
-    else{
+    } else {
         percentage = ((v1 - v2) / v2) * 100;
     }
-    
-    const value = Math.abs(percentage).toFixed(5) || 0;
+    const value = Math.abs(percentage).toFixed(2) || 0;
     return value;
 };
 
@@ -35,3 +33,11 @@ export const dateFormatHandler = (dt) => {
     const customDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate(); //prints expected format.
     return customDate;
 };
+
+export const fetchDiffDaysCount = (startDate, endDate) => {
+    let Difference_In_Time = endDate.getTime() - startDate.getTime();
+    let Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+    return Difference_In_Days.toFixed(0);
+};
+
+export const { timeZone } = Intl.DateTimeFormat().resolvedOptions();

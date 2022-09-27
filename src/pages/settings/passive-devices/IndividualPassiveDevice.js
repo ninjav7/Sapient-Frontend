@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass, faChartMixed } from '@fortawesome/pro-regular-svg-icons';
 import DeviceChartModel from '../DeviceChartModel';
 import { Link, useParams, useHistory } from 'react-router-dom';
+import moment from 'moment';
 import axios from 'axios';
 import {
     BaseUrl,
@@ -13,7 +14,6 @@ import {
     listSensor,
     updateActivePassiveDevice,
 } from '../../../services/Network';
-import { dateFormatHandler } from '../../../utils/helper';
 import { BuildingStore } from '../../../store/BuildingStore';
 import { BreadcrumbStore } from '../../../store/BreadcrumbStore';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -22,11 +22,15 @@ import { Cookies } from 'react-cookie';
 import Skeleton from 'react-loading-skeleton';
 import EditSensorPanelModel from './EditSensorPanelModel';
 import AddSensorPanelModel from './AddSensorPanelModel';
+import { DateRangeStore } from '../../../store/DateRangeStore';
 import './style.css';
 
 const IndividualPassiveDevice = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     let history = useHistory();
 
@@ -46,19 +50,11 @@ const IndividualPassiveDevice = () => {
     const closeEditSensorPanelModel = () => setShowEditSensorPanel(false);
     const openEditSensorPanelModel = () => setShowEditSensorPanel(true);
 
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [selectedTab, setSelectedTab] = useState(0);
-
-    const [sensorCount, setSensorCount] = useState(0);
-
     const [passiveData, setPassiveData] = useState({});
-    const [onlineDeviceData, setOnlineDeviceData] = useState([]);
-    const [offlineDeviceData, setOfflineDeviceData] = useState([]);
     const [locationData, setLocationData] = useState([]);
-    const [createDeviceData, setCreateDeviceData] = useState({
-        device_type: 'passive',
-    });
+
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [currentRecord, setCurrentRecord] = useState({});
     const [currentSensorObj, setCurrentSensorObj] = useState({});
     const [editSenorModelRefresh, setEditSenorModelRefresh] = useState(false);
@@ -72,29 +68,24 @@ const IndividualPassiveDevice = () => {
     const [sensorAPIRefresh, setSensorAPIRefresh] = useState(false);
     const [isFetchingSensorData, setIsFetchingSensorData] = useState(true);
 
-    // *********************************************************************************** //
-
     const [seriesData, setSeriesData] = useState([]);
     const [deviceData, setDeviceData] = useState([]);
 
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(true);
-
-    const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    // const CONVERSION_ALLOWED_UNITS = ['mV', 'mAh', 'power'];
+    const CONVERSION_ALLOWED_UNITS = ['power'];
 
     const UNIT_DIVIDER = 1000;
 
     const [metric, setMetric] = useState([
-        // { value: 'energy', label: 'Consumed Energy (Wh)' },
-        // { value: 'totalconsumedenergy', label: 'Total Consumed Energy (Wh)' },
-        // { value: 'mV', label: 'Voltage (V)' },
-        { value: 'minCurrentMilliAmps', label: 'minCurrentMilliAmps' },
-        { value: 'maxCurrentMilliAmps', label: 'maxCurrentMilliAmps' },
-        { value: 'rmsCurrentMilliAmps', label: 'rmsCurrentMilliAmps' },
-        { value: 'power', label: 'power' },
-        // { value: 'mAh', label: 'Amps' },
+        { value: 'minCurrentMilliAmps', label: 'Minimum Current (mA)', unit: 'mA' },
+        { value: 'maxCurrentMilliAmps', label: 'Maximum Current (mA)', unit: 'mA' },
+        { value: 'rmsCurrentMilliAmps', label: 'RMS Current (mA)', unit: 'mA' },
+        { value: 'power', label: 'Power (W)', unit: 'W' },
     ]);
 
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+    const [selectedConsumption, setConsumption] = useState(metric[0].value);
+    const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [searchSensor, setSearchSensor] = useState('');
 
     const handleSearchChange = (e) => {
@@ -104,12 +95,12 @@ const IndividualPassiveDevice = () => {
     const filtered = !searchSensor
         ? sensors
         : sensors.filter((sensor) => {
-            return (
-                sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
-                sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
-            );
-        });
+              return (
+                  sensor.name.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.breaker_link.toLowerCase().includes(searchSensor.toLowerCase()) ||
+                  sensor.equipment.toLowerCase().includes(searchSensor.toLowerCase())
+              );
+          });
 
     const handleChartShow = (id) => {
         setSensorId(id);
@@ -118,8 +109,6 @@ const IndividualPassiveDevice = () => {
         fetchSensorGraphData(id);
         setShowChart(true);
     };
-
-    const [selectedConsumption, setConsumption] = useState(metric[0].value);
 
     const getRequiredConsumptionLabel = (value) => {
         let label = '';
@@ -133,6 +122,98 @@ const IndividualPassiveDevice = () => {
         });
 
         return label;
+    };
+
+    const fetchSensorGraphData = async (id) => {
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            setIsSensorChartLoading(true);
+            let params = `?sensor_id=${
+                id === sensorId ? sensorId : id
+            }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
+            await axios
+                .post(
+                    `${BaseUrl}${sensorGraphData}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let response = res.data;
+                    console.log('SSR 1 => ', response);
+                    let data = response;
+
+                    let exploreData = [];
+
+                    let recordToInsert = {
+                        data: data,
+                        name: getRequiredConsumptionLabel(selectedConsumption),
+                    };
+
+                    try {
+                        recordToInsert.data = recordToInsert.data.map((_data) => {
+                            _data[0] = moment(new Date(_data[0])).tz(timeZone).format();
+                            _data[0] = new Date(_data[0]);
+                            // moment(_data[0]).tz(timeZone).format();
+
+                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
+                                _data[1] = _data[1] / UNIT_DIVIDER;
+                            }
+                            return _data;
+                        });
+                    } catch (error) {}
+
+                    exploreData.push(recordToInsert);
+                    console.log('SSR 2 => ', exploreData);
+                    setDeviceData(exploreData);
+
+                    console.log('UPDATED_CODE', seriesData);
+
+                    setSeriesData([
+                        {
+                            data: exploreData[0].data,
+                        },
+                    ]);
+                    setIsSensorChartLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Sensor Graph data');
+        }
+    };
+
+    const updateActiveDeviceData = async () => {
+        if (passiveData?.equipments_id) {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?device_id=${passiveData?.equipments_id}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
+                        {
+                            location_id: activeLocationId,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        setSensorAPIRefresh(!sensorAPIRefresh);
+                        console.log(res.data);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to link Sensor with Equipment');
+            }
+        }
     };
 
     useEffect(() => {
@@ -199,7 +280,6 @@ const IndividualPassiveDevice = () => {
                 console.log('Failed to fetch Location Data');
             }
         };
-
         fetchSinglePassiveDevice();
         fetchActiveDeviceSensorData();
         fetchLocationData();
@@ -224,101 +304,6 @@ const IndividualPassiveDevice = () => {
         updateBreadcrumbStore();
     }, []);
 
-    const fetchSensorGraphData = async (id) => {
-        try {
-            let endDate = new Date(); // today
-            let startDate = new Date();
-            startDate.setDate(startDate.getDate() - 7);
-
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id
-                }&consumption=minCurrentMilliAmps&tz_info=${timeZone}`;
-            await axios
-                .post(
-                    `${BaseUrl}${sensorGraphData}${params}`,
-                    {
-                        date_from: dateFormatHandler(startDate),
-                        date_to: dateFormatHandler(endDate),
-                    },
-                    { headers }
-                )
-                .then((res) => {
-                    let response = res.data;
-
-                    let data = response;
-
-                    let exploreData = [];
-
-                    let recordToInsert = {
-                        data: data,
-
-                        name: getRequiredConsumptionLabel(selectedConsumption),
-                    };
-
-                    try {
-                        recordToInsert.data = recordToInsert.data.map((_data) => {
-                            _data[0] = new Date(_data[0]);
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                _data[1] = _data[1] / UNIT_DIVIDER;
-                            }
-
-                            return _data;
-                        });
-                    } catch (error) { }
-
-                    exploreData.push(recordToInsert);
-
-                    console.log('SSR exploreData => ', exploreData);
-                    setDeviceData(exploreData);
-
-                    console.log('UPDATED_CODE', seriesData);
-
-                    setSeriesData([
-                        {
-                            data: exploreData[0].data,
-                        },
-                    ]);
-                    setIsSensorChartLoading(false);
-                });
-        } catch (error) {
-            console.log(error);
-            console.log('Failed to fetch Sensor Graph data');
-        }
-    };
-
-    const updateActiveDeviceData = async () => {
-        if (passiveData.equipments_id) {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?device_id=${passiveData.equipments_id}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${updateActivePassiveDevice}${params}`,
-                        {
-                            location_id: activeLocationId,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        setSensorAPIRefresh(!sensorAPIRefresh);
-                        console.log(res.data);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to link Sensor with Equipment');
-            }
-        }
-    };
-
     return (
         <>
             <div>
@@ -330,7 +315,7 @@ const IndividualPassiveDevice = () => {
                                     <span className="passive-device-style">Passive Device</span>
                                 </div>
                                 <div>
-                                    <span className="passive-device-name mr-3">{passiveData.identifier}</span>
+                                    <span className="passive-device-name mr-3">{passiveData?.identifier}</span>
                                     <span className="passive-sensor-count">{sensors.length} Sensors</span>
                                 </div>
                             </div>
@@ -349,7 +334,7 @@ const IndividualPassiveDevice = () => {
                                     }}
                                     disabled={
                                         activeLocationId === 'Select location' ||
-                                            activeLocationId === passiveData.location_id
+                                        activeLocationId === passiveData?.location_id
                                             ? true
                                             : false
                                     }>
@@ -388,8 +373,8 @@ const IndividualPassiveDevice = () => {
                                                 <option>Select Location</option>
                                                 {locationData.map((record, index) => {
                                                     return (
-                                                        <option value={record.location_id}>
-                                                            {record.location_name}
+                                                        <option value={record?.location_id}>
+                                                            {record?.location_name}
                                                         </option>
                                                     );
                                                 })}
@@ -406,7 +391,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="device-label-style" htmlFor="customSwitches">
                                             Identifier
                                         </h6>
-                                        <h6 className="passive-device-value">{passiveData.identifier}</h6>
+                                        <h6 className="passive-device-value">{passiveData?.identifier}</h6>
                                     </div>
                                     <div>
                                         <h6 className="device-label-style" htmlFor="customSwitches">
@@ -415,7 +400,7 @@ const IndividualPassiveDevice = () => {
                                         <h6 className="passive-device-value">
                                             {passiveData?.model &&
                                                 passiveData?.model.charAt(0).toUpperCase() +
-                                                passiveData?.model.slice(1)}
+                                                    passiveData?.model.slice(1)}
                                         </h6>
                                     </div>
                                 </div>
@@ -464,7 +449,7 @@ const IndividualPassiveDevice = () => {
                                     {filtered.map((record, index) => {
                                         return (
                                             <>
-                                                {record.equipment_id === '' ? (
+                                                {record.equipment_id === '' && record.breaker_id === '' ? (
                                                     <div className="sensor-container-style-notAttached mt-3">
                                                         <div className="sensor-data-style">
                                                             <span className="sensor-data-no">{record.index}</span>
@@ -549,6 +534,8 @@ const IndividualPassiveDevice = () => {
                 setMetric={setMetric}
                 selectedConsumption={selectedConsumption}
                 setConsumption={setConsumption}
+                selectedUnit={selectedUnit}
+                setSelectedUnit={setSelectedUnit}
                 getRequiredConsumptionLabel={getRequiredConsumptionLabel}
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}

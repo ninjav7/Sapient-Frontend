@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { BaseUrl, getBuilding } from '../../services/Network';
-import { Link, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuildings } from '@fortawesome/pro-solid-svg-icons';
@@ -15,44 +14,65 @@ import BuildingList from './BuildingList';
 import Input from '../../sharedComponents/form/input/Input';
 import SearchIcon from '../../assets/icon/search.svg';
 import { ReactComponent as CheckIcon } from '../../assets/icon/check.svg';
+import { buildingData } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
-const PortfolioItem = ({ handlePortfolioClick }) => {
+const PortfolioItem = ({ handlePortfolioClick, bldStoreId }) => {
     const location = useLocation();
+    const history = useHistory();
+
+    const configRoutes = [
+        '/settings/general',
+        '/settings/layout',
+        '/settings/equipment',
+        '/settings/panels',
+        '/active-devices',
+        '/settings/passive-devices',
+    ];
+
+    const handleChange = () => {
+        if (configRoutes.includes(location.pathname)) {
+            history.push({
+                pathname: `/settings/account`,
+            });
+        } else {
+            history.push({
+                pathname: `/energy/portfolio/overview`,
+            });
+        }
+    };
+
     return (
         <div>
-            {location.pathname === '/energy/portfolio/overview' ? (
-                <Dropdown.Item className="selected">
+            {location.pathname === '/energy/portfolio/overview' && (
+                <Dropdown.Item
+                    className="selected"
+                    onClick={() => {
+                        handlePortfolioClick && handlePortfolioClick('Portfolio');
+                        history.push({
+                            pathname: `/energy/portfolio/overview`,
+                        });
+                    }}>
                     <div className="filter-bld-style">
                         <div className="filter-name-style">
                             <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-
-                            <Link to="/energy/portfolio/overview">
-                                <span
-                                    className="portfolio-txt-style"
-                                    onClick={() => {
-                                        handlePortfolioClick && handlePortfolioClick('Portfolio');
-                                    }}>
-                                    Portfolio
-                                </span>
-                            </Link>
+                            <span className="portfolio-txt-style">Portfolio</span>
                         </div>
                         <div className="dropdown-item-selected">
                             <CheckIcon />
                         </div>
                     </div>
                 </Dropdown.Item>
-            ) : (
-                <Dropdown.Item>
+            )}
+
+            {location.pathname !== '/energy/portfolio/overview' && (
+                <Dropdown.Item
+                    onClick={() => {
+                        handlePortfolioClick && handlePortfolioClick('Portfolio');
+                        handleChange();
+                    }}>
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-                    <Link to="/energy/portfolio/overview">
-                        <span
-                            className="portfolio-txt-style"
-                            onClick={() => {
-                                handlePortfolioClick && handlePortfolioClick('Portfolio');
-                            }}>
-                            Portfolio
-                        </span>
-                    </Link>
+                    <span className="portfolio-txt-style">Portfolio</span>
                 </Dropdown.Item>
             )}
         </div>
@@ -79,27 +99,30 @@ const BuildingSwitcher = () => {
 
     const location = useLocation();
 
+    const accountRoutes = [
+        '/energy/portfolio/overview',
+        '/energy/compare-buildings',
+        '/settings/account',
+        '/settings/buildings',
+        '/settings/users',
+        '/settings/roles',
+        '/settings/equipment-types',
+    ];
+
     const [value, setValue] = useState('');
     const [buildingList, setBuildingList] = useState([]);
     const bldStoreId = BuildingStore.useState((s) => s.BldgId);
     const bldStoreName = BuildingStore.useState((s) => s.BldgName);
     const [portfolioName, setPortfolioName] = useState('');
 
+    const [buildingListData] = useAtom(buildingData);
+
     useEffect(() => {
         const getBuildingList = async () => {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                let data = res.data;
-                let activeBldgs = data.filter((bld) => bld.active === true);
-                setBuildingList(activeBldgs);
-            });
+            setBuildingList(buildingListData);
         };
         getBuildingList();
-    }, []);
+    }, [buildingListData]);
 
     useEffect(() => {
         ComponentStore.update((s) => {
@@ -107,23 +130,8 @@ const BuildingSwitcher = () => {
         });
     }, [portfolioName]);
 
-    useEffect(() => {
-        const getBuildingList = async () => {
-            let headers = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-            await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                let data = res.data;
-                let activeBldgs = data.filter((bld) => bld.active === true);
-                setBuildingList(activeBldgs);
-            });
-        };
-        getBuildingList();
-    }, []);
+    const dropDownTitle = accountRoutes.includes(location.pathname) ? 'Portfolio' : bldStoreName;
 
-    const dropDownTitle = location.pathname === '/energy/portfolio/overview' ? 'Portfolio' : bldStoreName;
     const filteredBuildings = buildingList.filter(({ building_name }) => {
         return building_name.toLowerCase().includes(value.toLowerCase());
     });
@@ -147,7 +155,7 @@ const BuildingSwitcher = () => {
                         <FilterBuildings handleValueChange={setValue} value={value} />
 
                         <div className="tracker-dropdown-content">
-                            <PortfolioItem handlePortfolioClick={setPortfolioName} />
+                            <PortfolioItem handlePortfolioClick={setPortfolioName} bldStoreId={bldStoreId} />
 
                             <BuildingList buildingList={filteredBuildings} bldStoreId={bldStoreId} />
                         </div>

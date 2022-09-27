@@ -1,0 +1,13 @@
+@import '../../assets/scss/colors';
+
+.tiny-bar-chart {
+    &-wrapper {
+        background: $primary-gray-150;
+        border-radius: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    &-line {
+        height: 0.375rem;
+    }
+}

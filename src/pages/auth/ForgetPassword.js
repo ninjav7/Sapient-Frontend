@@ -8,7 +8,7 @@ import { Mail } from 'react-feather';
 
 import { isUserAuthenticated } from '../../helpers/authUtils';
 import Loader from '../../components/Loader';
-import logo from '../../assets/images/logo.png';
+// import logo from '../../assets/images/logo.png';
 
 class ForgetPassword extends Component {
     _isMounted = false;

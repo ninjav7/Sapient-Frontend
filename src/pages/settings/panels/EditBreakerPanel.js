@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Row, Col, Label, Input, FormGroup, Button } from 'reactstrap';
+import { Row, Col, Label, Input, FormGroup, Button, Card, CardHeader, CardBody } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
@@ -16,6 +16,8 @@ import {
     createBreaker,
     generalEquipments,
     listSensor,
+    resetBreakers,
+    deletePanel,
 } from '../../../services/Network';
 import { Cookies } from 'react-cookie';
 import { ComponentStore } from '../../../store/ComponentStore';
@@ -26,10 +28,13 @@ import BreakerLink from './BreakerLinkForDistribution';
 import BreakerLinkForDisconnect from './BreakerLinkForDisconnect';
 import BreakersComponent from './BreakerFlowForDistribution';
 import DisconnectedBreakerComponent from './BreakerFlowForDisconnect';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkHorizontalSlash, faTrash } from '@fortawesome/pro-regular-svg-icons';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import '../style.css';
 import './panel-style.css';
+import Select from 'react-select';
 
 // Added Node and Egde types
 const nodeTypes = {
@@ -57,13 +62,25 @@ const EditBreakerPanel = () => {
     const handleMainClose = () => setShowMain(false);
     const handleMainShow = () => setShowMain(true);
 
+    // Unlink Alert Modal
+    const [showUnlinkAlert, setShowUnlinkAlert] = useState(false);
+    const handleUnlinkAlertClose = () => setShowUnlinkAlert(false);
+    const handleUnlinkAlertShow = () => setShowUnlinkAlert(true);
+
+    // Delete Panel Modal
+    const [showDeletePanelAlert, setShowDeletePanelAlert] = useState(false);
+    const handleDeletePanelAlertClose = () => setShowDeletePanelAlert(false);
+    const handleDeletePanelAlertShow = () => setShowDeletePanelAlert(true);
+
     const [equipmentData, setEquipmentData] = useState([]);
     const [passiveDeviceData, setPassiveDeviceData] = useState([]);
 
-    const bldgId = BuildingStore.useState(s => s.BldgId);
-    const isBreakerApiTrigerred = LoadingStore.useState(s => s.isBreakerDataFetched);
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const isBreakerApiTrigerred = LoadingStore.useState((s) => s.isBreakerDataFetched);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const [panel, setPanel] = useState({});
     const [breakersData, setBreakersData] = useState([]);
@@ -115,7 +132,49 @@ const EditBreakerPanel = () => {
     const [activePanelType, setActivePanelType] = useState('distribution');
     const [panelsDataList, setPanelsDataList] = useState([]);
 
+    const [parentPanel, setParentPanel] = useState([]);
+    const [location, setLocation] = useState([]);
+
+    const addPanelData = () => {
+        panelsDataList.map((item) => {
+            setParentPanel((el) => [...el, { value: `${item?.panel_id}`, label: `${item?.panel_name}` }]);
+        });
+    };
+
+    const addLocationData = () => {
+        locationDataList.map((item) => {
+            setLocation((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    useEffect(() => {
+        if (panelsDataList) {
+            addPanelData();
+        }
+    }, [panelsDataList]);
+
+    useEffect(() => {
+        if (locationDataList) {
+            addLocationData();
+        }
+    }, [locationDataList]);
+
+    console.log('parentPanel', parentPanel);
+
     const [isEditable, setIsEditable] = useState(true);
+
+    const [dynamicDistributeHeight, setDynamicDistributeHeight] = useState(300);
+    const [dynamicDisconnectHeight, setDynamicDisconnectHeight] = useState(300);
+
+    const [reactFlowDistributeStyle, setReactFlowDistributeStyle] = useState({
+        background: '#fafbfc',
+        height: `${dynamicDistributeHeight}px`,
+    });
+
+    const [reactFlowDisconnectStyle, setReactFlowDisconnectStyle] = useState({
+        background: '#fafbfc',
+        height: `${dynamicDisconnectHeight}px`,
+    });
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panel);
@@ -143,7 +202,7 @@ const EditBreakerPanel = () => {
         setPanel(obj);
     };
 
-    const addBreakersToList = newBreakerIndex => {
+    const addBreakersToList = (newBreakerIndex) => {
         let newBreakerList = normalStruct;
         let obj = {
             name: `Breaker ${newBreakerIndex}`,
@@ -251,27 +310,33 @@ const EditBreakerPanel = () => {
     const [disconnectedBreakersEdges, setDisconnectedBreakersEdges] = useState([]);
 
     // For Distributed
-    const onNodesChange = useCallback(changes => setDistributedBreakersNodes(ns => applyNodeChanges(changes, ns)), []);
-    const onEdgesChange = useCallback(changes => setDistributedBreakersEdges(es => applyEdgeChanges(changes, es)), []);
-    const onConnect = useCallback(connection => setDistributedBreakersEdges(eds => addEdge(connection, eds)));
+    const onNodesChange = useCallback(
+        (changes) => setDistributedBreakersNodes((ns) => applyNodeChanges(changes, ns)),
+        []
+    );
+    const onEdgesChange = useCallback(
+        (changes) => setDistributedBreakersEdges((es) => applyEdgeChanges(changes, es)),
+        []
+    );
+    const onConnect = useCallback((connection) => setDistributedBreakersEdges((eds) => addEdge(connection, eds)));
 
     // For Disconnected
     const onNodesChangeForDisconnect = useCallback(
-        changes => setDisconnectedBreakersNodes(ns => applyNodeChanges(changes, ns)),
+        (changes) => setDisconnectedBreakersNodes((ns) => applyNodeChanges(changes, ns)),
         []
     );
     const onEdgesChangeForDisconnect = useCallback(
-        changes => setDisconnectedBreakersEdges(es => applyEdgeChanges(changes, es)),
+        (changes) => setDisconnectedBreakersEdges((es) => applyEdgeChanges(changes, es)),
         []
     );
-    const onConnectForDisconnect = useCallback(connection =>
-        setDisconnectedBreakersEdges(eds => addEdge(connection, eds))
+    const onConnectForDisconnect = useCallback((connection) =>
+        setDisconnectedBreakersEdges((eds) => addEdge(connection, eds))
     );
 
     // Get co-rodinates for Distributed Breakers
-    const getYaxisCordinates = index => {
+    const getYaxisCordinates = (index) => {
         let num = index;
-        let value = 90;
+        let value = 100;
 
         if (num === 1 || num === 2) {
             return value;
@@ -284,15 +349,15 @@ const EditBreakerPanel = () => {
         }
     };
 
-    const getDiscYaxisCordinates = index => {
+    const getDiscYaxisCordinates = (index) => {
         if (index === 1) {
-            return 60;
+            return 25;
         }
         if (index === 2) {
-            return 150;
+            return 125;
         }
         if (index === 3) {
-            return 240;
+            return 225;
         }
     };
 
@@ -321,7 +386,7 @@ const EditBreakerPanel = () => {
                 .patch(`${BaseUrl}${updatePanel}${params}`, panelObj, {
                     headers: header,
                 })
-                .then(res => {
+                .then((res) => {
                     let response = res.data;
                 });
             setIsProcessing(false);
@@ -335,14 +400,64 @@ const EditBreakerPanel = () => {
         }
     };
 
-    const getTargetBreakerId = targetBreakerNo => {
-        let targetObj = breakersData?.find(obj => obj?.breaker_number === targetBreakerNo);
+    const unLinkAllBreakers = async () => {
+        try {
+            setIsResetting(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?building_id=${bldgId}`;
+            await axios.post(`${BaseUrl}${resetBreakers}${params}`, { panel_id: panelId }, { headers }).then((res) => {
+                let response = res.data;
+                setIsResetting(false);
+                handleUnlinkAlertClose();
+                triggerBreakerAPI();
+            });
+        } catch (error) {
+            setIsResetting(false);
+            console.log('Failed to unlink all Breakers from Panel');
+        }
+    };
+
+    const deletePanelBreakers = async () => {
+        try {
+            setIsDeleting(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?panel_id=${panelId}`;
+            await axios.delete(`${BaseUrl}${deletePanel}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                setIsDeleting(false);
+                handleDeletePanelAlertClose();
+                history.push({
+                    pathname: `/settings/panels`,
+                });
+            });
+        } catch (error) {
+            setIsDeleting(false);
+            console.log('Failed to unlink all Breakers from Panel');
+        }
+    };
+
+    const getTargetBreakerId = (targetBreakerNo) => {
+        let targetObj = breakersData?.find((obj) => obj?.breaker_number === targetBreakerNo);
         return targetObj?.id;
+    };
+
+    const triggerBreakerAPI = () => {
+        LoadingStore.update((s) => {
+            s.isBreakerDataFetched = true;
+        });
     };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update(bs => {
+            BreadcrumbStore.update((bs) => {
                 let newList = [
                     {
                         label: 'Edit Panel',
@@ -352,7 +467,7 @@ const EditBreakerPanel = () => {
                 ];
                 bs.items = newList;
             });
-            ComponentStore.update(s => {
+            ComponentStore.update((s) => {
                 s.parent = 'building-settings';
             });
         };
@@ -362,6 +477,19 @@ const EditBreakerPanel = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    useEffect(() => {
+        setReactFlowDisconnectStyle({ ...reactFlowDisconnectStyle, height: `${dynamicDisconnectHeight}px` });
+    }, [dynamicDisconnectHeight]);
+
+    useEffect(() => {
+        setReactFlowDistributeStyle({ ...reactFlowDistributeStyle, height: `${dynamicDistributeHeight}px` });
+    }, [dynamicDistributeHeight]);
+
+    useEffect(() => {
+        setDynamicDistributeHeight((breakersData?.length / 2) * 115);
+        setDynamicDisconnectHeight(breakersData?.length * 100);
+    }, [breakersData]);
 
     useEffect(() => {
         if (!isBreakerApiTrigerred) {
@@ -377,26 +505,59 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                     setBreakerDataFetched(false);
-                    LoadingStore.update(s => {
+                    LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
                     });
                 });
             } catch (error) {
                 console.log(error);
                 setBreakerDataFetched(false);
-                LoadingStore.update(s => {
+                LoadingStore.update((s) => {
                     s.isBreakerDataFetched = false;
                 });
                 console.log('Failed to fetch Breakers Data List');
             }
         };
+        const fetchEquipmentData = async () => {
+            try {
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&occupancy_filter=true`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    let responseData = res.data.data;
+                    let equipArray = [];
+                    responseData.forEach((record) => {
+                        if (record.equipments_name === '') {
+                            return;
+                        }
+                        let obj = {
+                            label: record.equipments_name,
+                            value: record.equipments_id,
+                            breakerId: record.breaker_id,
+                        };
+                        equipArray.push(obj);
+                    });
+                    setEquipmentData(equipArray);
+                    BreakersStore.update((s) => {
+                        s.equipmentData = equipArray;
+                    });
+                });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch all Equipments Data');
+            }
+        };
         fetchBreakersData();
+        fetchEquipmentData();
     }, [isBreakerApiTrigerred]);
 
     useEffect(() => {
@@ -409,12 +570,12 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}&panel_id=${panelId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setActivePanelType(response.panel_type);
                     setNormalCount(response.breakers);
                     setPanel(response);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.panelData = response;
                     });
                     setFetchedPanelResponse(response);
@@ -437,13 +598,13 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
 
-                let params = `?panel_id=${panelId}`;
+                let params = `?panel_id=${panelId}&building_id=${bldgId}`;
 
-                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getBreakers}${params}`, { headers }).then((res) => {
                     let response = res.data.data;
                     setBreakersData(response);
                     setBreakerDataFetched(false);
-                    LoadingStore.update(s => {
+                    LoadingStore.update((s) => {
                         s.isBreakerDataFetched = false;
                     });
                 });
@@ -462,7 +623,7 @@ const EditBreakerPanel = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${generalPanels}${params}`, { headers }).then((res) => {
                     let response = res.data;
                     setPanelsDataList(response);
                 });
@@ -479,22 +640,23 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}`;
-                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then(res => {
-                    let responseData = res.data;
+                let params = `?building_id=${bldgId}&occupancy_filter=true`;
+                await axios.get(`${BaseUrl}${generalEquipments}${params}`, { headers }).then((res) => {
+                    let responseData = res.data.data;
                     let equipArray = [];
-                    responseData.forEach(record => {
+                    responseData.forEach((record) => {
                         if (record.equipments_name === '') {
                             return;
                         }
                         let obj = {
                             label: record.equipments_name,
                             value: record.equipments_id,
+                            breakerId: record.breaker_id,
                         };
                         equipArray.push(obj);
                     });
                     setEquipmentData(equipArray);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.equipmentData = equipArray;
                     });
                 });
@@ -511,11 +673,11 @@ const EditBreakerPanel = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&page_size=10&page_no=1`;
-                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then(res => {
+                let params = `?building_id=${bldgId}&page_size=100&page_no=1`;
+                await axios.get(`${BaseUrl}${generalPassiveDevices}${params}`, { headers }).then((res) => {
                     let responseData = res.data.data;
                     let newArray = [];
-                    responseData.forEach(record => {
+                    responseData.forEach((record) => {
                         let obj = {
                             label: record.identifier,
                             value: record.equipments_id,
@@ -523,8 +685,11 @@ const EditBreakerPanel = () => {
                         newArray.push(obj);
                     });
                     setPassiveDeviceData(newArray);
-                    BreakersStore.update(s => {
+                    BreakersStore.update((s) => {
                         s.passiveDeviceData = newArray;
+                    });
+                    BreakersStore.update((s) => {
+                        s.totalPassiveDeviceCount = res?.data?.total_data;
                     });
                 });
             } catch (error) {
@@ -546,7 +711,7 @@ const EditBreakerPanel = () => {
                 } else {
                     requestedBldgId = bldgId;
                 }
-                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then(res => {
+                await axios.get(`${BaseUrl}${getLocation}/${requestedBldgId}`, { headers }).then((res) => {
                     setLocationDataList(res.data);
                 });
             } catch (error) {
@@ -572,7 +737,7 @@ const EditBreakerPanel = () => {
         let disconnectBreakerArray = [];
 
         // If Breakers are of Disconnected Panels
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             let obj = {
                 id: record.id,
                 type: 'disconnectedBreakerComponent',
@@ -598,7 +763,7 @@ const EditBreakerPanel = () => {
         });
 
         // If Breakers are of Distributed Panels
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             let obj = {
                 id: record.id,
                 type: 'breakerComponent',
@@ -630,10 +795,10 @@ const EditBreakerPanel = () => {
         setDistributedBreakersNodes(distributedBreakerArray);
         setDisconnectedBreakersNodes(disconnectBreakerArray);
 
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.distributedBreakersData = distributedBreakerArray;
         });
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.disconnectedBreakersData = disconnectBreakerArray;
         });
 
@@ -641,7 +806,7 @@ const EditBreakerPanel = () => {
         let breakerLinks = [];
         let disconnectBreakerLinks = [];
 
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             if (record.breaker_number + 2 > breakersData.length) {
                 return;
             }
@@ -654,7 +819,7 @@ const EditBreakerPanel = () => {
             breakerLinks.push(obj);
         });
 
-        breakersData.forEach(record => {
+        breakersData.forEach((record) => {
             if (record.breaker_number + 1 > breakersData.length) {
                 return;
             }
@@ -670,10 +835,10 @@ const EditBreakerPanel = () => {
         setDistributedBreakersEdges(breakerLinks);
         setDisconnectedBreakersEdges(disconnectBreakerLinks);
 
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.breakerLinkData = breakerLinks;
         });
-        BreakersStore.update(s => {
+        BreakersStore.update((s) => {
             s.disconnectBreakerLinkData = disconnectBreakerLinks;
         });
     }, [breakersData]);
@@ -708,7 +873,8 @@ const EditBreakerPanel = () => {
                     </div>
                 </Col>
             </Row>
-            <Row style={{ marginLeft: '20px' }}>
+
+            <Row className="ml-4">
                 <Col xl={10}>
                     <div className="panel-first-row-style mt-4">
                         <FormGroup>
@@ -725,7 +891,7 @@ const EditBreakerPanel = () => {
                                     name="panelName"
                                     id="panelName"
                                     placeholder="Panel Name"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('panel_name', e.target.value);
                                     }}
                                     className="font-weight-bold"
@@ -743,23 +909,20 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
-                                    onChange={e => {
-                                        handleChange('parent_id', e.target.value);
+                                    isSearchable={true}
+                                    defaultValue={'Select Parent Panel'}
+                                    options={parentPanel}
+                                    onChange={(e) => {
+                                        handleChange('parent_id', e.value);
                                     }}
-                                    value={panel.parent_id}>
-                                    <option>None</option>
-                                    {panelsDataList.map(record => {
-                                        if (record.panel_id === panelId) {
-                                            return;
-                                        }
-                                        return <option value={record.panel_id}>{record.panel_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
 
@@ -772,30 +935,44 @@ const EditBreakerPanel = () => {
                                     <Skeleton count={1} height={40} width={250} />
                                 </Form>
                             ) : (
-                                <Input
-                                    type="select"
+                                // <Input
+                                //     type="select"
+                                //     name="state"
+                                //     id="userState"
+                                //     className="font-weight-bold"
+                                //     onChange={(e) => {
+                                //         if (e.target.value === 'Select Location') {
+                                //             return;
+                                //         }
+                                //         handleChange('location_id', e.target.value);
+                                //     }}
+                                //     value={panel.location_id}>
+                                //     <option>Select Location</option>
+                                //     {locationDataList.map((record) => {
+                                //         return <option value={record.location_id}>{record.location_name}</option>;
+                                //     })}
+                                // </Input>
+                                <Select
                                     name="state"
                                     id="userState"
-                                    className="font-weight-bold"
-                                    onChange={e => {
-                                        if (e.target.value === 'Select Location') {
-                                            return;
-                                        }
-                                        handleChange('location_id', e.target.value);
+                                    isSearchable={true}
+                                    defaultValue={'Select Location Type'}
+                                    options={location}
+                                    onChange={(e) => {
+                                        handleChange('location_id', e.value);
                                     }}
-                                    value={panel.location_id}>
-                                    <option>Select Location</option>
-                                    {locationDataList.map(record => {
-                                        return <option value={record.location_id}>{record.location_name}</option>;
-                                    })}
-                                </Input>
+                                    className="font-weight-bold dropdownScrollaleDisable"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                    menuShouldBlockScroll={true}
+                                />
                             )}
                         </FormGroup>
                     </div>
                 </Col>
             </Row>
 
-            <Row style={{ marginLeft: '20px', marginBottom: '25vh' }}>
+            <Row className="ml-4">
                 <Col xl={10}>
                     <div className="panel-container-style mt-4">
                         <Row className="panel-header-styling ml-1 mr-1">
@@ -815,12 +992,12 @@ const EditBreakerPanel = () => {
                                                 name="state"
                                                 id="userState"
                                                 className="fields-disabled-style"
-                                                onChange={e => {
+                                                onChange={(e) => {
                                                     setActivePanelType(e.target.value);
                                                 }}
                                                 disabled={true}
                                                 value={panel.panel_type}>
-                                                {panelType.map(record => {
+                                                {panelType.map((record) => {
                                                     return <option value={record.value}>{record.name}</option>;
                                                 })}
                                             </Input>
@@ -843,8 +1020,9 @@ const EditBreakerPanel = () => {
                                                         type="number"
                                                         name="breakers"
                                                         id="breakers"
-                                                        value={panel.breakers}
-                                                        onChange={e => {
+                                                        // value={panel.breakers_linked}
+                                                        value={breakersData?.length}
+                                                        onChange={(e) => {
                                                             if (normalCount > parseInt(e.target.value)) {
                                                                 removeBreakersFromList();
                                                             }
@@ -862,8 +1040,9 @@ const EditBreakerPanel = () => {
                                                         name="state"
                                                         id="userState"
                                                         className="font-weight-bold breaker-no-width fields-disabled-style"
-                                                        value={panel.breakers}
-                                                        onChange={e => {
+                                                        // value={panel.breakers}
+                                                        value={breakersData?.length}
+                                                        onChange={(e) => {
                                                             handleDisconnectBreakers(
                                                                 disconnectBreakerCount,
                                                                 parseInt(e.target.value)
@@ -871,7 +1050,7 @@ const EditBreakerPanel = () => {
                                                             setDisconnectBreakerCount(parseInt(e.target.value));
                                                         }}
                                                         disabled={true}>
-                                                        {disconnectBreaker.map(record => {
+                                                        {disconnectBreaker.map((record) => {
                                                             return <option value={record.value}>{record.name}</option>;
                                                         })}
                                                     </Input>
@@ -892,7 +1071,7 @@ const EditBreakerPanel = () => {
                                         className="btn btn-md btn-secondary font-weight-bold"
                                         onClick={() => {
                                             setIsEditable(!isEditable);
-                                            BreakersStore.update(s => {
+                                            BreakersStore.update((s) => {
                                                 s.isEditable = !isEditable;
                                             });
                                         }}>
@@ -924,30 +1103,27 @@ const EditBreakerPanel = () => {
                         {activePanelType === 'distribution' && !isBreakerDataFetched && !panelDataFetched && (
                             <>
                                 <Row className="main-breaker-styling">
-                                    <FormGroup className="form-group row m-4">
-                                        <div className="breaker-container">
-                                            <div className="breaker-style">
-                                                <div className="breaker-content-middle">
-                                                    <div className="breaker-index font-weight-bold">M</div>
+                                    <div className="breaker-container">
+                                        <div className="breaker-style">
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-index font-weight-bold">M</div>
+                                            </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="dot-status"></div>
+                                            </div>
+                                            <div className="breaker-content-middle">
+                                                <div className="breaker-content">
+                                                    <span>{panel.voltage === '' ? '' : `${panel.rated_amps}A`}</span>
+                                                    <span>
+                                                        {panel.voltage === '' && ''}
+                                                        {panel.voltage === '120/240' && '240V'}
+                                                        {panel.voltage === '208/120' && '120V'}
+                                                        {panel.voltage === '480' && '480V'}
+                                                        {panel.voltage === '600' && '600V'}
+                                                    </span>
                                                 </div>
-                                                <div className="breaker-content-middle">
-                                                    <div className="dot-status"></div>
-                                                </div>
-                                                <div className="breaker-content-middle">
-                                                    <div className="breaker-content">
-                                                        <span>
-                                                            {panel.voltage === '' ? '' : `${panel.rated_amps}A`}
-                                                        </span>
-                                                        <span>
-                                                            {panel.voltage === '' && ''}
-                                                            {panel.voltage === '120/240' && '240V'}
-                                                            {panel.voltage === '208/120' && '120V'}
-                                                            {panel.voltage === '480' && '480V'}
-                                                            {panel.voltage === '600' && '600V'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {/* <div
+                                            </div>
+                                            {/* <div
                                             className="breaker-content-middle"
                                             onClick={() => {
                                                 handleMainShow();
@@ -957,76 +1133,136 @@ const EditBreakerPanel = () => {
                                             </div>
                                             <span className="font-weight-bold edit-btn-styling">Edit</span>
                                         </div> */}
-                                            </div>
                                         </div>
-                                    </FormGroup>
+                                    </div>
                                 </Row>
 
-                                <div className="row" style={{ width: '100%', height: '350vh', position: 'relative' }}>
-                                    {!panelDataFetched && (
-                                        <div className="col-sm">
-                                            <div
-                                                className="row"
-                                                style={{ width: '100%', height: '350vh', position: 'relative' }}>
-                                                {isEditable && (
-                                                    <ReactFlow
-                                                        nodes={distributedBreakersNodes}
-                                                        edges={distributedBreakersEdges}
-                                                        onNodesChange={onNodesChange}
-                                                        onEdgesChange={onEdgesChange}
-                                                        onConnect={onConnect}
-                                                        nodeTypes={nodeTypes}
-                                                        edgeTypes={edgeTypes}
-                                                        style={{ background: '#fafbfc' }}
-                                                        zoomOnScroll={false}
-                                                        panOnScroll={false}
-                                                        preventScrolling={false}
-                                                        onPaneScroll={false}
-                                                    />
-                                                )}
-                                                {!isEditable && (
-                                                    <ReactFlow
-                                                        nodes={distributedBreakersNodes}
-                                                        onNodesChange={onNodesChange}
-                                                        onEdgesChange={onEdgesChange}
-                                                        onConnect={onConnect}
-                                                        nodeTypes={nodeTypes}
-                                                        edgeTypes={edgeTypes}
-                                                        style={{ background: '#fafbfc' }}
-                                                        zoomOnScroll={false}
-                                                        panOnScroll={false}
-                                                        preventScrolling={false}
-                                                        onPaneScroll={false}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                {!panelDataFetched && (
+                                    <div className="row m-4">
+                                        {isEditable && (
+                                            <ReactFlow
+                                                nodes={distributedBreakersNodes}
+                                                edges={distributedBreakersEdges}
+                                                onNodesChange={onNodesChange}
+                                                onEdgesChange={onEdgesChange}
+                                                onConnect={onConnect}
+                                                nodeTypes={nodeTypes}
+                                                edgeTypes={edgeTypes}
+                                                style={reactFlowDistributeStyle}
+                                                zoomOnScroll={false}
+                                                panOnScroll={false}
+                                                preventScrolling={false}
+                                                onPaneScroll={false}
+                                                panOnDrag={false}
+                                            />
+                                        )}
+                                        {!isEditable && (
+                                            <ReactFlow
+                                                nodes={distributedBreakersNodes}
+                                                onNodesChange={onNodesChange}
+                                                onEdgesChange={onEdgesChange}
+                                                onConnect={onConnect}
+                                                nodeTypes={nodeTypes}
+                                                edgeTypes={edgeTypes}
+                                                style={reactFlowDistributeStyle}
+                                                zoomOnScroll={false}
+                                                panOnScroll={false}
+                                                preventScrolling={false}
+                                                onPaneScroll={false}
+                                                panOnDrag={false}
+                                            />
+                                        )}
+                                    </div>
+                                )}
                             </>
                         )}
 
                         {activePanelType === 'disconnect' && !isBreakerDataFetched && !panelDataFetched && (
-                            <div className="row" style={{ width: '100%', height: '50vh', position: 'relative' }}>
-                                <div className="col-sm">
-                                    <ReactFlow
-                                        nodes={disconnectedBreakersNodes}
-                                        edges={disconnectedBreakersEdges}
-                                        onNodesChange={onNodesChangeForDisconnect}
-                                        onEdgesChange={onEdgesChangeForDisconnect}
-                                        onConnect={onConnectForDisconnect}
-                                        nodeTypes={nodeTypes}
-                                        edgeTypes={edgeTypes}
-                                        style={{ background: '#fafbfc' }}
-                                        zoomOnScroll={false}
-                                        panOnScroll={false}
-                                        preventScrolling={false}
-                                        onPaneScroll={false}
-                                    />
-                                </div>
+                            <div className="row m-4">
+                                <ReactFlow
+                                    nodes={disconnectedBreakersNodes}
+                                    edges={disconnectedBreakersEdges}
+                                    onNodesChange={onNodesChangeForDisconnect}
+                                    onEdgesChange={onEdgesChangeForDisconnect}
+                                    onConnect={onConnectForDisconnect}
+                                    nodeTypes={nodeTypes}
+                                    edgeTypes={edgeTypes}
+                                    style={reactFlowDisconnectStyle}
+                                    zoomOnScroll={false}
+                                    panOnScroll={false}
+                                    preventScrolling={false}
+                                    onPaneScroll={false}
+                                    panOnDrag={false}
+                                />
                             </div>
                         )}
+
+                        <Card className="custom-card ml-4 mr-4">
+                            <CardHeader>
+                                <h5 className="danger-zone-style">Danger Zone</h5>
+                            </CardHeader>
+
+                            <CardBody>
+                                {isBreakerDataFetched ? (
+                                    <Form>
+                                        <Skeleton count={1} height={40} width={150} />
+                                    </Form>
+                                ) : (
+                                    <Form>
+                                        <FormGroup>
+                                            <button
+                                                type="button"
+                                                onClick={handleUnlinkAlertShow}
+                                                className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
+                                                <FontAwesomeIcon
+                                                    icon={faLinkHorizontalSlash}
+                                                    color="#FFFFFF"
+                                                    size="md"
+                                                    className="mr-2"
+                                                />
+                                                Unlink All Breakers
+                                            </button>
+                                        </FormGroup>
+                                    </Form>
+                                )}
+                            </CardBody>
+                        </Card>
                     </div>
+                </Col>
+            </Row>
+
+            <Row className="ml-4 mt-4">
+                <Col xl={10}>
+                    <Card className="custom-card">
+                        <CardHeader>
+                            <h5 className="danger-zone-style">Danger Zone</h5>
+                        </CardHeader>
+
+                        <CardBody>
+                            {isBreakerDataFetched ? (
+                                <Form>
+                                    <Skeleton count={1} height={40} width={150} />
+                                </Form>
+                            ) : (
+                                <Form>
+                                    <FormGroup>
+                                        <button
+                                            type="button"
+                                            onClick={handleDeletePanelAlertShow}
+                                            className="btn btn-md btn-danger font-weight-bold unlink-btn-style">
+                                            <FontAwesomeIcon
+                                                icon={faTrash}
+                                                color="#FFFFFF"
+                                                size="md"
+                                                className="mr-2"
+                                            />
+                                            Delete Panel
+                                        </button>
+                                    </FormGroup>
+                                </Form>
+                            )}
+                        </CardBody>
+                    </Card>
                 </Col>
             </Row>
 
@@ -1043,7 +1279,7 @@ const EditBreakerPanel = () => {
                                 type="number"
                                 placeholder="Enter Amps"
                                 className="font-weight-bold"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handlePanelConfigChange('rated_amps', e.target.value);
                                 }}
                                 defaultValue={panelConfig.rated_amps === null ? 200 : panelConfig.rated_amps}
@@ -1059,7 +1295,7 @@ const EditBreakerPanel = () => {
                                 id="userState"
                                 className="font-weight-bold selection-volts-style"
                                 placeholder="Select Volts"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handlePanelConfigChange('voltage', e.target.value);
                                 }}
                                 value={panelConfig.voltage}>
@@ -1083,6 +1319,65 @@ const EditBreakerPanel = () => {
                             handleMainClose();
                         }}>
                         Save
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showUnlinkAlert} onHide={handleUnlinkAlertClose} centered backdrop="static" keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Unlink All Breakers</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">
+                            Are you sure you want to unlink all breakers on this panel?
+                        </div>
+                        <div className="unlink-alert-styling">All links to equipment and sensors will be lost.</div>
+                    </div>
+                    <div className="panel-edit-model-row-style ml-2 mr-2"></div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleUnlinkAlertClose} className="unlink-cancel-style">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            unLinkAllBreakers();
+                        }}
+                        className="unlink-reset-style">
+                        {isResetting ? 'Resetting' : 'Reset'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+                show={showDeletePanelAlert}
+                onHide={handleDeletePanelAlertClose}
+                centered
+                backdrop="static"
+                keyboard={false}>
+                <Modal.Body>
+                    <div className="mb-4">
+                        <h5 className="unlink-heading-style ml-2 mb-0">Delete Panel</h5>
+                    </div>
+                    <div className="m-2">
+                        <div className="unlink-alert-styling mb-1">
+                            Are you sure you want to delete the Panel and the Panel Inputs it contains?
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="light" onClick={handleDeletePanelAlertClose} className="unlink-cancel-style">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => {
+                            deletePanelBreakers();
+                        }}
+                        className="unlink-reset-style">
+                        {isDeleting ? 'Deleting' : 'Delete'}
                     </Button>
                 </Modal.Footer>
             </Modal>

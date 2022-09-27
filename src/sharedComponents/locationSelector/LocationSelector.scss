@@ -1,0 +1,61 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers.scss';
+
+.location-selector {
+    &-wrapper {
+        @extend .box-shadow-xl;
+        @extend .borders;
+
+        border-radius: 0.625rem;
+        padding: 1rem;
+        width: 37.5rem;
+        height: 42.5rem;
+    }
+
+    &-control {
+        margin-left: 0.75rem;
+
+        .button-wrapper + .button-wrapper {
+            margin-left: 0.5rem;
+        }
+
+        .button-wrapper {
+        }
+    }
+
+    &-list-item {
+        &:not(:last-child) {
+            @extend .borders-bottom;
+        }
+
+        display: flex;
+        align-items: center;
+        min-height: 3.5rem;
+        width: 100%;
+        background: none;
+        border: 0;
+        outline: none;
+
+        &-button {
+            padding: 0;
+            margin: 0;
+            outline: none;
+            border: 0;
+            background: none;
+            display: block;
+            flex-grow: 1;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    &-list {
+        overflow-y: auto;
+        max-height: 33.375rem;
+    }
+}
+
+iframe {
+    display: none;
+}

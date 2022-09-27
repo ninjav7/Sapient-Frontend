@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Label, Input, FormGroup, Button } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { BaseUrl, createPanel, createBreaker } from '../../../services/Network';
+import { BaseUrl, createPanel } from '../../../services/Network';
+import { BuildingStore } from '../../../store/BuildingStore';
 import { Cookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
+import Select from 'react-select';
 import '../style.css';
 import './panel-style.css';
 
@@ -13,8 +15,14 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
     const cookies = new Cookies();
     const userdata = cookies.get('user');
     const history = useHistory();
+    const bldgId = BuildingStore.useState((s) => s.BldgId);
 
     const [isProcessing, setIsProcessing] = useState(false);
+    const [formValidation, setFormValidation] = useState(false);
+
+    useEffect(() => {
+        setFormValidation(false);
+    }, []);
 
     const [panelObj, setPanelObj] = useState({
         name: '',
@@ -28,9 +36,19 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         panel_type: 'distribution',
     });
 
-    const [breakersData, setBreakersData] = useState([]);
-
-    const [generatedPanelId, setGeneratedPanelId] = useState('');
+    useEffect(() => {
+        if (
+            panelObj.name.length > 0 &&
+            panelObj.rated_amps > 0 &&
+            panelObj.voltage.length > 0 &&
+            panelObj.panel_type.length > 0 &&
+            panelObj.breaker_count > 0
+        ) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    });
 
     const panelType = [
         {
@@ -58,33 +76,6 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
         },
     ];
 
-    const handleVoltageChange = voltageValue => {
-        if (panelObj.panel_type === 'disconnect') {
-            return;
-        }
-
-        if (breakersData?.length === 0) {
-            return;
-        }
-
-        let newArray = breakersData;
-        newArray.forEach(obj => {
-            if (voltageValue === '120/240') {
-                obj.voltage = '120';
-            }
-            if (voltageValue === '208/120') {
-                obj.voltage = '120';
-            }
-            if (voltageValue === '480') {
-                obj.voltage = '277';
-            }
-            if (voltageValue === '600') {
-                obj.voltage = '347';
-            }
-        });
-        setBreakersData(newArray);
-    };
-
     const handleChange = (key, value) => {
         let obj = Object.assign({}, panelObj);
         if (value === 'None') {
@@ -95,162 +86,86 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
             if (obj.voltage === '120/240') {
                 obj.voltage = '208/120';
             }
-            handleBreakerChange('disconnect', 3);
         }
         if (value === 'distribution') {
             obj.breaker_count = 0;
-            handleBreakerChange('distribution', 0);
-        }
-        if (key === 'voltage') {
-            handleVoltageChange(value);
         }
         obj[key] = value;
         setPanelObj(obj);
-    };
-
-    const getVoltageConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '208/120') {
-                return 120;
-            }
-            if (value === '480') {
-                return 277;
-            }
-            if (value === '600') {
-                return 347;
-            }
-        }
-    };
-
-    const getPhaseConfigValue = (value, breakerType) => {
-        if (breakerType === 'single') {
-            if (value === '208/120') {
-                return 1;
-            }
-            if (value === '480') {
-                return 1;
-            }
-            if (value === '600') {
-                return 1;
-            }
-        }
-    };
-
-    const handleBreakerChange = (panelType, breakerCount) => {
-        let newArray = [];
-        if (panelType === 'distribution') {
-            for (let index = 1; index <= breakerCount; index++) {
-                let obj = {
-                    name: `Breaker ${index}`,
-                    breaker_number: index,
-                    phase_configuration: 1,
-                    rated_amps: 0,
-                    voltage: '',
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                };
-                if (panelObj.voltage === '120/240') {
-                    obj.voltage = '120';
-                }
-                if (panelObj.voltage === '208/120') {
-                    obj.voltage = '120';
-                }
-                if (panelObj.voltage === '480') {
-                    obj.voltage = '277';
-                }
-                if (panelObj.voltage === '600') {
-                    obj.voltage = '347';
-                }
-                newArray.push(obj);
-            }
-        }
-
-        if (panelType === 'disconnect') {
-            for (let index = 1; index <= breakerCount; index++) {
-                let obj = {
-                    name: `Breaker ${index}`,
-                    breaker_number: index,
-                    phase_configuration: getPhaseConfigValue(panelObj.voltage, 'single'),
-                    rated_amps: 0,
-                    voltage: getVoltageConfigValue(panelObj.voltage, 'single'),
-                    equipment_link: [],
-                    sensor_id: '',
-                    device_id: '',
-                    breaker_type: 1,
-                    parent_breaker: '',
-                    is_linked: false,
-                };
-                newArray.push(obj);
-            }
-        }
-        setBreakersData(newArray);
     };
 
     const savePanelData = async () => {
         try {
             setIsProcessing(true);
 
-            let header = {
+            let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
 
             let newPanel = Object.assign({}, panelObj);
+            let params = `?building_id=${bldgId}`;
 
-            await axios
-                .post(`${BaseUrl}${createPanel}`, newPanel, {
-                    headers: header,
-                })
-                .then(res => {
-                    let response = res.data;
-                    setGeneratedPanelId(response.id);
-                });
+            await axios.post(`${BaseUrl}${createPanel}${params}`, newPanel, { headers }).then((res) => {
+                let response = res.data;
+                let panelID = response.id;
+
+                setIsProcessing(false);
+
+                if (panelID !== '') {
+                    history.push({
+                        pathname: `/settings/panels/edit-panel/${panelID}`,
+                    });
+                }
+            });
         } catch (error) {
             setIsProcessing(false);
-            console.log('Failed to Create Panel');
+            console.log('Failed to Create Panel & Breakers!');
         }
     };
 
+    const voltsOption = [
+        { value: '120/240', label: '120/240' },
+        { value: '208/120', label: '208/120' },
+        { value: '480', label: '480' },
+        { value: '600', label: '600' },
+    ];
+
+    const panelOption = [
+        { value: 'distribution', label: 'Distribution' },
+        { value: 'disconnect', label: 'Disconnect' },
+    ];
+
+    // const locationOption = [];
+    const [location, setLocation] = useState([]);
+    const [parentPanel, setParentPanel] = useState([]);
+
+    const addLocationData = () => {
+        locationData.map((item) => {
+            setLocation((el) => [...el, { value: `${item?.location_id}`, label: `${item?.location_name}` }]);
+        });
+    };
+
+    const addPanelData = () => {
+        panelData.map((item) => {
+            setParentPanel((el) => [...el, { value: `${item?.panel_id}`, label: `${item?.panel_name}` }]);
+        });
+    };
+
     useEffect(() => {
-        if (generatedPanelId === '') {
-            return;
+        if (locationData) {
+            addLocationData();
         }
+    }, [locationData]);
 
-        const saveBreakersData = async panelID => {
-            try {
-                let header = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
+    useEffect(() => {
+        if (panelData) {
+            addPanelData();
+        }
+    }, [panelData]);
 
-                let params = `?panel_id=${panelID}`;
-
-                await axios
-                    .post(`${BaseUrl}${createBreaker}${params}`, breakersData, {
-                        headers: header,
-                    })
-                    .then(res => {
-                        let response = res.data;
-                    });
-
-                setIsProcessing(false);
-
-                history.push({
-                    pathname: `/settings/panels/edit-panel/${panelID}`,
-                });
-            } catch (error) {
-                setIsProcessing(false);
-                console.log('Failed to Save Breakers');
-            }
-        };
-        saveBreakersData(generatedPanelId);
-    }, [generatedPanelId]);
+    console.log('location', location);
 
     return (
         <>
@@ -268,7 +183,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                             name="panelName"
                             id="panelName"
                             placeholder="Enter Panel Name"
-                            onChange={e => {
+                            onChange={(e) => {
                                 handleChange('name', e.target.value);
                             }}
                             className="font-weight-bold"
@@ -283,7 +198,7 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                 type="number"
                                 placeholder="Enter Amperage"
                                 className="font-weight-bold"
-                                onChange={e => {
+                                onChange={(e) => {
                                     handleChange('rated_amps', +e.target.value);
                                 }}
                                 value={panelObj.rated_amps}
@@ -292,48 +207,40 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Volts</Form.Label>
-                            <Input
-                                type="select"
-                                name="state"
-                                id="userState"
-                                className="font-weight-bold selection-volts-style"
+                            <Select
+                                id="exampleSelect"
                                 placeholder="Select Volts"
-                                onChange={e => {
-                                    if (e.target.value === 'Select Volts') {
-                                        return;
-                                    }
-                                    handleChange('voltage', e.target.value);
+                                name="state"
+                                isSearchable={true}
+                                defaultValue={'Select Volts'}
+                                options={voltsOption}
+                                onChange={(e) => {
+                                    handleChange('voltage', e.value);
                                 }}
-                                value={panelObj.voltage}>
-                                <option>Select Volts</option>
-                                {panelObj.panel_type === 'distribution' && <option value="120/240">120/240</option>}
-                                <option value="208/120">208/120</option>
-                                <option value="480">480</option>
-                                <option value="600">600</option>
-                            </Input>
+                                className="basic-single font-weight-bold"
+                            />
                         </Form.Group>
                     </div>
 
                     <div className="panel-edit-model-row-style ml-2 mr-2">
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="font-weight-bold">Panel Type</Form.Label>
-                            <Input
-                                type="select"
-                                name="state"
-                                id="userState"
-                                className="font-weight-bold selection-volts-style"
-                                onChange={e => {
-                                    if (e.target.value === 'Select Panel Type') {
-                                        return;
-                                    }
-                                    handleChange('panel_type', e.target.value);
-                                }}
-                                value={panelObj.panel_type}>
-                                <option>Select Panel Type</option>
-                                {panelType.map(record => {
-                                    return <option value={record.value}>{record.name}</option>;
-                                })}
-                            </Input>
+                            <div style={{ width: '200px' }}>
+                                <Select
+                                    id="exampleSelect"
+                                    name="state"
+                                    isSearchable={true}
+                                    defaultValue={'Select Panel Type'}
+                                    options={panelOption}
+                                    onChange={(e) => {
+                                        console.log('evolts', e.value);
+                                        handleChange('panel_type', e.value);
+                                    }}
+                                    className="font-weight-bold"
+                                    menuPlacement="auto"
+                                    menuPosition="fixed"
+                                />
+                            </div>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
@@ -344,11 +251,8 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     type="number"
                                     placeholder="Enter Amps"
                                     className="font-weight-bold"
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                    }}
-                                    onBlur={e => {
-                                        handleBreakerChange('distribution', +e.target.value);
                                     }}
                                     min={0}
                                     step={5}
@@ -363,13 +267,10 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                                     id="userState"
                                     className="font-weight-bold breaker-no-width"
                                     value={panelObj.breaker_count}
-                                    onChange={e => {
+                                    onChange={(e) => {
                                         handleChange('breaker_count', +e.target.value);
-                                    }}
-                                    onBlur={e => {
-                                        handleBreakerChange('disconnect', +e.target.value);
                                     }}>
-                                    {disconnectBreaker.map(record => {
+                                    {disconnectBreaker.map((record) => {
                                         return <option value={record.value}>{record.name}</option>;
                                     })}
                                 </Input>
@@ -381,56 +282,57 @@ const AddPanelModel = ({ showPanelModel, panelData, locationData, closeAddPanelM
                         <Label for="location" className="card-title">
                             Location
                         </Label>
-                        <Input
-                            type="select"
-                            name="state"
-                            id="userState"
-                            className="font-weight-bold"
-                            onChange={e => {
-                                if (e.target.value === 'Select Location') {
-                                    return;
-                                }
-                                handleChange('space_id', e.target.value);
-                            }}
-                            value={panelObj.space_id}>
-                            <option>Select Location</option>
-                            {locationData.map(record => {
-                                return <option value={record.location_id}>{record.location_name}</option>;
-                            })}
-                        </Input>
+
+                        <div style={{ width: '100%' }}>
+                            <Select
+                                isSearchable={true}
+                                defaultValue={'Select Location Type'}
+                                options={location}
+                                onChange={(e) => {
+                                    handleChange('space_id', e.value);
+                                }}
+                                className="font-weight-bold dropdownScrollaleDisable"
+                                menuPlacement="auto"
+                                menuPosition="fixed"
+                                menuShouldBlockScroll={true}
+                            />
+                        </div>
                     </FormGroup>
 
                     <FormGroup className="m-2 mt-3">
                         <Label for="userState" className="card-title">
                             Parent Panel
                         </Label>
-                        <Input
-                            type="select"
-                            name="state"
-                            id="userState"
-                            className="font-weight-bold"
-                            onChange={e => {
-                                handleChange('parent_panel', e.target.value);
+                        <Select
+                            isSearchable={true}
+                            defaultValue={'Select Parent Panel'}
+                            options={parentPanel}
+                            onChange={(e) => {
+                                handleChange('parent_panel', e.value);
                             }}
-                            value={panelObj.parent_panel}>
-                            <option>None</option>
-                            {panelData.map(record => {
-                                return <option value={record.panel_id}>{record.panel_name}</option>;
-                            })}
-                        </Input>
+                            className="font-weight-bold dropdownScrollaleDisable"
+                            menuPlacement="auto"
+                            menuPosition="fixed"
+                            menuShouldBlockScroll={true}
+                        />
                     </FormGroup>
                 </Form>
                 <Modal.Footer>
-                    <Button variant="light" onClick={closeAddPanelModel}>
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => {
-                            savePanelData();
-                        }}>
-                        {isProcessing ? 'Saving...' : 'Save'}
-                    </Button>
+                    <div style={{ display: 'flex', width: '100%', gap: '4px' }}>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#fff', border: '1px solid black', color: '#000' }}
+                            onClick={closeAddPanelModel}>
+                            Cancel
+                        </Button>
+                        <Button
+                            style={{ width: '50%', backgroundColor: '#444CE7', border: 'none' }}
+                            disabled={!formValidation}
+                            onClick={() => {
+                                savePanelData();
+                            }}>
+                            {isProcessing ? 'Saving...' : 'Save'}
+                        </Button>
+                    </div>
                 </Modal.Footer>
             </Modal>
         </>

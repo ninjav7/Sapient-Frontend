@@ -173,7 +173,9 @@
 
 .container-single-content:hover {
     background: #f3f4f7;
-    font-weight: 700;
+    font-weight: 100;
+    /* width: "20px";
+    height: "20px"; */
     background-image: url('../../assets/icon/arrow.svg');
     background-repeat: no-repeat;
     background-position: 225px 10px;

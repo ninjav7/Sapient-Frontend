@@ -1,5 +1,6 @@
 import moment from 'moment';
-import {kFormatter} from "../helpers/helper";
+import { kFormatter } from '../helpers/helper';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 export const configLineChartWidget = {
     markers: {
@@ -11,10 +12,10 @@ export const configLineChartWidget = {
         },
         type: 'line',
         zoom: {
-            enabled: false,
+            type: 'x',
+            enabled: true,
+            autoScaleYaxis: true,
         },
-        // offsetX: -10,
-        offsetY: 0,
     },
     animations: {
         enabled: false,
@@ -25,7 +26,7 @@ export const configLineChartWidget = {
     toolbar: {
         show: true,
     },
-    
+
     colors: ['#5E94E4'],
     stroke: {
         width: [2, 2],
@@ -49,7 +50,12 @@ export const configLineChartWidget = {
         },
         x: {
             show: true,
-            format: 'dd MMM',
+            type: 'datetime',
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment(timestamp).format('DD/MMM - HH:mm');
+                },
+            },
         },
         y: {
             formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -60,12 +66,15 @@ export const configLineChartWidget = {
             show: false,
         },
         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-            const { labels } = w.globals;
-            const timestamp = labels[dataPointIndex];
+            const { seriesX } = w.globals;
+            const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
 
             return `<div class="line-chart-widget-tooltip">
-                    <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
-                    <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
+                    <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                    <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                        series[seriesIndex][dataPointIndex],
+                        0
+                    )} kWh</div>
                     <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                         'D/M/YY @ hh:mm A'
                     )}</div>
@@ -74,43 +83,32 @@ export const configLineChartWidget = {
     },
     xaxis: {
         type: 'datetime',
-        //@TODO NEED?
-        // labels: {
-        //     format: 'dd/MMM - hh:mm TT',
-        // },
         labels: {
             formatter: function (val, timestamp) {
-                // return moment(timestamp).format('MMM DD');
-                // //@TODO NEED?
-                // return moment(timestamp).format('D/M/YY @ hh:mm A');
-                return moment(timestamp).format('DD/MMM - HH:mm');
+                return `${moment(timestamp).format('HH:00')}`;
             },
-            offsetX: 5,
-            trim: true,
         },
+        tickAmount: 9,
         style: {
             fontSize: '12px',
             fontWeight: 600,
             cssClass: 'apexcharts-xaxis-label',
         },
-
         crosshairs: {
             show: true,
             position: 'front',
             stroke: {
-                color: '#F04438',
+                color: '#7C879C',
                 width: 2,
                 dashArray: 0,
             },
         },
+        offsetX: 0,
     },
     yaxis: {
         labels: {
             formatter: function (value) {
                 var val = Math.abs(value);
-                // if (val >= 1000) {
-                //     val = (val / 1000).toFixed(0) + ' K';
-                // }
                 return kFormatter(val);
             },
         },
@@ -120,7 +118,6 @@ export const configLineChartWidget = {
             cssClass: 'apexcharts-xaxis-label',
         },
     },
-
     grid: {
         padding: {
             top: 0,

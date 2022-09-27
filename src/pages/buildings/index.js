@@ -11,13 +11,17 @@ import serviceAlert from '../../assets/icon/buildings/service-alert.svg';
 import buildingPeak from '../../assets/icon/buildings/building-peak.svg';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import { faMountain } from '@fortawesome/pro-solid-svg-icons';
 import { faArrowTrendUp } from '@fortawesome/pro-solid-svg-icons';
 import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-
+import LineColumnChart from '../charts/LineColumnChart';
+import { formatConsumptionValue } from '../../helpers/helpers';
+import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
     builidingAlerts,
@@ -29,7 +33,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -66,6 +70,11 @@ export function useHover() {
 const BuildingOverview = () => {
     // const { bldgId } = useParams();
     const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const [overview, setOverview] = useState({
@@ -85,36 +94,9 @@ const BuildingOverview = () => {
         },
     });
 
-    const [buildingConsumptionChart, setBuildingConsumptionChart] = useState([]);
-
-    const [buildingAlert, setBuildingAlerts] = useState([]);
-
-    const [buildingPeak, setBuildingPeak] = useState([
-        {
-            type: 'string',
-            building_name: 'New Building Peak',
-            building_address: 'address',
-            trend: 'string',
-            last_known_value: '100',
-            current_value: '10',
-            message: 'test',
-            due_message: '10',
-            created_at: 'Today',
-        },
-        {
-            type: 'type2',
-            building_name: 'Energy trend Upward',
-            building_address: 'address',
-            trend: 'string',
-            last_known_value: '100',
-            current_value: '10',
-            message: 'test',
-            due_message: '10',
-            created_at: 'Today',
-        },
-    ]);
-
-    const [buildingsEnergyConsume, setbuildingsEnergyConsume] = useState([]);
+    const [buildingConsumptionChartData, setBuildingConsumptionChartData] = useState([]);
+    const [isEnergyConsumptionDataLoading, setIsEnergyConsumptionDataLoading] = useState(false);
+    const [isAvgConsumptionDataLoading, setIsAvgConsumptionDataLoading] = useState(false);
 
     const [donutChartOpts, setDonutChartOpts] = useState({
         chart: {
@@ -234,136 +216,13 @@ const BuildingOverview = () => {
 
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
 
-    const [lineChartSeries, setLineChartSeries] = useState([
-        {
-            data: [
-                {
-                    x: new Date('2022-10-1').getTime(),
-                    y: 22000,
-                },
-                {
-                    x: new Date('2022-10-2').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-3').getTime(),
-                    y: 21500,
-                },
-                {
-                    x: new Date('2022-10-4').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-5').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-6').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-7').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-8').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-9').getTime(),
-                    y: 15000,
-                },
-                {
-                    x: new Date('2022-10-10').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-11').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-12').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-13').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-14').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-15').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-16').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-17').getTime(),
-                    y: 25000,
-                },
-                {
-                    x: new Date('2022-10-18').getTime(),
-                    y: 23000,
-                },
-                {
-                    x: new Date('2022-10-19').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-20').getTime(),
-                    y: 22000,
-                },
-                {
-                    x: new Date('2022-10-21').getTime(),
-                    y: 20000,
-                },
-                {
-                    x: new Date('2022-10-22').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-23').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-24').getTime(),
-                    y: 18000,
-                },
-                {
-                    x: new Date('2022-10-25').getTime(),
-                    y: 19000,
-                },
-                {
-                    x: new Date('2022-10-26').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-27').getTime(),
-                    y: 21000,
-                },
-                {
-                    x: new Date('2022-10-28').getTime(),
-                    y: 27000,
-                },
-                {
-                    x: new Date('2022-10-29').getTime(),
-                    y: 24000,
-                },
-                {
-                    x: new Date('2022-10-30').getTime(),
-                    y: 20000,
-                },
-            ],
-        },
-    ]);
-
-    const [lineChartOptions, setLineChartOptions] = useState({
+    const [buildingConsumptionChartOpts, setBuildingConsumptionChartOpts] = useState({
         chart: {
-            type: 'line',
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true,
+            },
             zoom: {
                 enabled: false,
             },
@@ -371,31 +230,21 @@ const BuildingOverview = () => {
                 enabled: false,
             },
         },
-        dataLabels: {
-            enabled: false,
-        },
-        toolbar: {
-            show: true,
-        },
-        colors: ['#87AADE'],
         stroke: {
+            width: 0.2,
+            show: true,
             curve: 'straight',
         },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5,
-            },
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
         },
-        stroke: {
-            width: [2, 2],
-        },
-        plotOptions: {
-            bar: {
-                columnWidth: '20%',
-            },
+        animations: {
+            enabled: false,
         },
         tooltip: {
+            //@TODO NEED?
+            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -406,39 +255,74 @@ const BuildingOverview = () => {
             },
             x: {
                 show: true,
-                // format: 'dd/MMM - hh:mm TT',
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                     return value + ' K';
                 },
             },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { seriesX } = w.globals;
+                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
+                            series[seriesIndex][dataPointIndex],
+                            4
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                            `MMM D 'YY @ hh:mm A`
+                        )}</div>
+                    </div>`;
+            },
         },
         xaxis: {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    let dateText = moment(timestamp).format('MMM D');
+                    let weekText = moment(timestamp).format('ddd');
+                    return `${weekText} - ${dateText}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
+                },
             },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    // if (val >= 1000) {
-                    //     val = (val / 1000).toFixed(0) + ' K';
-                    // }
-                    return val + ' K';
+                formatter: function (val) {
+                    let print = parseInt(val);
+                    return `${print}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
@@ -488,31 +372,81 @@ const BuildingOverview = () => {
                 useFillColorAsStroke: false,
             },
         },
+        xaxis: {
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
+        },
         yaxis: {
             labels: {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        //     type: 'category',
-        //     categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
-        // },
-        xaxis: {
-            axisTicks: {
-                show: true,
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
-            tickAmount: 12,
-            range: 24,
-            labels: {
+            x: {
                 show: true,
-                type: 'category',
-                categories: ['1AM', '3AM', '5AM', '7AM', '9AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM', '12AM'],
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
             },
         },
     });
@@ -561,40 +495,14 @@ const BuildingOverview = () => {
         stroke: {
             width: 0.7,
         },
+        colors: ['#87AADE', '#F87171'],
         plotOptions: {
             heatmap: {
-                // shadeIntensity: 0.5,
+                shadeIntensity: 0.5,
+                enableShades: true,
+                distributed: true,
                 radius: 1,
                 useFillColorAsStroke: false,
-                colorScale: {
-                    ranges: [
-                        {
-                            from: 0,
-                            to: 1500,
-                            color: '#9bb4da',
-                        },
-                        {
-                            from: 1501,
-                            to: 3000,
-                            color: '#819dc9',
-                        },
-                        {
-                            from: 3001,
-                            to: 4500,
-                            color: '#128FD9',
-                        },
-                        {
-                            from: 4501,
-                            to: 6000,
-                            color: '#F87171',
-                        },
-                        {
-                            from: 6001,
-                            to: 7500,
-                            color: '#FF0000',
-                        },
-                    ],
-                },
             },
         },
         yaxis: {
@@ -602,528 +510,84 @@ const BuildingOverview = () => {
                 show: false,
             },
         },
-        // xaxis: {
-        //     labels: {
-        //         show: true,
-        //         datetimeFormatter: {
-        //             hour: 'HH',
-        //         },
-        //     },
-        // },
         xaxis: {
-            axisTicks: {
-                show: true,
+            categories: [
+                '12AM',
+                '1AM',
+                '2AM',
+                '3AM',
+                '4AM',
+                '5AM',
+                '6AM',
+                '7AM',
+                '8AM',
+                '9AM',
+                '10AM',
+                '11AM',
+                '12PM',
+                '1PM',
+                '2PM',
+                '3PM',
+                '4PM',
+                '5PM',
+                '6PM',
+                '7PM',
+                '8PM',
+                '9PM',
+                '10PM',
+                '11PM',
+            ],
+        },
+        tooltip: {
+            //@TODO NEED?
+            // enabled: false,
+            shared: false,
+            intersect: false,
+            style: {
+                fontSize: '12px',
+                fontFamily: 'Inter, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
             },
-            tickAmount: 6,
-            // range: 23,
-            type: 'category',
-            // categories: [
-            //     '12AM',
-            //     '1AM',
-            //     '2AM',
-            //     '3AM',
-            //     '4AM',
-            //     '5AM',
-            //     '6AM',
-            //     '7AM',
-            //     '8AM',
-            //     '9AM',
-            //     '10AM',
-            //     '11AM',
-            //     '12PM',
-            //     '1PM',
-            //     '2PM',
-            //     '3PM',
-            //     '4PM',
-            //     '5PM',
-            //     '6PM',
-            //     '7PM',
-            //     '8PM',
-            //     '9PM',
-            //     '10PM',
-            //     '11PM',
-            // ],
-            labels: {
+            x: {
                 show: true,
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return moment(timestamp).format('DD/MM - HH:mm');
+                    },
+                },
+            },
+            y: {
+                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+                    return value + ' K';
+                },
+            },
+            marker: {
+                show: false,
+            },
+            custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                //console.log(w);
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
+                //console.log(day);
+                return `<div class="line-chart-widget-tooltip">
+                        <h6 class="line-chart-widget-tooltip-title">Energy Usage by Hour</h6>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${w.globals.labels[dataPointIndex]}
+                        </div>
+                    </div>`;
             },
         },
     });
 
-    const handleChange = (e, value) => {
-        // console.log('Selected Item ', value);
-        if (value === 'HVAC') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(0);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Lighting') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(1);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Process') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(2);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        } else if (value === 'Plug') {
-            setDonutChartOpts({
-                chart: {
-                    type: 'donut',
-                    events: {
-                        mounted: function (chartContext, config) {
-                            chartContext.toggleDataPointSelection(3);
-                        },
-                    },
-                },
-                labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-                colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
-                series: [12553, 11553, 6503, 2333],
-                plotOptions: {
-                    pie: {
-                        startAngle: 0,
-                        endAngle: 360,
-                        expandOnClick: false,
-                        offsetX: 0,
-                        offsetY: 0,
-                        customScale: 1,
-                        dataLabels: {
-                            offset: 0,
-                            minAngleToShowLabel: 10,
-                        },
-                        donut: {
-                            size: '80%',
-                            background: 'grey',
-                            labels: {
-                                show: true,
-                                name: {
-                                    show: false,
-                                    // fontSize: '22px',
-                                    // fontFamily: 'Helvetica, Arial, sans-serif',
-                                    // fontWeight: 600,
-                                    // color: '#373d3f',
-                                    // offsetY: -10,
-                                    // formatter: function (val) {
-                                    //     return val;
-                                    // },
-                                },
-                                value: {
-                                    show: true,
-                                    fontSize: '15px',
-                                    fontFamily: 'Helvetica, Arial, sans-serif',
-                                    fontWeight: 400,
-                                    color: 'red',
-                                    // offsetY: 16,
-                                    formatter: function (val) {
-                                        return `${val} kWh`;
-                                    },
-                                },
-                                total: {
-                                    show: true,
-                                    showAlways: false,
-                                    label: 'Total',
-                                    // color: '#373d3f',
-                                    fontSize: '22px',
-                                    fontWeight: 600,
-                                    // formatter: function (w) {
-                                    //     return w.globals.seriesTotals.reduce((a, b) => {
-                                    //         return a + b;
-                                    //     }, 0);
-                                    // },
-                                    formatter: function (w) {
-                                        let sum = w.globals.seriesTotals.reduce((a, b) => {
-                                            return a + b;
-                                        }, 0);
-                                        return `${sum} kWh`;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 300,
-                            },
-                            // legend: {
-                            //     show: true,
-                            //     showForSingleSeries:true,
-                            //     onItemHover: {
-                            //         highlightDataSeries: true
-                            //     },
-                            //     onItemClick: {
-                            //         toggleDataSeries: true
-                            //     },
-                            // },
-                        },
-                    },
-                ],
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: { show: false },
-                },
-                legend: {
-                    show: false,
-                },
-                stroke: {
-                    width: 0,
-                },
-
-                itemMargin: {
-                    horizontal: 10,
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-            });
-        }
-    };
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
-
     const [daysCount, setDaysCount] = useState(1);
 
     const [hoverRef, isHovered] = useHover();
-
+    const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1143,17 +607,17 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
                         setOverview(res.data);
-                        console.log('setOverview => ', percentageHandler(
-                            res.data.average_energy_density.now,
-                            res.data.average_energy_density.old
-                        ));
+                        console.log(
+                            'setOverview => ',
+                            percentageHandler(res.data.average_energy_density.now, res.data.average_energy_density.old)
+                        );
                     });
             } catch (error) {
                 console.log(error);
@@ -1173,19 +637,17 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
                         setEnergyConsumption(res.data);
-                        console.log('setenergyConsumption', res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now / 1000;
-                            // newArray.push(fixedConsumption);
                             newDonutData.push(fixedConsumption);
                         });
                         console.log(newDonutData);
@@ -1254,6 +716,7 @@ const BuildingOverview = () => {
 
         const builidingEquipmentsData = async () => {
             try {
+                setIsEquipmentProcessing(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
@@ -1264,8 +727,8 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -1283,116 +746,120 @@ const BuildingOverview = () => {
                             return parseFloat(b.energy_consumption.now) - parseFloat(a.energy_consumption.now);
                         });
                         setTopEnergyConsumption(sortedData);
+                        setIsEquipmentProcessing(false);
                     });
             } catch (error) {
                 console.log(error);
+                setIsEquipmentProcessing(false);
                 console.log('Failed to fetch Building Equipments Data');
             }
         };
 
-        // // // // // // const builidingHourlyData = async () => {
-        // // // // // //     try {
-        // // // // // //         let headers = {
-        // // // // // //             'Content-Type': 'application/json',
-        // // // // // //             accept: 'application/json',
-        // // // // // //             Authorization: `Bearer ${userdata.token}`,
-        // // // // // //         };
-        // // // // // //         let params = `?building_id=${bldgId}`;
-        // // // // // //         await axios
-        // // // // // //             .post(
-        // // // // // //                 `${BaseUrl}${builidingHourly}${params}`,
-        // // // // // //                 {
-        // // // // // //                     date_from: dateFormatHandler(startDate),
-        // // // // // //                     date_to: dateFormatHandler(endDate),
-        // // // // // //                 },
-        // // // // // //                 { headers }
-        // // // // // //             )
-        // // // // // //             .then((res) => {
-        // // // // // //                 let response = res.data;
+        const builidingHourlyData = async () => {
+            try {
+                setIsAvgConsumptionDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                await axios
+                    .post(
+                        `${BaseUrl}${builidingHourly}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let response = res?.data;
 
-        // // // // // //                 let weekDaysResData = response[0].weekdays;
-        // // // // // //                 let weekEndResData = response[0].weekend;
+                        let weekDaysResData = response[0]?.weekdays;
+                        let weekEndResData = response[0]?.weekend;
 
-        // // // // // //                 // console.log('weekDaysResData => ', weekDaysResData);
+                        const weekDaysData = weekDaysResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: parseInt(el.y / 1000),
+                            };
+                        });
 
-        // // // // // //                 const weekDaysData = weekDaysResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const weekendsData = weekEndResData.map((el) => {
+                            return {
+                                x: parseInt(moment(el.x).format('HH')),
+                                y: parseInt(el.y / 1000),
+                            };
+                        });
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // // // //                     return {
-        // // // //                         x: parseInt(moment(el.x).format('HH')),
-        // // // //                         y: (el.y / 1000).toFixed(2),
-        // // // //                     };
-        // // // //                 });
+                        const newWeekdaysData = [
+                            {
+                                name: 'Weekdays',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const weekendsData = weekEndResData.map((el) => {
-        // //                     return {
-        // //                         x: parseInt(moment(el.x).format('HH')),
-        // //                         y: (el.y / 1000).toFixed(2),
-        // //                     };
-        // //                 });
+                        const newWeekendsData = [
+                            {
+                                name: 'Weekends',
+                                data: [],
+                            },
+                        ];
 
-        // //                 const newWeekdaysData = [
-        // //                     {
-        // //                         name: 'Weekdays',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekDaysData.find((record) => record.x === i);
 
-        // //                 const newWeekendsData = [
-        // //                     {
-        // //                         name: 'Weekends',
-        // //                         data: [],
-        // //                     },
-        // //                 ];
+                            if (matchedRecord) {
+                                newWeekdaysData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekdaysData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
 
-        // //                 for (let i = 1; i <= 24; i++) {
-        // //                     let matchedRecord = weekDaysData.find((record) => record.x === i);
-
-        // // //                     if (matchedRecord) {
-        // // //                         newWeekdaysData[0].data.push(matchedRecord);
-        // // //                     } else {
-        // // //                         newWeekdaysData[0].data.push({
-        // // //                             x: i,
-        // // //                             y: 0,
-        // // //                         });
-        // // //                     }
-        // // //                 }
-
-        //                 for (let i = 0; i < 24; i++) {
-        //                     let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
-        //                     if (matchedRecord) {
-        //                         matchedRecord.x = i;
-        //                         // console.log('matchedRecord => ', matchedRecord);
-        //                         newWeekendsData[0].data.push(matchedRecord);
-        //                     } else {
-        //                         newWeekendsData[0].data.push({
-        //                             x: i,
-        //                             y: 0,
-        //                         });
-        //                     }
-        //                 }
-        //                 // console.log('newWeekendsData => ', newWeekendsData);
-        //                 setWeekDaysSeries(newWeekdaysData);
-        //                 setWeekEndsSeries(newWeekendsData);
-        //                 // setWeekEndsSeries([
-        //                 //     {
-        //                 //         name: 'Weekends',
-        //                 //         data: [
-        //                 //             500, 1000, 0, 0, 0, 415, 0, 0, 0, 0, 500, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 500, 0,
-        //                 //         ],
-        //                 //     },
-        //                 // ]);
-        //             });
-        //     } catch (error) {
-        //         console.log(error);
-        //         console.log('Failed to fetch Building Hourly Data');
-        //     }
-        // };
+                        for (let i = 0; i < 24; i++) {
+                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            if (matchedRecord) {
+                                matchedRecord.x = i;
+                                newWeekendsData[0].data.push(matchedRecord);
+                            } else {
+                                newWeekendsData[0].data.push({
+                                    x: i,
+                                    y: 0,
+                                });
+                            }
+                        }
+                        //console.log(newWeekdaysData);
+                        //console.log(newWeekendsData);
+                        for (let i = 0; i < 24; i++) {
+                            if (i === 0) {
+                                newWeekdaysData[0].data[i].x = '12AM';
+                                newWeekendsData[0].data[i].x = '12AM';
+                            } else if (i === 12) {
+                                newWeekdaysData[0].data[i].x = '12PM';
+                                newWeekendsData[0].data[i].x = '12PM';
+                            } else if (i > 12) {
+                                let a = i % 12;
+                                newWeekdaysData[0].data[i].x = a + 'PM';
+                                newWeekendsData[0].data[i].x = a + 'PM';
+                            } else {
+                                newWeekdaysData[0].data[i].x = i + 'AM';
+                                newWeekendsData[0].data[i].x = i + 'AM';
+                            }
+                        }
+                        setWeekDaysSeries(newWeekdaysData);
+                        setWeekEndsSeries(newWeekendsData);
+                        setIsAvgConsumptionDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Building Hourly Data');
+                setIsAvgConsumptionDataLoading(false);
+            }
+        };
 
         const buildingConsumptionChart = async () => {
             try {
@@ -1401,18 +868,19 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=minute&building_id=${bldgId}`;
+                setIsEnergyConsumptionDataLoading(true);
+                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
-                        let response = res.data;
+                        let response = res?.data;
                         let newArray = [
                             {
                                 name: 'Energy',
@@ -1421,16 +889,17 @@ const BuildingOverview = () => {
                         ];
                         response.forEach((record) => {
                             newArray[0].data.push({
-                                x: record.x,
-                                y: (record.y / 1000).toFixed(5),
+                                x: record?.x,
+                                y: parseInt(record?.y / 1000),
                             });
                         });
-                        // console.log('newArray => ', newArray);
-                        setBuildingConsumptionChart(newArray);
+                        setBuildingConsumptionChartData(newArray);
+                        setIsEnergyConsumptionDataLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Building Consumption Chart');
+                setIsEnergyConsumptionDataLoading(false);
             }
         };
 
@@ -1444,10 +913,8 @@ const BuildingOverview = () => {
         calculateDays();
         buildingOverallData();
         buildingEndUserData();
-        // // // buildingAlertsData();
-        //////buildingPeaksData();
         builidingEquipmentsData();
-       // builidingHourlyData();
+        builidingHourlyData();
         buildingConsumptionChart();
     }, [startDate, endDate, bldgId]);
 
@@ -1472,14 +939,16 @@ const BuildingOverview = () => {
 
     return (
         <React.Fragment>
-            <Header title="Building Overview" />
+            <div className="ml-2">
+                <Header title="Building Overview" />
+            </div>
             <Row xl={12} className="mt-2">
                 <div className="energy-summary-alignment">
                     <div className="card-box-style button-style">
                         <div className="card-body text-center">
                             <DetailedButton
                                 title="Total Consumption"
-                                description={overview.total_consumption.now / 1000}
+                                description={parseInt(overview?.total_consumption.now / 1000)}
                                 unit="kWh"
                                 value={percentageHandler(
                                     overview.total_consumption.now,
@@ -1507,13 +976,13 @@ const BuildingOverview = () => {
                                 1<span className="card-unit-style">&nbsp;&nbsp;of&nbsp;{buildingsEnergyConsume.length}</span>
                             </p>
                         </div>
-                    </div> */}  
+                    </div> */}
 
                     <div className="card-box-style button-style">
                         <div className="card-body">
                             <DetailedButton
                                 title="Energy Density"
-                                description={((overview.average_energy_density.now / 1000).toFixed(5))}
+                                description={(overview.average_energy_density.now / 1000).toFixed(2)}
                                 unit="kWh/sq.ft."
                                 value={percentageHandler(
                                     overview.average_energy_density.now,
@@ -1542,8 +1011,8 @@ const BuildingOverview = () => {
                                 infoType={`total-bld-eui`}
                             />
                         </div>
-                    </div> */}  
-                    <div className="card-box-style button-style">
+                    </div> */}
+                    {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
@@ -1559,14 +1028,14 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            {/* {/* <Link
+                            {<Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link> */} 
+                            </Link>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </Row>
 
@@ -1575,12 +1044,12 @@ const BuildingOverview = () => {
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
                     {/* Energy Consumption by End Use  */}
                     {/* <div> */}
-                        {/* <div> */}
-                            {/* <div style={{ display: 'inline-block' }}>
+                    {/* <div> */}
+                    {/* <div style={{ display: 'inline-block' }}>
                                 <h6 className="card-title custom-title">Energy Consumption by End Use</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Energy Totals</h6>
                             </div> */}
-                            {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
+                    {/* {/* <div style={{ display: 'inline-block', float: 'right' }} className="mr-2">
                                 <Link
                                     to={{
                                         pathname: `/energy/end-uses/${bldgId}`,
@@ -1595,19 +1064,23 @@ const BuildingOverview = () => {
                                         More Details
                                     </div>
                                 </Link>
-                            </div> */} 
-                        {/* </div>
+                            </div> */}
+                    {/* </div>
                         <div className="custom-bld-enduse-style">
                             <div> */}
-                            <EnergyConsumptionTotals series={donutChartData} options={donutChartOpts} energyConsumption={energyConsumption} />
-                                {/* <DonutChart
+                    <EnergyConsumptionTotals
+                        series={donutChartData}
+                        options={donutChartOpts}
+                        energyConsumption={energyConsumption}
+                    />
+                    {/* <DonutChart
                                     donutChartOpts={donutChartOpts}
                                     donutChartData={donutChartData}
                                     height={185}
                                     id={Date.now()}
                                 /> */}
-                            {/* </div> */}
-                            {/* <div className="mt-3">
+                    {/* </div> */}
+                    {/* <div className="mt-3">
                                 {energyConsumption.map((record, index) => {
                                     return (
                                         <div>
@@ -1703,7 +1176,7 @@ const BuildingOverview = () => {
                                     );
                                 })}
                             </div> */}
-                        {/* </div> */}
+                    {/* </div> */}
                     {/* </div> */}
 
                     {/* Top 3 Peak Demand Periods  */}
@@ -1762,7 +1235,7 @@ const BuildingOverview = () => {
                                                         className="m-4">
                                                         <Link
                                                             to={{
-                                                                pathname: `/explore/page`,
+                                                                pathname: `/explore/by-building`,
                                                             }}>
                                                             <button
                                                                 type="button"
@@ -1815,61 +1288,59 @@ const BuildingOverview = () => {
                                 ))}
                             </div>
                         </div>
-                    </Row> */}  
+                    </Row> */}
 
                     {/* Hourly Average Consumption */}
-                    {/* {/* {/* <Row>
+                    <Row>
                         <div className="card-body">
-                            <h6
-                                className="card-title custom-title"
-                                style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                Hourly Average Consumption
-                            </h6>
-                            <Link
-                                to={{
-                                    pathname: `/energy/time-of-day/${bldgId}`,
-                                }}>
-                                <a
-                                    rel="noopener noreferrer"
-                                    className="link-primary mr-3"
-                                    style={{
-                                        display: 'inline-block',
-                                        float: 'right',
-                                        textDecoration: 'none',
-                                        fontWeight: 'bold',
-                                    }}>
-                                    More Details
-                                </a>
-                            </Link>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour</h6>
-                            <div className="hour-avg-consumtn p-1">
-                                <HeatMapChart
-                                    options={weekDaysOptions}
-                                    series={weekDaysSeries}
-                                    height={weekdaysChartHeight}
-                                />
-                                <span className="m-2"></span>
-                                <HeatMapChart
-                                    options={weekEndsOptions}
-                                    series={weekEndsSeries}
-                                    height={weekendsChartHeight}
-                                />
+                            <div className="total-eng-consumtn">
+                                <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
+                                {isAvgConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <HeatMapChart
+                                            options={weekDaysOptions}
+                                            series={weekDaysSeries}
+                                            height={weekdaysChartHeight}
+                                        />
+                                        <span className="m-2"></span>
+                                        <HeatMapChart
+                                            options={weekEndsOptions}
+                                            series={weekEndsSeries}
+                                            height={weekendsChartHeight}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    </Row> */}
+                    </Row>
 
                     {/* Total Energy Consumption  */}
                     <Row>
                         <div className="card-body">
-                            <h6 className="card-title custom-title">Total Energy Consumption</h6>
-                            <h6 className="card-subtitle mb-2 custom-subtitle-style">Totaled by Hour</h6>
                             <div className="total-eng-consumtn">
-                                <LineChart options={lineChartOptions} series={buildingConsumptionChart} />
+                                <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
+                                <h6 className="card-subtitle mb-2 custom-subtitle-style">
+                                    Hourly Energy Consumption (kWh)
+                                </h6>
+                                {isEnergyConsumptionDataLoading ? (
+                                    <div className="loader-center-style" style={{ height: '400px' }}>
+                                        <Spinner className="m-2" color={'primary'} />
+                                    </div>
+                                ) : (
+                                    <LineColumnChart
+                                        series={buildingConsumptionChartData}
+                                        options={buildingConsumptionChartOpts}
+                                    />
+                                )}
                             </div>
                         </div>
                     </Row>
                 </div>
-                {/* </Col> */}
 
                 {/* <Col md={4} style={{ marginTop: '2rem', marginLeft: '23px' }}> */}
                 <div style={{ marginTop: '2rem', marginLeft: '23px' }}>
@@ -1967,8 +1438,8 @@ const BuildingOverview = () => {
                                 })}
                             </div>
                         </div>
-                    </Row> */}  
-                    <Row style={{ marginTop: '2rem' }}>
+                    </Row> */}
+                    <Row>
                         <div className="equip-table-container mt-1">
                             <h6 className="top-equip-title">Top Equipment Consumption</h6>
                             <table className="table table-borderless">
@@ -1979,86 +1450,108 @@ const BuildingOverview = () => {
                                         <th>Change</th>
                                     </tr>
                                 </thead>
-                                <tbody style={{ fontSize: '12px' }}>
-                                    {topEnergyConsumption.map((item, index) => (
-                                        <tr key={index}>
-                                            <td className="equip-table-content">
-                                                <div>
-                                                    <div className="font-weight-bold" style={{ color: 'black' }}>
-                                                        {item.equipment_name}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="equip-table-content">
-                                                <div>
+                                {isEquipmentProcessing ? (
+                                    <tbody>
+                                        <SkeletonTheme color="#202020" height={35}>
+                                            <tr>
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+
+                                                <td>
+                                                    <Skeleton count={5} />
+                                                </td>
+                                            </tr>
+                                        </SkeletonTheme>
+                                    </tbody>
+                                ) : (
+                                    <tbody style={{ fontSize: '12px' }}>
+                                        {topEnergyConsumption.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="equip-table-content">
                                                     <div>
-                                                        <span>
-                                                            {(item.energy_consumption.now / 1000).toLocaleString(
-                                                                undefined,
-                                                                {
-                                                                    maximumFractionDigits: 2,
-                                                                }
+                                                        <div className="font-weight-bold" style={{ color: 'black' }}>
+                                                            {item.equipment_name}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="equip-table-content">
+                                                    <div>
+                                                        <div>
+                                                            <span>
+                                                                {(item.energy_consumption.now / 1000).toLocaleString(
+                                                                    undefined,
+                                                                    {
+                                                                        maximumFractionDigits: 2,
+                                                                    }
+                                                                )}
+                                                            </span>
+                                                            <span className="equip-table-unit">&nbsp;kWh</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <div>
+                                                            {item.energy_consumption.now <
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-success text-success equip-table-button"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-chart-down">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
                                                             )}
-                                                        </span>
-                                                        <span className="equip-table-unit">&nbsp;kWh</span>
+                                                            {item.energy_consumption.now >
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button-danger text-danger equip-table-button"
+                                                                    style={{ width: 'auto' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                            {item.energy_consumption.now ===
+                                                                item.energy_consumption.old && (
+                                                                <button
+                                                                    className="button text-muted equip-table-button"
+                                                                    style={{ width: 'auto', border: 'none' }}>
+                                                                    <i className="uil uil-arrow-growth">
+                                                                        <strong>
+                                                                            {percentageHandler(
+                                                                                item.energy_consumption.now,
+                                                                                item.energy_consumption.old
+                                                                            )}{' '}
+                                                                            %
+                                                                        </strong>
+                                                                    </i>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div>
-                                                    <div>
-                                                        {item.energy_consumption.now < item.energy_consumption.old && (
-                                                            <button
-                                                                className="button-success text-success equip-table-button"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-chart-down">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {item.energy_consumption.now > item.energy_consumption.old && (
-                                                            <button
-                                                                className="button-danger text-danger equip-table-button"
-                                                                style={{ width: 'auto' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                        {item.energy_consumption.now ===
-                                                            item.energy_consumption.old && (
-                                                            <button
-                                                                className="button text-muted equip-table-button"
-                                                                style={{ width: 'auto', border: 'none' }}>
-                                                                <i className="uil uil-arrow-growth">
-                                                                    <strong>
-                                                                        {percentageHandler(
-                                                                            item.energy_consumption.now,
-                                                                            item.energy_consumption.old
-                                                                        )}{' '}
-                                                                        %
-                                                                    </strong>
-                                                                </i>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                )}
                             </table>
                         </div>
                     </Row>

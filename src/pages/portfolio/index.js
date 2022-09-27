@@ -19,10 +19,9 @@ import {
     portfolioBuilidings,
     portfolioEndUser,
     portfolioOverall,
-    getBuilding,
     getEnergyConsumption,
 } from '../../services/Network';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { timeZone, numberWithCommas } from '../../utils/helper';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { LoadingStore } from '../../store/LoadingStore';
@@ -36,6 +35,8 @@ import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -44,14 +45,19 @@ const PortfolioOverview = () => {
     // const [isProcessing, setIsProcessing] = useState(false);
     const [buildingsEnergyConsume, setBuildingsEnergyConsume] = useState([]);
     const [energyConsumption, setenergyConsumption] = useState([]);
+    const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [daysCount, setDaysCount] = useState(1);
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
+    const [isConsumpHistoryLoading, setIsConsumpHistoryLoading] = useState(false);
 
     const [lineChartSeries, setLineChartSeries] = useState([
         {
@@ -177,6 +183,7 @@ const PortfolioOverview = () => {
             old: 0,
         },
     });
+    const [isKPIsLoading, setIsKPIsLoading] = useState(false);
 
     // const [donutChartData, setDonutChartData] = useState([12553, 11553, 6503, 2333]);
     const [donutChartData, setDonutChartData] = useState([0, 0, 0, 0]);
@@ -317,8 +324,8 @@ const PortfolioOverview = () => {
                 },
             },
         },
-        labels: ['HVAC', 'Lightning', 'Plug', 'Process'],
-        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554'],
+        labels: ['HVAC', 'Lightning', 'Plug', 'Process', 'Other'],
+        colors: ['#3094B9', '#2C4A5E', '#66D6BC', '#3B8554', '#D70040'],
         legend: {
             show: false,
         },
@@ -396,25 +403,27 @@ const PortfolioOverview = () => {
 
         const portfolioOverallData = async () => {
             try {
+                setIsKPIsLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
                         `${BaseUrl}${portfolioOverall}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
                         setOveralldata(res.data);
+                        setIsKPIsLoading(false);
                     });
             } catch (error) {
+                setIsKPIsLoading(false);
                 console.log(error);
                 console.log('Failed to fetch Portfolio Overall Data');
             }
@@ -422,54 +431,55 @@ const PortfolioOverview = () => {
 
         const portfolioEndUsesData = async () => {
             try {
+                setIsEnergyConsumptionChartLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 await axios
                     .post(
                         `${BaseUrl}${portfolioEndUser}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
                     .then((res) => {
-                        console.log("energy consumption",res.data)
                         setenergyConsumption(res.data);
                         const energyData = res.data;
                         let newDonutData = [];
                         energyData.forEach((record) => {
                             let fixedConsumption = record.energy_consumption.now;
-                            newDonutData.push(parseInt(fixedConsumption / 1000));
+                            newDonutData.push(parseInt(fixedConsumption));
                         });
                         console.log(newDonutData);
                         setSeries(newDonutData);
+                        setIsEnergyConsumptionChartLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Portfolio EndUses Data');
+                setIsEnergyConsumptionChartLoading(false);
             }
         };
 
         const energyConsumptionData = async () => {
             try {
+                setIsConsumpHistoryLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
-                    // 'user-auth': '628f3144b712934f578be895',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = '?aggregate=day';
+                let params = `?aggregate=day&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -485,16 +495,17 @@ const PortfolioOverview = () => {
                             const d = new Date(record.x);
                             const milliseconds = d.getTime();
                             newArray[0].data.push({
-                                // x: moment(record.x).format('MMM D'),
                                 x: milliseconds,
-                                y: (record.y / 1000).toFixed(4),
+                                y: (record.y / 1000).toFixed(0),
                             });
                         });
                         setEnergyConsumptionChart(newArray);
+                        setIsConsumpHistoryLoading(false);
                     });
             } catch (error) {
                 console.log(error);
                 console.log('Failed to fetch Energy Consumption Data');
+                setIsConsumpHistoryLoading(false);
             }
         };
 
@@ -509,8 +520,8 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioBuilidings}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )
@@ -539,11 +550,10 @@ const PortfolioOverview = () => {
         };
 
         const calculateDays = () => {
-            let start = moment(startDate),
-                end = moment(endDate),
-                days = end.diff(start, 'days');
-            days = days + 1;
-            setDaysCount(days);
+            let time_difference = endDate.getTime() - startDate.getTime();
+            let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            days_difference = days_difference + 1;
+            setDaysCount(days_difference);
         };
 
         // const setLoading = () => {
@@ -563,7 +573,7 @@ const PortfolioOverview = () => {
 
         // setLoading();
         // setIsProcessing(false);
-    }, [startDate]);
+    }, [startDate, endDate]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -584,37 +594,50 @@ const PortfolioOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
-    //     if (!buildingsEnergyConsume.length > 0) {
-    //         return;
-    //     }
-    //     let topVal = buildingsEnergyConsume[0].density;
-    //     setTopEnergyDensity(topVal);
-    // }, [buildingsEnergyConsume]);
-    
+    const [userPermission] = useAtom(userPermissionData);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        // console.log('SSR days :>> ', days + 1);
+        setStartEndDayCount(days + 1);
+    });
+
     return (
         <>
             <Header title="Portfolio Overview" />
-            <Row className="mt-2 mb-2">
-                <div className="col">
-                    <PortfolioKPIs
-                        daysCount={daysCount}
-                        totalBuilding={buildingsEnergyConsume.length}
-                        overalldata={overalldata}
-                    />
-                </div>
-            </Row>
+            {userPermission?.user_role === 'admin' ||
+            userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
+                <>
+                    <Row className="mt-2 mb-2">
+                        <div className="col">
+                            <PortfolioKPIs
+                                daysCount={daysCount}
+                                totalBuilding={buildingsEnergyConsume.length}
+                                overalldata={overalldata}
+                                isKPIsLoading={isKPIsLoading}
+                            />
+                        </div>
+                    </Row>
 
-            {/* <EnergyDensityMap
-                topEnergyDensity={topEnergyDensity}
-                markers={markers}
-                buildingsEnergyConsume={buildingsEnergyConsume}
-            /> */}
-
-            <div className="portfolio-consume-widget-wrapper mt-5">
-                <EnergyConsumptionTotals series={series} options={options} energyConsumption={energyConsumption} />
-                <EnergyConsumptionHistory series={energyConsumptionChart} />
-            </div>
+                    <div className="portfolio-consume-widget-wrapper mt-5 ml-2">
+                        <EnergyConsumptionTotals
+                            series={series}
+                            options={options}
+                            energyConsumption={energyConsumption}
+                            isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                        />
+                        <EnergyConsumptionHistory
+                            series={energyConsumptionChart}
+                            isConsumpHistoryLoading={isConsumpHistoryLoading}
+                            startEndDayCount={startEndDayCount}
+                        />
+                    </div>
+                </>
+            ) : (
+                <p>You don't have the permission to view this page</p>
+            )}
         </>
     );
 };

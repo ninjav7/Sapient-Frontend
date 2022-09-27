@@ -13,7 +13,6 @@ import Equipment from '../pages/settings/Equipment';
 import EquipmentTypes from '../pages/settings/EquipmentTypes';
 import Panels from '../pages/settings/panels/Panels';
 import EditBreakerPanel from '../pages/settings/panels/EditBreakerPanel';
-// import EditPanel from '../pages/settings/panels/EditPanel';
 import ActiveDevices from '../pages/settings/active-devices/ActiveDevices';
 import Provision from '../pages/settings/active-devices/Provision';
 import PassiveDevices from '../pages/settings/passive-devices/PassiveDevices';
@@ -24,11 +23,15 @@ import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
 import Users from '../pages/settings/Users';
 import UserProfile from '../pages/settings/UserProfile';
+import UserProfileNew from '../pages/settings/UserProfileNew';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
+import SingleRoleNew from '../pages/settings/SingleRoleNew';
 
 // controls
 import PlugRules from '../pages/controls/PlugRules';
+import { userPermissionData } from '../store/globalState';
+import { useAtom } from 'jotai';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -78,6 +81,7 @@ const PeakDemand = React.lazy(() => import('../pages/peakDemand'));
 
 // endUses
 const EndUses = React.lazy(() => import('../pages/endUses'));
+const EndUseType = React.lazy(() => import('../pages/endUses/EndUseType'));
 
 // timeOfDay
 const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
@@ -85,10 +89,6 @@ const TimeOfDay = React.lazy(() => import('../pages/timeOfDay'));
 // compareBuildings
 const CompareBuildings = React.lazy(() => import('../pages/compareBuildings'));
 
-// endUses - Sub-pages
-const HVACUsage = React.lazy(() => import('../pages/endUses/HVAC'));
-const LightingUsage = React.lazy(() => import('../pages/endUses/Lighting'));
-const PlugUsage = React.lazy(() => import('../pages/endUses/Plug'));
 const ExploreBuildingPeak = React.lazy(() => import('../pages/peakDemand/ExploreBuildingPeak'));
 
 // forms
@@ -104,7 +104,9 @@ const BasicTables = React.lazy(() => import('../pages/tables/Basic'));
 const AdvancedTables = React.lazy(() => import('../pages/tables/Advanced'));
 
 // explore
-const Explore = React.lazy(() => import('../pages/explore/Explore'));
+// const Explore = React.lazy(() => import('../pages/explore/Explore_old'));
+const ExploreByEquipment = React.lazy(() => import('../pages/explore/ExploreByEquipment'));
+const ExploreByBuildings = React.lazy(() => import('../pages/explore/ExploreByBuildings'));
 
 // handle auth and authorization
 const PrivateRoute = ({ component: Component, roles, ...rest }) => (
@@ -129,6 +131,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         }}
     />
 );
+
+// let userDetails = {};
+// const [userPermission] = useAtom(userPermissionData);
 
 // root routes
 const rootRoute = {
@@ -157,7 +162,6 @@ const dashboardRoutes = {
 };
 
 // apps
-
 const calendarAppRoutes = {
     path: '/apps/calendar',
     name: 'Calendar',
@@ -301,50 +305,6 @@ const pagesRoutes = {
     ],
 };
 
-// components
-const componentsRoutes = {
-    path: '/ui',
-    name: 'UI Elements',
-    header: 'Components',
-    icon: FeatherIcon.Package,
-    children: [
-        {
-            path: '/ui/bscomponents',
-            name: 'Bootstrap UI',
-            component: BSComponents,
-            route: PrivateRoute,
-            roles: ['Admin'],
-        },
-        {
-            path: '/ui/icons',
-            name: 'Icons',
-            children: [
-                {
-                    path: '/ui/icons/feather',
-                    name: 'Feather Icons',
-                    component: FeatherIcons,
-                    route: PrivateRoute,
-                    roles: ['Admin'],
-                },
-                {
-                    path: '/ui/icons/unicons',
-                    name: 'Unicons Icons',
-                    component: UniconsIcons,
-                    route: PrivateRoute,
-                    roles: ['Admin'],
-                },
-            ],
-        },
-        {
-            path: '/ui/widgets',
-            name: 'Widgets',
-            component: Widgets,
-            route: PrivateRoute,
-            roles: ['Admin'],
-        },
-    ],
-};
-
 // charts
 const chartRoutes = {
     path: '/charts',
@@ -387,22 +347,29 @@ const portfolioRoutes = {
             visibility: true,
             parent: 'buildings',
         },
-        // {
-        //     path: '/energy/peak-demand/:bldgId',
-        //     name: 'Peak Demand',
-        //     component: PeakDemand,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
-        // {
-        //     path: '/energy/end-uses/:bldgId',
-        //     name: 'End Uses',
-        //     component: EndUses,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'buildings',
-        // },
+        {
+            path: '/energy/end-uses/:endUseType/:bldgId',
+            name: 'EndUseType',
+            component: EndUseType,
+            route: PrivateRoute,
+            visibility: false,
+        },
+        {
+            path: '/energy/peak-demand/:bldgId',
+            name: 'Peak Demand',
+            component: PeakDemand,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
+        {
+            path: '/energy/end-uses/:bldgId',
+            name: 'End Uses',
+            component: EndUses,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'buildings',
+        },
         {
             path: '/energy/time-of-day/:bldgId',
             name: 'Time Of Day',
@@ -410,27 +377,6 @@ const portfolioRoutes = {
             route: PrivateRoute,
             visibility: true,
             parent: 'buildings',
-        },
-        {
-            path: '/energy/hvac/:bldgId',
-            name: 'HVAC Usage',
-            component: HVACUsage,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/lighting/:bldgId',
-            name: 'Lighting Usage',
-            component: LightingUsage,
-            route: PrivateRoute,
-            visibility: false,
-        },
-        {
-            path: '/energy/plug/:bldgId',
-            name: 'Plug Usage',
-            component: PlugUsage,
-            route: PrivateRoute,
-            visibility: false,
         },
         {
             path: '/energy/building-peak-explore/:bldgId',
@@ -482,14 +428,6 @@ const settingsRoutes = {
         //     visibility: true,
         //     parent: 'building-settings',
         // },
-        // {
-        //     path: '/settings/panels/editPanel/:panelId',
-        //     name: 'Edit Panel',
-        //     component: EditPanel,
-        //     route: PrivateRoute,
-        //     visibility: false,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels/edit-panel/:panelId',
             name: 'Edit Breaker-Panel',
@@ -498,14 +436,6 @@ const settingsRoutes = {
             visibility: false,
             parent: 'building-settings',
         },
-        // {
-        //     path: '/settings/panels/panelBreakersFlow',
-        //     name: 'Panel Breakers',
-        //     component: PanelBreakers,
-        //     route: PrivateRoute,
-        //     visibility: false,
-        //     parent: 'building-settings',
-        // },
         {
             path: '/settings/panels',
             name: 'Panels',
@@ -586,36 +516,54 @@ const settingsRoutes = {
             visibility: true,
             parent: 'account',
         },
-        // {
-        //     path: '/settings/users',
-        //     name: 'Users',
-        //     component: Users,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
-        // {
-        //     path: '/settings/roles',
-        //     name: 'Roles',
-        //     component: Roles,
-        //     route: PrivateRoute,
-        //     visibility: true,
-        //     parent: 'account',
-        // },
+        {
+            path: '/settings/users',
+            name: 'Users',
+            component: Users,
+            route: PrivateRoute,
+            visibility: true,
+            parent: 'account',
+        },
+
+        {
+            path: '/settings/roles/config',
+            name: 'Create Role',
+            component: SingleRole,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+        {
+            path: '/settings/roles/:roleId',
+            name: 'Single Role New',
+            component: SingleRoleNew,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+
+        {
+            path: '/settings/user-profile/single/:userId',
+            name: 'Users',
+            component: UserProfileNew,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
         {
             path: '/settings/user-profile',
-            name: 'User Profile',
+            name: 'Users',
             component: UserProfile,
             route: PrivateRoute,
             visibility: false,
             parent: 'account',
         },
         {
-            path: '/settings/role-config',
-            name: 'Single Role',
-            component: SingleRole,
+            path: '/settings/roles',
+            name: 'Roles',
+            component: Roles,
             route: PrivateRoute,
-            visibility: false,
+            visibility: true,
             parent: 'account',
         },
         {
@@ -631,16 +579,31 @@ const settingsRoutes = {
     roles: ['Admin'],
 };
 
-// const exploreRoutes = {
-//     name: 'Explore',
-//     path: '/explore/page',
-//     component: Explore,
-//     route: PrivateRoute,
-//     visibility: true,
-//     icon: FeatherIcon.PieChart,
-//     parent: 'explore',
-//     roles: ['Admin'],
-// };
+const exploreRoutes = {
+    path: '/explore-page/by-buildings',
+    name: 'Explore',
+    visibility: true,
+    children: [
+        {
+            path: '/explore-page/by-buildings',
+            name: 'Explore by Building',
+            component: ExploreByBuildings,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: true,
+        },
+        {
+            path: '/explore-page/by-equipment/:bldgId',
+            name: 'Explore by Equipment',
+            component: ExploreByEquipment,
+            route: PrivateRoute,
+            parent: 'explore',
+            visibility: true,
+        },
+    ],
+    icon: FeatherIcon.PieChart,
+    roles: ['Admin'],
+};
 
 const controlRoutes = {
     path: '/control/plug-rules',
@@ -658,70 +621,6 @@ const controlRoutes = {
     ],
     icon: FeatherIcon.ToggleRight,
     roles: ['Admin'],
-};
-
-const formsRoutes = {
-    path: '/forms',
-    name: 'Forms',
-    icon: FeatherIcon.FileText,
-    children: [
-        {
-            path: '/forms/basic',
-            name: 'Basic Elements',
-            component: BasicForms,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/advanced',
-            name: 'Advanced',
-            component: FormAdvanced,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/validation',
-            name: 'Validation',
-            component: FormValidation,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/wizard',
-            name: 'Wizard',
-            component: FormWizard,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/editor',
-            name: 'Editor',
-            component: Editor,
-            route: PrivateRoute,
-        },
-        {
-            path: '/forms/upload',
-            name: 'File Upload',
-            component: FileUpload,
-            route: PrivateRoute,
-        },
-    ],
-};
-
-const tableRoutes = {
-    path: '/tables',
-    name: 'Tables',
-    icon: FeatherIcon.Grid,
-    children: [
-        {
-            path: '/tables/basic',
-            name: 'Basic',
-            component: BasicTables,
-            route: PrivateRoute,
-        },
-        {
-            path: '/tables/advanced',
-            name: 'Advanced',
-            component: AdvancedTables,
-            route: PrivateRoute,
-        },
-    ],
 };
 
 // auth
@@ -744,27 +643,27 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        {
-            path: '/account/register',
-            name: 'Register',
-            component: Register,
-            route: Route,
-            visibility: true,
-        },
-        {
-            path: '/account/confirm',
-            name: 'Confirm',
-            component: Confirm,
-            route: Route,
-            visibility: true,
-        },
-        {
-            path: '/account/forget-password',
-            name: 'Forget Password',
-            component: ForgetPassword,
-            route: Route,
-            visibility: true,
-        },
+        // {
+        //     path: '/account/register',
+        //     name: 'Register',
+        //     component: Register,
+        //     route: Route,
+        //     visibility: true,
+        // },
+        // {
+        //     path: '/account/confirm',
+        //     name: 'Confirm',
+        //     component: Confirm,
+        //     route: Route,
+        //     visibility: true,
+        // },
+        // {
+        //     path: '/account/forget-password',
+        //     name: 'Forget Password',
+        //     component: ForgetPassword,
+        //     route: Route,
+        //     visibility: true,
+        // },
         {
             path: '/*',
             name: 'Error 404',
@@ -795,7 +694,7 @@ const allRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    //exploreRoutes,
+    exploreRoutes,
     authRoutes,
     // ...appRoutes,
     // pagesRoutes,
@@ -809,7 +708,7 @@ const authProtectedRoutes = [
     portfolioRoutes,
     settingsRoutes,
     controlRoutes,
-    //exploreRoutes,
+    exploreRoutes,
     chartRoutes,
     // ...appRoutes, pagesRoutes, componentsRoutes, , formsRoutes, tableRoutes
 ];

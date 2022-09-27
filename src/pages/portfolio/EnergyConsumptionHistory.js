@@ -1,17 +1,16 @@
 import React from 'react';
 import LineChartWidget from '../../sharedComponents/lineChartWidget';
 
-const EnergyConsumptionHistory = ({ series, height  }) => {
-
+const EnergyConsumptionHistory = ({ series, height, isConsumpHistoryLoading, startEndDayCount }) => {
     return (
-        <div>
-            <LineChartWidget
-                height={height}
-                title="Energy Consumption History"
-                subtitle="Energy Totals by Day"
-                series={series}
-            />
-        </div>
+        <LineChartWidget
+            height={height}
+            title="Energy Consumption History"
+            subtitle="Totals by Hour (kWh)"
+            series={series}
+            isConsumpHistoryLoading={isConsumpHistoryLoading}
+            startEndDayCount={startEndDayCount}
+        />
     );
 };
 

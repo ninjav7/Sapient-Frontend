@@ -1,24 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, CardBody, Form, FormGroup, Label, Input, CardHeader } from 'reactstrap';
-import Switch from 'react-switch';
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
+import { Cookies } from 'react-cookie';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { ComponentStore } from '../../store/ComponentStore';
-import './style.css';
-import {
-    BaseUrl,
-    generalBuildingDetail,
-    generalBuildingAddress,
-    generalDateTime,
-    generalOperatingHours,
-} from '../../services/Network';
+import { UserStore } from '../../store/UserStore';
 import axios from 'axios';
+import { BaseUrl, updateAccount } from '../../services/Network';
+import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
+import { accountId } from '../../store/globalState';
 
 const AccountSettings = () => {
-    const [checked, setChecked] = useState(true);
+    const cookies = new Cookies();
+    const userdata = cookies.get('user');
+
+    const accountName = UserStore.useState((s) => s.accountName);
+    const [name, setName] = useState(accountName);
+    const [accoutnIdData, setAccoutnIdData] = useAtom(accountId);
+    const [userPermission] = useAtom(userPermissionData);
+
+    const updateAccountName = async () => {
+        const headers = {
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+            Authorization: `Bearer ${userdata.token}`,
+        };
+
+        const accountData = {
+            account_id: accoutnIdData,
+        };
+
+        await axios.patch(`${BaseUrl}${updateAccount}`, accountData, { headers }).then((res) => {
+            let response = res.data.data;
+            localStorage.setItem('accountId', response.account_id);
+            setAccoutnIdData(response.account_id);
+            setInputValidation(false);
+        });
+    };
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -39,11 +60,51 @@ const AccountSettings = () => {
         updateBreadcrumbStore();
     }, []);
 
+    useEffect(() => {
+        localStorage.setItem('accountName', userdata.name);
+        UserStore.update((s) => {
+            s.accountName = userdata.name;
+        });
+    }, [userdata]);
+
+    useEffect(() => {
+        setAccoutnIdData(localStorage.getItem('accountId'));
+    }, []);
+
+    const [inputValidation, setInputValidation] = useState(false);
+
     return (
         <React.Fragment>
-            <Row className="page-title">
-                <Col className="header-container">
+            <Row className="page-title ml-2">
+                <Col className="header-container" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="heading-style">General Account Settings</span>
+                    {userPermission?.user_role === 'admin' ||
+                    userPermission?.permissions?.permissions?.account_general_permission?.edit ? (
+                        <div>
+                            <button
+                                onClick={() => {
+                                    setAccoutnIdData(localStorage.getItem('accountId'));
+                                    setInputValidation(false);
+                                }}
+                                type="button"
+                                className="btn btn-default buildings-cancel-style"
+                                disabled={!inputValidation}>
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={(e) => {
+                                    updateAccountName();
+                                }}
+                                type="button"
+                                className="btn btn-primary buildings-save-style ml-3"
+                                disabled={!inputValidation}>
+                                Save
+                            </button>
+                        </div>
+                    ) : (
+                        ''
+                    )}
                 </Col>
             </Row>
 
@@ -69,15 +130,33 @@ const AccountSettings = () => {
 
                                     <FormGroup>
                                         <div className="singleline-box-style">
-                                            <Input
-                                                type="text"
-                                                name="buildingName"
-                                                id="buildingName"
-                                                placeholder="Enter Account Name"
-                                                className="single-line-style font-weight-bold"
-                                                // defaultValue='Nike'
-                                                value="Nike"
-                                            />
+                                            {userPermission?.user_role === 'admin' ||
+                                            userPermission?.permissions?.permissions?.account_general_permission
+                                                ?.edit ? (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    value={accoutnIdData}
+                                                    onChange={(e) => {
+                                                        setAccoutnIdData(e.target.value);
+                                                        setInputValidation(true);
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Input
+                                                    type="text"
+                                                    name="buildingName"
+                                                    id="buildingName"
+                                                    placeholder="Enter Account Name"
+                                                    className="single-line-style font-weight-bold"
+                                                    style={{ cursor: 'not-allowed' }}
+                                                    value={accoutnIdData}
+                                                    disabled={true}
+                                                />
+                                            )}
                                         </div>
                                     </FormGroup>
                                 </div>

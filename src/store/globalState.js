@@ -1,5 +1,11 @@
 import { atom } from 'jotai';
 
+export const buildingData = atom([]);
+export const userPermissionData = atom([]);
+
+export const equipmentDataGlobal = atom([]);
+export const allEquipmentDataGlobal = atom([]);
+
 export const switchValue = atom({
     mon: false,
     tue: false,
@@ -10,10 +16,16 @@ export const switchValue = atom({
     sun: false,
 });
 
+export const deleteFloor = atom(false);
+
 export const closedEditFloorModal = atom(false);
 export const closeEditSpaceModal = atom(false);
 export const floorList = atom([]);
 export const spaceId = atom('');
+
+export const showSkeletonNow = atom(false);
+
+export const getFloorsData = atom([]);
 
 export const spaceName = atom('');
 export const spaceName2 = atom('');
@@ -59,4 +71,11 @@ export const currentFloorIdNow7 = atom('');
 export const currentFloorIdNow8 = atom('');
 export const currentFloorIdNow9 = atom('');
 
-// export const floor1 = atom(['Room', 'Area']);
+export const identifier = atom('');
+export const deviceId = atom('');
+export const passiveDeviceModal = atom('');
+export const equipmentId = atom('');
+
+export const accountId = atom('');
+
+// Layout

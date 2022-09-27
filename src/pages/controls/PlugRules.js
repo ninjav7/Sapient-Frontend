@@ -19,6 +19,7 @@ import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
+import { useAtom } from 'jotai';
 import {
     BaseUrl,
     listPlugRules,
@@ -26,7 +27,6 @@ import {
     updatePlugRule,
     linkSocket,
     unLinkSocket,
-    getBuilding,
 } from '../../services/Network';
 import { ChevronDown } from 'react-feather';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -35,9 +35,11 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
+import { buildingData } from '../../store/globalState';
 
 const PlugRuleTable = ({
     plugRuleData,
+    skeletonLoading,
     handleEditRuleShow,
     currentData,
     setCurrentData,
@@ -50,7 +52,7 @@ const PlugRuleTable = ({
             <CardBody>
                 <Table className="mb-0 bordered table-hover">
                     <thead>
-                        <tr>
+                        <tr className="mouse-pointer">
                             <th>Name</th>
                             <th>Description</th>
                             <th>Days</th>
@@ -58,7 +60,7 @@ const PlugRuleTable = ({
                         </tr>
                     </thead>
                     {console.log(plugRuleData, 'plugRuleData')}
-                    {plugRuleData?.length === 0 ? (
+                    {skeletonLoading ? (
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
                                 <tr>
@@ -84,7 +86,7 @@ const PlugRuleTable = ({
                         <tbody>
                             {plugRuleData.map((record, index) => {
                                 return (
-                                    <tr key={index}>
+                                    <tr key={index} className="mouse-pointer">
                                         <td
                                             className="font-weight-bold panel-name"
                                             onClick={() => {
@@ -129,6 +131,7 @@ const PlugRules = () => {
     const activeBuildingId = localStorage.getItem('buildingId');
 
     const [buildingId, setBuildingId] = useState(1);
+    const [skeletonLoading, setSkeletonLoading] = useState(true)
     const [ruleData, setRuleData] = useState([
         {
             name: '8am-6pm M-F',
@@ -175,6 +178,8 @@ const PlugRules = () => {
         action: [],
     });
     const [buildingRecord, setBuildingRecord] = useState([]);
+
+    console.log(buildingRecord, 'buildingRecord');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -322,6 +327,9 @@ const PlugRules = () => {
         }
     };
 
+    // Building List Data Globally
+    const [buildingListData] = useAtom(buildingData);
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -338,23 +346,14 @@ const PlugRules = () => {
                 s.parent = 'control';
             });
         };
+
         const getBuildingData = async () => {
             try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                await axios.get(`${BaseUrl}${getBuilding}`, { headers }).then((res) => {
-                    let data = res.data;
-                    setBuildingRecord(data);
-                    console.log('Get Building', data);
-                    data.map((record, index) => {
-                        if (record.building_id === activeBuildingId) {
-                            localStorage.setItem('timeZone', record.timezone);
-                            // console.log("timezone",record.timezone);
-                        }
-                    });
+                setBuildingRecord(buildingListData);
+                buildingListData.map((record, index) => {
+                    if (record.building_id === activeBuildingId) {
+                        localStorage.setItem('timeZone', record.timezone);
+                    }
                 });
             } catch (error) {
                 console.log(error);
@@ -363,7 +362,7 @@ const PlugRules = () => {
         };
         getBuildingData();
         updateBreadcrumbStore();
-    }, []);
+    }, [buildingListData]);
 
     useEffect(() => {
         const fetchPlugRuleData = async () => {
@@ -375,6 +374,9 @@ const PlugRules = () => {
                 };
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    if(res?.status) {
+                        setSkeletonLoading(false);
+                    }
                     let response = res.data;
                     // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
@@ -404,6 +406,9 @@ const PlugRules = () => {
                 };
                 let params = `?building_id=${activeBuildingId}`;
                 await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
+                    if(res?.status) {
+                        setSkeletonLoading(false);
+                    }
                     let response = res.data;
                     // console.log("Plug Rule Data",response.data)
                     setPlugRuleData(response.data);
@@ -520,6 +525,7 @@ const PlugRules = () => {
                     {selectedTab === 0 && (
                         <PlugRuleTable
                             plugRuleData={plugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
@@ -535,6 +541,7 @@ const PlugRules = () => {
                     {selectedTab === 1 && (
                         <PlugRuleTable
                             plugRuleData={onlinePlugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
@@ -550,6 +557,7 @@ const PlugRules = () => {
                     {selectedTab === 2 && (
                         <PlugRuleTable
                             plugRuleData={offlinePlugRuleData}
+                            skeletonLoading={skeletonLoading}
                             handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}

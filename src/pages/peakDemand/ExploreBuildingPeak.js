@@ -10,7 +10,7 @@ import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import axios from 'axios';
-import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { percentageHandler } from '../../utils/helper';
 import { ComponentStore } from '../../store/ComponentStore';
 import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -391,8 +391,8 @@ const SelectPeakTable = () => {
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: dateFormatHandler(startDate),
-                            date_to: dateFormatHandler(endDate),
+                            date_from: startDate,
+                            date_to: endDate,
                         },
                         { headers }
                     )

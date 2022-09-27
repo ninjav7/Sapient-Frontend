@@ -21,13 +21,12 @@ const donutChartDataMock = [
     { label: 'Process', color: '#82EAF0', value: '0.553', unit: 'kWh', trendValue: 22, link: '#' },
 ];
 
-const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
-
+const EnergyConsumptionTotals = ({ series, options, energyConsumption, isEnergyConsumptionChartLoading }) => {
     const donutChartData = energyConsumption.map(({ device: label, energy_consumption }) => {
-        let val = (energy_consumption.now / 1000).toFixed(5);
-        let value=parseFloat(val)
-        console.log(value)
-        console.log(val)
+        let val = energy_consumption.now.toFixed(0);
+        let value = parseFloat(val);
+        console.log(value);
+        console.log(val);
         const trendValue = percentageHandler(energy_consumption.now, energy_consumption.old);
         const trendType =
             energy_consumption.now <= energy_consumption.old
@@ -42,8 +41,9 @@ const EnergyConsumptionTotals = ({ series, options, energyConsumption }) => {
             <DonutChartWidget
                 id="consumptionEnergyDonut"
                 title="Energy Consumption by End Use"
-                subtitle="Energy Totals"
+                subtitle="Totals in kWh"
                 items={donutChartData}
+                isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
             />
         </div>
     );

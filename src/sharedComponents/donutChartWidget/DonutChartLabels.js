@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import cx from 'classnames';
 import { TrendsBadge } from '../trendsBadge';
+import { formatConsumptionValue } from '../../helpers/helpers';
 
 import './Labels.scss';
 
@@ -30,7 +31,7 @@ const DonutChartLabels = ({ labels = [], isShowValue = true, isShowTrend, classN
 
                     {isShowValue && (
                         <div className="donut-chart-labels-value">
-                            {value} {unit}
+                            {formatConsumptionValue(value, 0)} {unit}
                         </div>
                     )}
 
