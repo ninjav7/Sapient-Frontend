@@ -111,7 +111,6 @@ const LineChartWidget = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-
             crosshairs: {
                 show: true,
                 position: 'front',
@@ -170,6 +169,56 @@ const LineChartWidget = ({
                     },
                 },
                 offsetX: 0,
+            };
+            setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
+        } else if (startEndDayCount >= 2 && startEndDayCount <= 3) {
+            let xaxisObj = {
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return `${moment(timestamp).format('MM/DD HH:00')}`;
+                    },
+                },
+                tickAmount: startEndDayCount * 6,
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+                crosshairs: {
+                    show: true,
+                    position: 'front',
+                    stroke: {
+                        color: '#7C879C',
+                        width: 2,
+                        dashArray: 0,
+                    },
+                },
+                offsetX: 0,
+            };
+            setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
+        } else {
+            let xaxisObj = {
+                type: 'datetime',
+                labels: {
+                    formatter: function (val, timestamp) {
+                        return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
+                    },
+                },
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+                crosshairs: {
+                    show: true,
+                    position: 'front',
+                    stroke: {
+                        color: '#7C879C',
+                        width: 2,
+                        dashArray: 0,
+                    },
+                },
             };
             setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
         }
