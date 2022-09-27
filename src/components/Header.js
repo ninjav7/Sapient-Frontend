@@ -40,18 +40,6 @@ const Header = (props) => {
             label: 'Last 12 Months',
             value: 365,
         },
-        // {
-        //     label: 'Month to Date',
-        //     value: 30,
-        // },
-        // {
-        //     label: 'Quarter to Date',
-        //     value: 120,
-        // },
-        // {
-        //     label: 'Year to Date',
-        //     value: 365,
-        // },
         {
             label: 'Custom',
             value: -1,
@@ -136,10 +124,6 @@ const Header = (props) => {
                             <DateRangePicker
                                 startDate={startDate}
                                 endDate={endDate}
-                                // initialSettings={{
-                                //     startDate: startDate?.toISOString(),
-                                //     endDate: endDate?.toISOString(),
-                                // }}
                                 alwaysShowCalendars={false}
                                 onApply={handleEvent}>
                                 <button className="select-button form-control header-widget-styling datefilter-styling font-weight-bold">
@@ -148,21 +132,7 @@ const Header = (props) => {
                                 </button>
                             </DateRangePicker>
                         </div>
-
-                        {/* {props.title !== 'Portfolio Overview' && props.title !== 'Compare Buildings' && (
-                            <div className="float-right ml-2">
-                                <Link
-                                    to={{
-                                        pathname: `/explore-page/by-buildings`,
-                                    }}>
-                                    <button type="button" className="btn btn-md btn-primary font-weight-bold">
-                                        <i className="uil uil-pen mr-1"></i>Explore
-                                    </button>
-                                </Link>
-                            </div>
-                        )} */}
                     </div>
-                    {/* )} */}
                 </Col>
             </Row>
         </React.Fragment>
