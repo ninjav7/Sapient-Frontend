@@ -609,33 +609,33 @@ const ExploreByEquipment = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value;
+            //     },
+            // },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             3
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
                     </div>`;
@@ -645,7 +645,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM HH:00');
+                    return moment.utc(timestamp).format('DD/MM HH:00');
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },

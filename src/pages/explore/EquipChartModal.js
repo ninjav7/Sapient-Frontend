@@ -295,7 +295,7 @@ const EquipChartModal = ({
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
                 },
             },
         },
@@ -317,20 +317,20 @@ const EquipChartModal = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment.utc(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value;
+            //     },
+            // },
             marker: {
                 show: false,
             },
@@ -346,7 +346,7 @@ const EquipChartModal = ({
                                 : series[seriesIndex][dataPointIndex].toFixed(3)
                         } 
                          ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
                     </div>`;
@@ -414,7 +414,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM');
+                    return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },

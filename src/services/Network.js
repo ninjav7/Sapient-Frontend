@@ -1,6 +1,6 @@
-//export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
+export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 //export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
-export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
+//export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
 //export const BaseUrl = 'https://sapient-prod-beta.azurewebsites.net/';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
@@ -165,7 +165,6 @@ export const getSingleUserDetail = '/api/user_role/user-permission-role/member-u
 export const updateSingleUserDetail = '/api/user_role/user-permission-role/update-member-user';
 export const assignUser = '/api/user_role/user-permission-role/assign-user-role';
 export const singleUserPermissionDetail = '/api/user_role/user-permission-role/user-permissions-restrctions';
-//export const updateMemberRole = '/api/user_role/user-permission-role/update-user-role';
 
 // Search
 export const serachUser = '/api/user_role/user-permission-role/all-member-users';
