@@ -1,6 +1,6 @@
-export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
+//export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 //export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
-//export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
+export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
 //export const BaseUrl = 'https://sapient-prod-beta.azurewebsites.net/';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
