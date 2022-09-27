@@ -33,6 +33,7 @@ import './style.css';
 import RangeSlider from './RangeSlider';
 //import { FilterList, FilterListSharp } from '@mui/icons-material';
 import moment from 'moment';
+import 'moment-timezone';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { set } from 'lodash';
@@ -719,7 +720,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM');
+                    return moment.utc(timestamp).format('DD/MM');
                 },
             },
         },
