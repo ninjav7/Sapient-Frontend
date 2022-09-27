@@ -36,6 +36,8 @@ import moment from 'moment';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { set } from 'lodash';
+import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -56,6 +58,11 @@ const ExploreEquipmentTable = ({
     pageSize,
     setPageSize,
 }) => {
+    const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
+    // const [totalEquipmentId, setTotalEquipmentId] = useState(totalSelectionEquipmentId);
+
+    // console.log('totalEquipmentId', totalEquipmentId);
+
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
         if (ischecked.checked == true) {
@@ -77,7 +84,7 @@ const ExploreEquipmentTable = ({
         }
     };
 
-    const handleSelection = (e, id) => {
+    const handleSelection = (id) => {
         var isChecked = document.getElementById(id);
         if (isChecked.checked == true) {
             setSelectedEquipmentId(id);
@@ -85,6 +92,12 @@ const ExploreEquipmentTable = ({
             setRemovedEquipmentId(id);
         }
     };
+
+    useEffect(() => {
+        if (equpimentIdSelection) {
+            setSelectedEquipmentId(equpimentIdSelection);
+        }
+    }, [equpimentIdSelection?.length > 0]);
 
     return (
         <>
@@ -162,8 +175,14 @@ const ExploreEquipmentTable = ({
                                                             className="mr-4"
                                                             id={record?.equipment_id}
                                                             value={record?.equipment_id}
+                                                            checked={record?.equipment_id === equpimentIdSelection}
                                                             onClick={(e) => {
-                                                                handleSelection(e, record?.equipment_id);
+                                                                handleSelection(record?.equipment_id);
+                                                                setEqupimentIdSelection(record?.equipment_id);
+                                                                // setTotalEquipmentId([
+                                                                //     ...totalEquipmentId,
+                                                                //     equpimentIdSelection,
+                                                                // ]);
                                                             }}
                                                         />
                                                         <a
@@ -501,11 +520,18 @@ const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const timeZone = localStorage.getItem('exploreBldTimeZone');
 
+    const [equpimentIdSelection] = useAtom(selectedEquipment);
+
+    console.log('equpimentIdSelection', equpimentIdSelection);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
+    console.log('startDate', startDate, 'endDate', endDate);
+
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
@@ -726,6 +752,16 @@ const ExploreByEquipment = () => {
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
+
+    useEffect(() => {
+        if (equpimentIdSelection) {
+            setSeriesData([]);
+            setSeriesLineData([]);
+            setSelectedEquipmentId(equpimentIdSelection);
+        } else {
+            setSelectedEquipmentId('');
+        }
+    }, [startDate, endDate, equpimentIdSelection]);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
@@ -1112,6 +1148,8 @@ const ExploreByEquipment = () => {
         } else removeDuplicates();
     }, [removeDuplicateFlag]);
 
+    // const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1134,7 +1172,9 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
+
+            let params = `?building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getSpaceTypes}${params}`, { headers }).then((res) => {
                 let response = res?.data?.data?.[0]?.generic_spacetypes;
                 // console.log(response);
                 setSpaceType(response);
@@ -1476,7 +1516,6 @@ const ExploreByEquipment = () => {
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
-
                         //setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -1486,7 +1525,7 @@ const ExploreByEquipment = () => {
             }
         };
         fetchExploreChartData();
-    }, [selectedEquipmentId]);
+    }, [selectedEquipmentId, equpimentIdSelection]);
 
     useEffect(() => {
         // console.log('Entered Remove Equipment ', removeEquipmentId);
@@ -1980,6 +2019,16 @@ const ExploreByEquipment = () => {
                                 seriesLineData={seriesLineData}
                                 optionsLineData={optionsLineData}
                             />
+                            {/* {console.log(
+                                'seriesData',
+                                seriesData,
+                                'optionsData',
+                                optionsData,
+                                'seriesLineData',
+                                seriesLineData,
+                                'optionsLineData',
+                                optionsLineData
+                            )} */}
                         </>
                     )}
                 </div>
