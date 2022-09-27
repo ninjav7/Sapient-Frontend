@@ -146,7 +146,6 @@ const IndividualPassiveDevice = () => {
                 )
                 .then((res) => {
                     let response = res.data;
-                    console.log('SSR 1 => ', response);
                     let data = response;
 
                     let exploreData = [];
@@ -170,10 +169,7 @@ const IndividualPassiveDevice = () => {
                     } catch (error) {}
 
                     exploreData.push(recordToInsert);
-                    console.log('SSR 2 => ', exploreData);
                     setDeviceData(exploreData);
-
-                    console.log('UPDATED_CODE', seriesData);
 
                     setSeriesData([
                         {
