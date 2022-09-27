@@ -80,7 +80,7 @@ const EquipChartModal = ({
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
         { value: 'power', label: 'Power (W)', unit: 'W' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
-    ]);
+    ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
