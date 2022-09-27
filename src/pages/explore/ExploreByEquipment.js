@@ -59,9 +59,9 @@ const ExploreEquipmentTable = ({
     setPageSize,
 }) => {
     const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
-    // const [totalEquipmentId, setTotalEquipmentId] = useState(totalSelectionEquipmentId);
+    const [totalEquipmentId, setTotalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    // console.log('totalEquipmentId', totalEquipmentId);
+    console.log('totalEquipmentId', totalEquipmentId);
 
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
@@ -175,14 +175,14 @@ const ExploreEquipmentTable = ({
                                                             className="mr-4"
                                                             id={record?.equipment_id}
                                                             value={record?.equipment_id}
-                                                            checked={record?.equipment_id === equpimentIdSelection}
+                                                            checked={totalEquipmentId.includes(record?.equipment_id)}
                                                             onClick={(e) => {
                                                                 handleSelection(record?.equipment_id);
                                                                 setEqupimentIdSelection(record?.equipment_id);
-                                                                // setTotalEquipmentId([
-                                                                //     ...totalEquipmentId,
-                                                                //     equpimentIdSelection,
-                                                                // ]);
+                                                                setTotalEquipmentId((el) => [
+                                                                    ...el,
+                                                                    record?.equipment_id,
+                                                                ]);
                                                             }}
                                                         />
                                                         <a
@@ -520,9 +520,12 @@ const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const timeZone = localStorage.getItem('exploreBldTimeZone');
 
-    const [equpimentIdSelection] = useAtom(selectedEquipment);
+    const [chartLoading, setChartLoading] = useState(false);
 
-    console.log('equpimentIdSelection', equpimentIdSelection);
+    const [equpimentIdSelection] = useAtom(selectedEquipment);
+    const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
+
+    console.log('totalEquipmentId', totalEquipmentId);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -538,6 +541,8 @@ const ExploreByEquipment = () => {
 
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+
+    console.log('seriesData', seriesData);
 
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
@@ -754,9 +759,11 @@ const ExploreByEquipment = () => {
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
 
     useEffect(() => {
-        if (equpimentIdSelection) {
+        if (equpimentIdSelection && totalEquipmentId?.length === 1) {
             setSeriesData([]);
             setSeriesLineData([]);
+            setSelectedEquipmentId(equpimentIdSelection);
+        } else if (equpimentIdSelection && totalEquipmentId?.length > 1) {
             setSelectedEquipmentId(equpimentIdSelection);
         } else {
             setSelectedEquipmentId('');
@@ -1475,6 +1482,7 @@ const ExploreByEquipment = () => {
             return;
         }
         const fetchExploreChartData = async () => {
+            setChartLoading(true);
             try {
                 // setIsExploreDataLoading(true);
                 let headers = {
@@ -1516,6 +1524,7 @@ const ExploreByEquipment = () => {
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
+                        setChartLoading(false);
                         //setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -1989,6 +1998,7 @@ const ExploreByEquipment = () => {
         <>
             <Row className="ml-2 mt-2 explore-filters-style">
                 <Header title="" />
+                {chartLoading && <Spinner>Loading...</Spinner>}
             </Row>
 
             <Row>

@@ -81,3 +81,5 @@ export const accountId = atom('');
 // explorer
 export const selectedEquipment = atom('');
 export const totalSelectionEquipmentId = atom([]);
+
+export const totalSeriesGraphData = atom([]);
