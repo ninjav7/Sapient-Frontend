@@ -61,7 +61,7 @@ const ExploreEquipmentTable = ({
     const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
     // const [totalEquipmentId, setTotalEquipmentId] = useState(totalSelectionEquipmentId);
 
-    console.log('totalEquipmentId', totalEquipmentId);
+    // console.log('totalEquipmentId', totalEquipmentId);
 
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
