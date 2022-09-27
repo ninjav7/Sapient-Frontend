@@ -59,7 +59,7 @@ const ExploreEquipmentTable = ({
     setPageSize,
 }) => {
     const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
-    const [totalEquipmentId, setTotalEquipmentId] = useState(totalSelectionEquipmentId);
+    // const [totalEquipmentId, setTotalEquipmentId] = useState(totalSelectionEquipmentId);
 
     console.log('totalEquipmentId', totalEquipmentId);
 
@@ -179,10 +179,10 @@ const ExploreEquipmentTable = ({
                                                             onClick={(e) => {
                                                                 handleSelection(record?.equipment_id);
                                                                 setEqupimentIdSelection(record?.equipment_id);
-                                                                setTotalEquipmentId((el) => [
-                                                                    ...el,
-                                                                    equpimentIdSelection,
-                                                                ]);
+                                                                // setTotalEquipmentId([
+                                                                //     ...totalEquipmentId,
+                                                                //     equpimentIdSelection,
+                                                                // ]);
                                                             }}
                                                         />
                                                         <a
