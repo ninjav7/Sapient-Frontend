@@ -21,8 +21,28 @@ const TimeOfDay = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
+    // temperory soln
+    const getTimeData = (value) => {
+        if (value === 1) {
+            return '12AM';
+        }
+        if (value === 13) {
+            return '12PM';
+        }
+        if (value >= 2 && value <= 12) {
+            let num = value - 1;
+            let time = `${num}AM`;
+            return time;
+        }
+        if (value >= 14) {
+            let num = value - 13;
+            let time = `${num}PM`;
+            return time;
+        }
+    };
 
     const areaChartOptions = {
         chart: {
@@ -176,12 +196,17 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                const { labels } = w.globals;
-                const timestamp = labels[dataPointIndex];
+                const { seriesNames } = w.globals;
+                const day = seriesNames[seriesIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][
+                            dataPointIndex
+                        ].toLocaleString(undefined, { maximumFractionDigits: 3 })} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">
+                        ${day}, ${getTimeData(w.globals.labels[dataPointIndex])}
+                        </div>
                     </div>`;
             },
         },

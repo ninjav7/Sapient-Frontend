@@ -33,6 +33,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -223,6 +224,9 @@ const BuildingOverview = () => {
             toolbar: {
                 show: true,
             },
+            zoom: {
+                enabled: false,
+            },
             animations: {
                 enabled: false,
             },
@@ -250,26 +254,12 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -277,9 +267,9 @@ const BuildingOverview = () => {
                             series[seriesIndex][dataPointIndex],
                             4
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -287,8 +277,8 @@ const BuildingOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
@@ -1009,7 +999,7 @@ const BuildingOverview = () => {
                             />
                         </div>
                     </div> */}
-                    <div className="card-box-style button-style">
+                    {/* <div className="card-box-style button-style">
                         <div className="card-body">
                             <h5 className="card-title subtitle-style" style={{ marginTop: '3px' }}>
                                 Monitored Load&nbsp;&nbsp;
@@ -1025,14 +1015,14 @@ const BuildingOverview = () => {
                                     </UncontrolledTooltip>
                                 </div>
                             </h5>
-                            {/* {/* <Link
+                            {<Link
                                 to={{
                                     pathname: `/settings/utility-bills`,
                                 }}>
                                 <button id="inner-button">Add Utility Bill</button>
-                            </Link> */}
+                            </Link>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </Row>
 
@@ -1291,11 +1281,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6
-                                    className="card-title custom-title"
-                                    style={{ display: 'inline-block', fontWeight: 'bold' }}>
-                                    Hourly Average Consumption
-                                </h6>
+                                <h6 className="card-title custom-title mb-1">Hourly Average Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">Average by Hour (kWh)</h6>
                                 {isAvgConsumptionDataLoading ? (
                                     <div className="loader-center-style" style={{ height: '400px' }}>
@@ -1324,7 +1310,7 @@ const BuildingOverview = () => {
                     <Row>
                         <div className="card-body">
                             <div className="total-eng-consumtn">
-                                <h6 className="card-title custom-title">Total Energy Consumption</h6>
+                                <h6 className="card-title custom-title mb-1">Total Energy Consumption</h6>
                                 <h6 className="card-subtitle mb-2 custom-subtitle-style">
                                     Hourly Energy Consumption (kWh)
                                 </h6>

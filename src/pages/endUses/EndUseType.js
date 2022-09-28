@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import 'moment-timezone';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
@@ -27,8 +28,8 @@ const EndUseType = () => {
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
     const [equipTypeChartOptions, setEquipTypeChartOptions] = useState({
         chart: {
@@ -36,6 +37,9 @@ const EndUseType = () => {
             type: 'bar',
             toolbar: {
                 show: true,
+            },
+            zoom: {
+                enabled: false,
             },
         },
         plotOptions: {
@@ -106,6 +110,9 @@ const EndUseType = () => {
             toolbar: {
                 show: true,
             },
+            zoom: {
+                enabled: false,
+            },
         },
         stroke: {
             width: 0.2,
@@ -120,8 +127,6 @@ const EndUseType = () => {
             enabled: false,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -129,15 +134,6 @@ const EndUseType = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -154,9 +150,9 @@ const EndUseType = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -164,8 +160,8 @@ const EndUseType = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
@@ -214,6 +210,28 @@ const EndUseType = () => {
 
     const [hvacUsageData, setHvacUsageData] = useState([]);
 
+    const fetchEndUseType = (end_uses_type) => {
+        if (end_uses_type === 'hvac') {
+            return 'HVAC';
+        }
+
+        if (end_uses_type === 'lighting') {
+            return 'Lighting';
+        }
+
+        if (end_uses_type === 'plug') {
+            return 'Plug';
+        }
+
+        if (end_uses_type === 'process') {
+            return 'Process';
+        }
+
+        if (end_uses_type === 'other') {
+            return 'Other';
+        }
+    };
+
     useEffect(() => {
         const updateBreadcrumbStore = () => {
             BreadcrumbStore.update((bs) => {
@@ -247,15 +265,6 @@ const EndUseType = () => {
                         fontWeight: 600,
                         cssClass: 'apexcharts-xaxis-label',
                     },
-                    x: {
-                        show: true,
-                        type: 'datetime',
-                        labels: {
-                            formatter: function (val, timestamp) {
-                                return moment(timestamp).format('DD/MMM - HH:mm');
-                            },
-                        },
-                    },
                     y: {
                         formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                             return value + ' K';
@@ -274,9 +283,9 @@ const EndUseType = () => {
                                 series[seriesIndex][dataPointIndex],
                                 0
                             )} kWh</div>
-                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                                `MMM D 'YY @ hh:mm A`
-                            )}</div>
+                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                                .tz(timeZone)
+                                .format(`MMM D 'YY @ hh:mm A`)}</div>
                         </div>`;
                     },
                 },
@@ -312,15 +321,14 @@ const EndUseType = () => {
     }, [endUseType]);
 
     useEffect(() => {
-        if (endUseName === '') {
-            return;
-        }
         if (startDate === null) {
             return;
         }
         if (endDate === null) {
             return;
         }
+
+        let endUseTypeRequest = fetchEndUseType(endUseType);
 
         const endUsesDataFetch = async () => {
             try {
@@ -330,7 +338,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEndUsesDataFetched(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUses}${params}`,
@@ -342,7 +350,8 @@ const EndUseType = () => {
                     )
                     .then((res) => {
                         let response = res.data;
-                        let data = response.find((element) => element.device === endUseName);
+                        let requestEndUseType = fetchEndUseType(endUseType);
+                        let data = response.find((element) => element.device === requestEndUseType);
                         setEndUsesData(data);
                         setIsEndUsesDataFetched(false);
                     });
@@ -361,7 +370,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEquipTypeChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
@@ -418,7 +427,7 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseName}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}&tz_info=${timeZone}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
@@ -479,9 +488,11 @@ const EndUseType = () => {
                                     Total Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {(endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
-                                        maximumFractionDigits: 0,
-                                    })}
+                                    {endUsesData?.energy_consumption?.now === 0
+                                        ? 0
+                                        : (endUsesData?.energy_consumption?.now / 1000).toLocaleString(undefined, {
+                                              maximumFractionDigits: 0,
+                                          })}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
                                 {endUsesData?.energy_consumption?.now >= endUsesData?.energy_consumption?.old ? (
@@ -556,12 +567,14 @@ const EndUseType = () => {
                                     After-Hours Consumption
                                 </p>
                                 <p className="card-text usage-card-content-style">
-                                    {(endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
-                                        undefined,
-                                        {
-                                            maximumFractionDigits: 0,
-                                        }
-                                    )}
+                                    {endUsesData?.after_hours_energy_consumption?.now === 0
+                                        ? 0
+                                        : (endUsesData?.after_hours_energy_consumption?.now / 1000).toLocaleString(
+                                              undefined,
+                                              {
+                                                  maximumFractionDigits: 0,
+                                              }
+                                          )}
                                     <span className="card-unit-style">&nbsp;kWh</span>
                                 </p>
                                 {endUsesData?.after_hours_energy_consumption?.now >=

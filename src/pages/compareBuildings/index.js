@@ -1,30 +1,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Progress,
-} from 'reactstrap';
+import {Row, Col, Card, CardBody, Table} from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
-import { ChevronDown, Search } from 'react-feather';
+import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+//import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BaseUrl, compareBuildings, sortCompareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
 import axios from 'axios';
-import BootstrapTable from 'react-bootstrap-table-next';
 import { Cookies } from 'react-cookie';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
@@ -404,7 +392,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density / 1000).toFixed(4)} kWh / sq. ft.sq.
+                                                {parseFloat(record.energy_density / 1000).toFixed(0)} kWh / sq. ft.sq.
                                                 ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
@@ -421,7 +409,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#D14065`}
@@ -432,7 +420,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#DF5775`}
@@ -443,7 +431,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -454,7 +442,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -465,7 +453,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FC9EAC`}
@@ -476,7 +464,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                         <Line
                                                             percent={parseFloat(
                                                                 (record.energy_density / topEnergyDensity) * 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FFCFD6`}
@@ -521,7 +509,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'hvac') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.hvac_consumption.now).toFixed(4)} kWh / sq. ft.sq.
+                                                {parseFloat(record.hvac_consumption.now).toFixed(0)} kWh / sq. ft.sq.
                                                 ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
@@ -549,7 +537,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#D14065`}
@@ -561,7 +549,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#DF5775`}
@@ -573,7 +561,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -585,7 +573,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#EB6E87`}
@@ -597,7 +585,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FC9EAC`}
@@ -609,7 +597,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                                             percent={(
                                                                 (record.hvac_consumption.now / topHVACConsumption) *
                                                                 100
-                                                            ).toFixed(2)}
+                                                            ).toFixed(0)}
                                                             strokeWidth="3"
                                                             trailWidth="3"
                                                             strokeColor={`#FFCFD6`}
@@ -654,7 +642,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'total') && (
                                             <td className="value-style">
-                                                {(record.total_consumption / 1000).toFixed(5)}
+                                                {(record.total_consumption / 1000).toFixed(0)}
                                                 kWh
                                             </td>
                                         )}

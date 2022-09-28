@@ -23,11 +23,15 @@ import AccountSettings from '../pages/settings/AccountSettings';
 import Buildings from '../pages/settings/Buildings';
 import Users from '../pages/settings/Users';
 import UserProfile from '../pages/settings/UserProfile';
+import UserProfileNew from '../pages/settings/UserProfileNew';
 import Roles from '../pages/settings/Roles';
 import SingleRole from '../pages/settings/SingleRole';
+import SingleRoleNew from '../pages/settings/SingleRoleNew';
 
 // controls
 import PlugRules from '../pages/controls/PlugRules';
+import { userPermissionData } from '../store/globalState';
+import { useAtom } from 'jotai';
 
 // auth
 const Login = React.lazy(() => import('../pages/auth/Login'));
@@ -127,6 +131,9 @@ const PrivateRoute = ({ component: Component, roles, ...rest }) => (
         }}
     />
 );
+
+// let userDetails = {};
+// const [userPermission] = useAtom(userPermissionData);
 
 // root routes
 const rootRoute = {
@@ -520,8 +527,25 @@ const settingsRoutes = {
 
         {
             path: '/settings/roles/config',
-            name: 'Single Role',
+            name: 'Create Role',
             component: SingleRole,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+        {
+            path: '/settings/roles/:roleId',
+            name: 'Single Role New',
+            component: SingleRoleNew,
+            route: PrivateRoute,
+            visibility: false,
+            parent: 'account',
+        },
+
+        {
+            path: '/settings/user-profile/single/:userId',
+            name: 'Users',
+            component: UserProfileNew,
             route: PrivateRoute,
             visibility: false,
             parent: 'account',
@@ -619,27 +643,27 @@ const authRoutes = {
             route: Route,
             visibility: true,
         },
-        {
-            path: '/account/register',
-            name: 'Register',
-            component: Register,
-            route: Route,
-            visibility: true,
-        },
-        {
-            path: '/account/confirm',
-            name: 'Confirm',
-            component: Confirm,
-            route: Route,
-            visibility: true,
-        },
-        {
-            path: '/account/forget-password',
-            name: 'Forget Password',
-            component: ForgetPassword,
-            route: Route,
-            visibility: true,
-        },
+        // {
+        //     path: '/account/register',
+        //     name: 'Register',
+        //     component: Register,
+        //     route: Route,
+        //     visibility: true,
+        // },
+        // {
+        //     path: '/account/confirm',
+        //     name: 'Confirm',
+        //     component: Confirm,
+        //     route: Route,
+        //     visibility: true,
+        // },
+        // {
+        //     path: '/account/forget-password',
+        //     name: 'Forget Password',
+        //     component: ForgetPassword,
+        //     route: Route,
+        //     visibility: true,
+        // },
         {
             path: '/*',
             name: 'Error 404',

@@ -35,6 +35,8 @@ import PortfolioKPIs from './PortfolioKPIs';
 // import EnergyDensityMap from './EnergyDensityMap';
 import EnergyConsumptionTotals from './EnergyConsumptionTotals';
 import EnergyConsumptionHistory from './EnergyConsumptionHistory';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../store/globalState';
 
 const PortfolioOverview = () => {
     let cookies = new Cookies();
@@ -46,9 +48,12 @@ const PortfolioOverview = () => {
     const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
     // const [startDate, endDate] = dateRange;
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
+
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const [daysCount, setDaysCount] = useState(1);
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
     const [energyConsumptionChart, setEnergyConsumptionChart] = useState([]);
@@ -589,46 +594,50 @@ const PortfolioOverview = () => {
         updateBreadcrumbStore();
     }, []);
 
-    // useEffect(() => {
-    //     if (!buildingsEnergyConsume.length > 0) {
-    //         return;
-    //     }
-    //     let topVal = buildingsEnergyConsume[0].density;
-    //     setTopEnergyDensity(topVal);
-    // }, [buildingsEnergyConsume]);
+    const [userPermission] = useAtom(userPermissionData);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        // console.log('SSR days :>> ', days + 1);
+        setStartEndDayCount(days + 1);
+    });
 
     return (
         <>
             <Header title="Portfolio Overview" />
-            <Row className="mt-2 mb-2">
-                <div className="col">
-                    <PortfolioKPIs
-                        daysCount={daysCount}
-                        totalBuilding={buildingsEnergyConsume.length}
-                        overalldata={overalldata}
-                        isKPIsLoading={isKPIsLoading}
-                    />
-                </div>
-            </Row>
+            {userPermission?.user_role === 'admin' ||
+            userPermission?.permissions?.permissions?.energy_portfolio_permission?.view ? (
+                <>
+                    <Row className="mt-2 mb-2">
+                        <div className="col">
+                            <PortfolioKPIs
+                                daysCount={daysCount}
+                                totalBuilding={buildingsEnergyConsume.length}
+                                overalldata={overalldata}
+                                isKPIsLoading={isKPIsLoading}
+                            />
+                        </div>
+                    </Row>
 
-            {/* <EnergyDensityMap
-                topEnergyDensity={topEnergyDensity}
-                markers={markers}
-                buildingsEnergyConsume={buildingsEnergyConsume}
-            /> */}
-
-            <div className="portfolio-consume-widget-wrapper mt-5 ml-2">
-                <EnergyConsumptionTotals
-                    series={series}
-                    options={options}
-                    energyConsumption={energyConsumption}
-                    isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
-                />
-                <EnergyConsumptionHistory
-                    series={energyConsumptionChart}
-                    isConsumpHistoryLoading={isConsumpHistoryLoading}
-                />
-            </div>
+                    <div className="portfolio-consume-widget-wrapper mt-5 ml-2">
+                        <EnergyConsumptionTotals
+                            series={series}
+                            options={options}
+                            energyConsumption={energyConsumption}
+                            isEnergyConsumptionChartLoading={isEnergyConsumptionChartLoading}
+                        />
+                        <EnergyConsumptionHistory
+                            series={energyConsumptionChart}
+                            isConsumpHistoryLoading={isConsumpHistoryLoading}
+                            startEndDayCount={startEndDayCount}
+                        />
+                    </div>
+                </>
+            ) : (
+                <p>You don't have the permission to view this page</p>
+            )}
         </>
     );
 };

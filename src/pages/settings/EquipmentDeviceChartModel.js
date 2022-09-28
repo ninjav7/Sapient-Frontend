@@ -57,6 +57,7 @@ import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
+import ModalHeader from '../../components/ModalHeader';
 
 const EquipmentDeviceChartModel = ({
     showChart,
@@ -68,10 +69,16 @@ const EquipmentDeviceChartModel = ({
     fetchEquipmentData,
     deviceType,
     locationData,
+    formValidation,
+    setFormValidation,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     console.log(equipData);
+
+    console.log('formValidation', formValidation);
+
+    // const [formValidation, setFormValidation] = useState(false);
 
     const [metric, setMetric] = useState([
         { value: 'energy', label: 'Energy (kWh)' },
@@ -81,7 +88,8 @@ const EquipmentDeviceChartModel = ({
     const [deviceData, setDeviceData] = useState([]);
     const [dateRange, setDateRange] = useState([null, null]);
     const [seriesData, setSeriesData] = useState([]);
-    const [startDate, endDate] = dateRange;
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const [topConsumption, setTopConsumption] = useState('');
     const [peak, setPeak] = useState('');
     const [metricClass, setMetricClass] = useState('mr-3 single-passive-tab-active tab-switch');
@@ -89,6 +97,15 @@ const EquipmentDeviceChartModel = ({
     const [historyClass, setHistoryClass] = useState('mr-3 single-passive-tab tab-switch');
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
+
+    useEffect(() => {
+        if (selectedZones?.length > 0) {
+            setFormValidation(true);
+        } else {
+            setFormValidation(false);
+        }
+    }, []);
+
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
     const [showTab, setShowTab] = useState('');
@@ -134,30 +151,30 @@ const EquipmentDeviceChartModel = ({
         return label;
     };
 
-    useEffect(() => {
-        const setCustomDate = (date) => {
-            let endCustomDate = new Date(); // today
-            let startCustomDate = new Date();
-            startCustomDate.setDate(startCustomDate.getDate() - date);
-            endCustomDate.setDate(endCustomDate.getDate());
+    // useEffect(() => {
+    //     const setCustomDate = (date) => {
+    //         let endCustomDate = new Date(); // today
+    //         let startCustomDate = new Date();
+    //         startCustomDate.setDate(startCustomDate.getDate() - date);
+    //         endCustomDate.setDate(endCustomDate.getDate());
 
-            setDateRange([startCustomDate, endCustomDate]);
+    //         setDateRange([startCustomDate, endCustomDate]);
 
-            DateRangeStore.update((s) => {
-                s.dateFilter = date;
-                s.startDate = startCustomDate;
-                s.endDate = endCustomDate;
-            });
+    //         DateRangeStore.update((s) => {
+    //             s.dateFilter = date;
+    //             s.startDate = startCustomDate;
+    //             s.endDate = endCustomDate;
+    //         });
 
-            // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
-            // let sstr =
-            //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
-            // setEDateStr(estr);
-            // setSDateStr(sstr);
-        };
+    //         // let estr = endCustomDate.getFullYear() + '-' + endCustomDate.getMonth() + '-' + endCustomDate.getDate();
+    //         // let sstr =
+    //         //     startCustomDate.getFullYear() + '-' + startCustomDate.getMonth() + '-' + startCustomDate.getDate();
+    //         // setEDateStr(estr);
+    //         // setSDateStr(sstr);
+    //     };
 
-        setCustomDate(dateFilter);
-    }, [dateFilter]);
+    //     setCustomDate(dateFilter);
+    // }, [dateFilter]);
     const exploreDataFetch = async () => {
         try {
             console.log(sensorData.length);
@@ -182,23 +199,12 @@ const EquipmentDeviceChartModel = ({
                 )
                 .then((res) => {
                     let response = res.data;
-                    let data = response;
+                    let data = response.data;
                     let exploreData = [];
-
                     let recordToInsert = {
                         data: data,
-                        name: getRequiredConsumptionLabel(selectedConsumption),
+                        name: 'AHUs',
                     };
-                    try {
-                        recordToInsert.data = recordToInsert.data.map((_data) => {
-                            _data[0] = new Date(_data[0]);
-                            if (CONVERSION_ALLOWED_UNITS.indexOf(selectedConsumption) > -1) {
-                                _data[1] = _data[1] / UNIT_DIVIDER;
-                            }
-
-                            return _data;
-                        });
-                    } catch (error) {}
                     exploreData.push(recordToInsert);
                     setDeviceData(exploreData);
                     setSeriesData([
@@ -206,6 +212,12 @@ const EquipmentDeviceChartModel = ({
                             data: exploreData[0].data,
                         },
                     ]);
+                    // setDeviceData(exploreData);
+                    // setSeriesData([
+                    //     {
+                    //         data: exploreData[0].data,
+                    //     },
+                    // ]);
                     setIsSensorChartLoading(false);
                 });
         } catch (error) {
@@ -635,6 +647,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -682,6 +695,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
+                                            disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -839,7 +853,7 @@ const EquipmentDeviceChartModel = ({
                                     </Input>
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Input
                                         type="select"
                                         name="select"
@@ -854,21 +868,9 @@ const EquipmentDeviceChartModel = ({
                                             return <option value={el.value}>{el.label}</option>;
                                         })}
                                     </Input>
-                                </div>
+                                </div> */}
 
-                                <div>
-                                    <DatePicker
-                                        selectsRange={true}
-                                        startDate={startDate}
-                                        endDate={endDate}
-                                        onChange={(update) => {
-                                            setDateRange(update);
-                                        }}
-                                        dateFormat="MMMM d"
-                                        className="select-button form-control form-control-md font-weight-bold model-sensor-date-range"
-                                        placeholderText="Select Date Range"
-                                    />
-                                </div>
+                                <ModalHeader />
 
                                 <div className="mr-3 sensor-chart-options">
                                     <Dropdown>
@@ -936,6 +938,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -951,6 +954,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1186,6 +1190,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
+                                                setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -1201,6 +1206,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1240,6 +1246,7 @@ const EquipmentDeviceChartModel = ({
                                             // defaultValue={loc.length===0?"":loc.location_id}
                                             onChange={(e) => {
                                                 handleChange('space_id', e.target.value);
+                                                setFormValidation(true);
                                             }}>
                                             <option value="" selected>
                                                 Select Location

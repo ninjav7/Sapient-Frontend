@@ -3,16 +3,19 @@ import Modal from 'react-bootstrap/Modal';
 import { useAtom } from 'jotai';
 
 import { Button, Input, Label } from 'reactstrap';
-import { closedEditFloorModal, floorList } from '../../store/globalState';
+import { closedEditFloorModal, deleteFloor, floorList } from '../../store/globalState';
 import { BuildingStore } from '../../store/BuildingStore';
 import { floorIdState } from '../../store/globalState';
 import { Cookies } from 'react-cookie';
 import axios from 'axios';
 import { BaseUrl, createFloors, getFloors, updateSpace } from '../../services/Network';
+import Delete from '../../assets/images/delete.png';
 
 const EditFloorModal = (props) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
+    console.log('props.floorName', props.floorName);
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
 
@@ -21,15 +24,17 @@ const EditFloorModal = (props) => {
 
     console.log('apiBody', apiBody);
 
-    const [floorName, setFloorName] = useState('');
+    const [floorsName, setFloorName] = useState('');
     const [floors, setFloors] = useAtom(floorList);
     const [floorModal, setFloorModal] = useAtom(closedEditFloorModal);
     const [floorid] = useAtom(floorIdState);
     const [floorNameApi, setFloorNameApi] = useState();
 
+    console.log('floorsName', floorsName);
+
     useEffect(() => {
-        setFloorNameApi({ name: floorName });
-    }, [floorName]);
+        setFloorNameApi({ name: floorsName });
+    }, [floorsName]);
 
     const createFloorsFunc = () => {
         const headers = {
@@ -37,7 +42,8 @@ const EditFloorModal = (props) => {
             accept: 'application/json',
             Authorization: `Bearer ${userdata.token}`,
         };
-        axios.post(`${BaseUrl}${createFloors}`, apiBody, { headers }).then((res) => {
+        let params = `?building_id=${bldgId}`;
+        axios.post(`${BaseUrl}${createFloors}${params}`, apiBody, { headers }).then((res) => {
             console.log('res', res);
         });
     };
@@ -56,6 +62,8 @@ const EditFloorModal = (props) => {
 
     console.log('editFloor', props.editFloor);
 
+    const [deletingFloor, setDeletingFloor] = useAtom(deleteFloor);
+
     return (
         <>
             <Modal {...props} centered>
@@ -67,27 +75,73 @@ const EditFloorModal = (props) => {
                     )}
                 </Modal.Header>
                 <Modal.Body>
-                    <Label>Name</Label>
-                    <Input
-                        className="mb-3 font-weight-bold"
-                        onChange={(e) => {
-                            setApiBody({ ...apiBody, name: e.target.value });
-                            setFloorName(e.target.value);
-                        }}
-                        autoFocus
-                    />
-                    {/* <Label>Type</Label>
-                    <Input id="font-weight-bold mb-3" name="select" type="select" disabled>
-                        <option>Floors</option>
-                    </Input>
-                    <span>Only floors can be at the building root</span> */}
+                    {props.editFloor ? (
+                        <>
+                            <div>
+                                <Label>Name</Label>
+                                <Input
+                                    className="mb-3 font-weight-bold"
+                                    defaultValue={props.floorName}
+                                    onChange={(e) => {
+                                        setApiBody({ ...apiBody, name: e.target.value });
+                                        setFloorName(e.target.value);
+                                    }}
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <Label>Type</Label>
+                                <Input className="mb-3 font-weight-bold" disabled value="Floor" />
+                                <span>Only Floors can be at the building root</span>
+                            </div>
+                            <div
+                                style={{ marginTop: '20px' }}
+                                onClick={() => {
+                                    props.onHide();
+                                    props.handleDeleteAlertShow();
+                                }}>
+                                <span
+                                    onClick={() => {}}
+                                    style={{
+                                        backgroundColor: '#fdebea',
+                                        padding: '10px 15px',
+                                        borderRadius: '10px',
+                                        marginTop: '20px',
+                                        cursor: 'pointer',
+                                    }}>
+                                    <img src={Delete} alt="delete" style={{ width: '20px' }} />
+                                    <span style={{ color: '#df4544', marginLeft: '10px' }}>Delete Floor</span>
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <Label>Name</Label>
+                            <Input
+                                className="mb-3 font-weight-bold"
+                                onChange={(e) => {
+                                    setApiBody({ ...apiBody, name: e.target.value });
+                                    setFloorName(e.target.value);
+                                }}
+                                autoFocus
+                            />
+                            <Label>Type</Label>
+                            <Input
+                                style={{ color: 'grey' }}
+                                className="mb-3 font-weight-bold"
+                                disabled={true}
+                                value="Floor"
+                            />
+                            <span style={{ marginBottom: '10px' }}>Only Floors can be at the building root</span>
+                        </>
+                    )}
                 </Modal.Body>
 
                 <Modal.Footer>
                     <Button onClick={props.onHide}>Cancel</Button>
                     <Button
                         onClick={() => {
-                            setFloors((el) => [...el, floorName]);
+                            setFloors((el) => [...el, floorsName]);
                             if (props.editFloor) {
                                 updateFloorsFunc();
                             }

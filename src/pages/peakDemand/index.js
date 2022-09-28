@@ -20,6 +20,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { Cookies } from 'react-cookie';
 import moment from 'moment';
+import 'moment-timezone';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
 import { formatConsumptionValue } from '../../helpers/helpers';
@@ -252,6 +253,9 @@ const PeakDemand = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const cookies = new Cookies();
     const userdata = cookies.get('user');
+    const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
+    const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
     const headers = {
         'Content-Type': 'application/json',
         accept: 'application/json',
@@ -277,7 +281,7 @@ const PeakDemand = () => {
             stacked: false,
             zoom: {
                 type: 'x',
-                enabled: true,
+                enabled: false,
                 autoScaleYaxis: true,
             },
             toolbar: {
@@ -315,8 +319,8 @@ const PeakDemand = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
@@ -338,8 +342,6 @@ const PeakDemand = () => {
             },
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -347,15 +349,6 @@ const PeakDemand = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -372,9 +365,9 @@ const PeakDemand = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Peak for Time Period</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kW</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -383,9 +376,6 @@ const PeakDemand = () => {
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
     const [yearlyPeakData, setYearlyPeakData] = useState(null);
-
-    const startDate = DateRangeStore.useState((s) => s.startDate);
-    const endDate = DateRangeStore.useState((s) => s.endDate);
 
     useEffect(() => {
         if (startDate === null) {

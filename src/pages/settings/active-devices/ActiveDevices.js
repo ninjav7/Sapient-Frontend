@@ -31,6 +31,8 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp } from '@fortawesome/pro-solid-svg-icons';
 import './style.css';
+import { useAtom } from 'jotai';
+import { userPermissionData } from '../../../store/globalState';
 
 const ActiveDevicesTable = ({
     deviceData,
@@ -51,6 +53,8 @@ const ActiveDevicesTable = ({
     const [sensorOrder, setSensorOrder] = useState(false);
     const [firmwareOrder, setFirmwareOrder] = useState(false);
     const [hardwareOrder, setHardwareOrder] = useState(false);
+
+    const [userPermission] = useAtom(userPermissionData);
 
     const handleColumnSort = (order, columnName) => {
         if (columnName === 'mac_address') {
@@ -318,15 +322,24 @@ const ActiveDevicesTable = ({
                                                 )}
                                             </td>
                                         )}
-
-                                        <Link
-                                            to={{
-                                                pathname: `/settings/active-devices/single/${record.equipments_id}`,
-                                            }}>
-                                            {selectedOptions.some((record) => record.value === 'identifier') && (
-                                                <td className="font-weight-bold panel-name">{record.identifier}</td>
-                                            )}
-                                        </Link>
+                                        {userPermission?.user_role === 'admin' ||
+                                        userPermission?.permissions?.permissions?.advanced_active_device_permission
+                                            ?.edit ? (
+                                            <Link
+                                                to={{
+                                                    pathname: `/settings/active-devices/single/${record.equipments_id}`,
+                                                }}>
+                                                {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                                )}
+                                            </Link>
+                                        ) : (
+                                            <>
+                                                {selectedOptions.some((record) => record.value === 'identifier') && (
+                                                    <td className="font-weight-bold panel-name">{record.identifier}</td>
+                                                )}
+                                            </>
+                                        )}
                                         {selectedOptions.some((record) => record.value === 'model') && (
                                             <td>{record.model}</td>
                                         )}
@@ -441,6 +454,8 @@ const ActiveDevices = () => {
     });
 
     const [isDeviceProcessing, setIsDeviceProcessing] = useState(true);
+
+    const [userPermission] = useAtom(userPermissionData);
 
     const handleChange = (key, value) => {
         let obj = Object.assign({}, createDeviceData);
@@ -757,14 +772,19 @@ const ActiveDevices = () => {
                                 to={{
                                     pathname: `/settings/active-devices/provision`,
                                 }}>
-                                <button
-                                    type="button"
-                                    className="btn btn-md btn-primary font-weight-bold"
-                                    onClick={() => {
-                                        handleShow();
-                                    }}>
-                                    <i className="uil uil-plus mr-1"></i>Add Device(s)
-                                </button>
+                                {userPermission?.user_role === 'admin' ||
+                                userPermission?.permissions?.permissions?.advanced_active_device_permission?.create ? (
+                                    <button
+                                        type="button"
+                                        className="btn btn-md btn-primary font-weight-bold"
+                                        onClick={() => {
+                                            handleShow();
+                                        }}>
+                                        <i className="uil uil-plus mr-1"></i>Add Device(s)
+                                    </button>
+                                ) : (
+                                    <></>
+                                )}
                             </Link>
                         </div>
                     </div>
