@@ -1489,65 +1489,67 @@ const ExploreByEquipment = () => {
         localStorage.removeItem('explorer');
     }, []);
 
+    const fetchExploreChartData = async () => {
+        setChartLoading(true);
+        try {
+            // setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreEquipmentChart}${params}`,
+                    {
+                        date_from: startDate,
+                        date_to: endDate,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    // console.log(responseData);
+                    let data = responseData.data;
+                    // console.log(data);
+                    let arr = [];
+                    arr = exploreTableData.filter(function (item) {
+                        return item.equipment_id === selectedEquipmentId;
+                    });
+                    // console.log(arr);
+                    let exploreData = [];
+
+                    let recordToInsert = {
+                        name: arr[0].equipment_name,
+                        data: data,
+                        id: arr[0].equipment_id,
+                    };
+                    // console.log(recordToInsert);
+                    const arrayColumn = (arr, n) => arr.map((x) => x[n]);
+                    console.log(arrayColumn(data, 0));
+
+                    setSeriesData([...seriesData, recordToInsert]);
+                    setSeriesLineData([...seriesLineData, recordToInsert]);
+                    setSelectedEquipmentId('');
+                    setChartLoading(false);
+                    //setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            //setIsExploreDataLoading(false);
+        }
+    };
+
     useEffect(() => {
-        // console.log('Entered selected Equipment id ', selectedEquipmentId);
         if (selectedEquipmentId === '') {
             return;
         }
-        const fetchExploreChartData = async () => {
-            setChartLoading(true);
-            try {
-                // setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                        {
-                            date_from: startDate,
-                            date_to: endDate,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let responseData = res.data;
-                        // console.log(responseData);
-                        let data = responseData.data;
-                        // console.log(data);
-                        let arr = [];
-                        arr = exploreTableData.filter(function (item) {
-                            return item.equipment_id === selectedEquipmentId;
-                        });
-                        // console.log(arr);
-                        let exploreData = [];
-
-                        let recordToInsert = {
-                            name: arr[0].equipment_name,
-                            data: data,
-                            id: arr[0].equipment_id,
-                        };
-                        // console.log(recordToInsert);
-                        const arrayColumn = (arr, n) => arr.map((x) => x[n]);
-                        console.log(arrayColumn(data, 0));
-
-                        setSeriesData([...seriesData, recordToInsert]);
-                        setSeriesLineData([...seriesLineData, recordToInsert]);
-                        setSelectedEquipmentId('');
-                        setChartLoading(false);
-                        //setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                //setIsExploreDataLoading(false);
-            }
-        };
-        fetchExploreChartData();
-    }, [selectedEquipmentId, equpimentIdSelection]);
+        if (exploreTableData) {
+            fetchExploreChartData();
+        }
+    }, [selectedEquipmentId]);
 
     useEffect(() => {
         // console.log('Entered Remove Equipment ', removeEquipmentId);
