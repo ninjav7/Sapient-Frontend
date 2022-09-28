@@ -78,4 +78,8 @@ export const equipmentId = atom('');
 
 export const accountId = atom('');
 
-// Layout
+// explorer
+export const selectedEquipment = atom('');
+export const totalSelectionEquipmentId = atom([]);
+
+export const totalSeriesGraphData = atom([]);
