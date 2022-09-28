@@ -23,6 +23,7 @@ import RangeSlider from './RangeSlider';
 import './style.css';
 // import { ConstructionOutlined } from '@mui/icons-material';
 import moment from 'moment';
+import 'moment-timezone';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
@@ -367,6 +368,9 @@ const ExploreByBuildings = () => {
         legend: {
             position: 'top',
             horizontalAlign: 'left',
+            showForSingleSeries: true,
+            showForNullSeries: false,
+            showForZeroSeries: true,
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
@@ -403,22 +407,22 @@ const ExploreByBuildings = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
-                        const { seriesX } = w.globals;
-                        const timestamp = new Date(seriesX[0][dataPointIndex]);
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value / 1000;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
+            //             const { seriesX } = w.globals;
+            //             const timestamp = new Date(seriesX[0][dataPointIndex]);
+            //             return moment(timestamp).tz(timeZone).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value ;
+            //     },
+            // },
             marker: {
                 show: false,
             },
@@ -429,7 +433,7 @@ const ExploreByBuildings = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${(
-                            series[seriesIndex][dataPointIndex] / 1000
+                            series[seriesIndex][dataPointIndex]
                         ).toFixed(3)} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
                             `MMM D 'YY @ HH:mm`
@@ -448,7 +452,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value / 1000).toFixed(3);
+                    return (value).toFixed(3);
                 },
             },
         },
@@ -500,7 +504,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value / 1000;
+                    return value ;
                 },
             },
             tickAmount: 2,
@@ -644,7 +648,7 @@ const ExploreByBuildings = () => {
                 let params = `?consumption=energy&building_id=${selectedBuildingId}`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}`,
+                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}&divisible_by=1000`,
                         {
                             date_from: startDate,
                             date_to: endDate,

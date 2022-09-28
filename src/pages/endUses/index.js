@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
+import 'moment-timezone';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import { BaseUrl, endUses, endUsesChart } from '../../services/Network';
@@ -58,8 +59,6 @@ const EndUsesPage = () => {
             show: false,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -67,15 +66,6 @@ const EndUsesPage = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -95,9 +85,9 @@ const EndUsesPage = () => {
                             series[seriesIndex][dataPointIndex],
                             0
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -105,8 +95,8 @@ const EndUsesPage = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('M/DD');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('M/DD');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} ${dateText}`;
                 },
             },

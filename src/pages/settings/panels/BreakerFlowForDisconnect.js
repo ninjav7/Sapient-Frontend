@@ -22,7 +22,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
 
     const [breakerData, setBreakerData] = useState(data);
 
-    console.log('data', data);
     const [doubleBreakerData, setDoubleBreakerData] = useState({});
     const [tripleBreakerData, setTripleBreakerData] = useState({});
 
@@ -41,8 +40,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     const [sensorData, setSensorData] = useState([]);
     const [doubleSensorData, setDoubleSensorData] = useState([]);
     const [tripleSensorData, setTripleSensorData] = useState([]);
-
-    console.log('tripleSensorData', tripleSensorData);
 
     const [isSensorDataFetched, setIsSensorDataFetched] = useState(false);
     const [isSensorDataFetchedForDouble, setIsSensorDataFetchedForDouble] = useState(false);
@@ -609,7 +606,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
     };
 
     const handleLinkedSensor = (previousSensorId, newSensorId) => {
-        console.log('previousSensorId', previousSensorId, 'newSensorId', newSensorId);
         if (previousSensorId === '') {
             let newSensorList = linkedSensors;
             newSensorList.push(newSensorId);
@@ -762,8 +758,6 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         }
     }, [sensorData, doubleSensorData, tripleSensorData]);
 
-    console.log('doubleSensorDataSearch', doubleSensorDataSearch);
-
     const [equipmentDataSearch, setEquipmentDataSearch] = useState([]);
 
     const equpimentDataFunc = () => {
@@ -775,15 +769,11 @@ const DisconnectedBreakerComponent = ({ data, id }) => {
         });
     };
 
-    console.log('equipmentData', equipmentData);
-
     useEffect(() => {
         if (equipmentData) {
             equpimentDataFunc();
         }
     }, [equipmentData]);
-
-    console.log('linkedSensors', linkedSensors);
 
     return (
         <React.Fragment>

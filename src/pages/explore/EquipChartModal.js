@@ -13,7 +13,6 @@ import {
     Input,
     FormGroup,
     Spinner,
-    ModalHeader,
 } from 'reactstrap';
 import Modal from 'react-bootstrap/Modal';
 import DatePicker from 'react-datepicker';
@@ -45,6 +44,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
 import moment from 'moment';
+import 'moment-timezone';
 import { TagsInput } from 'react-tag-input-component';
 import { BuildingStore } from '../../store/BuildingStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
@@ -56,6 +56,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 import Switch from 'react-switch';
+import ModalHeader from '../../components/ModalHeader';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -76,11 +77,11 @@ const EquipChartModal = ({
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const [metric, setMetric] = useState([
+    const metric = [
         { value: 'energy', label: 'Energy (kWh)', unit: 'kWh' },
-        { value: 'power', label: 'Power (kW)', unit: 'kW' },
+        { value: 'power', label: 'Power (W)', unit: 'W' },
         // { value: 'carbon-emissions', label: 'Carbon Emissions' },
-    ]);
+    ];
 
     const [selectedUnit, setSelectedUnit] = useState(metric[0].unit);
     const [equipmentTypeData, setEquipmentTypeData] = useState([]);
@@ -295,7 +296,7 @@ const EquipChartModal = ({
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM - HH:mm');
+                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
                 },
             },
         },
@@ -317,20 +318,20 @@ const EquipChartModal = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment.utc(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value;
+            //     },
+            // },
             marker: {
                 show: false,
             },
@@ -342,11 +343,11 @@ const EquipChartModal = ({
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${
                             w.config.series[0].unit === 'kWh'
-                                ? (series[seriesIndex][dataPointIndex] / 1000).toFixed(3)
-                                : (series[seriesIndex][dataPointIndex] / 1000000).toFixed(3)
+                                ? series[seriesIndex][dataPointIndex].toFixed(3)
+                                : series[seriesIndex][dataPointIndex].toFixed(3)
                         } 
                          ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
                     </div>`;
@@ -414,7 +415,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM');
+                    return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },
@@ -424,7 +425,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(0);
+                    return val.toFixed(2);
                 },
             },
         },
@@ -439,7 +440,7 @@ const EquipChartModal = ({
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
-        return [['timestamp', selectedConsumption], ...streamData];
+        return [['timestamp', `${selectedConsumption} ${selectedUnit}`], ...streamData];
     };
     //Single Active Equipment Manipulation
 
@@ -526,6 +527,7 @@ const EquipChartModal = ({
         }
         fetchEquipmentChart(equipmentFilter?.equipment_id);
     }, [endDate, selectedConsumption]);
+
     const fetchEquipmentChart = async (equipId) => {
         try {
             setIsEquipDataFetched(true);
@@ -535,7 +537,7 @@ const EquipChartModal = ({
                 Authorization: `Bearer ${userdata.token}`,
             };
 
-            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}`;
+            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
@@ -800,6 +802,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
                                                 }}>
@@ -811,6 +814,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
                                                 }}>
@@ -846,6 +850,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-light font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
                                                 }}>
@@ -857,6 +862,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
+                                                    setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
                                                 }}>

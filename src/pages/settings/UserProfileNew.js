@@ -11,14 +11,12 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
 import { Cookies } from 'react-cookie';
-import Select, { useStateManager } from 'react-select';
-import makeAnimated from 'react-select/animated';
+import Select from 'react-select';
 import {
     assignUser,
     BaseUrl,
     getPermissionRole,
     getSingleUserDetail,
-    updateMemberRole,
     updateSingleUserDetail,
 } from '../../services/Network';
 import axios from 'axios';
@@ -29,8 +27,6 @@ import { buildingData } from '../../store/globalState';
 const UserProfileNew = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
-
-    const animatedComponents = makeAnimated();
 
     const [checked, setChecked] = useState(true);
     const [userDetail, setUserDetail] = useState();
@@ -44,31 +40,8 @@ const UserProfileNew = () => {
     const { userId } = useParams();
 
     const [userPermissionList, setUserPermissionList] = useState();
-    const [buildingIndex, setBuildingIndex] = useState();
-    const [buildingSelect, setBuildingSelect] = useState([]);
-    const [buildingIdList, setBuildingIdList] = useState([]);
-    const [buildingListForvalue, setBuildingListForvalue] = useState([]);
-    const [permissionid, setPermissionid] = useState('');
 
-    console.log('buildingIdList', buildingIdList);
-
-    const buildingSelectFunc = () => {
-        setBuildingSelect([]);
-        // setBuildingIdList([]);
-        userPermissionList[buildingIndex].building_access.map((item) => {
-            setBuildingSelect((el) => [...el, { value: `${item?.building_id}`, label: `${item?.building_name}` }]);
-            // setBuildingIdList((el) => [...el, item?.building_id]);
-        });
-        setPermissionid(userPermissionList[buildingIndex].permissions[0].permission_id);
-    };
-
-    useEffect(() => {
-        if (buildingIndex >= 0) {
-            buildingSelectFunc();
-        }
-    }, [userPermissionList, buildingIndex]);
-
-    console.log('permissionid', permissionid);
+    console.log('userPermissionList', userPermissionList);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
@@ -89,6 +62,7 @@ const UserProfileNew = () => {
         updateBreadcrumbStore();
     }, []);
 
+    // TODO:
     const getSingleUserDetailFunc = async () => {
         let header = {
             'Content-Type': 'application/json',
@@ -104,29 +78,6 @@ const UserProfileNew = () => {
             });
     };
 
-    // TODO:
-    const updateBuildingAccessDetailFunc = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let params = `?member_user_id=${userId}&permission_id=${permissionid}`;
-            await axios.patch(
-                `${BaseUrl}${updateMemberRole}${params}`,
-                { buildings: [buildingIdList] },
-                {
-                    headers: header,
-                }
-            );
-        } catch (err) {
-            console.log('err', err);
-        }
-    };
-
-    //
     const updateSingleUserDetailFunc = async () => {
         let header = {
             'Content-Type': 'application/json',
@@ -267,10 +218,7 @@ const UserProfileNew = () => {
                             <button
                                 type="button"
                                 className="btn btn-md btn-primary font-weight-bold ml-2"
-                                onClick={() => {
-                                    updateSingleUserDetailFunc();
-                                    updateBuildingAccessDetailFunc();
-                                }}>
+                                onClick={updateSingleUserDetailFunc}>
                                 Save
                             </button>
                         </div>
@@ -412,36 +360,32 @@ const UserProfileNew = () => {
                         <CardBody>
                             <Form>
                                 <FormGroup className="mb-3" controlId="exampleForm.ControlInput1">
-                                    {userPermissionList?.map((item, index) => {
+                                    {userPermissionList?.map((item) => {
                                         return (
                                             <>
-                                                <div
-                                                    onClick={() => {
-                                                        setBuildingIndex(index);
-                                                    }}>
-                                                    <div className="user-role-style" style={{ marginTop: '15px' }}>
-                                                        <h6 className="card-title admin-text-style">
-                                                            {item?.permissions?.[0]?.permission_name}
-                                                        </h6>
-                                                        <Link
-                                                            to={`/settings/roles/${item?.permissions?.[0]?.permission_id}`}>
-                                                            <span className="view-role-style">View Role</span>
-                                                        </Link>
-                                                    </div>
-                                                    <Select
-                                                        closeMenuOnSelect={false}
-                                                        components={animatedComponents}
-                                                        isMulti
-                                                        options={buildingSelect}
-                                                        defaultValue={buildingSelect}
-                                                        onChange={(options) => [
-                                                            ...buildingIdList,
-                                                            setBuildingIdList(options?.[0]?.value),
-                                                            setBuildingListForvalue(options),
-                                                        ]}
-                                                        placeholder="Select Buildings"
-                                                    />
+                                                <div className="user-role-style" style={{ marginTop: '15px' }}>
+                                                    <h6 className="card-title admin-text-style">
+                                                        {item?.permissions?.[0]?.permission_name}
+                                                    </h6>
+                                                    <Link
+                                                        to={`/settings/roles/${item?.permissions?.[0]?.permission_id}`}>
+                                                        <span className="view-role-style">View Role</span>
+                                                    </Link>
                                                 </div>
+                                                <Input
+                                                    type="select"
+                                                    name="select"
+                                                    id="exampleSelect"
+                                                    className="font-weight-bold user-role-textbox">
+                                                    <option selected>All Buildings</option>
+                                                    {item?.building_access?.map((item) => {
+                                                        return (
+                                                            <option value={item?.building_id}>
+                                                                {item?.building_name}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </Input>
                                             </>
                                         );
                                     })}
