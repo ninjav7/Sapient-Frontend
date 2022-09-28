@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
+import 'moment-timezone';
 import { Row, Col } from 'reactstrap';
 import Header from '../../components/Header';
 import UsageBarChart from './UsageBarChart';
@@ -126,8 +127,6 @@ const EndUseType = () => {
             enabled: false,
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -135,15 +134,6 @@ const EndUseType = () => {
                 fontFamily: 'Inter, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
             },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
@@ -160,9 +150,9 @@ const EndUseType = () => {
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex]} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -170,8 +160,8 @@ const EndUseType = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
@@ -275,15 +265,6 @@ const EndUseType = () => {
                         fontWeight: 600,
                         cssClass: 'apexcharts-xaxis-label',
                     },
-                    x: {
-                        show: true,
-                        type: 'datetime',
-                        labels: {
-                            formatter: function (val, timestamp) {
-                                return moment(timestamp).format('DD/MMM - HH:mm');
-                            },
-                        },
-                    },
                     y: {
                         formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                             return value + ' K';
@@ -302,9 +283,9 @@ const EndUseType = () => {
                                 series[seriesIndex][dataPointIndex],
                                 0
                             )} kWh</div>
-                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                                `MMM D 'YY @ hh:mm A`
-                            )}</div>
+                            <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                                .tz(timeZone)
+                                .format(`MMM D 'YY @ hh:mm A`)}</div>
                         </div>`;
                     },
                 },

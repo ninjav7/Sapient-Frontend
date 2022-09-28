@@ -33,9 +33,12 @@ import './style.css';
 import RangeSlider from './RangeSlider';
 //import { FilterList, FilterListSharp } from '@mui/icons-material';
 import moment from 'moment';
+import 'moment-timezone';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
 import { set } from 'lodash';
+import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
+import { useAtom } from 'jotai';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -56,6 +59,11 @@ const ExploreEquipmentTable = ({
     pageSize,
     setPageSize,
 }) => {
+    const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
+    const [totalEquipmentId, setTotalEquipmentId] = useAtom(totalSelectionEquipmentId);
+
+    console.log('totalEquipmentId', totalEquipmentId);
+
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
         if (ischecked.checked == true) {
@@ -77,7 +85,7 @@ const ExploreEquipmentTable = ({
         }
     };
 
-    const handleSelection = (e, id) => {
+    const handleSelection = (id) => {
         var isChecked = document.getElementById(id);
         if (isChecked.checked == true) {
             setSelectedEquipmentId(id);
@@ -85,6 +93,12 @@ const ExploreEquipmentTable = ({
             setRemovedEquipmentId(id);
         }
     };
+
+    useEffect(() => {
+        if (equpimentIdSelection) {
+            setSelectedEquipmentId(equpimentIdSelection);
+        }
+    }, [equpimentIdSelection?.length > 0]);
 
     return (
         <>
@@ -162,8 +176,27 @@ const ExploreEquipmentTable = ({
                                                             className="mr-4"
                                                             id={record?.equipment_id}
                                                             value={record?.equipment_id}
+                                                            checked={totalEquipmentId.includes(record?.equipment_id)}
                                                             onClick={(e) => {
-                                                                handleSelection(e, record?.equipment_id);
+                                                                console.log(
+                                                                    e.currentTarget.checked,
+                                                                    'e.currentTarget.checked'
+                                                                );
+                                                                handleSelection(record?.equipment_id);
+                                                                setEqupimentIdSelection(record?.equipment_id);
+                                                                if (e.target.checked) {
+                                                                    setTotalEquipmentId((el) => [
+                                                                        ...el,
+                                                                        record?.equipment_id,
+                                                                    ]);
+                                                                }
+                                                                if (!e.target.checked) {
+                                                                    setTotalEquipmentId((el) =>
+                                                                        el.filter((item) => {
+                                                                            return item !== record?.equipment_id;
+                                                                        })
+                                                                    );
+                                                                }
                                                             }}
                                                         />
                                                         <a
@@ -501,17 +534,29 @@ const ExploreByEquipment = () => {
     const { bldgId } = useParams();
     const timeZone = localStorage.getItem('exploreBldTimeZone');
 
+    const [chartLoading, setChartLoading] = useState(false);
+
+    const [equpimentIdSelection] = useAtom(selectedEquipment);
+    const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
+
+    console.log('totalEquipmentId', totalEquipmentId);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+
+    console.log('startDate', startDate, 'endDate', endDate);
+
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
     const [isExploreDataLoading, setIsExploreDataLoading] = useState(false);
 
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+
+    console.log('seriesData', seriesData);
 
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
@@ -583,33 +628,33 @@ const ExploreByEquipment = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value;
+            //     },
+            // },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             3
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
                             `MMM D 'YY @ HH:mm`
                         )}</div>
                     </div>`;
@@ -619,7 +664,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM HH:00');
+                    return moment.utc(timestamp).format('DD/MM HH:00');
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
@@ -675,7 +720,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM');
+                    return moment.utc(timestamp).format('DD/MM');
                 },
             },
         },
@@ -726,6 +771,18 @@ const ExploreByEquipment = () => {
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
+
+    useEffect(() => {
+        if (equpimentIdSelection && totalEquipmentId?.length === 1) {
+            setSeriesData([]);
+            setSeriesLineData([]);
+            setSelectedEquipmentId(equpimentIdSelection);
+        } else if (equpimentIdSelection && totalEquipmentId?.length > 1) {
+            setSelectedEquipmentId(equpimentIdSelection);
+        } else {
+            setSelectedEquipmentId('');
+        }
+    }, [startDate, endDate, equpimentIdSelection]);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
@@ -1112,6 +1169,8 @@ const ExploreByEquipment = () => {
         } else removeDuplicates();
     }, [removeDuplicateFlag]);
 
+    // const bldgId = BuildingStore.useState((s) => s.BldgId);
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -1134,7 +1193,9 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            axios.get(`${BaseUrl}${getSpaceTypes}`, { headers }).then((res) => {
+
+            let params = `?building_id=${bldgId}`;
+            axios.get(`${BaseUrl}${getSpaceTypes}${params}`, { headers }).then((res) => {
                 let response = res?.data?.data?.[0]?.generic_spacetypes;
                 // console.log(response);
                 setSpaceType(response);
@@ -1435,6 +1496,7 @@ const ExploreByEquipment = () => {
             return;
         }
         const fetchExploreChartData = async () => {
+            setChartLoading(true);
             try {
                 // setIsExploreDataLoading(true);
                 let headers = {
@@ -1476,7 +1538,7 @@ const ExploreByEquipment = () => {
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
                         setSelectedEquipmentId('');
-
+                        setChartLoading(false);
                         //setIsExploreDataLoading(false);
                     });
             } catch (error) {
@@ -1486,7 +1548,7 @@ const ExploreByEquipment = () => {
             }
         };
         fetchExploreChartData();
-    }, [selectedEquipmentId]);
+    }, [selectedEquipmentId, equpimentIdSelection]);
 
     useEffect(() => {
         // console.log('Entered Remove Equipment ', removeEquipmentId);
@@ -1950,6 +2012,7 @@ const ExploreByEquipment = () => {
         <>
             <Row className="ml-2 mt-2 explore-filters-style">
                 <Header title="" />
+                {chartLoading && <Spinner>Loading...</Spinner>}
             </Row>
 
             <Row>
@@ -1980,6 +2043,16 @@ const ExploreByEquipment = () => {
                                 seriesLineData={seriesLineData}
                                 optionsLineData={optionsLineData}
                             />
+                            {/* {console.log(
+                                'seriesData',
+                                seriesData,
+                                'optionsData',
+                                optionsData,
+                                'seriesLineData',
+                                seriesLineData,
+                                'optionsLineData',
+                                optionsLineData
+                            )} */}
                         </>
                     )}
                 </div>

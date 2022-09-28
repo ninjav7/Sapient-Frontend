@@ -76,7 +76,7 @@ export const configLineChartWidget = {
                         0
                     )} kWh</div>
                     <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                        'D/M/YY @ hh:mm A'
+                        `MMM D 'YY @ hh:mm A`
                     )}</div>
                 </div>`;
         },

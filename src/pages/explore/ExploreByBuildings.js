@@ -23,6 +23,7 @@ import RangeSlider from './RangeSlider';
 import './style.css';
 // import { ConstructionOutlined } from '@mui/icons-material';
 import moment from 'moment';
+import 'moment-timezone';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
@@ -367,6 +368,9 @@ const ExploreByBuildings = () => {
         legend: {
             position: 'top',
             horizontalAlign: 'left',
+            showForSingleSeries: true,
+            showForNullSeries: false,
+            showForZeroSeries: true,
             fontSize: '18px',
             fontFamily: 'Helvetica, Arial',
             fontWeight: 600,
@@ -403,22 +407,22 @@ const ExploreByBuildings = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
-                        const { seriesX } = w.globals;
-                        const timestamp = new Date(seriesX[0][dataPointIndex]);
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value ;
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
+            //             const { seriesX } = w.globals;
+            //             const timestamp = new Date(seriesX[0][dataPointIndex]);
+            //             return moment(timestamp).tz(timeZone).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
+            // y: {
+            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+            //         return value ;
+            //     },
+            // },
             marker: {
                 show: false,
             },

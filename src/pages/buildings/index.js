@@ -33,6 +33,7 @@ import {
     portfolioOverall,
 } from '../../services/Network';
 import moment from 'moment';
+import 'moment-timezone';
 import { percentageHandler } from '../../utils/helper';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { Link, useParams } from 'react-router-dom';
@@ -253,26 +254,12 @@ const BuildingOverview = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -280,9 +267,9 @@ const BuildingOverview = () => {
                             series[seriesIndex][dataPointIndex],
                             4
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
@@ -290,8 +277,8 @@ const BuildingOverview = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).format('MMM D');
-                    let weekText = moment(timestamp).format('ddd');
+                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
                     return `${weekText} - ${dateText}`;
                 },
             },
