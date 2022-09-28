@@ -649,7 +649,7 @@ const ExploreByEquipment = () => {
                         )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
                             .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A5`)}</div>
+                            .format(`MMM D 'YY @ HH:mm A`)}</div>
                     </div>`;
             },
         },
