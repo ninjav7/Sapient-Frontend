@@ -57,6 +57,7 @@ import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -73,6 +74,7 @@ const EquipChartModal = ({
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -105,7 +107,6 @@ const EquipChartModal = ({
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
 
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
@@ -347,9 +348,9 @@ const EquipChartModal = ({
                                 : series[seriesIndex][dataPointIndex].toFixed(3)
                         } 
                          ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
-                            `MMM D 'YY @ HH:mm`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment
+                            .utc(timestamp)
+                            .format(`MMM D 'YY @ HH:mm A`)}</div>
                     </div>`;
             },
         },
@@ -536,8 +537,8 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-
-            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
+            // Add TimeZone
+            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&tz_info=${timeZone}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
