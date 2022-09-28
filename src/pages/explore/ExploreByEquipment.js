@@ -1281,8 +1281,9 @@ const ExploreByEquipment = () => {
             }
         };
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreDataFetch(arr);
         fetchEquipTypeData();
@@ -1303,8 +1304,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1341,8 +1343,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1497,13 +1500,14 @@ const ExploreByEquipment = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}&divisible_by=1000`;
+                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
                 await axios
                     .post(
                         `${BaseUrl}${getExploreEquipmentChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1567,13 +1571,14 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?consumption=energy&equipment_id=${id}&tz_info=${timeZone}`;
+            let params = `?consumption=energy&equipment_id=${id}`;
             await axios
                 .post(
                     `${BaseUrl}${getExploreEquipmentChart}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -1797,8 +1802,9 @@ const ExploreByEquipment = () => {
 
     const clearFilterData = () => {
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreFilterDataFetch(arr);
     };
@@ -1864,8 +1870,9 @@ const ExploreByEquipment = () => {
                     .post(
                         `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

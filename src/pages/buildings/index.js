@@ -274,14 +274,27 @@ const BuildingOverview = () => {
             },
         },
         xaxis: {
-            type: 'datetime',
             labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
-                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
-                    return `${weekText} - ${dateText}`;
+                formatter: function (val) {
+                    return moment(val).tz(timeZone).format('MM/DD HH:00');
                 },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
             },
+            tickAmount: 12,
+            axisTicks: {
+                show: true,
+            },
+            // type: 'datetime',
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         console.log('timestamp => ', timestamp);
+            //         let dateText = moment(timestamp).tz(timeZone).format('MMM D');
+            //         let weekText = moment(timestamp).tz(timeZone).format('ddd');
+            //         return `${weekText} - ${dateText}`;
+            //     },
+            // },
             style: {
                 colors: ['#1D2939'],
                 fontSize: '12px',
@@ -594,8 +607,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -624,8 +638,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -714,8 +729,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -750,13 +766,14 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -856,13 +873,14 @@ const BuildingOverview = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

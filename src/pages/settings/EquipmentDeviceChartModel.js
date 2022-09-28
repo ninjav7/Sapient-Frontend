@@ -187,13 +187,14 @@ const EquipmentDeviceChartModel = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipData.equipments_id}&consumption=${selectedConsumption}&tz_info=${timeZone}`;
+            let params = `?equipment_id=${equipData.equipments_id}&consumption=${selectedConsumption}`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -245,8 +246,9 @@ const EquipmentDeviceChartModel = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
