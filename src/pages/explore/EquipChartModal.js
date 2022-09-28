@@ -188,8 +188,9 @@ const EquipChartModal = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -538,13 +539,14 @@ const EquipChartModal = ({
                 Authorization: `Bearer ${userdata.token}`,
             };
             // Add TimeZone
-            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&tz_info=${timeZone}&divisible_by=1000`;
+            let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -593,8 +595,9 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -640,8 +643,9 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

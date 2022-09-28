@@ -343,8 +343,9 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -375,8 +376,9 @@ const EndUseType = () => {
                     .post(
                         `${BaseUrl}${endUsesEquipmentUsage}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -427,13 +429,14 @@ const EndUseType = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsPlugLoadChartLoading(true);
-                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&end_uses_type=${endUseTypeRequest}`;
                 await axios
                     .post(
                         `${BaseUrl}${endUsesUsageChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

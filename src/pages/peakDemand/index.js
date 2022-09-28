@@ -390,13 +390,14 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=power&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -416,13 +417,14 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}&consumption=power`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -453,13 +455,14 @@ const PeakDemand = () => {
         const peakDemandYearlyData = async () => {
             try {
                 setIsPeakContentLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -495,6 +498,7 @@ const PeakDemand = () => {
                         {
                             date_from: filterDate,
                             date_to: filterDate,
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -524,6 +528,7 @@ const PeakDemand = () => {
                         {
                             date_from: filterDate,
                             date_to: filterDate,
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
