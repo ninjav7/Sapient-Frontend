@@ -613,7 +613,7 @@ const ExploreByEquipment = () => {
         tooltip: {
             //@TODO NEED?
             // enabled: false,
-            shared: false,
+            shared: true,
             intersect: false,
             style: {
                 fontSize: '12px',
@@ -640,16 +640,25 @@ const ExploreByEquipment = () => {
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
+                const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
+                let ch=''
+                for(let i=0;i<series.length;i++){
+                    console.log(series[i][dataPointIndex])
+                    console.log(seriesNames[i])
+                    console.log(seriesX[i][dataPointIndex])
+                    ch= ch+`<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
+                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(
+                        3
+                    )} kWh </div>`
+                }
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period">${moment
+                    .utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ HH:mm A`)}</div>`
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            3
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment
-                            .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A5`)}</div>
+                        ${ch}
                     </div>`;
             },
         },
@@ -764,18 +773,26 @@ const ExploreByEquipment = () => {
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
+    const [selectedAllEquipmentId,setSelectedAllEquipmentId] =useState([]);
+    const [objectExplore,setObjectExplore]=useState([]);
 
     useEffect(() => {
-        if (equpimentIdSelection && totalEquipmentId?.length === 1) {
-            setSeriesData([]);
-            setSeriesLineData([]);
-            setSelectedEquipmentId(equpimentIdSelection);
-        } else if (equpimentIdSelection && totalEquipmentId?.length > 1) {
-            setSelectedEquipmentId(equpimentIdSelection);
+        console.log(totalEquipmentId);
+        if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+            // for(let i=0;totalEquipmentId?.length;i++){
+            //     fetchExploreChartDataRerender(totalEquipmentId[i]);
+            // }
+            let arr=[];
+            for(let i=0;i<totalEquipmentId?.length;i++){
+                arr.push(totalEquipmentId[i])
+            }
+            console.log(arr)
+            setSelectedAllEquipmentId(arr);
+            //setSelectedEquipmentId(equpimentIdSelection);
         } else {
             setSelectedEquipmentId('');
         }
-    }, [startDate, endDate, equpimentIdSelection]);
+    }, [startDate, endDate]);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
@@ -1073,6 +1090,7 @@ const ExploreByEquipment = () => {
             await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
                 setPaginationData(res.data);
+                console.log("ALL")
                 setSeriesData([]);
                 setSeriesLineData([]);
                 if (txt === 'consumption' || txt === 'endUse') removeDuplicatesEndUse(txt, responseData.data);
@@ -1263,8 +1281,7 @@ const ExploreByEquipment = () => {
                     let responseData = res.data;
                     setPaginationData(res.data);
                     if (responseData.data.length !== 0) {
-                        setSeriesData([]);
-                        setSeriesLineData([]);
+                        console.log("ALL")
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
                         setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                         set_minConValue(0.0);
@@ -1525,11 +1542,40 @@ const ExploreByEquipment = () => {
                             id: arr[0].equipment_id,
                         };
                         // console.log(recordToInsert);
-                        const arrayColumn = (arr, n) => arr.map((x) => x[n]);
-                        console.log(arrayColumn(data, 0));
+                        let coll=[];
+                        let sname=arr[0].equipment_name;
+                        // const arrayColumn = (arr, n) => arr.map((x) => x[n]);
+                        // console.log("Record data",arrayColumn(data, 0));
+                        data.map((el)=>{
+                            let ab={}
+                            ab["timestamp"]=el[0];
+                            ab[sname]=el[1]
+                            coll.push(ab)
+                        })
+                        console.log("ALL",coll);
+                        if(objectExplore.length===0){
+                            setObjectExplore(coll);
+                        }
+                        else{
+                            var s = new Set();
+                                var result = [];
+                                objectExplore.forEach(function(e) {
+                                    result.push(Object.assign({}, e));
+                                    s.add(e.timestamp);
+                                });
+                                coll.forEach(function(e) {
+                                    if (!s.has(e.timestamp)) {
+                                    var temp = Object.assign({}, e);
+                                    temp[sname] = null;
+                                    result.push(temp);
+                                    }
+                                });
+                                console.log(result);
+                        }
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
+                        console.log("ALL")
                         setSelectedEquipmentId('');
                         setChartLoading(false);
                         //setIsExploreDataLoading(false);
@@ -1540,8 +1586,92 @@ const ExploreByEquipment = () => {
                 //setIsExploreDataLoading(false);
             }
         };
+        console.log(totalEquipmentId)
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
+
+    useEffect(()=>{
+        console.log("ALL ",selectedAllEquipmentId);
+        console.log("ALL", typeof(selectedAllEquipmentId))
+        if(selectedAllEquipmentId.length===1){
+            console.log("ALL")
+            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 100000);
+        }
+        else{
+        selectedAllEquipmentId.map(ele=>{
+            console.log("ALL",ele)
+            const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+
+        })
+    }
+
+        const fetchExploreChartData = async (id) => {
+            setChartLoading(true);
+            try {
+                // setIsExploreDataLoading(true);
+                let headers = {
+                    'Content-Type': 'application/json',
+                    accept: 'application/json',
+                    Authorization: `Bearer ${userdata.token}`,
+                };
+                let params = `?consumption=energy&equipment_id=${id}&tz_info=${timeZone}&divisible_by=1000`;
+                await axios
+                    .post(
+                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
+                        {
+                            date_from: startDate,
+                            date_to: endDate,
+                        },
+                        { headers }
+                    )
+                    .then((res) => {
+                        let responseData = res.data;
+                        // console.log(responseData);
+                        let data = responseData.data;
+                        // console.log(data);
+                        // let arr = [];
+                        // arr = exploreTableData.filter(function (item) {
+                        //     return item.equipment_id === selectedEquipmentId;
+                        // });
+                        // // console.log(arr);
+                        // let exploreData = [];
+
+                        // let recordToInsert = {
+                        //     name: arr[0].equipment_name,
+                        //     data: data,
+                        //     id: arr[0].equipment_id,
+                        // };
+                        // // console.log(recordToInsert);
+                        // const arrayColumn = (arr, n) => arr.map((x) => x[n]);
+                        // console.log(arrayColumn(data, 0));
+
+                        // setSeriesData([...seriesData, recordToInsert]);
+                        // setSeriesLineData([...seriesLineData, recordToInsert]);
+                        // setSelectedEquipmentId('');
+                        setChartLoading(false);
+                        //setIsExploreDataLoading(false);
+                    });
+            } catch (error) {
+                console.log(error);
+                console.log('Failed to fetch Explore Data');
+                //setIsExploreDataLoading(false);
+            }
+        };
+            
+
+    },[selectedAllEquipmentId])
+   
+    // useEffect(async()=>{
+    //     if(selectedAllEquipmentId.length===0){
+    //         return;
+    //     }
+    //     console.log(selectedAllEquipmentId)
+    //     // for(let i=0;i<selectedAllEquipmentId.length;i++){
+    //     //     //fetchExploreChartDataRerender(selectedAllEquipmentId[i]);
+    //     // }
+   
+
+    // },[selectedAllEquipmentId])
 
     useEffect(() => {
         // console.log('Entered Remove Equipment ', removeEquipmentId);
@@ -1552,7 +1682,7 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
-        // console.log(arr1);
+        console.log("ALL",arr1);
         setSeriesData(arr1);
         setSeriesLineData(arr1);
     }, [removeEquipmentId]);
@@ -1597,7 +1727,12 @@ const ExploreByEquipment = () => {
                     };
                     // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
-                    // console.log(dataarr);
+                    console.log(dataarr);
+                    if(totalEquipmentId.length===dataarr.length){
+                        console.log("ALL")
+                        setSeriesData(dataarr);
+                        setSeriesLineData(dataarr);
+                    }
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
@@ -1629,7 +1764,7 @@ const ExploreByEquipment = () => {
         }
         // console.log('allEquipmentSData ', allEquipmentData);
         if (allEquipmentData.length === exploreTableData.length) {
-            // console.log('All equipment Data set');
+            console.log('All equipment Data set');
             setSeriesData(allEquipmentData);
             setSeriesLineData(allEquipmentData);
         }
@@ -1930,16 +2065,23 @@ const ExploreByEquipment = () => {
     const getCSVLinkChartData = () => {
         // console.log("csv entered");
         let arr = [];
+        let aname='';
         // console.log(seriesData);
         seriesData.map(function (obj) {
-            arr.push([obj.name, obj.data]);
+            let abc=[]
+            obj.data.map(ele=>{
+                abc.push([moment
+                    .utc(ele[0])
+                    .format(`MMM D 'YY @ HH:mm A`), ele[1]])
+            })
+            arr=abc;
+            aname=obj.name;
         });
-        // console.log(sData);
         let streamData = seriesData.length > 0 ? arr : [];
 
         // streamData.unshift(['Timestamp', selectedConsumption])
 
-        return [['Equipment Name', ['timestamp', 'energy']], ...streamData];
+    return [['timestamp', `${aname} energy`], ...streamData];
     };
 
     useEffect(() => {
