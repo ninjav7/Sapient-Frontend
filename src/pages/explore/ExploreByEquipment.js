@@ -39,6 +39,7 @@ import Header from '../../components/Header';
 import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -61,8 +62,6 @@ const ExploreEquipmentTable = ({
 }) => {
     const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId, setTotalEquipmentId] = useAtom(totalSelectionEquipmentId);
-
-    console.log('totalEquipmentId', totalEquipmentId);
 
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
@@ -532,22 +531,18 @@ const ExploreEquipmentTable = ({
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
-    const timeZone = localStorage.getItem('exploreBldTimeZone');
 
     const [chartLoading, setChartLoading] = useState(false);
 
     const [equpimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    console.log('totalEquipmentId', totalEquipmentId);
-
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-
-    console.log('startDate', startDate, 'endDate', endDate);
+    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
@@ -555,8 +550,6 @@ const ExploreByEquipment = () => {
 
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
-
-    console.log('seriesData', seriesData);
 
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
@@ -654,9 +647,9 @@ const ExploreByEquipment = () => {
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             3
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
-                            `MMM D 'YY @ HH:mm`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment
+                            .utc(timestamp)
+                            .format(`MMM D 'YY @ HH:mm A`)}</div>
                     </div>`;
             },
         },
@@ -1288,8 +1281,9 @@ const ExploreByEquipment = () => {
             }
         };
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreDataFetch(arr);
         fetchEquipTypeData();
@@ -1310,8 +1304,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1348,8 +1343,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1504,13 +1500,14 @@ const ExploreByEquipment = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}&divisible_by=1000`;
+                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
                 await axios
                     .post(
                         `${BaseUrl}${getExploreEquipmentChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1579,8 +1576,9 @@ const ExploreByEquipment = () => {
                 .post(
                     `${BaseUrl}${getExploreEquipmentChart}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -1804,8 +1802,9 @@ const ExploreByEquipment = () => {
 
     const clearFilterData = () => {
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreFilterDataFetch(arr);
     };
@@ -1871,8 +1870,9 @@ const ExploreByEquipment = () => {
                     .post(
                         `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )

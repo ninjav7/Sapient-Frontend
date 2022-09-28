@@ -23,6 +23,7 @@ const TimeOfDay = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
 
     // temperory soln
     const getTimeData = (value) => {
@@ -484,8 +485,9 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -563,8 +565,9 @@ const TimeOfDay = () => {
                     .post(
                         `${BaseUrl}${avgDailyUsageByHour}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
