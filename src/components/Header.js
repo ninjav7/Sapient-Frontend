@@ -9,6 +9,8 @@ import Select from '../sharedComponents/form/select';
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import '../pages/portfolio/style.scss';
+import { dateApplied } from '../store/globalState';
+import { useAtom } from 'jotai';
 
 const Header = (props) => {
     const dateValue = DateRangeStore.useState((s) => +s.dateFilter);
@@ -18,6 +20,9 @@ const Header = (props) => {
     const [dateFilter, setDateFilter] = useState(dateValue);
     const [startDate, setStartDate] = useState(customStartDate);
     const [endDate, setEndDate] = useState(customEndDate);
+    // const [first, setfirst] = useState(second)
+
+    const [apply, setApply] = useAtom(dateApplied);
 
     const customDaySelect = [
         {
@@ -53,6 +58,7 @@ const Header = (props) => {
         setEndDate(end);
         localStorage.setItem('dateFilter', -1);
         setDateFilter(-1);
+        setApply(true);
     };
 
     const handleDateFilterChange = (value) => {

@@ -83,3 +83,4 @@ export const selectedEquipment = atom('');
 export const totalSelectionEquipmentId = atom([]);
 
 export const totalSeriesGraphData = atom([]);
+export const dateApplied = atom(false);
