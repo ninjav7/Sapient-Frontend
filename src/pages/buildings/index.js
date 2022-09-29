@@ -289,15 +289,6 @@ const BuildingOverview = () => {
             axisTicks: {
                 show: true,
             },
-            // type: 'datetime',
-            // labels: {
-            //     formatter: function (val, timestamp) {
-            //         console.log('timestamp => ', timestamp);
-            //         let dateText = moment(timestamp).tz(timeZone).format('MMM D');
-            //         let weekText = moment(timestamp).tz(timeZone).format('ddd');
-            //         return `${weekText} - ${dateText}`;
-            //     },
-            // },
             style: {
                 colors: ['#1D2939'],
                 fontSize: '12px',
@@ -950,6 +941,13 @@ const BuildingOverview = () => {
         let xaxisObj = xaxisFilters(startEndDayCount);
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        setStartEndDayCount(days + 1);
+    });
 
     return (
         <React.Fragment>
