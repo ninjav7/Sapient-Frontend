@@ -39,7 +39,7 @@ import BrushChart from '../charts/BrushChart';
 import { faAngleRight, faAngleDown, faAngleUp, faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { ComponentStore } from '../../store/ComponentStore';
 import { ChevronDown, Search } from 'react-feather';
 import './style.css';
@@ -57,6 +57,7 @@ import { CSVLink } from 'react-csv';
 import { result } from 'lodash';
 import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -70,9 +71,13 @@ const EquipChartModal = ({
     let cookies = new Cookies();
     let userdata = cookies.get('user');
     const bldgId = localStorage.getItem('exploreBldId');
+    const bldgName = localStorage.getItem('exploreBldName');
+
+    const history = useHistory();
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -105,7 +110,6 @@ const EquipChartModal = ({
     const [equipmentData, setEquipmentData] = useState({});
     const [equipResult, setEquipResult] = useState([]);
 
-    const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
     const [isSensorChartLoading, setIsSensorChartLoading] = useState(false);
 
     const [equipmentTypeDataNow, setEquipmentTypeDataNow] = useState([]);
@@ -187,8 +191,9 @@ const EquipChartModal = ({
                 .post(
                     `${BaseUrl}${builidingAlerts}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -347,9 +352,9 @@ const EquipChartModal = ({
                                 : series[seriesIndex][dataPointIndex].toFixed(3)
                         } 
                          ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
-                            `MMM D 'YY @ HH:mm`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment
+                            .utc(timestamp)
+                            .format(`MMM D 'YY @ HH:mm A`)}</div>
                     </div>`;
             },
         },
@@ -536,14 +541,15 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-
+            // Add TimeZone
             let params = `?equipment_id=${equipId}&consumption=${selectedConsumption}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${equipmentGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -572,6 +578,34 @@ const EquipChartModal = ({
         }
     };
 
+    const redirectToConfigDevicePage = (equipDeviceId, deviceType) => {
+        if (equipDeviceId === '' || equipDeviceId === null) {
+            return;
+        }
+
+        localStorage.setItem('buildingId', bldgId);
+        localStorage.setItem('buildingName', bldgName);
+        localStorage.setItem('buildingTimeZone', timeZone === '' ? 'US/Eastern' : timeZone);
+
+        BuildingStore.update((s) => {
+            s.BldgId = bldgId;
+            s.BldgName = bldgName;
+            s.BldgTimeZone = timeZone;
+        });
+
+        if (deviceType === 'active-device') {
+            history.push({
+                pathname: `/settings/active-devices/single/${equipDeviceId}`,
+            });
+        }
+
+        if (deviceType === 'passive-device') {
+            history.push({
+                pathname: `/settings/passive-devices/single/${equipDeviceId}`,
+            });
+        }
+    };
+
     useEffect(() => {
         console.log(equipmentFilter);
         if (!equipmentFilter?.equipment_id) {
@@ -592,8 +626,9 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${getExploreEquipmentYTDUsage}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -639,8 +674,9 @@ const EquipChartModal = ({
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -768,7 +804,13 @@ const EquipChartModal = ({
     }, [equipmentData]);
 
     return (
-        <Modal show={showEquipmentChart} onHide={handleChartClose} dialogClassName="modal-container-style" centered>
+        <Modal
+            show={showEquipmentChart}
+            onHide={handleChartClose}
+            dialogClassName="modal-container-style"
+            centered
+            backdrop="static"
+            keyboard={false}>
             <>
                 <Modal.Body>
                     {equipmentData?.device_type === 'active' ? (
@@ -1219,21 +1261,17 @@ const EquipChartModal = ({
                                             <div className="modal-right-card mt-2" style={{ padding: '1rem' }}>
                                                 <span className="modal-right-card-title">Energy Monitoring</span>
 
-                                                <Link
-                                                    to={{
-                                                        pathname:
-                                                            equipmentData !== null
-                                                                ? equipmentData?.device_id !== ''
-                                                                    ? `/settings/passive-devices/single/${equipmentData?.device_id}`
-                                                                    : `equipment/#`
-                                                                : '',
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                    onClick={() => {
+                                                        redirectToConfigDevicePage(
+                                                            equipmentData?.device_id,
+                                                            'passive-device'
+                                                        );
                                                     }}>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-light btn-md font-weight-bold float-right mr-2">
-                                                        View
-                                                    </button>
-                                                </Link>
+                                                    View
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -1426,28 +1464,25 @@ const EquipChartModal = ({
                                         </div>
                                         <div className="modal-right-card mt-2">
                                             <span className="modal-right-card-title">Power Strip Socket 2</span>
-                                            <Link
-                                                to={{
-                                                    pathname:
-                                                        equipmentData !== null
-                                                            ? equipmentData.device_id !== ''
-                                                                ? `/settings/active-devices/single/${equipmentData.device_id}`
-                                                                : `equipment/#`
-                                                            : '',
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-light btn-md font-weight-bold float-right mr-2"
+                                                disabled={
+                                                    equipmentData !== null
+                                                        ? equipmentData.device_id === ''
+                                                            ? true
+                                                            : false
+                                                        : true
+                                                }
+                                                onClick={() => {
+                                                    redirectToConfigDevicePage(
+                                                        equipmentData?.device_id,
+                                                        'active-device'
+                                                    );
                                                 }}>
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-light btn-md font-weight-bold float-right mr-2"
-                                                    disabled={
-                                                        equipmentData !== null
-                                                            ? equipmentData.device_id === ''
-                                                                ? true
-                                                                : false
-                                                            : true
-                                                    }>
-                                                    View Devices
-                                                </button>
-                                            </Link>
+                                                View Devices
+                                            </button>
                                         </div>
                                         <div>
                                             {equipmentData !== null

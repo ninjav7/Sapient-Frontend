@@ -39,6 +39,7 @@ import Header from '../../components/Header';
 import { set } from 'lodash';
 import { selectedEquipment, totalSelectionEquipmentId } from '../../store/globalState';
 import { useAtom } from 'jotai';
+import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
 
 const ExploreEquipmentTable = ({
     exploreTableData,
@@ -62,16 +63,12 @@ const ExploreEquipmentTable = ({
     const [equpimentIdSelection, setEqupimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId, setTotalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    console.log('totalEquipmentId', totalEquipmentId);
-
     const handleSelectionAll = (e) => {
         var ischecked = document.getElementById('selection');
         if (ischecked.checked == true) {
             let arr = [];
             for (var i = 0; i < exploreTableData.length; i++) {
                 arr.push(exploreTableData[i].equipment_id);
-                // console.log(arr);
-
                 var checking = document.getElementById(exploreTableData[i].equipment_id);
                 checking.checked = ischecked.checked;
             }
@@ -178,10 +175,6 @@ const ExploreEquipmentTable = ({
                                                             value={record?.equipment_id}
                                                             checked={totalEquipmentId.includes(record?.equipment_id)}
                                                             onClick={(e) => {
-                                                                console.log(
-                                                                    e.currentTarget.checked,
-                                                                    'e.currentTarget.checked'
-                                                                );
                                                                 handleSelection(record?.equipment_id);
                                                                 setEqupimentIdSelection(record?.equipment_id);
                                                                 if (e.target.checked) {
@@ -532,22 +525,18 @@ const ExploreEquipmentTable = ({
 
 const ExploreByEquipment = () => {
     const { bldgId } = useParams();
-    const timeZone = localStorage.getItem('exploreBldTimeZone');
 
     const [chartLoading, setChartLoading] = useState(false);
 
     const [equpimentIdSelection] = useAtom(selectedEquipment);
     const [totalEquipmentId] = useAtom(totalSelectionEquipmentId);
 
-    console.log('totalEquipmentId', totalEquipmentId);
-
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-
-    console.log('startDate', startDate, 'endDate', endDate);
+    const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
 
@@ -555,8 +544,6 @@ const ExploreByEquipment = () => {
 
     const [seriesData, setSeriesData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
-
-    console.log('seriesData', seriesData);
 
     const tableColumnOptions = [
         { label: 'Energy Consumption', value: 'consumption' },
@@ -613,6 +600,7 @@ const ExploreByEquipment = () => {
         colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             opacity: 1,
+            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         },
         markers: {
             size: 0,
@@ -620,7 +608,7 @@ const ExploreByEquipment = () => {
         tooltip: {
             //@TODO NEED?
             // enabled: false,
-            shared: false,
+            shared: true,
             intersect: false,
             style: {
                 fontSize: '12px',
@@ -646,18 +634,26 @@ const ExploreByEquipment = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                
+                const {colors} = w.globals;
+                console.log(colors)
                 const { seriesX } = w.globals;
+                const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
+                let ch=''
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
+                for(let i=0;i<series.length;i++){
+                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};">.</span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                        3
+                    )} kWh </td></tr>`
+                }
+               
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
-                            3
-                        )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
-                            `MMM D 'YY @ HH:mm`
-                        )}</div>
-                    </div>`;
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
+                        ${ch}
+                    </table></div>`;
             },
         },
         xaxis: {
@@ -771,18 +767,20 @@ const ExploreByEquipment = () => {
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
+    const [selectedAllEquipmentId,setSelectedAllEquipmentId] =useState([]);
+    const [objectExplore,setObjectExplore]=useState([]);
 
     useEffect(() => {
-        if (equpimentIdSelection && totalEquipmentId?.length === 1) {
-            setSeriesData([]);
-            setSeriesLineData([]);
-            setSelectedEquipmentId(equpimentIdSelection);
-        } else if (equpimentIdSelection && totalEquipmentId?.length > 1) {
-            setSelectedEquipmentId(equpimentIdSelection);
+        if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
+            let arr=[];
+            for(let i=0;i<totalEquipmentId?.length;i++){
+                arr.push(totalEquipmentId[i])
+            }
+            setSelectedAllEquipmentId(arr);
         } else {
             setSelectedEquipmentId('');
         }
-    }, [startDate, endDate, equpimentIdSelection]);
+    }, [startDate, endDate]);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const setDropdown = () => {
@@ -809,7 +807,6 @@ const ExploreByEquipment = () => {
             } else {
                 setEquipmentTxt(`${filteredEquipOptions.length} Equipment Types`);
             }
-            //console.log('selected Equip Type ',selectEquip);
             setSelectedEquipType(selectEquip);
         } else {
             setSelectedEquipType([]);
@@ -842,18 +839,14 @@ const ExploreByEquipment = () => {
                 let arr1 = filteredEquipOptions.filter(function (item) {
                     return item.value === arr[0];
                 });
-                console.log(arr1);
-                console.log(arr);
 
                 setEquipmentTxt(`${arr1[0].label}`);
             } else {
                 setEquipmentTxt(`${selectedEquipType.length - 1} Equipment Types`);
             }
-            //console.log(e.target.value);
             let arr = selectedEquipType.filter(function (item) {
                 return item !== e.target.value;
             });
-            //console.log(arr);
             setSelectedEquipType(arr);
         }
     };
@@ -875,7 +868,6 @@ const ExploreByEquipment = () => {
             } else {
                 setEndUseTxt(`${filteredEndUseOptions.length} End Use Category`);
             }
-            //console.log('selected End Use ',selectEndUse);
             setSelectedEndUse(selectEndUse);
         } else {
             setSelectedEndUse([]);
@@ -899,7 +891,6 @@ const ExploreByEquipment = () => {
         } else {
             let slt = document.getElementById('allEndUse');
             slt.checked = selection.checked;
-            //console.log(e.target.value);
             if (selectedEndUse.length === 1) {
                 setEndUseTxt('');
             } else if (selectedEndUse.length === 2) {
@@ -909,8 +900,6 @@ const ExploreByEquipment = () => {
                 let arr1 = filteredEndUseOptions.filter(function (item) {
                     return item.value === arr[0];
                 });
-                console.log(arr1);
-                console.log(arr);
 
                 setEndUseTxt(`${arr1[0].label}`);
             } else {
@@ -919,7 +908,6 @@ const ExploreByEquipment = () => {
             let arr = selectedEndUse.filter(function (item) {
                 return item !== e.target.value;
             });
-            //console.log(arr);
             setSelectedEndUse(arr);
         }
     };
@@ -929,7 +917,6 @@ const ExploreByEquipment = () => {
         if (slt.checked === true) {
             let selectLoc = [];
             for (let i = 0; i < floorListAPI.length; i++) {
-                //console.log(floorListAPI[i].floor_id)
                 selectLoc.push(floorListAPI[i].floor_id);
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
@@ -941,7 +928,6 @@ const ExploreByEquipment = () => {
             } else {
                 setLocationTxt(`${floorListAPI.length} Locations`);
             }
-            //console.log('selected Space Type ',selectLoc);
             setSelectedLocation(selectLoc);
         } else {
             setSelectedLocation([]);
@@ -972,18 +958,14 @@ const ExploreByEquipment = () => {
                 let arr1 = floorListAPI.filter(function (item) {
                     return item.floor_id === arr[0];
                 });
-                console.log(arr1);
-                console.log(arr);
 
                 setLocationTxt(`${arr1[0].name}`);
             } else {
                 setLocationTxt(`${selectedLocation.length - 1} Locations`);
             }
-            //console.log(e.target.value);
             let arr = selectedLocation.filter(function (item) {
                 return item !== e.target.value;
             });
-            //console.log(arr);
             setSelectedLocation(arr);
         }
     };
@@ -1004,7 +986,6 @@ const ExploreByEquipment = () => {
             } else {
                 setSpaceTxt(`${filteredSpaceTypeOptions.length} Space Types`);
             }
-            //console.log('selected Space Type ',selectSpace);
             setSelectedSpaceType(selectSpace);
         } else {
             setSelectedSpaceType([]);
@@ -1037,31 +1018,24 @@ const ExploreByEquipment = () => {
                 let arr1 = filteredSpaceTypeOptions.filter(function (item) {
                     return item.value === arr[0];
                 });
-                console.log(arr1);
-                console.log(arr);
 
                 setSpaceTxt(`${arr1[0].label}`);
             } else {
                 setSpaceTxt(`${selectedSpaceType.length - 1} Space Types`);
             }
-
-            //console.log(e.target.value);
             let arr = selectedSpaceType.filter(function (item) {
                 return item !== e.target.value;
             });
-            //console.log(arr);
             setSelectedSpaceType(arr);
         }
     };
 
     const handleInput = (values) => {
-        //console.log("values ",values);
         set_minConValue(values[0]);
         set_maxConValue(values[1]);
     };
 
     const handleInputPer = (values) => {
-        //console.log("values ",values);
         set_minPerValue(values[0]);
         set_maxPerValue(values[1]);
     };
@@ -1084,10 +1058,6 @@ const ExploreByEquipment = () => {
                 setSeriesLineData([]);
                 if (txt === 'consumption' || txt === 'endUse') removeDuplicatesEndUse(txt, responseData.data);
                 if (responseData.data.length !== 0) {
-                    //setTopEnergyConsumption(responseData.data[0].consumption.now);
-                    //setTopPeakConsumption(responseData.data[0].peak_power.now);
-                    // set_minConValue(0);
-                    // set_maxConValue(responseData.data[0].consumption.now)
                 }
                 setExploreTableData(responseData.data);
 
@@ -1149,10 +1119,6 @@ const ExploreByEquipment = () => {
         });
 
         setRemoveEndUseDuplication(uniqueEndUse);
-        // console.log("Unique End Use ",uniqueEndUse);
-        // console.log("Unique Equipment Type ", uniqueEqupimentTypes)
-        // console.log("Unique location ", uniqueLocation)
-        // console.log("Unique Space Type ",uniqueSpaceType)
 
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
         setRemoveLocationDuplication(uniqueLocation);
@@ -1160,7 +1126,6 @@ const ExploreByEquipment = () => {
     };
 
     useEffect(() => {
-        // console.log("exploreTableData")
         if (exploreTableData.length === 0) {
             setRemoveEndUseDuplication([]);
             setRemoveEqupimentTypesDuplication([]);
@@ -1197,12 +1162,7 @@ const ExploreByEquipment = () => {
             let params = `?building_id=${bldgId}`;
             axios.get(`${BaseUrl}${getSpaceTypes}${params}`, { headers }).then((res) => {
                 let response = res?.data?.data?.[0]?.generic_spacetypes;
-                // console.log(response);
                 setSpaceType(response);
-                // response.sort((a, b) => {
-                //     return a.name.localeCompare(b.name);
-                // });
-                // setFloor1(response);
             });
         };
         const fetchEquipTypeData = async () => {
@@ -1220,12 +1180,7 @@ const ExploreByEquipment = () => {
                         let rec = { label: response[i].equipment_type, value: response[i].equipment_id };
                         equipData.push(rec);
                     }
-                    // console.log("equipData ",equipData)
                     setEquipOptions(equipData);
-                    // response.sort((a, b) => {
-                    //     return a.equipment_type.localeCompare(b.equipment_type);
-                    // });
-                    // setEquipmentTypeData(response);
                 });
             } catch (error) {
                 console.log(error);
@@ -1246,7 +1201,6 @@ const ExploreByEquipment = () => {
                         let rec = { label: response[i].name, value: response[i].end_user_id };
                         equipData.push(rec);
                     }
-                    // console.log("equipData ",equipData)
                     setEndUseOptions(equipData);
                 });
             } catch (error) {
@@ -1270,8 +1224,6 @@ const ExploreByEquipment = () => {
                     let responseData = res.data;
                     setPaginationData(res.data);
                     if (responseData.data.length !== 0) {
-                        setSeriesData([]);
-                        setSeriesLineData([]);
                         setTopEnergyConsumption(responseData.data[0].consumption.now);
                         setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
                         set_minConValue(0.0);
@@ -1288,8 +1240,9 @@ const ExploreByEquipment = () => {
             }
         };
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreDataFetch(arr);
         fetchEquipTypeData();
@@ -1298,7 +1251,6 @@ const ExploreByEquipment = () => {
     }, [startDate, endDate, bldgId]);
 
     const nextPageData = async (path) => {
-        // console.log("next path ",path);
         try {
             setIsExploreDataLoading(true);
             if (path === null) {
@@ -1310,8 +1262,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1348,8 +1301,9 @@ const ExploreByEquipment = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             let arr = {
-                date_from: startDate,
-                date_to: endDate,
+                date_from: startDate.toLocaleDateString(),
+                date_to: endDate.toLocaleDateString(),
+                tz_info: timeZone,
             };
             let params = `?consumption=energy&building_id=${bldgId}`;
             await axios.post(`${BaseUrl}${path}`, arr, { headers }).then((res) => {
@@ -1389,11 +1343,7 @@ const ExploreByEquipment = () => {
             });
             let rec = { label: arr[0].label, value: arr[0].value };
             rvmEquip.push(rec);
-            // arr1 = seriesData.filter(function (item) {
-            //     return item.id !== removeEquipmentId
-            // })
         }
-        // console.log(rvmEquip);
         setFilteredEquipOptions(rvmEquip);
         setFilteredEquipOptionsCopy(rvmEquip);
     }, [equipOptions, removeEqupimentTypesDuplication]);
@@ -1414,11 +1364,7 @@ const ExploreByEquipment = () => {
             });
             let rec = { label: arr[0].label, value: arr[0].value };
             rvmEndUse.push(rec);
-            // arr1 = seriesData.filter(function (item) {
-            //     return item.id !== removeEquipmentId
-            // })
         }
-        // console.log(rvmEndUse);
         setFilteredEndUseOptions(rvmEndUse);
         setFilteredEndUseOptionsCopy(rvmEndUse);
     }, [endUseOptions, removeEndUseDuplication]);
@@ -1438,7 +1384,6 @@ const ExploreByEquipment = () => {
                     rvmLocation.push(floorListAPI[j]);
             }
         }
-        // console.log(rvmLocation);
         setFilteredLocationOptions(rvmLocation);
         setFilteredLocationOptionsCopy(rvmLocation);
     }, [floorListAPI, removeLocationDuplication]);
@@ -1461,11 +1406,7 @@ const ExploreByEquipment = () => {
                 let rec = { label: arr[0].name, value: arr[0].id };
                 rvmSpaceType.push(rec);
             }
-            // arr1 = seriesData.filter(function (item) {
-            //     return item.id !== removeEquipmentId
-            // })
         }
-        // console.log(rvmSpaceType);
         setFilteredSpaceTypeOptions(rvmSpaceType);
         setFilteredSpaceTypeOptionsCopy(rvmSpaceType);
     }, [spaceType, removeSpaceTypeDuplication]);
@@ -1491,49 +1432,71 @@ const ExploreByEquipment = () => {
     }, []);
 
     useEffect(() => {
-        // console.log('Entered selected Equipment id ', selectedEquipmentId);
         if (selectedEquipmentId === '') {
             return;
         }
         const fetchExploreChartData = async () => {
             setChartLoading(true);
             try {
-                // setIsExploreDataLoading(true);
                 let headers = {
                     'Content-Type': 'application/json',
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&tz_info=${timeZone}&divisible_by=1000`;
+                let params = `?consumption=energy&equipment_id=${selectedEquipmentId}&divisible_by=1000`;
                 await axios
                     .post(
                         `${BaseUrl}${getExploreEquipmentChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
                     .then((res) => {
                         let responseData = res.data;
-                        // console.log(responseData);
                         let data = responseData.data;
-                        // console.log(data);
                         let arr = [];
                         arr = exploreTableData.filter(function (item) {
                             return item.equipment_id === selectedEquipmentId;
                         });
-                        // console.log(arr);
                         let exploreData = [];
+                        let sg=""
+                        sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
+
 
                         let recordToInsert = {
-                            name: arr[0].equipment_name,
+                            name: `${arr[0].equipment_name} - ${sg}`,
                             data: data,
                             id: arr[0].equipment_id,
                         };
-                        // console.log(recordToInsert);
-                        const arrayColumn = (arr, n) => arr.map((x) => x[n]);
-                        console.log(arrayColumn(data, 0));
+                        let coll=[];
+                        let sname=arr[0].equipment_name;
+                        data.map((el)=>{
+                            let ab={}
+                            ab["timestamp"]=el[0];
+                            ab[sname]=el[1]
+                            coll.push(ab)
+                        })
+                        if(objectExplore.length===0){
+                            setObjectExplore(coll);
+                        }
+                        else{
+                            var s = new Set();
+                                var result = [];
+                                objectExplore.forEach(function(e) {
+                                    result.push(Object.assign({}, e));
+                                    s.add(e.timestamp);
+                                });
+                                coll.forEach(function(e) {
+                                    if (!s.has(e.timestamp)) {
+                                    var temp = Object.assign({}, e);
+                                    temp[sname] = null;
+                                    result.push(temp);
+                                    }
+                                });
+                        }
 
                         setSeriesData([...seriesData, recordToInsert]);
                         setSeriesLineData([...seriesLineData, recordToInsert]);
@@ -1550,8 +1513,21 @@ const ExploreByEquipment = () => {
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
 
+    useEffect(()=>{
+        if(selectedAllEquipmentId.length===1){
+            const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 100000);
+        }
+        else{
+        selectedAllEquipmentId.map(ele=>{
+            const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+
+        })
+    }
+
+    },[selectedAllEquipmentId])
+   
+
     useEffect(() => {
-        // console.log('Entered Remove Equipment ', removeEquipmentId);
         if (removeEquipmentId === '') {
             return;
         }
@@ -1559,7 +1535,6 @@ const ExploreByEquipment = () => {
         arr1 = seriesData.filter(function (item) {
             return item.id !== removeEquipmentId;
         });
-        // console.log(arr1);
         setSeriesData(arr1);
         setSeriesLineData(arr1);
     }, [removeEquipmentId]);
@@ -1568,43 +1543,40 @@ const ExploreByEquipment = () => {
 
     const fetchExploreAllChartData = async (id) => {
         try {
-            // setIsExploreDataLoading(true);
             let headers = {
                 'Content-Type': 'application/json',
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?consumption=energy&equipment_id=${id}`;
+            let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${getExploreEquipmentChart}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
                 .then((res) => {
                     let responseData = res.data;
-                    // console.log(responseData);
                     let data = responseData.data;
-                    // console.log(data);
                     let arr = [];
                     arr = exploreTableData.filter(function (item) {
                         return item.equipment_id === id;
                     });
-                    // console.log(arr);
                     let exploreData = [];
-                    // data.forEach((record) => {
-                    //     if (record.building_name !== null) {
                     let recordToInsert = {
                         name: arr[0].equipment_name,
                         data: data,
                         id: arr[0].equipment_id,
                     };
-                    // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
-                    // console.log(dataarr);
+                    if(totalEquipmentId.length===dataarr.length){
+                        setSeriesData(dataarr);
+                        setSeriesLineData(dataarr);
+                    }
                     setAllEquipmenData(dataarr);
                 });
         } catch (error) {
@@ -1614,7 +1586,6 @@ const ExploreByEquipment = () => {
         }
     };
     useEffect(() => {
-        // console.log('building List Array ', equipmentListArray);
         if (equipmentListArray.length === 0) {
             return;
         }
@@ -1623,10 +1594,8 @@ const ExploreByEquipment = () => {
             arr1 = seriesData.filter(function (item) {
                 return item.id === equipmentListArray[i];
             });
-            // console.log('Arr 1 ', arr1);
             if (arr1.length === 0) {
                 fetchExploreAllChartData(equipmentListArray[i]);
-                // console.log(dataarr);
             }
         }
     }, [equipmentListArray]);
@@ -1634,9 +1603,7 @@ const ExploreByEquipment = () => {
         if (allEquipmentData.length === 0) {
             return;
         }
-        // console.log('allEquipmentSData ', allEquipmentData);
         if (allEquipmentData.length === exploreTableData.length) {
-            // console.log('All equipment Data set');
             setSeriesData(allEquipmentData);
             setSeriesLineData(allEquipmentData);
         }
@@ -1647,7 +1614,6 @@ const ExploreByEquipment = () => {
         arr = selectedOptions.filter(function (item) {
             return item.value !== val;
         });
-        // console.log(arr);
         setSelectedOptions(arr);
         let txt = '';
         let arr1 = {};
@@ -1749,22 +1715,6 @@ const ExploreByEquipment = () => {
         exploreFilterDataFetch(arr1, txt);
     };
 
-    // useEffect(()=>{
-    //     if(minConValue===0 && maxConValue===0 || maxConValue===1){
-    //         return;
-    //     }
-    //    let arr={
-    //     date_from: startDate,
-    //     date_to: endDate,
-    //     consumption_range: {
-    //         "gte": minConValue,
-    //         "lte": maxConValue
-    //       }
-    // }
-
-    //     exploreFilterDataFetch(arr);
-
-    // },[APIFlag])
     useEffect(() => {
         if (
             selectedLocation.length === 0 &&
@@ -1804,8 +1754,9 @@ const ExploreByEquipment = () => {
 
     const clearFilterData = () => {
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreFilterDataFetch(arr);
     };
@@ -1814,7 +1765,6 @@ const ExploreByEquipment = () => {
         if (txt !== '') {
             var search = new RegExp(txt, 'i');
             let b = filteredEndUseOptions.filter((item) => search.test(item.label));
-            // console.log(b);
             setFilteredEndUseOptions(b);
         } else {
             setFilteredEndUseOptions(filteredEndUseOptionsCopy);
@@ -1825,7 +1775,6 @@ const ExploreByEquipment = () => {
         if (txt !== '') {
             var search = new RegExp(txt, 'i');
             let b = filteredSpaceTypeOptions.filter((item) => search.test(item.label));
-            // console.log(b);
             setFilteredSpaceTypeOptions(b);
         } else {
             setFilteredSpaceTypeOptions(filteredSpaceTypeOptionsCopy);
@@ -1836,7 +1785,6 @@ const ExploreByEquipment = () => {
         if (txt !== '') {
             var search = new RegExp(txt, 'i');
             let b = filteredEquipOptions.filter((item) => search.test(item.label));
-            // console.log(b);
             setFilteredEquipOptions(b);
         } else {
             setFilteredEquipOptions(filteredEquipOptionsCopy);
@@ -1848,7 +1796,6 @@ const ExploreByEquipment = () => {
         if (txt !== '') {
             var search = new RegExp(txt, 'i');
             let b = filteredLocationOptions.filter((item) => search.test(item.name));
-            // console.log(b);
             setFilteredLocationOptions(b);
         } else {
             setFilteredLocationOptions(filteredLocationOptionsCopy);
@@ -1856,7 +1803,6 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
-        // console.log(equipmentSearchTxt);
 
         const exploreDataFetch = async () => {
             try {
@@ -1871,8 +1817,9 @@ const ExploreByEquipment = () => {
                     .post(
                         `${BaseUrl}${getExploreEquipmentList}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -1898,7 +1845,6 @@ const ExploreByEquipment = () => {
     };
 
     const getCSVLinkData = () => {
-        // console.log("csv entered");
         let sData = [];
         exploreTableData.map(function (obj) {
             let change = percentageHandler(obj.consumption.now, obj.consumption.old) + '%';
@@ -1912,13 +1858,7 @@ const ExploreByEquipment = () => {
                 obj.end_user,
             ]);
         });
-        //console.log(sData)
-        //let arr = exploreTableData.length > 0 ? sData : [];
-        //console.log(exploreTableData);
-        //console.log([exploreTableData]);
         let streamData = exploreTableData.length > 0 ? sData : [];
-
-        // streamData.unshift(['Timestamp', selectedConsumption])
 
         return [
             [
@@ -1935,22 +1875,24 @@ const ExploreByEquipment = () => {
     };
 
     const getCSVLinkChartData = () => {
-        // console.log("csv entered");
         let arr = [];
-        // console.log(seriesData);
+        let aname='';
         seriesData.map(function (obj) {
-            arr.push([obj.name, obj.data]);
+            let abc=[]
+            obj.data.map(ele=>{
+                abc.push([moment
+                    .utc(ele[0])
+                    .format(`MMM D 'YY @ HH:mm A`), ele[1]])
+            })
+            arr=abc;
+            aname=obj.name;
         });
-        // console.log(sData);
         let streamData = seriesData.length > 0 ? arr : [];
 
-        // streamData.unshift(['Timestamp', selectedConsumption])
-
-        return [['Equipment Name', ['timestamp', 'energy']], ...streamData];
+    return [['timestamp', `${aname} energy`], ...streamData];
     };
 
     useEffect(() => {
-        console.log('showDropdown', showDropdown);
     }, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
@@ -1998,11 +1940,6 @@ const ExploreByEquipment = () => {
             setRemoveEndUseDuplication(uniqueEndUse);
         }
 
-        // console.log("Unique End Use ",uniqueEndUse);
-        // console.log("Unique Equipment Type ", uniqueEqupimentTypes)
-        // console.log("Unique location ", uniqueLocation)
-        // console.log("Unique Space Type ",uniqueSpaceType)
-
         setRemoveEqupimentTypesDuplication(uniqueEqupimentTypes);
         setRemoveLocationDuplication(uniqueLocation);
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
@@ -2043,16 +1980,6 @@ const ExploreByEquipment = () => {
                                 seriesLineData={seriesLineData}
                                 optionsLineData={optionsLineData}
                             />
-                            {/* {console.log(
-                                'seriesData',
-                                seriesData,
-                                'optionsData',
-                                optionsData,
-                                'seriesLineData',
-                                seriesLineData,
-                                'optionsLineData',
-                                optionsLineData
-                            )} */}
                         </>
                     )}
                 </div>
@@ -2086,6 +2013,7 @@ const ExploreByEquipment = () => {
                                 onChange={setSelectedOptions}
                                 labelledBy="Columns"
                                 className="column-filter-styling"
+                                disabled={isExploreDataLoading}
                                 valueRenderer={() => {
                                     return (
                                         <>
@@ -2131,15 +2059,6 @@ const ExploreByEquipment = () => {
                                             <div style={{ margin: '1rem' }}>
                                                 <div>
                                                     <a className="pop-text">kWh Used</a>
-                                                    {/* <button
-                                                        style={{
-                                                            border: 'none',
-                                                            backgroundColor: 'white',
-                                                            marginLeft: '5rem',
-                                                        }}
-                                                        onClick={clearFilterData}>
-                                                        <i className="uil uil-multiply"></i>
-                                                    </button> */}
                                                 </div>
                                                 <div className="pop-inputbox-wrapper">
                                                     <input className="pop-inputbox" type="text" value={minConValue} />{' '}
@@ -2315,7 +2234,6 @@ const ExploreByEquipment = () => {
                                                                     <span>{record.name}</span>
                                                                 </div>
                                                                 <div style={{ display: 'flex' }}>
-                                                                    {/* <div className='room-box'> 12 Rooms </div> */}
                                                                     <button
                                                                         style={{
                                                                             border: 'none',
@@ -2597,10 +2515,10 @@ const ExploreByEquipment = () => {
                     </div>
                 </Col>
                 <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
+                    {/* <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
                         {' '}
                         <FontAwesomeIcon icon={faTableColumns} size="md" />
-                    </button>
+                    </button> */}
                     <CSVLink
                         style={{ color: 'black' }}
                         className="btn btn-white d-inline btnHover font-weight-bold"
