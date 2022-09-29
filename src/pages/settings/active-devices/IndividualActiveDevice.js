@@ -351,6 +351,7 @@ const IndividualActiveDevice = () => {
                 });
         } catch (error) {
             console.log(error);
+            setIsSensorChartLoading(false);
             console.log('Failed to fetch Sensor Graph data');
         }
     };
