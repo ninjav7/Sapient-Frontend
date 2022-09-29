@@ -23,7 +23,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -275,7 +275,7 @@ const PeakDemand = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const peakDemandTrendOptions = {
+    const [peakDemandTrendOptions, setpeakDemandTrendOptions] = useState({
         chart: {
             type: 'area',
             stacked: false,
@@ -371,7 +371,9 @@ const PeakDemand = () => {
                     </div>`;
             },
         },
-    };
+    });
+
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
 
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
@@ -547,6 +549,18 @@ const PeakDemand = () => {
         fetchEquipTypeData(equipTypeToFetch);
         fetchEquipUsageData(equipTypeToFetch);
     }, [equipTypeToFetch]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(startEndDayCount);
+        setpeakDemandTrendOptions({ ...peakDemandTrendOptions, xaxis: xaxisObj });
+    }, [startEndDayCount]);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        setStartEndDayCount(days + 1);
+    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
