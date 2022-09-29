@@ -600,6 +600,7 @@ const ExploreByEquipment = () => {
         colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         fill: {
             opacity: 1,
+            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
         },
         markers: {
             size: 0,
@@ -633,30 +634,33 @@ const ExploreByEquipment = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                
+                const {colors} = w.globals;
+                console.log(colors)
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
                 let ch=''
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
                 for(let i=0;i<series.length;i++){
-                    ch= ch+`<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
-                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(
+                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};">.</span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
                         3
-                    )} kWh </div>`
+                    )} kWh </td></tr>`
                 }
-                ch=ch+`<div class="line-chart-widget-tooltip-time-period">${moment(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ HH:mm A`)}</div>`
+               
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
                         ${ch}
-                    </div>`;
+                    </table></div>`;
             },
         },
         xaxis: {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM HH:00');
+                    return moment.utc(timestamp).format('DD/MM HH:00');
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
@@ -712,7 +716,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM');
+                    return moment.utc(timestamp).format('DD/MM');
                 },
             },
         },
@@ -1458,9 +1462,12 @@ const ExploreByEquipment = () => {
                             return item.equipment_id === selectedEquipmentId;
                         });
                         let exploreData = [];
+                        let sg=""
+                        sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
+
 
                         let recordToInsert = {
-                            name: arr[0].equipment_name,
+                            name: `${arr[0].equipment_name} - ${sg}`,
                             data: data,
                             id: arr[0].equipment_id,
                         };
@@ -1516,37 +1523,6 @@ const ExploreByEquipment = () => {
 
         })
     }
-
-        const fetchExploreChartData = async (id) => {
-            setChartLoading(true);
-            try {
-                // setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy&equipment_id=${id}&tz_info=${timeZone}&divisible_by=1000`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreEquipmentChart}${params}`,
-                        {
-                            date_from: startDate,
-                            date_to: endDate,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let responseData = res.data;
-                        let data = responseData.data;
-                        setChartLoading(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-            }
-        };
-            
 
     },[selectedAllEquipmentId])
    
@@ -2037,6 +2013,7 @@ const ExploreByEquipment = () => {
                                 onChange={setSelectedOptions}
                                 labelledBy="Columns"
                                 className="column-filter-styling"
+                                disabled={isExploreDataLoading}
                                 valueRenderer={() => {
                                     return (
                                         <>
@@ -2538,10 +2515,10 @@ const ExploreByEquipment = () => {
                     </div>
                 </Col>
                 <Col lg={1} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
+                    {/* <button className="btn btn-white d-inline btnHover font-weight-bold mr-2">
                         {' '}
                         <FontAwesomeIcon icon={faTableColumns} size="md" />
-                    </button>
+                    </button> */}
                     <CSVLink
                         style={{ color: 'black' }}
                         className="btn btn-white d-inline btnHover font-weight-bold"
