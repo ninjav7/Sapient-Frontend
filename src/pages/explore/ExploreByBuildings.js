@@ -438,7 +438,7 @@ const ExploreByBuildings = () => {
                         <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
                             3
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
+                        <div class="line-chart-widget-tooltip-time-period">${moment.utc(timestamp).format(
                             `MMM D 'YY @ HH:mm A`
                         )}</div>
                     </div>`;
@@ -448,7 +448,7 @@ const ExploreByBuildings = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM - HH:mm');
+                    return moment.utc(timestamp).format('DD/MM - HH:mm');
                 },
             },
         },
@@ -500,7 +500,7 @@ const ExploreByBuildings = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM - HH:mm');
+                    return moment.utc(timestamp).format('DD/MM - HH:mm');
                 },
             },
         },

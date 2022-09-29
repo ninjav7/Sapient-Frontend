@@ -633,6 +633,7 @@ const ExploreByEquipment = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                console.log(w)
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
@@ -643,7 +644,7 @@ const ExploreByEquipment = () => {
                         3
                     )} kWh </div>`
                 }
-                ch=ch+`<div class="line-chart-widget-tooltip-time-period">${moment(seriesX[0][dataPointIndex])
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period">${moment.utc(seriesX[0][dataPointIndex])
                     .format(`MMM D 'YY @ HH:mm A`)}</div>`
 
                 return `<div class="line-chart-widget-tooltip">
@@ -656,7 +657,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM HH:00');
+                    return moment.utc(timestamp).format('DD/MM HH:00');
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
@@ -712,7 +713,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MM');
+                    return moment.utc(timestamp).format('DD/MM');
                 },
             },
         },
