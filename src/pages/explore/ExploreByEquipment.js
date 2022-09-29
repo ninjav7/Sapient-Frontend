@@ -1548,7 +1548,7 @@ const ExploreByEquipment = () => {
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?consumption=energy&equipment_id=${id}`;
+            let params = `?consumption=energy&equipment_id=${id}&divisible_by=1000`;
             await axios
                 .post(
                     `${BaseUrl}${getExploreEquipmentChart}${params}`,
