@@ -1,0 +1,40 @@
+@import '../../assets/scss/colors';
+
+.tabs {
+  &-wrapper {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    
+    &.no-radius-left {
+      .tab-content {
+        border-top-left-radius: 0;
+      }
+    }
+    
+    .nav-tabs .nav-link {
+      margin-bottom: -2px;
+      padding: 0.8rem 1rem 1.3rem 1rem;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+
+      &.active {
+        border-color: $primary-gray-200;
+        border-bottom: 0;
+      }
+      
+      &:hover:not(.active) {
+        border-color: transparent;
+      }
+    }
+
+    .tab-content {
+      border: 1px solid $primary-gray-200;
+      border-radius: 8px;
+    }
+
+    .nav-tabs {
+      border: 0;
+    }
+  }
+}
+

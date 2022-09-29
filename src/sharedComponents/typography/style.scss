@@ -1,8 +1,13 @@
 @import '../../assets/scss/colors';
 @import '../../assets/scss/custom/fonts/_fonts.scss';
 
+$text-colors: (
+    'gray-550': $primary-gray-550,
+);
+
 .typography-wrapper {
     font-family: $main-font;
+
     &.header {
         &.xs {
             font-weight: 500;
@@ -12,6 +17,7 @@
         }
 
         &.md {
+            font-family: $second-font;
             font-weight: 700;
             font-size: 1.25rem;
             line-height: 1.75rem;
@@ -19,9 +25,16 @@
         }
 
         &.lg {
+            font-family: $second-font;
             font-weight: 700;
             font-size: 1.5rem;
             line-height: 2rem;
+            color: $primary-gray-800;
+        }
+        &.sm {
+            font-weight: 500;
+            font-size: 1.125rem;
+            line-height: 1.625rem;
             color: $primary-gray-800;
         }
     }
@@ -107,5 +120,11 @@
     }
     &.Bold {
         font-weight: 700 !important;
+    }
+
+    @each $color, $value in $text-colors {
+        &.#{$color} {
+            color: $value !important;
+        }
     }
 }

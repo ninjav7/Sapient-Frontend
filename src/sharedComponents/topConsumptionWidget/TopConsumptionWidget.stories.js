@@ -15,7 +15,9 @@ export const Default = () => {
         <BrowserRouter>
             <TopConsumptionWidget
                 title="Title"
+                subtitle="subtitle"
                 heads={['Equipment', 'Power', 'Change']}
+                handleClick={alert}
                 rows={[
                     {
                         link: '#',
