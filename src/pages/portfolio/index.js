@@ -604,7 +604,6 @@ const PortfolioOverview = () => {
         const start = moment(startDate);
         const end = moment(endDate);
         const days = end.diff(start, 'days');
-        // console.log('SSR days :>> ', days + 1);
         setStartEndDayCount(days + 1);
     });
 
