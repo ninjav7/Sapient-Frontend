@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // import DatePicker from 'react-datepicker';
-import { Row, Col, Card, CardBody, Table} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler } from '../../utils/helper';
@@ -42,15 +42,17 @@ const ExploreBuildingsTable = ({
 }) => {
     const history = useHistory();
 
-    const redirectToExploreEquipPage = (bldId, bldName) => {
-        history.push({
-            pathname: `/explore-page/by-equipment/${bldId}`,
-        });
+    const redirectToExploreEquipPage = (bldId, bldName, bldTimeZone) => {
         localStorage.setItem('exploreBldId', bldId);
         localStorage.setItem('exploreBldName', bldName);
+        localStorage.setItem('exploreBldTimeZone', bldTimeZone);
         ExploreBuildingStore.update((s) => {
             s.exploreBldId = bldId;
             s.exploreBldName = bldName;
+            s.exploreBldTimeZone = bldTimeZone;
+        });
+        history.push({
+            pathname: `/explore-page/by-equipment/${bldId}`,
         });
     };
 
@@ -160,7 +162,8 @@ const ExploreBuildingsTable = ({
                                                                 onClick={() => {
                                                                     redirectToExploreEquipPage(
                                                                         record?.building_id,
-                                                                        record?.building_name
+                                                                        record?.building_name,
+                                                                        record?.timezone
                                                                     );
                                                                 }}>
                                                                 {record?.building_name}
@@ -432,11 +435,11 @@ const ExploreByBuildings = () => {
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${(
-                            series[seriesIndex][dataPointIndex]
-                        ).toFixed(3)} kWh</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            3
+                        )} kWh</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ HH:mm`
+                            `MMM D 'YY @ HH:mm A`
                         )}</div>
                     </div>`;
             },
@@ -452,7 +455,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return (value).toFixed(3);
+                    return value.toFixed(3);
                 },
             },
         },
@@ -504,7 +507,7 @@ const ExploreByBuildings = () => {
         yaxis: {
             labels: {
                 formatter: function (value) {
-                    return value ;
+                    return value;
                 },
             },
             tickAmount: 2,
@@ -582,8 +585,9 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -620,7 +624,7 @@ const ExploreByBuildings = () => {
             await axios.post(`${BaseUrl}${getExploreBuildingList}${params}`, bodyVal, { headers }).then((res) => {
                 let responseData = res.data;
                 setSeriesData([]);
-                        setSeriesLineData([]);
+                setSeriesLineData([]);
                 setExploreTableData(responseData);
                 setTopEnergyConsumption(responseData[0].consumption.now);
                 setIsExploreDataLoading(false);
@@ -648,10 +652,11 @@ const ExploreByBuildings = () => {
                 let params = `?consumption=energy&building_id=${selectedBuildingId}`;
                 await axios
                     .post(
-                        `${BaseUrl}${getExploreBuildingChart}${params}&tz_info=${timeZone}&divisible_by=1000`,
+                        `${BaseUrl}${getExploreBuildingChart}${params}&divisible_by=1000`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -719,8 +724,9 @@ const ExploreByBuildings = () => {
                 .post(
                     `${BaseUrl}${getExploreBuildingChart}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -775,7 +781,7 @@ const ExploreByBuildings = () => {
     }, [allBuildingData]);
 
     useEffect(() => {
-        if(selectedBuildingOptions.length===0){
+        if (selectedBuildingOptions.length === 0) {
             setBuildingTypeTxt('');
         }
         if (
@@ -801,11 +807,10 @@ const ExploreByBuildings = () => {
             };
         }
         if (selectedBuildingOptions.length !== 0) {
-            if(selectedBuildingOptions.length===1){
-                setBuildingTypeTxt(`${selectedBuildingOptions[0]}`)
-            }
-            else{
-                setBuildingTypeTxt(`${selectedBuildingOptions.length} Building Types`)
+            if (selectedBuildingOptions.length === 1) {
+                setBuildingTypeTxt(`${selectedBuildingOptions[0]}`);
+            } else {
+                setBuildingTypeTxt(`${selectedBuildingOptions.length} Building Types`);
             }
             arr['building_type'] = selectedBuildingOptions;
         }
@@ -841,8 +846,9 @@ const ExploreByBuildings = () => {
 
     const clearFilterData = () => {
         let arr = {
-            date_from: startDate,
-            date_to: endDate,
+            date_from: startDate.toLocaleDateString(),
+            date_to: endDate.toLocaleDateString(),
+            tz_info: timeZone,
         };
         exploreFilterDataFetch(arr);
     };
@@ -910,8 +916,9 @@ const ExploreByBuildings = () => {
                     .post(
                         `${BaseUrl}${getExploreBuildingList}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
