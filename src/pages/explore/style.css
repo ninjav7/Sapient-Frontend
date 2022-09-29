@@ -1,7 +1,12 @@
 .explorer-select-style {
     width: 10vw !important;
 }
-
+.tooltipclass{
+    margin-top:5px;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+}
 .explore-page-filter {
     display: flex !important;
     flex-direction: row !important;
