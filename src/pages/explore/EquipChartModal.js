@@ -825,9 +825,7 @@ const EquipChartModal = ({
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">
-                                        {equipmentData?.location} {'>'} {equipmentData?.equipments_type}
-                                    </h6>
+                                    <h6 className="text-muted">{equipmentData?.location}</h6>
                                 </Col>
                             </Row>
                             <Row>
