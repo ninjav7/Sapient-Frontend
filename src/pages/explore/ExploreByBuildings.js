@@ -29,6 +29,7 @@ import 'moment-timezone';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
+import { xaxisFilters } from '../../helpers/helpers';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -42,7 +43,6 @@ const ExploreBuildingsTable = ({
     setBuildingListArray,
     selectedOptions,
 }) => {
-
     const [buildingIdSelection, setBuildingIdSelection] = useAtom(selectedBuilding);
     const [totalBuildingId, setTotalBuildingId] = useAtom(totalSelectionBuildingId);
     const history = useHistory();
@@ -168,19 +168,19 @@ const ExploreBuildingsTable = ({
                                                                 onClick={(e) => {
                                                                     handleSelection(e, record?.building_id);
                                                                     setBuildingIdSelection(record?.building_id);
-                                                                if (e.target.checked) {
-                                                                    setTotalBuildingId((el) => [
-                                                                        ...el,
-                                                                        record?.building_id,
-                                                                    ]);
-                                                                }
-                                                                if (!e.target.checked) {
-                                                                    setTotalBuildingId((el) =>
-                                                                        el.filter((item) => {
-                                                                            return item !== record?.building_id;
-                                                                        })
-                                                                    );
-                                                                }
+                                                                    if (e.target.checked) {
+                                                                        setTotalBuildingId((el) => [
+                                                                            ...el,
+                                                                            record?.building_id,
+                                                                        ]);
+                                                                    }
+                                                                    if (!e.target.checked) {
+                                                                        setTotalBuildingId((el) =>
+                                                                            el.filter((item) => {
+                                                                                return item !== record?.building_id;
+                                                                            })
+                                                                        );
+                                                                    }
                                                                 }}
                                                             />
                                                             <a
@@ -345,12 +345,12 @@ const ExploreByBuildings = () => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
 
-    
     const [buildingIdSelection] = useAtom(selectedBuilding);
     const [totalBuildingId] = useAtom(totalSelectionBuildingId);
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [exploreTableData, setExploreTableData] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
@@ -463,15 +463,18 @@ const ExploreByBuildings = () => {
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch=''
-                for(let i=0;i<series.length;i++){
-                    ch= ch+`<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
-                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(
-                        3
-                    )} kWh </div>`
+                let ch = '';
+                for (let i = 0; i < series.length; i++) {
+                    ch =
+                        ch +
+                        `<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
+                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(3)} kWh </div>`;
                 }
-                ch=ch+`<div class="line-chart-widget-tooltip-time-period">${moment.utc(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ HH:mm A`)}</div>`
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period">${moment
+                        .utc(seriesX[0][dataPointIndex])
+                        .format(`MMM D 'YY @ HH:mm A`)}</div>`;
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
@@ -499,6 +502,7 @@ const ExploreByBuildings = () => {
     });
 
     const [seriesLineData, setSeriesLineData] = useState([]);
+
     const [optionsLineData, setOptionsLineData] = useState({
         chart: {
             id: 'chart1',
@@ -564,14 +568,13 @@ const ExploreByBuildings = () => {
     const [buildingTypeTxt, setBuildingTypeTxt] = useState('');
     const [consumptionTxt, setConsumptionTxt] = useState('');
     const [sq_ftTxt, setSq_FtTxt] = useState('');
-    const [selectedAllBuildingId,setSelectedAllBuildingId] =useState([]);
-
+    const [selectedAllBuildingId, setSelectedAllBuildingId] = useState([]);
 
     useEffect(() => {
         if (buildingIdSelection && totalBuildingId?.length >= 1) {
-            let arr=[];
-            for(let i=0;i<totalBuildingId?.length;i++){
-                arr.push(totalBuildingId[i])
+            let arr = [];
+            for (let i = 0; i < totalBuildingId?.length; i++) {
+                arr.push(totalBuildingId[i]);
             }
             setSelectedAllBuildingId(arr);
         } else {
@@ -613,6 +616,43 @@ const ExploreByBuildings = () => {
         // setSelectedOptions(arr);
     }, []);
 
+    const exploreDataFetch = async () => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingList}${params}`,
+                    {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    // console.log(responseData[0]);
+                    setSeriesData([]);
+                    setSeriesLineData([]);
+                    setExploreTableData(responseData);
+                    // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
+                    setTopEnergyConsumption(responseData[0].consumption.now);
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                    setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -623,43 +663,7 @@ const ExploreByBuildings = () => {
         let result = [];
         setSeriesData([]);
         setSeriesLineData([]);
-        const exploreDataFetch = async () => {
-            try {
-                setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let responseData = res.data;
-                        // console.log(responseData[0]);
-                        setSeriesData([]);
-                        setSeriesLineData([]);
-                        setExploreTableData(responseData);
-                        // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
-                        setTopEnergyConsumption(responseData[0].consumption.now);
-                        set_minConValue(0.0);
-                        set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
-                        setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                setIsExploreDataLoading(false);
-            }
-        };
+        
         exploreDataFetch();
     }, [startDate, endDate]);
 
@@ -745,22 +749,17 @@ const ExploreByBuildings = () => {
         };
 
         fetchExploreChartData();
-    }, [selectedBuildingId,buildingIdSelection]);
+    }, [selectedBuildingId, buildingIdSelection]);
 
-
-    useEffect(()=>{
-        if(selectedAllBuildingId.length===1){
+    useEffect(() => {
+        if (selectedAllBuildingId.length === 1) {
             const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllBuildingId[0]), 100000);
+        } else {
+            selectedAllBuildingId.map((ele) => {
+                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+            });
         }
-        else{
-        selectedAllBuildingId.map(ele=>{
-            const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
-
-        })
-    }
-
-    },[selectedAllBuildingId])
-
+    }, [selectedAllBuildingId]);
 
     useEffect(() => {
         if (removeBuildingId === '') {
@@ -817,7 +816,7 @@ const ExploreByBuildings = () => {
                     // console.log(recordToInsert);
                     dataarr.push(recordToInsert);
                     // console.log(dataarr);
-                    if(totalBuildingId.length===dataarr.length){
+                    if (totalBuildingId.length === dataarr.length) {
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
@@ -886,6 +885,12 @@ const ExploreByBuildings = () => {
         }
         exploreFilterDataFetch(arr);
     }, [APIFlag, Sq_FtFlag, selectedBuildingOptions]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount);
+        setOptionsData({ ...optionsData, xaxis: xaxisObj });
+        setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
+    }, [daysCount]);
 
     const handleCloseFilter = (e, val) => {
         let arr = [];
@@ -1037,22 +1042,24 @@ const ExploreByBuildings = () => {
 
     const getCSVLinkChartData = () => {
         let arr = [];
-        let aname='';
+        let aname = '';
         seriesData.map(function (obj) {
-            let abc=[]
-            obj.data.map(ele=>{
-                abc.push([moment
-                    .utc(ele[0])
-                    .format(`MMM D 'YY @ HH:mm A`), ele[1]])
-            })
-            arr=abc;
-            aname=obj.name;
+            let abc = [];
+            obj.data.map((ele) => {
+                abc.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`), ele[1]]);
+            });
+            arr = abc;
+            aname = obj.name;
         });
         let streamData = seriesData.length > 0 ? arr : [];
 
-    return [['timestamp', `${aname} energy`], ...streamData];
+        return [['timestamp', `${aname} energy`], ...streamData];
     };
 
+    useEffect(()=>{
+        if(buildingSearchTxt==="")
+            exploreDataFetch();
+    },[buildingSearchTxt])
     return (
         <>
             <Row className="ml-2 mt-2 explore-filters-style">

@@ -81,12 +81,21 @@ const ModalHeader = (props) => {
             let startCustomDate = dates[0];
             let endCustomDate = dates[1];
 
+            let end = new Date(endDate);
+            let start = new Date(startDate);
+
+            let time_difference = end.getTime() - start.getTime();
+            let days_difference = time_difference / (1000 * 60 * 60 * 24);
+            days_difference = parseInt(days_difference + 1);
+
             localStorage.setItem('startDate', startCustomDate);
             localStorage.setItem('endDate', endCustomDate);
+            localStorage.setItem('daysCount', days_difference);
 
             DateRangeStore.update((s) => {
                 s.startDate = startCustomDate;
                 s.endDate = endCustomDate;
+                s.daysCount = days_difference;
             });
         };
         setCustomDate([startDate, endDate]);
