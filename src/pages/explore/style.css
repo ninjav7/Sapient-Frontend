@@ -2,10 +2,11 @@
     width: 10vw !important;
 }
 .tooltipclass{
-    margin-top:5px;
-    width:10px;
-    height:10px;
-    border-radius:50%;
+    height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  display: inline-block;
+
 }
 .explore-page-filter {
     display: flex !important;

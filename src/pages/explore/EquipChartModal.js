@@ -474,7 +474,7 @@ const EquipChartModal = ({
         }
     };
     const handleChange = (key, value) => {
-        // let obj = Object.assign({}, updateEqipmentData);
+         let obj = Object.assign({}, updateEqipmentData);
         // if (key === 'equipment_type') {
         //     const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
         //     // console.log(result1.end_use_name);
@@ -486,9 +486,9 @@ const EquipChartModal = ({
         //     }
         //     obj['end_use'] = eq_id.end_user_id;
         // }
-        // obj[key] = value;
+         obj[key] = value;
         // // console.log(obj);
-        // setUpdateEqipmentData(obj);
+        setUpdateEqipmentData(obj);
     };
     const handleSave = () => {
         try {
@@ -499,15 +499,24 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipData?.equipments_id}`;
+            let params = `?equipment_id=${equipmentData?.equipments_id}`;
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
+                    let arr = {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    };
                     // console.log(res.data);
-                    fetchEquipmentData();
-                    handleChartClose();
+                    setSelectedTab(0);
+                    setEquipResult([]);
+                    setEquipmentData({});
+                    handleChartClose();           
+                    fetchEquipmentData(arr);
+
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
@@ -750,14 +759,15 @@ const EquipChartModal = ({
     }, [equipmentFilter]);
 
     useEffect(() => {
-        if (equipmentTypeData.lenght === 0) {
+        console.log(equipmentTypeData)
+        if (equipmentTypeData.lenght === 0 || Object.keys(equipmentData).length===0) {
             return;
         }
         let res = [];
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
         console.log(res);
         setEquipResult(res);
-    }, [equipmentTypeData]);
+    }, [equipmentTypeData,equipmentData]);
 
     useEffect(() => {
         if (equipmentData.length === 0) {
@@ -847,6 +857,7 @@ const EquipChartModal = ({
                                                     setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
+                                                    setEquipmentData({});
                                                 }}>
                                                 Cancel
                                             </button>
@@ -856,9 +867,8 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    setSelectedTab(0);
-                                                    handleChartClose();
-                                                    setEquipResult([]);
+                                                    
+                                                    handleSave();
                                                 }}>
                                                 Save
                                             </button>
@@ -895,6 +905,7 @@ const EquipChartModal = ({
                                                     setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
+                                                    setEquipmentData({});
                                                 }}>
                                                 Cancel
                                             </button>
@@ -904,9 +915,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    setSelectedTab(0);
-                                                    handleChartClose();
-                                                    setEquipResult([]);
+                                                    handleSave();    
                                                 }}>
                                                 Save
                                             </button>
@@ -1390,7 +1399,7 @@ const EquipChartModal = ({
                                                     id="exampleText"
                                                     rows="3"
                                                     placeholder="Enter a Note..."
-                                                    defaultValue={equipmentData !== null ? equipmentData?.note : ''}
+                                                    value={equipmentData !== null ? equipmentData?.note : ''}
                                                     onChange={(e) => {
                                                         handleChange('note', e.target.value);
                                                     }}

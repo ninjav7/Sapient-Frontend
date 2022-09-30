@@ -613,6 +613,43 @@ const ExploreByBuildings = () => {
         // setSelectedOptions(arr);
     }, []);
 
+    const exploreDataFetch = async () => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let params = `?consumption=energy`;
+            await axios
+                .post(
+                    `${BaseUrl}${getExploreBuildingList}${params}`,
+                    {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    },
+                    { headers }
+                )
+                .then((res) => {
+                    let responseData = res.data;
+                    // console.log(responseData[0]);
+                    setSeriesData([]);
+                    setSeriesLineData([]);
+                    setExploreTableData(responseData);
+                    // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
+                    setTopEnergyConsumption(responseData[0].consumption.now);
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
+                    setIsExploreDataLoading(false);
+                });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -623,43 +660,7 @@ const ExploreByBuildings = () => {
         let result = [];
         setSeriesData([]);
         setSeriesLineData([]);
-        const exploreDataFetch = async () => {
-            try {
-                setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?consumption=energy`;
-                await axios
-                    .post(
-                        `${BaseUrl}${getExploreBuildingList}${params}`,
-                        {
-                            date_from: startDate.toLocaleDateString(),
-                            date_to: endDate.toLocaleDateString(),
-                            tz_info: timeZone,
-                        },
-                        { headers }
-                    )
-                    .then((res) => {
-                        let responseData = res.data;
-                        // console.log(responseData[0]);
-                        setSeriesData([]);
-                        setSeriesLineData([]);
-                        setExploreTableData(responseData);
-                        // console.log('Consumption ', (responseData[0].consumption.now / 1000).toFixed(3));
-                        setTopEnergyConsumption(responseData[0].consumption.now);
-                        set_minConValue(0.0);
-                        set_maxConValue((responseData[0].consumption.now / 1000).toFixed(3));
-                        setIsExploreDataLoading(false);
-                    });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                setIsExploreDataLoading(false);
-            }
-        };
+        
         exploreDataFetch();
     }, [startDate, endDate]);
 
@@ -1053,6 +1054,10 @@ const ExploreByBuildings = () => {
     return [['timestamp', `${aname} energy`], ...streamData];
     };
 
+    useEffect(()=>{
+        if(buildingSearchTxt==="")
+            exploreDataFetch();
+    },[buildingSearchTxt])
     return (
         <>
             <Row className="ml-2 mt-2 explore-filters-style">

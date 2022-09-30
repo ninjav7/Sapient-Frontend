@@ -608,7 +608,7 @@ const ExploreByEquipment = () => {
         tooltip: {
             //@TODO NEED?
             // enabled: false,
-            shared: true,
+            shared: false,
             intersect: false,
             style: {
                 fontSize: '12px',
@@ -644,7 +644,7 @@ const ExploreByEquipment = () => {
                 ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
                     .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
                 for(let i=0;i<series.length;i++){
-                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};">.</span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
                         3
                     )} kWh </td></tr>`
                 }
@@ -1135,6 +1135,41 @@ const ExploreByEquipment = () => {
     }, [removeDuplicateFlag]);
 
     // const bldgId = BuildingStore.useState((s) => s.BldgId);
+    const exploreDataFetch = async (bodyVal) => {
+        try {
+            setIsExploreDataLoading(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+
+            let params = `?consumption=energy&building_id=${bldgId}`;
+
+            await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
+                let responseData = res.data;
+                setPaginationData(res.data);
+                if (responseData.data.length !== 0) {
+                    setTopEnergyConsumption(responseData.data[0].consumption.now);
+                    setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
+                    set_minConValue(0.0);
+                    set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
+                }
+                setExploreTableData(responseData.data);
+                setRemoveDuplicateFlag(!removeDuplicateFlag);
+                setIsExploreDataLoading(false);
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Explore Data');
+            setIsExploreDataLoading(false);
+        }
+    };
+    let arr = {
+        date_from: startDate.toLocaleDateString(),
+        date_to: endDate.toLocaleDateString(),
+        tz_info: timeZone,
+    };
 
     useEffect(() => {
         if (startDate === null) {
@@ -1209,41 +1244,7 @@ const ExploreByEquipment = () => {
             }
         };
 
-        const exploreDataFetch = async (bodyVal) => {
-            try {
-                setIsExploreDataLoading(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-
-                let params = `?consumption=energy&building_id=${bldgId}`;
-
-                await axios.post(`${BaseUrl}${getExploreEquipmentList}${params}`, bodyVal, { headers }).then((res) => {
-                    let responseData = res.data;
-                    setPaginationData(res.data);
-                    if (responseData.data.length !== 0) {
-                        setTopEnergyConsumption(responseData.data[0].consumption.now);
-                        setTopPeakConsumption((responseData.data[0].peak_power.now / 100000).toFixed(2));
-                        set_minConValue(0.0);
-                        set_maxConValue((responseData.data[0].consumption.now / 1000).toFixed(2));
-                    }
-                    setExploreTableData(responseData.data);
-                    setRemoveDuplicateFlag(!removeDuplicateFlag);
-                    setIsExploreDataLoading(false);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Explore Data');
-                setIsExploreDataLoading(false);
-            }
-        };
-        let arr = {
-            date_from: startDate.toLocaleDateString(),
-            date_to: endDate.toLocaleDateString(),
-            tz_info: timeZone,
-        };
+        
         exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
@@ -1463,11 +1464,17 @@ const ExploreByEquipment = () => {
                         });
                         let exploreData = [];
                         let sg=""
+                        let legendName=""
                         sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
-
-
+                        if(sg===""){
+                            legendName=arr[0].equipment_name;
+                        }
+                        else{
+                            legendName=arr[0].equipment_name+" - "+sg;
+                        }
+    
                         let recordToInsert = {
-                            name: `${arr[0].equipment_name} - ${sg}`,
+                            name: legendName,
                             data: data,
                             id: arr[0].equipment_id,
                         };
@@ -1567,8 +1574,18 @@ const ExploreByEquipment = () => {
                         return item.equipment_id === id;
                     });
                     let exploreData = [];
+                    let sg=""
+                    let legendName=""
+                    sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
+                    if(sg===""){
+                        legendName=arr[0].equipment_name;
+                    }
+                    else{
+                        legendName=arr[0].equipment_name+" - "+sg;
+                    }
+
                     let recordToInsert = {
-                        name: arr[0].equipment_name,
+                        name: legendName,
                         data: data,
                         id: arr[0].equipment_id,
                     };
@@ -1944,6 +1961,10 @@ const ExploreByEquipment = () => {
         setRemoveLocationDuplication(uniqueLocation);
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
+    useEffect(()=>{
+        if(equipmentSearchTxt==="")
+            exploreDataFetch(arr);
+    },[equipmentSearchTxt])
 
     return (
         <>
@@ -1994,6 +2015,7 @@ const ExploreByEquipment = () => {
                                 type="search"
                                 name="search"
                                 placeholder="Search..."
+                                onCommit={()=>{exploreDataFetch(arr)}}
                                 onChange={(e) => {
                                     setEquipmentSearchTxt(e.target.value);
                                 }}
@@ -2562,6 +2584,7 @@ const ExploreByEquipment = () => {
                 handleChartOpen={handleChartOpen}
                 handleChartClose={handleChartClose}
                 equipmentFilter={equipmentFilter}
+                fetchEquipmentData={exploreDataFetch}
             />
         </>
     );
