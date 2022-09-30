@@ -58,6 +58,7 @@ import { result } from 'lodash';
 import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { xaxisFilters } from '../../helpers/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -78,6 +79,7 @@ const EquipChartModal = ({
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -122,6 +124,12 @@ const EquipChartModal = ({
             ]);
         });
     };
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount);
+        setOptions({ ...options, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+    }, [daysCount]);
 
     useEffect(() => {
         if (equipmentTypeData) {
@@ -308,7 +316,7 @@ const EquipChartModal = ({
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
@@ -348,8 +356,8 @@ const EquipChartModal = ({
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${
                             w.config.series[0].unit === 'kWh'
-                                ? series[seriesIndex][dataPointIndex].toFixed(3)
-                                : series[seriesIndex][dataPointIndex].toFixed(3)
+                                ? series[seriesIndex][dataPointIndex].toFixed(0)
+                                : series[seriesIndex][dataPointIndex].toFixed(0)
                         } 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
@@ -430,7 +438,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
@@ -564,7 +572,13 @@ const EquipChartModal = ({
                 )
                 .then((res) => {
                     let response = res.data;
-                    let data = response.data;
+
+                    let data = response.data.map((_data) => {
+                        _data[1] = parseInt(_data[1]);
+                        return _data;
+                    });
+
+                    data.forEach((record) => {});
                     let exploreData = [];
                     let recordToInsert = {
                         data: data,
@@ -827,9 +841,7 @@ const EquipChartModal = ({
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">
-                                        {equipmentData?.location} {'>'} {equipmentData?.equipments_type}
-                                    </h6>
+                                    <h6 className="text-muted">{equipmentData?.location}</h6>
                                 </Col>
                             </Row>
                             <Row>
@@ -884,9 +896,7 @@ const EquipChartModal = ({
                         <>
                             <Row>
                                 <Col lg={12}>
-                                    <h6 className="text-muted">
-                                        {equipmentData?.location} {'>'} {equipmentData?.equipments_type}
-                                    </h6>
+                                    <h6 className="text-muted">{equipmentData?.location}</h6>
                                 </Col>
                             </Row>
                             <Row>

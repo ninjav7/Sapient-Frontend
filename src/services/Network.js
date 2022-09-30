@@ -1,5 +1,5 @@
 export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
-//export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
+// export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
 // export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
 // export const BaseUrl = 'https://sapient-prod-stage.azurewebsites.net';
 

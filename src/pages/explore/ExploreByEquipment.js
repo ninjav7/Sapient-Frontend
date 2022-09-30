@@ -4,6 +4,7 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
+import { xaxisFilters } from '../../helpers/helpers';
 import {
     BaseUrl,
     getExploreEquipmentList,
@@ -536,6 +537,7 @@ const ExploreByEquipment = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
     const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
 
     const [isExploreChartDataLoading, setIsExploreChartDataLoading] = useState(false);
@@ -634,9 +636,8 @@ const ExploreByEquipment = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                
-                const {colors} = w.globals;
-                console.log(colors)
+                const { colors } = w.globals;
+                console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
@@ -648,7 +649,6 @@ const ExploreByEquipment = () => {
                         3
                     )} kWh </td></tr>`
                 }
-               
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
@@ -767,14 +767,20 @@ const ExploreByEquipment = () => {
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
     const [removeDuplicateTxt, setRemoveDuplicateTxt] = useState('');
-    const [selectedAllEquipmentId,setSelectedAllEquipmentId] =useState([]);
-    const [objectExplore,setObjectExplore]=useState([]);
+    const [selectedAllEquipmentId, setSelectedAllEquipmentId] = useState([]);
+    const [objectExplore, setObjectExplore] = useState([]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount);
+        setOptionsData({ ...optionsData, xaxis: xaxisObj });
+        setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
+    }, [daysCount]);
 
     useEffect(() => {
         if (equpimentIdSelection && totalEquipmentId?.length >= 1) {
-            let arr=[];
-            for(let i=0;i<totalEquipmentId?.length;i++){
-                arr.push(totalEquipmentId[i])
+            let arr = [];
+            for (let i = 0; i < totalEquipmentId?.length; i++) {
+                arr.push(totalEquipmentId[i]);
             }
             setSelectedAllEquipmentId(arr);
         } else {
@@ -1478,31 +1484,30 @@ const ExploreByEquipment = () => {
                             data: data,
                             id: arr[0].equipment_id,
                         };
-                        let coll=[];
-                        let sname=arr[0].equipment_name;
-                        data.map((el)=>{
-                            let ab={}
-                            ab["timestamp"]=el[0];
-                            ab[sname]=el[1]
-                            coll.push(ab)
-                        })
-                        if(objectExplore.length===0){
+                        let coll = [];
+                        let sname = arr[0].equipment_name;
+                        data.map((el) => {
+                            let ab = {};
+                            ab['timestamp'] = el[0];
+                            ab[sname] = el[1];
+                            coll.push(ab);
+                        });
+                        if (objectExplore.length === 0) {
                             setObjectExplore(coll);
-                        }
-                        else{
+                        } else {
                             var s = new Set();
-                                var result = [];
-                                objectExplore.forEach(function(e) {
-                                    result.push(Object.assign({}, e));
-                                    s.add(e.timestamp);
-                                });
-                                coll.forEach(function(e) {
-                                    if (!s.has(e.timestamp)) {
+                            var result = [];
+                            objectExplore.forEach(function (e) {
+                                result.push(Object.assign({}, e));
+                                s.add(e.timestamp);
+                            });
+                            coll.forEach(function (e) {
+                                if (!s.has(e.timestamp)) {
                                     var temp = Object.assign({}, e);
                                     temp[sname] = null;
                                     result.push(temp);
-                                    }
-                                });
+                                }
+                            });
                         }
 
                         setSeriesData([...seriesData, recordToInsert]);
@@ -1520,19 +1525,15 @@ const ExploreByEquipment = () => {
         fetchExploreChartData();
     }, [selectedEquipmentId, equpimentIdSelection]);
 
-    useEffect(()=>{
-        if(selectedAllEquipmentId.length===1){
+    useEffect(() => {
+        if (selectedAllEquipmentId.length === 1) {
             const myTimeout = setTimeout(fetchExploreAllChartData(selectedAllEquipmentId[0]), 100000);
+        } else {
+            selectedAllEquipmentId.map((ele) => {
+                const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
+            });
         }
-        else{
-        selectedAllEquipmentId.map(ele=>{
-            const myTimeout = setTimeout(fetchExploreAllChartData(ele), 100000);
-
-        })
-    }
-
-    },[selectedAllEquipmentId])
-   
+    }, [selectedAllEquipmentId]);
 
     useEffect(() => {
         if (removeEquipmentId === '') {
@@ -1590,7 +1591,7 @@ const ExploreByEquipment = () => {
                         id: arr[0].equipment_id,
                     };
                     dataarr.push(recordToInsert);
-                    if(totalEquipmentId.length===dataarr.length){
+                    if (totalEquipmentId.length === dataarr.length) {
                         setSeriesData(dataarr);
                         setSeriesLineData(dataarr);
                     }
@@ -1820,7 +1821,6 @@ const ExploreByEquipment = () => {
     };
 
     const handleEquipmentSearch = (e) => {
-
         const exploreDataFetch = async () => {
             try {
                 setIsExploreDataLoading(true);
@@ -1893,24 +1893,21 @@ const ExploreByEquipment = () => {
 
     const getCSVLinkChartData = () => {
         let arr = [];
-        let aname='';
+        let aname = '';
         seriesData.map(function (obj) {
-            let abc=[]
-            obj.data.map(ele=>{
-                abc.push([moment
-                    .utc(ele[0])
-                    .format(`MMM D 'YY @ HH:mm A`), ele[1]])
-            })
-            arr=abc;
-            aname=obj.name;
+            let abc = [];
+            obj.data.map((ele) => {
+                abc.push([moment.utc(ele[0]).format(`MMM D 'YY @ HH:mm A`), ele[1]]);
+            });
+            arr = abc;
+            aname = obj.name;
         });
         let streamData = seriesData.length > 0 ? arr : [];
 
-    return [['timestamp', `${aname} energy`], ...streamData];
+        return [['timestamp', `${aname} energy`], ...streamData];
     };
 
-    useEffect(() => {
-    }, [showDropdown]);
+    useEffect(() => {}, [showDropdown]);
 
     const removeDuplicatesEndUse = (txt, tabledata) => {
         uniqueIds.length = 0;
