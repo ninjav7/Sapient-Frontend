@@ -474,10 +474,9 @@ const PortfolioOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=day`;
                 await axios
                     .post(
-                        `${BaseUrl}${getEnergyConsumption}${params}`,
+                        `${BaseUrl}${getEnergyConsumption}`,
                         {
                             date_from: startDate.toLocaleDateString(),
                             date_to: endDate.toLocaleDateString(),
