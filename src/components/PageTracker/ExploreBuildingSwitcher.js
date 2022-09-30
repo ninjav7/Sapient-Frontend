@@ -31,23 +31,20 @@ const PortfolioItem = ({ exploreBldName, exploreBldId }) => {
                     </div>
                 </Dropdown.Item>
             ) : (
-                <Dropdown.Item>
+                <Dropdown.Item
+                    onClick={() => {
+                        localStorage.setItem('exploreBldId', 'portfolio');
+                        localStorage.setItem('exploreBldName', 'Portfolio');
+                        ExploreBuildingStore.update((s) => {
+                            s.exploreBldId = 'portfolio';
+                            s.exploreBldName = 'Portfolio';
+                        });
+                        history.push({
+                            pathname: `/explore-page/by-buildings`,
+                        });
+                    }}>
                     <FontAwesomeIcon icon={faBuildings} size="lg" className="mr-2" />
-                    <span
-                        className="portfolio-txt-style"
-                        onClick={() => {
-                            localStorage.setItem('exploreBldId', 'portfolio');
-                            localStorage.setItem('exploreBldName', 'Portfolio');
-                            ExploreBuildingStore.update((s) => {
-                                s.exploreBldId = 'portfolio';
-                                s.exploreBldName = 'Portfolio';
-                            });
-                            history.push({
-                                pathname: `/explore-page/by-buildings`,
-                            });
-                        }}>
-                        Portfolio
-                    </span>
+                    <span className="portfolio-txt-style">Portfolio</span>
                 </Dropdown.Item>
             )}
         </div>

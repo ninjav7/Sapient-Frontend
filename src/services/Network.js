@@ -1,7 +1,7 @@
 export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 //export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
-//export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
-//export const BaseUrl = 'https://sapient-prod-beta.azurewebsites.net/';
+// export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
+// export const BaseUrl = 'https://sapient-prod-stage.azurewebsites.net';
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -140,8 +140,8 @@ export const avgDailyUsageByHour = '/api/energy/time_of_day/chart';
 export const listSensor = '/api/config/sensor/list_sensor';
 
 // plug rules
-export const listPlugRules = '/api/user_role/plug_rule/list';
-export const createPlugRule = '/api/user_role/plug_rule/create';
+export const listPlugRules = '/api/user_role/plug_rule/all-plug-rules';
+export const createPlugRule = '/api/user_role/plug_rule/create-plug-rule';
 export const updatePlugRule = '/api/user_role/plug_rule/update';
 
 // Auth

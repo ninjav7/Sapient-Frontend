@@ -330,7 +330,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     </div>
                                 </th>
                             )}
-                            {selectedOptions.some((record) => record.value === 'load') && (
+                            {/* {selectedOptions.some((record) => record.value === 'load') && (
                                 <th className="table-heading-style">
                                     <button
                                         type="button"
@@ -345,7 +345,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         Monitored Load
                                     </button>
                                 </th>
-                            )}
+                            )} */}
                         </tr>
                     </thead>
                     {isBuildingDataFetched ? (
@@ -360,6 +360,17 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         <Skeleton count={5} />
                                     </td>
 
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
+
+                                    <td>
+                                        <Skeleton count={5} />
+                                    </td>
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
@@ -392,7 +403,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density / 1000).toFixed(0)} kWh / sq. ft.sq.
+                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq.
                                                 ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
@@ -735,13 +746,13 @@ const CompareBuildings = () => {
         let arr = [
             { label: 'Name', value: 'name' },
             { label: 'Energy Density', value: 'density' },
-            // { label: '% Change', value: 'per_change' },
-            // { label: 'HVAC Consumption', value: 'hvac' },
-            // { label: 'HVAC % change', value: 'hvac_per' },
+            //{ label: '% Change', value: 'per_change' },
+            //{ label: 'HVAC Consumption', value: 'hvac' },
+            //{ label: 'HVAC % change', value: 'hvac_per' },
             { label: 'Total Consumption', value: 'total' },
-            // { label: 'Total % change', value: 'total_per' },
+            { label: 'Total % change', value: 'total_per' },
             { label: 'Sq. ft.', value: 'sq_ft' },
-            { label: 'Monitored Load', value: 'load' },
+            // { label: 'Monitored Load', value: 'load' },
         ];
         setSelectedOptions(arr);
     }, []);
@@ -822,12 +833,10 @@ const CompareBuildings = () => {
                         </span>
                     </div>
                 </Col>
-                <Col xl={9}>
+                {/* <Col xl={9}>
                     <button type="button" className="btn btn-white d-inline ml-2">
                         <i className="uil uil-plus mr-1"></i>Add Filter
                     </button>
-
-                    {/* ---------------------------------------------------------------------- */}
                     <div className="float-right">
                         <MultiSelect
                             options={tableColumnOptions}
@@ -841,7 +850,7 @@ const CompareBuildings = () => {
                             ClearSelectedIcon={null}
                         />
                     </div>
-                </Col>
+                </Col> */}
             </Row>
             <Row>
                 <Col xl={12}>

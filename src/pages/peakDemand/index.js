@@ -23,7 +23,7 @@ import moment from 'moment';
 import 'moment-timezone';
 import './style.css';
 import '../../sharedComponents/lineChartWidget/style.scss';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 
 const TopBuildingPeaks = ({ peakData, setEquipTypeToFetch }) => {
     return (
@@ -275,7 +275,7 @@ const PeakDemand = () => {
 
     const [selectedTab, setSelectedTab] = useState(0);
 
-    const peakDemandTrendOptions = {
+    const [peakDemandTrendOptions, setpeakDemandTrendOptions] = useState({
         chart: {
             type: 'area',
             stacked: false,
@@ -371,7 +371,9 @@ const PeakDemand = () => {
                     </div>`;
             },
         },
-    };
+    });
+
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
 
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
@@ -390,13 +392,14 @@ const PeakDemand = () => {
                 setIsTopBuildingPeaksLoading(true);
                 setIsTopPeakCategoriesLoading(true);
                 setIsTopPeakContributersLoading(true);
-                let params = `?building_id=${bldgId}&consumption=power&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemand}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -416,13 +419,14 @@ const PeakDemand = () => {
         const peakDemandTrendFetch = async () => {
             try {
                 setIsPeakTrendChartLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}&consumption=power`;
+                let params = `?building_id=${bldgId}&consumption=power`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandTrendChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -453,13 +457,14 @@ const PeakDemand = () => {
         const peakDemandYearlyData = async () => {
             try {
                 setIsPeakContentLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${peakDemandYearlyPeak}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -495,6 +500,7 @@ const PeakDemand = () => {
                         {
                             date_from: filterDate,
                             date_to: filterDate,
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -524,6 +530,7 @@ const PeakDemand = () => {
                         {
                             date_from: filterDate,
                             date_to: filterDate,
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -542,6 +549,18 @@ const PeakDemand = () => {
         fetchEquipTypeData(equipTypeToFetch);
         fetchEquipUsageData(equipTypeToFetch);
     }, [equipTypeToFetch]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(startEndDayCount);
+        setpeakDemandTrendOptions({ ...peakDemandTrendOptions, xaxis: xaxisObj });
+    }, [startEndDayCount]);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        setStartEndDayCount(days + 1);
+    });
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {

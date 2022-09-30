@@ -8,12 +8,31 @@ import { TRENDS_BADGE_TYPES, TrendsBadge } from '../trendsBadge';
 import { UNITS } from '../../constants/units';
 
 import './TopConsumptionWidget.scss';
+import { Button } from '../button';
+import { ReactComponent as TelescopeSVG } from '../assets/icons/telescope.svg';
 
-const TopConsumptionWidget = ({ title, heads = [], rows = [], className }) => {
+const TopConsumptionWidget = ({ subtitle, title, heads = [], rows = [], className = '', handleClick }) => {
     return (
         <div className={`TopConsumptionWidget-wrapper ${className}`}>
-            <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>
-            <Brick sizeInRem={0.6785} />
+            <div className="d-flex align-items-center justify-content-between">
+                <div>
+                    {title && <Typography.Subheader size={Typography.Sizes.md}>{title}</Typography.Subheader>}
+                    {subtitle && <Typography.Body size={Typography.Sizes.xs}>{subtitle}</Typography.Body>}
+                </div>
+
+                {handleClick && (
+                    <Button
+                        onClick={handleClick}
+                        className="ml-4"
+                        label="Explore"
+                        size={Button.Sizes.md}
+                        type={Button.Type.secondaryGrey}
+                        icon={<TelescopeSVG />}
+                    />
+                )}
+            </div>
+
+            <Brick sizeInRem={1.5} />
             <div className="TopConsumptionWidget-table">
                 <div className="TopConsumptionWidget-table-row">
                     {heads.map((head, index) => (
@@ -25,25 +44,25 @@ const TopConsumptionWidget = ({ title, heads = [], rows = [], className }) => {
 
                 {rows.map(({ link, label, value, unit, badgePercentage, badgeType }, index) => (
                     <div className="TopConsumptionWidget-table-row" key={index}>
-                        <td>
+                        <div>
                             <Link className="typography-wrapper link" to={link}>
                                 {label}
                             </Link>
-                        </td>
-                        <td>
+                        </div>
+                        <div>
                             <Typography.Body
-                                className="d-inline"
+                                className="d-inline mr-1"
                                 size={Typography.Sizes.md}
                                 fontWeight={Typography.Types.SemiBold}>
                                 {value}
-                            </Typography.Body>{' '}
+                            </Typography.Body>
                             <Typography.Body className="d-inline" size={Typography.Sizes.xxs}>
                                 {unit}
                             </Typography.Body>
-                        </td>
-                        <td>
+                        </div>
+                        <div>
                             <TrendsBadge type={badgeType} value={badgePercentage} />
-                        </td>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -52,8 +71,10 @@ const TopConsumptionWidget = ({ title, heads = [], rows = [], className }) => {
 };
 
 TopConsumptionWidget.propTypes = {
-    title: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    subtitle: PropTypes.string,
     heads: PropTypes.arrayOf(PropTypes.string).isRequired,
+    handleClick: PropTypes.func,
     rows: PropTypes.arrayOf(
         PropTypes.exact({
             link: PropTypes.string,

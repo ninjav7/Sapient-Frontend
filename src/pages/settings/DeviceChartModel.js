@@ -256,13 +256,14 @@ const DeviceChartModel = ({
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}&tz_info=${timeZone}`;
+                let params = `?sensor_id=${sensorData.id}&consumption=${selectedConsumption}`;
                 await axios
                     .post(
                         `${BaseUrl}${sensorGraphData}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -296,6 +297,7 @@ const DeviceChartModel = ({
                     });
             } catch (error) {
                 console.log(error);
+                setIsSensorChartLoading(false);
                 console.log('Failed to fetch Sensor Graph data');
             }
         };

@@ -20,7 +20,7 @@ import { faTriangleExclamation } from '@fortawesome/pro-solid-svg-icons';
 import { ComponentStore } from '../../store/ComponentStore';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import LineColumnChart from '../charts/LineColumnChart';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import { Spinner } from 'reactstrap';
 import {
     BaseUrl,
@@ -76,8 +76,11 @@ const BuildingOverview = () => {
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
 
+    const [startEndDayCount, setStartEndDayCount] = useState(0);
+
     let cookies = new Cookies();
     let userdata = cookies.get('user');
+
     const [overview, setOverview] = useState({
         total_building: 0,
         portfolio_rank: '10 of 50',
@@ -274,13 +277,17 @@ const BuildingOverview = () => {
             },
         },
         xaxis: {
-            type: 'datetime',
             labels: {
-                formatter: function (val, timestamp) {
-                    let dateText = moment(timestamp).tz(timeZone).format('MMM D');
-                    let weekText = moment(timestamp).tz(timeZone).format('ddd');
-                    return `${weekText} - ${dateText}`;
+                formatter: function (val) {
+                    return moment(val).tz(timeZone).format('MM/DD HH:00');
                 },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: 12,
+            axisTicks: {
+                show: true,
             },
             style: {
                 colors: ['#1D2939'],
@@ -575,6 +582,7 @@ const BuildingOverview = () => {
 
     const [hoverRef, isHovered] = useHover();
     const [isEquipmentProcessing, setIsEquipmentProcessing] = useState(false);
+
     useEffect(() => {
         if (startDate === null) {
             return;
@@ -594,8 +602,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -624,8 +633,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -714,8 +724,9 @@ const BuildingOverview = () => {
                     .post(
                         `${BaseUrl}${builidingEquipments}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -750,13 +761,14 @@ const BuildingOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${builidingHourly}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -856,13 +868,14 @@ const BuildingOverview = () => {
                     Authorization: `Bearer ${userdata.token}`,
                 };
                 setIsEnergyConsumptionDataLoading(true);
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
                 await axios
                     .post(
                         `${BaseUrl}${getEnergyConsumption}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -923,6 +936,18 @@ const BuildingOverview = () => {
         };
         updateBreadcrumbStore();
     }, []);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(startEndDayCount);
+        setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
+    }, [startEndDayCount]);
+
+    useEffect(() => {
+        const start = moment(startDate);
+        const end = moment(endDate);
+        const days = end.diff(start, 'days');
+        setStartEndDayCount(days + 1);
+    });
 
     return (
         <React.Fragment>

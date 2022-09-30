@@ -7,7 +7,7 @@ import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 // import { configLineChartWidget } from './config';
 import moment from 'moment';
 import { kFormatter } from '../helpers/helper';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.scss';
 
 const LineChartWidget = ({
@@ -106,20 +106,6 @@ const LineChartWidget = ({
                     return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },
-            style: {
-                fontSize: '12px',
-                fontWeight: 600,
-                cssClass: 'apexcharts-xaxis-label',
-            },
-            crosshairs: {
-                show: true,
-                position: 'front',
-                stroke: {
-                    color: '#7C879C',
-                    width: 2,
-                    dashArray: 0,
-                },
-            },
         },
         yaxis: {
             labels: {
@@ -145,83 +131,8 @@ const LineChartWidget = ({
     });
 
     useEffect(() => {
-        if (startEndDayCount === 1) {
-            let xaxisObj = {
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return `${moment(timestamp).format('HH:00')}`;
-                    },
-                },
-                tickAmount: 9,
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                crosshairs: {
-                    show: true,
-                    position: 'front',
-                    stroke: {
-                        color: '#7C879C',
-                        width: 2,
-                        dashArray: 0,
-                    },
-                },
-                offsetX: 0,
-            };
-            setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
-        } else if (startEndDayCount >= 2 && startEndDayCount <= 3) {
-            let xaxisObj = {
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return `${moment(timestamp).format('MM/DD HH:00')}`;
-                    },
-                },
-                tickAmount: startEndDayCount * 6,
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                crosshairs: {
-                    show: true,
-                    position: 'front',
-                    stroke: {
-                        color: '#7C879C',
-                        width: 2,
-                        dashArray: 0,
-                    },
-                },
-                offsetX: 0,
-            };
-            setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
-        } else {
-            let xaxisObj = {
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
-                    },
-                },
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cssClass: 'apexcharts-xaxis-label',
-                },
-                crosshairs: {
-                    show: true,
-                    position: 'front',
-                    stroke: {
-                        color: '#7C879C',
-                        width: 2,
-                        dashArray: 0,
-                    },
-                },
-            };
-            setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
-        }
+        let xaxisObj = xaxisFilters(startEndDayCount);
+        setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
     return (

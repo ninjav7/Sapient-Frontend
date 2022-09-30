@@ -186,8 +186,9 @@ const EndUsesPage = () => {
                     .post(
                         `${BaseUrl}${endUses}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -244,14 +245,15 @@ const EndUsesPage = () => {
                 //     filter = 'month';
                 // }
 
-                let params = `?building_id=${bldgId}&tz_info=${timeZone}`;
+                let params = `?building_id=${bldgId}`;
 
                 await axios
                     .post(
                         `${BaseUrl}${endUsesChart}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
