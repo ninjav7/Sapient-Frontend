@@ -371,7 +371,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
-                                    <td>
+                                    {/* <td>
                                         <Skeleton count={5} />
                                     </td>
 
@@ -381,7 +381,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
 
                                     <td>
                                         <Skeleton count={5} />
-                                    </td>
+                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
