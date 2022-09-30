@@ -771,6 +771,9 @@ const ExploreByEquipment = () => {
 
     const [consumptionTxt, setConsumptionTxt] = useState('');
     const [locationTxt, setLocationTxt] = useState('');
+
+    console.log('selectedLocation', selectedLocation);
+
     const [spaceTxt, setSpaceTxt] = useState('');
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
@@ -936,9 +939,9 @@ const ExploreByEquipment = () => {
             } else {
                 setLocationTxt(`${floorListAPI.length} Locations`);
             }
-            setSelectedLocation(selectLoc);
+            // setSelectedLocation(selectLoc);
         } else {
-            setSelectedLocation([]);
+            // setSelectedLocation([]);
             for (let i = 0; i < floorListAPI.length; i++) {
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
@@ -955,7 +958,7 @@ const ExploreByEquipment = () => {
             } else {
                 setLocationTxt(`${selectedLocation.length + 1} Locations`);
             }
-            setSelectedLocation([...selectedLocation, e.target.value]);
+            // setSelectedLocation([...selectedLocation, e.target.value]);
         } else {
             if (selectedLocation.length === 1) {
                 setLocationTxt('');
@@ -974,7 +977,7 @@ const ExploreByEquipment = () => {
             let arr = selectedLocation.filter(function (item) {
                 return item !== e.target.value;
             });
-            setSelectedLocation(arr);
+            // setSelectedLocation(arr);
         }
     };
 
@@ -1151,8 +1154,6 @@ const ExploreByEquipment = () => {
     const [spaceName, setSpaceName] = useState('');
 
     const [floorChecked, setFloorChecked] = useState(false);
-
-    console.log('floorCheckedList', floorCheckedList);
 
     useEffect(() => {
         if (startDate === null) {
@@ -2176,7 +2177,6 @@ const ExploreByEquipment = () => {
                                                     setGettingFloors(true);
                                                     setFloorName('');
                                                     setFloorChecked(false);
-                                                    setfloorCheckedList([]);
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2253,14 +2253,15 @@ const ExploreByEquipment = () => {
                                                                                         ? record.type_id
                                                                                         : record.floor_id
                                                                                 }
-                                                                                checked={floorCheckedList.includes(
-                                                                                    record._id
-                                                                                )}
                                                                                 onClick={(e) => {
                                                                                     handleSelectedLocation(
                                                                                         e,
                                                                                         record.name
                                                                                     );
+                                                                                    setSelectedLocation((el) => [
+                                                                                        ...el,
+                                                                                        record?._id,
+                                                                                    ]);
                                                                                     // if (!e.currentTarget.checked) {
                                                                                     //     setspaceChecked(record?._id);
                                                                                     // }
