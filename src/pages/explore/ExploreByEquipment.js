@@ -13,7 +13,6 @@ import {
     equipmentType,
     getEndUseId,
     getSpaceTypes,
-    getSpaces,
 } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
@@ -755,11 +754,8 @@ const ExploreByEquipment = () => {
 
     const [topEnergyConsumption, setTopEnergyConsumption] = useState(1);
     const [topPeakConsumption, setTopPeakConsumption] = useState(1);
-    // TODO:
     const [floorListAPI, setFloorListAPI] = useState([]);
-    const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState([]);
-    // const [selectedFloor, setSelectedFloor] = useState(false)
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
@@ -774,10 +770,6 @@ const ExploreByEquipment = () => {
 
     const [consumptionTxt, setConsumptionTxt] = useState('');
     const [locationTxt, setLocationTxt] = useState('');
-
-    console.log('selectedLocation', selectedLocation);
-    console.log('spaceListAPI', spaceListAPI);
-
     const [spaceTxt, setSpaceTxt] = useState('');
     const [equipmentTxt, setEquipmentTxt] = useState('');
     const [endUseTxt, setEndUseTxt] = useState('');
@@ -949,9 +941,9 @@ const ExploreByEquipment = () => {
             } else {
                 setLocationTxt(`${floorListAPI.length} Locations`);
             }
-            // setSelectedLocation(selectLoc);
+            setSelectedLocation(selectLoc);
         } else {
-            // setSelectedLocation([]);
+            setSelectedLocation([]);
             for (let i = 0; i < floorListAPI.length; i++) {
                 let check = document.getElementById(floorListAPI[i].floor_id);
                 check.checked = slt.checked;
@@ -968,7 +960,7 @@ const ExploreByEquipment = () => {
             } else {
                 setLocationTxt(`${selectedLocation.length + 1} Locations`);
             }
-            // setSelectedLocation([...selectedLocation, e.target.value]);
+            setSelectedLocation([...selectedLocation, e.target.value]);
         } else {
             if (selectedLocation.length === 1) {
                 setLocationTxt('');
@@ -987,7 +979,7 @@ const ExploreByEquipment = () => {
             let arr = selectedLocation.filter(function (item) {
                 return item !== e.target.value;
             });
-            // setSelectedLocation(arr);
+            setSelectedLocation(arr);
         }
     };
 
@@ -2198,11 +2190,6 @@ const ExploreByEquipment = () => {
                                                 onClick={(e) => {
                                                     handleCloseFilter(e, el.value);
                                                     setLocationTxt('');
-
-                                                    setGettingSpaces(false);
-                                                    setGettingFloors(true);
-                                                    setFloorName('');
-                                                    setFloorChecked(false);
                                                 }}>
                                                 <i className="uil uil-multiply"></i>
                                             </button>
@@ -2235,13 +2222,11 @@ const ExploreByEquipment = () => {
                                                         Save
                                                     </button>
                                                 </div>
-
                                                 <div className="pop-inputbox-wrapper mt-4 mb-2 p-1">
                                                     <span className="pop-text">
                                                         {localStorage.getItem('exploreBldName')}
                                                     </span>
                                                 </div>
-                                                <span style={{ marginTop: '3px', marginLeft: '2px' }}>{floorName}</span>
                                                 <div
                                                     className={floorListAPI.length > 4 ? `hScroll` : `hHundredPercent`}>
                                                     <div className="floor-box">
@@ -2257,161 +2242,18 @@ const ExploreByEquipment = () => {
                                                             <span>Select All</span>
                                                         </div>
                                                     </div>
-
-                                                    {/* setFloorChecked */}
-                                                    {gettingSpaces ? (
-                                                        <>
-                                                            {/* floorCheckedList */}
-                                                            {spaceListAPI.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={
-                                                                                    gettingSpaces
-                                                                                        ? record.type_id
-                                                                                        : record.floor_id
-                                                                                }
-                                                                                value={
-                                                                                    gettingSpaces
-                                                                                        ? record.type_id
-                                                                                        : record.floor_id
-                                                                                }
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedLocation(
-                                                                                        e,
-                                                                                        record.name
-                                                                                    );
-                                                                                    if (e.currentTarget.checked) {
-                                                                                        setSelectedLocation((el) => [
-                                                                                            ...el,
-                                                                                            record?._id,
-                                                                                        ]);
-                                                                                    }
-                                                                                    // else {
-                                                                                    //     setSelectedLocation((items) =>
-                                                                                    //         items?.filter(
-                                                                                    //             (item) =>
-                                                                                    //                 item === record?._id
-                                                                                    //         )
-                                                                                    //     );
-                                                                                    // }
-                                                                                    // if (!e.currentTarget.checked) {
-                                                                                    //     setspaceChecked(record?._id);
-                                                                                    // }
-                                                                                }}
-                                                                            />
-                                                                            <span>{record.name}</span>
-                                                                        </div>
-                                                                        <div style={{ display: 'flex' }}>
-                                                                            {/* <div className='room-box'> 12 Rooms </div> */}
-                                                                            <button
-                                                                                style={{
-                                                                                    border: 'none',
-                                                                                    backgroundColor: 'white',
-                                                                                }}>
-                                                                                <i className="uil uil-angle-right"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            {floorListAPI.map((record) => {
-                                                                return (
-                                                                    <div className="floor-box">
-                                                                        <div>
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="mr-2"
-                                                                                id={
-                                                                                    gettingSpaces
-                                                                                        ? record.type_id
-                                                                                        : record.floor_id
-                                                                                }
-                                                                                value={
-                                                                                    gettingSpaces
-                                                                                        ? record.type_id
-                                                                                        : record.floor_id
-                                                                                }
-                                                                                onClick={(e) => {
-                                                                                    handleSelectedLocation(
-                                                                                        e,
-                                                                                        record.name
-                                                                                    );
-                                                                                    setFloorChecked(
-                                                                                        e.currentTarget.checked
-                                                                                    );
-                                                                                }}
-                                                                            />
-                                                                            <span
-                                                                                onClick={() => {
-                                                                                    if (!gettingSpaces) {
-                                                                                        getSpacesApiFunc(
-                                                                                            record?.floor_id
-                                                                                        );
-                                                                                        // floorListAPIFunc();
-                                                                                    }
-                                                                                    // setSpaceName(record?.name);
-                                                                                }}>
-                                                                                {record.name}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div
-                                                                            onClick={() => {
-                                                                                if (!gettingSpaces) {
-                                                                                    getSpacesApiFunc(record?.floor_id);
-                                                                                    // floorListAPIFunc();
-                                                                                }
-                                                                                // setSpaceName(record?.name);
-                                                                            }}
-                                                                            style={{ display: 'flex' }}>
-                                                                            {/* <div className='room-box'> 12 Rooms </div> */}
-                                                                            <button
-                                                                                style={{
-                                                                                    border: 'none',
-                                                                                    backgroundColor: 'white',
-                                                                                }}>
-                                                                                <i className="uil uil-angle-right"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </>
-                                                    )}
-                                                    {/* {floorListAPI.map((record) => {
+                                                    {floorListAPI.map((record) => {
                                                         return (
-                                                            <div
-                                                                className="floor-box"
-                                                                onClick={() => {
-                                                                    if (!gettingSpaces) {
-                                                                        getSpacesApiFunc(record?.floor_id);
-                                                                    }
-                                                                    setFloorName(record?.name);
-                                                                }}>
+                                                            <div className="floor-box">
                                                                 <div>
                                                                     <input
                                                                         type="checkbox"
                                                                         className="mr-2"
-                                                                        id={
-                                                                            gettingSpaces
-                                                                                ? record.type_id
-                                                                                : record.floor_id
-                                                                        }
-                                                                        value={
-                                                                            gettingSpaces
-                                                                                ? record.type_id
-                                                                                : record.floor_id
-                                                                        }
+                                                                        id={record.floor_id}
+                                                                        value={record.floor_id}
                                                                         onClick={(e) => {
                                                                             handleSelectedLocation(e, record.name);
                                                                         }}
-                                                                        checked={gettingSpaces}
                                                                     />
                                                                     <span>{record.name}</span>
                                                                 </div>
@@ -2426,7 +2268,7 @@ const ExploreByEquipment = () => {
                                                                 </div>
                                                             </div>
                                                         );
-                                                    })} */}
+                                                    })}
                                                 </div>
                                                 <div></div>
                                             </div>
