@@ -31,7 +31,6 @@ export const xaxisFilters = (daysCount) => {
                 },
             },
             tickAmount: 9,
-            showDuplicates: false,
         };
         return xaxisObj;
     }
