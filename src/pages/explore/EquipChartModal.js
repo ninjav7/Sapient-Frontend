@@ -305,14 +305,14 @@ const EquipChartModal = ({
         markers: {
             size: 0,
         },
-        xaxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
-                },
-            },
-        },
+        // xaxis: {
+        //     type: 'datetime',
+        //     // labels: {
+        //     //     formatter: function (val, timestamp) {
+        //     //         return moment(timestamp).format('DD/MMM - HH:mm');
+        //     //     },
+        //     // },
+        // },
         yaxis: {
             labels: {
                 formatter: function (val) {
@@ -368,20 +368,6 @@ const EquipChartModal = ({
         },
     });
 
-    // const [seriesLine, setSeriesLine] = useState([
-    //     {
-    //         data: [
-    //             [1650874614695, 784.55],
-    //             [1650874694654, 169],
-    //             [1650782931595, 210],
-    //             [1650874587699, 825],
-    //             [1650955774141, 234.55],
-    //             [1650874722069, 240],
-    //             [1650874733485, 989.55],
-    //         ],
-    //     },
-    // ]);
-
     const [optionsLine, setOptionsLine] = useState({
         chart: {
             id: 'chart1',
@@ -397,10 +383,7 @@ const EquipChartModal = ({
 
             selection: {
                 enabled: true,
-                // xaxis: {
-                //     min: new Date('19 July 2022').getTime(),
-                //     max: new Date('20 July 2022').getTime(),
-                // },
+
             },
             animations: {
                 enabled: false,
@@ -419,19 +402,19 @@ const EquipChartModal = ({
             },
         },
 
-        xaxis: {
-            type: 'datetime',
+        // xaxis: {
+        //     type: 'datetime',
 
-            tooltip: {
-                enabled: false,
-            },
+        //     tooltip: {
+        //         enabled: false,
+        //     },
 
-            labels: {
-                formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MMM');
-                },
-            },
-        },
+        //     labels: {
+        //         formatter: function (val, timestamp) {
+        //             return moment.utc(timestamp).format('DD/MMM');
+        //         },
+        //     },
+        // },
 
         yaxis: {
             tickAmount: 2,

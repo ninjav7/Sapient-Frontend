@@ -660,7 +660,7 @@ const ExploreByEquipment = () => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment.utc(timestamp).format('DD/MM HH:00');
+                    return moment(timestamp).format('DD/MM HH:00');
                     // return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
                 },
             },

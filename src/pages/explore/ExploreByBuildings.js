@@ -460,26 +460,24 @@ const ExploreByBuildings = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { colors } = w.globals;
+                console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = '';
-                for (let i = 0; i < series.length; i++) {
-                    ch =
-                        ch +
-                        `<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
-                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(3)} kWh </div>`;
+                let ch=''
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
+                for(let i=0;i<series.length;i++){
+                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                        3
+                    )} kWh </td></tr>`
                 }
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period">${moment
-                        .utc(seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ HH:mm A`)}</div>`;
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
                         ${ch}
-                    </div>`;
+                    </table></div>`;
             },
         },
         xaxis: {
@@ -886,11 +884,11 @@ const ExploreByBuildings = () => {
         exploreFilterDataFetch(arr);
     }, [APIFlag, Sq_FtFlag, selectedBuildingOptions]);
 
-    useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
-        setOptionsData({ ...optionsData, xaxis: xaxisObj });
-        setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
-    }, [daysCount]);
+    // useEffect(() => {
+    //     let xaxisObj = xaxisFilters(daysCount);
+    //     setOptionsData({ ...optionsData, xaxis: xaxisObj });
+    //     setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
+    // }, [daysCount]);
 
     const handleCloseFilter = (e, val) => {
         let arr = [];
