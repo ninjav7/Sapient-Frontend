@@ -757,6 +757,7 @@ const ExploreByEquipment = () => {
     const [floorListAPI, setFloorListAPI] = useState([]);
     const [spaceListAPI, setSpaceListAPI] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState([]);
+    // const [selectedFloor, setSelectedFloor] = useState(false)
     const [selectedEquipType, setSelectedEquipType] = useState([]);
     const [selectedEndUse, setSelectedEndUse] = useState([]);
     const [selectedSpaceType, setSelectedSpaceType] = useState([]);
@@ -773,6 +774,7 @@ const ExploreByEquipment = () => {
     const [locationTxt, setLocationTxt] = useState('');
 
     console.log('selectedLocation', selectedLocation);
+    console.log('spaceListAPI', spaceListAPI);
 
     const [spaceTxt, setSpaceTxt] = useState('');
     const [equipmentTxt, setEquipmentTxt] = useState('');
@@ -1280,9 +1282,20 @@ const ExploreByEquipment = () => {
             console.log('restfulrest', res.data);
             // setFloorListAPI(res.data.data);
             setSpaceListAPI(res.data.data);
+            if (floorChecked) {
+                setSelectedLocation((el) => [...el, res?.data?.data?._id]);
+            }
             setGettingSpaces(true);
         });
     };
+
+    useEffect(() => {
+        if (floorChecked && spaceListAPI) {
+            spaceListAPI.map((item) => {
+                setSelectedLocation((el) => [...el, item._id]);
+            });
+        }
+    }, [spaceListAPI]);
 
     const nextPageData = async (path) => {
         try {
@@ -2258,10 +2271,20 @@ const ExploreByEquipment = () => {
                                                                                         e,
                                                                                         record.name
                                                                                     );
-                                                                                    setSelectedLocation((el) => [
-                                                                                        ...el,
-                                                                                        record?._id,
-                                                                                    ]);
+                                                                                    if (e.currentTarget.checked) {
+                                                                                        setSelectedLocation((el) => [
+                                                                                            ...el,
+                                                                                            record?._id,
+                                                                                        ]);
+                                                                                    }
+                                                                                    // else {
+                                                                                    //     setSelectedLocation((items) =>
+                                                                                    //         items?.filter(
+                                                                                    //             (item) =>
+                                                                                    //                 item === record?._id
+                                                                                    //         )
+                                                                                    //     );
+                                                                                    // }
                                                                                     // if (!e.currentTarget.checked) {
                                                                                     //     setspaceChecked(record?._id);
                                                                                     // }

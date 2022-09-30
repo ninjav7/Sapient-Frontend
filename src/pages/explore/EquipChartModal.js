@@ -268,6 +268,112 @@ const EquipChartModal = ({
         },
     ]);
 
+    // const [options, setOptions] = useState({
+    //     chart: {
+    //         id: 'chart2',
+    //         type: 'line',
+    //         height: 180,
+    //         toolbar: {
+    //             autoSelected: 'pan',
+
+    //             show: false,
+    //         },
+
+    //         animations: {
+    //             enabled: false,
+    //         },
+    //     },
+    //     colors: ['#546E7A'],
+    //     stroke: {
+    //         width: 3,
+    //     },
+    //     dataLabels: {
+    //         enabled: false,
+    //     },
+    //     colors: ['#10B981', '#2955E7'],
+    //     fill: {
+    //         opacity: 1,
+    //     },
+    //     markers: {
+    //         size: 0,
+    //     },
+    //     xaxis: {
+    //         type: 'datetime',
+    //         labels: {
+    //             formatter: function (val, timestamp) {
+    //                 return moment.utc(timestamp).format('DD/MMM - HH:mm');
+    //             },
+    //         },
+    //     },
+    //     yaxis: {
+    //         labels: {
+    //             formatter: function (val) {
+    //                 return val.toFixed(2);
+    //             },
+    //         },
+    //     },
+    //     tooltip: {
+    //         //@TODO NEED?
+    //         // enabled: false,
+    //         shared: false,
+    //         intersect: false,
+    //         style: {
+    //             fontSize: '12px',
+    //             fontFamily: 'Inter, Arial, sans-serif',
+    //             fontWeight: 600,
+    //             cssClass: 'apexcharts-xaxis-label',
+    //         },
+    //         // x: {
+    //         //     show: true,
+    //         //     type: 'datetime',
+    //         //     labels: {
+    //         //         formatter: function (val, timestamp) {
+    //         //             return moment.utc(timestamp).format('DD/MM - HH:mm');
+    //         //         },
+    //         //     },
+    //         // },
+    //         // y: {
+    //         //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+    //         //         return value;
+    //         //     },
+    //         // },
+    //         marker: {
+    //             show: false,
+    //         },
+    //         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+    //             const { seriesX } = w.globals;
+    //             const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+    //             return `<div class="line-chart-widget-tooltip">
+    //                     <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+    //                     <div class="line-chart-widget-tooltip-value">${
+    //                         w.config.series[0].unit === 'kWh'
+    //                             ? series[seriesIndex][dataPointIndex].toFixed(3)
+    //                             : series[seriesIndex][dataPointIndex].toFixed(3)
+    //                     }
+    //                      ${w.config.series[0].unit}</div>
+    //                     <div class="line-chart-widget-tooltip-time-period">${moment
+    //                         .utc(timestamp)
+    //                         .format(`MMM D 'YY @ HH:mm A`)}</div>
+    //                 </div>`;
+    //         },
+    //     },
+    // });
+
+    // const [seriesLine, setSeriesLine] = useState([
+    //     {
+    //         data: [
+    //             [1650874614695, 784.55],
+    //             [1650874694654, 169],
+    //             [1650782931595, 210],
+    //             [1650874587699, 825],
+    //             [1650955774141, 234.55],
+    //             [1650874722069, 240],
+    //             [1650874733485, 989.55],
+    //         ],
+    //     },
+    // ]);
+
     const [options, setOptions] = useState({
         chart: {
             id: 'chart2',
@@ -299,22 +405,43 @@ const EquipChartModal = ({
         },
         xaxis: {
             type: 'datetime',
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
+            //             .tz(timeZone)
+            //             .format('LT')}`;
+            //     },
+            // },
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MMM - HH:mm');
+                },
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
                 },
             },
         },
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -323,20 +450,6 @@ const EquipChartModal = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment.utc(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value;
-            //     },
-            // },
             marker: {
                 show: false,
             },
@@ -346,33 +459,16 @@ const EquipChartModal = ({
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${
-                            w.config.series[0].unit === 'kWh'
-                                ? series[seriesIndex][dataPointIndex].toFixed(3)
-                                : series[seriesIndex][dataPointIndex].toFixed(3)
-                        } 
-                         ${w.config.series[0].unit}</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment
-                            .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A`)}</div>
+                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][dataPointIndex].toFixed(
+                            0
+                        )} kWh</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
     });
-
-    // const [seriesLine, setSeriesLine] = useState([
-    //     {
-    //         data: [
-    //             [1650874614695, 784.55],
-    //             [1650874694654, 169],
-    //             [1650782931595, 210],
-    //             [1650874587699, 825],
-    //             [1650955774141, 234.55],
-    //             [1650874722069, 240],
-    //             [1650874733485, 989.55],
-    //         ],
-    //     },
-    // ]);
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
