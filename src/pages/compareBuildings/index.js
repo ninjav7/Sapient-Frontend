@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Header from '../../components/Header';
 import { Link } from 'react-router-dom';
-import {Row, Col, Card, CardBody, Table} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table } from 'reactstrap';
 import { MultiSelect } from 'react-multi-select-component';
 import { Search } from 'react-feather';
 import { Line } from 'rc-progress';
 import { ComponentStore } from '../../store/ComponentStore';
 //import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BaseUrl, compareBuildings, sortCompareBuildings } from '../../services/Network';
+import { BaseUrl, compareBuildings, searchCompareBuildings, sortCompareBuildings } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { percentageHandler } from '../../utils/helper';
@@ -371,7 +371,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                     <td>
                                         <Skeleton count={5} />
                                     </td>
-                                    <td>
+                                    {/* <td>
                                         <Skeleton count={5} />
                                     </td>
 
@@ -381,7 +381,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
 
                                     <td>
                                         <Skeleton count={5} />
-                                    </td>
+                                    </td> */}
                                 </tr>
                             </SkeletonTheme>
                         </tbody>
@@ -403,8 +403,7 @@ const BuildingTable = ({ buildingsData, selectedOptions, buildingDataWithFilter,
                                         )}
                                         {selectedOptions.some((record) => record.value === 'density') && (
                                             <td className="table-content-style">
-                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq.
-                                                ft.
+                                                {parseFloat(record.energy_density).toFixed(0)} kWh / sq. ft.sq. ft.
                                                 <br />
                                                 <div style={{ width: '100%', display: 'inline-block' }}>
                                                     {index === 0 && record.energy_density === 0 && (
@@ -757,31 +756,32 @@ const CompareBuildings = () => {
         setSelectedOptions(arr);
     }, []);
 
-    useEffect(() => {
-        const compareBuildingsData = async () => {
-            try {
-                setIsBuildingDataFetched(true);
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
+    const compareBuildingsData = async () => {
+        try {
+            setIsBuildingDataFetched(true);
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
 
-                let count = parseInt(localStorage.getItem('dateFilter'));
-                let params = `?days=${count}`;
-                await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
-                    let response = res.data;
-                    response.sort((a, b) => b.energy_consumption - a.energy_consumption);
-                    setBuildingsData(response);
-                    setIsBuildingDataFetched(false);
-                    // console.log('setBuildingsData => ', res.data);
-                });
-            } catch (error) {
-                console.log(error);
+            let count = parseInt(localStorage.getItem('dateFilter'));
+            let params = `?days=${count}`;
+            await axios.get(`${BaseUrl}${sortCompareBuildings}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response);
                 setIsBuildingDataFetched(false);
-                console.log('Failed to fetch Buildings Data');
-            }
-        };
+                // console.log('setBuildingsData => ', res.data);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsBuildingDataFetched(false);
+            console.log('Failed to fetch Buildings Data');
+        }
+    };
+
+    useEffect(() => {
         compareBuildingsData();
     }, [daysCount]);
 
@@ -808,6 +808,43 @@ const CompareBuildings = () => {
         }
     };
 
+    const [buildingInput, setBuildingInput] = useState('');
+
+    const searchCompareBuildingsFunc = async () => {
+        setIsBuildingDataFetched(true);
+        try {
+            let headers = {
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+                Authorization: `Bearer ${userdata.token}`,
+            };
+            let count = parseInt(localStorage.getItem('dateFilter'));
+
+            let params = `?days=${count}&building_name=${buildingInput}`;
+            await axios.get(`${BaseUrl}${searchCompareBuildings}${params}`, { headers }).then((res) => {
+                let response = res.data;
+                response.sort((a, b) => b.energy_consumption - a.energy_consumption);
+                setBuildingsData(response);
+                setIsBuildingDataFetched(false);
+            });
+        } catch (error) {
+            console.log(error);
+            setIsBuildingDataFetched(false);
+            console.log('Failed to fetch all Equipments Data');
+        }
+    };
+
+    const handleKeyDownSearch = (e) => {
+        if (e.key === 'Enter') {
+            if (buildingInput.length >= 1) {
+                searchCompareBuildingsFunc();
+            }
+            if (buildingInput.length === 0) {
+                compareBuildingsData();
+            }
+        }
+    };
+
     return (
         <React.Fragment>
             <Header title="Compare Buildings" />
@@ -827,8 +864,23 @@ const CompareBuildings = () => {
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="search-addon"
+                            onChange={(e) => {
+                                setBuildingInput(e.target.value);
+                            }}
+                            onKeyDown={handleKeyDownSearch}
                         />
-                        <span className="input-group-text border-0" id="search-addon">
+                        <span
+                            className="input-group-text border-0"
+                            id="search-addon"
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                if (buildingInput.length >= 1) {
+                                    searchCompareBuildingsFunc();
+                                }
+                                if (buildingInput.length === 0) {
+                                    compareBuildingsData();
+                                }
+                            }}>
                             <Search className="icon-sm" />
                         </span>
                     </div>

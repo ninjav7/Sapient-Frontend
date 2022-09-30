@@ -276,6 +276,112 @@ const EquipChartModal = ({
         },
     ]);
 
+    // const [options, setOptions] = useState({
+    //     chart: {
+    //         id: 'chart2',
+    //         type: 'line',
+    //         height: 180,
+    //         toolbar: {
+    //             autoSelected: 'pan',
+
+    //             show: false,
+    //         },
+
+    //         animations: {
+    //             enabled: false,
+    //         },
+    //     },
+    //     colors: ['#546E7A'],
+    //     stroke: {
+    //         width: 3,
+    //     },
+    //     dataLabels: {
+    //         enabled: false,
+    //     },
+    //     colors: ['#10B981', '#2955E7'],
+    //     fill: {
+    //         opacity: 1,
+    //     },
+    //     markers: {
+    //         size: 0,
+    //     },
+    //     xaxis: {
+    //         type: 'datetime',
+    //         labels: {
+    //             formatter: function (val, timestamp) {
+    //                 return moment.utc(timestamp).format('DD/MMM - HH:mm');
+    //             },
+    //         },
+    //     },
+    //     yaxis: {
+    //         labels: {
+    //             formatter: function (val) {
+    //                 return val.toFixed(2);
+    //             },
+    //         },
+    //     },
+    //     tooltip: {
+    //         //@TODO NEED?
+    //         // enabled: false,
+    //         shared: false,
+    //         intersect: false,
+    //         style: {
+    //             fontSize: '12px',
+    //             fontFamily: 'Inter, Arial, sans-serif',
+    //             fontWeight: 600,
+    //             cssClass: 'apexcharts-xaxis-label',
+    //         },
+    //         // x: {
+    //         //     show: true,
+    //         //     type: 'datetime',
+    //         //     labels: {
+    //         //         formatter: function (val, timestamp) {
+    //         //             return moment.utc(timestamp).format('DD/MM - HH:mm');
+    //         //         },
+    //         //     },
+    //         // },
+    //         // y: {
+    //         //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
+    //         //         return value;
+    //         //     },
+    //         // },
+    //         marker: {
+    //             show: false,
+    //         },
+    //         custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+    //             const { seriesX } = w.globals;
+    //             const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+
+    //             return `<div class="line-chart-widget-tooltip">
+    //                     <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+    //                     <div class="line-chart-widget-tooltip-value">${
+    //                         w.config.series[0].unit === 'kWh'
+    //                             ? series[seriesIndex][dataPointIndex].toFixed(3)
+    //                             : series[seriesIndex][dataPointIndex].toFixed(3)
+    //                     }
+    //                      ${w.config.series[0].unit}</div>
+    //                     <div class="line-chart-widget-tooltip-time-period">${moment
+    //                         .utc(timestamp)
+    //                         .format(`MMM D 'YY @ HH:mm A`)}</div>
+    //                 </div>`;
+    //         },
+    //     },
+    // });
+
+    // const [seriesLine, setSeriesLine] = useState([
+    //     {
+    //         data: [
+    //             [1650874614695, 784.55],
+    //             [1650874694654, 169],
+    //             [1650782931595, 210],
+    //             [1650874587699, 825],
+    //             [1650955774141, 234.55],
+    //             [1650874722069, 240],
+    //             [1650874733485, 989.55],
+    //         ],
+    //     },
+    // ]);
+
     const [options, setOptions] = useState({
         chart: {
             id: 'chart2',
@@ -307,9 +413,32 @@ const EquipChartModal = ({
         },
         xaxis: {
             type: 'datetime',
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
+            //             .tz(timeZone)
+            //             .format('LT')}`;
+            //     },
+            // },
             labels: {
                 formatter: function (val, timestamp) {
                     return moment.utc(timestamp).format('DD/MMM - HH:mm');
+                },
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 1,
+                    dashArray: 0,
                 },
             },
         },
@@ -321,8 +450,6 @@ const EquipChartModal = ({
             },
         },
         tooltip: {
-            //@TODO NEED?
-            // enabled: false,
             shared: false,
             intersect: false,
             style: {
@@ -331,20 +458,6 @@ const EquipChartModal = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function (val, timestamp) {
-            //             return moment.utc(timestamp).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value;
-            //     },
-            // },
             marker: {
                 show: false,
             },
@@ -367,20 +480,6 @@ const EquipChartModal = ({
             },
         },
     });
-
-    // const [seriesLine, setSeriesLine] = useState([
-    //     {
-    //         data: [
-    //             [1650874614695, 784.55],
-    //             [1650874694654, 169],
-    //             [1650782931595, 210],
-    //             [1650874587699, 825],
-    //             [1650955774141, 234.55],
-    //             [1650874722069, 240],
-    //             [1650874733485, 989.55],
-    //         ],
-    //     },
-    // ]);
 
     const [optionsLine, setOptionsLine] = useState({
         chart: {
@@ -482,7 +581,7 @@ const EquipChartModal = ({
         }
     };
     const handleChange = (key, value) => {
-        // let obj = Object.assign({}, updateEqipmentData);
+        let obj = Object.assign({}, updateEqipmentData);
         // if (key === 'equipment_type') {
         //     const result1 = equipmentTypeData.find(({ equipment_id }) => equipment_id === value);
         //     // console.log(result1.end_use_name);
@@ -494,9 +593,9 @@ const EquipChartModal = ({
         //     }
         //     obj['end_use'] = eq_id.end_user_id;
         // }
-        // obj[key] = value;
+        obj[key] = value;
         // // console.log(obj);
-        // setUpdateEqipmentData(obj);
+        setUpdateEqipmentData(obj);
     };
     const handleSave = () => {
         try {
@@ -507,15 +606,23 @@ const EquipChartModal = ({
                 accept: 'application/json',
                 Authorization: `Bearer ${userdata.token}`,
             };
-            let params = `?equipment_id=${equipData?.equipments_id}`;
+            let params = `?equipment_id=${equipmentData?.equipments_id}`;
             axios
                 .post(`${BaseUrl}${updateEquipment}${params}`, obj, {
                     headers: header,
                 })
                 .then((res) => {
+                    let arr = {
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
+                    };
                     // console.log(res.data);
-                    fetchEquipmentData();
+                    setSelectedTab(0);
+                    setEquipResult([]);
+                    setEquipmentData({});
                     handleChartClose();
+                    fetchEquipmentData(arr);
                 });
         } catch (error) {
             console.log('Failed to update Passive device data');
@@ -764,14 +871,15 @@ const EquipChartModal = ({
     }, [equipmentFilter]);
 
     useEffect(() => {
-        if (equipmentTypeData.lenght === 0) {
+        console.log(equipmentTypeData);
+        if (equipmentTypeData.lenght === 0 || Object.keys(equipmentData).length === 0) {
             return;
         }
         let res = [];
         res = equipmentTypeData.find(({ equipment_type }) => equipment_type === equipmentData?.equipments_type);
         console.log(res);
         setEquipResult(res);
-    }, [equipmentTypeData]);
+    }, [equipmentTypeData, equipmentData]);
 
     useEffect(() => {
         if (equipmentData.length === 0) {
@@ -859,6 +967,7 @@ const EquipChartModal = ({
                                                     setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
+                                                    setEquipmentData({});
                                                 }}>
                                                 Cancel
                                             </button>
@@ -868,9 +977,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    setSelectedTab(0);
-                                                    handleChartClose();
-                                                    setEquipResult([]);
+                                                    handleSave();
                                                 }}>
                                                 Save
                                             </button>
@@ -905,6 +1012,7 @@ const EquipChartModal = ({
                                                     setSelectedTab(0);
                                                     handleChartClose();
                                                     setEquipResult([]);
+                                                    setEquipmentData({});
                                                 }}>
                                                 Cancel
                                             </button>
@@ -914,9 +1022,7 @@ const EquipChartModal = ({
                                                 type="button"
                                                 className="btn btn-md btn-primary font-weight-bold mr-4"
                                                 onClick={() => {
-                                                    setSelectedTab(0);
-                                                    handleChartClose();
-                                                    setEquipResult([]);
+                                                    handleSave();
                                                 }}>
                                                 Save
                                             </button>
@@ -1400,7 +1506,7 @@ const EquipChartModal = ({
                                                     id="exampleText"
                                                     rows="3"
                                                     placeholder="Enter a Note..."
-                                                    defaultValue={equipmentData !== null ? equipmentData?.note : ''}
+                                                    value={equipmentData !== null ? equipmentData?.note : ''}
                                                     onChange={(e) => {
                                                         handleChange('note', e.target.value);
                                                     }}

@@ -2,6 +2,9 @@ export const BaseUrl = 'https://sapient-prod.azurewebsites.net';
 // export const BaseUrl = 'https://sapient-prod-qa.azurewebsites.net';
 // export const BaseUrl = 'https://sapient-prod-dev.azurewebsites.net';
 // export const BaseUrl = 'https://sapient-prod-stage.azurewebsites.net';
+// export const BaseUrl = 'https://sapient-prod-beta.azurewebsites.net/';
+
+// new things
 
 export const portfolioOverall = '/api/energy/portfolio/overall';
 export const portfolioBuilidings = '/api/energy/portfolio/buildings';
@@ -86,6 +89,7 @@ export const energyUsage = '/api/energy/energy/usage';
 // compare-buildings
 export const compareBuildings = '/api/energy/energy/compare_building';
 export const sortCompareBuildings = '/api/energy/energy/sort-compare-buildings';
+export const searchCompareBuildings = '/api/energy/energy/search-compare-buildings';
 
 //config settings
 export const getBuildings = '/api/config/get_buildings';
