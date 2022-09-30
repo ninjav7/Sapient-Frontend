@@ -641,13 +641,20 @@ const ExploreByEquipment = () => {
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch=''
-                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
-                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
-                for(let i=0;i<series.length;i++){
-                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
-                        3
-                    )} kWh </td></tr>`
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
+                        .utc(seriesX[0][dataPointIndex])
+                        .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`;
+                for (let i = 0; i < series.length; i++) {
+                    ch =
+                        ch +
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                            3
+                        )} kWh </td></tr>`;
                 }
 
                 return `<div class="line-chart-widget-tooltip">
@@ -1250,7 +1257,6 @@ const ExploreByEquipment = () => {
             }
         };
 
-        
         exploreDataFetch(arr);
         fetchEquipTypeData();
         fetchEndUseData();
@@ -1469,16 +1475,15 @@ const ExploreByEquipment = () => {
                             return item.equipment_id === selectedEquipmentId;
                         });
                         let exploreData = [];
-                        let sg=""
-                        let legendName=""
-                        sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
-                        if(sg===""){
-                            legendName=arr[0].equipment_name;
+                        let sg = '';
+                        let legendName = '';
+                        sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                        if (sg === '') {
+                            legendName = arr[0].equipment_name;
+                        } else {
+                            legendName = arr[0].equipment_name + ' - ' + sg;
                         }
-                        else{
-                            legendName=arr[0].equipment_name+" - "+sg;
-                        }
-    
+
                         let recordToInsert = {
                             name: legendName,
                             data: data,
@@ -1575,14 +1580,13 @@ const ExploreByEquipment = () => {
                         return item.equipment_id === id;
                     });
                     let exploreData = [];
-                    let sg=""
-                    let legendName=""
-                    sg=arr[0].location.substring(arr[0].location.indexOf('>') + 1);;
-                    if(sg===""){
-                        legendName=arr[0].equipment_name;
-                    }
-                    else{
-                        legendName=arr[0].equipment_name+" - "+sg;
+                    let sg = '';
+                    let legendName = '';
+                    sg = arr[0].location.substring(arr[0].location.indexOf('>') + 1);
+                    if (sg === '') {
+                        legendName = arr[0].equipment_name;
+                    } else {
+                        legendName = arr[0].equipment_name + ' - ' + sg;
                     }
 
                     let recordToInsert = {
@@ -1958,10 +1962,9 @@ const ExploreByEquipment = () => {
         setRemoveLocationDuplication(uniqueLocation);
         setRemoveSpaceTyepDuplication(uniqueSpaceType);
     };
-    useEffect(()=>{
-        if(equipmentSearchTxt==="")
-            exploreDataFetch(arr);
-    },[equipmentSearchTxt])
+    useEffect(() => {
+        if (equipmentSearchTxt === '') exploreDataFetch(arr);
+    }, [equipmentSearchTxt]);
 
     return (
         <>
@@ -2012,7 +2015,9 @@ const ExploreByEquipment = () => {
                                 type="search"
                                 name="search"
                                 placeholder="Search..."
-                                onCommit={()=>{exploreDataFetch(arr)}}
+                                onCommit={() => {
+                                    exploreDataFetch(arr);
+                                }}
                                 onChange={(e) => {
                                     setEquipmentSearchTxt(e.target.value);
                                 }}
