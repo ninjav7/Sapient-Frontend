@@ -316,7 +316,7 @@ const EquipChartModal = ({
         yaxis: {
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
@@ -356,8 +356,8 @@ const EquipChartModal = ({
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${
                             w.config.series[0].unit === 'kWh'
-                                ? series[seriesIndex][dataPointIndex].toFixed(3)
-                                : series[seriesIndex][dataPointIndex].toFixed(3)
+                                ? series[seriesIndex][dataPointIndex].toFixed(0)
+                                : series[seriesIndex][dataPointIndex].toFixed(0)
                         } 
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
@@ -438,7 +438,7 @@ const EquipChartModal = ({
 
             labels: {
                 formatter: function (val) {
-                    return val.toFixed(2);
+                    return val.toFixed(0);
                 },
             },
         },
@@ -563,7 +563,13 @@ const EquipChartModal = ({
                 )
                 .then((res) => {
                     let response = res.data;
-                    let data = response.data;
+
+                    let data = response.data.map((_data) => {
+                        _data[1] = parseInt(_data[1]);
+                        return _data;
+                    });
+
+                    data.forEach((record) => {});
                     let exploreData = [];
                     let recordToInsert = {
                         data: data,
