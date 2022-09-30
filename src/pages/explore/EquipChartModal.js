@@ -58,6 +58,7 @@ import { result } from 'lodash';
 import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
+import { xaxisFilters } from '../../helpers/helpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -78,6 +79,7 @@ const EquipChartModal = ({
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
     const timeZone = ExploreBuildingStore.useState((s) => s.exploreBldTimeZone);
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEquipDataFetched, setIsEquipDataFetched] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -122,6 +124,12 @@ const EquipChartModal = ({
             ]);
         });
     };
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount);
+        setOptions({ ...options, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+    }, [daysCount]);
 
     useEffect(() => {
         if (equipmentTypeData) {

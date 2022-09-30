@@ -75,8 +75,7 @@ const BuildingOverview = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
-
-    const [startEndDayCount, setStartEndDayCount] = useState(0);
+    const startEndDayCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -941,13 +940,6 @@ const BuildingOverview = () => {
         let xaxisObj = xaxisFilters(startEndDayCount);
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
-
-    useEffect(() => {
-        const start = moment(startDate);
-        const end = moment(endDate);
-        const days = end.diff(start, 'days');
-        setStartEndDayCount(days + 1);
-    });
 
     return (
         <React.Fragment>

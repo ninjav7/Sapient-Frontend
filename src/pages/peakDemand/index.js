@@ -255,6 +255,7 @@ const PeakDemand = () => {
     const userdata = cookies.get('user');
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const headers = {
         'Content-Type': 'application/json',
@@ -372,8 +373,6 @@ const PeakDemand = () => {
             },
         },
     });
-
-    const [startEndDayCount, setStartEndDayCount] = useState(0);
 
     const [peakDemandTrendData, setPeakDemandTrendData] = useState([]);
 
@@ -551,16 +550,9 @@ const PeakDemand = () => {
     }, [equipTypeToFetch]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount);
+        let xaxisObj = xaxisFilters(daysCount);
         setpeakDemandTrendOptions({ ...peakDemandTrendOptions, xaxis: xaxisObj });
-    }, [startEndDayCount]);
-
-    useEffect(() => {
-        const start = moment(startDate);
-        const end = moment(endDate);
-        const days = end.diff(start, 'days');
-        setStartEndDayCount(days + 1);
-    });
+    }, [daysCount]);
 
     useEffect(() => {
         const updateBreadcrumbStore = () => {
