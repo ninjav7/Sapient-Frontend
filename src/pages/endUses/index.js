@@ -280,7 +280,7 @@ const EndUsesPage = () => {
     }, [startDate, endDate, bldgId]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setBarChartOptions({ ...barChartOptions, xaxis: xaxisObj });
     }, [daysCount]);
 

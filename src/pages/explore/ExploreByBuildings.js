@@ -663,7 +663,7 @@ const ExploreByBuildings = () => {
         let result = [];
         setSeriesData([]);
         setSeriesLineData([]);
-        
+
         exploreDataFetch();
     }, [startDate, endDate]);
 
@@ -887,7 +887,7 @@ const ExploreByBuildings = () => {
     }, [APIFlag, Sq_FtFlag, selectedBuildingOptions]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setOptionsData({ ...optionsData, xaxis: xaxisObj });
         setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
     }, [daysCount]);
@@ -1056,10 +1056,9 @@ const ExploreByBuildings = () => {
         return [['timestamp', `${aname} energy`], ...streamData];
     };
 
-    useEffect(()=>{
-        if(buildingSearchTxt==="")
-            exploreDataFetch();
-    },[buildingSearchTxt])
+    useEffect(() => {
+        if (buildingSearchTxt === '') exploreDataFetch();
+    }, [buildingSearchTxt]);
     return (
         <>
             <Row className="ml-2 mt-2 explore-filters-style">

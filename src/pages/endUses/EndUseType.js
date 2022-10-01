@@ -472,7 +472,7 @@ const EndUseType = () => {
     }, [startDate, endDate, endUseType, bldgId]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setEnergyChartOptions({ ...energyChartOptions, xaxis: xaxisObj });
     }, [daysCount]);
 

@@ -126,7 +126,7 @@ const LineChartWidget = ({
     });
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount);
+        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
         setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
