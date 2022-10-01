@@ -459,6 +459,7 @@ const IndividualPassiveDevice = () => {
                                                                 onClick={() => {
                                                                     handleChartShow(record.id);
                                                                 }}
+                                                                className="mouse-pointer"
                                                             />
                                                             <button
                                                                 type="button"

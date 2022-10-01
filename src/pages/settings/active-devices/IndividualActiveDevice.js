@@ -720,6 +720,7 @@ const IndividualActiveDevice = () => {
                                                         onClick={() => {
                                                             handleChartShow(record.id);
                                                         }}
+                                                        className="mouse-pointer"
                                                     />
                                                     <Button
                                                         type="button"

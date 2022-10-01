@@ -126,7 +126,7 @@ const EquipChartModal = ({
     };
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setOptions({ ...options, xaxis: xaxisObj });
         setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
     }, [daysCount]);

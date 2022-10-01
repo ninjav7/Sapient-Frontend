@@ -20,14 +20,14 @@ export const handleDateFormat = (customDate, dateType) => {
     return dt;
 };
 
-export const xaxisFilters = (daysCount) => {
+export const xaxisFilters = (daysCount, timezone) => {
     // Up to and including 1 day
     if (daysCount === 1) {
         let xaxisObj = {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('HH:00')}`;
+                    return `${moment(timestamp).tz(timezone).format('HH:00')}`;
                 },
             },
             tickAmount: 9,
@@ -41,7 +41,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD HH:00')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
                 },
             },
             tickAmount: daysCount * 4,
@@ -55,7 +55,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD HH:00')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD HH:00')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -75,7 +75,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -95,7 +95,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -115,7 +115,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -135,7 +135,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MM/DD')}`;
+                    return `${moment(timestamp).tz(timezone).format('MM/DD')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -155,7 +155,7 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('MMM')}`;
+                    return `${moment(timestamp).tz(timezone).format('MMM')}`;
                 },
                 hideOverlappingLabels: Boolean,
                 rotate: 0,
@@ -175,7 +175,9 @@ export const xaxisFilters = (daysCount) => {
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
+                    return `${moment(timestamp).tz(timezone).format('DD/MMM')} ${moment(timestamp)
+                        .tz(timezone)
+                        .format('LT')}`;
                 },
             },
         };

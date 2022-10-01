@@ -550,7 +550,7 @@ const PeakDemand = () => {
     }, [equipTypeToFetch]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setpeakDemandTrendOptions({ ...peakDemandTrendOptions, xaxis: xaxisObj });
     }, [daysCount]);
 

@@ -778,7 +778,7 @@ const ExploreByEquipment = () => {
     const [objectExplore, setObjectExplore] = useState([]);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(daysCount);
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
         setOptionsData({ ...optionsData, xaxis: xaxisObj });
         setOptionsLineData({ ...optionsLineData, xaxis: xaxisObj });
     }, [daysCount]);
