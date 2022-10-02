@@ -22,6 +22,10 @@ const HorizontalLayout = (props) => {
         if (location.pathname.includes('/explore-page/')) {
             setShowSideNav(false);
         }
+
+        if (location.pathname.includes('/control/plug-rules/')) {
+            setShowSideNav(false);
+        }
     }, [location]);
 
     return (
