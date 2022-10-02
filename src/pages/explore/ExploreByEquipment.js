@@ -4,7 +4,7 @@ import { Row, Col, Input, Card, CardBody, Table } from 'reactstrap';
 import axios from 'axios';
 import BrushChart from '../charts/BrushChart';
 import { percentageHandler, dateFormatHandler } from '../../utils/helper';
-import { xaxisFilters } from '../../helpers/helpers';
+import { xaxisFilters } from '../../helpers/explorehelpers';
 import {
     BaseUrl,
     getExploreEquipmentList,
@@ -644,8 +644,7 @@ const ExploreByEquipment = () => {
                 let ch = '';
                 ch =
                     ch +
-                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment
-                        .utc(seriesX[0][dataPointIndex])
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
                         .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`;
                 for (let i = 0; i < series.length; i++) {
                     ch =

@@ -29,7 +29,7 @@ import 'moment-timezone';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { xaxisFilters } from '../../helpers/helpers';
+import { xaxisFilters } from '../../helpers/explorehelpers';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -440,46 +440,28 @@ const ExploreByBuildings = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
-            //             const { seriesX } = w.globals;
-            //             const timestamp = new Date(seriesX[0][dataPointIndex]);
-            //             return moment(timestamp).tz(timeZone).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value ;
-            //     },
-            // },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { colors } = w.globals;
+                console.log(colors);
                 const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
                 const timestamp = seriesX[seriesIndex][dataPointIndex];
-                let ch = '';
-                for (let i = 0; i < series.length; i++) {
-                    ch =
-                        ch +
-                        `<div class="line-chart-widget-tooltip-value">${seriesNames[i]}</div>
-                    <div class="line-chart-widget-tooltip-value">${series[i][dataPointIndex].toFixed(3)} kWh </div>`;
+                let ch=''
+                ch=ch+`<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">${moment.utc(seriesX[0][dataPointIndex])
+                    .format(`MMM D 'YY @ HH:mm A`)}</div><table style="border:none;">`
+                for(let i=0;i<series.length;i++){
+                    ch= ch+`<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${colors[i]};"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                        3
+                    )} kWh </td></tr>`
                 }
-                ch =
-                    ch +
-                    `<div class="line-chart-widget-tooltip-time-period">${moment
-                        .utc(seriesX[0][dataPointIndex])
-                        .format(`MMM D 'YY @ HH:mm A`)}</div>`;
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
                         ${ch}
-                    </div>`;
+                    </table></div>`;
             },
         },
         xaxis: {
