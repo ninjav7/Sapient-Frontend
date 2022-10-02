@@ -15,7 +15,7 @@ import { ComponentStore } from '../../store/ComponentStore';
 import { Cookies } from 'react-cookie';
 import { Spinner } from 'reactstrap';
 import Skeleton from 'react-loading-skeleton';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUsesPage = () => {
@@ -26,11 +26,12 @@ const EndUsesPage = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [isEndUsesChartLoading, setIsEndUsesChartLoading] = useState(false);
     const [isEndUsesDataFetched, setIsEndUsesDataFetched] = useState(false);
 
-    const barChartOptions = {
+    const [barChartOptions, setBarChartOptions] = useState({
         chart: {
             type: 'bar',
             height: 400,
@@ -141,7 +142,7 @@ const EndUsesPage = () => {
         grid: {
             borderColor: '#f1f3fa',
         },
-    };
+    });
 
     const [barChartData, setBarChartData] = useState([]);
     const [endUsesData, setEndUsesData] = useState([]);
@@ -277,6 +278,11 @@ const EndUsesPage = () => {
         endUsesDataFetch();
         endUsesChartDataFetch();
     }, [startDate, endDate, bldgId]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setBarChartOptions({ ...barChartOptions, xaxis: xaxisObj });
+    }, [daysCount]);
 
     return (
         <React.Fragment>

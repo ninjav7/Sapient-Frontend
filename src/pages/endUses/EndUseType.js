@@ -17,7 +17,7 @@ import { BuildingStore } from '../../store/BuildingStore';
 import { ComponentStore } from '../../store/ComponentStore';
 import Skeleton from 'react-loading-skeleton';
 import { Spinner } from 'reactstrap';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import './style.css';
 
 const EndUseType = () => {
@@ -30,6 +30,7 @@ const EndUseType = () => {
     const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     const [equipTypeChartOptions, setEquipTypeChartOptions] = useState({
         chart: {
@@ -469,6 +470,11 @@ const EndUseType = () => {
         equipmentUsageDataFetch();
         plugUsageDataFetch();
     }, [startDate, endDate, endUseType, bldgId]);
+
+    useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setEnergyChartOptions({ ...energyChartOptions, xaxis: xaxisObj });
+    }, [daysCount]);
 
     return (
         <React.Fragment>

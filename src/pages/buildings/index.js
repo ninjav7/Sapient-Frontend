@@ -937,7 +937,7 @@ const BuildingOverview = () => {
     }, []);
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount);
+        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
         setBuildingConsumptionChartOpts({ ...buildingConsumptionChartOpts, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
