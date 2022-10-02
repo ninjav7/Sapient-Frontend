@@ -1,0 +1,60 @@
+@import '../../assets/scss/colors';
+@import '../assets/scss/helpers';
+
+.buildings-peaks-widget {
+    &-wrapper {
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        .nav.nav-tabs {
+            gap: 0.625rem;
+        }
+
+        .tabs-wrapper .nav-tabs .nav-link {
+            position: relative;
+            &.active {
+            }
+
+            &:not(.active) {
+                &::before {
+                    content: ' ';
+                    background: $primary-gray-50;
+                    top: 0;
+                    right: 0;
+                    bottom: 0.5625rem;
+                    left: 0;
+                    position: absolute;
+                    z-index: -1;
+                    border-radius: 0.5rem;
+                }
+            }
+        }
+
+        .TopConsumptionWidget-wrapper {
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+        }
+
+        .nav-link:not(.active) {
+            .typography-wrapper {
+                color: $primary-gray-550;
+            }
+        }
+    }
+
+    &-values {
+        margin-right: 0.625rem;
+    }
+
+    &-titles-wrapper {
+        text-align: left;
+    }
+
+    &-content {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 1.5rem;
+    }
+}

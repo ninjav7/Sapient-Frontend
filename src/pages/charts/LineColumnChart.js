@@ -9,7 +9,7 @@ const LineColumnChart = ({ options, series, className = '' }) => {
     return (
         <div className={`line-chart-widget-wrapper ${className}`}>
             <Brick sizeInRem={1} />
-            <Chart options={options} series={series} type="bar" className="line-chart-widget" />
+            <Chart options={options} series={series} type="bar" height={350} className="line-chart-widget" />
         </div>
     );
 };

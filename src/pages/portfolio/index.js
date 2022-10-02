@@ -47,12 +47,11 @@ const PortfolioOverview = () => {
     const [energyConsumption, setenergyConsumption] = useState([]);
     const [isEnergyConsumptionChartLoading, setIsEnergyConsumptionChartLoading] = useState(false);
     const [markers, setMarkers] = useState([]);
-    // const [startDate, endDate] = dateRange;
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
-    const [daysCount, setDaysCount] = useState(1);
     const [startEndDayCount, setStartEndDayCount] = useState(0);
     // const [topEnergyDensity, setTopEnergyDensity] = useState(1);
 
@@ -413,8 +412,9 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioOverall}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -441,8 +441,9 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioEndUser}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -473,13 +474,13 @@ const PortfolioOverview = () => {
                     accept: 'application/json',
                     Authorization: `Bearer ${userdata.token}`,
                 };
-                let params = `?aggregate=day&tz_info=${timeZone}`;
                 await axios
                     .post(
-                        `${BaseUrl}${getEnergyConsumption}${params}`,
+                        `${BaseUrl}${getEnergyConsumption}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -520,8 +521,9 @@ const PortfolioOverview = () => {
                     .post(
                         `${BaseUrl}${portfolioBuilidings}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
@@ -549,12 +551,12 @@ const PortfolioOverview = () => {
             }
         };
 
-        const calculateDays = () => {
-            let time_difference = endDate.getTime() - startDate.getTime();
-            let days_difference = time_difference / (1000 * 60 * 60 * 24);
-            days_difference = days_difference + 1;
-            setDaysCount(days_difference);
-        };
+        // const calculateDays = () => {
+        //     let time_difference = endDate.getTime() - startDate.getTime();
+        //     let days_difference = time_difference / (1000 * 60 * 60 * 24);
+        //     days_difference = days_difference + 1;
+        //     setDaysCount(days_difference);
+        // };
 
         // const setLoading = () => {
         //     ProcessingStore.update((s) => {
@@ -569,7 +571,7 @@ const PortfolioOverview = () => {
         portfolioOverallData();
         portfolioEndUsesData();
         energyConsumptionData();
-        calculateDays();
+        // calculateDays();
 
         // setLoading();
         // setIsProcessing(false);
@@ -600,7 +602,6 @@ const PortfolioOverview = () => {
         const start = moment(startDate);
         const end = moment(endDate);
         const days = end.diff(start, 'days');
-        // console.log('SSR days :>> ', days + 1);
         setStartEndDayCount(days + 1);
     });
 

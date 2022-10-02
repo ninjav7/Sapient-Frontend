@@ -37,6 +37,7 @@ const IndividualActiveDevice = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
 
@@ -301,13 +302,14 @@ const IndividualActiveDevice = () => {
                 Authorization: `Bearer ${userdata.token}`,
             };
             setIsSensorChartLoading(true);
-            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy&tz_info=${timeZone}`;
+            let params = `?sensor_id=${id === sensorId ? sensorId : id}&consumption=energy`;
             await axios
                 .post(
                     `${BaseUrl}${sensorGraphData}${params}`,
                     {
-                        date_from: startDate,
-                        date_to: endDate,
+                        date_from: startDate.toLocaleDateString(),
+                        date_to: endDate.toLocaleDateString(),
+                        tz_info: timeZone,
                     },
                     { headers }
                 )
@@ -350,6 +352,7 @@ const IndividualActiveDevice = () => {
                 });
         } catch (error) {
             console.log(error);
+            setIsSensorChartLoading(false);
             console.log('Failed to fetch Sensor Graph data');
         }
     };
@@ -717,6 +720,7 @@ const IndividualActiveDevice = () => {
                                                         onClick={() => {
                                                             handleChartShow(record.id);
                                                         }}
+                                                        className="mouse-pointer"
                                                     />
                                                     <Button
                                                         type="button"
@@ -762,6 +766,7 @@ const IndividualActiveDevice = () => {
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
+                daysCount={daysCount}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>

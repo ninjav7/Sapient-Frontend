@@ -16,6 +16,7 @@ import { Link, useParams } from 'react-router-dom';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import { BaseUrl, builidingAlerts } from '../../services/Network';
 import { Cookies } from 'react-cookie';
+import { BuildingStore } from '../../store/BuildingStore';
 import './style.css';
 
 const BuildingPeakTable = () => {
@@ -292,6 +293,7 @@ const SelectPeakTable = () => {
     const { bldgId = localStorage.getItem('buildingId') } = useParams();
     const startDate = DateRangeStore.useState((s) => s.startDate);
     const endDate = DateRangeStore.useState((s) => s.endDate);
+    const timeZone = BuildingStore.useState((s) => s.BldgTimeZone);
     const [modal, setModal] = useState(false);
     const Toggle = () => setModal(!modal);
     const [equipData, setEquipData] = useState(null);
@@ -391,8 +393,9 @@ const SelectPeakTable = () => {
                     .post(
                         `${BaseUrl}${builidingAlerts}${params}`,
                         {
-                            date_from: startDate,
-                            date_to: endDate,
+                            date_from: startDate.toLocaleDateString(),
+                            date_to: endDate.toLocaleDateString(),
+                            tz_info: timeZone,
                         },
                         { headers }
                     )
