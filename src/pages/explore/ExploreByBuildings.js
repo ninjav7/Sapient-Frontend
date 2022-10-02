@@ -29,7 +29,7 @@ import 'moment-timezone';
 import { timeZone } from '../../utils/helper';
 import { CSVLink } from 'react-csv';
 import Header from '../../components/Header';
-import { xaxisFilters } from '../../helpers/helpers';
+import { xaxisFilters } from '../../helpers/explorehelpers';
 
 const ExploreBuildingsTable = ({
     exploreTableData,
@@ -440,22 +440,6 @@ const ExploreByBuildings = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            // x: {
-            //     show: true,
-            //     type: 'datetime',
-            //     labels: {
-            //         formatter: function ({ series, seriesIndex, dataPointIndex, w }) {
-            //             const { seriesX } = w.globals;
-            //             const timestamp = new Date(seriesX[0][dataPointIndex]);
-            //             return moment(timestamp).tz(timeZone).format('DD/MM - HH:mm');
-            //         },
-            //     },
-            // },
-            // y: {
-            //     formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-            //         return value ;
-            //     },
-            // },
             marker: {
                 show: false,
             },

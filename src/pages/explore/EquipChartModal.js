@@ -58,7 +58,7 @@ import { result } from 'lodash';
 import Switch from 'react-switch';
 import ModalHeader from '../../components/ModalHeader';
 import { ExploreBuildingStore } from '../../store/ExploreBuildingStore';
-import { xaxisFilters } from '../../helpers/helpers';
+import { xaxisFilters } from '../../helpers/explorehelpers';
 
 const EquipChartModal = ({
     showEquipmentChart,
@@ -508,19 +508,19 @@ const EquipChartModal = ({
             },
         },
 
-        // xaxis: {
-        //     type: 'datetime',
+        xaxis: {
+            type: 'datetime',
 
-        //     tooltip: {
-        //         enabled: false,
-        //     },
+            tooltip: {
+                enabled: false,
+            },
 
-        //     labels: {
-        //         formatter: function (val, timestamp) {
-        //             return moment.utc(timestamp).format('DD/MMM');
-        //         },
-        //     },
-        // },
+            labels: {
+                formatter: function (val, timestamp) {
+                    return moment.utc(timestamp).format('DD/MMM');
+                },
+            },
+        },
 
         yaxis: {
             tickAmount: 2,
