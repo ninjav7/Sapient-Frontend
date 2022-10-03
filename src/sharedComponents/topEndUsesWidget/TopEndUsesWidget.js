@@ -18,9 +18,9 @@ const TopEndUsesWidgetContent = ({ title, value, unit, trends }) => {
             <Brick sizeInRem={0.25} />
             <Typography.Header className="d-inline-block" size={Typography.Sizes.lg}>
                 {value}
-            </Typography.Header>{' '}
+            </Typography.Header>
             <Typography.Subheader className="d-inline-block" size={Typography.Sizes.sm}>
-                {unit}
+                <span> {unit} </span>
             </Typography.Subheader>
             <Brick sizeInRem={0.5} />
             <div className="top-end-uses-trends-badge-wrapper">
