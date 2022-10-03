@@ -70,8 +70,8 @@ const EquipmentDeviceChartModel = ({
     fetchEquipmentData,
     deviceType,
     locationData,
-    formValidation,
-    setFormValidation,
+    // formValidation,
+    // setFormValidation,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -98,13 +98,13 @@ const EquipmentDeviceChartModel = ({
     const [selected, setSelected] = useState([]);
     const [selectedZones, setSelectedZones] = useState([]);
 
-    useEffect(() => {
-        if (selectedZones?.length > 0) {
-            setFormValidation(true);
-        } else {
-            setFormValidation(false);
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (selectedZones?.length > 0) {
+    //         setFormValidation(true);
+    //     } else {
+    //         setFormValidation(false);
+    //     }
+    // }, []);
 
     const [sensors, setSensors] = useState([]);
     const [updateEqipmentData, setUpdateEqipmentData] = useState({});
@@ -381,11 +381,16 @@ const EquipmentDeviceChartModel = ({
         },
         xaxis: {
             type: 'datetime',
+            // labels: {
+            //     formatter: function (val, timestamp) {
+            //         return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
+            //             .tz(timeZone)
+            //             .format('LT')}`;
+            //     },
+            // },
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
-                        .tz(timeZone)
-                        .format('LT')}`;
+                    return moment.utc(timestamp).format('DD/MMM - HH:mm');
                 },
             },
             style: {
@@ -455,6 +460,68 @@ const EquipmentDeviceChartModel = ({
         },
     ]);
 
+    // const [optionsLine, setOptionsLine] = useState({
+    //     chart: {
+    //         id: 'chart1',
+    //         height: 90,
+    //         type: 'area',
+    //         brush: {
+    //             target: 'chart2',
+    //             enabled: true,
+    //         },
+    //         toolbar: {
+    //             show: false,
+    //         },
+
+    //         selection: {
+    //             enabled: true,
+    //             // xaxis: {
+    //             //     min: new Date('19 July 2022').getTime(),
+    //             //     max: new Date('20 July 2022').getTime(),
+    //             // },
+    //         },
+    //         animations: {
+    //             enabled: false,
+    //         },
+    //     },
+
+    //     colors: ['#008FFB'],
+
+    //     fill: {
+    //         type: 'gradient',
+
+    //         gradient: {
+    //             opacityFrom: 0.91,
+
+    //             opacityTo: 0.1,
+    //         },
+    //     },
+
+    //     xaxis: {
+    //         type: 'datetime',
+
+    //         tooltip: {
+    //             enabled: false,
+    //         },
+
+    //         labels: {
+    //             formatter: function (val, timestamp) {
+    //                 return moment(timestamp).format('DD/MMM');
+    //             },
+    //         },
+    //     },
+
+    //     yaxis: {
+    //         tickAmount: 2,
+
+    //         labels: {
+    //             formatter: function (val) {
+    //                 return val.toFixed(2);
+    //             },
+    //         },
+    //     },
+    // });
+
     const [optionsLine, setOptionsLine] = useState({
         chart: {
             id: 'chart1',
@@ -501,7 +568,7 @@ const EquipmentDeviceChartModel = ({
 
             labels: {
                 formatter: function (val, timestamp) {
-                    return moment(timestamp).format('DD/MMM');
+                    return moment.utc(timestamp).format('DD/MMM');
                 },
             },
         },
@@ -688,7 +755,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
-                                            disabled={!formValidation}
+                                            // disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -736,7 +803,7 @@ const EquipmentDeviceChartModel = ({
                                         <button
                                             type="button"
                                             className="btn btn-md btn-primary font-weight-bold mr-4"
-                                            disabled={!formValidation}
+                                            // disabled={!formValidation}
                                             onClick={handleSave}>
                                             Save
                                         </button>
@@ -979,7 +1046,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
-                                                setFormValidation(true);
+                                                // setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -995,7 +1062,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
-                                                setFormValidation(true);
+                                                // setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1231,7 +1298,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={equipData !== null ? equipData.equipments_name : ''}
                                             onChange={(e) => {
                                                 handleChange('name', e.target.value);
-                                                setFormValidation(true);
+                                                // setFormValidation(true);
                                             }}
                                         />
                                     </Form.Group>
@@ -1247,7 +1314,7 @@ const EquipmentDeviceChartModel = ({
                                             defaultValue={result.length === 0 ? '' : result.equipment_id}
                                             onChange={(e) => {
                                                 handleChange('equipment_type', e.target.value);
-                                                setFormValidation(true);
+                                                // setFormValidation(true);
                                             }}>
                                             <option selected>Select Type</option>
                                             {equipmentTypeData.map((record) => {
@@ -1287,7 +1354,7 @@ const EquipmentDeviceChartModel = ({
                                             // defaultValue={loc.length===0?"":loc.location_id}
                                             onChange={(e) => {
                                                 handleChange('space_id', e.target.value);
-                                                setFormValidation(true);
+                                                // setFormValidation(true);
                                             }}>
                                             <option value="" selected>
                                                 Select Location

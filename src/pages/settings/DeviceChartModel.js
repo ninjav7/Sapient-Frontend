@@ -15,7 +15,7 @@ import { Cookies } from 'react-cookie';
 import { CSVLink } from 'react-csv';
 import { DateRangeStore } from '../../store/DateRangeStore';
 import ModalHeader from '../../components/ModalHeader';
-import { formatConsumptionValue } from '../../helpers/helpers';
+import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
 import '../../pages/portfolio/style.scss';
 import './style.css';
 
@@ -40,6 +40,7 @@ const DeviceChartModel = ({
     timeZone,
     selectedUnit,
     setSelectedUnit,
+    daysCount,
 }) => {
     let cookies = new Cookies();
     let userdata = cookies.get('user');
@@ -93,7 +94,7 @@ const DeviceChartModel = ({
             type: 'datetime',
             labels: {
                 formatter: function (val, timestamp) {
-                    return `${moment(timestamp).tz(timeZone).format('DD/MMM')} ${moment(timestamp)
+                    return `${moment(timestamp).tz(timeZone).format('DD/MM')} ${moment(timestamp)
                         .tz(timeZone)
                         .format('LT')}`;
                 },
@@ -238,6 +239,12 @@ const DeviceChartModel = ({
     };
 
     useEffect(() => {
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setOptions({ ...options, xaxis: xaxisObj });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
+    }, [daysCount]);
+
+    useEffect(() => {
         if (startDate === null) {
             return;
         }
@@ -334,7 +341,9 @@ const DeviceChartModel = ({
                     </div>`;
             },
         };
-        setOptions({ ...options, tooltip: toolTip });
+        let xaxisObj = xaxisFilters(daysCount, timeZone);
+        setOptions({ ...options, xaxis: xaxisObj, tooltip: toolTip });
+        setOptionsLine({ ...optionsLine, xaxis: xaxisObj });
     }, [selectedUnit]);
 
     return (

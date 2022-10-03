@@ -31,6 +31,7 @@ const IndividualPassiveDevice = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
 
@@ -458,6 +459,7 @@ const IndividualPassiveDevice = () => {
                                                                 onClick={() => {
                                                                     handleChartShow(record.id);
                                                                 }}
+                                                                className="mouse-pointer"
                                                             />
                                                             <button
                                                                 type="button"
@@ -536,6 +538,7 @@ const IndividualPassiveDevice = () => {
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
+                daysCount={daysCount}
             />
 
             <AddSensorPanelModel

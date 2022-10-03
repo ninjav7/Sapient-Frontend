@@ -6,8 +6,10 @@ import PropTypes from 'prop-types';
 import { Row, Col, Card, CardBody, Table, Spinner } from 'reactstrap';
 // import { configLineChartWidget } from './config';
 import moment from 'moment';
-import { kFormatter } from '../helpers/helper';
+import 'moment-timezone';
+import { timeZone } from '../../utils/helper';
 import { formatConsumptionValue, xaxisFilters } from '../../helpers/helpers';
+import LineColumnChart from '../../../src/pages/charts/LineColumnChart';
 import './style.scss';
 
 const LineChartWidget = ({
@@ -21,40 +23,31 @@ const LineChartWidget = ({
     startEndDayCount,
 }) => {
     const [configLineChartWidget, setConfigLineChartWidget] = useState({
-        markers: {
-            size: -10,
-        },
         chart: {
+            type: 'bar',
+            height: 350,
             toolbar: {
-                show: false,
+                show: true,
             },
-            type: 'line',
             zoom: {
-                type: 'x',
-                enabled: true,
-                autoScaleYaxis: true,
+                enabled: false,
             },
+            animations: {
+                enabled: false,
+            },
+        },
+        stroke: {
+            width: 0.2,
+            show: true,
+            curve: 'straight',
+        },
+        dataLabels: {
+            enabled: true,
+            enabledOnSeries: [1],
         },
         animations: {
             enabled: false,
         },
-        dataLabels: {
-            enabled: false,
-        },
-        toolbar: {
-            show: true,
-        },
-
-        colors: ['#5E94E4'],
-        stroke: {
-            width: [2, 2],
-        },
-        //@TODO NEED?
-        // plotOptions: {
-        //     bar: {
-        //         columnWidth: '20%',
-        //     },
-        // },
         tooltip: {
             //@TODO NEED?
             // enabled: false,
@@ -66,72 +59,74 @@ const LineChartWidget = ({
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MMM - HH:mm');
-                    },
-                },
-            },
-            y: {
-                formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
-                    return value + ' K';
-                },
-            },
             marker: {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                 const { seriesX } = w.globals;
-                const timestamp = new Date(seriesX[seriesIndex][dataPointIndex]);
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
 
                 return `<div class="line-chart-widget-tooltip">
                         <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
                         <div class="line-chart-widget-tooltip-value">${formatConsumptionValue(
                             series[seriesIndex][dataPointIndex],
-                            0
+                            4
                         )} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp).format(
-                            `MMM D 'YY @ hh:mm A`
-                        )}</div>
+                        <div class="line-chart-widget-tooltip-time-period">${moment(timestamp)
+                            .tz(timeZone)
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
         xaxis: {
-            type: 'datetime',
             labels: {
-                formatter: function (val, timestamp) {
-                    return `${moment(timestamp).format('DD/MMM')} ${moment(timestamp).format('LT')}`;
+                formatter: function (val) {
+                    return moment(val).tz(timeZone).format('MM/DD HH:00');
+                },
+                hideOverlappingLabels: Boolean,
+                rotate: 0,
+                trim: false,
+            },
+            tickAmount: 12,
+            axisTicks: {
+                show: true,
+            },
+            style: {
+                colors: ['#1D2939'],
+                fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontWeight: 600,
+                cssClass: 'apexcharts-xaxis-label',
+            },
+            crosshairs: {
+                show: true,
+                position: 'front',
+                stroke: {
+                    color: '#7C879C',
+                    width: 2,
+                    dashArray: 0,
                 },
             },
         },
         yaxis: {
             labels: {
-                formatter: function (value) {
-                    var val = Math.abs(value);
-                    return kFormatter(val);
+                formatter: function (val) {
+                    let print = parseInt(val);
+                    return `${print}`;
                 },
             },
             style: {
+                colors: ['#1D2939'],
                 fontSize: '12px',
+                fontFamily: 'Helvetica, Arial, sans-serif',
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
-            },
-        },
-        grid: {
-            padding: {
-                top: 0,
-                right: 10,
-                bottom: 0,
-                left: 10,
             },
         },
     });
 
     useEffect(() => {
-        let xaxisObj = xaxisFilters(startEndDayCount);
+        let xaxisObj = xaxisFilters(startEndDayCount, timeZone);
         setConfigLineChartWidget({ ...configLineChartWidget, xaxis: xaxisObj });
     }, [startEndDayCount]);
 
@@ -152,13 +147,9 @@ const LineChartWidget = ({
                     <Spinner className="m-2" color={'primary'} />
                 </div>
             ) : (
-                <Chart
-                    className="line-chart-widget"
-                    options={configLineChartWidget}
-                    series={series}
-                    {...{ height, width }}
-                    type="line"
-                />
+                <div className="m-4">
+                    <LineColumnChart series={series} options={configLineChartWidget} />
+                </div>
             )}
         </div>
     );

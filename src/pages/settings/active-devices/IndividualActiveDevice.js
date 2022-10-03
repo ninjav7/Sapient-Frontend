@@ -37,6 +37,7 @@ const IndividualActiveDevice = () => {
 
     const startDate = DateRangeStore.useState((s) => new Date(s.startDate));
     const endDate = DateRangeStore.useState((s) => new Date(s.endDate));
+    const daysCount = DateRangeStore.useState((s) => +s.daysCount);
 
     let history = useHistory();
 
@@ -719,6 +720,7 @@ const IndividualActiveDevice = () => {
                                                         onClick={() => {
                                                             handleChartShow(record.id);
                                                         }}
+                                                        className="mouse-pointer"
                                                     />
                                                     <Button
                                                         type="button"
@@ -764,6 +766,7 @@ const IndividualActiveDevice = () => {
                 isSensorChartLoading={isSensorChartLoading}
                 setIsSensorChartLoading={setIsSensorChartLoading}
                 timeZone={timeZone}
+                daysCount={daysCount}
             />
 
             <Modal show={showEdit} onHide={handleEditClose} centered>
