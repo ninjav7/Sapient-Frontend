@@ -419,9 +419,10 @@ const ExploreByBuildings = () => {
         dataLabels: {
             enabled: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444','#800000','#FFA500','#0AFFFF','#033E3E','#E2F516'],
         fill: {
             opacity: 1,
+            colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444','#800000','#FFA500','#0AFFFF','#033E3E','#E2F516'],
         },
         markers: {
             size: 0,
@@ -511,7 +512,7 @@ const ExploreByBuildings = () => {
         legend: {
             show: false,
         },
-        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444'],
+        colors: ['#3C6DF5', '#12B76A', '#DC6803', '#088AB2', '#EF4444','#800000','#FFA500','#0AFFFF','#033E3E','#E2F516'],
         fill: {
             type: 'gradient',
             gradient: {
