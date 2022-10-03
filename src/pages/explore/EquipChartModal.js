@@ -852,7 +852,7 @@ const EquipChartModal = ({
         };
 
         fetchEquipmentChart(equipmentFilter?.equipment_id);
-        //fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
+        fetchEquipmentYTDUsageData(equipmentFilter?.equipment_id);
         fetchEquipmentDetails(equipmentFilter?.equipment_id);
         fetchBuildingAlerts();
         fetchEndUseData();
