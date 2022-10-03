@@ -1,52 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Row,
-    Col,
-    Card,
-    CardBody,
-    Table,
-    UncontrolledDropdown,
-    DropdownMenu,
-    DropdownToggle,
-    DropdownItem,
-    Button,
-    Input,
-} from 'reactstrap';
+import { Row, Col, Card, CardBody, Table, Button } from 'reactstrap';
+import { useHistory } from 'react-router-dom';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/pro-regular-svg-icons';
 import { faPlus } from '@fortawesome/pro-solid-svg-icons';
 import { Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import { fetchPlugRules, updatePlugRuleRequest, createPlugRuleRequest } from '../../services/plugRules';
 import axios from 'axios';
 import { useAtom } from 'jotai';
-import {
-    BaseUrl,
-    listPlugRules,
-    createPlugRule,
-    updatePlugRule,
-    linkSocket,
-    unLinkSocket,
-} from '../../services/Network';
-import { ChevronDown } from 'react-feather';
+import { BaseUrl, linkSocket } from '../../services/Network';
 import { BreadcrumbStore } from '../../store/BreadcrumbStore';
-import EditPlugRule from './EditPlugRule';
 import { ComponentStore } from '../../store/ComponentStore';
 import { BuildingStore } from '../../store/BuildingStore';
-import './style.css';
+import './style.scss';
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton';
 import { buildingData } from '../../store/globalState';
 
-const PlugRuleTable = ({
-    plugRuleData,
-    skeletonLoading,
-    handleEditRuleShow,
-    currentData,
-    setCurrentData,
-    handleCurrentDataChange,
-    modelRefresh,
-    setModelRefresh,
-}) => {
+const PlugRuleTable = ({ plugRuleData, skeletonLoading }) => {
+    const history = useHistory();
+
+    const redirectToPlugRulePage = (ruleId) => {
+        history.push({
+            pathname: `/control/plug-rules/${ruleId}`,
+        });
+    };
     return (
         <Card>
             <CardBody>
@@ -57,9 +37,9 @@ const PlugRuleTable = ({
                             <th>Description</th>
                             <th>Days</th>
                             <th>Socket Count</th>
+                            <th></th>
                         </tr>
                     </thead>
-                    {console.log(plugRuleData, 'plugRuleData')}
                     {skeletonLoading ? (
                         <tbody>
                             <SkeletonTheme color="#202020" height={35}>
@@ -90,9 +70,7 @@ const PlugRuleTable = ({
                                         <td
                                             className="font-weight-bold panel-name"
                                             onClick={() => {
-                                                setModelRefresh(!modelRefresh);
-                                                setCurrentData(record);
-                                                handleEditRuleShow();
+                                                redirectToPlugRulePage(record.id);
                                             }}>
                                             {record.name}
                                         </td>
@@ -123,53 +101,8 @@ const PlugRules = () => {
     const handleAddRuleClose = () => setShowAddRule(false);
     const handleAddRuleShow = () => setShowAddRule(true);
 
-    // Edit Rule Model
-    const [showEditRule, setShowEditRule] = useState(false);
-    const handleEditRuleClose = () => setShowEditRule(false);
-    const handleEditRuleShow = () => setShowEditRule(true);
-
     const activeBuildingId = localStorage.getItem('buildingId');
-
-    const [buildingId, setBuildingId] = useState(1);
-    const [skeletonLoading, setSkeletonLoading] = useState(true)
-    const [ruleData, setRuleData] = useState([
-        {
-            name: '8am-6pm M-F',
-            description: '-',
-            days: 'Weekdays',
-            socketCount: 15,
-        },
-        {
-            name: 'Workstations 7am-5pm',
-            description: '-',
-            days: 'Weekdays',
-            socketCount: 25,
-        },
-        {
-            name: 'Refrigerators',
-            description: '-',
-            days: 'All Days',
-            socketCount: 25,
-        },
-        {
-            name: '9am-7pm',
-            description: '-',
-            days: 'Weekdays',
-            socketCount: 25,
-        },
-        {
-            name: 'Ice/Water Machines',
-            description: '-',
-            days: 'Weekdays',
-            socketCount: 25,
-        },
-        {
-            name: '8am-9pm M-F',
-            description: '-',
-            days: 'Weekdays',
-            socketCount: 25,
-        },
-    ]);
+    const [skeletonLoading, setSkeletonLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
     const [pageRefresh, setPageRefresh] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -177,12 +110,8 @@ const PlugRules = () => {
         building_id: '',
         action: [],
     });
-    const [buildingRecord, setBuildingRecord] = useState([]);
-
-    console.log(buildingRecord, 'buildingRecord');
 
     const bldgId = BuildingStore.useState((s) => s.BldgId);
-
     const [currentData, setCurrentData] = useState({});
 
     const [modelRefresh, setModelRefresh] = useState(false);
@@ -214,59 +143,31 @@ const PlugRules = () => {
     };
 
     const savePlugRuleData = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            let newRuleData = Object.assign({}, createRuleData);
-            newRuleData.building_id = localStorage.getItem('buildingId');
-
-            setIsProcessing(true);
-
-            await axios
-                .post(`${BaseUrl}${createPlugRule}`, newRuleData, {
-                    headers: header,
-                })
-                .then((res) => {
-                    console.log(res.data);
-                });
-
-            setIsProcessing(false);
-            setPageRefresh(!pageRefresh);
-        } catch (error) {
-            setIsProcessing(false);
-            console.log('Failed to create Plug Rule');
-        }
+        let newRuleData = Object.assign({}, createRuleData);
+        newRuleData.building_id = [localStorage.getItem('buildingId')];
+        setIsProcessing(true);
+        await createPlugRuleRequest(newRuleData)
+            .then((res) => {
+                setIsProcessing(false);
+                setPageRefresh(!pageRefresh);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+                console.log('Failed to update requested Plug Rule', error);
+            });
     };
 
     const updatePlugRuleData = async () => {
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            setIsProcessing(true);
-
-            let params = `?role_id=${currentData.id}`;
-            await axios
-                .patch(`${BaseUrl}${updatePlugRule}${params}`, currentData, {
-                    headers: header,
-                })
-                .then((res) => {
-                    console.log(res.data);
-                });
-
-            setIsProcessing(false);
-            setPageRefresh(!pageRefresh);
-        } catch (error) {
-            setIsProcessing(false);
-            console.log('Failed to update requested Plug Rule');
-        }
+        setIsProcessing(true);
+        await updatePlugRuleRequest(currentData)
+            .then((res) => {
+                setIsProcessing(false);
+                setPageRefresh(!pageRefresh);
+            })
+            .catch((error) => {
+                setIsProcessing(false);
+                console.log('Failed to update requested Plug Rule', error);
+            });
     };
 
     const updateSocketLink = async () => {
@@ -298,145 +199,77 @@ const PlugRules = () => {
         }
     };
 
-    const updateSocketUnlink = async () => {
-        if (rulesToUnLink.sensor_id.length === 0) {
-            return;
-        }
-        try {
-            let header = {
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-                Authorization: `Bearer ${userdata.token}`,
-            };
-
-            setIsProcessing(true);
-
-            await axios
-                .post(`${BaseUrl}${unLinkSocket}`, rulesToUnLink, {
-                    headers: header,
-                })
-                .then((res) => {
-                    console.log(res.data);
-                });
-
-            setIsProcessing(false);
-            setPageRefresh(!pageRefresh);
-        } catch (error) {
-            setIsProcessing(false);
-            console.log('Failed to update requested Socket Unlinking!');
-        }
-    };
-
     // Building List Data Globally
     const [buildingListData] = useAtom(buildingData);
 
-    useEffect(() => {
-        const updateBreadcrumbStore = () => {
-            BreadcrumbStore.update((bs) => {
-                let newList = [
-                    {
-                        label: 'Plug Rules',
-                        path: '/control/plug-rules',
-                        active: true,
-                    },
-                ];
-                bs.items = newList;
-            });
-            ComponentStore.update((s) => {
-                s.parent = 'control';
-            });
-        };
+    const updateBreadcrumbStore = () => {
+        BreadcrumbStore.update((bs) => {
+            let newList = [
+                {
+                    label: 'Plug Rules',
+                    path: '/control/plug-rules',
+                    active: true,
+                },
+            ];
+            bs.items = newList;
+        });
+        ComponentStore.update((s) => {
+            s.parent = 'control';
+        });
+    };
 
-        const getBuildingData = async () => {
-            try {
-                setBuildingRecord(buildingListData);
-                buildingListData.map((record, index) => {
-                    if (record.building_id === activeBuildingId) {
-                        localStorage.setItem('timeZone', record.timezone);
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch Building Data');
-            }
-        };
+    const getBuildingData = async () => {
+        try {
+            buildingListData.map((record) => {
+                if (record.building_id === activeBuildingId) {
+                    localStorage.setItem('timeZone', record.timezone);
+                }
+            });
+        } catch (error) {
+            console.log(error);
+            console.log('Failed to fetch Building Data');
+        }
+    };
+
+    useEffect(() => {
         getBuildingData();
         updateBreadcrumbStore();
     }, [buildingListData]);
 
-    useEffect(() => {
-        const fetchPlugRuleData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${activeBuildingId}`;
-                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
-                    if(res?.status) {
-                        setSkeletonLoading(false);
-                    }
-                    let response = res.data;
-                    // console.log("Plug Rule Data",response.data)
-                    setPlugRuleData(response.data);
-                    let onlineData = [];
-                    let offlineData = [];
-                    response.data.forEach((record) => {
-                        record.is_active ? onlineData.push(record) : offlineData.push(record);
-                    });
-                    setOnlinePlugRuleData(onlineData);
-                    setOfflinePlugRuleData(offlineData);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch list of Plug Rules data');
+    const fetchPlugRuleData = async () => {
+        await fetchPlugRules(activeBuildingId).then((res) => {
+            if (res.status) {
+                setSkeletonLoading(false);
             }
-        };
+            let response = res.data;
+            setPlugRuleData(response.data);
+            let onlineData = [];
+            let offlineData = [];
+            response.data.forEach((record) => {
+                record.is_active ? onlineData.push(record) : offlineData.push(record);
+            });
+            setOnlinePlugRuleData(onlineData);
+            setOfflinePlugRuleData(offlineData);
+        });
+    };
+
+    useEffect(() => {
         fetchPlugRuleData();
     }, [pageRefresh]);
 
     useEffect(() => {
-        const fetchPlugRuleData = async () => {
-            try {
-                let headers = {
-                    'Content-Type': 'application/json',
-                    accept: 'application/json',
-                    Authorization: `Bearer ${userdata.token}`,
-                };
-                let params = `?building_id=${activeBuildingId}`;
-                await axios.get(`${BaseUrl}${listPlugRules}${params}`, { headers }).then((res) => {
-                    if(res?.status) {
-                        setSkeletonLoading(false);
-                    }
-                    let response = res.data;
-                    // console.log("Plug Rule Data",response.data)
-                    setPlugRuleData(response.data);
-                    let onlineData = [];
-                    let offlineData = [];
-                    response.data.forEach((record) => {
-                        record.is_active ? onlineData.push(record) : offlineData.push(record);
-                    });
-                    setOnlinePlugRuleData(onlineData);
-                    setOfflinePlugRuleData(offlineData);
-                });
-            } catch (error) {
-                console.log(error);
-                console.log('Failed to fetch list of Plug Rules data');
-            }
-        };
         fetchPlugRuleData();
     }, [activeBuildingId]);
 
     return (
         <React.Fragment>
-            <div className="plug-rules-header-style mt-4 ml-4 mr-3">
+            <div className="plug-rules-header mt-4 ml-4 mr-3">
                 <div className="plug-left-header">
                     {/* <div className="plug-blg-name">NYPL</div> */}
                     <div className="plug-blg-name">
                         {localStorage.getItem('buildingName') === 'null' ? '' : localStorage.getItem('buildingName')}
                     </div>
-                    <div className="plug-heading-style">Plug Rules</div>
+                    <div className="plug-heading">Plug Rules</div>
                 </div>
                 <div className="btn-group custom-button-group" role="group" aria-label="Basic example">
                     <div className="mr-2">
@@ -453,8 +286,8 @@ const PlugRules = () => {
                 </div>
             </div>
 
-            <div className="plug-rules-header-style mt-4 ml-4 mr-4">
-                <div className="plug-search-tabs-style">
+            <div className="plug-rules-header mt-4 ml-4 mr-4">
+                <div className="plug-search-tabs">
                     <div className="search-container mr-2">
                         <FontAwesomeIcon icon={faMagnifyingGlass} size="md" />
                         <input className="search-box ml-2" type="search" name="search" placeholder="Search" />
@@ -500,24 +333,6 @@ const PlugRules = () => {
                         </div>
                     </div>
                 </div>
-
-                <div>
-                    <UncontrolledDropdown className="d-inline float-right">
-                        <DropdownToggle color="white">
-                            Columns
-                            <i className="icon">
-                                <ChevronDown></ChevronDown>
-                            </i>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem>Phoenix Baker</DropdownItem>
-                            <DropdownItem active={true} className="bg-primary">
-                                Olivia Rhye
-                            </DropdownItem>
-                            <DropdownItem>Lana Steiner</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
-                </div>
             </div>
 
             <Row>
@@ -526,7 +341,6 @@ const PlugRules = () => {
                         <PlugRuleTable
                             plugRuleData={plugRuleData}
                             skeletonLoading={skeletonLoading}
-                            handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
@@ -542,7 +356,6 @@ const PlugRules = () => {
                         <PlugRuleTable
                             plugRuleData={onlinePlugRuleData}
                             skeletonLoading={skeletonLoading}
-                            handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
@@ -558,7 +371,6 @@ const PlugRules = () => {
                         <PlugRuleTable
                             plugRuleData={offlinePlugRuleData}
                             skeletonLoading={skeletonLoading}
-                            handleEditRuleShow={handleEditRuleShow}
                             currentData={currentData}
                             setCurrentData={setCurrentData}
                             handleCurrentDataChange={handleCurrentDataChange}
@@ -621,24 +433,6 @@ const PlugRules = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-
-            {/* Edit Rule Model  */}
-            <EditPlugRule
-                showEditRule={showEditRule}
-                handleEditRuleClose={handleEditRuleClose}
-                currentData={currentData}
-                setCurrentData={setCurrentData}
-                handleCurrentDataChange={handleCurrentDataChange}
-                updatePlugRuleData={updatePlugRuleData}
-                modelRefresh={modelRefresh}
-                setModelRefresh={setModelRefresh}
-                rulesToLink={rulesToLink}
-                rulesToUnLink={rulesToUnLink}
-                setRulesToLink={setRulesToLink}
-                setRulesToUnLink={setRulesToUnLink}
-                updateSocketLink={updateSocketLink}
-                updateSocketUnlink={updateSocketUnlink}
-            />
         </React.Fragment>
     );
 };

@@ -145,18 +145,20 @@ export const listSensor = '/api/config/sensor/list_sensor';
 
 // plug rules
 export const listPlugRules = '/api/user_role/plug_rule/all-plug-rules';
+export const plugRuleDetails = '/api/user_role/plug_rule/plug-rule-details';
 export const createPlugRule = '/api/user_role/plug_rule/create-plug-rule';
-export const updatePlugRule = '/api/user_role/plug_rule/update';
+export const updatePlugRule = '/api/user_role/plug_rule/update-plug-rule';
+export const deletePlugRule = '/api/user_role/plug_rule/delete-plug-rule';
 
 // Auth
 export const signin = '/api/user_role/user/signin';
 export const signup = '/api/user_role/user/signup';
 
-export const linkSocketRules = '/api/user_role/plug_rule/list_link_socket';
-export const unLinkSocketRules = '/api/user_role/plug_rule/list_sensor_by_buildingID';
+export const listLinkSocketRules = '/api/user_role/plug_rule/list_link_socket';
+export const getListSensorsForBuildings = '/api/user_role/plug_rule/sensor-for-buildings';
 export const linkSocket = '/api/user_role/plug_rule/link_socket';
 export const unLinkSocket = '/api/user_role/plug_rule/unlink_socket';
-export const graphData = '/api/user_role/plug_rule/average-chart-calculation';
+export const graphData = '/api/user_role/plug_rule/average-sensor-usage';
 
 // user permission and roles
 export const addMemberUser = '/api/user_role/user-permission-role/add-member-user';
