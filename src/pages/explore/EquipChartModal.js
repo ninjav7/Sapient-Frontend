@@ -468,7 +468,7 @@ const EquipChartModal = ({
                          ${w.config.series[0].unit}</div>
                         <div class="line-chart-widget-tooltip-time-period">${moment
                             .utc(timestamp)
-                            .format(`MMM D 'YY @ HH:mm A`)}</div>
+                            .format(`MMM D 'YY @ hh:mm A`)}</div>
                     </div>`;
             },
         },
