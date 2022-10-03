@@ -179,15 +179,15 @@ const TimeOfDay = () => {
                 fontWeight: 600,
                 cssClass: 'apexcharts-xaxis-label',
             },
-            x: {
-                show: true,
-                type: 'datetime',
-                labels: {
-                    formatter: function (val, timestamp) {
-                        return moment(timestamp).format('DD/MM - HH:mm');
-                    },
-                },
-            },
+            // x: {
+            //     show: true,
+            //     type: 'datetime',
+            //     labels: {
+            //         formatter: function (val, timestamp) {
+            //             return moment(timestamp).format('DD/MM - HH:mm');
+            //         },
+            //     },
+            // },
             y: {
                 formatter: function (value, { series, seriesIndex, dataPointIndex, w }) {
                     return value + ' K';
@@ -197,18 +197,32 @@ const TimeOfDay = () => {
                 show: false,
             },
             custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                const { colors } = w.globals;
+                console.log(colors);
+                const { seriesX } = w.globals;
                 const { seriesNames } = w.globals;
+                const timestamp = seriesX[seriesIndex][dataPointIndex];
                 const day = seriesNames[seriesIndex];
+                let ch = '';
+                ch =
+                    ch +
+                    `<div class="line-chart-widget-tooltip-time-period" style="margin-bottom:10px;">Time: ${getTimeData(
+                        w.globals.labels[dataPointIndex]
+                    )}</div><table style="border:none;">`;
+                for (let i = 0; i < series.length; i++) {
+                    ch =
+                        ch +
+                        `<tr style="style="border:none;"><td><span class="tooltipclass" style="background-color:${
+                            colors[i]
+                        };"></span> &nbsp;${seriesNames[i]} </td><td> &nbsp;${series[i][dataPointIndex].toFixed(
+                            0
+                        )} kWh </td></tr>`;
+                }
 
                 return `<div class="line-chart-widget-tooltip">
-                        <h6 class="line-chart-widget-tooltip-title">Energy Consumption</h6>
-                        <div class="line-chart-widget-tooltip-value">${series[seriesIndex][
-                            dataPointIndex
-                        ].toLocaleString(undefined, { maximumFractionDigits: 3 })} kWh</div>
-                        <div class="line-chart-widget-tooltip-time-period">
-                        ${day}, ${getTimeData(w.globals.labels[dataPointIndex])}
-                        </div>
-                    </div>`;
+                        <h6 class="line-chart-widget-tooltip-title" style="font-weight:bold;">Energy Consumption</h6>
+                        ${ch}
+                    </table></div>`;
             },
         },
     };
