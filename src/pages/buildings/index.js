@@ -779,14 +779,14 @@ const BuildingOverview = () => {
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
+                                x: parseInt(moment.utc(el.x).format('HH')),
                                 y: parseInt(el.y / 1000),
                             };
                         });
@@ -819,7 +819,7 @@ const BuildingOverview = () => {
                         }
 
                         for (let i = 0; i < 24; i++) {
-                            let matchedRecord = weekendsData.find((record) => record.x - 1 === i);
+                            let matchedRecord = weekendsData.find((record) => record.x === i);
                             if (matchedRecord) {
                                 matchedRecord.x = i;
                                 newWeekendsData[0].data.push(matchedRecord);

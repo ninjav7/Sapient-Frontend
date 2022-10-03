@@ -499,15 +499,15 @@ const TimeOfDay = () => {
 
                         const weekDaysData = weekDaysResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                x: parseInt(moment.utc(el.x).format('HH')),
+                                y: el.y.toFixed(0),
                             };
                         });
 
                         const weekendsData = weekEndResData.map((el) => {
                             return {
-                                x: parseInt(moment(el.x).format('HH')),
-                                y: el.y.toFixed(2),
+                                x: parseInt(moment.utc(el.x).format('HH')),
+                                y: el.y.toFixed(0),
                             };
                         });
 
